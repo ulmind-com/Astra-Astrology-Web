@@ -15,15 +15,22 @@ import type {
   AuthResult,
   AvailabilityUpdate,
   ConsultationMode,
+  CreateOrderResponse,
   EmailAvailability,
   GalleryUploadResult,
   HealthStatus,
   OtpSentResult,
+  PageMeta,
   PaginatedAstrologers,
   ProfileUpdate,
+  RechargeOptions,
   Skill,
+  TransactionReason,
   UserProfile,
   UserPublic,
+  VerifyPaymentResponse,
+  WalletSummary,
+  WalletTransaction,
 } from "@/types";
 
 // ------------------------------------------------------------------- auth
@@ -170,4 +177,25 @@ export const adminApi = {
 // ----------------------------------------------------------------- health
 export const healthApi = {
   check: () => api.get<HealthStatus>(endpoints.health, { auth: false }),
+};
+
+// ----------------------------------------------------------------- wallet
+export const walletApi = {
+  summary: () => api.get<WalletSummary>(endpoints.wallet.summary),
+
+  transactions: (params: { page?: number; limit?: number; reason?: TransactionReason } = {}) =>
+    api.get<{ items: WalletTransaction[]; meta: PageMeta }>(endpoints.wallet.transactions, {
+      query: { page: params.page, limit: params.limit, reason: params.reason },
+    }),
+
+  rechargeOptions: () => api.get<RechargeOptions>(endpoints.wallet.rechargeOptions),
+
+  createOrder: (amount_paise: number) =>
+    api.post<CreateOrderResponse>(endpoints.wallet.rechargeOrder, { amount_paise }),
+
+  verify: (body: {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+  }) => api.post<VerifyPaymentResponse>(endpoints.wallet.rechargeVerify, body),
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarHeart, MapPin, ShieldCheck, UserRound } from "lucide-react";
+import { CalendarHeart, MapPin, ShieldCheck, UserRound, Wallet } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -13,6 +13,7 @@ import { useRequireAuth } from "@/providers/auth-provider";
 const NAV = [
   { href: "/account", label: "Profile", icon: UserRound },
   { href: "/account/birth-details", label: "Birth details", icon: CalendarHeart },
+  { href: "/account/wallet", label: "Wallet", icon: Wallet },
   { href: "/account/addresses", label: "Addresses", icon: MapPin },
   { href: "/account/security", label: "Security", icon: ShieldCheck },
 ];
