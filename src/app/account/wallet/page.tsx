@@ -35,6 +35,8 @@ import { ApiError } from "@/lib/api/client";
 import { cn, formatDateTime } from "@/lib/utils";
 import {
   TRANSACTION_REASON_LABELS,
+  coinWord,
+  formatCoins,
   formatPaise,
   rupeesToPaise,
   type WalletTransaction,
@@ -63,6 +65,8 @@ function TransactionRow({ txn }: { txn: WalletTransaction }) {
         </p>
         <p className="text-xs text-muted-foreground">
           {formatDateTime(txn.created_at)} · {TRANSACTION_REASON_LABELS[txn.reason]}
+          {/* Only on rows where money actually changed hands. */}
+          {txn.amount_paise != null && ` · paid ${formatPaise(txn.amount_paise)}`}
         </p>
       </div>
 
@@ -74,10 +78,10 @@ function TransactionRow({ txn }: { txn: WalletTransaction }) {
           )}
         >
           {isCredit ? "+" : "−"}
-          {formatPaise(txn.amount_paise)}
+          {formatCoins(txn.amount_coins)}
         </p>
         <p className="text-xs text-muted-foreground tabular-nums">
-          {formatPaise(txn.balance_after_paise)}
+          {formatCoins(txn.balance_after_coins)} left
         </p>
       </div>
     </li>
@@ -116,6 +120,12 @@ export default function WalletPage() {
       setCustomError("Enter an amount.");
       return;
     }
+    if (!Number.isInteger(rupees)) {
+      // The backend refuses this too: Rs 99.55 at 10 coins/rupee would be
+      // 995.5 coins, and a coin cannot be half.
+      setCustomError("Enter a whole number of rupees.");
+      return;
+    }
     const paise = rupeesToPaise(rupees);
     if (options && paise < options.min_paise) {
       setCustomError(`The smallest recharge is ${formatPaise(options.min_paise)}.`);
@@ -142,7 +152,10 @@ export default function WalletPage() {
             Wallet balance
           </div>
           <p className="mt-2 text-4xl font-bold tabular-nums">
-            {formatPaise(summary.wallet.balance_paise)}
+            {formatCoins(summary.wallet.balance_coins)}{" "}
+            <span className="text-2xl font-semibold text-white/70">
+              {coinWord(summary.wallet.balance_coins)}
+            </span>
           </p>
           {summary.wallet.last_transaction_at && (
             <p className="mt-1 text-xs text-white/60">
@@ -171,8 +184,11 @@ export default function WalletPage() {
           <CardHeader>
             <CardTitle>Add money</CardTitle>
             <CardDescription>
-              Pay by UPI, card or netbanking. Your balance updates as soon as the payment
-              is confirmed.
+              {options
+                ? `₹1 gets you ${options.coins_per_rupee} ${coinWord(options.coins_per_rupee)}. `
+                : ""}
+              Pay by UPI, card or netbanking. Your coins arrive as soon as the payment is
+              confirmed.
             </CardDescription>
           </CardHeader>
           <CardBody className="space-y-5">
@@ -190,23 +206,38 @@ export default function WalletPage() {
                       disabled={isBusy}
                       onClick={() => recharge(pack.amount_paise)}
                       className={cn(
-                        "rounded-xl border border-border bg-surface px-4 py-3.5 text-base font-semibold",
+                        "rounded-xl border border-border bg-surface px-4 py-3.5 text-center",
                         "transition-colors hover:border-brand-400 hover:bg-brand-50/60",
                         "disabled:cursor-not-allowed disabled:opacity-60",
                         "dark:hover:bg-brand-950/40",
                       )}
                     >
-                      {formatPaise(pack.amount_paise)}
+                      <span className="block text-base font-semibold">
+                        {formatPaise(pack.amount_paise)}
+                      </span>
+                      <span className="mt-0.5 block text-xs text-brand-600 dark:text-brand-300">
+                        {formatCoins(pack.coins)} {coinWord(pack.coins)}
+                      </span>
                     </button>
                   ))}
                 </div>
 
                 <form onSubmit={rechargeCustom} className="flex flex-wrap items-end gap-3">
-                  <Field label="Or another amount" error={customError ?? undefined} className="flex-1 min-w-48">
+                  <Field
+                    label="Or another amount"
+                    error={customError ?? undefined}
+                    hint={
+                      options && custom && Number(custom) > 0
+                        ? `${formatCoins(Math.floor(Number(custom)) * options.coins_per_rupee)} ${coinWord(options.coins_per_rupee)}`
+                        : "Whole rupees"
+                    }
+                    className="flex-1 min-w-48"
+                  >
                     <Input
                       type="number"
                       inputMode="numeric"
                       min={1}
+                      step={1}
                       placeholder="₹ amount"
                       value={custom}
                       invalid={Boolean(customError)}
@@ -248,7 +279,7 @@ export default function WalletPage() {
             <EmptyState
               icon={WalletIcon}
               title="Nothing here yet"
-              description="Add money to your wallet and it will show up here."
+              description="Add coins to your wallet and every credit and debit will show up here."
             />
           </CardBody>
         ) : (
