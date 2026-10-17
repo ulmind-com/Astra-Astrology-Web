@@ -10,14 +10,17 @@ npm install
 npm run dev          # http://localhost:3000
 ```
 
-The backend must be running too (`uvicorn app.main:app --port 8000` in
-`Astra-Astrology-Backend`). CORS is open (`ALLOWED_ORIGINS=*`), so no proxy is needed.
+Out of the box it talks to the **deployed** backend
+(`https://astra-astrology-backend.onrender.com`), so nothing else needs to run.
+To develop against a local backend, uncomment the localhost line in `.env.local`
+and start `uvicorn app.main:app --port 8000` in `Astra-Astrology-Backend`.
+CORS is open (`ALLOWED_ORIGINS=*`), so no proxy is needed either way.
 
 `.env.local`:
 
 | Variable | Meaning |
 | --- | --- |
-| `NEXT_PUBLIC_API_URL` | Backend origin, e.g. `http://localhost:8000` |
+| `NEXT_PUBLIC_API_URL` | Backend origin, no trailing slash. **Optional** — defaults to the deployed API, `https://astra-astrology-backend.onrender.com`. Set it to `http://localhost:8000` to work against a local backend. |
 | `NEXT_PUBLIC_API_PREFIX` | API prefix, `/api/v1` |
 | `NEXT_PUBLIC_APP_NAME` | Shown in the header and page titles |
 
