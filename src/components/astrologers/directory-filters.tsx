@@ -101,11 +101,11 @@ export function DirectoryFilters({
           className={cn(
             "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
             filters.online_only
-              ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-300"
+              ? "border-success/40 bg-success-surface text-success"
               : "border-border text-muted-foreground hover:border-border-strong",
           )}
         >
-          <span className="size-1.5 rounded-full bg-emerald-500" />
+          <span className="size-1.5 rounded-full bg-success" />
           Online now
         </button>
 

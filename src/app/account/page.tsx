@@ -149,7 +149,7 @@ export default function ProfilePage() {
                   size="sm"
                   disabled={uploading}
                   onClick={removeAvatar}
-                  className="text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
+                  className="text-danger hover:bg-danger/15"
                 >
                   <Trash2 className="size-4" />
                   Remove

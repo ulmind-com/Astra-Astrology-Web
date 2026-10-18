@@ -166,7 +166,7 @@ export default function AddressesPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="ml-auto text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
+                    className="ml-auto text-danger hover:bg-danger/15"
                     onClick={() => setDeleting(address)}
                   >
                     <Trash2 className="size-3.5" />

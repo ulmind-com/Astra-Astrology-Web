@@ -84,7 +84,7 @@ export default function CallPage() {
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">{call.peer?.name}</p>
             <p className="flex items-center gap-1.5 text-xs text-white/70">
-              <span className="size-1.5 rounded-full bg-emerald-400" />
+              <span className="size-1.5 rounded-full bg-success" />
               {formatDuration(seconds)}
             </p>
           </div>
@@ -92,7 +92,7 @@ export default function CallPage() {
             size="sm"
             onClick={hangUp}
             disabled={end.isPending}
-            className="pointer-events-auto bg-red-600 text-white hover:bg-red-700"
+            className="pointer-events-auto bg-rose-600 text-white hover:bg-rose-500"
           >
             <PhoneOff className="size-4" />
             End
@@ -128,7 +128,7 @@ export default function CallPage() {
               <Button
                 onClick={hangUp}
                 disabled={end.isPending}
-                className="mt-2 bg-red-600 text-white hover:bg-red-700"
+                className="mt-2 bg-rose-600 text-white hover:bg-rose-500"
               >
                 <PhoneOff className="size-4" />
                 Cancel

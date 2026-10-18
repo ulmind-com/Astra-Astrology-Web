@@ -166,7 +166,7 @@ export function DurationPicker({
                   className={cn(
                     "rounded-xl px-3.5 py-2.5 text-sm",
                     tooLong || outOfRange
-                      ? "bg-red-500/10 text-red-600 dark:text-red-400"
+                      ? "bg-danger-surface text-danger"
                       : "bg-brand-50 text-brand-700 dark:bg-brand-950/50 dark:text-brand-200",
                   )}
                 >

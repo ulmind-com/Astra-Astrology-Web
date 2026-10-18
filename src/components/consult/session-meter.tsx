@@ -43,7 +43,7 @@ function Cell({
       <p
         className={cn(
           "truncate text-sm font-semibold tabular-nums",
-          tone === "warn" && "text-amber-500",
+          tone === "warn" && "text-warning",
         )}
       >
         {value}
@@ -108,7 +108,7 @@ export function SessionMeter({
         className={cn(
           "flex items-center justify-between gap-3 rounded-xl px-3 py-2",
           lastMinute
-            ? "bg-amber-500/15"
+            ? "bg-warning-surface"
             : onDark
               ? "bg-white/10 text-white"
               : "bg-surface-muted",
@@ -142,7 +142,7 @@ export function SessionMeter({
               setError(null);
               setAsking(true);
             }}
-            className={lastMinute ? "shrink-0 bg-amber-500 text-white hover:bg-amber-600" : "shrink-0"}
+            className={lastMinute ? "shrink-0 bg-warning text-night-950 hover:bg-gold-300" : "shrink-0"}
           >
             <Plus className="size-3.5" />
             Add time
@@ -151,7 +151,7 @@ export function SessionMeter({
       </div>
 
       {lastMinute && !billing.can_extend && (
-        <p className="mt-1.5 flex items-center gap-1.5 px-1 text-xs text-amber-500">
+        <p className="mt-1.5 flex items-center gap-1.5 px-1 text-xs text-warning">
           <AlertTriangle className="size-3.5 shrink-0" />
           Last minute, and not enough coins to add more.
           <Link href="/account/wallet" className="font-medium underline">
@@ -239,7 +239,7 @@ function ExtendModal({
           ))}
         </div>
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
 
         <div className="flex items-center justify-between gap-2 pt-1">
           <Link href="/account/wallet" className="text-sm font-medium text-brand-600 underline">
@@ -259,7 +259,7 @@ function ExtendModal({
 export function OutOfCoins({ onBack }: { onBack: () => void }) {
   return (
     <div className="flex flex-col items-center gap-3 text-center">
-      <span className="flex size-16 items-center justify-center rounded-full bg-amber-500/15 text-amber-500">
+      <span className="flex size-16 items-center justify-center rounded-full bg-warning-surface text-warning">
         <Coins className="size-7" />
       </span>
       <div>

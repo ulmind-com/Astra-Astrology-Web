@@ -155,12 +155,12 @@ export default function BirthDetailsPage() {
               className={cn(
                 "flex items-start gap-2.5 rounded-xl border p-3.5",
                 item.ready
-                  ? "border-emerald-200 bg-emerald-50 dark:border-emerald-500/30 dark:bg-emerald-500/10"
+                  ? "border-success/30 bg-success-surface"
                   : "border-border bg-surface-muted",
               )}
             >
               {item.ready ? (
-                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success" />
               ) : (
                 <CircleDashed className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
               )}

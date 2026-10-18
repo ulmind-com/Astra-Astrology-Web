@@ -60,7 +60,7 @@ export default function ChatPage() {
           <p className="flex items-center gap-1.5 text-xs leading-tight text-muted-foreground">
             {active ? (
               <>
-                <span className="size-1.5 rounded-full bg-emerald-500" />
+                <span className="size-1.5 rounded-full bg-success" />
                 {formatDuration(seconds)}
               </>
             ) : (
@@ -84,7 +84,7 @@ export default function ChatPage() {
               end.mutate({ id });
             }}
             disabled={end.isPending}
-            className={confirming ? "bg-red-600 text-white hover:bg-red-700" : undefined}
+            className={confirming ? "bg-rose-600 text-white hover:bg-rose-500" : undefined}
           >
             {confirming ? "Tap to confirm" : "End"}
           </Button>

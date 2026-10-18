@@ -1,13 +1,12 @@
 "use client";
 
-import { LogOut, Menu, Moon, Sparkles, Sun, User, X } from "lucide-react";
+import { LogOut, Menu, Sparkles, User, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 
 import { Avatar, Button } from "@/components/ui";
 import { useAuth } from "@/providers/auth-provider";
-import { useTheme } from "@/providers/theme-provider";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
@@ -19,20 +18,19 @@ const LINKS = [
 export function SiteHeader() {
   const pathname = usePathname();
   const { user, isSignedIn, signOut } = useAuth();
-  const { theme, toggle } = useTheme();
   const [open, setOpen] = React.useState(false);
 
   // A route change should never leave the mobile menu hanging open.
   React.useEffect(() => setOpen(false), [pathname]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/70 bg-background/80 backdrop-blur-lg">
+    <header className="sticky top-0 z-40 bg-night-950/55 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
         <Link href="/" className="flex items-center gap-2 font-semibold">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-brand-600 text-white">
+          <span className="medallion flex size-9 items-center justify-center rounded-xl text-brand-100">
             <Sparkles className="size-4" />
           </span>
-          <span className="text-[15px] tracking-tight">Astra Astrology</span>
+          <span className="font-display text-[15px] tracking-wide text-foreground">Astra Astrology</span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
@@ -43,7 +41,7 @@ export function SiteHeader() {
               className={cn(
                 "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 pathname === link.href
-                  ? "bg-surface-muted text-foreground"
+                  ? "bg-brand-500/15 text-brand-100 ring-1 ring-brand-400/30"
                   : "text-muted-foreground hover:bg-surface-muted hover:text-foreground",
               )}
             >
@@ -53,10 +51,6 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={toggle} aria-label="Toggle theme">
-            {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
-          </Button>
-
           {isSignedIn ? (
             <>
               <Link href="/account" className="hidden md:block" aria-label="My account">
@@ -98,8 +92,10 @@ export function SiteHeader() {
         </div>
       </div>
 
+      <div className="hairline h-px w-full" aria-hidden />
+
       {open && (
-        <div className="border-t border-border bg-surface px-4 py-3 md:hidden">
+        <div className="bg-night-900/95 px-4 py-3 backdrop-blur-xl md:hidden">
           <nav className="flex flex-col gap-1">
             {LINKS.map((link) => (
               <Link
@@ -121,7 +117,7 @@ export function SiteHeader() {
                   </Link>
                   <button
                     onClick={() => signOut({ redirectTo: "/" })}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-600"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-danger"
                   >
                     <LogOut className="size-4" /> Sign out
                   </button>

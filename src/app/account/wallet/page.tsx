@@ -50,7 +50,7 @@ function TransactionRow({ txn }: { txn: WalletTransaction }) {
       <span
         className={cn(
           "flex size-9 shrink-0 items-center justify-center rounded-full",
-          isCredit ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600",
+          isCredit ? "bg-success-surface text-success" : "bg-warning-surface text-warning",
         )}
       >
         {isCredit ? (
@@ -75,7 +75,7 @@ function TransactionRow({ txn }: { txn: WalletTransaction }) {
         <p
           className={cn(
             "text-sm font-semibold tabular-nums",
-            isCredit ? "text-emerald-600" : "text-foreground",
+            isCredit ? "text-success" : "text-foreground",
           )}
         >
           {isCredit ? "+" : "−"}

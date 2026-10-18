@@ -13,15 +13,19 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <div className="grid min-h-dvh lg:grid-cols-2">
       {/* The pitch, kept off small screens where it would push the form down. */}
       <aside className="bg-stars relative hidden flex-col justify-between overflow-hidden bg-cosmos p-12 lg:flex">
+        <div className="pointer-events-none absolute inset-0" aria-hidden>
+          <span className="orb animate-float-slow absolute -right-20 top-10 size-64 opacity-75" />
+          <span className="orb-gold orb absolute left-10 bottom-32 size-10 opacity-85" />
+        </div>
         <Link href="/" className="relative flex items-center gap-2 font-semibold text-white">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-white/10 backdrop-blur">
+          <span className="medallion flex size-9 items-center justify-center rounded-xl">
             <Sparkles className="size-4" />
           </span>
-          Astra Astrology
+          <span className="font-display tracking-wide">Astra Astrology</span>
         </Link>
 
         <div className="relative">
-          <h2 className="max-w-sm text-3xl font-bold leading-tight text-white">
+          <h2 className="glow-text max-w-sm font-display text-3xl font-bold leading-tight text-white">
             The sky has been keeping notes since the day you were born.
           </h2>
           <ul className="mt-8 space-y-3">
@@ -45,10 +49,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             href="/"
             className="mb-8 flex items-center justify-center gap-2 font-semibold lg:hidden"
           >
-            <span className="flex size-8 items-center justify-center rounded-lg bg-brand-600 text-white">
+            <span className="medallion flex size-9 items-center justify-center rounded-xl text-brand-100">
               <Sparkles className="size-4" />
             </span>
-            Astra Astrology
+            <span className="font-display tracking-wide">Astra Astrology</span>
           </Link>
           {children}
         </div>
