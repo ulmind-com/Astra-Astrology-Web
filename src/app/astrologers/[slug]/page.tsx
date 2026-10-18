@@ -34,18 +34,14 @@ import {
 } from "@/components/ui";
 import { astrologerApi, callApi, chatApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
-import {
-  baseRate,
-  cn,
-  effectiveRate,
-  formatCurrency,
-  formatNumber,
-  hasDiscount,
-} from "@/lib/utils";
+import { cn, coinsPerMinute, formatNumber } from "@/lib/utils";
+import { DurationPicker } from "@/components/consult/duration-picker";
 import { useAuth } from "@/providers/auth-provider";
 import {
   MODE_LABELS,
   SKILL_LABELS,
+  coinWord,
+  formatCoins,
   type AstrologerPublic,
   type ConsultationMode,
 } from "@/types";
@@ -280,15 +276,14 @@ export default function AstrologerDetailPage() {
 function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
   const router = useRouter();
   const { user } = useAuth();
+  const [picking, setPicking] = React.useState<ConsultationMode | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
   const start = useMutation({
-    // Chat opens a conversation; a call opens a room. Different endpoints,
-    // same button.
-    mutationFn: (mode: ConsultationMode) =>
+    mutationFn: ({ mode, minutes }: { mode: ConsultationMode; minutes: number }) =>
       mode === "chat"
-        ? chatApi.start(astrologer.id).then((s) => `/chat/${s.chat.id}`)
-        : callApi.start(astrologer.id, mode).then((s) => `/call/${s.call.id}`),
+        ? chatApi.start(astrologer.id, minutes).then((s) => `/chat/${s.chat.id}`)
+        : callApi.start(astrologer.id, mode, minutes).then((s) => `/call/${s.call.id}`),
     onSuccess: (href) => router.push(href),
     onError: (e: ApiError) => setError(e.message),
   });
@@ -315,13 +310,9 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
 
   return (
     <>
-      {error && <Alert tone="error">{error}</Alert>}
-
       {modes.map((mode: ConsultationMode) => {
         const Icon = MODE_ICONS[mode];
-        const price = effectiveRate(astrologer.rates, mode);
-        const discounted = hasDiscount(astrologer.rates, mode);
-        const base = baseRate(astrologer.rates, mode);
+        const rate = coinsPerMinute(astrologer.rates, mode);
         const paused = pausedReason(mode);
         const disabled = Boolean(paused) || start.isPending;
 
@@ -336,7 +327,7 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
                 router.push(`/login?next=/astrologers/${astrologer.slug}`);
                 return;
               }
-              start.mutate(mode);
+              setPicking(mode);
             }}
             className={cn(
               "flex w-full items-center justify-between rounded-xl border p-3 text-left transition-colors",
@@ -360,15 +351,11 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
             </span>
 
             <span className="text-right">
-              {discounted && (
-                <span className="mr-1.5 text-xs text-muted-foreground line-through">
-                  {formatCurrency(base)}
-                </span>
-              )}
-              <span className="font-semibold">
-                {price > 0 ? formatCurrency(price) : "Free"}
+              <span className="font-semibold">{formatCoins(rate)}</span>
+              <span className="text-xs text-muted-foreground">
+                {" "}
+                {coinWord(rate)}/min
               </span>
-              <span className="text-xs text-muted-foreground">/min</span>
             </span>
           </button>
         );
@@ -379,6 +366,20 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
           You will be asked to sign in first.
         </p>
       )}
+
+      <DurationPicker
+        astrologerId={astrologer.id}
+        astrologerName={astrologer.display_name}
+        mode={picking}
+        open={picking !== null}
+        onClose={() => {
+          setPicking(null);
+          setError(null);
+        }}
+        onConfirm={(minutes) => picking && start.mutate({ mode: picking, minutes })}
+        starting={start.isPending}
+        error={error}
+      />
     </>
   );
 }

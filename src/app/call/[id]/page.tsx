@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import * as React from "react";
 
 import { CallRoom } from "@/components/call/call-room";
+import { OutOfCoins, SessionMeter } from "@/components/consult/session-meter";
 import { Alert, Avatar, Button, LoadingBlock } from "@/components/ui";
 import { useCall, useCallActions, useCallHeartbeat, useCallTimer } from "@/hooks/use-call";
 import { ApiError } from "@/lib/api/client";
@@ -65,6 +66,12 @@ export default function CallPage() {
       )}
 
       {/* ------------------------------------------------- connected chrome */}
+      {connected && call.billing && (
+        <div className="pointer-events-auto absolute inset-x-0 top-16 z-10 px-3">
+          <SessionMeter billing={call.billing} onDark />
+        </div>
+      )}
+
       {connected ? (
         <header className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center gap-3 bg-gradient-to-b from-black/70 to-transparent px-4 py-3">
           <div className="min-w-0 flex-1">
@@ -121,6 +128,11 @@ export default function CallPage() {
               </Button>
             </>
           ) : (
+            call.end_reason === "Ran out of coins" ? (
+              <div className="rounded-2xl bg-white/5 p-6">
+                <OutOfCoins onBack={() => router.replace("/astrologers")} />
+              </div>
+            ) : (
             <>
               <span className="flex size-20 items-center justify-center rounded-full bg-white/10">
                 <PhoneOff className="size-8" />
@@ -140,6 +152,7 @@ export default function CallPage() {
                 Back to astrologers
               </Button>
             </>
+            )
           )}
         </div>
       )}

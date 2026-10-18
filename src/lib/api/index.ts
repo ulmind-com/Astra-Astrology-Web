@@ -19,6 +19,7 @@ import type {
   Chat,
   ChatSession,
   ConsultationMode,
+  ConsultationQuote,
   CreateOrderResponse,
   EmailAvailability,
   GalleryUploadResult,
@@ -120,6 +121,11 @@ export type DirectoryFilters = {
 };
 
 export const astrologerApi = {
+  quote: (astrologerId: string, mode: ConsultationMode) =>
+    api.get<ConsultationQuote>(endpoints.astrologers.quote(astrologerId), {
+      query: { mode },
+    }),
+
   list: (filters: DirectoryFilters = {}) =>
     api.get<PaginatedAstrologers>(endpoints.astrologers.list, {
       query: filters,
@@ -206,8 +212,12 @@ export const walletApi = {
 
 // ------------------------------------------------------------------- calls
 export const callApi = {
-  start: (astrologer_id: string, mode: ConsultationMode = "video") =>
-    api.post<CallSession>(endpoints.calls.start, { astrologer_id, mode }),
+  start: (astrologer_id: string, mode: ConsultationMode, requested_minutes: number) =>
+    api.post<CallSession>(endpoints.calls.start, {
+      astrologer_id,
+      mode,
+      requested_minutes,
+    }),
 
   active: () => api.get<CallSession | null>(endpoints.calls.active),
 
@@ -227,8 +237,8 @@ export const callApi = {
 
 // -------------------------------------------------------------------- chat
 export const chatApi = {
-  start: (astrologer_id: string) =>
-    api.post<ChatSession>(endpoints.chats.start, { astrologer_id }),
+  start: (astrologer_id: string, requested_minutes: number) =>
+    api.post<ChatSession>(endpoints.chats.start, { astrologer_id, requested_minutes }),
 
   active: () => api.get<ChatSession | null>(endpoints.chats.active),
 

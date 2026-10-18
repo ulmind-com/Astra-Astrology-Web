@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import * as React from "react";
 
 import { ChatRoom } from "@/components/chat/chat-room";
+import { OutOfCoins, SessionMeter } from "@/components/consult/session-meter";
 import { Alert, Avatar, Button, LoadingBlock } from "@/components/ui";
 import { useChat, useChatActions, useChatHeartbeat, useChatTimer } from "@/hooks/use-chat";
 import { ApiError } from "@/lib/api/client";
@@ -112,12 +113,21 @@ export default function ChatPage() {
             </p>
           </div>
         ) : data?.firebase ? (
-          <ChatRoom
-            conversationId={chat.conversation_id}
-            firebase={data.firebase}
-            canSend={active}
-            peerName={chat.peer?.name}
-          />
+          <div className="flex h-full flex-col">
+            {chat.billing && active && (
+              <div className="border-b border-border bg-surface px-3 py-2">
+                <SessionMeter billing={chat.billing} />
+              </div>
+            )}
+            <div className="flex-1 overflow-hidden">
+              <ChatRoom
+                conversationId={chat.conversation_id}
+                firebase={data.firebase}
+                canSend={active}
+                peerName={chat.peer?.name}
+              />
+            </div>
+          </div>
         ) : (
           <ChatEnded chat={chat} onBack={() => router.push("/astrologers")} />
         )}
@@ -135,6 +145,10 @@ function ChatEnded({
 }) {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-4 p-8 text-center">
+      {chat.end_reason === "Ran out of coins" ? (
+        <OutOfCoins onBack={onBack} />
+      ) : (
+        <>
       <span className="flex size-16 items-center justify-center rounded-full bg-surface-muted">
         <Phone className="size-6 text-muted-foreground" />
       </span>
@@ -153,6 +167,8 @@ function ChatEnded({
       <Button variant="secondary" onClick={onBack}>
         Back to astrologers
       </Button>
+        </>
+      )}
     </div>
   );
 }

@@ -4,15 +4,12 @@ import { Languages, MessageCircle, Phone, Star, Video } from "lucide-react";
 import Link from "next/link";
 
 import { Avatar, Badge, StatusDot } from "@/components/ui";
+import { cn, coinsPerMinute, formatNumber } from "@/lib/utils";
 import {
-  baseRate,
-  cn,
-  effectiveRate,
-  formatCurrency,
-  formatNumber,
-  hasDiscount,
-} from "@/lib/utils";
-import { MODE_LABELS, SKILL_LABELS, type AstrologerPublic } from "@/types";
+  MODE_LABELS, SKILL_LABELS, type AstrologerPublic,
+  coinWord,
+  formatCoins,
+} from "@/types";
 
 const MODE_ICONS = { chat: MessageCircle, call: Phone, video: Video } as const;
 
@@ -24,8 +21,7 @@ export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic })
   const primaryMode = astrologer.modes_enabled.includes("chat")
     ? "chat"
     : (astrologer.modes_enabled[0] ?? "chat");
-  const price = effectiveRate(rates, primaryMode);
-  const discounted = hasDiscount(rates, primaryMode);
+  const price = coinsPerMinute(rates, primaryMode);
 
   return (
     <Link
@@ -108,21 +104,9 @@ export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic })
           })}
         </div>
 
-        <div className="text-right">
-          {discounted && (
-            <span className="mr-1.5 text-xs text-muted-foreground line-through">
-              {formatCurrency(baseRate(rates, primaryMode))}
-            </span>
-          )}
-          <span
-            className={cn(
-              "font-semibold",
-              discounted ? "text-emerald-600 dark:text-emerald-400" : "text-foreground",
-            )}
-          >
-            {price > 0 ? formatCurrency(price) : "Free"}
-          </span>
-          <span className="text-xs text-muted-foreground">/min</span>
+        <div className="whitespace-nowrap text-right">
+          <span className="font-semibold">{formatCoins(price)}</span>
+          <span className="text-xs text-muted-foreground"> {coinWord(price)}/min</span>
         </div>
       </div>
     </Link>

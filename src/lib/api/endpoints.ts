@@ -26,7 +26,10 @@ export const endpoints = {
   astrologers: {
     list: "/astrologers",
     detail: (slugOrId: string) => `/astrologers/${slugOrId}`,
+    quote: (id: string) => `/astrologers/${id}/quote`,
     me: "/astrologers/me",
+    myEarnings: "/astrologers/me/earnings",
+    myEarningsRecent: "/astrologers/me/earnings/recent",
     availability: "/astrologers/me/availability",
     image: "/astrologers/me/image",
     gallery: "/astrologers/me/gallery",
