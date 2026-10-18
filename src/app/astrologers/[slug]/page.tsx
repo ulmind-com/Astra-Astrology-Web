@@ -32,7 +32,7 @@ import {
   LoadingBlock,
   StatusDot,
 } from "@/components/ui";
-import { astrologerApi, callApi } from "@/lib/api";
+import { astrologerApi, callApi, chatApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import {
   baseRate,
@@ -283,8 +283,13 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
   const [error, setError] = React.useState<string | null>(null);
 
   const start = useMutation({
-    mutationFn: (mode: ConsultationMode) => callApi.start(astrologer.id, mode),
-    onSuccess: (session) => router.push(`/call/${session.call.id}`),
+    // Chat opens a conversation; a call opens a room. Different endpoints,
+    // same button.
+    mutationFn: (mode: ConsultationMode) =>
+      mode === "chat"
+        ? chatApi.start(astrologer.id).then((s) => `/chat/${s.chat.id}`)
+        : callApi.start(astrologer.id, mode).then((s) => `/call/${s.call.id}`),
+    onSuccess: (href) => router.push(href),
     onError: (e: ApiError) => setError(e.message),
   });
 
@@ -318,9 +323,7 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
         const discounted = hasDiscount(astrologer.rates, mode);
         const base = baseRate(astrologer.rates, mode);
         const paused = pausedReason(mode);
-        // Chat is a conversation, not a call — it is built separately.
-        const comingSoon = mode === "chat";
-        const disabled = Boolean(paused) || comingSoon || start.isPending;
+        const disabled = Boolean(paused) || start.isPending;
 
         return (
           <button
@@ -348,9 +351,9 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
               </span>
               <span>
                 {MODE_LABELS[mode]}
-                {(paused || comingSoon) && (
+                {paused && (
                   <span className="block text-xs font-normal text-muted-foreground">
-                    {comingSoon ? "Coming soon" : paused}
+                    {paused}
                   </span>
                 )}
               </span>
