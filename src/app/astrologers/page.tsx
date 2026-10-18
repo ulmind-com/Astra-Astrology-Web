@@ -69,9 +69,12 @@ function DirectoryInner() {
       <SiteHeader />
 
       <main className="mx-auto max-w-6xl px-4 py-10">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight">Astrologers</h1>
-          <p className="mt-2 text-muted-foreground">
+        <header className="mb-10">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-400/30 bg-brand-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-300 mb-4">
+            ✦ Live directory
+          </span>
+          <h1 className="font-display text-4xl font-bold tracking-tight">Astrologers</h1>
+          <p className="mt-2 max-w-lg text-muted-foreground leading-relaxed">
             Verified practitioners, ready when you are. Whoever is online shows first.
           </p>
         </header>
@@ -115,8 +118,8 @@ function DirectoryInner() {
           ) : (
             <>
               <div
-                className={`grid gap-5 transition-opacity sm:grid-cols-2 lg:grid-cols-3 ${
-                  isFetching ? "opacity-60" : ""
+                className={`grid gap-5 transition-opacity duration-300 sm:grid-cols-2 lg:grid-cols-3 ${
+                  isFetching ? "opacity-50" : "opacity-100"
                 }`}
               >
                 {data.items.map((astrologer) => (

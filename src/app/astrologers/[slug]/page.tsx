@@ -67,9 +67,9 @@ export default function AstrologerDetailPage() {
       <main className="mx-auto max-w-5xl px-4 py-8">
         <Link
           href="/astrologers"
-          className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+          className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/50 px-3.5 py-1.5 text-sm text-muted-foreground backdrop-blur transition-all hover:border-brand-400/40 hover:bg-surface-muted hover:text-foreground"
         >
-          <ArrowLeft className="size-4" />
+          <ArrowLeft className="size-3.5" />
           All astrologers
         </Link>
 
@@ -93,16 +93,28 @@ export default function AstrologerDetailPage() {
         ) : astrologer ? (
           <article className="grid gap-6 lg:grid-cols-3">
             {/* ------------------------------------------------- main */}
-            <div className="space-y-6 lg:col-span-2">
-              <Card>
-                <CardBody className="flex flex-col gap-5 sm:flex-row sm:items-start">
+            <div className="space-y-5 lg:col-span-2">
+              {/* Profile hero card */}
+              <div className="card-surface overflow-hidden">
+                {/* Gradient top strip based on online status */}
+                <div className={cn(
+                  "h-1",
+                  astrologer.availability.is_online && !astrologer.availability.is_busy
+                    ? "bg-gradient-to-r from-transparent via-success to-transparent"
+                    : astrologer.availability.is_busy
+                    ? "bg-gradient-to-r from-transparent via-gold-400 to-transparent"
+                    : "bg-gradient-to-r from-transparent via-brand-400/40 to-transparent",
+                )} />
+                <div className="flex flex-col gap-5 p-6 sm:flex-row sm:items-start">
                   <div className="relative shrink-0">
-                    <Avatar
-                      src={astrologer.profile_image_url}
-                      name={astrologer.display_name}
-                      size="xl"
-                    />
-                    <span className="absolute right-1 bottom-1 rounded-full bg-surface p-1">
+                    <div className="ring-2 ring-brand-400/30 rounded-full">
+                      <Avatar
+                        src={astrologer.profile_image_url}
+                        name={astrologer.display_name}
+                        size="xl"
+                      />
+                    </div>
+                    <span className="absolute right-1 bottom-1 rounded-full bg-surface-solid p-1.5 shadow-md">
                       <StatusDot
                         online={astrologer.availability.is_online}
                         busy={astrologer.availability.is_busy}
@@ -112,60 +124,63 @@ export default function AstrologerDetailPage() {
 
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h1 className="text-2xl font-bold tracking-tight">
+                      <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
                         {astrologer.display_name}
                       </h1>
-                      {astrologer.is_featured && <Badge tone="gold">Featured</Badge>}
-                      <Badge tone={astrologer.availability.is_online ? "green" : "neutral"}>
+                      {astrologer.is_featured && <Badge tone="gold">✦ Featured</Badge>}
+                      <Badge
+                        tone={
+                          astrologer.availability.is_busy
+                            ? "gold"
+                            : astrologer.availability.is_online
+                            ? "green"
+                            : "neutral"
+                        }
+                      >
                         {astrologer.availability.is_busy
-                          ? "Busy"
+                          ? "◉ In Session"
                           : astrologer.availability.is_online
-                            ? "Online"
-                            : "Offline"}
+                          ? "● Online"
+                          : "○ Offline"}
                       </Badge>
                     </div>
 
                     {astrologer.tagline && (
-                      <p className="mt-1 text-muted-foreground">{astrologer.tagline}</p>
+                      <p className="mt-1.5 leading-relaxed text-muted-foreground">{astrologer.tagline}</p>
                     )}
 
-                    <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                    {/* Stats pills */}
+                    <div className="mt-4 flex flex-wrap gap-2.5 text-sm">
                       {astrologer.rating.count > 0 && (
-                        <div className="flex items-center gap-1.5">
-                          <Star className="size-4 fill-gold-400 text-gold-400" />
-                          <dd className="font-semibold">
-                            {astrologer.rating.average.toFixed(1)}
-                          </dd>
-                          <dt className="text-muted-foreground">
-                            ({formatNumber(astrologer.rating.count)} reviews)
-                          </dt>
-                        </div>
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-gold-500/10 px-3 py-1 border border-gold-400/25">
+                          <Star className="size-3.5 fill-gold-400 text-gold-400" />
+                          <span className="font-semibold text-gold-300">{astrologer.rating.average.toFixed(1)}</span>
+                          <span className="text-muted-foreground text-xs">({formatNumber(astrologer.rating.count)})</span>
+                        </span>
                       )}
-                      <div className="flex items-center gap-1.5">
-                        <Award className="size-4 text-brand-500" />
-                        <dd className="font-semibold">{astrologer.experience_years}</dd>
-                        <dt className="text-muted-foreground">years experience</dt>
-                      </div>
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-500/10 px-3 py-1 border border-brand-400/25">
+                        <Award className="size-3.5 text-brand-300" />
+                        <span className="font-semibold text-foreground">{astrologer.experience_years}</span>
+                        <span className="text-muted-foreground text-xs">yrs exp</span>
+                      </span>
                       {astrologer.total_consultations > 0 && (
-                        <div className="flex items-center gap-1.5">
-                          <Sparkles className="size-4 text-brand-500" />
-                          <dd className="font-semibold">
-                            {formatNumber(astrologer.total_consultations)}
-                          </dd>
-                          <dt className="text-muted-foreground">consultations</dt>
-                        </div>
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-500/10 px-3 py-1 border border-brand-400/25">
+                          <Sparkles className="size-3.5 text-brand-300" />
+                          <span className="font-semibold text-foreground">{formatNumber(astrologer.total_consultations)}</span>
+                          <span className="text-muted-foreground text-xs">consults</span>
+                        </span>
                       )}
-                    </dl>
+                    </div>
 
                     {astrologer.languages.length > 0 && (
                       <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                        <Languages className="size-4 shrink-0" />
-                        {astrologer.languages.join(", ")}
+                        <Languages className="size-3.5 shrink-0 text-brand-400/70" />
+                        <span>{astrologer.languages.join(" · ")}</span>
                       </p>
                     )}
                   </div>
-                </CardBody>
-              </Card>
+                </div>
+              </div>
 
               {astrologer.skills.length > 0 && (
                 <Card>
@@ -330,20 +345,23 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
               setPicking(mode);
             }}
             className={cn(
-              "flex w-full items-center justify-between rounded-xl border p-3 text-left transition-colors",
+              "flex w-full items-center justify-between rounded-xl border p-3.5 text-left transition-all duration-200 group",
               disabled
-                ? "cursor-not-allowed border-border opacity-60"
-                : "border-border hover:border-brand-400 hover:bg-brand-50/60 dark:hover:bg-brand-950/40",
+                ? "cursor-not-allowed border-border/50 opacity-55"
+                : "border-border hover:border-brand-400/60 hover:bg-brand-500/8 hover:shadow-[0_0_16px_-6px_rgb(168_85_247/0.4)]",
             )}
           >
-            <span className="flex items-center gap-2.5 text-sm font-medium">
-              <span className="flex size-8 items-center justify-center rounded-lg bg-brand-100 text-brand-700 dark:bg-brand-900 dark:text-brand-200">
+            <span className="flex items-center gap-3 text-sm font-medium">
+              <span className={cn(
+                "icon-box flex size-9 items-center justify-center rounded-xl icon-box-brand transition-all duration-200",
+                !disabled && "group-hover:shadow-[0_0_12px_-3px_rgb(168_85_247/0.5)]",
+              )}>
                 <Icon className="size-4" />
               </span>
               <span>
-                {MODE_LABELS[mode]}
+                <span className="font-semibold text-foreground">{MODE_LABELS[mode]}</span>
                 {paused && (
-                  <span className="block text-xs font-normal text-muted-foreground">
+                  <span className="block text-xs font-normal text-muted-foreground mt-0.5">
                     {paused}
                   </span>
                 )}
@@ -351,11 +369,8 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
             </span>
 
             <span className="text-right">
-              <span className="font-semibold">{formatCoins(rate)}</span>
-              <span className="text-xs text-muted-foreground">
-                {" "}
-                {coinWord(rate)}/min
-              </span>
+              <span className="text-base font-bold text-foreground">{formatCoins(rate)}</span>
+              <span className="block text-xs text-muted-foreground">{coinWord(rate)}/min</span>
             </span>
           </button>
         );
