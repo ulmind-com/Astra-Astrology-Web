@@ -31,7 +31,7 @@ function toQuery(filters: Filters, page: number): ApiFilters {
     online_only: filters.online_only || undefined,
     featured_only: filters.featured_only || undefined,
     min_experience: filters.min_experience ? Number(filters.min_experience) : undefined,
-    max_rate: filters.max_rate ? Number(filters.max_rate) : undefined,
+    max_coins_per_minute: filters.max_rate ? Number(filters.max_rate) : undefined,
     page,
     limit: 12,
   };

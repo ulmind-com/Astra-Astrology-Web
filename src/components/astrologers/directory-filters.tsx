@@ -182,7 +182,7 @@ export function DirectoryFilters({
               />
             </label>
             <label className="space-y-1.5">
-              <span className="text-xs font-medium text-muted-foreground">Max ₹/min</span>
+              <span className="text-xs font-medium text-muted-foreground">Max coins/min</span>
               <Input
                 type="number"
                 min={0}
@@ -225,7 +225,7 @@ export function ActiveFilterChips({
   if (filters.mode) chips.push({ key: "mode", label: MODE_LABELS[filters.mode] });
   if (filters.min_experience)
     chips.push({ key: "min_experience", label: `${filters.min_experience}+ yrs` });
-  if (filters.max_rate) chips.push({ key: "max_rate", label: `≤ ₹${filters.max_rate}/min` });
+  if (filters.max_rate) chips.push({ key: "max_rate", label: `≤ ${filters.max_rate} coins/min` });
 
   if (chips.length === 0) return null;
 
