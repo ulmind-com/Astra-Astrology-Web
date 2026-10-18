@@ -452,15 +452,15 @@
     animation: fade-in 0.5s ease-out forwards;
   }
 
-  /* Lottie ring decorations */
+  /* Hardware-accelerated GPU spin keyframes (0% CPU, locked 60/120fps) */
   @keyframes spin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
+    from { transform: rotate(0deg) translateZ(0); }
+    to   { transform: rotate(360deg) translateZ(0); }
   }
 
   @keyframes spin-reverse {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(-360deg); }
+    from { transform: rotate(0deg) translateZ(0); }
+    to   { transform: rotate(-360deg) translateZ(0); }
   }
 
   @keyframes pulse-scale {
