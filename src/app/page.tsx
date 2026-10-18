@@ -16,7 +16,6 @@ import Link from "next/link";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Button } from "@/components/ui";
-import { LottieAstrology } from "@/components/ui/lottie-astrology";
 
 const SERVICES = [
   {
@@ -24,28 +23,24 @@ const SERVICES = [
     title: "Kundli & Birth Chart",
     body: "Your planetary positions, dasha periods and what they point to — read by seasoned practitioners.",
     accent: "brand",
-    isWheel: true,
   },
   {
     icon: Heart,
     title: "Matchmaking",
     body: "Guna milan across all eight kootas, with the doshas read properly and explained clearly.",
     accent: "gold",
-    isWheel: false,
   },
   {
     icon: Hash,
     title: "Numerology",
     body: "Mulank, bhagyank, lucky numbers, and what your name adds up to in your life path.",
     accent: "brand",
-    isWheel: false,
   },
   {
     icon: Sparkles,
     title: "Vastu Shastra",
     body: "Room by room, on the sixteen-direction compass — bringing alignment to your spaces.",
     accent: "gold",
-    isWheel: false,
   },
 ];
 
@@ -84,7 +79,7 @@ export default function HomePage() {
       <main>
         {/* ─────────────────────────────────────────── HERO */}
         <section className="bg-stars relative overflow-hidden">
-          {/* Decorative cosmic planets and orbs */}
+          {/* Decorative planets */}
           <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
             <span className="orb animate-float-slow absolute -left-44 -top-32 size-80 opacity-40 blur-[2px] sm:size-[28rem]" />
             <span className="absolute -left-52 -top-40 hidden size-[34rem] rounded-full border border-brand-300/15 [transform:rotate(-18deg)_scaleY(0.3)] sm:block" />
@@ -92,20 +87,8 @@ export default function HomePage() {
             <span className="orb-gold orb absolute right-20 top-14 size-11 opacity-80 sm:right-32" />
             <span className="orb absolute left-[13%] bottom-20 size-8 opacity-50" />
             <span className="orb absolute right-[22%] bottom-28 size-5 opacity-40" />
-            {/* Subtle extra orbital ring */}
+            {/* Subtle extra ring */}
             <span className="absolute right-[8%] top-[30%] hidden size-48 rounded-full border border-gold-300/10 [transform:scaleY(0.4)] sm:block" />
-          </div>
-
-          {/* Majestic Celestial Rotating Zodiac Wheel in Hero Backdrop */}
-          <div
-            className="pointer-events-none absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2 opacity-40 sm:opacity-50 transition-opacity duration-1000"
-            aria-hidden
-          >
-            <LottieAstrology
-              size={720}
-              variant="hero-backdrop"
-              className="scale-75 sm:scale-90 lg:scale-100"
-            />
           </div>
 
           <div className="relative mx-auto max-w-6xl px-4 py-28 text-center sm:py-40">
@@ -144,7 +127,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* Trust stats (Original glassmorphism cards layout) */}
+            {/* Trust stats */}
             <dl className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-4 sm:grid-cols-3">
               {TRUST_STATS.map(({ value, label }) => (
                 <div
@@ -162,20 +145,20 @@ export default function HomePage() {
         </section>
 
         {/* ─────────────────────────────────────────── SERVICES */}
-        <section className="mx-auto max-w-6xl px-4 py-24">
-          <div className="text-center">
-            <span className="inline-block rounded-full bg-brand-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-300 border border-brand-400/30 mb-3">
+        <section id="services" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-24">
+          <div className="mb-12 text-center">
+            <span className="inline-block rounded-full bg-brand-500/12 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-300 border border-brand-400/30 mb-4">
               What we offer
             </span>
-            <h2 className="glow-text font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Every tradition, read with care
+            <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+              What you can ask about
             </h2>
-            <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
-              Choose the reading that matches where you are right now.
+            <p className="mt-3 mx-auto max-w-lg text-muted-foreground leading-relaxed">
+              Traditional methods, interpreted by people who practise them every day.
             </p>
           </div>
 
-          <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {SERVICES.map((service, i) => (
               <div
                 key={service.title}
@@ -186,17 +169,11 @@ export default function HomePage() {
                 <div className="absolute inset-0 rounded-[inherit] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-b from-brand-500/5 to-transparent" />
 
                 <span
-                  className={`medallion relative mx-auto flex size-16 items-center justify-center rounded-2xl transition-all duration-300 group-hover:scale-110 group-hover:shadow-glow ${
+                  className={`medallion mx-auto flex size-16 items-center justify-center rounded-2xl transition-all duration-300 group-hover:scale-110 group-hover:shadow-glow ${
                     service.accent === "gold" ? "medallion-gold" : ""
                   }`}
                 >
-                  {service.isWheel ? (
-                    <div className="relative flex size-10 items-center justify-center overflow-hidden rounded-full">
-                      <LottieAstrology size={54} variant="minimal" decorative={false} />
-                    </div>
-                  ) : (
-                    <service.icon className="size-7 text-brand-100" />
-                  )}
+                  <service.icon className="size-7 text-brand-100" />
                 </span>
                 <h3 className="mt-5 font-display text-base font-semibold tracking-tight text-foreground">
                   {service.title}
@@ -313,14 +290,6 @@ export default function HomePage() {
             {/* decorative orbs */}
             <span className="orb pointer-events-none absolute -left-16 -top-16 size-48 opacity-35 blur-[2px]" aria-hidden />
             <span className="orb-gold orb pointer-events-none absolute -right-10 -bottom-10 size-40 opacity-25 blur-[3px]" aria-hidden />
-
-            {/* Subtle rotating celestial watermark in the background corner */}
-            <div
-              className="pointer-events-none absolute -right-16 -bottom-16 opacity-25"
-              aria-hidden
-            >
-              <LottieAstrology size={360} variant="minimal" decorative={false} />
-            </div>
 
             <div className="relative">
               <span className="inline-block rounded-full bg-brand-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-300 border border-brand-400/30 mb-6">
