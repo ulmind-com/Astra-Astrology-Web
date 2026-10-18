@@ -1,6 +1,7 @@
 import { Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Year } from "@/components/ui";
+import { UlmindCredit } from "@/components/ulmind-credit";
 
 const POINTS = [
   "Your birth details, saved once and reused by every reading",
@@ -38,9 +39,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </ul>
         </div>
 
-        <p className="relative text-xs text-brand-100/50">
-          © <Year /> Astra Astrology
-        </p>
+        <div className="relative space-y-4">
+          <UlmindCredit />
+          <p className="text-xs text-brand-100/50">
+            © <Year /> Astra Astrology
+          </p>
+        </div>
       </aside>
 
       <main className="flex items-center justify-center px-4 py-12">
@@ -55,6 +59,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <span className="font-display tracking-wide">Astra Astrology</span>
           </Link>
           {children}
+
+          {/* Small screens never see the panel on the left, so the credit
+              rides with the form instead. */}
+          <div className="mt-10 flex justify-center lg:hidden">
+            <UlmindCredit />
+          </div>
         </div>
       </main>
     </div>

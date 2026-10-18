@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 
 import { AuthProvider } from "@/providers/auth-provider";
 import { QueryProvider } from "@/providers/query-provider";
+import { RealtimeProvider } from "@/providers/realtime-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import "./globals.css";
 
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full">
         <ThemeProvider>
           <QueryProvider>
+            <RealtimeProvider>
             <AuthProvider signInPath="/login">
               {children}
               <Toaster
@@ -41,6 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 toastOptions={{ className: "font-sans" }}
               />
             </AuthProvider>
+            </RealtimeProvider>
           </QueryProvider>
         </ThemeProvider>
       </body>

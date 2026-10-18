@@ -1,6 +1,7 @@
 import { Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Year } from "@/components/ui";
+import { UlmindCredit } from "@/components/ulmind-credit";
 
 const COLUMNS = [
   {
@@ -61,7 +62,11 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-10 border-t border-border pt-6">
+          <UlmindCredit />
+        </div>
+
+        <div className="mt-6 flex flex-col gap-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>© <Year /> Astra Astrology. All rights reserved.</p>
           <p className="max-w-md sm:text-right">
             Astrological guidance is offered for personal reflection and is not a
