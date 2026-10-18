@@ -11,6 +11,7 @@ import { useCall, useCallActions, useCallHeartbeat, useCallTimer } from "@/hooks
 import { ApiError } from "@/lib/api/client";
 import { useRequireAuth } from "@/providers/auth-provider";
 import { CALL_STATUS_LABELS, formatDuration, isCallLive } from "@/types";
+import { useLoopingSound } from "@/hooks/use-sound";
 
 export default function CallPage() {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +28,10 @@ export default function CallPage() {
 
   useCallHeartbeat(id, live);
   const seconds = useCallTimer(call?.started_at);
+
+  // The caller hears the same tone while they wait, so "ringing…" on screen is
+  // backed by something audible. It stops the moment the astrologer answers.
+  useLoopingSound("ring", call?.status === "ringing");
 
   // The other side may hang up, or the call may time out. Once it is over
   // there is nothing left on this screen worth looking at.
