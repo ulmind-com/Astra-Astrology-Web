@@ -63,12 +63,12 @@ export default function HomePage() {
           {/* Planets. Decoration only — they carry no meaning, so they are
               hidden from assistive tech and sit behind the content. */}
           <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-            <span className="orb animate-float-slow absolute -left-28 -top-24 size-80 opacity-80" />
-            <span className="absolute -left-36 -top-32 size-[26rem] rounded-full border border-brand-300/20 [transform:rotate(-18deg)_scaleY(0.32)]" />
-            <span className="orb animate-float-slow absolute -right-16 top-24 size-56 opacity-70 [animation-delay:-4s]" />
-            <span className="orb-gold orb absolute right-28 top-10 size-12 opacity-90" />
-            <span className="orb absolute left-[18%] bottom-16 size-8 opacity-70" />
-            <span className="orb absolute right-[22%] bottom-24 size-5 opacity-60" />
+            <span className="orb animate-float-slow absolute -left-40 -top-28 size-72 opacity-45 blur-[2px] sm:size-96" />
+            <span className="absolute -left-48 -top-36 hidden size-[30rem] rounded-full border border-brand-300/20 [transform:rotate(-18deg)_scaleY(0.32)] sm:block" />
+            <span className="orb animate-float-slow absolute -right-24 top-28 size-56 opacity-35 blur-[3px] [animation-delay:-4s] sm:size-72" />
+            <span className="orb-gold orb absolute right-16 top-12 size-10 opacity-75 sm:right-28" />
+            <span className="orb absolute left-[14%] bottom-16 size-7 opacity-55" />
+            <span className="orb absolute right-[20%] bottom-24 size-4 opacity-45" />
           </div>
 
           <div className="relative mx-auto max-w-6xl px-4 py-24 text-center sm:py-32">
@@ -125,7 +125,7 @@ export default function HomePage() {
         {/* --------------------------------------------------- services */}
         <section id="services" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-20">
           <div className="max-w-2xl">
-            <h2 className="text-3xl font-bold tracking-tight">What you can ask about</h2>
+            <h2 className="font-display text-3xl font-bold tracking-tight">What you can ask about</h2>
             <p className="mt-3 text-muted-foreground">
               Traditional methods, read by people who practise them daily.
             </p>
@@ -152,7 +152,7 @@ export default function HomePage() {
         {/* ----------------------------------------------- how it works */}
         <section id="how-it-works" className="scroll-mt-20 px-4">
           <div className="card-surface mx-auto max-w-6xl px-6 py-16 sm:px-10">
-            <h2 className="text-3xl font-bold tracking-tight">How it works</h2>
+            <h2 className="font-display text-3xl font-bold tracking-tight">How it works</h2>
 
             <ol className="mt-10 grid gap-8 md:grid-cols-3">
               {STEPS.map((step, index) => (
