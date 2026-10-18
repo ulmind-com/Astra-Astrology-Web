@@ -4,6 +4,9 @@ import { api, apiFetch } from "@/lib/api/client";
 import { endpoints } from "@/lib/api/endpoints";
 import type {
   Address,
+  AppointmentQuote,
+  AppointmentDayView,
+  Appointment,
   AddressInput,
   AddressUpdate,
   AstrologerAdminUpdate,
@@ -260,4 +263,32 @@ export const chatApi = {
 
   history: (params: { page?: number; limit?: number } = {}) =>
     api.get<{ items: Chat[]; meta: PageMeta }>(endpoints.chats.history, { query: params }),
+};
+
+// ------------------------------------------------------------ appointments
+export const appointmentApi = {
+  /** What is open and what is taken on one day, for the chooser. */
+  day: (astrologerId: string, on: string) =>
+    api.get<AppointmentDayView>(endpoints.appointments.day(astrologerId), {
+      query: { on },
+      auth: false,
+    }),
+
+  quote: (astrologer_id: string, minutes: number) =>
+    api.post<AppointmentQuote>(endpoints.appointments.quote, { astrologer_id, minutes }),
+
+  book: (body: {
+    astrologer_id: string;
+    starts_at: string;
+    minutes: number;
+    note?: string | null;
+  }) => api.post<Appointment>(endpoints.appointments.book, body),
+
+  mine: (upcoming_only = false) =>
+    api.get<Appointment[]>(endpoints.appointments.mine, { query: { upcoming_only } }),
+
+  get: (id: string) => api.get<Appointment>(endpoints.appointments.detail(id)),
+
+  cancel: (id: string, reason?: string) =>
+    api.post<Appointment>(endpoints.appointments.cancel(id), { reason: reason ?? null }),
 };
