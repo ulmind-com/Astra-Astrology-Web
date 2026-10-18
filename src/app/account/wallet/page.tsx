@@ -3,6 +3,7 @@
 import {
   ArrowDownLeft,
   ArrowUpRight,
+  Coins,
   Loader2,
   Snowflake,
   Wallet as WalletIcon,
@@ -184,9 +185,6 @@ export default function WalletPage() {
           <CardHeader>
             <CardTitle>Add money</CardTitle>
             <CardDescription>
-              {options
-                ? `₹1 gets you ${options.coins_per_rupee} ${coinWord(options.coins_per_rupee)}. `
-                : ""}
               Pay by UPI, card or netbanking. Your coins arrive as soon as the payment is
               confirmed.
             </CardDescription>
@@ -198,6 +196,21 @@ export default function WalletPage() {
               </Alert>
             ) : (
               <>
+                {options && (
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-surface-muted/50 px-3.5 py-2.5 text-sm">
+                    <span className="flex items-center gap-1.5">
+                      <Coins className="size-4 text-gold-500" />
+                      ₹1 ={" "}
+                      <strong className="text-brand-600 dark:text-brand-300">
+                        {options.coins_per_rupee} {coinWord(options.coins_per_rupee)}
+                      </strong>
+                    </span>
+                    <span className="text-muted-foreground">
+                      Minimum {formatPaise(options.min_paise)}
+                    </span>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                   {options?.packs.map((pack) => (
                     <button
@@ -229,7 +242,9 @@ export default function WalletPage() {
                     hint={
                       options && custom && Number(custom) > 0
                         ? `${formatCoins(Math.floor(Number(custom)) * options.coins_per_rupee)} ${coinWord(options.coins_per_rupee)}`
-                        : "Whole rupees"
+                        : options
+                          ? `Whole rupees, ${formatPaise(options.min_paise)} or more`
+                          : "Whole rupees"
                     }
                     className="flex-1 min-w-48"
                   >
