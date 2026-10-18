@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Award,
@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import * as React from "react";
 
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -32,10 +32,16 @@ import {
   LoadingBlock,
   StatusDot,
 } from "@/components/ui";
-import { astrologerApi } from "@/lib/api";
+import { astrologerApi, callApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { baseRate, effectiveRate, formatCurrency, formatNumber, hasDiscount } from "@/lib/utils";
-import { MODE_LABELS, SKILL_LABELS, type ConsultationMode } from "@/types";
+import { useAuth } from "@/providers/auth-provider";
+import {
+  MODE_LABELS,
+  SKILL_LABELS,
+  type AstrologerPublic,
+  type ConsultationMode,
+} from "@/types";
 
 const MODE_ICONS = { chat: MessageCircle, call: Phone, video: Video } as const;
 
@@ -275,16 +281,7 @@ export default function AstrologerDetailPage() {
                     );
                   })}
 
-                  {/* Consultations are not built yet — say so rather than
-                      offering a button that does nothing. */}
-                  <Alert tone="info" className="mt-1">
-                    Chat and call consultations are coming soon. Create an account now so
-                    you are ready when they open.
-                  </Alert>
-
-                  <Link href="/register" className="block">
-                    <Button className="w-full">Create a free account</Button>
-                  </Link>
+                  <VideoCallButton astrologer={astrologer} />
                 </CardBody>
               </Card>
             </aside>
@@ -293,6 +290,71 @@ export default function AstrologerDetailPage() {
       </main>
 
       <SiteFooter />
+    </>
+  );
+}
+
+/**
+ * Starts a video call, or explains why it cannot start.
+ *
+ * The button is only live when the astrologer is online and actually offers
+ * video — the backend refuses otherwise, and a button that always fails is
+ * worse than one that says why.
+ */
+function VideoCallButton({ astrologer }: { astrologer: AstrologerPublic }) {
+  const router = useRouter();
+  const { user } = useAuth();
+  const [error, setError] = React.useState<string | null>(null);
+
+  const offersVideo = astrologer.modes_enabled.includes("video");
+  const online = astrologer.availability.is_online;
+
+  const start = useMutation({
+    mutationFn: () => callApi.start(astrologer.id, "video"),
+    onSuccess: (session) => router.push(`/call/${session.call.id}`),
+    onError: (e: ApiError) => setError(e.message),
+  });
+
+  if (!user) {
+    return (
+      <>
+        <Alert tone="info" className="mt-1">
+          Sign in to start a video call with {astrologer.display_name}.
+        </Alert>
+        <Link href={`/login?next=/astrologers/${astrologer.slug}`} className="block">
+          <Button className="w-full">Sign in to call</Button>
+        </Link>
+      </>
+    );
+  }
+
+  if (!offersVideo) {
+    return (
+      <Alert tone="info" className="mt-1">
+        {astrologer.display_name} does not take video calls yet.
+      </Alert>
+    );
+  }
+
+  return (
+    <>
+      {error && <Alert tone="error">{error}</Alert>}
+      {!online && (
+        <Alert tone="info" className="mt-1">
+          {astrologer.display_name} is offline right now. Try again when they are online.
+        </Alert>
+      )}
+      <Button
+        className="w-full"
+        disabled={!online || start.isPending}
+        onClick={() => {
+          setError(null);
+          start.mutate();
+        }}
+      >
+        <Video className="size-4" />
+        {start.isPending ? "Calling…" : "Start video call"}
+      </Button>
     </>
   );
 }
