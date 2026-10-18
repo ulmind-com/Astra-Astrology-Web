@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Alert, Button, Field, Input, LoadingBlock } from "@/components/ui";
 import { authApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
+import { GoogleButton } from "@/components/auth/google-button";
 import { useAuth } from "@/providers/auth-provider";
 
 /**
@@ -288,6 +289,18 @@ function RegisterForm() {
           <ArrowRight className="size-4" />
         </Button>
       </form>
+
+      {/* A line rather than a second heading: the two routes lead to the same
+          place, so neither should look like the main one. */}
+      <div className="my-6 flex items-center gap-3">
+        <span className="h-px flex-1 bg-border" />
+        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          or
+        </span>
+        <span className="h-px flex-1 bg-border" />
+      </div>
+
+      <GoogleButton label="Sign up with Google" onSignedIn={() => router.replace("/account/birth-details")} />
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
         Already have an account?{" "}
