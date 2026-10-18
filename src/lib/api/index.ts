@@ -4,6 +4,10 @@ import { api, apiFetch } from "@/lib/api/client";
 import { endpoints } from "@/lib/api/endpoints";
 import type {
   Address,
+  ReviewPage,
+  ReviewKind,
+  Review,
+  PendingReview,
   AppointmentQuote,
   AppointmentDayView,
   Appointment,
@@ -291,4 +295,26 @@ export const appointmentApi = {
 
   cancel: (id: string, reason?: string) =>
     api.post<Appointment>(endpoints.appointments.cancel(id), { reason: reason ?? null }),
+};
+
+// ----------------------------------------------------------------- reviews
+export const reviewApi = {
+  /** Public: what people said about an astrologer. */
+  forAstrologer: (astrologerId: string, params: { skip?: number; limit?: number } = {}) =>
+    api.get<ReviewPage>(endpoints.reviews.forAstrologer(astrologerId), {
+      query: params,
+      auth: false,
+    }),
+
+  /** Consultations this person finished but has not reviewed — drives the prompt. */
+  pending: () => api.get<PendingReview[]>(endpoints.reviews.pending),
+
+  mine: () => api.get<Review[]>(endpoints.reviews.mine),
+
+  leave: (body: {
+    kind: ReviewKind;
+    session_id: string;
+    stars: number;
+    text?: string | null;
+  }) => api.post<Review>(endpoints.reviews.leave, body),
 };

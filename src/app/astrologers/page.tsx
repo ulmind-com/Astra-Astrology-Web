@@ -70,7 +70,7 @@ function DirectoryInner() {
 
       <main className="mx-auto max-w-6xl px-4 py-10">
         <header className="mb-10">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-400/30 bg-brand-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-300 mb-4">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-500/30 bg-brand-100 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-700 mb-4">
             ✦ Live directory
           </span>
           <h1 className="font-display text-4xl font-bold tracking-tight">Astrologers</h1>

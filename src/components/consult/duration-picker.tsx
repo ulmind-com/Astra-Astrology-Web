@@ -93,7 +93,7 @@ export function DurationPicker({
           {/* ------------------------------------------------- the numbers */}
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-surface-muted/50 px-3.5 py-2.5 text-sm">
             <span className="flex items-center gap-1.5">
-              <Coins className="size-4 text-gold-500" />
+              <Coins className="size-4 text-gold-600" />
               <strong>{rate}</strong> {coinWord(rate)} a minute
             </span>
             <span className="flex items-center gap-1.5 text-muted-foreground">
@@ -133,8 +133,8 @@ export function DurationPicker({
                         over
                           ? "cursor-not-allowed border-border opacity-40"
                           : active
-                            ? "border-brand-500 bg-brand-500 text-white"
-                            : "border-border hover:border-brand-400",
+                            ? "border-brand-500/50 bg-brand-300 text-brand-950"
+                            : "border-border hover:border-brand-500/50",
                       )}
                     >
                       <span className="block text-base font-semibold">{m}</span>
@@ -156,7 +156,7 @@ export function DurationPicker({
                     setCustom(e.target.value);
                     setMinutes(null);
                   }}
-                  className="h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-sm outline-none focus:border-brand-400"
+                  className="h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-sm outline-none focus:border-brand-500/50"
                 />
               </div>
 
@@ -167,7 +167,7 @@ export function DurationPicker({
                     "rounded-xl px-3.5 py-2.5 text-sm",
                     tooLong || outOfRange
                       ? "bg-danger-surface text-danger"
-                      : "bg-brand-50 text-brand-700 dark:bg-brand-950/50 dark:text-brand-200",
+                      : "bg-brand-50 text-brand-700 dark:bg-brand-950/50 dark:text-ink-800",
                   )}
                 >
                   {outOfRange ? (

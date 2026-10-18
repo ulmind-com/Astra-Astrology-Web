@@ -26,6 +26,7 @@ import {
   Button,
   Card,
   CardBody,
+  CardDescription,
   CardHeader,
   CardTitle,
   EmptyState,
@@ -36,6 +37,7 @@ import { astrologerApi, callApi, chatApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { cn, coinsPerMinute, formatNumber } from "@/lib/utils";
 import { DurationPicker } from "@/components/consult/duration-picker";
+import { ReviewList } from "@/components/reviews/review-list";
 import { useAuth } from "@/providers/auth-provider";
 import {
   MODE_LABELS,
@@ -67,7 +69,7 @@ export default function AstrologerDetailPage() {
       <main className="mx-auto max-w-5xl px-4 py-8">
         <Link
           href="/astrologers"
-          className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/50 px-3.5 py-1.5 text-sm text-muted-foreground backdrop-blur transition-all hover:border-brand-400/40 hover:bg-surface-muted hover:text-foreground"
+          className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/50 px-3.5 py-1.5 text-sm text-muted-foreground backdrop-blur transition-all hover:border-brand-500/40 hover:bg-surface-muted hover:text-foreground"
         >
           <ArrowLeft className="size-3.5" />
           All astrologers
@@ -107,7 +109,7 @@ export default function AstrologerDetailPage() {
                 )} />
                 <div className="flex flex-col gap-5 p-6 sm:flex-row sm:items-start">
                   <div className="relative shrink-0">
-                    <div className="ring-2 ring-brand-400/30 rounded-full">
+                    <div className="ring-2 ring-brand-500/30 rounded-full">
                       <Avatar
                         src={astrologer.profile_image_url}
                         name={astrologer.display_name}
@@ -152,20 +154,20 @@ export default function AstrologerDetailPage() {
                     {/* Stats pills */}
                     <div className="mt-4 flex flex-wrap gap-2.5 text-sm">
                       {astrologer.rating.count > 0 && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-gold-500/10 px-3 py-1 border border-gold-400/25">
-                          <Star className="size-3.5 fill-gold-400 text-gold-400" />
-                          <span className="font-semibold text-gold-300">{astrologer.rating.average.toFixed(1)}</span>
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-gold-100 px-3 py-1 border border-gold-400/40">
+                          <Star className="size-3.5 fill-gold-500 text-gold-600" />
+                          <span className="font-semibold text-gold-600">{astrologer.rating.average.toFixed(1)}</span>
                           <span className="text-muted-foreground text-xs">({formatNumber(astrologer.rating.count)})</span>
                         </span>
                       )}
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-500/10 px-3 py-1 border border-brand-400/25">
-                        <Award className="size-3.5 text-brand-300" />
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-3 py-1 border border-brand-500/30">
+                        <Award className="size-3.5 text-brand-700" />
                         <span className="font-semibold text-foreground">{astrologer.experience_years}</span>
                         <span className="text-muted-foreground text-xs">yrs exp</span>
                       </span>
                       {astrologer.total_consultations > 0 && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-500/10 px-3 py-1 border border-brand-400/25">
-                          <Sparkles className="size-3.5 text-brand-300" />
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-3 py-1 border border-brand-500/30">
+                          <Sparkles className="size-3.5 text-brand-700" />
                           <span className="font-semibold text-foreground">{formatNumber(astrologer.total_consultations)}</span>
                           <span className="text-muted-foreground text-xs">consults</span>
                         </span>
@@ -174,7 +176,7 @@ export default function AstrologerDetailPage() {
 
                     {astrologer.languages.length > 0 && (
                       <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                        <Languages className="size-3.5 shrink-0 text-brand-400/70" />
+                        <Languages className="size-3.5 shrink-0 text-brand-700" />
                         <span>{astrologer.languages.join(" · ")}</span>
                       </p>
                     )}
@@ -225,7 +227,7 @@ export default function AstrologerDetailPage() {
                           key={qualification}
                           className="flex items-start gap-2 text-sm text-muted-foreground"
                         >
-                          <Award className="mt-0.5 size-4 shrink-0 text-brand-500" />
+                          <Award className="mt-0.5 size-4 shrink-0 text-brand-700" />
                           {qualification}
                         </li>
                       ))}
@@ -233,6 +235,18 @@ export default function AstrologerDetailPage() {
                   </CardBody>
                 </Card>
               )}
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Reviews</CardTitle>
+                  <CardDescription>
+                    From people who have actually consulted them.
+                  </CardDescription>
+                </CardHeader>
+                <CardBody className="pt-0">
+                  <ReviewList astrologerId={astrologer.id} />
+                </CardBody>
+              </Card>
 
               {astrologer.gallery.length > 0 && (
                 <Card>
@@ -348,13 +362,13 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
               "flex w-full items-center justify-between rounded-xl border p-3.5 text-left transition-all duration-200 group",
               disabled
                 ? "cursor-not-allowed border-border/50 opacity-55"
-                : "border-border hover:border-brand-400/60 hover:bg-brand-500/8 hover:shadow-[0_0_16px_-6px_rgb(168_85_247/0.4)]",
+                : "border-border hover:border-brand-500/55 hover:bg-brand-500/8 hover:shadow-soft",
             )}
           >
             <span className="flex items-center gap-3 text-sm font-medium">
               <span className={cn(
                 "icon-box flex size-9 items-center justify-center rounded-xl icon-box-brand transition-all duration-200",
-                !disabled && "group-hover:shadow-[0_0_12px_-3px_rgb(168_85_247/0.5)]",
+                !disabled && "group-hover:shadow-soft",
               )}>
                 <Icon className="size-4" />
               </span>

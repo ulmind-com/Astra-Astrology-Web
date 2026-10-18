@@ -26,13 +26,13 @@ const COLUMNS = [
 
 export function SiteFooter() {
   return (
-    <footer className="relative mt-20 bg-night-950/55 backdrop-blur-xl">
+    <footer className="relative mt-20 bg-surface">
       <div className="hairline absolute inset-x-0 top-0 h-px" aria-hidden />
       <div className="mx-auto max-w-6xl px-4 py-12">
         <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-4">
           <div className="md:col-span-2">
             <div className="flex items-center gap-2 font-semibold">
-              <span className="medallion flex size-9 items-center justify-center rounded-xl text-brand-100">
+              <span className="medallion flex size-9 items-center justify-center rounded-xl text-ink-900">
                 <Sparkles className="size-4" />
               </span>
               <span className="font-display tracking-wide">Astra Astrology</span>

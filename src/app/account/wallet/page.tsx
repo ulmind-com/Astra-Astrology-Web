@@ -147,19 +147,19 @@ export default function WalletPage() {
     <div className="space-y-6">
       {/* --------------------------------------------------------- balance */}
       <Card className="overflow-hidden">
-        <div className="bg-cosmos px-6 py-7 text-white">
-          <div className="flex items-center gap-2 text-sm text-white/70">
+        <div className="bg-cosmos px-6 py-7 text-brand-950">
+          <div className="flex items-center gap-2 text-sm text-ink-600">
             <WalletIcon className="size-4" />
             Wallet balance
           </div>
           <p className="mt-2 text-4xl font-bold tabular-nums">
             {formatCoins(summary.wallet.balance_coins)}{" "}
-            <span className="text-2xl font-semibold text-white/70">
+            <span className="text-2xl font-semibold text-ink-600">
               {coinWord(summary.wallet.balance_coins)}
             </span>
           </p>
           {summary.wallet.last_transaction_at && (
-            <p className="mt-1 text-xs text-white/60">
+            <p className="mt-1 text-xs text-ink-600">
               Last activity {formatDateTime(summary.wallet.last_transaction_at)}
             </p>
           )}
@@ -199,9 +199,9 @@ export default function WalletPage() {
                 {options && (
                   <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-surface-muted/50 px-3.5 py-2.5 text-sm">
                     <span className="flex items-center gap-1.5">
-                      <Coins className="size-4 text-gold-500" />
+                      <Coins className="size-4 text-gold-600" />
                       ₹1 ={" "}
-                      <strong className="text-brand-600 dark:text-brand-300">
+                      <strong className="text-brand-700 dark:text-brand-700">
                         {options.coins_per_rupee} {coinWord(options.coins_per_rupee)}
                       </strong>
                     </span>
@@ -220,15 +220,15 @@ export default function WalletPage() {
                       onClick={() => recharge(pack.amount_paise)}
                       className={cn(
                         "rounded-xl border border-border bg-surface px-4 py-3.5 text-center",
-                        "transition-colors hover:border-brand-400 hover:bg-brand-50/60",
+                        "transition-colors hover:border-brand-500/50 hover:bg-brand-100",
                         "disabled:cursor-not-allowed disabled:opacity-60",
-                        "dark:hover:bg-brand-950/40",
+                        "dark:hover:bg-brand-100",
                       )}
                     >
                       <span className="block text-base font-semibold">
                         {formatPaise(pack.amount_paise)}
                       </span>
-                      <span className="mt-0.5 block text-xs text-brand-600 dark:text-brand-300">
+                      <span className="mt-0.5 block text-xs text-brand-700 dark:text-brand-700">
                         {formatCoins(pack.coins)} {coinWord(pack.coins)}
                       </span>
                     </button>

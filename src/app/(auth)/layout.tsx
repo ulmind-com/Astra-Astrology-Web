@@ -18,7 +18,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <span className="orb animate-float-slow absolute -right-20 top-10 size-64 opacity-75" />
           <span className="orb-gold orb absolute left-10 bottom-32 size-10 opacity-85" />
         </div>
-        <Link href="/" className="relative flex items-center gap-2 font-semibold text-white">
+        <Link href="/" className="relative flex items-center gap-2 font-semibold text-brand-950">
           <span className="medallion flex size-9 items-center justify-center rounded-xl">
             <Sparkles className="size-4" />
           </span>
@@ -26,12 +26,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </Link>
 
         <div className="relative">
-          <h2 className="glow-text max-w-sm font-display text-3xl font-bold leading-tight text-white">
+          <h2 className="glow-text max-w-sm font-display text-3xl font-bold leading-tight text-brand-950">
             The sky has been keeping notes since the day you were born.
           </h2>
           <ul className="mt-8 space-y-3">
             {POINTS.map((point) => (
-              <li key={point} className="flex gap-3 text-sm text-brand-100/85">
+              <li key={point} className="flex gap-3 text-sm text-ink-600">
                 <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-gold-400" />
                 {point}
               </li>
@@ -41,7 +41,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
         <div className="relative space-y-4">
           <UlmindCredit />
-          <p className="text-xs text-brand-100/50">
+          <p className="text-xs text-ink-500">
             © <Year /> Astra Astrology
           </p>
         </div>
@@ -53,7 +53,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             href="/"
             className="mb-8 flex items-center justify-center gap-2 font-semibold lg:hidden"
           >
-            <span className="medallion flex size-9 items-center justify-center rounded-xl text-brand-100">
+            <span className="medallion flex size-9 items-center justify-center rounded-xl text-ink-900">
               <Sparkles className="size-4" />
             </span>
             <span className="font-display tracking-wide">Astra Astrology</span>

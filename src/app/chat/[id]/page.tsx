@@ -86,7 +86,7 @@ export default function ChatPage() {
               end.mutate({ id });
             }}
             disabled={end.isPending}
-            className={confirming ? "bg-rose-600 text-white hover:bg-rose-500" : undefined}
+            className={confirming ? "bg-rose-600 text-brand-950 hover:bg-rose-500" : undefined}
           >
             {confirming ? "Tap to confirm" : "End"}
           </Button>
@@ -98,8 +98,8 @@ export default function ChatPage() {
         {chat.status === "requested" ? (
           <div className="flex h-full flex-col items-center justify-center gap-5 p-8 text-center">
             <span className="relative flex size-20 items-center justify-center">
-              <span className="absolute inset-0 animate-ping rounded-full bg-brand-500/20" />
-              <span className="relative flex size-16 items-center justify-center rounded-full bg-brand-100 text-brand-700 dark:bg-brand-900 dark:text-brand-200">
+              <span className="absolute inset-0 animate-ping rounded-full bg-brand-200/70" />
+              <span className="relative flex size-16 items-center justify-center rounded-full bg-brand-100 text-brand-700 dark:bg-brand-100 dark:text-ink-800">
                 <MessageCircle className="size-7" />
               </span>
             </span>

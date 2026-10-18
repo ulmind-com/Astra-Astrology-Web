@@ -115,7 +115,7 @@ function LoginForm() {
         <div className="flex justify-end">
           <Link
             href={`/forgot-password?email=${encodeURIComponent(email)}`}
-            className="text-sm font-medium text-brand-600 hover:underline dark:text-brand-300"
+            className="text-sm font-medium text-brand-700 hover:underline dark:text-brand-700"
           >
             Forgot password?
           </Link>
@@ -131,7 +131,7 @@ function LoginForm() {
         New here?{" "}
         <Link
           href="/register"
-          className="font-medium text-brand-600 hover:underline dark:text-brand-300"
+          className="font-medium text-brand-700 hover:underline dark:text-brand-700"
         >
           Create an account
         </Link>

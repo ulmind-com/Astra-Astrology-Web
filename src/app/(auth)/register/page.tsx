@@ -123,7 +123,7 @@ function RegisterForm() {
           Back
         </button>
 
-        <span className="flex size-11 items-center justify-center rounded-xl bg-brand-100 text-brand-700 dark:bg-brand-900 dark:text-brand-200">
+        <span className="flex size-11 items-center justify-center rounded-xl bg-brand-100 text-brand-700 dark:bg-brand-100 dark:text-ink-800">
           <MailCheck className="size-5" />
         </span>
 
@@ -175,7 +175,7 @@ function RegisterForm() {
           ) : (
             <button
               onClick={resend}
-              className="font-medium text-brand-600 hover:underline dark:text-brand-300"
+              className="font-medium text-brand-700 hover:underline dark:text-brand-700"
             >
               Send a new code
             </button>
@@ -293,7 +293,7 @@ function RegisterForm() {
         Already have an account?{" "}
         <Link
           href="/login"
-          className="font-medium text-brand-600 hover:underline dark:text-brand-300"
+          className="font-medium text-brand-700 hover:underline dark:text-brand-700"
         >
           Sign in
         </Link>

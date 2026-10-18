@@ -70,7 +70,7 @@ export default function AppointmentsPage() {
                     </div>
 
                     <p className="mt-auto flex items-center gap-1.5 text-sm">
-                      <Clock className="size-4 text-brand-300" />
+                      <Clock className="size-4 text-brand-700" />
                       <span className="font-semibold tabular-nums">
                         ₹{rupees(a.appointment.price_paise)}
                       </span>

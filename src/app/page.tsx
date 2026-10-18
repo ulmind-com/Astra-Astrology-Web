@@ -93,17 +93,17 @@ export default function HomePage() {
 
           <div className="relative mx-auto max-w-6xl px-4 py-28 text-center sm:py-40">
             {/* Eyebrow badge */}
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand-400/35 bg-brand-500/12 px-4 py-1.5 text-xs font-semibold tracking-widest text-brand-200 uppercase backdrop-blur-sm shadow-[0_0_20px_-8px_rgb(168_85_247/0.5)]">
-              <Sparkles className="size-3.5 text-gold-300" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-brand-500/35 bg-brand-500/12 px-4 py-1.5 text-xs font-semibold tracking-widest text-ink-800 uppercase backdrop-blur-sm shadow-[0_6px_18px_-10px_rgb(242_229_74/0.8)]">
+              <Sparkles className="size-3.5 text-gold-600" />
               Verified astrologers · Real answers
             </span>
 
-            <h1 className="glow-text mx-auto mt-8 max-w-4xl font-display text-5xl font-bold leading-[1.1] tracking-tight text-white sm:text-7xl">
+            <h1 className="glow-text mx-auto mt-8 max-w-4xl font-display text-5xl font-bold leading-[1.1] tracking-tight text-brand-950 sm:text-7xl">
               Clarity,{" "}
               <span className="text-gradient-brand">written in the stars</span>
             </h1>
 
-            <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-brand-100/70 sm:text-lg">
+            <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-ink-500 sm:text-lg">
               Talk to astrologers who have spent years reading charts. Kundli,
               matchmaking, numerology and vastu — whenever a decision needs a second
               perspective.
@@ -120,7 +120,7 @@ export default function HomePage() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="w-full border-brand-300/30 text-brand-100 hover:bg-brand-500/12 hover:border-brand-400/50 sm:w-auto"
+                  className="w-full border-brand-300/30 text-ink-900 hover:bg-brand-100 hover:border-brand-500/45 sm:w-auto"
                 >
                   Create a free account
                 </Button>
@@ -147,7 +147,7 @@ export default function HomePage() {
         {/* ─────────────────────────────────────────── SERVICES */}
         <section id="services" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-24">
           <div className="mb-12 text-center">
-            <span className="inline-block rounded-full bg-brand-500/12 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-300 border border-brand-400/30 mb-4">
+            <span className="inline-block rounded-full bg-brand-500/12 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-700 border border-brand-500/30 mb-4">
               What we offer
             </span>
             <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
@@ -173,7 +173,7 @@ export default function HomePage() {
                     service.accent === "gold" ? "medallion-gold" : ""
                   }`}
                 >
-                  <service.icon className="size-7 text-brand-100" />
+                  <service.icon className="size-7 text-ink-900" />
                 </span>
                 <h3 className="mt-5 font-display text-base font-semibold tracking-tight text-foreground">
                   {service.title}
@@ -193,7 +193,7 @@ export default function HomePage() {
             <div className="bg-cosmos px-8 py-10 sm:px-12">
               <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <span className="inline-block rounded-full bg-brand-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-300 border border-brand-400/30 mb-3">
+                  <span className="inline-block rounded-full bg-brand-200/60 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-700 border border-brand-500/30 mb-3">
                     How it works
                   </span>
                   <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
@@ -202,13 +202,13 @@ export default function HomePage() {
                 </div>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mt-4 sm:mt-0">
                   <span className="inline-flex items-center gap-2">
-                    <MessageCircle className="size-4 text-brand-300" /> Chat
+                    <MessageCircle className="size-4 text-brand-700" /> Chat
                   </span>
                   <span className="inline-flex items-center gap-2">
-                    <Phone className="size-4 text-brand-300" /> Call
+                    <Phone className="size-4 text-brand-700" /> Call
                   </span>
                   <span className="inline-flex items-center gap-2">
-                    <Star className="size-3.5 fill-gold-300 text-gold-300" /> Rated
+                    <Star className="size-3.5 fill-gold-300 text-gold-600" /> Rated
                   </span>
                 </div>
               </div>
@@ -224,7 +224,7 @@ export default function HomePage() {
                       <div className="hidden md:block absolute left-[calc(50%+2.5rem)] top-5 h-px w-[calc(100%_-_2.5rem)] bg-gradient-to-r from-brand-400/40 to-transparent" />
                     )}
                     <div className="flex items-start gap-4">
-                      <span className="medallion flex size-12 shrink-0 items-center justify-center rounded-xl font-display text-lg font-bold text-brand-100">
+                      <span className="medallion flex size-12 shrink-0 items-center justify-center rounded-xl font-display text-lg font-bold text-ink-900">
                         {step.num}
                       </span>
                       <div className="pt-1">
@@ -273,7 +273,7 @@ export default function HomePage() {
                     item.tone === "gold" ? "medallion-gold" : ""
                   }`}
                 >
-                  <item.icon className="size-5 text-brand-100" />
+                  <item.icon className="size-5 text-ink-900" />
                 </span>
                 <div>
                   <h3 className="font-display font-semibold tracking-tight text-foreground">{item.title}</h3>
@@ -292,13 +292,13 @@ export default function HomePage() {
             <span className="orb-gold orb pointer-events-none absolute -right-10 -bottom-10 size-40 opacity-25 blur-[3px]" aria-hidden />
 
             <div className="relative">
-              <span className="inline-block rounded-full bg-brand-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-300 border border-brand-400/30 mb-6">
+              <span className="inline-block rounded-full bg-brand-200/60 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-700 border border-brand-500/30 mb-6">
                 Get started today
               </span>
-              <h2 className="glow-text font-display text-4xl font-bold tracking-tight text-white sm:text-5xl">
+              <h2 className="glow-text font-display text-4xl font-bold tracking-tight text-brand-950 sm:text-5xl">
                 Ready when you are
               </h2>
-              <p className="mx-auto mt-4 max-w-md text-brand-100/70 leading-relaxed">
+              <p className="mx-auto mt-4 max-w-md text-ink-500 leading-relaxed">
                 Create an account, add your birth details once, and every reading after
                 that is a click away.
               </p>
@@ -313,7 +313,7 @@ export default function HomePage() {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="w-full border-brand-300/30 text-brand-100 hover:bg-brand-500/12 sm:w-auto"
+                    className="w-full border-brand-300/30 text-ink-900 hover:bg-brand-100 sm:w-auto"
                   >
                     Browse astrologers
                   </Button>

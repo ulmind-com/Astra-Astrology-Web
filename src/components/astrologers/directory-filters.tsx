@@ -89,7 +89,7 @@ export function DirectoryFilters({
           <SlidersHorizontal className="size-4" />
           Filters
           {active > 0 && (
-            <span className="ml-0.5 rounded-full bg-white/25 px-1.5 text-xs">{active}</span>
+            <span className="ml-0.5 rounded-full bg-ink-900/10 px-1.5 text-xs">{active}</span>
           )}
         </Button>
       </div>
@@ -114,7 +114,7 @@ export function DirectoryFilters({
           className={cn(
             "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
             filters.featured_only
-              ? "border-gold-300 bg-gold-50 text-gold-800 dark:border-gold-500/40 dark:bg-gold-500/10 dark:text-gold-300"
+              ? "border-gold-300 bg-gold-50 text-gold-800 dark:border-gold-500/40 dark:bg-gold-100 dark:text-gold-600"
               : "border-border text-muted-foreground hover:border-border-strong",
           )}
         >

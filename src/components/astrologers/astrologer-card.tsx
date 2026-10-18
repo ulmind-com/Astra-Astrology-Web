@@ -72,7 +72,7 @@ export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic })
               <h3
                 className={cn(
                   "truncate font-semibold leading-tight tracking-tight text-foreground",
-                  "transition-colors duration-200 group-hover:text-brand-300",
+                  "transition-colors duration-200 group-hover:text-brand-700",
                 )}
               >
                 {astrologer.display_name}
@@ -92,7 +92,7 @@ export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic })
                 isOnline && !isBusy
                   ? "text-success"
                   : isBusy
-                  ? "text-gold-400"
+                  ? "text-gold-600"
                   : "text-muted-foreground/60",
               )}
             >
@@ -104,9 +104,9 @@ export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic })
         {/* Stats row: rating, experience, consultations */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs">
           {rating.count > 0 && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-gold-500/10 px-2 py-0.5 border border-gold-400/25">
-              <Star className="size-3 fill-gold-400 text-gold-400" />
-              <span className="font-semibold text-gold-300">{rating.average.toFixed(1)}</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-gold-100 px-2 py-0.5 border border-gold-400/40">
+              <Star className="size-3 fill-gold-500 text-gold-600" />
+              <span className="font-semibold text-gold-600">{rating.average.toFixed(1)}</span>
               <span className="text-muted-foreground">({formatNumber(rating.count)})</span>
             </span>
           )}
@@ -139,7 +139,7 @@ export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic })
         {/* Languages */}
         {astrologer.languages.length > 0 && (
           <p className="flex items-center gap-1.5 truncate text-xs text-muted-foreground">
-            <Languages className="size-3.5 shrink-0 text-brand-400/70" />
+            <Languages className="size-3.5 shrink-0 text-brand-700" />
             <span className="truncate">{astrologer.languages.join(" · ")}</span>
           </p>
         )}
@@ -158,7 +158,7 @@ export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic })
                   "flex size-7 items-center justify-center rounded-lg border border-border/60",
                   "bg-surface-muted text-muted-foreground",
                   "transition-all duration-200",
-                  "group-hover:border-brand-400/40 group-hover:text-brand-300",
+                  "group-hover:border-brand-500/40 group-hover:text-brand-700",
                 )}
               >
                 <Icon className="size-3.5" />

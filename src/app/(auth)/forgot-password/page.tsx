@@ -45,7 +45,7 @@ function ForgotPasswordForm() {
         Back to sign in
       </Link>
 
-      <span className="flex size-11 items-center justify-center rounded-xl bg-brand-100 text-brand-700 dark:bg-brand-900 dark:text-brand-200">
+      <span className="flex size-11 items-center justify-center rounded-xl bg-brand-100 text-brand-700 dark:bg-brand-100 dark:text-ink-800">
         <KeyRound className="size-5" />
       </span>
 

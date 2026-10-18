@@ -232,7 +232,7 @@ export default function BookAppointmentPage() {
                       className={cn(
                         "flex min-w-16 shrink-0 flex-col items-center rounded-xl border px-3 py-2 text-sm transition-colors",
                         active
-                          ? "border-brand-400/50 bg-brand-500/15 text-brand-100"
+                          ? "border-brand-500/45 bg-brand-200/60 text-ink-900"
                           : "border-border text-muted-foreground hover:border-border-strong",
                       )}
                     >
@@ -263,7 +263,7 @@ export default function BookAppointmentPage() {
                     className={cn(
                       "rounded-full border px-4 py-2 text-sm transition-colors",
                       m === minutes
-                        ? "border-brand-400/50 bg-brand-500/15 text-brand-100"
+                        ? "border-brand-500/45 bg-brand-200/60 text-ink-900"
                         : "border-border text-muted-foreground hover:border-border-strong",
                     )}
                   >
@@ -314,7 +314,7 @@ export default function BookAppointmentPage() {
                             className={cn(
                               "rounded-lg border px-3.5 py-2 text-sm tabular-nums transition-colors",
                               active
-                                ? "border-brand-400/60 bg-brand-500/20 text-brand-100"
+                                ? "border-brand-500/55 bg-brand-200/70 text-ink-900"
                                 : "border-border hover:border-border-strong",
                             )}
                           >
@@ -373,7 +373,7 @@ export default function BookAppointmentPage() {
                         <dt className="text-muted-foreground">
                           Pay now to hold it ({quote.commission_percent}%)
                         </dt>
-                        <dd className="font-semibold tabular-nums text-brand-200">
+                        <dd className="font-semibold tabular-nums text-ink-800">
                           ₹{rupees(quote.deposit_paise)} · {quote.deposit_coins} coins
                         </dd>
                       </div>

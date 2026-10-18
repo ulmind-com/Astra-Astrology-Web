@@ -24,10 +24,10 @@ export function SiteHeader() {
   React.useEffect(() => setOpen(false), [pathname]);
 
   return (
-    <header className="sticky top-0 z-40 bg-night-950/60 backdrop-blur-2xl">
+    <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
         <Link href="/" className="flex items-center gap-2.5 font-semibold group">
-          <span className="medallion flex size-9 items-center justify-center rounded-xl text-brand-100 shadow-[0_0_16px_-4px_rgb(168_85_247/0.6)] transition-all duration-300 group-hover:shadow-[0_0_24px_-4px_rgb(168_85_247/0.9)]">
+          <span className="medallion flex size-9 items-center justify-center rounded-xl text-ink-900 shadow-soft transition-all duration-300 group-hover:shadow-soft">
             <Sparkles className="size-4" />
           </span>
           <span className="font-display text-[15px] font-bold tracking-wide text-foreground">
@@ -43,7 +43,7 @@ export function SiteHeader() {
               className={cn(
                 "rounded-xl px-3.5 py-2 text-sm font-medium transition-all duration-200",
                 pathname === link.href
-                  ? "bg-brand-500/15 text-brand-200 ring-1 ring-brand-400/35 shadow-[0_0_12px_-4px_rgb(168_85_247/0.4)]"
+                  ? "bg-brand-200/60 text-ink-800 ring-1 ring-brand-500/35 shadow-soft"
                   : "text-muted-foreground hover:bg-surface-muted hover:text-foreground",
               )}
             >
@@ -97,7 +97,7 @@ export function SiteHeader() {
       <div className="hairline h-px w-full" aria-hidden />
 
       {open && (
-        <div className="bg-night-900/96 px-4 py-3 backdrop-blur-2xl md:hidden">
+        <div className="border-t border-border bg-surface px-4 py-3 md:hidden">
           <nav className="flex flex-col gap-0.5">
             {LINKS.map((link) => (
               <Link

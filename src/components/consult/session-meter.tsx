@@ -35,7 +35,7 @@ function Cell({
       <p
         className={cn(
           "text-[10px] uppercase tracking-wide",
-          onDark ? "text-white/50" : "text-muted-foreground",
+          onDark ? "text-ink-500" : "text-muted-foreground",
         )}
       >
         {label}
@@ -110,7 +110,7 @@ export function SessionMeter({
           lastMinute
             ? "bg-warning-surface"
             : onDark
-              ? "bg-white/10 text-white"
+              ? "bg-ink-900/5 text-brand-950"
               : "bg-surface-muted",
         )}
       >
@@ -213,7 +213,7 @@ function ExtendModal({
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-surface-muted/60 px-3.5 py-2.5 text-sm">
           <span className="flex items-center gap-1.5">
-            <Coins className="size-4 text-gold-500" />
+            <Coins className="size-4 text-gold-600" />
             {billing.coins_per_minute} {coinWord(billing.coins_per_minute)} a minute
           </span>
           <span className="flex items-center gap-1.5 text-muted-foreground">
@@ -229,7 +229,7 @@ function ExtendModal({
               type="button"
               disabled={pending}
               onClick={() => onPick(m)}
-              className="rounded-xl border border-border px-2 py-3 text-center transition-colors hover:border-brand-400 hover:bg-brand-50/60 disabled:opacity-50 dark:hover:bg-brand-950/40"
+              className="rounded-xl border border-border px-2 py-3 text-center transition-colors hover:border-brand-500/50 hover:bg-brand-100 disabled:opacity-50 dark:hover:bg-brand-100"
             >
               <span className="block text-base font-semibold">+{m}</span>
               <span className="block text-[11px] text-muted-foreground">
@@ -242,7 +242,7 @@ function ExtendModal({
         {error && <p className="text-sm text-danger">{error}</p>}
 
         <div className="flex items-center justify-between gap-2 pt-1">
-          <Link href="/account/wallet" className="text-sm font-medium text-brand-600 underline">
+          <Link href="/account/wallet" className="text-sm font-medium text-brand-700 underline">
             Add coins instead
           </Link>
           <Button type="button" variant="secondary" onClick={onClose} disabled={pending}>
@@ -272,7 +272,7 @@ export function OutOfCoins({ onBack }: { onBack: () => void }) {
         <Link href="/account/wallet">
           <button
             type="button"
-            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+            className="rounded-lg bg-brand-300 px-4 py-2 text-sm font-medium text-brand-950 hover:bg-brand-400"
           >
             Add coins
           </button>
