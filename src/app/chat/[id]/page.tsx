@@ -11,12 +11,14 @@ import { useChat, useChatActions, useChatHeartbeat, useChatTimer } from "@/hooks
 import { ApiError } from "@/lib/api/client";
 import { useRequireAuth } from "@/providers/auth-provider";
 import { CHAT_STATUS_LABELS, formatDuration, isChatLive } from "@/types";
+import { useAuth } from "@/providers/auth-provider";
 
 export default function ChatPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { ready } = useRequireAuth();
 
+  const { user } = useAuth();
   const { data, isLoading, error, refetch } = useChat(ready ? id : null);
   const { end } = useChatActions();
   const [confirming, setConfirming] = React.useState(false);
@@ -112,7 +114,7 @@ export default function ChatPage() {
               this open for a couple of minutes.
             </p>
           </div>
-        ) : data?.firebase ? (
+        ) : live ? (
           <div className="flex h-full flex-col">
             {chat.billing && active && (
               <div className="border-b border-border bg-surface px-3 py-2">
@@ -127,8 +129,8 @@ export default function ChatPage() {
             )}
             <div className="flex-1 overflow-hidden">
               <ChatRoom
-                conversationId={chat.conversation_id}
-                firebase={data.firebase}
+                sessionId={chat.id}
+                myUserId={user?.id ?? ""}
                 canSend={active}
                 peerName={chat.peer?.name}
               />
