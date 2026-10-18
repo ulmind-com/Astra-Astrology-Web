@@ -17,7 +17,7 @@ export default function CallPage() {
   const router = useRouter();
   const { ready } = useRequireAuth();
 
-  const { data, isLoading, error } = useCall(ready ? id : null);
+  const { data, isLoading, error, refetch } = useCall(ready ? id : null);
   const { end } = useCallActions();
 
   const call = data?.call;
@@ -68,7 +68,14 @@ export default function CallPage() {
       {/* ------------------------------------------------- connected chrome */}
       {connected && call.billing && (
         <div className="pointer-events-auto absolute inset-x-0 top-16 z-10 px-3">
-          <SessionMeter billing={call.billing} onDark />
+          <SessionMeter
+            sessionId={id}
+            kind="call"
+            billing={call.billing}
+            elapsedSeconds={seconds}
+            onDark
+            onExtended={() => refetch()}
+          />
         </div>
       )}
 

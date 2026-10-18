@@ -17,7 +17,7 @@ export default function ChatPage() {
   const router = useRouter();
   const { ready } = useRequireAuth();
 
-  const { data, isLoading, error } = useChat(ready ? id : null);
+  const { data, isLoading, error, refetch } = useChat(ready ? id : null);
   const { end } = useChatActions();
   const [confirming, setConfirming] = React.useState(false);
 
@@ -116,7 +116,13 @@ export default function ChatPage() {
           <div className="flex h-full flex-col">
             {chat.billing && active && (
               <div className="border-b border-border bg-surface px-3 py-2">
-                <SessionMeter billing={chat.billing} />
+                <SessionMeter
+                  sessionId={id}
+                  kind="chat"
+                  billing={chat.billing}
+                  elapsedSeconds={seconds}
+                  onExtended={() => refetch()}
+                />
               </div>
             )}
             <div className="flex-1 overflow-hidden">

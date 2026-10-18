@@ -1,79 +1,257 @@
 "use client";
 
-import { AlertTriangle, Coins } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { AlertTriangle, Clock, Coins, Loader2, Plus, Wallet } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 
+import { Button, Modal } from "@/components/ui";
+import { callApi, chatApi } from "@/lib/api";
+import { ApiError } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
-import { coinWord, formatCoins, type SessionBilling } from "@/types";
+import {
+  coinWord,
+  formatCoins,
+  formatDuration,
+  type SessionBilling,
+} from "@/types";
 
-/**
- * What this session is costing, while it runs.
- *
- * The numbers come from the server on every poll, so the meter cannot drift
- * away from the wallet — a client-side countdown would, and would then be
- * wrong at exactly the moment it mattered.
- *
- * It turns into a warning when there is about a minute left, because being cut
- * off is far less upsetting when you saw it coming.
- */
-export function SessionMeter({
-  billing,
-  onDark = false,
+/** Minutes the user is offered when extending, within what they can afford. */
+const EXTEND_PRESETS = [2, 5, 10, 15];
+
+function Cell({
+  label,
+  value,
+  tone,
+  onDark,
 }: {
-  billing: SessionBilling;
+  label: string;
+  value: React.ReactNode;
+  tone?: "warn";
   onDark?: boolean;
 }) {
-  const low = billing.minutes_left <= 1;
+  return (
+    <div className="min-w-0">
+      <p
+        className={cn(
+          "text-[10px] uppercase tracking-wide",
+          onDark ? "text-white/50" : "text-muted-foreground",
+        )}
+      >
+        {label}
+      </p>
+      <p
+        className={cn(
+          "truncate text-sm font-semibold tabular-nums",
+          tone === "warn" && "text-amber-500",
+        )}
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * The session meter: elapsed, left, spent, balance — all four, always.
+ *
+ * Every number comes from the server on each poll rather than being counted
+ * down here, because a client-side clock drifts and would be wrong exactly
+ * when it matters: the minute before someone is cut off.
+ */
+export function SessionMeter({
+  sessionId,
+  kind,
+  billing,
+  elapsedSeconds,
+  onDark = false,
+  onExtended,
+}: {
+  sessionId: string;
+  kind: "call" | "chat";
+  billing: SessionBilling;
+  elapsedSeconds: number;
+  onDark?: boolean;
+  onExtended?: () => void;
+}) {
+  const [asking, setAsking] = React.useState(false);
+  const [dismissed, setDismissed] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const extend = useMutation({
+    // Both endpoints return their own session shape; nothing here needs it,
+    // only that the call succeeded.
+    mutationFn: async (minutes: number): Promise<void> => {
+      if (kind === "call") await callApi.extend(sessionId, minutes);
+      else await chatApi.extend(sessionId, minutes);
+    },
+    onSuccess: () => {
+      setAsking(false);
+      setDismissed(false);
+      onExtended?.();
+    },
+    onError: (e: ApiError) => setError(e.message),
+  });
+
+  const lastMinute = billing.minutes_remaining <= 1;
+
+  // Ask once, a minute before the booked time runs out — and only when they
+  // could actually say yes. Offering an extension nobody can pay for is just
+  // telling someone they are about to be cut off.
+  React.useEffect(() => {
+    if (lastMinute && billing.can_extend && !dismissed) setAsking(true);
+  }, [lastMinute, billing.can_extend, dismissed]);
 
   return (
-    <div
-      className={cn(
-        "flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl px-3 py-2 text-xs",
-        low
-          ? "bg-amber-500/15 text-amber-600 dark:text-amber-300"
-          : onDark
-            ? "bg-white/10 text-white/80"
-            : "bg-surface-muted text-muted-foreground",
-      )}
-    >
-      <span className="flex items-center gap-1.5">
-        {low ? (
-          <AlertTriangle className="size-3.5 shrink-0" />
-        ) : (
-          <Coins className="size-3.5 shrink-0" />
+    <>
+      <div
+        className={cn(
+          "flex items-center justify-between gap-3 rounded-xl px-3 py-2",
+          lastMinute
+            ? "bg-amber-500/15"
+            : onDark
+              ? "bg-white/10 text-white"
+              : "bg-surface-muted",
         )}
-        {low ? (
-          billing.minutes_left === 0 ? (
-            <span className="font-medium">
-              This is your last minute — add coins to keep going.
-            </span>
-          ) : (
-            <span className="font-medium">About a minute of coins left.</span>
-          )
-        ) : (
-          <span>
-            {formatCoins(billing.coins_per_minute)} {coinWord(billing.coins_per_minute)}
-            /min · about {billing.minutes_left} min left
-          </span>
-        )}
-      </span>
+      >
+        <div className="grid flex-1 grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-4">
+          <Cell label="Talking" value={formatDuration(elapsedSeconds)} onDark={onDark} />
+          <Cell
+            label="Time left"
+            value={`${billing.minutes_remaining} min`}
+            tone={lastMinute ? "warn" : undefined}
+            onDark={onDark}
+          />
+          <Cell
+            label="Spent"
+            value={`${formatCoins(billing.coins_charged)}`}
+            onDark={onDark}
+          />
+          <Cell
+            label="Wallet"
+            value={`${formatCoins(billing.balance_coins)}`}
+            onDark={onDark}
+          />
+        </div>
 
-      <span className="flex items-center gap-2">
-        <span className={cn(onDark && !low && "text-white/60")}>
-          {formatCoins(billing.coins_charged)} spent ·{" "}
-          {formatCoins(billing.balance_coins)} left
-        </span>
-        {low && (
-          <Link
-            href="/account/wallet"
-            className="rounded-full bg-amber-500 px-2.5 py-0.5 font-medium text-white"
+        {billing.can_extend && (
+          <Button
+            size="sm"
+            variant={lastMinute ? "primary" : "secondary"}
+            onClick={() => {
+              setError(null);
+              setAsking(true);
+            }}
+            className={lastMinute ? "shrink-0 bg-amber-500 text-white hover:bg-amber-600" : "shrink-0"}
           >
-            Add coins
-          </Link>
+            <Plus className="size-3.5" />
+            Add time
+          </Button>
         )}
-      </span>
-    </div>
+      </div>
+
+      {lastMinute && !billing.can_extend && (
+        <p className="mt-1.5 flex items-center gap-1.5 px-1 text-xs text-amber-500">
+          <AlertTriangle className="size-3.5 shrink-0" />
+          Last minute, and not enough coins to add more.
+          <Link href="/account/wallet" className="font-medium underline">
+            Recharge
+          </Link>
+        </p>
+      )}
+
+      <ExtendModal
+        open={asking}
+        billing={billing}
+        pending={extend.isPending}
+        error={error}
+        onClose={() => {
+          setAsking(false);
+          setDismissed(true);
+          setError(null);
+        }}
+        onPick={(m) => extend.mutate(m)}
+      />
+    </>
+  );
+}
+
+function ExtendModal({
+  open,
+  billing,
+  pending,
+  error,
+  onClose,
+  onPick,
+}: {
+  open: boolean;
+  billing: SessionBilling;
+  pending: boolean;
+  error: string | null;
+  onClose: () => void;
+  onPick: (minutes: number) => void;
+}) {
+  const max = billing.max_extend_minutes;
+  // Only offer what the wallet can actually carry, and always offer the
+  // largest affordable option — someone with 40 minutes of coins should not be
+  // limited to the presets.
+  const options = Array.from(
+    new Set([...EXTEND_PRESETS.filter((m) => m <= max), max].filter((m) => m >= 1)),
+  ).sort((a, b) => a - b);
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Keep talking?"
+      description={`Your booked time is almost up. You have ${formatCoins(
+        billing.balance_coins,
+      )} ${coinWord(billing.balance_coins)} — enough for about ${max} more minute${
+        max === 1 ? "" : "s"
+      }.`}
+    >
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-surface-muted/60 px-3.5 py-2.5 text-sm">
+          <span className="flex items-center gap-1.5">
+            <Coins className="size-4 text-gold-500" />
+            {billing.coins_per_minute} {coinWord(billing.coins_per_minute)} a minute
+          </span>
+          <span className="flex items-center gap-1.5 text-muted-foreground">
+            <Wallet className="size-4" />
+            {formatCoins(billing.balance_coins)} left
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {options.map((m) => (
+            <button
+              key={m}
+              type="button"
+              disabled={pending}
+              onClick={() => onPick(m)}
+              className="rounded-xl border border-border px-2 py-3 text-center transition-colors hover:border-brand-400 hover:bg-brand-50/60 disabled:opacity-50 dark:hover:bg-brand-950/40"
+            >
+              <span className="block text-base font-semibold">+{m}</span>
+              <span className="block text-[11px] text-muted-foreground">
+                {m * billing.coins_per_minute} {coinWord(m * billing.coins_per_minute)}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {error && <p className="text-sm text-red-500">{error}</p>}
+
+        <div className="flex items-center justify-between gap-2 pt-1">
+          <Link href="/account/wallet" className="text-sm font-medium text-brand-600 underline">
+            Add coins instead
+          </Link>
+          <Button type="button" variant="secondary" onClick={onClose} disabled={pending}>
+            {pending ? <Loader2 className="size-4 animate-spin" /> : <Clock className="size-4" />}
+            No thanks
+          </Button>
+        </div>
+      </div>
+    </Modal>
   );
 }
 
