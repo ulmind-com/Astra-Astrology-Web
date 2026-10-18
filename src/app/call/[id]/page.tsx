@@ -81,6 +81,7 @@ export default function CallPage() {
             credentials={data.credentials}
             onLeave={hangUp}
             className="absolute inset-0"
+            audioOnly={call.mode === "call"}
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center">

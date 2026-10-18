@@ -34,7 +34,14 @@ import {
 } from "@/components/ui";
 import { astrologerApi, callApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
-import { baseRate, effectiveRate, formatCurrency, formatNumber, hasDiscount } from "@/lib/utils";
+import {
+  baseRate,
+  cn,
+  effectiveRate,
+  formatCurrency,
+  formatNumber,
+  hasDiscount,
+} from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 import {
   MODE_LABELS,
@@ -249,39 +256,7 @@ export default function AstrologerDetailPage() {
                   <CardTitle>Start a consultation</CardTitle>
                 </CardHeader>
                 <CardBody className="space-y-3 pt-0">
-                  {astrologer.modes_enabled.map((mode: ConsultationMode) => {
-                    const Icon = MODE_ICONS[mode];
-                    const price = effectiveRate(astrologer.rates, mode);
-                    const discounted = hasDiscount(astrologer.rates, mode);
-                    const base = baseRate(astrologer.rates, mode);
-
-                    return (
-                      <div
-                        key={mode}
-                        className="flex items-center justify-between rounded-xl border border-border p-3"
-                      >
-                        <span className="flex items-center gap-2.5 text-sm font-medium">
-                          <span className="flex size-8 items-center justify-center rounded-lg bg-brand-100 text-brand-700 dark:bg-brand-900 dark:text-brand-200">
-                            <Icon className="size-4" />
-                          </span>
-                          {MODE_LABELS[mode]}
-                        </span>
-                        <span className="text-right">
-                          {discounted && (
-                            <span className="mr-1.5 text-xs text-muted-foreground line-through">
-                              {formatCurrency(base)}
-                            </span>
-                          )}
-                          <span className="font-semibold">
-                            {price > 0 ? formatCurrency(price) : "Free"}
-                          </span>
-                          <span className="text-xs text-muted-foreground">/min</span>
-                        </span>
-                      </div>
-                    );
-                  })}
-
-                  <VideoCallButton astrologer={astrologer} />
+                  <ConsultationOptions astrologer={astrologer} />
                 </CardBody>
               </Card>
             </aside>
@@ -295,66 +270,112 @@ export default function AstrologerDetailPage() {
 }
 
 /**
- * Starts a video call, or explains why it cannot start.
+ * The three ways to consult, each a real button.
  *
- * The button is only live when the astrologer is online and actually offers
- * video — the backend refuses otherwise, and a button that always fails is
- * worse than one that says why.
+ * A mode the astrologer does not offer is simply absent — showing a price for
+ * something nobody can book is worse than showing nothing. A mode they offer
+ * but have paused is shown disabled with the reason, so the person knows to
+ * come back rather than assuming the app is broken.
  */
-function VideoCallButton({ astrologer }: { astrologer: AstrologerPublic }) {
+function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
   const router = useRouter();
   const { user } = useAuth();
   const [error, setError] = React.useState<string | null>(null);
 
-  const offersVideo = astrologer.modes_enabled.includes("video");
-  const online = astrologer.availability.is_online;
-
   const start = useMutation({
-    mutationFn: () => callApi.start(astrologer.id, "video"),
+    mutationFn: (mode: ConsultationMode) => callApi.start(astrologer.id, mode),
     onSuccess: (session) => router.push(`/call/${session.call.id}`),
     onError: (e: ApiError) => setError(e.message),
   });
 
-  if (!user) {
+  const online = astrologer.availability.is_online;
+  const modes = astrologer.modes_enabled;
+
+  if (modes.length === 0) {
     return (
-      <>
-        <Alert tone="info" className="mt-1">
-          Sign in to start a video call with {astrologer.display_name}.
-        </Alert>
-        <Link href={`/login?next=/astrologers/${astrologer.slug}`} className="block">
-          <Button className="w-full">Sign in to call</Button>
-        </Link>
-      </>
+      <Alert tone="info">
+        {astrologer.display_name} is not taking consultations yet.
+      </Alert>
     );
   }
 
-  if (!offersVideo) {
-    return (
-      <Alert tone="info" className="mt-1">
-        {astrologer.display_name} does not take video calls yet.
-      </Alert>
-    );
+  function pausedReason(mode: ConsultationMode): string | null {
+    if (!online) return "Offline right now";
+    const a = astrologer.availability;
+    if (mode === "chat" && !a.is_available_for_chat) return "Chat paused";
+    if (mode === "call" && !a.is_available_for_call) return "Calls paused";
+    if (mode === "video" && !a.is_available_for_video) return "Video paused";
+    return null;
   }
 
   return (
     <>
       {error && <Alert tone="error">{error}</Alert>}
-      {!online && (
-        <Alert tone="info" className="mt-1">
-          {astrologer.display_name} is offline right now. Try again when they are online.
-        </Alert>
+
+      {modes.map((mode: ConsultationMode) => {
+        const Icon = MODE_ICONS[mode];
+        const price = effectiveRate(astrologer.rates, mode);
+        const discounted = hasDiscount(astrologer.rates, mode);
+        const base = baseRate(astrologer.rates, mode);
+        const paused = pausedReason(mode);
+        // Chat is a conversation, not a call — it is built separately.
+        const comingSoon = mode === "chat";
+        const disabled = Boolean(paused) || comingSoon || start.isPending;
+
+        return (
+          <button
+            key={mode}
+            type="button"
+            disabled={disabled}
+            onClick={() => {
+              setError(null);
+              if (!user) {
+                router.push(`/login?next=/astrologers/${astrologer.slug}`);
+                return;
+              }
+              start.mutate(mode);
+            }}
+            className={cn(
+              "flex w-full items-center justify-between rounded-xl border p-3 text-left transition-colors",
+              disabled
+                ? "cursor-not-allowed border-border opacity-60"
+                : "border-border hover:border-brand-400 hover:bg-brand-50/60 dark:hover:bg-brand-950/40",
+            )}
+          >
+            <span className="flex items-center gap-2.5 text-sm font-medium">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-brand-100 text-brand-700 dark:bg-brand-900 dark:text-brand-200">
+                <Icon className="size-4" />
+              </span>
+              <span>
+                {MODE_LABELS[mode]}
+                {(paused || comingSoon) && (
+                  <span className="block text-xs font-normal text-muted-foreground">
+                    {comingSoon ? "Coming soon" : paused}
+                  </span>
+                )}
+              </span>
+            </span>
+
+            <span className="text-right">
+              {discounted && (
+                <span className="mr-1.5 text-xs text-muted-foreground line-through">
+                  {formatCurrency(base)}
+                </span>
+              )}
+              <span className="font-semibold">
+                {price > 0 ? formatCurrency(price) : "Free"}
+              </span>
+              <span className="text-xs text-muted-foreground">/min</span>
+            </span>
+          </button>
+        );
+      })}
+
+      {!user && (
+        <p className="pt-1 text-center text-xs text-muted-foreground">
+          You will be asked to sign in first.
+        </p>
       )}
-      <Button
-        className="w-full"
-        disabled={!online || start.isPending}
-        onClick={() => {
-          setError(null);
-          start.mutate();
-        }}
-      >
-        <Video className="size-4" />
-        {start.isPending ? "Calling…" : "Start video call"}
-      </Button>
     </>
   );
 }
