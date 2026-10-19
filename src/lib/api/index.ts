@@ -4,6 +4,8 @@ import { api, apiFetch } from "@/lib/api/client";
 import { endpoints } from "@/lib/api/endpoints";
 import type {
   Address,
+  FaceReadingAvailability,
+  FaceReading,
   ReviewPage,
   ReviewKind,
   Review,
@@ -317,4 +319,19 @@ export const reviewApi = {
     stars: number;
     text?: string | null;
   }) => api.post<Review>(endpoints.reviews.leave, body),
+};
+
+// ------------------------------------------------------------ face reading
+export const faceReadingApi = {
+  /** Cost and availability, asked before the camera opens. */
+  availability: () =>
+    api.get<FaceReadingAvailability>(endpoints.faceReading.availability),
+
+  /** Sends measurements only — never an image. */
+  submit: (measurements: Record<string, number>, quality: number) =>
+    api.post<FaceReading>(endpoints.faceReading.submit, { measurements, quality }),
+
+  mine: () => api.get<FaceReading[]>(endpoints.faceReading.mine),
+
+  get: (id: string) => api.get<FaceReading>(endpoints.faceReading.detail(id)),
 };
