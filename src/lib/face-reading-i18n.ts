@@ -61,6 +61,7 @@ export const I18N_UI: Record<FaceReadingLanguage, Record<string, string>> = {
     captureManual: "Capture Now",
     holdStill: "Hold still for",
     perfectKeepStill: "Perfect! Hold still",
+    alignedReady: "Face aligned! Click button below to scan",
     centerFace: "Position face inside oval",
   },
   bn: {
@@ -111,6 +112,7 @@ export const I18N_UI: Record<FaceReadingLanguage, Record<string, string>> = {
     captureManual: "ছবি তুলুন",
     holdStill: "স্থির থাকুন",
     perfectKeepStill: "নিখুঁত! স্থির থাকুন",
+    alignedReady: "মুখের অবস্থান সঠিক! নিচের বাটনে ক্লিক করুন",
     centerFace: "ওভালের ভেতরে মুখ রাখুন",
   },
   hi: {
@@ -161,6 +163,7 @@ export const I18N_UI: Record<FaceReadingLanguage, Record<string, string>> = {
     captureManual: "फोटो लें",
     holdStill: "स्थिर रहें",
     perfectKeepStill: "बिल्कुल सही! स्थिर रहें",
+    alignedReady: "चेहरा सही स्थिति में है! नीचे बटन दबाएं",
     centerFace: "अंडाकार घेरे में चेहरा रखें",
   },
 };

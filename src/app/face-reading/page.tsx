@@ -53,12 +53,10 @@ import type { FaceReading, FaceScanResponse } from "@/types";
 
 type Stage = "intro" | "measuring" | "reading" | "rejected";
 
-/** How long alignment must stay ≥ GOOD_QUALITY before auto-capture (ms). */
-const HOLD_DURATION_MS = 1200;
-/** Quality threshold to start counting the hold-still timer. */
+/** Quality threshold to consider the face well-positioned in frame. */
 const GOOD_QUALITY = 0.58;
-/** Target detection interval (ms) — ~12 fps, light on CPU. */
-const DETECT_INTERVAL_MS = 80;
+/** Target detection interval (ms) — ~16 fps, smooth and CPU-light. */
+const DETECT_INTERVAL_MS = 60;
 
 export default function FaceReadingPage() {
   const { isSignedIn } = useAuth();
@@ -221,7 +219,6 @@ function Capture({
   const fileRef = React.useRef<HTMLInputElement>(null);
   const streamRef = React.useRef<MediaStream | null>(null);
   const animFrameRef = React.useRef<number>(0);
-  const holdStartRef = React.useRef<number>(0);
   const capturingRef = React.useRef(false);
   const autoStartedRef = React.useRef(false);
 
@@ -232,8 +229,6 @@ function Capture({
 
   // Real-time feedback state
   const [faceStatus, setFaceStatus] = React.useState<LiveFaceStatus | null>(null);
-  /** 0→1, progress of hold-still timer. */
-  const [holdProgress, setHoldProgress] = React.useState(0);
 
   const stopCamera = React.useCallback(() => {
     if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
@@ -243,8 +238,6 @@ function Capture({
     capturingRef.current = false;
     setLive(false);
     setFaceStatus(null);
-    setHoldProgress(0);
-    holdStartRef.current = 0;
     if (canvasRef.current) {
       const ctx = canvasRef.current.getContext("2d");
       ctx?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
@@ -256,6 +249,7 @@ function Capture({
   // Capture current high-res frame from video and submit to OpenCV MediaPipe pipeline
   const doCapture = React.useCallback(async () => {
     if (!videoRef.current || capturingRef.current) return;
+    if (coins > 0 && !canAfford) return;
     capturingRef.current = true;
 
     // Flash animation
@@ -282,7 +276,7 @@ function Capture({
         onCancelled();
       }
     }, "image/jpeg", 0.95);
-  }, [onMeasuring, stopCamera, onScanImage, onCancelled]);
+  }, [coins, canAfford, onMeasuring, stopCamera, onScanImage, onCancelled]);
 
   // Real-time alignment & 3D facial mesh rendering loop
   const runDetectionLoop = React.useCallback(() => {
@@ -326,24 +320,6 @@ function Capture({
             ctx?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
           }
         }
-
-        if (status.detected && status.quality >= GOOD_QUALITY && !status.warning) {
-          // Face is well-aligned — advance hold countdown
-          if (holdStartRef.current === 0) holdStartRef.current = now;
-          const elapsed = now - holdStartRef.current;
-          const progress = Math.min(1, elapsed / HOLD_DURATION_MS);
-          setHoldProgress(progress);
-
-          if (progress >= 1) {
-            // Auto-capture!
-            await doCapture();
-            return;
-          }
-        } else {
-          // Alignment broke — reset hold timer
-          holdStartRef.current = 0;
-          setHoldProgress(0);
-        }
       } catch {
         // Skip occasional frame glitch
       }
@@ -352,7 +328,7 @@ function Capture({
     };
 
     animFrameRef.current = requestAnimationFrame(loop);
-  }, [doCapture]);
+  }, []);
 
   const startCamera = React.useCallback(async () => {
     setError(null);
@@ -402,8 +378,6 @@ function Capture({
 
   // Visual state derived from live feedback
   const isAligned = Boolean(faceStatus?.detected && faceStatus.quality >= GOOD_QUALITY && !faceStatus.warning);
-  const ringCircumference = 2 * Math.PI * 40; // r=40
-  const ringOffset = ringCircumference * (1 - holdProgress);
 
   return (
     <div className="card-surface mt-8 space-y-6 p-6 sm:p-8 rounded-2xl border border-ink-900/10 shadow-soft">
@@ -476,11 +450,9 @@ function Capture({
                   {faceStatus.warning}
                 </span>
               ) : isAligned ? (
-                <span className="text-emerald-200 bg-emerald-950/70 px-3 py-1 rounded-full border border-emerald-400/30 flex items-center gap-1.5">
+                <span className="text-emerald-200 bg-emerald-950/70 px-3.5 py-1 rounded-full border border-emerald-400/30 flex items-center gap-1.5">
                   <UserCheck className="size-3.5 text-emerald-400" />
-                  {holdProgress > 0
-                    ? `${ui.holdStill} ${Math.ceil((1 - holdProgress) * (HOLD_DURATION_MS / 1000))}s`
-                    : ui.perfectKeepStill}
+                  {ui.alignedReady}
                 </span>
               ) : faceStatus?.detected ? (
                 <span className="text-sky-200 bg-sky-950/70 px-3 py-1 rounded-full border border-sky-400/30">
@@ -492,37 +464,6 @@ function Capture({
                 </span>
               )}
             </div>
-
-            {/* Hold-Still Progress Ring */}
-            {holdProgress > 0 && (
-              <div className="absolute top-3 right-3 z-25 flex items-center justify-center">
-                <svg className="size-12 -rotate-90" viewBox="0 0 100 100">
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    fill="rgba(0,0,0,0.4)"
-                    stroke="rgba(255,255,255,0.2)"
-                    strokeWidth="8"
-                  />
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    fill="none"
-                    stroke="#10b981"
-                    strokeWidth="8"
-                    strokeDasharray={ringCircumference}
-                    strokeDashoffset={ringOffset}
-                    strokeLinecap="round"
-                    className="transition-all duration-100"
-                  />
-                </svg>
-                <span className="absolute text-[10px] font-bold text-white">
-                  {Math.round(holdProgress * 100)}%
-                </span>
-              </div>
-            )}
           </div>
         )}
 
@@ -576,16 +517,18 @@ function Capture({
           <>
             <Button
               onClick={doCapture}
-              disabled={busy}
+              disabled={busy || (coins > 0 && !canAfford)}
               className={cn(
-                "flex-1 transition-all",
-                isAligned && "shadow-glow bg-emerald-600 hover:bg-emerald-700 text-white",
+                "flex-1 transition-all h-11 text-base font-semibold",
+                isAligned
+                  ? "shadow-glow bg-emerald-600 hover:bg-emerald-700 text-white"
+                  : "bg-brand-500 hover:bg-brand-600 text-ink-950",
               )}
             >
-              <ScanFace className="size-4" />
+              <ScanFace className="size-5" />
               {isAligned ? ui.captureReady : ui.captureManual}
             </Button>
-            <Button variant="secondary" onClick={stopCamera} disabled={busy}>
+            <Button variant="secondary" onClick={stopCamera} disabled={busy} className="h-11">
               {ui.stopCamera}
             </Button>
           </>
