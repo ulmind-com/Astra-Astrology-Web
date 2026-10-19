@@ -926,7 +926,9 @@ function Reading({
                     {language === "bn" ? "মুখের ফ্রেম কভারেজ" : language === "hi" ? "फेस फ्रेम कवरेज" : "Face Frame Coverage"}
                   </span>
                   <span className="text-sm font-bold text-ink-900">
-                    {Math.round(scanResult.quality_checks.face_coverage_pct * 100)}%
+                    {scanResult.quality_checks.face_coverage_pct >= 1
+                      ? `${scanResult.quality_checks.face_coverage_pct.toFixed(1)}%`
+                      : `${(scanResult.quality_checks.face_coverage_pct * 100).toFixed(1)}%`}
                   </span>
                 </div>
               </div>
