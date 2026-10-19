@@ -72,11 +72,13 @@ export const endpoints = {
   faceReading: {
     availability: "/face-reading/availability",
     submit: "/face-reading",
+    scan: "/face-reading/scan",
     mine: "/face-reading/mine",
     detail: (id: string) => `/face-reading/${id}`,
     rules: "/admin/face-reading/rules",
     rule: (id: string) => `/admin/face-reading/rules/${id}`,
   },
+
 
   reviews: {
     leave: "/reviews",

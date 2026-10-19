@@ -315,3 +315,53 @@ export type FaceReading = S["FaceReadingOut"];
 export type FaceReadingSection = S["ReadingSectionOut"];
 export type FaceReadingAvailability = S["FaceReadingAvailability"];
 export type FaceRule = S["RuleOut"];
+
+export type HeadPose = {
+  yaw: number;
+  pitch: number;
+  roll: number;
+  is_frontal: boolean;
+};
+
+export type QualityChecks = {
+  is_valid: boolean;
+  status: "ACCEPTED" | "RETAKE_RECOMMENDED" | "REJECTED";
+  face_count: number;
+  face_coverage_pct: number;
+  blur_score: number;
+  brightness_mean: number;
+  contrast_std: number;
+  lighting_symmetry_ratio: number;
+  head_pose: HeadPose | null;
+  issues: string[];
+  recommendations: string[];
+};
+
+export type MeasurementDetail = {
+  name: string;
+  value: number;
+  description: string;
+  formula: string;
+  landmarks_used: number[];
+  status: string;
+};
+
+export type FaceScanResponse = {
+  scan_id: string;
+  status: "ACCEPTED" | "RETAKE_RECOMMENDED" | "REJECTED";
+  quality_score: number;
+  quality_checks: QualityChecks;
+  head_pose: HeadPose | null;
+  measurements: Record<string, number>;
+  measurement_details: Record<string, MeasurementDetail>;
+  measurement_status: "valid" | "retake_recommended" | "rejected";
+  visualization_image: string | null;
+  reading: FaceReading | null;
+  coins_charged: number;
+  landmark_mapping_version: string;
+  model_version: string;
+  processing_duration_ms: number;
+  warnings: string[];
+  error_message: string | null;
+};
+

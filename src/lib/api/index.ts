@@ -6,7 +6,9 @@ import type {
   Address,
   FaceReadingAvailability,
   FaceReading,
+  FaceScanResponse,
   ReviewPage,
+
   ReviewKind,
   Review,
   PendingReview,
@@ -327,7 +329,20 @@ export const faceReadingApi = {
   availability: () =>
     api.get<FaceReadingAvailability>(endpoints.faceReading.availability),
 
-  /** Sends measurements only — never an image. */
+  /** Production 3D MediaPipe + OpenCV facial scanning pipeline */
+  scan: (image: File | Blob | string) => {
+    if (typeof image === "string") {
+      return api.post<FaceScanResponse>(endpoints.faceReading.scan, { image });
+    }
+    const form = new FormData();
+    form.append("file", image, image instanceof File ? image.name : "face_capture.jpg");
+    return apiFetch<FaceScanResponse>(endpoints.faceReading.scan, {
+      method: "POST",
+      body: form,
+    });
+  },
+
+  /** Sends measurements only — legacy fallback. */
   submit: (measurements: Record<string, number>, quality: number) =>
     api.post<FaceReading>(endpoints.faceReading.submit, { measurements, quality }),
 
@@ -335,3 +350,4 @@ export const faceReadingApi = {
 
   get: (id: string) => api.get<FaceReading>(endpoints.faceReading.detail(id)),
 };
+

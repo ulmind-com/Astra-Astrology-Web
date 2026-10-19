@@ -1,16 +1,25 @@
 "use client";
 
 /**
- * Face reading — with real-time biometric alignment guidance, progress ring,
- * laser scanline animation, auto-capture, and multi-language support (English, বাংলা, हिंदी).
+ * Robust MediaPipe + OpenCV Facial Scanning System (Stages A through H).
+ *
+ * Provides real-time camera alignment guidance, live laser scanline, hold countdown,
+ * instant OpenCV + MediaPipe 3D biometric scanning, visual landmark mesh overlay,
+ * and multi-language Vedic Samudrik Shastra interpretation (English, বাংলা, हिंदी).
  */
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
+  AlertTriangle,
   Camera,
   Check,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Compass,
+  Eye,
   Globe,
+  Info,
   Loader2,
   RefreshCw,
   ScanFace,
@@ -29,10 +38,7 @@ import { Alert, Button, LoadingBlock } from "@/components/ui";
 import { faceReadingApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import {
-  NoFaceError,
-  measureImage,
   detectFromVideo,
-  type MeasureResult,
   type LiveFaceStatus,
 } from "@/lib/face-measure";
 import {
@@ -42,21 +48,23 @@ import {
 } from "@/lib/face-reading-i18n";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
-import type { FaceReading } from "@/types";
+import type { FaceReading, FaceScanResponse } from "@/types";
 
-type Stage = "intro" | "capturing" | "measuring" | "reading";
+type Stage = "intro" | "measuring" | "reading" | "rejected";
 
-/** How long quality must stay ≥ GOOD_QUALITY before auto-capture (ms). */
+/** How long alignment must stay ≥ GOOD_QUALITY before auto-capture (ms). */
 const HOLD_DURATION_MS = 1200;
 /** Quality threshold to start counting the hold-still timer. */
-const GOOD_QUALITY = 0.60;
+const GOOD_QUALITY = 0.58;
 /** Target detection interval (ms) — ~12 fps, light on CPU. */
 const DETECT_INTERVAL_MS = 80;
 
 export default function FaceReadingPage() {
   const { isSignedIn } = useAuth();
   const [stage, setStage] = React.useState<Stage>("intro");
+  const [scanResult, setScanResult] = React.useState<FaceScanResponse | null>(null);
   const [reading, setReading] = React.useState<FaceReading | null>(null);
+  const [rejectedInfo, setRejectedInfo] = React.useState<{ issues: string[]; message?: string | null } | null>(null);
   const [language, setLanguage] = React.useState<FaceReadingLanguage>("bn");
 
   const ui = I18N_UI[language];
@@ -67,14 +75,27 @@ export default function FaceReadingPage() {
     enabled: isSignedIn,
   });
 
-  const submit = useMutation({
-    mutationFn: (m: MeasureResult) => faceReadingApi.submit(m.measurements, m.quality),
+  const scanMutation = useMutation({
+    mutationFn: (image: File | Blob | string) => faceReadingApi.scan(image),
     onSuccess: (result) => {
-      setReading(result);
+      if (result.status === "REJECTED") {
+        setRejectedInfo({
+          issues: result.warnings && result.warnings.length > 0
+            ? result.warnings
+            : ["Image quality did not meet facial scanning standards."],
+          message: result.error_message || "Could not detect a clear frontal face suitable for scanning.",
+        });
+        setStage("rejected");
+        return;
+      }
+      setScanResult(result);
+      if (result.reading) {
+        setReading(result.reading);
+      }
       setStage("reading");
     },
     onError: (e: ApiError) => {
-      toast.error(e.message || "Face reading failed. Please try again.");
+      toast.error(e.message || "Face scanning failed. Please try again.");
       setStage("intro");
     },
   });
@@ -134,13 +155,25 @@ export default function FaceReadingPage() {
         ) : stage === "reading" && reading ? (
           <Reading
             reading={reading}
+            scanResult={scanResult}
             language={language}
             onAgain={() => {
               setReading(null);
+              setScanResult(null);
               setStage("intro");
             }}
           />
-        ) : stage === "measuring" || submit.isPending ? (
+        ) : stage === "rejected" && rejectedInfo ? (
+          <RejectedView
+            language={language}
+            issues={rejectedInfo.issues}
+            message={rejectedInfo.message}
+            onRetry={() => {
+              setRejectedInfo(null);
+              setStage("intro");
+            }}
+          />
+        ) : stage === "measuring" || scanMutation.isPending ? (
           <MeasuringView language={language} />
         ) : (
           <Capture
@@ -148,9 +181,9 @@ export default function FaceReadingPage() {
             coins={availability.coins}
             canAfford={availability.can_afford}
             balance={availability.balance_coins}
-            busy={submit.isPending}
+            busy={scanMutation.isPending}
             onMeasuring={() => setStage("measuring")}
-            onMeasured={(m) => submit.mutate(m)}
+            onScanImage={(img) => scanMutation.mutate(img)}
             onCancelled={() => setStage("intro")}
           />
         )}
@@ -168,7 +201,7 @@ function Capture({
   balance,
   busy,
   onMeasuring,
-  onMeasured,
+  onScanImage,
   onCancelled,
 }: {
   language: FaceReadingLanguage;
@@ -177,7 +210,7 @@ function Capture({
   balance: number;
   busy: boolean;
   onMeasuring: () => void;
-  onMeasured: (m: MeasureResult) => void;
+  onScanImage: (fileOrBlob: File | Blob) => void;
   onCancelled: () => void;
 }) {
   const ui = I18N_UI[language];
@@ -213,7 +246,7 @@ function Capture({
 
   React.useEffect(() => stopCamera, [stopCamera]);
 
-  // Capture current frame and submit
+  // Capture current high-res frame from video and submit to OpenCV MediaPipe pipeline
   const doCapture = React.useCallback(async () => {
     if (!videoRef.current || capturingRef.current) return;
     capturingRef.current = true;
@@ -224,43 +257,27 @@ function Capture({
 
     const video = videoRef.current;
     const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
     const ctx = canvas.getContext("2d");
     if (ctx) {
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     }
 
     onMeasuring();
-    try {
-      const result = await measureImage(canvas);
-      if (result.warning && result.quality < 0.55) {
-        setError(result.warning);
-        capturingRef.current = false;
-        holdStartRef.current = 0;
-        setHoldProgress(0);
-        onCancelled();
-        runDetectionLoop();
-        return;
-      }
-      stopCamera();
-      onMeasured(result);
-    } catch (e) {
-      setError(
-        e instanceof NoFaceError
-          ? e.message
-          : "Could not clearly measure your face. Please ensure good lighting and look straight ahead.",
-      );
-      capturingRef.current = false;
-      holdStartRef.current = 0;
-      setHoldProgress(0);
-      onCancelled();
-      runDetectionLoop();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onMeasuring, onMeasured, onCancelled, stopCamera]);
+    stopCamera();
 
-  // ─── real-time detection loop ───
+    canvas.toBlob((blob) => {
+      if (blob) {
+        onScanImage(blob);
+      } else {
+        setError("Failed to capture video frame.");
+        onCancelled();
+      }
+    }, "image/jpeg", 0.95);
+  }, [onMeasuring, stopCamera, onScanImage, onCancelled]);
+
+  // Real-time alignment loop
   const runDetectionLoop = React.useCallback(() => {
     let lastDetect = 0;
 
@@ -315,7 +332,7 @@ function Capture({
     try {
       setModelLoading(true);
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: { ideal: 1280 } },
+        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: false,
       });
       streamRef.current = stream;
@@ -327,7 +344,7 @@ function Capture({
       runDetectionLoop();
     } catch {
       setError(
-        "Could not access the camera. Please allow camera permissions, or upload a clear frontal photo instead.",
+        "Could not access camera. Please allow camera permission, or upload a clear frontal photo below.",
       );
     } finally {
       setModelLoading(false);
@@ -337,316 +354,222 @@ function Capture({
   function onFile(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
-    const image = new Image();
-    image.onload = () => {
-      void measureFromImage(image);
-      URL.revokeObjectURL(image.src);
-    };
-    image.onerror = () => setError("That file could not be opened as an image.");
-    image.src = URL.createObjectURL(file);
-  }
-
-  async function measureFromImage(image: HTMLImageElement) {
     setError(null);
     onMeasuring();
-    try {
-      const result = await measureImage(image);
-      if (result.warning && result.quality < 0.55) {
-        setError(result.warning);
-        onCancelled();
-        return;
-      }
-      onMeasured(result);
-    } catch (e) {
-      setError(
-        e instanceof NoFaceError
-          ? e.message
-          : "Could not measure that photo. Make sure the face is well lit and looking straight ahead.",
-      );
-      onCancelled();
-    }
+    stopCamera();
+    onScanImage(file);
+    event.target.value = "";
   }
 
-  // Visual cues derived from live detector translated to current language
-  const guideState = React.useMemo(() => {
-    if (!faceStatus) {
-      return {
-        color: "border-white/40 shadow-[0_0_15px_rgba(255,255,255,0.15)]",
-        hint: ui.posInOval,
-        tone: "neutral" as const,
-      };
-    }
-    if (!faceStatus.detected) {
-      return {
-        color: "border-amber-400/80 shadow-[0_0_20px_rgba(251,191,36,0.3)]",
-        hint: ui.moveIntoFrame,
-        tone: "warn" as const,
-      };
-    }
-    if (faceStatus.warning) {
-      let warningText = faceStatus.warning;
-      if (warningText.includes("turned")) warningText = ui.lookStraight;
-      else if (warningText.includes("tilted")) warningText = ui.headTilted;
-      else if (warningText.includes("closer")) warningText = ui.tooFar;
-      else if (warningText.includes("back")) warningText = ui.tooClose;
-
-      return {
-        color: "border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.45)]",
-        hint: warningText,
-        tone: "warn" as const,
-      };
-    }
-    if (holdProgress < 1) {
-      return {
-        color: "border-emerald-400 shadow-[0_0_30px_rgba(52,211,153,0.6)]",
-        hint: `${ui.alignedHold} (${Math.round(holdProgress * 100)}%)`,
-        tone: "good" as const,
-      };
-    }
-    return {
-      color: "border-emerald-300 shadow-[0_0_35px_rgba(110,231,183,0.8)]",
-      hint: ui.faceCaptured,
-      tone: "good" as const,
-    };
-  }, [faceStatus, holdProgress, ui]);
-
-  // Progress ring calculations
-  const ringRadius = 42;
-  const ringCircumference = 2 * Math.PI * ringRadius;
+  // Visual state derived from live feedback
+  const isAligned = Boolean(faceStatus?.detected && faceStatus.quality >= GOOD_QUALITY && !faceStatus.warning);
+  const ringCircumference = 2 * Math.PI * 40; // r=40
   const ringOffset = ringCircumference * (1 - holdProgress);
 
   return (
-    <div className="mt-8 space-y-5">
-      <div className="card-surface overflow-hidden rounded-2xl border border-ink-900/10 shadow-lift">
-        <div className="relative aspect-[4/3] bg-ink-950 overflow-hidden">
-          {/* Mirrored video feed */}
-          <video
-            ref={videoRef}
-            playsInline
-            muted
-            className={cn("size-full object-cover [transform:scaleX(-1)]", !live && "hidden")}
-          />
+    <div className="card-surface mt-8 space-y-6 p-6 sm:p-8 rounded-2xl border border-ink-900/10 shadow-soft">
+      {error && (
+        <Alert tone="error" className="text-left">
+          {error}
+        </Alert>
+      )}
 
-          {/* Shutter flash animation overlay */}
-          <div
-            className={cn(
-              "pointer-events-none absolute inset-0 z-30 bg-white transition-opacity duration-200",
-              flashActive ? "opacity-80" : "opacity-0",
-            )}
-          />
-
-          {/* Camera inactive placeholder */}
-          {!live && (
-            <div className="flex size-full flex-col items-center justify-center gap-3 p-8 text-center text-cream-100">
-              <span className="flex size-16 items-center justify-center rounded-full bg-white/10 backdrop-blur-md">
-                <Camera className="size-8 text-brand-300" />
-              </span>
-              <p className="font-display font-medium text-lg">{ui.title}</p>
-              <p className="max-w-xs text-xs text-cream-200/80 leading-relaxed">
-                {ui.subtitle}
-              </p>
-            </div>
+      {/* Camera Live View or Idle Placeholder */}
+      <div className="relative mx-auto aspect-[4/3] max-w-md overflow-hidden rounded-2xl bg-ink-950 border-2 border-ink-900/20 shadow-inner">
+        {/* Flash overlay */}
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-0 z-30 bg-white transition-opacity duration-200",
+            flashActive ? "opacity-95" : "opacity-0",
           )}
+        />
 
-          {/* ─── Live alignment biometric overlay ─── */}
-          {live && (
+        <video
+          ref={videoRef}
+          playsInline
+          muted
+          className={cn(
+            "size-full object-cover transition-opacity duration-300 -scale-x-100",
+            live ? "opacity-100" : "opacity-0",
+          )}
+        />
+
+        {/* Biometric Laser Scanline Animation */}
+        {live && (
+          <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden">
+            <div className="laser-scanline" />
+          </div>
+        )}
+
+        {/* Biometric Alignment Oval Overlay */}
+        {live && (
+          <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center p-4">
             <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center select-none"
+              className={cn(
+                "relative aspect-[3/4] w-48 sm:w-56 rounded-[50%] border-2 transition-all duration-300",
+                isAligned
+                  ? "border-emerald-400 shadow-[0_0_25px_rgba(52,211,153,0.55)] scale-[1.02]"
+                  : faceStatus?.detected
+                  ? "border-amber-400/90 shadow-[0_0_15px_rgba(251,191,36,0.35)]"
+                  : "border-white/40 border-dashed",
+              )}
             >
-              {/* Top status bar */}
-              <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-20">
-                <span className="flex items-center gap-1.5 rounded-full bg-ink-950/70 px-3 py-1 text-[11px] font-medium text-white/90 backdrop-blur-md border border-white/10">
-                  <span className="size-2 rounded-full bg-emerald-400 animate-ping" />
-                  {ui.aiActive}
-                </span>
-                {faceStatus?.detected && (
-                  <span
-                    className={cn(
-                      "rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider backdrop-blur-md border",
-                      (faceStatus.quality ?? 0) >= GOOD_QUALITY
-                        ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                        : "bg-amber-500/20 text-amber-300 border-amber-500/40",
-                    )}
-                  >
-                    {Math.round((faceStatus.quality ?? 0) * 100)}% {ui.aligned}
-                  </span>
-                )}
-              </div>
-
-              {/* Central Biometric Oval Guide */}
-              <div
-                className={cn(
-                  "relative h-[80%] w-[58%] rounded-[50%] border-[3px] transition-all duration-300 flex items-center justify-center overflow-hidden",
-                  guideState.color,
-                )}
-              >
-                {/* Horizontal Eye Level Guideline */}
-                <div className="absolute top-[38%] left-0 right-0 flex items-center justify-center">
-                  <div className="w-full border-t border-dashed border-white/30" />
-                  <span className="absolute bg-ink-950/60 px-2.5 py-0.5 rounded-full text-[10px] font-medium tracking-wider text-white/75 backdrop-blur-sm uppercase">
-                    {ui.eyeLevel}
-                  </span>
-                </div>
-
-                {/* Vertical Center Axis */}
-                <div className="absolute inset-y-0 left-1/2 border-l border-dashed border-white/20" />
-
-                {/* Chin Placement Guideline */}
-                <div className="absolute bottom-[8%] left-0 right-0 flex justify-center">
-                  <span className="rounded-full bg-ink-950/60 px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider text-white/70 backdrop-blur-sm border border-white/10">
-                    {ui.chinPos}
-                  </span>
-                </div>
-
-                {/* Animated Green Laser Scanline (when aligned) */}
-                {guideState.tone === "good" && (
-                  <div className="animate-scanline pointer-events-none absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_15px_#34d399]" />
-                )}
-
-                {/* High-tech Corner Brackets on the Oval */}
-                <span className="absolute -left-1 -top-1 size-6 rounded-tl-full border-l-3 border-t-3 border-inherit" />
-                <span className="absolute -right-1 -top-1 size-6 rounded-tr-full border-r-3 border-t-3 border-inherit" />
-                <span className="absolute -bottom-1 -left-1 size-6 rounded-bl-full border-b-3 border-l-3 border-inherit" />
-                <span className="absolute -bottom-1 -right-1 size-6 rounded-br-full border-b-3 border-r-3 border-inherit" />
-
-                {/* Circular Progress Indicator when scanning */}
-                {faceStatus?.detected && !faceStatus.warning && holdProgress > 0 && (
-                  <div className="absolute inset-0 flex items-center justify-center z-20">
-                    <div className="flex flex-col items-center justify-center rounded-2xl bg-ink-950/80 p-3.5 backdrop-blur-md border border-emerald-500/40 shadow-glow">
-                      <svg width="92" height="92" className="drop-shadow-lg">
-                        <circle
-                          cx="46"
-                          cy="46"
-                          r={ringRadius}
-                          fill="none"
-                          stroke="rgb(255 255 255 / 0.15)"
-                          strokeWidth="5"
-                        />
-                        <circle
-                          cx="46"
-                          cy="46"
-                          r={ringRadius}
-                          fill="none"
-                          stroke="rgb(52 211 153 / 1)"
-                          strokeWidth="5"
-                          strokeLinecap="round"
-                          strokeDasharray={ringCircumference}
-                          strokeDashoffset={ringOffset}
-                          className="transition-[stroke-dashoffset] duration-100 ease-linear"
-                          style={{ transform: "rotate(-90deg)", transformOrigin: "46px 46px" }}
-                        />
-                        <text
-                          x="46"
-                          y="46"
-                          textAnchor="middle"
-                          dominantBaseline="central"
-                          className="fill-white text-base font-bold font-mono"
-                        >
-                          {Math.round(holdProgress * 100)}%
-                        </text>
-                      </svg>
-                      <span className="mt-1 text-[11px] font-semibold tracking-wider text-emerald-300 uppercase animate-pulse">
-                        {ui.scanning}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Bottom Guidance Pill & Linear Progress Bar */}
-              <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center gap-2 px-4 z-20">
-                <span
-                  className={cn(
-                    "flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold backdrop-blur-md border transition-all duration-300 shadow-md",
-                    guideState.tone === "warn" && "bg-amber-500/30 text-amber-100 border-amber-400/50",
-                    guideState.tone === "good" && "bg-emerald-500/30 text-emerald-100 border-emerald-400/50",
-                    guideState.tone === "neutral" && "bg-ink-900/70 text-white/90 border-white/20",
-                  )}
-                >
-                  {guideState.tone === "good" && holdProgress < 1 && (
-                    <Loader2 className="size-3.5 animate-spin text-emerald-300" />
-                  )}
-                  {guideState.hint}
-                </span>
-
-                {/* Progress bar at bottom */}
-                {holdProgress > 0 && (
-                  <div className="h-1.5 w-44 rounded-full bg-white/20 overflow-hidden shadow-sm">
-                    <div
-                      className="h-full bg-gradient-to-r from-emerald-400 to-brand-300 transition-all duration-100 ease-linear shadow-[0_0_8px_#34d399]"
-                      style={{ width: `${Math.round(holdProgress * 100)}%` }}
-                    />
-                  </div>
-                )}
-              </div>
+              {/* Corner crosshairs */}
+              <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-white/70" />
+              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-white/70" />
+              <span className="absolute top-1/2 -left-1 -translate-y-1/2 h-6 w-0.5 bg-white/70" />
+              <span className="absolute top-1/2 -right-1 -translate-y-1/2 h-6 w-0.5 bg-white/70" />
             </div>
-          )}
-        </div>
 
-        {/* Camera action buttons */}
-        <div className="flex flex-wrap items-center gap-3 p-5 bg-surface">
-          {live ? (
-            <>
-              <Button
-                onClick={() => void doCapture()}
-                disabled={busy}
-                className="flex-1 shadow-glow"
-              >
-                <ScanFace className="size-4" />
-                {ui.captureNow}
-              </Button>
-              <Button variant="secondary" onClick={stopCamera} disabled={busy}>
-                {ui.cancel}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                onClick={startCamera}
-                disabled={busy}
-                loading={modelLoading}
-                className="flex-1 shadow-glow"
-              >
-                <Camera className="size-4" />
-                {ui.startCamera}
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => fileRef.current?.click()}
-                disabled={busy}
-              >
-                <Upload className="size-4" />
-                {ui.uploadPhoto}
-              </Button>
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={onFile}
-              />
-            </>
-          )}
-        </div>
+            {/* Live Alignment Feedback Pill */}
+            <div className="mt-4 px-3.5 py-1.5 rounded-full backdrop-blur-md text-xs font-semibold tracking-wide transition-all duration-300 shadow-md">
+              {faceStatus?.warning ? (
+                <span className="text-amber-200 bg-amber-950/70 px-3 py-1 rounded-full border border-amber-400/30">
+                  {faceStatus.warning}
+                </span>
+              ) : isAligned ? (
+                <span className="text-emerald-200 bg-emerald-950/70 px-3 py-1 rounded-full border border-emerald-400/30 flex items-center gap-1.5">
+                  <UserCheck className="size-3.5 text-emerald-400" />
+                  {holdProgress > 0
+                    ? `${ui.holdStill} ${Math.ceil((1 - holdProgress) * (HOLD_DURATION_MS / 1000))}s`
+                    : ui.perfectKeepStill}
+                </span>
+              ) : faceStatus?.detected ? (
+                <span className="text-sky-200 bg-sky-950/70 px-3 py-1 rounded-full border border-sky-400/30">
+                  {ui.centerFace}
+                </span>
+              ) : (
+                <span className="text-white/80 bg-black/60 px-3 py-1 rounded-full border border-white/20">
+                  {ui.lookStraight}
+                </span>
+              )}
+            </div>
+
+            {/* Hold-Still Progress Ring */}
+            {holdProgress > 0 && (
+              <div className="absolute top-3 right-3 z-25 flex items-center justify-center">
+                <svg className="size-12 -rotate-90" viewBox="0 0 100 100">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    fill="rgba(0,0,0,0.4)"
+                    stroke="rgba(255,255,255,0.2)"
+                    strokeWidth="8"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    fill="none"
+                    stroke="#10b981"
+                    strokeWidth="8"
+                    strokeDasharray={ringCircumference}
+                    strokeDashoffset={ringOffset}
+                    strokeLinecap="round"
+                    className="transition-all duration-100"
+                  />
+                </svg>
+                <span className="absolute text-[10px] font-bold text-white">
+                  {Math.round(holdProgress * 100)}%
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Camera Idle Placeholder */}
+        {!live && (
+          <div className="flex size-full flex-col items-center justify-center gap-3 p-6 text-center text-cream-200">
+            <span className="rounded-full bg-white/10 p-4 backdrop-blur-sm">
+              <Camera className="size-8 text-cream-100" />
+            </span>
+            <p className="max-w-xs text-xs text-cream-200/80 leading-relaxed">
+              {ui.cameraReady}
+            </p>
+          </div>
+        )}
       </div>
 
-      {error && <Alert tone="warning">{error}</Alert>}
+      {/* Wallet / Cost Pill */}
+      {coins > 0 && (
+        <div className="flex items-center justify-center gap-2 text-xs">
+          <span className="flex items-center gap-1 text-muted-foreground">
+            <Wallet className="size-3.5 text-brand-700" />
+            {ui.costLabel} <strong className="text-foreground">{coins} {ui.coins}</strong>
+          </span>
+          <span className="text-ink-400">·</span>
+          <span className="text-muted-foreground">
+            {ui.balanceLabel} <strong className="text-foreground">{balance} {ui.coins}</strong>
+          </span>
+        </div>
+      )}
 
-      {!canAfford && coins > 0 && (
+      {/* Primary Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        {!live ? (
+          <Button
+            onClick={startCamera}
+            disabled={busy || modelLoading || (coins > 0 && !canAfford)}
+            className="flex-1"
+          >
+            {modelLoading ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Camera className="size-4" />
+            )}
+            {ui.startCamera}
+          </Button>
+        ) : (
+          <>
+            <Button
+              onClick={doCapture}
+              disabled={busy}
+              className={cn(
+                "flex-1 transition-all",
+                isAligned && "shadow-glow bg-emerald-600 hover:bg-emerald-700 text-white",
+              )}
+            >
+              <ScanFace className="size-4" />
+              {isAligned ? ui.captureReady : ui.captureManual}
+            </Button>
+            <Button variant="secondary" onClick={stopCamera} disabled={busy}>
+              {ui.stopCamera}
+            </Button>
+          </>
+        )}
+
+        <Button
+          variant="secondary"
+          onClick={() => fileRef.current?.click()}
+          disabled={busy || (coins > 0 && !canAfford)}
+          className="flex-1 sm:flex-initial"
+        >
+          <Upload className="size-4" />
+          {ui.uploadPhoto}
+        </Button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/heic"
+          onChange={onFile}
+          className="hidden"
+        />
+      </div>
+
+      {coins > 0 && !canAfford && (
         <Alert tone="warning">
-          <Wallet className="mr-1.5 inline size-4" />
-          This reading costs {coins} coins; you have {balance}.{" "}
-          <Link href="/account/wallet" className="font-semibold underline">
-            Add coins
+          You need {coins} coins for a face reading, but your balance is {balance} coins.{" "}
+          <Link href="/wallet" className="underline font-semibold">
+            Recharge wallet
           </Link>
         </Alert>
       )}
 
-      {/* Helpful Tips Card */}
-      <div className="card-surface p-5 text-sm space-y-3">
-        <div className="flex items-center gap-2 font-semibold text-ink-900">
-          <UserCheck className="size-4 text-emerald-600" />
+      {/* Guidance and Quality Standards Checklist */}
+      <div className="rounded-xl bg-cream-100/70 p-4 border border-ink-900/5 text-left space-y-2">
+        <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-brand-900">
+          <Sparkles className="size-3.5 text-brand-700" />
           {ui.tipsTitle}
         </div>
         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
@@ -684,6 +607,74 @@ function Capture({
   );
 }
 
+/* --------------------------------------------------------------- rejected view */
+function RejectedView({
+  language,
+  issues,
+  message,
+  onRetry,
+}: {
+  language: FaceReadingLanguage;
+  issues: string[];
+  message?: string | null;
+  onRetry: () => void;
+}) {
+  const isBn = language === "bn";
+  const isHi = language === "hi";
+
+  return (
+    <div className="card-surface mt-8 p-8 rounded-2xl border border-rose-500/20 shadow-lift text-center space-y-6">
+      <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-rose-50 border border-rose-200 shadow-sm">
+        <AlertTriangle className="size-8 text-rose-600" />
+      </span>
+
+      <div>
+        <h2 className="font-display text-2xl font-bold tracking-tight text-ink-950">
+          {isBn ? "স্ক্যান সম্পন্ন হয়নি" : isHi ? "स्कैन पूरा नहीं हुआ" : "Scan Unsuccessful"}
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto">
+          {message || (isBn
+            ? "সঠিক ফলাফলের জন্য ছবিটি প্রয়োজনীয় মান পূরণ করতে পারেনি।"
+            : isHi
+            ? "सटीक परिणाम के लिए छवि आवश्यक गुणवत्ता मानक को पूरा नहीं कर सकी।"
+            : "The image did not meet the quality criteria required for an accurate reading.")}
+        </p>
+      </div>
+
+      {issues.length > 0 && (
+        <div className="bg-rose-50/60 p-4 rounded-xl text-left border border-rose-200/50 max-w-md mx-auto space-y-2">
+          <p className="text-xs font-bold text-rose-900 uppercase tracking-wider">
+            {isBn ? "শনাক্ত ত্রুটিসমূহ:" : isHi ? "पहचानी गई समस्याएं:" : "Detected Issues:"}
+          </p>
+          <ul className="text-xs text-rose-800 space-y-1.5 list-disc pl-4">
+            {issues.map((issue, idx) => (
+              <li key={idx}>{issue}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="bg-emerald-50/80 p-3 rounded-xl border border-emerald-200/60 max-w-md mx-auto flex items-center justify-center gap-2 text-xs font-medium text-emerald-800">
+        <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+        <span>
+          {isBn
+            ? "আপনার ব্যালেন্স থেকে কোনো কয়েন কাটা হয়নি।"
+            : isHi
+            ? "आपके बैलेंस से कोई कॉइन नहीं काटा गया।"
+            : "No coins were charged for this attempt."}
+        </span>
+      </div>
+
+      <div className="pt-2">
+        <Button onClick={onRetry} className="w-full sm:w-auto px-8">
+          <RefreshCw className="size-4" />
+          {isBn ? "আবার চেষ্টা করুন" : isHi ? "पुनः प्रयास करें" : "Try Again"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 /* --------------------------------------------------------------- measuring animation view */
 function MeasuringView({ language }: { language: FaceReadingLanguage }) {
   const ui = I18N_UI[language];
@@ -691,9 +682,9 @@ function MeasuringView({ language }: { language: FaceReadingLanguage }) {
   const steps = [ui.step1, ui.step2, ui.step3, ui.step4];
 
   React.useEffect(() => {
-    const t1 = setTimeout(() => setStepIndex(1), 700);
-    const t2 = setTimeout(() => setStepIndex(2), 1500);
-    const t3 = setTimeout(() => setStepIndex(3), 2300);
+    const t1 = setTimeout(() => setStepIndex(1), 500);
+    const t2 = setTimeout(() => setStepIndex(2), 1200);
+    const t3 = setTimeout(() => setStepIndex(3), 1900);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
@@ -746,15 +737,18 @@ function MeasuringView({ language }: { language: FaceReadingLanguage }) {
 /* --------------------------------------------------------------- reading results */
 function Reading({
   reading,
+  scanResult,
   language,
   onAgain,
 }: {
   reading: FaceReading;
+  scanResult: FaceScanResponse | null;
   language: FaceReadingLanguage;
   onAgain: () => void;
 }) {
   const ui = I18N_UI[language];
   const [viewMode, setViewMode] = React.useState<"grouped" | "primary">("grouped");
+  const [showBiometrics, setShowBiometrics] = React.useState(false);
 
   // Group sections by canonical Vedic facial feature order
   const groupedFeatures = React.useMemo(() => {
@@ -782,23 +776,47 @@ function Reading({
       }));
   }, [reading.sections]);
 
+  const qualityScorePct = Math.round((scanResult?.quality_score ?? reading.quality) * 100);
+  const isAccepted = scanResult?.status !== "RETAKE_RECOMMENDED";
+
   return (
-    <div className="mt-8 space-y-5">
+    <div className="mt-8 space-y-6">
+      {/* Top Header Card */}
       <div className="card-glow rounded-2xl p-6 text-center space-y-3">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-800">
-          <Sparkles className="size-3.5" />
-          {Math.round(reading.quality * 100)}% {ui.scanPrecision}
-        </span>
+        <div className="inline-flex items-center gap-2 flex-wrap justify-center">
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold shadow-sm",
+              isAccepted
+                ? "bg-emerald-500/15 text-emerald-800 border border-emerald-300/40"
+                : "bg-amber-500/15 text-amber-800 border border-amber-300/40",
+            )}
+          >
+            <Sparkles className="size-3.5" />
+            {qualityScorePct}% {ui.scanPrecision} ({scanResult?.status || "ACCEPTED"})
+          </span>
+          {scanResult?.processing_duration_ms && (
+            <span className="text-[11px] font-medium text-muted-foreground bg-cream-200/70 px-2.5 py-1 rounded-full">
+              {scanResult.processing_duration_ms} ms
+            </span>
+          )}
+        </div>
+
         <h2 className="font-display text-2xl font-bold tracking-tight text-ink-950">
           {ui.resultsTitle}
         </h2>
         <p className="text-sm text-muted-foreground">
-          {groupedFeatures.length} {language === "bn" ? "টি প্রধান অঙ্গের বিশ্লেষণ" : language === "hi" ? "मुख्य अंगों का विश्लेषण" : "facial features analyzed"}
+          {groupedFeatures.length}{" "}
+          {language === "bn"
+            ? "টি প্রধান অঙ্গের বৈদিক সমুদ্রিক বিশ্লেষণ"
+            : language === "hi"
+            ? "मुख्य अंगों का सामुद्रिक शास्त्र विश्लेषण"
+            : "facial features analyzed with Samudrik Shastra"}
           {reading.coins_charged > 0 && ` · ${reading.coins_charged} ${ui.coinsDebited}`}
         </p>
 
         {/* View Mode Switcher */}
-        <div className="inline-flex items-center gap-1 rounded-full bg-cream-200/70 p-1 border border-ink-900/10 text-xs">
+        <div className="inline-flex items-center gap-1 rounded-full bg-cream-200/70 p-1 border border-ink-900/10 text-xs mt-1">
           <button
             type="button"
             onClick={() => setViewMode("grouped")}
@@ -825,6 +843,87 @@ function Reading({
           </button>
         </div>
       </div>
+
+      {/* 3D Facial Mesh Visualization Card */}
+      {scanResult?.visualization_image && (
+        <div className="card-surface p-6 rounded-2xl border border-ink-900/10 shadow-soft space-y-4">
+          <div className="flex items-center justify-between border-b border-ink-900/10 pb-3">
+            <div className="flex items-center gap-2">
+              <Eye className="size-4 text-brand-700" />
+              <h3 className="font-display text-base font-bold text-ink-950">
+                {language === "bn" ? "OpenCV ত্রিমাত্রিক ফেস মেশ ও ল্যান্ডমার্ক স্ক্যান" : language === "hi" ? "OpenCV 3D फेस मेश व लैंडमार्क स्कैन" : "OpenCV 3D Biometric Face Mesh Scan"}
+              </h3>
+            </div>
+            <span className="text-[11px] font-semibold text-brand-800 bg-brand-50 px-2 py-0.5 rounded border border-brand-200">
+              478 Biometric Nodes
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
+            {/* Visualizer Image */}
+            <div className="relative aspect-square max-w-sm mx-auto overflow-hidden rounded-xl border-2 border-brand-400/30 shadow-inner bg-ink-950">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={scanResult.visualization_image}
+                alt="OpenCV 3D Facial Mesh Overlay"
+                className="size-full object-cover"
+              />
+              <div className="absolute bottom-2 left-2 right-2 text-center text-[10px] bg-black/60 backdrop-blur-sm text-white/90 py-1 rounded">
+                MediaPipe Face Landmarker · {scanResult.model_version}
+              </div>
+            </div>
+
+            {/* Quality & Head Pose Telemetry */}
+            <div className="space-y-3 text-xs">
+              <div className="bg-cream-100/70 p-3.5 rounded-xl border border-ink-900/5 space-y-2">
+                <div className="flex items-center gap-1.5 font-bold text-ink-900">
+                  <Compass className="size-4 text-brand-700" />
+                  <span>
+                    {language === "bn" ? "মাথার অবস্থান ও অ্যাঙ্গেল (Head Pose)" : language === "hi" ? "सिर की स्थिति व कोण (Head Pose)" : "3D Head Pose Orientation"}
+                  </span>
+                </div>
+                {scanResult.head_pose ? (
+                  <div className="grid grid-cols-3 gap-2 text-center pt-1">
+                    <div className="bg-white p-2 rounded-lg border border-ink-900/5 shadow-2xs">
+                      <div className="text-[10px] text-muted-foreground uppercase">Yaw (সাইড)</div>
+                      <div className="text-sm font-bold text-ink-900">{scanResult.head_pose.yaw}°</div>
+                    </div>
+                    <div className="bg-white p-2 rounded-lg border border-ink-900/5 shadow-2xs">
+                      <div className="text-[10px] text-muted-foreground uppercase">Pitch (উপর/নিচ)</div>
+                      <div className="text-sm font-bold text-ink-900">{scanResult.head_pose.pitch}°</div>
+                    </div>
+                    <div className="bg-white p-2 rounded-lg border border-ink-900/5 shadow-2xs">
+                      <div className="text-[10px] text-muted-foreground uppercase">Roll (কাত)</div>
+                      <div className="text-sm font-bold text-ink-900">{scanResult.head_pose.roll}°</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-muted-foreground">Frontal alignment detected</div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-cream-100/70 p-3 rounded-xl border border-ink-900/5">
+                  <span className="text-[10px] text-muted-foreground uppercase block">
+                    {language === "bn" ? "শার্পনেস / ফোকাস" : language === "hi" ? "शार्पनेस / फोकस" : "Sharpness Score"}
+                  </span>
+                  <span className="text-sm font-bold text-ink-900">
+                    {scanResult.quality_checks.blur_score.toFixed(1)} / 100+
+                  </span>
+                </div>
+                <div className="bg-cream-100/70 p-3 rounded-xl border border-ink-900/5">
+                  <span className="text-[10px] text-muted-foreground uppercase block">
+                    {language === "bn" ? "মুখের ফ্রেম কভারেজ" : language === "hi" ? "फेस फ्रेम कवरेज" : "Face Frame Coverage"}
+                  </span>
+                  <span className="text-sm font-bold text-ink-900">
+                    {Math.round(scanResult.quality_checks.face_coverage_pct * 100)}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Render Exactly 1 Card per Facial Feature */}
       <div className="grid grid-cols-1 gap-4">
@@ -886,6 +985,52 @@ function Reading({
           );
         })}
       </div>
+
+      {/* Expandable Technical Biometric Ratios */}
+      {scanResult?.measurement_details && Object.keys(scanResult.measurement_details).length > 0 && (
+        <div className="card-surface p-4 rounded-xl border border-ink-900/10 text-xs">
+          <button
+            type="button"
+            onClick={() => setShowBiometrics(!showBiometrics)}
+            className="flex w-full items-center justify-between font-semibold text-ink-800 hover:text-ink-950"
+          >
+            <span className="flex items-center gap-1.5">
+              <Info className="size-4 text-brand-700" />
+              {language === "bn"
+                ? "২৩টি বৈদিক জ্যামিতিক অনুপাত ও পরিমাপ টেবিল দেখুন"
+                : language === "hi"
+                ? "23 वैदिक ज्यामितीय अनुपात व माप तालिका देखें"
+                : "View 23 Vedic Biometric Proportions & Ratios Table"}
+            </span>
+            {showBiometrics ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+          </button>
+
+          {showBiometrics && (
+            <div className="mt-3 pt-3 border-t border-ink-900/10 overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-ink-900/10 text-[10px] uppercase text-muted-foreground">
+                    <th className="py-1.5 pr-2">Metric</th>
+                    <th className="py-1.5 px-2">Value</th>
+                    <th className="py-1.5 px-2">Formula</th>
+                    <th className="py-1.5 pl-2">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-ink-900/5 text-[11px]">
+                  {Object.entries(scanResult.measurement_details).map(([key, item]) => (
+                    <tr key={key} className="hover:bg-cream-100/50">
+                      <td className="py-1.5 pr-2 font-mono font-medium text-brand-900">{key}</td>
+                      <td className="py-1.5 px-2 font-mono font-bold text-ink-950">{item.value.toFixed(4)}</td>
+                      <td className="py-1.5 px-2 font-mono text-muted-foreground text-[10px]">{item.formula}</td>
+                      <td className="py-1.5 pl-2 text-ink-700">{item.description}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       <p className="px-2 text-center text-xs leading-relaxed text-muted-foreground">
         {ui.disclaimer}
