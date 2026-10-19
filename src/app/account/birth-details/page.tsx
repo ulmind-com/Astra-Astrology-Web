@@ -405,7 +405,7 @@ export default function BirthDetailsPage() {
         </CardBody>
 
         <CardFooter className="justify-end">
-          <Button type="submit" loading={update.isPending}>
+          <Button type="submit" loading={update.isPending} className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm">
             Save details
           </Button>
         </CardFooter>

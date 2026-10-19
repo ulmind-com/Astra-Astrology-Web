@@ -83,14 +83,14 @@ export default function AddressesPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-start justify-between gap-3">
+      <header className="flex flex-col sm:flex-row items-stretch sm:items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Addresses</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Where orders from the store should be delivered.
           </p>
         </div>
-        <Button onClick={() => setCreating(true)}>
+        <Button onClick={() => setCreating(true)} className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm">
           <Plus className="size-4" />
           Add address
         </Button>

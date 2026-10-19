@@ -18,7 +18,7 @@ export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDiv
   return (
     <div
       className={cn(
-        "flex items-center justify-between px-5 pt-5 pb-4",
+        "flex items-center justify-between px-4 sm:px-6 pt-5 pb-4",
         className,
       )}
       {...props}
@@ -45,14 +45,14 @@ export function CardDescription({
 }
 
 export function CardBody({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("px-8 py-5", className)} {...props} />;
+  return <div className={cn("px-4 sm:px-6 py-5", className)} {...props} />;
 }
 
 export function CardFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
-        "flex items-center gap-3 border-t border-border px-5 py-3.5",
+        "flex items-center gap-3 border-t border-border px-4 sm:px-6 py-3.5",
         className,
       )}
       {...props}

@@ -118,14 +118,17 @@ export default function ProfilePage() {
 
       {/* ------------------------------------------------------- picture */}
       <Card>
-        <CardBody className="flex flex-wrap items-center gap-5">
-          <Avatar src={profile.avatar_url} name={profile.full_name} size="xl" />
+        <CardBody className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-5">
+          <div className="relative shrink-0">
+            <Avatar src={profile.avatar_url} name={profile.full_name} size="lg" className="sm:hidden" />
+            <Avatar src={profile.avatar_url} name={profile.full_name} size="xl" className="hidden sm:inline-flex" />
+          </div>
 
           <div className="min-w-0 flex-1">
-            <p className="font-semibold">{profile.full_name}</p>
-            <p className="truncate text-sm text-muted-foreground">{profile.email}</p>
+            <p className="font-semibold text-foreground text-base sm:text-lg">{profile.full_name}</p>
+            <p className="truncate text-xs sm:text-sm text-muted-foreground mt-0.5">{profile.email}</p>
 
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-3.5 flex flex-wrap items-center justify-center sm:justify-start gap-2">
               <input
                 ref={fileRef}
                 type="file"
@@ -138,8 +141,9 @@ export default function ProfilePage() {
                 size="sm"
                 loading={uploading}
                 onClick={() => fileRef.current?.click()}
+                className="h-9 px-3.5 text-xs sm:text-sm"
               >
-                <Camera className="size-4" />
+                <Camera className="size-3.5 sm:size-4" />
                 {profile.avatar_url ? "Change picture" : "Upload picture"}
               </Button>
 
@@ -149,9 +153,9 @@ export default function ProfilePage() {
                   size="sm"
                   disabled={uploading}
                   onClick={removeAvatar}
-                  className="text-danger hover:bg-danger/15"
+                  className="text-danger hover:bg-danger/15 h-9 px-3 text-xs sm:text-sm"
                 >
-                  <Trash2 className="size-4" />
+                  <Trash2 className="size-3.5 sm:size-4" />
                   Remove
                 </Button>
               )}
@@ -266,7 +270,7 @@ export default function ProfilePage() {
           </CardBody>
 
           <CardFooter className="justify-end">
-            <Button type="submit" loading={update.isPending}>
+            <Button type="submit" loading={update.isPending} className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm">
               Save changes
             </Button>
           </CardFooter>
@@ -312,16 +316,17 @@ function NotificationCard() {
       <CardHeader>
         <CardTitle>Notifications</CardTitle>
       </CardHeader>
-      <CardBody className="space-y-4 pt-0">
+      <CardBody className="divide-y divide-border/60 pt-0">
         {ROWS.map((row) => (
-          <Switch
-            key={row.key}
-            checked={prefs[row.key]}
-            onChange={toggle(row.key)}
-            disabled={update.isPending}
-            label={row.label}
-            description={row.description}
-          />
+          <div key={row.key} className="py-3 first:pt-0 last:pb-0">
+            <Switch
+              checked={prefs[row.key]}
+              onChange={toggle(row.key)}
+              disabled={update.isPending}
+              label={row.label}
+              description={row.description}
+            />
+          </div>
         ))}
       </CardBody>
     </Card>

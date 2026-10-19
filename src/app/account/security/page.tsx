@@ -181,7 +181,7 @@ export default function SecurityPage() {
           </CardBody>
 
           <CardFooter className="justify-end">
-            <Button type="submit" loading={change.isPending}>
+            <Button type="submit" loading={change.isPending} className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm">
               <KeyRound className="size-4" />
               {hasPassword ? "Change password" : "Set password"}
             </Button>
@@ -198,7 +198,7 @@ export default function SecurityPage() {
           </CardDescription>
         </CardHeader>
         <CardFooter className="justify-end">
-          <Button variant="secondary" onClick={() => signOut({ redirectTo: "/" })}>
+          <Button variant="secondary" onClick={() => signOut({ redirectTo: "/" })} className="w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm">
             <LogOut className="size-4" />
             Sign out
           </Button>

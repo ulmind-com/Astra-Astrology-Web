@@ -29,34 +29,36 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
     <>
       <SiteHeader />
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:py-10">
         {!ready ? (
           <LoadingBlock label="Checking your session…" />
         ) : (
-          <div className="grid gap-8 md:grid-cols-[210px_1fr]">
+          <div className="grid gap-6 md:gap-8 md:grid-cols-[220px_1fr]">
             <nav className="md:sticky md:top-24 md:self-start">
-              <ul className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0 md:flex-col md:overflow-visible md:pb-0">
-                {NAV.map((item) => {
-                  const active = pathname === item.href;
-                  return (
-                    <li key={item.href} className="shrink-0">
-                      <Link
-                        href={item.href}
-                        aria-current={active ? "page" : undefined}
-                        className={cn(
-                          "flex items-center gap-2 rounded-full md:rounded-lg px-3.5 py-2 md:py-2.5 text-xs sm:text-sm font-medium transition-all whitespace-nowrap",
-                          active
-                            ? "bg-brand-300 text-brand-950 font-semibold shadow-2xs border border-brand-400/40"
-                            : "bg-surface/80 border border-border/40 text-muted-foreground hover:bg-surface-muted hover:text-foreground",
-                        )}
-                      >
-                        <item.icon className="size-4 shrink-0" />
-                        {item.label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
+              <div className="relative -mx-4 px-4 sm:mx-0 sm:px-0">
+                <ul className="flex gap-2 overflow-x-auto pb-3 pt-1 scrollbar-none md:flex-col md:overflow-visible md:p-0 md:gap-1.5">
+                  {NAV.map((item) => {
+                    const active = pathname === item.href;
+                    return (
+                      <li key={item.href} className="shrink-0 md:w-full">
+                        <Link
+                          href={item.href}
+                          aria-current={active ? "page" : undefined}
+                          className={cn(
+                            "flex items-center gap-2.5 rounded-full md:rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium transition-all whitespace-nowrap",
+                            active
+                              ? "bg-brand-300 text-brand-950 font-semibold shadow-soft border border-brand-400/60 ring-2 ring-brand-400/20"
+                              : "bg-surface border border-border/80 text-muted-foreground hover:border-border-strong hover:bg-surface-muted hover:text-foreground",
+                          )}
+                        >
+                          <item.icon className={cn("size-4 shrink-0", active ? "text-brand-900" : "text-muted-foreground")} />
+                          {item.label}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             </nav>
 
             <div className="min-w-0">{children}</div>
