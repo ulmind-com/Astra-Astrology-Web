@@ -258,10 +258,12 @@ function Capture({
 
     const video = videoRef.current;
     const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth || 1280;
-    canvas.height = video.videoHeight || 720;
+    canvas.width = video.videoWidth || 1920;
+    canvas.height = video.videoHeight || 1080;
     const ctx = canvas.getContext("2d");
     if (ctx) {
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     }
 
@@ -275,7 +277,7 @@ function Capture({
         setError("Failed to capture video frame.");
         onCancelled();
       }
-    }, "image/jpeg", 0.95);
+    }, "image/jpeg", 0.98);
   }, [coins, canAfford, onMeasuring, stopCamera, onScanImage, onCancelled]);
 
   // Real-time alignment & 3D facial mesh rendering loop
@@ -335,7 +337,11 @@ function Capture({
     try {
       setModelLoading(true);
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+        video: {
+          facingMode: "user",
+          width: { ideal: 1920, min: 1280 },
+          height: { ideal: 1080, min: 720 },
+        },
         audio: false,
       });
       streamRef.current = stream;

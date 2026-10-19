@@ -124,16 +124,17 @@ export function assessPose(pts: Pt[]): { quality: number; warning: string | null
   // Height of face for distance / framing guidance
   const faceH = dist(pts[P.foreheadTop], pts[P.chinBottom]);
 
-  // Scaled scores: 0.18 for yaw and 0.25 for roll provide natural webcam tolerance
-  const yawScore = Math.max(0, 1 - yaw / 0.18);
-  const rollScore = Math.max(0, 1 - roll / 0.25);
+  // Scaled scores
+  const yawScore = Math.max(0, 1 - yaw / 0.16);
+  const rollScore = Math.max(0, 1 - roll / 0.20);
   let quality = Math.min(yawScore, rollScore);
 
   let warning: string | null = null;
-  if (faceH < 0.22) {
+  // Ideal anthropometric face coverage is between 28% and 68% of frame
+  if (faceH < 0.28) {
     warning = "Move closer to the camera.";
     quality = Math.min(quality, 0.45);
-  } else if (faceH > 0.88) {
+  } else if (faceH > 0.68) {
     warning = "Move slightly back from the camera.";
     quality = Math.min(quality, 0.45);
   } else if (yawScore < rollScore && yawScore < 0.55) {
