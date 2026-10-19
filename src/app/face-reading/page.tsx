@@ -1,27 +1,38 @@
 "use client";
 
 /**
- * Face reading — with real-time alignment feedback and auto-capture.
+ * Face reading — with real-time biometric alignment guidance, progress ring,
+ * laser scanline animation, and auto-capture.
  *
  * Flow:
- * 1. User opens camera → live feed appears inside an oval guide.
- * 2. Every ~80ms we run a lightweight face detection (VIDEO mode) and show:
- *    - A colour-coded oval border (red → amber → green) reflecting alignment.
- *    - A circular progress ring that fills as quality stays above threshold.
- *    - A text hint ("Move closer", "Look straight", "Hold still…").
- * 3. When quality ≥ 0.65 for 1.5 s straight, we auto-capture the frame,
- *    run the full measurement, and send the ratios to the backend.
- * 4. The photo never leaves this device — only ~20 ratios are transmitted.
+ * 1. User opens camera → live mirrored feed inside a biometric oval guide.
+ * 2. Visual guide lines indicate:
+ *    - Eye level guideline ("── Eye Level ──")
+ *    - Center vertical alignment axis
+ *    - Chin placement curve
+ * 3. Every ~80ms we run a lightweight face detection (VIDEO mode) and provide:
+ *    - Real-time status: "Look straight", "Move closer", "Keep head level", etc.
+ *    - Dynamic border color: White (searching) → Amber (adjusting) → Radiant Green (aligned).
+ *    - Animated green laser scan beam across the face.
+ *    - Real-time circular progress ring (0% → 100%) as the face remains aligned.
+ * 4. When quality ≥ 0.60 for ~1.2s straight, auto-capture snaps the frame with
+ *    a camera flash effect, calculates Samudrik Shastra proportions, and submits.
+ * 5. While reading, an immersive Vedic analysis view with step-by-step progress
+ *    is displayed.
+ * 6. Privacy: Photo is processed client-side only — only ~20 ratios are transmitted.
  */
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Camera,
   Check,
+  CheckCircle2,
   Loader2,
   RefreshCw,
   ScanFace,
+  Sparkles,
   Upload,
+  UserCheck,
   Wallet,
 } from "lucide-react";
 import Link from "next/link";
@@ -47,9 +58,9 @@ import type { FaceReading } from "@/types";
 type Stage = "intro" | "capturing" | "measuring" | "reading";
 
 /** How long quality must stay ≥ GOOD_QUALITY before auto-capture (ms). */
-const HOLD_DURATION_MS = 1500;
+const HOLD_DURATION_MS = 1200;
 /** Quality threshold to start counting the hold-still timer. */
-const GOOD_QUALITY = 0.65;
+const GOOD_QUALITY = 0.60;
 /** Target detection interval (ms) — ~12 fps, light on CPU. */
 const DETECT_INTERVAL_MS = 80;
 
@@ -71,7 +82,7 @@ export default function FaceReadingPage() {
       setStage("reading");
     },
     onError: (e: ApiError) => {
-      toast.error(e.message);
+      toast.error(e.message || "Face reading failed. Please try again.");
       setStage("intro");
     },
   });
@@ -81,15 +92,15 @@ export default function FaceReadingPage() {
       <SiteHeader />
       <main className="mx-auto max-w-3xl px-4 py-10">
         <header className="text-center">
-          <span className="medallion mx-auto flex size-16 items-center justify-center rounded-full">
-            <ScanFace className="size-7" />
+          <span className="medallion mx-auto flex size-16 items-center justify-center rounded-full shadow-glow">
+            <ScanFace className="size-8 text-brand-900" />
           </span>
           <h1 className="mt-5 font-display text-3xl font-semibold tracking-tight">
-            Face reading
+            Samudrik Shastra Face Reading
           </h1>
-          <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
-            Samudrik Shastra reads character in the proportions of a face — the
-            forehead, the eyes, the nose, the set of the mouth and jaw.
+          <p className="mx-auto mt-3 max-w-lg text-muted-foreground text-sm leading-relaxed">
+            Ancient Vedic physiognomy reads your character, strengths, and destiny in the
+            classical proportions of your forehead, eyes, nose, lips, and jawline.
           </p>
         </header>
 
@@ -108,12 +119,14 @@ export default function FaceReadingPage() {
           </Alert>
         ) : stage === "reading" && reading ? (
           <Reading reading={reading} onAgain={() => { setReading(null); setStage("intro"); }} />
+        ) : stage === "measuring" || submit.isPending ? (
+          <MeasuringView />
         ) : (
           <Capture
             coins={availability.coins}
             canAfford={availability.can_afford}
             balance={availability.balance_coins}
-            busy={submit.isPending || stage === "measuring"}
+            busy={submit.isPending}
             onMeasuring={() => setStage("measuring")}
             onMeasured={(m) => submit.mutate(m)}
             onCancelled={() => setStage("intro")}
@@ -153,10 +166,11 @@ function Capture({
   const [live, setLive] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [modelLoading, setModelLoading] = React.useState(false);
+  const [flashActive, setFlashActive] = React.useState(false);
 
   // Real-time feedback state
   const [faceStatus, setFaceStatus] = React.useState<LiveFaceStatus | null>(null);
-  /** 0→1, how far through the "hold still" countdown we are. */
+  /** 0→1, progress of hold-still timer. */
   const [holdProgress, setHoldProgress] = React.useState(0);
 
   const stopCamera = React.useCallback(() => {
@@ -172,6 +186,53 @@ function Capture({
   }, []);
 
   React.useEffect(() => stopCamera, [stopCamera]);
+
+  // Capture current frame and submit
+  const doCapture = React.useCallback(async () => {
+    if (!videoRef.current || capturingRef.current) return;
+    capturingRef.current = true;
+
+    // Flash animation
+    setFlashActive(true);
+    setTimeout(() => setFlashActive(false), 260);
+
+    const video = videoRef.current;
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    }
+
+    onMeasuring();
+    try {
+      const result = await measureImage(canvas);
+      if (result.warning && result.quality < 0.55) {
+        setError(result.warning);
+        capturingRef.current = false;
+        holdStartRef.current = 0;
+        setHoldProgress(0);
+        onCancelled();
+        runDetectionLoop();
+        return;
+      }
+      stopCamera();
+      onMeasured(result);
+    } catch (e) {
+      setError(
+        e instanceof NoFaceError
+          ? e.message
+          : "Could not clearly measure your face. Please ensure good lighting and look straight ahead.",
+      );
+      capturingRef.current = false;
+      holdStartRef.current = 0;
+      setHoldProgress(0);
+      onCancelled();
+      runDetectionLoop();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onMeasuring, onMeasured, onCancelled, stopCamera]);
 
   // ─── real-time detection loop ───
   const runDetectionLoop = React.useCallback(() => {
@@ -192,12 +253,12 @@ function Capture({
 
       try {
         const status = await detectFromVideo(videoRef.current, now);
-        if (capturingRef.current) return; // might have captured while awaiting
+        if (capturingRef.current) return;
 
         setFaceStatus(status);
 
         if (status.detected && status.quality >= GOOD_QUALITY && !status.warning) {
-          // Face is well-aligned — advance the hold timer
+          // Face is well-aligned — advance hold countdown
           if (holdStartRef.current === 0) holdStartRef.current = now;
           const elapsed = now - holdStartRef.current;
           const progress = Math.min(1, elapsed / HOLD_DURATION_MS);
@@ -205,59 +266,23 @@ function Capture({
 
           if (progress >= 1) {
             // Auto-capture!
-            capturingRef.current = true;
-            setHoldProgress(1);
             await doCapture();
-            return; // stop the loop
+            return;
           }
         } else {
-          // Not aligned — reset hold
+          // Alignment broke — reset hold timer
           holdStartRef.current = 0;
           setHoldProgress(0);
         }
       } catch {
-        // Detection can occasionally throw on bad frames — just skip.
+        // Skip occasional frame glitch
       }
 
       animFrameRef.current = requestAnimationFrame(loop);
     };
 
     animFrameRef.current = requestAnimationFrame(loop);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  async function doCapture() {
-    if (!videoRef.current) return;
-    setError(null);
-    onMeasuring();
-    try {
-      const result = await measureImage(videoRef.current);
-      if (result.warning) {
-        // Shouldn't happen often after the live check, but handle it
-        setError(result.warning);
-        capturingRef.current = false;
-        holdStartRef.current = 0;
-        setHoldProgress(0);
-        onCancelled();
-        // Restart the loop
-        runDetectionLoop();
-        return;
-      }
-      stopCamera();
-      onMeasured(result);
-    } catch (e) {
-      setError(
-        e instanceof NoFaceError
-          ? e.message
-          : "Could not measure that photo. Try again in better light.",
-      );
-      capturingRef.current = false;
-      holdStartRef.current = 0;
-      setHoldProgress(0);
-      onCancelled();
-      runDetectionLoop();
-    }
-  }
+  }, [doCapture]);
 
   async function startCamera() {
     setError(null);
@@ -273,11 +298,10 @@ function Capture({
         await videoRef.current.play();
       }
       setLive(true);
-      // Start the real-time detection loop
       runDetectionLoop();
     } catch {
       setError(
-        "Could not open the camera. Allow camera access, or upload a photo instead.",
+        "Could not access the camera. Please allow camera permissions, or upload a clear frontal photo instead.",
       );
     } finally {
       setModelLoading(false);
@@ -301,7 +325,7 @@ function Capture({
     onMeasuring();
     try {
       const result = await measureImage(image);
-      if (result.warning) {
+      if (result.warning && result.quality < 0.55) {
         setError(result.warning);
         onCancelled();
         return;
@@ -311,148 +335,231 @@ function Capture({
       setError(
         e instanceof NoFaceError
           ? e.message
-          : "Could not measure that photo. Try again in better light.",
+          : "Could not measure that photo. Make sure the face is well lit and looking straight ahead.",
       );
       onCancelled();
     }
   }
 
-  // Derive the guide colour and hint text from the live status
+  // Visual cues derived from live detector
   const guideState = React.useMemo(() => {
-    if (!faceStatus) return { color: "border-brand-300/40", hint: "Detecting face…", tone: "neutral" as const };
-    if (!faceStatus.detected) return { color: "border-red-400/80", hint: "Move your face into the oval", tone: "bad" as const };
-    if (faceStatus.warning) return { color: "border-amber-400/80", hint: faceStatus.warning, tone: "warn" as const };
-    if (holdProgress < 1) return { color: "border-emerald-400/90", hint: "Perfect — hold still…", tone: "good" as const };
-    return { color: "border-emerald-400", hint: "Captured!", tone: "good" as const };
+    if (!faceStatus) {
+      return {
+        color: "border-white/40 shadow-[0_0_15px_rgba(255,255,255,0.15)]",
+        hint: "Position your face inside the oval",
+        tone: "neutral" as const,
+      };
+    }
+    if (!faceStatus.detected) {
+      return {
+        color: "border-amber-400/80 shadow-[0_0_20px_rgba(251,191,36,0.3)]",
+        hint: "Move your face into the frame",
+        tone: "warn" as const,
+      };
+    }
+    if (faceStatus.warning) {
+      return {
+        color: "border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.45)]",
+        hint: faceStatus.warning,
+        tone: "warn" as const,
+      };
+    }
+    if (holdProgress < 1) {
+      return {
+        color: "border-emerald-400 shadow-[0_0_30px_rgba(52,211,153,0.6)]",
+        hint: `Aligned! Hold still (${Math.round(holdProgress * 100)}%)`,
+        tone: "good" as const,
+      };
+    }
+    return {
+      color: "border-emerald-300 shadow-[0_0_35px_rgba(110,231,183,0.8)]",
+      hint: "Face Captured!",
+      tone: "good" as const,
+    };
   }, [faceStatus, holdProgress]);
 
-  // SVG progress ring params
-  const ringRadius = 48;
+  // Progress ring calculations
+  const ringRadius = 42;
   const ringCircumference = 2 * Math.PI * ringRadius;
   const ringOffset = ringCircumference * (1 - holdProgress);
 
   return (
     <div className="mt-8 space-y-5">
-      <div className="card-surface overflow-hidden">
-        <div className="relative aspect-[4/3] bg-ink-900/5">
+      <div className="card-surface overflow-hidden rounded-2xl border border-ink-900/10 shadow-lift">
+        <div className="relative aspect-[4/3] bg-ink-950 overflow-hidden">
+          {/* Mirrored video feed */}
           <video
             ref={videoRef}
             playsInline
             muted
             className={cn("size-full object-cover [transform:scaleX(-1)]", !live && "hidden")}
           />
+
+          {/* Shutter flash animation overlay */}
+          <div
+            className={cn(
+              "pointer-events-none absolute inset-0 z-30 bg-white transition-opacity duration-200",
+              flashActive ? "opacity-80" : "opacity-0",
+            )}
+          />
+
+          {/* Camera inactive placeholder */}
           {!live && (
-            <div className="flex size-full flex-col items-center justify-center gap-3 p-8 text-center">
-              <Camera className="size-8 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">
-                Face the camera straight on, in even light.
-                <br />
-                No glasses, hair off the forehead.
+            <div className="flex size-full flex-col items-center justify-center gap-3 p-8 text-center text-cream-100">
+              <span className="flex size-16 items-center justify-center rounded-full bg-white/10 backdrop-blur-md">
+                <Camera className="size-8 text-brand-300" />
+              </span>
+              <p className="font-display font-medium text-lg">Align your face for Vedic analysis</p>
+              <p className="max-w-xs text-xs text-cream-200/80 leading-relaxed">
+                Look straight at the camera with even lighting. Remove glasses and keep hair off your forehead for highest precision.
               </p>
             </div>
           )}
 
-          {/* ─── Live alignment overlay ─── */}
+          {/* ─── Live alignment biometric overlay ─── */}
           {live && (
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center"
+              className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center select-none"
             >
-              {/* Oval guide with colour feedback */}
+              {/* Top status bar */}
+              <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-20">
+                <span className="flex items-center gap-1.5 rounded-full bg-ink-950/70 px-3 py-1 text-[11px] font-medium text-white/90 backdrop-blur-md border border-white/10">
+                  <span className="size-2 rounded-full bg-emerald-400 animate-ping" />
+                  AI Vision Active
+                </span>
+                {faceStatus?.detected && (
+                  <span
+                    className={cn(
+                      "rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider backdrop-blur-md border",
+                      (faceStatus.quality ?? 0) >= GOOD_QUALITY
+                        ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                        : "bg-amber-500/20 text-amber-300 border-amber-500/40",
+                    )}
+                  >
+                    {Math.round((faceStatus.quality ?? 0) * 100)}% Aligned
+                  </span>
+                )}
+              </div>
+
+              {/* Central Biometric Oval Guide */}
               <div
                 className={cn(
-                  "relative h-[78%] w-[54%] rounded-[50%] border-[3px] transition-colors duration-300",
+                  "relative h-[80%] w-[58%] rounded-[50%] border-[3px] transition-all duration-300 flex items-center justify-center overflow-hidden",
                   guideState.color,
                 )}
               >
-                {/* Corner scan lines for visual effect */}
-                <span className="absolute -left-1 -top-1 h-5 w-5 rounded-tl-full border-l-2 border-t-2 border-inherit" />
-                <span className="absolute -right-1 -top-1 h-5 w-5 rounded-tr-full border-r-2 border-t-2 border-inherit" />
-                <span className="absolute -bottom-1 -left-1 h-5 w-5 rounded-bl-full border-b-2 border-l-2 border-inherit" />
-                <span className="absolute -bottom-1 -right-1 h-5 w-5 rounded-br-full border-b-2 border-r-2 border-inherit" />
+                {/* Horizontal Eye Level Guideline */}
+                <div className="absolute top-[38%] left-0 right-0 flex items-center justify-center">
+                  <div className="w-full border-t border-dashed border-white/30" />
+                  <span className="absolute bg-ink-950/60 px-2.5 py-0.5 rounded-full text-[10px] font-medium tracking-wider text-white/75 backdrop-blur-sm uppercase">
+                    Eye Level
+                  </span>
+                </div>
+
+                {/* Vertical Center Axis */}
+                <div className="absolute inset-y-0 left-1/2 border-l border-dashed border-white/20" />
+
+                {/* Chin Placement Guideline */}
+                <div className="absolute bottom-[8%] left-0 right-0 flex justify-center">
+                  <span className="rounded-full bg-ink-950/60 px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider text-white/70 backdrop-blur-sm border border-white/10">
+                    Chin Position
+                  </span>
+                </div>
+
+                {/* Animated Green Laser Scanline (when aligned) */}
+                {guideState.tone === "good" && (
+                  <div className="animate-scanline pointer-events-none absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_15px_#34d399]" />
+                )}
+
+                {/* High-tech Corner Brackets on the Oval */}
+                <span className="absolute -left-1 -top-1 size-6 rounded-tl-full border-l-3 border-t-3 border-inherit" />
+                <span className="absolute -right-1 -top-1 size-6 rounded-tr-full border-r-3 border-t-3 border-inherit" />
+                <span className="absolute -bottom-1 -left-1 size-6 rounded-bl-full border-b-3 border-l-3 border-inherit" />
+                <span className="absolute -bottom-1 -right-1 size-6 rounded-br-full border-b-3 border-r-3 border-inherit" />
+
+                {/* Circular Progress Indicator when scanning */}
+                {faceStatus?.detected && !faceStatus.warning && holdProgress > 0 && (
+                  <div className="absolute inset-0 flex items-center justify-center z-20">
+                    <div className="flex flex-col items-center justify-center rounded-2xl bg-ink-950/80 p-3.5 backdrop-blur-md border border-emerald-500/40 shadow-glow">
+                      <svg width="92" height="92" className="drop-shadow-lg">
+                        <circle
+                          cx="46"
+                          cy="46"
+                          r={ringRadius}
+                          fill="none"
+                          stroke="rgb(255 255 255 / 0.15)"
+                          strokeWidth="5"
+                        />
+                        <circle
+                          cx="46"
+                          cy="46"
+                          r={ringRadius}
+                          fill="none"
+                          stroke="rgb(52 211 153 / 1)"
+                          strokeWidth="5"
+                          strokeLinecap="round"
+                          strokeDasharray={ringCircumference}
+                          strokeDashoffset={ringOffset}
+                          className="transition-[stroke-dashoffset] duration-100 ease-linear"
+                          style={{ transform: "rotate(-90deg)", transformOrigin: "46px 46px" }}
+                        />
+                        <text
+                          x="46"
+                          y="46"
+                          textAnchor="middle"
+                          dominantBaseline="central"
+                          className="fill-white text-base font-bold font-mono"
+                        >
+                          {Math.round(holdProgress * 100)}%
+                        </text>
+                      </svg>
+                      <span className="mt-1 text-[11px] font-semibold tracking-wider text-emerald-300 uppercase animate-pulse">
+                        Scanning…
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Progress ring — small circular indicator */}
-              {faceStatus?.detected && !faceStatus.warning && holdProgress > 0 && (
-                <div className="absolute left-1/2 top-[12%] -translate-x-1/2">
-                  <svg width="108" height="108" className="drop-shadow-lg">
-                    {/* Background ring */}
-                    <circle
-                      cx="54" cy="54" r={ringRadius}
-                      fill="none"
-                      stroke="rgb(255 255 255 / 0.12)"
-                      strokeWidth="4"
-                    />
-                    {/* Progress arc */}
-                    <circle
-                      cx="54" cy="54" r={ringRadius}
-                      fill="none"
-                      stroke="rgb(52 211 153 / 0.9)"
-                      strokeWidth="4"
-                      strokeLinecap="round"
-                      strokeDasharray={ringCircumference}
-                      strokeDashoffset={ringOffset}
-                      className="transition-[stroke-dashoffset] duration-100 ease-linear"
-                      style={{ transform: "rotate(-90deg)", transformOrigin: "54px 54px" }}
-                    />
-                    {/* Percentage text */}
-                    <text
-                      x="54" y="54"
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      className="fill-white text-lg font-bold"
-                      style={{ fontSize: "18px", fontFamily: "var(--font-display)" }}
-                    >
-                      {Math.round(holdProgress * 100)}%
-                    </text>
-                  </svg>
-                </div>
-              )}
-
-              {/* Hint text at the bottom */}
-              <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+              {/* Bottom Guidance Pill & Linear Progress Bar */}
+              <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center gap-2 px-4 z-20">
                 <span
                   className={cn(
-                    "rounded-full px-4 py-1.5 text-xs font-semibold backdrop-blur-md transition-colors duration-300",
-                    guideState.tone === "bad" && "bg-red-500/20 text-red-200",
-                    guideState.tone === "warn" && "bg-amber-500/20 text-amber-200",
-                    guideState.tone === "good" && "bg-emerald-500/20 text-emerald-200",
-                    guideState.tone === "neutral" && "bg-white/10 text-white/70",
+                    "flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold backdrop-blur-md border transition-all duration-300 shadow-md",
+                    guideState.tone === "warn" && "bg-amber-500/30 text-amber-100 border-amber-400/50",
+                    guideState.tone === "good" && "bg-emerald-500/30 text-emerald-100 border-emerald-400/50",
+                    guideState.tone === "neutral" && "bg-ink-900/70 text-white/90 border-white/20",
                   )}
                 >
                   {guideState.tone === "good" && holdProgress < 1 && (
-                    <Loader2 className="mr-1.5 inline size-3 animate-spin" />
+                    <Loader2 className="size-3.5 animate-spin text-emerald-300" />
                   )}
                   {guideState.hint}
                 </span>
-              </div>
 
-              {/* Quality score badge */}
-              {faceStatus?.detected && (
-                <div className="absolute right-3 top-3">
-                  <span
-                    className={cn(
-                      "rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm",
-                      (faceStatus.quality ?? 0) >= GOOD_QUALITY
-                        ? "bg-emerald-500/20 text-emerald-300"
-                        : "bg-amber-500/20 text-amber-300",
-                    )}
-                  >
-                    {Math.round((faceStatus.quality ?? 0) * 100)}% aligned
-                  </span>
-                </div>
-              )}
+                {/* Progress bar at bottom */}
+                {holdProgress > 0 && (
+                  <div className="h-1.5 w-44 rounded-full bg-white/20 overflow-hidden shadow-sm">
+                    <div
+                      className="h-full bg-gradient-to-r from-emerald-400 to-brand-300 transition-all duration-100 ease-linear shadow-[0_0_8px_#34d399]"
+                      style={{ width: `${Math.round(holdProgress * 100)}%` }}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
 
-        <div className="flex flex-wrap gap-3 p-5">
+        {/* Camera action buttons */}
+        <div className="flex flex-wrap items-center gap-3 p-5 bg-surface">
           {live ? (
             <>
               <Button
-                onClick={() => videoRef.current && doCapture()}
-                loading={busy}
-                className="flex-1"
+                onClick={() => void doCapture()}
+                disabled={busy}
+                className="flex-1 shadow-glow"
               >
                 <ScanFace className="size-4" />
                 Capture now
@@ -463,9 +570,14 @@ function Capture({
             </>
           ) : (
             <>
-              <Button onClick={startCamera} disabled={busy} loading={modelLoading} className="flex-1">
+              <Button
+                onClick={startCamera}
+                disabled={busy}
+                loading={modelLoading}
+                className="flex-1 shadow-glow"
+              >
                 <Camera className="size-4" />
-                Use the camera
+                Start Camera Scan
               </Button>
               <Button
                 variant="secondary"
@@ -473,7 +585,7 @@ function Capture({
                 disabled={busy}
               >
                 <Upload className="size-4" />
-                Upload a photo
+                Upload a Photo
               </Button>
               <input
                 ref={fileRef}
@@ -487,13 +599,6 @@ function Capture({
         </div>
       </div>
 
-      {busy && (
-        <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" />
-          Measuring facial proportions…
-        </p>
-      )}
-
       {error && <Alert tone="warning">{error}</Alert>}
 
       {!canAfford && coins > 0 && (
@@ -506,62 +611,149 @@ function Capture({
         </Alert>
       )}
 
-      <div className="card-surface p-5 text-sm">
-        <p className="font-semibold">
-          <Check className="mr-1.5 inline size-4 text-success" />
-          Your photo never leaves this device
-        </p>
-        <p className="mt-1.5 leading-relaxed text-muted-foreground">
-          The measuring happens here, in your browser. What we receive is about
-          twenty proportions — the width of your nose against the width of your
-          face, and so on. The picture itself is never uploaded and never
-          stored.
-        </p>
-        {coins > 0 && (
-          <p className="mt-3 text-muted-foreground">
-            A reading costs <strong className="text-foreground">{coins} coins</strong>,
-            taken when the reading is made.
-          </p>
-        )}
+      {/* Helpful Tips Card */}
+      <div className="card-surface p-5 text-sm space-y-3">
+        <div className="flex items-center gap-2 font-semibold text-ink-900">
+          <UserCheck className="size-4 text-emerald-600" />
+          How to get the most accurate scan
+        </div>
+        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+          <li className="flex items-start gap-1.5">
+            <CheckCircle2 className="size-3.5 text-brand-600 mt-0.5 shrink-0" />
+            <span>Look directly at the camera at eye level.</span>
+          </li>
+          <li className="flex items-start gap-1.5">
+            <CheckCircle2 className="size-3.5 text-brand-600 mt-0.5 shrink-0" />
+            <span>Ensure soft, even lighting without harsh shadows.</span>
+          </li>
+          <li className="flex items-start gap-1.5">
+            <CheckCircle2 className="size-3.5 text-brand-600 mt-0.5 shrink-0" />
+            <span>Keep your hair away from your forehead and eyebrows.</span>
+          </li>
+          <li className="flex items-start gap-1.5">
+            <CheckCircle2 className="size-3.5 text-brand-600 mt-0.5 shrink-0" />
+            <span>Maintain a neutral facial expression while holding still.</span>
+          </li>
+        </ul>
+
+        <div className="pt-2 border-t border-ink-900/10 flex items-center justify-between text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <Check className="size-3.5 text-emerald-600" />
+            Zero image storage — 100% processed on your device
+          </span>
+          {coins > 0 && (
+            <span>Cost: <strong className="text-foreground">{coins} coins</strong></span>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-/* --------------------------------------------------------------- reading */
-function Reading({ reading, onAgain }: { reading: FaceReading; onAgain: () => void }) {
+/* --------------------------------------------------------------- measuring animation view */
+function MeasuringView() {
+  const [stepIndex, setStepIndex] = React.useState(0);
+  const steps = [
+    "Mapping 478 high-precision facial coordinates…",
+    "Calculating forehead, eye, and jawline proportions…",
+    "Cross-referencing Vedic Samudrik Shastra treatises…",
+    "Synthesizing your personalized character & destiny report…",
+  ];
+
+  React.useEffect(() => {
+    const t1 = setTimeout(() => setStepIndex(1), 700);
+    const t2 = setTimeout(() => setStepIndex(2), 1500);
+    const t3 = setTimeout(() => setStepIndex(3), 2300);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, []);
+
   return (
-    <div className="mt-8 space-y-4">
-      <div className="card-glow rounded-2xl p-6 text-center">
-        <p className="font-display text-lg font-semibold">Your reading</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {reading.sections.length} features read
-          {reading.coins_charged > 0 && ` · ${reading.coins_charged} coins`}
+    <div className="card-surface mt-8 p-8 text-center space-y-6 rounded-2xl shadow-lift border border-ink-900/10">
+      <div className="relative mx-auto size-24">
+        <div className="absolute inset-0 rounded-full border-2 border-brand-400/40 animate-ping" />
+        <div className="relative flex size-full items-center justify-center rounded-full bg-brand-50 border-2 border-brand-300 shadow-glow">
+          <ScanFace className="size-10 text-brand-800 animate-pulse" />
+        </div>
+      </div>
+
+      <div>
+        <h2 className="font-display text-2xl font-semibold tracking-tight text-ink-950">
+          Analyzing Vedic Facial Proportions
+        </h2>
+        <p className="mt-2 text-sm text-brand-700 font-medium">
+          {steps[stepIndex]}
         </p>
       </div>
 
-      {reading.sections.map((section, i) => (
-        <article key={`${section.feature}-${section.option}-${i}`} className="card-surface p-6">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="font-display text-lg font-semibold">{section.label}</h2>
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {section.feature_label}
-              {section.area ? ` · ${section.area}` : ""}
-            </span>
+      <div className="mx-auto max-w-sm space-y-2.5 text-left text-xs bg-cream-50 p-4 rounded-xl border border-ink-900/5">
+        {steps.map((text, idx) => (
+          <div
+            key={idx}
+            className={cn(
+              "flex items-center gap-2.5 transition-all duration-300",
+              idx <= stepIndex ? "text-ink-900 font-medium" : "opacity-35 text-muted-foreground",
+            )}
+          >
+            {idx < stepIndex ? (
+              <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+            ) : idx === stepIndex ? (
+              <Loader2 className="size-4 text-brand-600 animate-spin shrink-0" />
+            ) : (
+              <span className="size-4 rounded-full border border-muted-foreground/30 shrink-0 inline-block" />
+            )}
+            <span>{text}</span>
           </div>
-          <p className="mt-3 leading-relaxed text-muted-foreground">{section.meaning}</p>
-        </article>
-      ))}
+        ))}
+      </div>
+    </div>
+  );
+}
 
-      <p className="px-2 text-xs leading-relaxed text-muted-foreground">
-        Face reading is a traditional practice, offered here for reflection. It
-        is not a medical, psychological or financial assessment, and nothing in
-        it should be treated as one.
+/* --------------------------------------------------------------- reading results */
+function Reading({ reading, onAgain }: { reading: FaceReading; onAgain: () => void }) {
+  return (
+    <div className="mt-8 space-y-5">
+      <div className="card-glow rounded-2xl p-6 text-center space-y-2">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-800">
+          <Sparkles className="size-3.5" />
+          {Math.round(reading.quality * 100)}% Scan Precision
+        </span>
+        <h2 className="font-display text-2xl font-bold tracking-tight">Your Vedic Physiognomy Analysis</h2>
+        <p className="text-sm text-muted-foreground">
+          {reading.sections.length} facial features decoded
+          {reading.coins_charged > 0 && ` · ${reading.coins_charged} coins debited`}
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        {reading.sections.map((section, i) => (
+          <article
+            key={`${section.feature}-${section.option}-${i}`}
+            className="card-surface p-6 rounded-2xl border border-ink-900/10 shadow-soft hover:shadow-lift transition-shadow"
+          >
+            <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-ink-900/5 pb-3">
+              <h3 className="font-display text-lg font-semibold text-ink-950">{section.label}</h3>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-brand-700 bg-brand-50 px-2.5 py-1 rounded-md">
+                {section.feature_label}
+                {section.area ? ` · ${section.area}` : ""}
+              </span>
+            </div>
+            <p className="mt-3 leading-relaxed text-sm text-ink-700">{section.meaning}</p>
+          </article>
+        ))}
+      </div>
+
+      <p className="px-2 text-center text-xs leading-relaxed text-muted-foreground">
+        Samudrik Shastra is a revered traditional system of character reading offered here for personal self-reflection.
       </p>
 
       <Button variant="secondary" onClick={onAgain} className="w-full">
         <RefreshCw className="size-4" />
-        Read another face
+        Read Another Face
       </Button>
     </div>
   );
