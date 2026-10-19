@@ -558,10 +558,20 @@ function Capture({
       </div>
 
       {coins > 0 && !canAfford && (
-        <Alert tone="warning">
-          You need {coins} coins for a face reading, but your balance is {balance} coins.{" "}
-          <Link href="/wallet" className="underline font-semibold">
-            Recharge wallet
+        <Alert tone="warning" className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-left">
+          <div className="text-sm">
+            {language === "bn"
+              ? `মুখাবয়ব বিশ্লেষণের জন্য আপনার ${coins} কয়েন প্রয়োজন, কিন্তু আপনার বর্তমান ব্যালেন্স ${balance} কয়েন।`
+              : language === "hi"
+              ? `मुखाकृति विश्लेषण के लिए आपको ${coins} कॉइन्स की आवश्यकता है, लेकिन आपका बैलेंस ${balance} कॉइन्स है।`
+              : `You need ${coins} coins for a face reading, but your balance is ${balance} coins.`}
+          </div>
+          <Link
+            href="/account/wallet"
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-amber-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-amber-700 transition-colors shrink-0"
+          >
+            <Wallet className="size-3.5" />
+            {language === "bn" ? "ওয়ালেট রিচার্জ করুন" : language === "hi" ? "वॉलेट रीचार्ज करें" : "Recharge Wallet"}
           </Link>
         </Alert>
       )}

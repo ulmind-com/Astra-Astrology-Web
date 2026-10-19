@@ -18,6 +18,15 @@ const nextConfig: NextConfig = {
     // Profile pictures and galleries are served from Cloudinary.
     remotePatterns: [{ protocol: "https", hostname: "res.cloudinary.com" }],
   },
+  async redirects() {
+    return [
+      {
+        source: "/wallet",
+        destination: "/account/wallet",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
