@@ -754,10 +754,37 @@ function Reading({
   onAgain: () => void;
 }) {
   const ui = I18N_UI[language];
+  const [viewMode, setViewMode] = React.useState<"grouped" | "primary">("grouped");
+
+  // Group sections by canonical Vedic facial feature order
+  const groupedFeatures = React.useMemo(() => {
+    const order = [
+      "face_shape",
+      "forehead",
+      "eyebrows",
+      "eyes",
+      "nose",
+      "lips",
+      "chin",
+      "cheeks",
+    ];
+    const map = new Map<string, typeof reading.sections>();
+    for (const s of reading.sections) {
+      const list = map.get(s.feature) || [];
+      list.push(s);
+      map.set(s.feature, list);
+    }
+    return order
+      .filter((f) => map.has(f))
+      .map((f) => ({
+        feature: f,
+        items: map.get(f)!,
+      }));
+  }, [reading.sections]);
 
   return (
     <div className="mt-8 space-y-5">
-      <div className="card-glow rounded-2xl p-6 text-center space-y-2">
+      <div className="card-glow rounded-2xl p-6 text-center space-y-3">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-800">
           <Sparkles className="size-3.5" />
           {Math.round(reading.quality * 100)}% {ui.scanPrecision}
@@ -766,28 +793,95 @@ function Reading({
           {ui.resultsTitle}
         </h2>
         <p className="text-sm text-muted-foreground">
-          {reading.sections.length} {ui.featuresDecoded}
+          {groupedFeatures.length} {language === "bn" ? "টি প্রধান অঙ্গের বিশ্লেষণ" : language === "hi" ? "मुख्य अंगों का विश्लेषण" : "facial features analyzed"}
           {reading.coins_charged > 0 && ` · ${reading.coins_charged} ${ui.coinsDebited}`}
         </p>
+
+        {/* View Mode Switcher */}
+        <div className="inline-flex items-center gap-1 rounded-full bg-cream-200/70 p-1 border border-ink-900/10 text-xs">
+          <button
+            type="button"
+            onClick={() => setViewMode("grouped")}
+            className={cn(
+              "rounded-full px-3 py-1 font-semibold transition-all cursor-pointer",
+              viewMode === "grouped"
+                ? "bg-white text-ink-950 shadow-sm"
+                : "text-ink-700/80 hover:text-ink-950",
+            )}
+          >
+            {language === "bn" ? "অঙ্গভিত্তিক সম্পূর্ণ বিশ্লেষণ" : language === "hi" ? "अंगवार विस्तृत विश्लेषण" : "Detailed by Feature"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("primary")}
+            className={cn(
+              "rounded-full px-3 py-1 font-semibold transition-all cursor-pointer",
+              viewMode === "primary"
+                ? "bg-white text-ink-950 shadow-sm"
+                : "text-ink-700/80 hover:text-ink-950",
+            )}
+          >
+            {language === "bn" ? "১টি করে প্রধান লক্ষণ" : language === "hi" ? "मुख्य लक्षण मात्र" : "Primary Traits Only"}
+          </button>
+        </div>
       </div>
 
+      {/* Render Exactly 1 Card per Facial Feature */}
       <div className="grid grid-cols-1 gap-4">
-        {reading.sections.map((section, i) => {
-          const tr = translateReadingSection(section, language);
+        {groupedFeatures.map(({ feature, items }) => {
+          const displayItems = viewMode === "primary" ? [items[0]] : items;
+          const firstTr = translateReadingSection(displayItems[0], language);
 
           return (
             <article
-              key={`${section.feature}-${section.option}-${i}`}
-              className="card-surface p-6 rounded-2xl border border-ink-900/10 shadow-soft hover:shadow-lift transition-shadow"
+              key={feature}
+              className="card-surface p-6 rounded-2xl border border-ink-900/10 shadow-soft hover:shadow-lift transition-shadow space-y-4"
             >
-              <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-ink-900/5 pb-3">
-                <h3 className="font-display text-lg font-semibold text-ink-950">{tr.label}</h3>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-brand-700 bg-brand-50 px-2.5 py-1 rounded-md">
-                  {tr.featureLabel}
-                  {tr.areaLabel ? ` · ${tr.areaLabel}` : ""}
-                </span>
+              {/* Feature Header Badge */}
+              <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-ink-900/10 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="size-2 rounded-full bg-brand-500" />
+                  <h3 className="font-display text-lg font-bold text-ink-950">
+                    {firstTr.featureLabel}
+                  </h3>
+                </div>
+                {firstTr.areaLabel && (
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-brand-800 bg-brand-50 px-2.5 py-1 rounded-md border border-brand-200">
+                    {firstTr.areaLabel}
+                  </span>
+                )}
               </div>
-              <p className="mt-3 leading-relaxed text-sm text-ink-700">{tr.meaning}</p>
+
+              {/* Trait Insights */}
+              <div className="space-y-4">
+                {displayItems.map((item, idx) => {
+                  const tr = translateReadingSection(item, language);
+
+                  return (
+                    <div
+                      key={`${item.feature}-${item.option}-${idx}`}
+                      className={cn(
+                        "space-y-1.5",
+                        idx > 0 && "pt-3.5 border-t border-dashed border-ink-900/10",
+                      )}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="font-display font-semibold text-ink-900 text-base">
+                          {tr.label}
+                        </h4>
+                        {displayItems.length > 1 && (
+                          <span className="text-[10px] font-semibold text-muted-foreground bg-cream-100 px-2 py-0.5 rounded">
+                            {language === "bn" ? `বৈশিষ্ট্য ${idx + 1}` : language === "hi" ? `लक्षण ${idx + 1}` : `Aspect ${idx + 1}`}
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1 leading-relaxed text-sm text-ink-700">
+                        {tr.meaning}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
             </article>
           );
         })}

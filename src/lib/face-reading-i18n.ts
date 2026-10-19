@@ -158,6 +158,10 @@ export const AREA_NAMES: Record<string, Record<FaceReadingLanguage, string>> = {
   relationships: { en: "Relationships", bn: "সম্পর্ক ও সামাজিকতা", hi: "संबंध व मेलजोल" },
   resolve: { en: "Resolve", bn: "সংকল্প ও ইচ্ছাশক্তি", hi: "दृढ़ संकल्प" },
   vitality: { en: "Vitality", bn: "প্রাণশক্তি ও স্থায়িত্ব", hi: "जीवटता व स्वास्थ्य" },
+  expression: { en: "Expression", bn: "অভিব্যক্তি ও আকর্ষণ", hi: "अभिव्यक्ति व आकर्षण" },
+  wealth: { en: "Wealth & Prosperity", bn: "অর্থ ও সমৃদ্ধি", hi: "धन व समृद्धि" },
+  standing: { en: "Social Standing", bn: "সামাজিক মর্যাদা ও প্রভাব", hi: "सामाजिक प्रतिष्ठा" },
+  drive: { en: "Drive & Enterprise", bn: "কর্মপ্রেরণা ও উদ্যোগ", hi: "उद्यम व कर्मशक्ति" },
 };
 
 
