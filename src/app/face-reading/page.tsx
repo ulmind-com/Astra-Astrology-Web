@@ -927,6 +927,94 @@ function Reading({
         </div>
       )}
 
+      {/* Planetary Forehead Wrinkles & Lines Special Card */}
+      {scanResult && (scanResult.forehead_lines_shastra || scanResult.forehead_lines_count !== undefined) && (
+        <div className="card-surface p-6 rounded-2xl border border-brand-500/20 shadow-soft bg-gradient-to-br from-cream-50 via-cream-100/60 to-brand-50/30 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink-900/10 pb-3">
+            <div className="flex items-center gap-2.5">
+              <span className="flex size-8 items-center justify-center rounded-xl bg-brand-500/15 text-brand-800 shadow-2xs">
+                <Sparkles className="size-4" />
+              </span>
+              <div>
+                <h3 className="font-display text-base font-bold text-ink-950 flex items-center gap-2">
+                  {language === "bn"
+                    ? "কপালের রেখা ও গ্রহীয় ভাঁজ বিশ্লেষণ"
+                    : language === "hi"
+                    ? "माथे की रेखाएं व ग्रह सिलवटें विश्लेषण"
+                    : "Forehead Lines & Planetary Folds Analysis"}
+                </h3>
+                <p className="text-[11px] text-muted-foreground">
+                  {language === "bn"
+                    ? "বৈদিক সমুদ্র শাস্ত্র গ্রহীয় রেখা বিশ্লেষণ (শনি, বৃহস্পতি, মঙ্গল, সূর্য, চন্দ্র, শুক্র, বুধ)"
+                    : language === "hi"
+                    ? "वैदिक सामुद्रिक शास्त्र ग्रहीय रेखा विश्लेषण"
+                    : "Vedic Samudrika Shastra planetary crease line biometrics"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold bg-brand-500/15 text-brand-900 border border-brand-400/30">
+                {scanResult.forehead_lines_count === 0
+                  ? (language === "bn" ? "মসৃণ কপাল (০টি রেখা)" : language === "hi" ? "चिकना माथा (0 रेखाएं)" : "Smooth Forehead (0 lines)")
+                  : `${scanResult.forehead_lines_count || 0} ${language === "bn" ? "টি গ্রহীয় রেখা সনাক্ত" : language === "hi" ? "ग्रहीय रेखाएं मिलीं" : "Planetary Lines Detected"}`}
+              </span>
+            </div>
+          </div>
+
+          {/* Shastra Interpretation Box */}
+          {scanResult.forehead_lines_shastra && (
+            <div className="p-4 rounded-xl bg-white/90 border border-brand-300/30 shadow-xs space-y-1.5">
+              <h4 className="font-display text-sm font-bold text-brand-950 flex items-center gap-1.5">
+                <span className="size-1.5 rounded-full bg-brand-600" />
+                {language === "bn"
+                  ? scanResult.forehead_lines_shastra.title_bn || scanResult.forehead_lines_shastra.title_en
+                  : scanResult.forehead_lines_shastra.title_en}
+              </h4>
+              <p className="text-xs leading-relaxed text-ink-800">
+                {language === "bn"
+                  ? scanResult.forehead_lines_shastra.meaning_bn || scanResult.forehead_lines_shastra.meaning_en
+                  : scanResult.forehead_lines_shastra.meaning_en}
+              </p>
+            </div>
+          )}
+
+          {/* Individual Detected Planetary Lines Grid */}
+          {scanResult.forehead_lines_data && scanResult.forehead_lines_data.length > 0 && (
+            <div className="space-y-2 pt-1">
+              <h5 className="text-[11px] font-bold uppercase tracking-wider text-ink-600">
+                {language === "bn" ? "সনাক্তকৃত গ্রহীয় রেখাসমূহ" : language === "hi" ? "पहचानी गई ग्रहीय रेखाएं" : "Identified Planetary Tracks"}
+              </h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {scanResult.forehead_lines_data.map((lineTrack, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between p-2.5 rounded-lg bg-white/80 border border-ink-900/5 text-xs shadow-2xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="flex size-5 items-center justify-center rounded-full bg-brand-100 text-[10px] font-bold text-brand-900">
+                        {i + 1}
+                      </span>
+                      <div>
+                        <div className="font-bold text-ink-900">{lineTrack.planet_name}</div>
+                        <div className="text-[10px] text-muted-foreground">
+                          {language === "bn" ? "প্রস্থ:" : "Width:"} {lineTrack.width_px}px · {lineTrack.is_continuous ? (language === "bn" ? "অটুট" : "Continuous") : (language === "bn" ? "খণ্ডিত" : "Segmented")}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-50 text-brand-800 border border-brand-200">
+                        {Math.round(lineTrack.prominence * 100)}% {language === "bn" ? "স্পষ্ট" : "depth"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Render Exactly 1 Card per Facial Feature */}
       <div className="grid grid-cols-1 gap-4">
         {groupedFeatures.map(({ feature, items }) => {
@@ -999,10 +1087,10 @@ function Reading({
             <span className="flex items-center gap-1.5">
               <Info className="size-4 text-brand-700" />
               {language === "bn"
-                ? "২৩টি বৈদিক জ্যামিতিক অনুপাত ও পরিমাপ টেবিল দেখুন"
+                ? `${Object.keys(scanResult.measurement_details).length}টি বৈদিক জ্যামিতিক অনুপাত ও পরিমাপ টেবিল দেখুন`
                 : language === "hi"
-                ? "23 वैदिक ज्यामितीय अनुपात व माप तालिका देखें"
-                : "View 23 Vedic Biometric Proportions & Ratios Table"}
+                ? `${Object.keys(scanResult.measurement_details).length} वैदिक ज्यामितीय अनुपात व माप तालिका देखें`
+                : `View ${Object.keys(scanResult.measurement_details).length} Vedic Biometric Proportions & Ratios Table`}
             </span>
             {showBiometrics ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
           </button>

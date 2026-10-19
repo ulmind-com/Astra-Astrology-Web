@@ -358,6 +358,22 @@ export type FaceScanResponse = {
   visualization_image: string | null;
   reading: FaceReading | null;
   coins_charged: number;
+  forehead_lines_count?: number;
+  forehead_lines_data?: Array<{
+    y_center: number;
+    x_start: number;
+    x_end: number;
+    width_px: number;
+    prominence: number;
+    is_continuous: boolean;
+    planet_name: string;
+  }>;
+  forehead_lines_shastra?: {
+    title_bn?: string;
+    title_en?: string;
+    meaning_bn?: string;
+    meaning_en?: string;
+  };
   landmark_mapping_version: string;
   model_version: string;
   processing_duration_ms: number;

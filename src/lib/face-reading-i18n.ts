@@ -171,6 +171,7 @@ export const I18N_UI: Record<FaceReadingLanguage, Record<string, string>> = {
 export const FEATURE_NAMES: Record<string, Record<FaceReadingLanguage, string>> = {
   face_shape: { en: "Face Shape", bn: "মুখের গঠন", hi: "चेहरे की बनावट" },
   forehead: { en: "Forehead", bn: "কপাল", hi: "माथा" },
+  forehead_lines: { en: "Forehead Lines & Wrinkles", bn: "কপালের রেখা ও গ্রহীয় ভাঁজ", hi: "माथे की रेखाएं व ग्रह सिलवटें" },
   eyebrows: { en: "Eyebrows", bn: "ভ্রু", hi: "भौंहें" },
   eyes: { en: "Eyes", bn: "চোখ", hi: "आंखें" },
   nose: { en: "Nose", bn: "নাক", hi: "नाक" },
@@ -247,6 +248,46 @@ export const RULE_TRANSLATIONS: Record<string, { label: Record<FaceReadingLangua
   "forehead:balanced": {
     label: { en: "Even forehead", bn: "ভারসাম্যপূর্ণ কপাল", hi: "संतुलित माथा" },
     meaning: { en: "A forehead in proportion with the rest of the face is read as thought and action kept in balance \u2014 neither deliberating past the moment for acting nor moving before the matter is understood. The tradition treats this as the practical ideal rather than a remarkable sign, associating it with steady judgement and with being trusted to decide on others' behalf. It asks only that the balance be used: an evenness that never commits to a view is indistinguishable from having none.", bn: "আদর্শ পরিমাপের কপাল যুক্তি ও অনুভূতির অপূর্ব সামঞ্জস্য বহন করে। যেকোনো জটিল পরিস্থিতিতে স্থির থেকে সঠিক সিদ্ধান্ত নেওয়ার গুণ আপনার রয়েছে।", hi: "संतुलित माथा बुद्धि और भावना का सुंदर संतुलन दर्शाता है। आप किसी भी परिस्थिति में शांत रहकर संतुलित निर्णय लेते हैं।" },
+  },
+  "forehead_lines:smooth": {
+    label: { en: "Smooth & Uncreased Forehead", bn: "মসৃণ ও রেখাহীন কপাল", hi: "चिकना व रेखारहित माथा" },
+    meaning: {
+      en: "A smooth forehead without prominent crease lines signifies a clear mind, free-spirited nature, and natural vitality. You prefer straightforward action over complicated speculation.",
+      bn: "কপালে কোনো দৃশ্যমান ভাঁজ বা রেখা না থাকা মুক্তচিন্তা, তরুণসুলভ প্রাণশক্তি এবং প্রত্যক্ষ পদক্ষেপের নির্দেশক। আপনি জটিল তাত্ত্বিক আলোচনায় সময় ব্যয় না করে বাস্তবিক পদক্ষেপ নিতে ভালোবাসেন।",
+      hi: "माथे पर गहरी रेखाएं न होना स्पष्ट विचार, युवा ऊर्जा और स्वतंत्र सोच का संकेत है। आप जटिल चिंतन के बजाय सीधे और व्यावहारिक कदम उठाना पसंद करते हैं।",
+    },
+  },
+  "forehead_lines:single_line": {
+    label: { en: "Single Prominent Line - Sun", bn: "একরেখা কপাল (সূর্য রেখা)", hi: "एकल रेखा - सूर्य रेखा" },
+    meaning: {
+      en: "A single distinct horizontal line represents laser-sharp focus and determined willpower. You forge your own unique path and achieve success through steadfast commitment.",
+      bn: "কপালে একটি সুস্পষ্ট রেখা (সূর্য রেখা) প্রবল ইচ্ছাশক্তি এবং গভীর আত্মবিশ্বাসের পরিচায়ক। সমুদ্র শাস্ত্র অনুযায়ী আপনি যেকোনো একটি নির্দিষ্ট লক্ষ্য স্থির করে একাগ্রচিত্তে তা অর্জন করতে সক্ষম।",
+      hi: "माथे पर एक स्पष्ट रेखा (सूर्य रेखा) प्रबल इच्छाशक्ति और एकाग्रता का प्रतीक है। आप अपने दम पर अपना मार्ग बनाते हैं और लक्ष्य प्राप्ति तक अडिग रहते हैं।",
+    },
+  },
+  "forehead_lines:two_lines": {
+    label: { en: "Two Balanced Lines - Jupiter & Mars", bn: "দ্বিরেখা কপাল (বৃহস্পতি ও মঙ্গল)", hi: "दो संतुलित रेखाएं - गुरु व मंगल" },
+    meaning: {
+      en: "Two parallel lines reveal an auspicious equilibrium between wisdom and decisive action. You balance strategic thinking with practical execution, earning trust and respect.",
+      bn: "কপালে দুটি সুস্পষ্ট সমান্তরাল রেখা প্রজ্ঞা (বৃহস্পতি) এবং কর্মশক্তি (মঙ্গল)-র সুসমন্বিত ভারসাম্যের লক্ষণ। আপনি যেকোনো সিদ্ধান্ত নেওয়ার আগে ভালোমন্দ বিচার করেন এবং নির্ভুলভাবে পরিকল্পনা বাস্তবায়ন করেন।",
+      hi: "दो समानांतर रेखाएं ज्ञान (बृहस्पति) और कार्यशक्ति (मंगल) के सुंदर संतुलन को दर्शाती हैं। आप सूझबूझ और तत्परता से सही निर्णय लेकर प्रतिष्ठा प्राप्त करते हैं।",
+    },
+  },
+  "forehead_lines:three_lines": {
+    label: { en: "Three Auspicious Royal Lines - Trishula Yoga", bn: "ত্রিরেখা কপাল (রাজযোগ লক্ষণ - শনি, বৃহস্পতি, মঙ্গল)", hi: "त्रिशूल योग - तीन राजयोग रेखाएं" },
+    meaning: {
+      en: "In Samudrika Shastra, three distinct, unbroken horizontal lines represent high fortune, leadership, and intellectual eminence. It bestows longevity, prosperity, and societal honor.",
+      bn: "সমুদ্র শাস্ত্রে কপালে তিনটি অটুট সমান্তরাল রেখা থাকা পরম সৌভাগ্য ও রাজযোগের প্রতীক (শনি, বৃহস্পতি ও মঙ্গল রেখা)। এই লক্ষণ দীর্ঘায়ু, অগাধ জ্ঞান, সামাজিক প্রতিপত্তি এবং অর্থভাগ্যের দ্বার উন্মোচন করে।",
+      hi: "सामुद्रिक शास्त्र में माथे पर तीन अटूट रेखाएं राजयोग और परम सौभाग्य का प्रतीक मानी जाती हैं। यह दीर्घायु, उच्च विद्या, समाज में प्रभाव और अकूत समृद्धि प्रदान करती हैं।",
+    },
+  },
+  "forehead_lines:multi_lines": {
+    label: { en: "Multiple Planetary Lines", bn: "বহুরেখা কপাল (বহুদর্শী প্রজ্ঞা)", hi: "बहु-ग्रह रेखाएं - दार्शनिक प्रज्ञा" },
+    meaning: {
+      en: "Having four or more forehead lines denotes a multifaceted mind with philosophical depth and keen analytical perception. You look beyond surface appearances to uncover deep truths.",
+      bn: "কপালে চার বা ততোধিক গ্রহীয় রেখা থাকা বহুদর্শী অভিজ্ঞতা, দূরদৃষ্টি এবং দার্শনিক চিন্তাশীলতার পরিচায়ক। আপনি জীবনের বাহ্যিক বিষয়ের চেয়ে অন্তর্নিহিত সত্য অন্বেষণে বেশি আগ্রহী।",
+      hi: "माथे पर चार या अधिक रेखाएं बहुआयामी प्रतिभा, दार्शनिक दृष्टिकोण और जीवन के गहरे अनुभवों की परिचायक हैं। आप दूरदृष्टि से सत्य को परखने की क्षमता रखते हैं।",
+    },
   },
   "eyebrows:thick": {
     label: { en: "Thick eyebrows", bn: "ঘন ভ্রু", hi: "घनी भौंहें" },
