@@ -798,13 +798,8 @@ function Reading({
             )}
           >
             <Sparkles className="size-3.5" />
-            {qualityScorePct}% {ui.scanPrecision} ({scanResult?.status || "ACCEPTED"})
+            {qualityScorePct}% {ui.scanPrecision}
           </span>
-          {scanResult?.processing_duration_ms && (
-            <span className="text-[11px] font-medium text-muted-foreground bg-cream-200/70 px-2.5 py-1 rounded-full">
-              {scanResult.processing_duration_ms} ms
-            </span>
-          )}
         </div>
 
         <h2 className="font-display text-2xl font-bold tracking-tight text-ink-950">
@@ -856,26 +851,20 @@ function Reading({
             <div className="flex items-center gap-2">
               <Eye className="size-4 text-brand-700" />
               <h3 className="font-display text-base font-bold text-ink-950">
-                {language === "bn" ? "OpenCV ত্রিমাত্রিক ফেস মেশ ও ল্যান্ডমার্ক স্ক্যান" : language === "hi" ? "OpenCV 3D फेस मेश व लैंडमार्क स्कैन" : "OpenCV 3D Biometric Face Mesh Scan"}
+                {language === "bn" ? "মুখাবয়ব বিশ্লেষণ মানচিত্র" : language === "hi" ? "मुखाकृति विश्लेषण मानचित्र" : "Facial Analysis Mapping"}
               </h3>
             </div>
-            <span className="text-[11px] font-semibold text-brand-800 bg-brand-50 px-2 py-0.5 rounded border border-brand-200">
-              478 Biometric Nodes
-            </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
             {/* Visualizer Image */}
-            <div className="relative aspect-square max-w-sm mx-auto overflow-hidden rounded-xl border-2 border-brand-400/30 shadow-inner bg-ink-950">
+            <div className="relative aspect-square max-w-sm mx-auto overflow-hidden rounded-xl border border-brand-400/20 shadow-inner bg-ink-950">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={scanResult.visualization_image}
-                alt="OpenCV 3D Facial Mesh Overlay"
+                alt="Facial Analysis"
                 className="size-full object-cover"
               />
-              <div className="absolute bottom-2 left-2 right-2 text-center text-[10px] bg-black/60 backdrop-blur-sm text-white/90 py-1 rounded">
-                MediaPipe Face Landmarker · {scanResult.model_version}
-              </div>
             </div>
 
             {/* Quality & Head Pose Telemetry */}
@@ -884,21 +873,21 @@ function Reading({
                 <div className="flex items-center gap-1.5 font-bold text-ink-900">
                   <Compass className="size-4 text-brand-700" />
                   <span>
-                    {language === "bn" ? "মাথার অবস্থান ও অ্যাঙ্গেল (Head Pose)" : language === "hi" ? "सिर की स्थिति व कोण (Head Pose)" : "3D Head Pose Orientation"}
+                    {language === "bn" ? "মাথার অবস্থান" : language === "hi" ? "सिर की स्थिति" : "Head Orientation"}
                   </span>
                 </div>
                 {scanResult.head_pose ? (
                   <div className="grid grid-cols-3 gap-2 text-center pt-1">
                     <div className="bg-white p-2 rounded-lg border border-ink-900/5 shadow-2xs">
-                      <div className="text-[10px] text-muted-foreground uppercase">Yaw (সাইড)</div>
+                      <div className="text-[10px] text-muted-foreground uppercase">{language === "bn" ? "পার্শ্ব" : language === "hi" ? "पार्श्व" : "Yaw"}</div>
                       <div className="text-sm font-bold text-ink-900">{scanResult.head_pose.yaw}°</div>
                     </div>
                     <div className="bg-white p-2 rounded-lg border border-ink-900/5 shadow-2xs">
-                      <div className="text-[10px] text-muted-foreground uppercase">Pitch (উপর/নিচ)</div>
+                      <div className="text-[10px] text-muted-foreground uppercase">{language === "bn" ? "উল্লম্ব" : language === "hi" ? "लंबवत" : "Pitch"}</div>
                       <div className="text-sm font-bold text-ink-900">{scanResult.head_pose.pitch}°</div>
                     </div>
                     <div className="bg-white p-2 rounded-lg border border-ink-900/5 shadow-2xs">
-                      <div className="text-[10px] text-muted-foreground uppercase">Roll (কাত)</div>
+                      <div className="text-[10px] text-muted-foreground uppercase">{language === "bn" ? "হেলন" : language === "hi" ? "झुकाव" : "Roll"}</div>
                       <div className="text-sm font-bold text-ink-900">{scanResult.head_pose.roll}°</div>
                     </div>
                   </div>
@@ -910,15 +899,15 @@ function Reading({
               <div className="grid grid-cols-2 gap-2">
                 <div className="bg-cream-100/70 p-3 rounded-xl border border-ink-900/5">
                   <span className="text-[10px] text-muted-foreground uppercase block">
-                    {language === "bn" ? "শার্পনেস / ফোকাস" : language === "hi" ? "शार्पनेस / फोकस" : "Sharpness Score"}
+                    {language === "bn" ? "স্পষ্টতা" : language === "hi" ? "स्पष्टता" : "Clarity"}
                   </span>
                   <span className="text-sm font-bold text-ink-900">
-                    {scanResult.quality_checks.blur_score.toFixed(1)} / 100+
+                    {scanResult.quality_checks.blur_score.toFixed(1)} / 100
                   </span>
                 </div>
                 <div className="bg-cream-100/70 p-3 rounded-xl border border-ink-900/5">
                   <span className="text-[10px] text-muted-foreground uppercase block">
-                    {language === "bn" ? "মুখের ফ্রেম কভারেজ" : language === "hi" ? "फेस फ्रेम कवरेज" : "Face Frame Coverage"}
+                    {language === "bn" ? "ফ্রেমের অনুপাত" : language === "hi" ? "फ्रेम अनुपात" : "Frame Coverage"}
                   </span>
                   <span className="text-sm font-bold text-ink-900">
                     {scanResult.quality_checks.face_coverage_pct >= 1
