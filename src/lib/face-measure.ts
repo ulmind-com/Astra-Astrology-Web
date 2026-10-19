@@ -282,7 +282,9 @@ export async function getLandmarker(): Promise<FaceLandmarker> {
 export async function getVideoLandmarker(): Promise<FaceLandmarker> {
   if (!landmarkerVideoPromise) {
     landmarkerVideoPromise = (async () => {
-      const { FaceLandmarker, FilesetResolver } = await import("@mediapipe/tasks-vision");
+      const visionPkg = await import("@mediapipe/tasks-vision");
+      cachedVisionPackage = visionPkg;
+      const { FaceLandmarker, FilesetResolver } = visionPkg;
       const vision = await FilesetResolver.forVisionTasks(
         "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.1/wasm",
       );
@@ -332,8 +334,8 @@ export async function measureImage(
 
 /**
  * Lightweight live-frame result for the real-time feedback loop.
- * Returns face detected status, quality score, warning, and bounding box
- * so the UI can show alignment feedback without running the full measurement.
+ * Returns face detected status, quality score, warning, bounding box,
+ * and 3D landmarks for real-time mesh rendering.
  */
 export type LiveFaceStatus = {
   detected: boolean;
@@ -341,13 +343,15 @@ export type LiveFaceStatus = {
   warning: string | null;
   /** Normalised bounding box of the detected face [0–1]. */
   bbox: { x: number; y: number; w: number; h: number } | null;
+  /** Complete 478 normalized 3D landmarks (x, y, z). */
+  landmarks: Pt[] | null;
 };
 
 let lastVideoTimestamp = 0;
 
 /**
  * Runs a single frame through the VIDEO-mode landmarker.
- * Returns a lightweight status suitable for a 10–15 fps feedback loop.
+ * Returns a lightweight status suitable for a 12–15 fps feedback loop.
  */
 export async function detectFromVideo(
   video: HTMLVideoElement,
@@ -363,7 +367,7 @@ export async function detectFromVideo(
   const faces = result.faceLandmarks ?? [];
 
   if (faces.length === 0) {
-    return { detected: false, quality: 0, warning: "No face found — position face in frame", bbox: null };
+    return { detected: false, quality: 0, warning: "No face found — position face in frame", bbox: null, landmarks: null };
   }
 
   const pts = faces[0] as Pt[];
@@ -382,5 +386,141 @@ export async function detectFromVideo(
     quality,
     warning,
     bbox: { x: minX, y: minY, w: maxX - minX, h: maxY - minY },
+    landmarks: pts,
   };
+}
+
+let cachedVisionPackage: any = null;
+
+/**
+ * Renders the live 3D facial landmark mesh, contours, pupil tracking,
+ * and glowing biometric anchor nodes continuously onto the overlay canvas.
+ * Highly optimized with single-path batching for 60fps performance.
+ */
+export async function drawLiveFaceMesh(
+  canvas: HTMLCanvasElement,
+  landmarks: Pt[],
+  isAligned: boolean,
+) {
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const w = canvas.width;
+  const h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  if (!landmarks || landmarks.length < 468) return;
+
+  if (!cachedVisionPackage) {
+    cachedVisionPackage = await import("@mediapipe/tasks-vision");
+  }
+  const { FaceLandmarker } = cachedVisionPackage;
+
+  // Futuristic biometric styling
+  const meshColor = isAligned ? "rgba(52, 211, 153, 0.35)" : "rgba(56, 189, 248, 0.28)";
+  const contourColor = isAligned ? "rgba(52, 211, 153, 0.95)" : "rgba(56, 189, 248, 0.88)";
+  const irisColor = "#fbbf24";
+  const anchorNodeColor = isAligned ? "#34d399" : "#fbbf24";
+  const anchorGlowColor = isAligned ? "rgba(52, 211, 153, 0.5)" : "rgba(251, 191, 36, 0.5)";
+
+  // 1. Full 3D Tesselation Mesh (Surface wireframe - batched for 60fps)
+  const tesselation = FaceLandmarker.FACE_LANDMARKS_TESSELATION;
+  if (tesselation && tesselation.length > 0) {
+    ctx.strokeStyle = meshColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let i = 0; i < tesselation.length; i++) {
+      const conn = tesselation[i];
+      const p1 = landmarks[conn.start];
+      const p2 = landmarks[conn.end];
+      if (p1 && p2) {
+        ctx.moveTo(p1.x * w, p1.y * h);
+        ctx.lineTo(p2.x * w, p2.y * h);
+      }
+    }
+    ctx.stroke();
+  }
+
+  // 2. Anatomical Contours (Face oval, brows, eyes, nose, lips)
+  const contours = FaceLandmarker.FACE_LANDMARKS_CONTOURS;
+  if (contours && contours.length > 0) {
+    ctx.strokeStyle = contourColor;
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    for (let i = 0; i < contours.length; i++) {
+      const conn = contours[i];
+      const p1 = landmarks[conn.start];
+      const p2 = landmarks[conn.end];
+      if (p1 && p2) {
+        ctx.moveTo(p1.x * w, p1.y * h);
+        ctx.lineTo(p2.x * w, p2.y * h);
+      }
+    }
+    ctx.stroke();
+  }
+
+  // 3. Iris / Pupil Tracking Circles
+  const irisConn = [
+    ...(FaceLandmarker.FACE_LANDMARKS_RIGHT_IRIS || []),
+    ...(FaceLandmarker.FACE_LANDMARKS_LEFT_IRIS || []),
+  ];
+  if (irisConn.length > 0) {
+    ctx.strokeStyle = irisColor;
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    for (let i = 0; i < irisConn.length; i++) {
+      const conn = irisConn[i];
+      const p1 = landmarks[conn.start];
+      const p2 = landmarks[conn.end];
+      if (p1 && p2) {
+        ctx.moveTo(p1.x * w, p1.y * h);
+        ctx.lineTo(p2.x * w, p2.y * h);
+      }
+    }
+    ctx.stroke();
+  }
+
+  // 4. Subtle surface micro-nodes across vertices (batched)
+  ctx.fillStyle = isAligned ? "rgba(52, 211, 153, 0.75)" : "rgba(56, 189, 248, 0.65)";
+  ctx.beginPath();
+  for (let i = 0; i < landmarks.length; i += 3) {
+    const pt = landmarks[i];
+    const px = pt.x * w;
+    const py = pt.y * h;
+    ctx.moveTo(px + 1.2, py);
+    ctx.arc(px, py, 1.2, 0, 2 * Math.PI);
+  }
+  ctx.fill();
+
+  // 5. Primary Vedic Anthropometric Anchor Nodes (Glowing Dual-Ring Markers)
+  const keyNodes = [
+    P.foreheadTop, P.chinBottom, P.cheekRight, P.cheekLeft,
+    P.rEyeOuter, P.rEyeInner, P.lEyeInner, P.lEyeOuter,
+    P.noseBridgeTop, P.noseTip, P.noseBase,
+    P.mouthRight, P.mouthLeft, P.lipTop, P.lipBottom,
+    P.rBrowPeak, P.lBrowPeak, 468, 473,
+  ];
+
+  ctx.save();
+  for (const idx of keyNodes) {
+    if (idx < landmarks.length) {
+      const pt = landmarks[idx];
+      const px = pt.x * w;
+      const py = pt.y * h;
+
+      // Outer glow halo
+      ctx.beginPath();
+      ctx.arc(px, py, 5, 0, 2 * Math.PI);
+      ctx.fillStyle = anchorGlowColor;
+      ctx.fill();
+
+      // Solid core point
+      ctx.beginPath();
+      ctx.arc(px, py, 2.2, 0, 2 * Math.PI);
+      ctx.fillStyle = anchorNodeColor;
+      ctx.fill();
+    }
+  }
+  ctx.restore();
 }

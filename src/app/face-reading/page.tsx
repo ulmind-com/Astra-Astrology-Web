@@ -39,6 +39,7 @@ import { faceReadingApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import {
   detectFromVideo,
+  drawLiveFaceMesh,
   type LiveFaceStatus,
 } from "@/lib/face-measure";
 import {
@@ -216,11 +217,13 @@ function Capture({
   const ui = I18N_UI[language];
 
   const videoRef = React.useRef<HTMLVideoElement>(null);
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const fileRef = React.useRef<HTMLInputElement>(null);
   const streamRef = React.useRef<MediaStream | null>(null);
   const animFrameRef = React.useRef<number>(0);
   const holdStartRef = React.useRef<number>(0);
   const capturingRef = React.useRef(false);
+  const autoStartedRef = React.useRef(false);
 
   const [live, setLive] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -242,6 +245,10 @@ function Capture({
     setFaceStatus(null);
     setHoldProgress(0);
     holdStartRef.current = 0;
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext("2d");
+      ctx?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    }
   }, []);
 
   React.useEffect(() => stopCamera, [stopCamera]);
@@ -277,7 +284,7 @@ function Capture({
     }, "image/jpeg", 0.95);
   }, [onMeasuring, stopCamera, onScanImage, onCancelled]);
 
-  // Real-time alignment loop
+  // Real-time alignment & 3D facial mesh rendering loop
   const runDetectionLoop = React.useCallback(() => {
     let lastDetect = 0;
 
@@ -299,6 +306,26 @@ function Capture({
         if (capturingRef.current) return;
 
         setFaceStatus(status);
+
+        // Continuously render 3D facial mesh markings on the mirrored canvas
+        if (canvasRef.current && videoRef.current) {
+          const vW = videoRef.current.videoWidth || 640;
+          const vH = videoRef.current.videoHeight || 480;
+          if (canvasRef.current.width !== vW || canvasRef.current.height !== vH) {
+            canvasRef.current.width = vW;
+            canvasRef.current.height = vH;
+          }
+
+          if (status.landmarks) {
+            const isCurrentlyAligned = Boolean(
+              status.detected && status.quality >= GOOD_QUALITY && !status.warning,
+            );
+            await drawLiveFaceMesh(canvasRef.current, status.landmarks, isCurrentlyAligned);
+          } else {
+            const ctx = canvasRef.current.getContext("2d");
+            ctx?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+          }
+        }
 
         if (status.detected && status.quality >= GOOD_QUALITY && !status.warning) {
           // Face is well-aligned — advance hold countdown
@@ -327,7 +354,7 @@ function Capture({
     animFrameRef.current = requestAnimationFrame(loop);
   }, [doCapture]);
 
-  async function startCamera() {
+  const startCamera = React.useCallback(async () => {
     setError(null);
     try {
       setModelLoading(true);
@@ -338,18 +365,30 @@ function Capture({
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+        await videoRef.current.play().catch(() => {});
       }
       setLive(true);
       runDetectionLoop();
     } catch {
       setError(
-        "Could not access camera. Please allow camera permission, or upload a clear frontal photo below.",
+        language === "bn"
+          ? "ক্যামেরা এক্সেস করা যায়নি। অনুগ্রহ করে ব্রাউজারে ক্যামেরা পারমিশন দিন, অথবা নিচে ছবি আপলোড করুন।"
+          : language === "hi"
+          ? "कैमरा ऐक्सेस नहीं हो सका। कृपया ब्राउज़र में कैमरा अनुमति दें, या नीचे फोटो अपलोड करें।"
+          : "Could not access camera. Please allow camera permission in your browser, or upload a photo below.",
       );
     } finally {
       setModelLoading(false);
     }
-  }
+  }, [language, runDetectionLoop]);
+
+  // Auto-start camera when the page opens so user sees live face & 3D markings immediately
+  React.useEffect(() => {
+    if (!autoStartedRef.current) {
+      autoStartedRef.current = true;
+      startCamera();
+    }
+  }, [startCamera]);
 
   function onFile(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -390,6 +429,15 @@ function Capture({
           muted
           className={cn(
             "size-full object-cover transition-opacity duration-300 -scale-x-100",
+            live ? "opacity-100" : "opacity-0",
+          )}
+        />
+
+        {/* Live 3D Facial Mesh & Biometric Wireframe Canvas */}
+        <canvas
+          ref={canvasRef}
+          className={cn(
+            "pointer-events-none absolute inset-0 size-full object-cover -scale-x-100 z-[15] transition-opacity duration-200",
             live ? "opacity-100" : "opacity-0",
           )}
         />
@@ -482,10 +530,14 @@ function Capture({
         {!live && (
           <div className="flex size-full flex-col items-center justify-center gap-3 p-6 text-center text-cream-200">
             <span className="rounded-full bg-white/10 p-4 backdrop-blur-sm">
-              <Camera className="size-8 text-cream-100" />
+              {modelLoading ? (
+                <Loader2 className="size-8 text-amber-400 animate-spin" />
+              ) : (
+                <Camera className="size-8 text-cream-100" />
+              )}
             </span>
             <p className="max-w-xs text-xs text-cream-200/80 leading-relaxed">
-              {ui.cameraReady}
+              {modelLoading ? ui.cameraStarting : ui.cameraReady}
             </p>
           </div>
         )}
