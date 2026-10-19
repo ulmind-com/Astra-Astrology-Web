@@ -1,13 +1,15 @@
 "use client";
 
-import { LogOut, Menu, Sparkles, User, X } from "lucide-react";
+import { Coins, LogOut, Menu, Sparkles, User, Wallet, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 
 import { Avatar, Button } from "@/components/ui";
 import { useAuth } from "@/providers/auth-provider";
+import { useWallet } from "@/hooks/use-wallet";
 import { cn } from "@/lib/utils";
+import { formatCoins } from "@/types";
 
 const LINKS = [
   { href: "/astrologers", label: "Astrologers" },
@@ -20,6 +22,8 @@ const LINKS = [
 export function SiteHeader() {
   const pathname = usePathname();
   const { user, isSignedIn, signOut } = useAuth();
+  const { data: walletData } = useWallet(Boolean(isSignedIn));
+  const coinsBalance = walletData?.wallet?.balance_coins;
   const [open, setOpen] = React.useState(false);
 
   React.useEffect(() => setOpen(false), [pathname]);
@@ -70,12 +74,32 @@ export function SiteHeader() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:gap-2.5">
             {isSignedIn ? (
               <>
+                {/* Quick Wallet Button - Visible on Desktop & Mobile */}
+                <Link
+                  href="/account/wallet"
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-full border transition-all duration-200",
+                    "border-brand-400/50 bg-brand-100/80 hover:bg-brand-200/90 text-brand-950 font-bold",
+                    "px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs shadow-2xs hover:shadow-soft active:scale-95",
+                  )}
+                  title="My Wallet & Coin Balance"
+                  aria-label="Wallet"
+                >
+                  <Coins className="size-3.5 text-brand-800" />
+                  <span className="tabular-nums font-bold">
+                    {coinsBalance !== undefined ? formatCoins(coinsBalance) : "—"}
+                  </span>
+                  <span className="hidden sm:inline text-[11px] font-medium text-ink-700">
+                    coins
+                  </span>
+                </Link>
+
                 <Link
                   href="/account"
-                  className="flex items-center gap-2 rounded-full p-0.5 hover:ring-2 hover:ring-brand-400 transition-all"
+                  className="flex items-center gap-2 rounded-full p-0.5 hover:ring-2 hover:ring-brand-400 transition-all shrink-0"
                   aria-label="My account"
                 >
                   <Avatar src={user?.avatar_url} name={user?.full_name} size="sm" />
@@ -132,9 +156,10 @@ export function SiteHeader() {
                 <Link
                   href="/account/wallet"
                   onClick={() => setOpen(false)}
-                  className="shrink-0 rounded-lg bg-brand-300/80 px-2.5 py-1 text-xs font-bold text-ink-950 hover:bg-brand-400 transition-colors"
+                  className="shrink-0 flex items-center gap-1.5 rounded-xl bg-brand-300 px-3 py-1.5 text-xs font-bold text-ink-950 hover:bg-brand-400 transition-colors shadow-2xs"
                 >
-                  Wallet
+                  <Coins className="size-3.5 text-brand-800" />
+                  <span>{coinsBalance !== undefined ? `${formatCoins(coinsBalance)} coins` : "Wallet"}</span>
                 </Link>
               </div>
             )}
@@ -169,6 +194,18 @@ export function SiteHeader() {
                       className="flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm font-semibold hover:bg-surface-muted transition-colors text-ink-800"
                     >
                       <User className="size-4 text-brand-700" /> My Account & Settings
+                    </Link>
+                    <Link
+                      href="/account/wallet"
+                      onClick={() => setOpen(false)}
+                      className="flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold hover:bg-surface-muted transition-colors text-ink-800"
+                    >
+                      <span className="flex items-center gap-2.5">
+                        <Wallet className="size-4 text-brand-700" /> Wallet & Recharge
+                      </span>
+                      <span className="text-xs font-bold text-brand-900 bg-brand-200/80 px-2.5 py-0.5 rounded-full tabular-nums">
+                        {coinsBalance !== undefined ? `${formatCoins(coinsBalance)} coins` : "Recharge"}
+                      </span>
                     </Link>
                     <button
                       onClick={() => {

@@ -48,8 +48,12 @@ function loadCheckout(): Promise<void> {
   });
 }
 
-export function useWallet() {
-  return useQuery({ queryKey: WALLET_KEY, queryFn: walletApi.summary });
+export function useWallet(enabled = true) {
+  return useQuery({
+    queryKey: WALLET_KEY,
+    queryFn: walletApi.summary,
+    enabled,
+  });
 }
 
 export function useRechargeOptions() {
