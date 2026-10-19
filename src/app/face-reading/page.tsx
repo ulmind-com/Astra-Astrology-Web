@@ -2,24 +2,7 @@
 
 /**
  * Face reading — with real-time biometric alignment guidance, progress ring,
- * laser scanline animation, and auto-capture.
- *
- * Flow:
- * 1. User opens camera → live mirrored feed inside a biometric oval guide.
- * 2. Visual guide lines indicate:
- *    - Eye level guideline ("── Eye Level ──")
- *    - Center vertical alignment axis
- *    - Chin placement curve
- * 3. Every ~80ms we run a lightweight face detection (VIDEO mode) and provide:
- *    - Real-time status: "Look straight", "Move closer", "Keep head level", etc.
- *    - Dynamic border color: White (searching) → Amber (adjusting) → Radiant Green (aligned).
- *    - Animated green laser scan beam across the face.
- *    - Real-time circular progress ring (0% → 100%) as the face remains aligned.
- * 4. When quality ≥ 0.60 for ~1.2s straight, auto-capture snaps the frame with
- *    a camera flash effect, calculates Samudrik Shastra proportions, and submits.
- * 5. While reading, an immersive Vedic analysis view with step-by-step progress
- *    is displayed.
- * 6. Privacy: Photo is processed client-side only — only ~20 ratios are transmitted.
+ * laser scanline animation, auto-capture, and multi-language support (English, বাংলা, हिंदी).
  */
 
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -27,6 +10,7 @@ import {
   Camera,
   Check,
   CheckCircle2,
+  Globe,
   Loader2,
   RefreshCw,
   ScanFace,
@@ -51,6 +35,11 @@ import {
   type MeasureResult,
   type LiveFaceStatus,
 } from "@/lib/face-measure";
+import {
+  type FaceReadingLanguage,
+  I18N_UI,
+  translateReadingSection,
+} from "@/lib/face-reading-i18n";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 import type { FaceReading } from "@/types";
@@ -68,6 +57,9 @@ export default function FaceReadingPage() {
   const { isSignedIn } = useAuth();
   const [stage, setStage] = React.useState<Stage>("intro");
   const [reading, setReading] = React.useState<FaceReading | null>(null);
+  const [language, setLanguage] = React.useState<FaceReadingLanguage>("bn");
+
+  const ui = I18N_UI[language];
 
   const { data: availability, isLoading } = useQuery({
     queryKey: ["face-reading", "availability"],
@@ -95,13 +87,35 @@ export default function FaceReadingPage() {
           <span className="medallion mx-auto flex size-16 items-center justify-center rounded-full shadow-glow">
             <ScanFace className="size-8 text-brand-900" />
           </span>
-          <h1 className="mt-5 font-display text-3xl font-semibold tracking-tight">
-            Samudrik Shastra Face Reading
+          <h1 className="mt-5 font-display text-3xl font-semibold tracking-tight text-ink-950">
+            {ui.title}
           </h1>
           <p className="mx-auto mt-3 max-w-lg text-muted-foreground text-sm leading-relaxed">
-            Ancient Vedic physiognomy reads your character, strengths, and destiny in the
-            classical proportions of your forehead, eyes, nose, lips, and jawline.
+            {ui.subtitle}
           </p>
+
+          {/* Language Selector Bar */}
+          <div className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-cream-200/80 p-1.5 border border-ink-900/10 shadow-sm backdrop-blur-sm">
+            <span className="text-[11px] font-medium text-ink-700 pl-2 pr-1 flex items-center gap-1">
+              <Globe className="size-3.5 text-brand-800" />
+              {ui.langLabel}:
+            </span>
+            {(["bn", "hi", "en"] as const).map((l) => (
+              <button
+                key={l}
+                type="button"
+                onClick={() => setLanguage(l)}
+                className={cn(
+                  "rounded-full px-3 py-1 text-xs font-semibold transition-all duration-200 cursor-pointer",
+                  language === l
+                    ? "bg-white text-ink-950 shadow-sm border border-brand-300"
+                    : "text-ink-700/80 hover:text-ink-950 hover:bg-white/50",
+                )}
+              >
+                {l === "bn" ? "বাংলা" : l === "hi" ? "हिंदी" : "English"}
+              </button>
+            ))}
+          </div>
         </header>
 
         {!isSignedIn ? (
@@ -118,11 +132,19 @@ export default function FaceReadingPage() {
             Face reading is not available at the moment.
           </Alert>
         ) : stage === "reading" && reading ? (
-          <Reading reading={reading} onAgain={() => { setReading(null); setStage("intro"); }} />
+          <Reading
+            reading={reading}
+            language={language}
+            onAgain={() => {
+              setReading(null);
+              setStage("intro");
+            }}
+          />
         ) : stage === "measuring" || submit.isPending ? (
-          <MeasuringView />
+          <MeasuringView language={language} />
         ) : (
           <Capture
+            language={language}
             coins={availability.coins}
             canAfford={availability.can_afford}
             balance={availability.balance_coins}
@@ -140,6 +162,7 @@ export default function FaceReadingPage() {
 
 /* --------------------------------------------------------------- capture */
 function Capture({
+  language,
   coins,
   canAfford,
   balance,
@@ -148,6 +171,7 @@ function Capture({
   onMeasured,
   onCancelled,
 }: {
+  language: FaceReadingLanguage;
   coins: number;
   canAfford: boolean;
   balance: number;
@@ -156,6 +180,8 @@ function Capture({
   onMeasured: (m: MeasureResult) => void;
   onCancelled: () => void;
 }) {
+  const ui = I18N_UI[language];
+
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const fileRef = React.useRef<HTMLInputElement>(null);
   const streamRef = React.useRef<MediaStream | null>(null);
@@ -341,42 +367,48 @@ function Capture({
     }
   }
 
-  // Visual cues derived from live detector
+  // Visual cues derived from live detector translated to current language
   const guideState = React.useMemo(() => {
     if (!faceStatus) {
       return {
         color: "border-white/40 shadow-[0_0_15px_rgba(255,255,255,0.15)]",
-        hint: "Position your face inside the oval",
+        hint: ui.posInOval,
         tone: "neutral" as const,
       };
     }
     if (!faceStatus.detected) {
       return {
         color: "border-amber-400/80 shadow-[0_0_20px_rgba(251,191,36,0.3)]",
-        hint: "Move your face into the frame",
+        hint: ui.moveIntoFrame,
         tone: "warn" as const,
       };
     }
     if (faceStatus.warning) {
+      let warningText = faceStatus.warning;
+      if (warningText.includes("turned")) warningText = ui.lookStraight;
+      else if (warningText.includes("tilted")) warningText = ui.headTilted;
+      else if (warningText.includes("closer")) warningText = ui.tooFar;
+      else if (warningText.includes("back")) warningText = ui.tooClose;
+
       return {
         color: "border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.45)]",
-        hint: faceStatus.warning,
+        hint: warningText,
         tone: "warn" as const,
       };
     }
     if (holdProgress < 1) {
       return {
         color: "border-emerald-400 shadow-[0_0_30px_rgba(52,211,153,0.6)]",
-        hint: `Aligned! Hold still (${Math.round(holdProgress * 100)}%)`,
+        hint: `${ui.alignedHold} (${Math.round(holdProgress * 100)}%)`,
         tone: "good" as const,
       };
     }
     return {
       color: "border-emerald-300 shadow-[0_0_35px_rgba(110,231,183,0.8)]",
-      hint: "Face Captured!",
+      hint: ui.faceCaptured,
       tone: "good" as const,
     };
-  }, [faceStatus, holdProgress]);
+  }, [faceStatus, holdProgress, ui]);
 
   // Progress ring calculations
   const ringRadius = 42;
@@ -409,9 +441,9 @@ function Capture({
               <span className="flex size-16 items-center justify-center rounded-full bg-white/10 backdrop-blur-md">
                 <Camera className="size-8 text-brand-300" />
               </span>
-              <p className="font-display font-medium text-lg">Align your face for Vedic analysis</p>
+              <p className="font-display font-medium text-lg">{ui.title}</p>
               <p className="max-w-xs text-xs text-cream-200/80 leading-relaxed">
-                Look straight at the camera with even lighting. Remove glasses and keep hair off your forehead for highest precision.
+                {ui.subtitle}
               </p>
             </div>
           )}
@@ -426,7 +458,7 @@ function Capture({
               <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-20">
                 <span className="flex items-center gap-1.5 rounded-full bg-ink-950/70 px-3 py-1 text-[11px] font-medium text-white/90 backdrop-blur-md border border-white/10">
                   <span className="size-2 rounded-full bg-emerald-400 animate-ping" />
-                  AI Vision Active
+                  {ui.aiActive}
                 </span>
                 {faceStatus?.detected && (
                   <span
@@ -437,7 +469,7 @@ function Capture({
                         : "bg-amber-500/20 text-amber-300 border-amber-500/40",
                     )}
                   >
-                    {Math.round((faceStatus.quality ?? 0) * 100)}% Aligned
+                    {Math.round((faceStatus.quality ?? 0) * 100)}% {ui.aligned}
                   </span>
                 )}
               </div>
@@ -453,7 +485,7 @@ function Capture({
                 <div className="absolute top-[38%] left-0 right-0 flex items-center justify-center">
                   <div className="w-full border-t border-dashed border-white/30" />
                   <span className="absolute bg-ink-950/60 px-2.5 py-0.5 rounded-full text-[10px] font-medium tracking-wider text-white/75 backdrop-blur-sm uppercase">
-                    Eye Level
+                    {ui.eyeLevel}
                   </span>
                 </div>
 
@@ -463,7 +495,7 @@ function Capture({
                 {/* Chin Placement Guideline */}
                 <div className="absolute bottom-[8%] left-0 right-0 flex justify-center">
                   <span className="rounded-full bg-ink-950/60 px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider text-white/70 backdrop-blur-sm border border-white/10">
-                    Chin Position
+                    {ui.chinPos}
                   </span>
                 </div>
 
@@ -515,7 +547,7 @@ function Capture({
                         </text>
                       </svg>
                       <span className="mt-1 text-[11px] font-semibold tracking-wider text-emerald-300 uppercase animate-pulse">
-                        Scanning…
+                        {ui.scanning}
                       </span>
                     </div>
                   </div>
@@ -562,10 +594,10 @@ function Capture({
                 className="flex-1 shadow-glow"
               >
                 <ScanFace className="size-4" />
-                Capture now
+                {ui.captureNow}
               </Button>
               <Button variant="secondary" onClick={stopCamera} disabled={busy}>
-                Cancel
+                {ui.cancel}
               </Button>
             </>
           ) : (
@@ -577,7 +609,7 @@ function Capture({
                 className="flex-1 shadow-glow"
               >
                 <Camera className="size-4" />
-                Start Camera Scan
+                {ui.startCamera}
               </Button>
               <Button
                 variant="secondary"
@@ -585,7 +617,7 @@ function Capture({
                 disabled={busy}
               >
                 <Upload className="size-4" />
-                Upload a Photo
+                {ui.uploadPhoto}
               </Button>
               <input
                 ref={fileRef}
@@ -615,34 +647,36 @@ function Capture({
       <div className="card-surface p-5 text-sm space-y-3">
         <div className="flex items-center gap-2 font-semibold text-ink-900">
           <UserCheck className="size-4 text-emerald-600" />
-          How to get the most accurate scan
+          {ui.tipsTitle}
         </div>
         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
           <li className="flex items-start gap-1.5">
             <CheckCircle2 className="size-3.5 text-brand-600 mt-0.5 shrink-0" />
-            <span>Look directly at the camera at eye level.</span>
+            <span>{ui.tip1}</span>
           </li>
           <li className="flex items-start gap-1.5">
             <CheckCircle2 className="size-3.5 text-brand-600 mt-0.5 shrink-0" />
-            <span>Ensure soft, even lighting without harsh shadows.</span>
+            <span>{ui.tip2}</span>
           </li>
           <li className="flex items-start gap-1.5">
             <CheckCircle2 className="size-3.5 text-brand-600 mt-0.5 shrink-0" />
-            <span>Keep your hair away from your forehead and eyebrows.</span>
+            <span>{ui.tip3}</span>
           </li>
           <li className="flex items-start gap-1.5">
             <CheckCircle2 className="size-3.5 text-brand-600 mt-0.5 shrink-0" />
-            <span>Maintain a neutral facial expression while holding still.</span>
+            <span>{ui.tip4}</span>
           </li>
         </ul>
 
         <div className="pt-2 border-t border-ink-900/10 flex items-center justify-between text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <Check className="size-3.5 text-emerald-600" />
-            Zero image storage — 100% processed on your device
+            {ui.privacyNote}
           </span>
           {coins > 0 && (
-            <span>Cost: <strong className="text-foreground">{coins} coins</strong></span>
+            <span>
+              {ui.costLabel} <strong className="text-foreground">{coins} {ui.coins}</strong>
+            </span>
           )}
         </div>
       </div>
@@ -651,14 +685,10 @@ function Capture({
 }
 
 /* --------------------------------------------------------------- measuring animation view */
-function MeasuringView() {
+function MeasuringView({ language }: { language: FaceReadingLanguage }) {
+  const ui = I18N_UI[language];
   const [stepIndex, setStepIndex] = React.useState(0);
-  const steps = [
-    "Mapping 478 high-precision facial coordinates…",
-    "Calculating forehead, eye, and jawline proportions…",
-    "Cross-referencing Vedic Samudrik Shastra treatises…",
-    "Synthesizing your personalized character & destiny report…",
-  ];
+  const steps = [ui.step1, ui.step2, ui.step3, ui.step4];
 
   React.useEffect(() => {
     const t1 = setTimeout(() => setStepIndex(1), 700);
@@ -682,7 +712,7 @@ function MeasuringView() {
 
       <div>
         <h2 className="font-display text-2xl font-semibold tracking-tight text-ink-950">
-          Analyzing Vedic Facial Proportions
+          {ui.measuringTitle}
         </h2>
         <p className="mt-2 text-sm text-brand-700 font-medium">
           {steps[stepIndex]}
@@ -714,46 +744,62 @@ function MeasuringView() {
 }
 
 /* --------------------------------------------------------------- reading results */
-function Reading({ reading, onAgain }: { reading: FaceReading; onAgain: () => void }) {
+function Reading({
+  reading,
+  language,
+  onAgain,
+}: {
+  reading: FaceReading;
+  language: FaceReadingLanguage;
+  onAgain: () => void;
+}) {
+  const ui = I18N_UI[language];
+
   return (
     <div className="mt-8 space-y-5">
       <div className="card-glow rounded-2xl p-6 text-center space-y-2">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-800">
           <Sparkles className="size-3.5" />
-          {Math.round(reading.quality * 100)}% Scan Precision
+          {Math.round(reading.quality * 100)}% {ui.scanPrecision}
         </span>
-        <h2 className="font-display text-2xl font-bold tracking-tight">Your Vedic Physiognomy Analysis</h2>
+        <h2 className="font-display text-2xl font-bold tracking-tight text-ink-950">
+          {ui.resultsTitle}
+        </h2>
         <p className="text-sm text-muted-foreground">
-          {reading.sections.length} facial features decoded
-          {reading.coins_charged > 0 && ` · ${reading.coins_charged} coins debited`}
+          {reading.sections.length} {ui.featuresDecoded}
+          {reading.coins_charged > 0 && ` · ${reading.coins_charged} ${ui.coinsDebited}`}
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4">
-        {reading.sections.map((section, i) => (
-          <article
-            key={`${section.feature}-${section.option}-${i}`}
-            className="card-surface p-6 rounded-2xl border border-ink-900/10 shadow-soft hover:shadow-lift transition-shadow"
-          >
-            <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-ink-900/5 pb-3">
-              <h3 className="font-display text-lg font-semibold text-ink-950">{section.label}</h3>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-brand-700 bg-brand-50 px-2.5 py-1 rounded-md">
-                {section.feature_label}
-                {section.area ? ` · ${section.area}` : ""}
-              </span>
-            </div>
-            <p className="mt-3 leading-relaxed text-sm text-ink-700">{section.meaning}</p>
-          </article>
-        ))}
+        {reading.sections.map((section, i) => {
+          const tr = translateReadingSection(section, language);
+
+          return (
+            <article
+              key={`${section.feature}-${section.option}-${i}`}
+              className="card-surface p-6 rounded-2xl border border-ink-900/10 shadow-soft hover:shadow-lift transition-shadow"
+            >
+              <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-ink-900/5 pb-3">
+                <h3 className="font-display text-lg font-semibold text-ink-950">{tr.label}</h3>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-brand-700 bg-brand-50 px-2.5 py-1 rounded-md">
+                  {tr.featureLabel}
+                  {tr.areaLabel ? ` · ${tr.areaLabel}` : ""}
+                </span>
+              </div>
+              <p className="mt-3 leading-relaxed text-sm text-ink-700">{tr.meaning}</p>
+            </article>
+          );
+        })}
       </div>
 
       <p className="px-2 text-center text-xs leading-relaxed text-muted-foreground">
-        Samudrik Shastra is a revered traditional system of character reading offered here for personal self-reflection.
+        {ui.disclaimer}
       </p>
 
       <Button variant="secondary" onClick={onAgain} className="w-full">
         <RefreshCw className="size-4" />
-        Read Another Face
+        {ui.readAnother}
       </Button>
     </div>
   );

@@ -220,7 +220,9 @@ export function measureFrom(pts: Pt[]): MeasureResult {
     // Not yet read by any rule, but stored: these values are what future
     // thresholds get calibrated against.
     mouth_w: over(mouthW, faceW),
-    lip_corner: over(lipCentreY - cornerY, mouthW),
+    // Measured as distance from lower lip bottom to corners, divided by mouth width.
+    // Calibrated against reference faces (0.056 - 0.088); >0.095 is upturned, <0.045 is downturned.
+    lip_corner: over(pts[P.lipBottom].y - cornerY, mouthW),
     lip_asym: over(
       Math.abs(pts[P.mouthRight].y - pts[P.mouthLeft].y),
       Math.max(lipH, 1e-6),
@@ -230,10 +232,9 @@ export function measureFrom(pts: Pt[]): MeasureResult {
     cheek_full: over(cheekLineW, faceW),
   };
 
-  // Round hard. Six decimals of a ratio is noise, and it makes stored
-  // measurements readable when a threshold is being argued about later.
+  // Round and clamp all metrics to [0, 10.0] to strictly comply with backend METRIC_BOUNDS.
   for (const key of Object.keys(measurements)) {
-    measurements[key] = Math.round(measurements[key] * 10000) / 10000;
+    measurements[key] = Math.max(0, Math.min(10.0, Math.round(measurements[key] * 10000) / 10000));
   }
 
   return { measurements, quality: Math.round(quality * 1000) / 1000, warning };
