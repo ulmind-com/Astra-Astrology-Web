@@ -111,24 +111,33 @@ export function assessPose(pts: Pt[]): { quality: number; warning: string | null
   const faceW = dist(pts[P.cheekRight], pts[P.cheekLeft]);
   if (faceW <= 0) return { quality: 0, warning: "No face was found in that photo." };
 
-  const centre = mid(pts[P.cheekRight], pts[P.cheekLeft]);
-  const yaw = Math.abs(pts[P.noseTip].x - centre.x) / faceW;
+  // Midline estimate using cheek and outer eye centers for robust stability
+  const cheekMidX = (pts[P.cheekRight].x + pts[P.cheekLeft].x) / 2;
+  const eyeMidX = (pts[P.rEyeOuter].x + pts[P.lEyeOuter].x) / 2;
+  const midX = (cheekMidX + eyeMidX) / 2;
+  const yaw = Math.abs(pts[P.noseTip].x - midX) / faceW;
 
   const eyeR = pts[P.rEyeOuter];
   const eyeL = pts[P.lEyeOuter];
   const roll = Math.abs(eyeL.y - eyeR.y) / Math.max(dist(eyeR, eyeL), 1e-6);
 
-  // Divisors: yaw 0.15 means a yaw offset of 15% of face width scores zero;
-  // roll 0.25 means a 25% tilt of the inter-eye distance scores zero.
-  // These are generous enough for a typical webcam selfie while still
-  // rejecting obviously turned or tilted faces.
-  const yawScore = Math.max(0, 1 - yaw / 0.15);
+  // Height of face for distance / framing guidance
+  const faceH = dist(pts[P.foreheadTop], pts[P.chinBottom]);
+
+  // Scaled scores: 0.18 for yaw and 0.25 for roll provide natural webcam tolerance
+  const yawScore = Math.max(0, 1 - yaw / 0.18);
   const rollScore = Math.max(0, 1 - roll / 0.25);
-  const quality = Math.min(yawScore, rollScore);
+  let quality = Math.min(yawScore, rollScore);
 
   let warning: string | null = null;
-  if (yawScore < rollScore && yawScore < 0.55) {
-    warning = "Your head is turned to one side. Look straight at the camera.";
+  if (faceH < 0.22) {
+    warning = "Move closer to the camera.";
+    quality = Math.min(quality, 0.45);
+  } else if (faceH > 0.88) {
+    warning = "Move slightly back from the camera.";
+    quality = Math.min(quality, 0.45);
+  } else if (yawScore < rollScore && yawScore < 0.55) {
+    warning = "Your head is turned. Look straight at the camera.";
   } else if (rollScore < 0.55) {
     warning = "Your head is tilted. Keep it level.";
   }
@@ -242,15 +251,27 @@ export async function getLandmarker(): Promise<FaceLandmarker> {
       const vision = await FilesetResolver.forVisionTasks(
         "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.1/wasm",
       );
-      return FaceLandmarker.createFromOptions(vision, {
-        baseOptions: {
-          modelAssetPath:
-            "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-          delegate: "GPU",
-        },
-        runningMode: "IMAGE",
-        numFaces: 1,
-      });
+      try {
+        return await FaceLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath:
+              "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+            delegate: "GPU",
+          },
+          runningMode: "IMAGE",
+          numFaces: 1,
+        });
+      } catch {
+        return await FaceLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath:
+              "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+            delegate: "CPU",
+          },
+          runningMode: "IMAGE",
+          numFaces: 1,
+        });
+      }
     })();
   }
   return landmarkerImagePromise;
@@ -264,15 +285,27 @@ export async function getVideoLandmarker(): Promise<FaceLandmarker> {
       const vision = await FilesetResolver.forVisionTasks(
         "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.1/wasm",
       );
-      return FaceLandmarker.createFromOptions(vision, {
-        baseOptions: {
-          modelAssetPath:
-            "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-          delegate: "GPU",
-        },
-        runningMode: "VIDEO",
-        numFaces: 1,
-      });
+      try {
+        return await FaceLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath:
+              "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+            delegate: "GPU",
+          },
+          runningMode: "VIDEO",
+          numFaces: 1,
+        });
+      } catch {
+        return await FaceLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath:
+              "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+            delegate: "CPU",
+          },
+          runningMode: "VIDEO",
+          numFaces: 1,
+        });
+      }
     })();
   }
   return landmarkerVideoPromise;
@@ -309,6 +342,8 @@ export type LiveFaceStatus = {
   bbox: { x: number; y: number; w: number; h: number } | null;
 };
 
+let lastVideoTimestamp = 0;
+
 /**
  * Runs a single frame through the VIDEO-mode landmarker.
  * Returns a lightweight status suitable for a 10–15 fps feedback loop.
@@ -318,11 +353,16 @@ export async function detectFromVideo(
   timestampMs: number,
 ): Promise<LiveFaceStatus> {
   const landmarker = await getVideoLandmarker();
-  const result = landmarker.detectForVideo(video, timestampMs);
+
+  // MediaPipe requires strictly monotonically increasing timestamps for VIDEO mode
+  const safeTimestamp = Math.max(timestampMs, lastVideoTimestamp + 1);
+  lastVideoTimestamp = safeTimestamp;
+
+  const result = landmarker.detectForVideo(video, safeTimestamp);
   const faces = result.faceLandmarks ?? [];
 
   if (faces.length === 0) {
-    return { detected: false, quality: 0, warning: "No face found — move into frame.", bbox: null };
+    return { detected: false, quality: 0, warning: "No face found — position face in frame", bbox: null };
   }
 
   const pts = faces[0] as Pt[];

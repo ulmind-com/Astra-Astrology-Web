@@ -369,6 +369,25 @@
   .animate-float-slow {
     animation: float-slow 11s ease-in-out infinite;
   }
+
+  @keyframes scanline {
+    0% { top: 8%; opacity: 0.2; }
+    50% { top: 88%; opacity: 0.9; }
+    100% { top: 8%; opacity: 0.2; }
+  }
+
+  .animate-scanline {
+    animation: scanline 2.2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.03); opacity: 1; }
+  }
+
+  .animate-pulse-ring {
+    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
