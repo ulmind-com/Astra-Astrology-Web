@@ -221,7 +221,7 @@ export default function BookAppointmentPage() {
             {/* ------------------------------------------------------- day */}
             <section className="mt-8">
               <h2 className="font-display text-lg font-semibold">Pick a day</h2>
-              <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
+              <div className="mt-3 flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none">
                 {days.map(({ key, date }) => {
                   const active = key === dayKey;
                   return (

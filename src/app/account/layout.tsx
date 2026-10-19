@@ -35,7 +35,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
         ) : (
           <div className="grid gap-8 md:grid-cols-[210px_1fr]">
             <nav className="md:sticky md:top-24 md:self-start">
-              <ul className="flex gap-1 overflow-x-auto pb-2 md:flex-col md:overflow-visible md:pb-0">
+              <ul className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0 md:flex-col md:overflow-visible md:pb-0">
                 {NAV.map((item) => {
                   const active = pathname === item.href;
                   return (
@@ -44,13 +44,13 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
                         href={item.href}
                         aria-current={active ? "page" : undefined}
                         className={cn(
-                          "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                          "flex items-center gap-2 rounded-full md:rounded-lg px-3.5 py-2 md:py-2.5 text-xs sm:text-sm font-medium transition-all whitespace-nowrap",
                           active
-                            ? "bg-brand-300 text-brand-950"
-                            : "text-muted-foreground hover:bg-surface-muted hover:text-foreground",
+                            ? "bg-brand-300 text-brand-950 font-semibold shadow-2xs border border-brand-400/40"
+                            : "bg-surface/80 border border-border/40 text-muted-foreground hover:bg-surface-muted hover:text-foreground",
                         )}
                       >
-                        <item.icon className="size-4" />
+                        <item.icon className="size-4 shrink-0" />
                         {item.label}
                       </Link>
                     </li>

@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Poppins } from "next/font/google";
 import { Toaster } from "sonner";
 
+import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { ReviewPrompt } from "@/components/reviews/review-prompt";
 import { AuthProvider } from "@/providers/auth-provider";
 import { QueryProvider } from "@/providers/query-provider";
@@ -18,6 +19,13 @@ const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#fff8d9",
+};
 
 export const metadata: Metadata = {
   title: {
@@ -36,21 +44,22 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning className={`${poppins.variable} ${geistMono.variable} h-full`}>
-      <body className="min-h-full">
+      <body className="min-h-full pb-20 md:pb-0">
         <ThemeProvider>
           <QueryProvider>
             <RealtimeProvider>
-            <AuthProvider signInPath="/login">
-              {children}
-              <ReviewPrompt />
-              <Toaster
-                theme="light"
-                position="top-center"
-                richColors
-                closeButton
-                toastOptions={{ className: "font-sans" }}
-              />
-            </AuthProvider>
+              <AuthProvider signInPath="/login">
+                {children}
+                <ReviewPrompt />
+                <MobileBottomNav />
+                <Toaster
+                  theme="light"
+                  position="top-center"
+                  richColors
+                  closeButton
+                  toastOptions={{ className: "font-sans" }}
+                />
+              </AuthProvider>
             </RealtimeProvider>
           </QueryProvider>
         </ThemeProvider>

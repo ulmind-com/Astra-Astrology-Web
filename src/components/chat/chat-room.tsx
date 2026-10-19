@@ -321,7 +321,7 @@ export function ChatRoom({
             e.preventDefault();
             void submit();
           }}
-          className="flex items-end gap-2 border-t border-border bg-surface p-2.5 sm:p-3"
+          className="flex items-end gap-2 border-t border-border bg-surface px-2.5 pt-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] sm:p-3"
         >
           <textarea
             ref={boxRef}
@@ -331,7 +331,7 @@ export function ChatRoom({
             placeholder="Write a message…"
             rows={1}
             maxLength={4000}
-            className="max-h-32 min-h-11 flex-1 resize-none rounded-2xl border border-border bg-surface-muted/60 px-4 py-2.5 text-sm leading-relaxed outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-brand-500/50"
+            className="max-h-32 min-h-11 flex-1 resize-none rounded-2xl border border-border bg-surface-muted/60 px-4 py-2.5 text-base sm:text-sm leading-relaxed outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-brand-500/50"
           />
           <button
             type="submit"

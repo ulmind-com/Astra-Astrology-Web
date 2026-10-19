@@ -46,42 +46,41 @@ import {
 function TransactionRow({ txn }: { txn: WalletTransaction }) {
   const isCredit = txn.direction === "credit";
   return (
-    <li className="flex items-center gap-3 border-b border-border px-5 py-3.5 last:border-0">
+    <li className="flex items-center gap-2.5 sm:gap-3 border-b border-border px-3.5 sm:px-5 py-3 sm:py-3.5 last:border-0">
       <span
         className={cn(
-          "flex size-9 shrink-0 items-center justify-center rounded-full",
+          "flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-full",
           isCredit ? "bg-success-surface text-success" : "bg-warning-surface text-warning",
         )}
       >
         {isCredit ? (
-          <ArrowDownLeft className="size-4" />
+          <ArrowDownLeft className="size-3.5 sm:size-4" />
         ) : (
-          <ArrowUpRight className="size-4" />
+          <ArrowUpRight className="size-3.5 sm:size-4" />
         )}
       </span>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">
+        <p className="truncate text-xs sm:text-sm font-medium">
           {txn.note ?? TRANSACTION_REASON_LABELS[txn.reason]}
         </p>
-        <p className="text-xs text-muted-foreground">
-          {formatDateTime(txn.created_at)} · {TRANSACTION_REASON_LABELS[txn.reason]}
-          {/* Only on rows where money actually changed hands. */}
+        <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
+          {formatDateTime(txn.created_at)}
           {txn.amount_paise != null && ` · paid ${formatPaise(txn.amount_paise)}`}
         </p>
       </div>
 
-      <div className="text-right">
+      <div className="shrink-0 text-right">
         <p
           className={cn(
-            "text-sm font-semibold tabular-nums",
+            "text-xs sm:text-sm font-semibold tabular-nums",
             isCredit ? "text-success" : "text-foreground",
           )}
         >
           {isCredit ? "+" : "−"}
           {formatCoins(txn.amount_coins)}
         </p>
-        <p className="text-xs text-muted-foreground tabular-nums">
+        <p className="text-[11px] sm:text-xs text-muted-foreground tabular-nums">
           {formatCoins(txn.balance_after_coins)} left
         </p>
       </div>
@@ -235,7 +234,7 @@ export default function WalletPage() {
                   ))}
                 </div>
 
-                <form onSubmit={rechargeCustom} className="flex flex-wrap items-end gap-3">
+                <form onSubmit={rechargeCustom} className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
                   <Field
                     label="Or another amount"
                     error={customError ?? undefined}
@@ -246,7 +245,7 @@ export default function WalletPage() {
                           ? `Whole rupees, ${formatPaise(options.min_paise)} or more`
                           : "Whole rupees"
                     }
-                    className="flex-1 min-w-48"
+                    className="flex-1 min-w-0 sm:min-w-48"
                   >
                     <Input
                       type="number"
@@ -260,7 +259,7 @@ export default function WalletPage() {
                       disabled={isBusy}
                     />
                   </Field>
-                  <Button type="submit" disabled={isBusy}>
+                  <Button type="submit" disabled={isBusy} className="w-full sm:w-auto h-11 sm:h-10">
                     {isBusy && <Loader2 className="size-4 animate-spin" />}
                     {state === "verifying" ? "Confirming…" : "Add money"}
                   </Button>

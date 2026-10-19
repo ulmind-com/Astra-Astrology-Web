@@ -386,7 +386,7 @@ function Capture({
   const isAligned = Boolean(faceStatus?.detected && faceStatus.quality >= GOOD_QUALITY && !faceStatus.warning);
 
   return (
-    <div className="card-surface mt-8 space-y-6 p-6 sm:p-8 rounded-2xl border border-ink-900/10 shadow-soft">
+    <div className="card-surface mt-6 sm:mt-8 space-y-5 sm:space-y-6 p-4 sm:p-8 rounded-2xl border border-ink-900/10 shadow-soft">
       {error && (
         <Alert tone="error" className="text-left">
           {error}
@@ -394,7 +394,7 @@ function Capture({
       )}
 
       {/* Camera Live View or Idle Placeholder */}
-      <div className="relative mx-auto aspect-[4/3] max-w-md overflow-hidden rounded-2xl bg-ink-950 border-2 border-ink-900/20 shadow-inner">
+      <div className="relative mx-auto aspect-[3/4] sm:aspect-[4/3] max-w-sm sm:max-w-md overflow-hidden rounded-2xl bg-ink-950 border-2 border-ink-900/20 shadow-inner">
         {/* Flash overlay */}
         <div
           className={cn(
@@ -434,7 +434,7 @@ function Capture({
           <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center p-4">
             <div
               className={cn(
-                "relative aspect-[3/4] w-48 sm:w-56 rounded-[50%] border-2 transition-all duration-300",
+                "relative aspect-[3/4] w-44 sm:w-56 rounded-[50%] border-2 transition-all duration-300",
                 isAligned
                   ? "border-emerald-400 shadow-[0_0_25px_rgba(52,211,153,0.55)] scale-[1.02]"
                   : faceStatus?.detected
@@ -793,7 +793,7 @@ function Reading({
   return (
     <div className="mt-8 space-y-6">
       {/* Top Header Card */}
-      <div className="card-glow rounded-2xl p-6 text-center space-y-3">
+      <div className="card-glow rounded-2xl p-4 sm:p-6 text-center space-y-3">
         <div className="inline-flex items-center gap-2 flex-wrap justify-center">
           <span
             className={cn(
@@ -808,10 +808,10 @@ function Reading({
           </span>
         </div>
 
-        <h2 className="font-display text-2xl font-bold tracking-tight text-ink-950">
+        <h2 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-ink-950">
           {ui.resultsTitle}
         </h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs sm:text-sm text-muted-foreground">
           {groupedFeatures.length}{" "}
           {language === "bn"
             ? "টি প্রধান অঙ্গের বৈদিক সমুদ্রিক বিশ্লেষণ"
@@ -822,12 +822,12 @@ function Reading({
         </p>
 
         {/* View Mode Switcher */}
-        <div className="inline-flex items-center gap-1 rounded-full bg-cream-200/70 p-1 border border-ink-900/10 text-xs mt-1">
+        <div className="inline-flex flex-col sm:flex-row items-stretch sm:items-center gap-1 rounded-2xl sm:rounded-full bg-cream-200/70 p-1 border border-ink-900/10 text-xs mt-1 w-full sm:w-auto">
           <button
             type="button"
             onClick={() => setViewMode("grouped")}
             className={cn(
-              "rounded-full px-3 py-1 font-semibold transition-all cursor-pointer",
+              "rounded-xl sm:rounded-full px-3 py-1.5 sm:py-1 font-semibold transition-all cursor-pointer text-center",
               viewMode === "grouped"
                 ? "bg-white text-ink-950 shadow-sm"
                 : "text-ink-700/80 hover:text-ink-950",
@@ -839,7 +839,7 @@ function Reading({
             type="button"
             onClick={() => setViewMode("primary")}
             className={cn(
-              "rounded-full px-3 py-1 font-semibold transition-all cursor-pointer",
+              "rounded-xl sm:rounded-full px-3 py-1.5 sm:py-1 font-semibold transition-all cursor-pointer text-center",
               viewMode === "primary"
                 ? "bg-white text-ink-950 shadow-sm"
                 : "text-ink-700/80 hover:text-ink-950",

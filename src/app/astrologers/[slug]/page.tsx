@@ -94,9 +94,8 @@ export default function AstrologerDetailPage() {
           </Alert>
         ) : astrologer ? (
           <article className="grid gap-6 lg:grid-cols-3">
-            {/* ------------------------------------------------- main */}
-            <div className="space-y-5 lg:col-span-2">
-              {/* Profile hero card */}
+            {/* 1. Profile hero card (spans 2 cols on desktop) */}
+            <div className="lg:col-span-2">
               <div className="card-surface overflow-hidden">
                 {/* Gradient top strip based on online status */}
                 <div className={cn(
@@ -107,7 +106,7 @@ export default function AstrologerDetailPage() {
                     ? "bg-gradient-to-r from-transparent via-gold-400 to-transparent"
                     : "bg-gradient-to-r from-transparent via-brand-400/40 to-transparent",
                 )} />
-                <div className="flex flex-col gap-5 p-6 sm:flex-row sm:items-start">
+                <div className="flex flex-col gap-5 p-5 sm:p-6 sm:flex-row sm:items-start">
                   <div className="relative shrink-0">
                     <div className="ring-2 ring-brand-500/30 rounded-full">
                       <Avatar
@@ -126,7 +125,7 @@ export default function AstrologerDetailPage() {
 
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
+                      <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-foreground">
                         {astrologer.display_name}
                       </h1>
                       {astrologer.is_featured && <Badge tone="gold">✦ Featured</Badge>}
@@ -148,34 +147,34 @@ export default function AstrologerDetailPage() {
                     </div>
 
                     {astrologer.tagline && (
-                      <p className="mt-1.5 leading-relaxed text-muted-foreground">{astrologer.tagline}</p>
+                      <p className="mt-1.5 text-sm sm:text-base leading-relaxed text-muted-foreground">{astrologer.tagline}</p>
                     )}
 
                     {/* Stats pills */}
-                    <div className="mt-4 flex flex-wrap gap-2.5 text-sm">
+                    <div className="mt-4 flex flex-wrap gap-2 text-xs sm:text-sm">
                       {astrologer.rating.count > 0 && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-gold-100 px-3 py-1 border border-gold-400/40">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-gold-100 px-2.5 py-1 sm:px-3 border border-gold-400/40">
                           <Star className="size-3.5 fill-gold-500 text-gold-600" />
                           <span className="font-semibold text-gold-600">{astrologer.rating.average.toFixed(1)}</span>
-                          <span className="text-muted-foreground text-xs">({formatNumber(astrologer.rating.count)})</span>
+                          <span className="text-muted-foreground text-[11px] sm:text-xs">({formatNumber(astrologer.rating.count)})</span>
                         </span>
                       )}
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-3 py-1 border border-brand-500/30">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-2.5 py-1 sm:px-3 border border-brand-500/30">
                         <Award className="size-3.5 text-brand-700" />
                         <span className="font-semibold text-foreground">{astrologer.experience_years}</span>
-                        <span className="text-muted-foreground text-xs">yrs exp</span>
+                        <span className="text-muted-foreground text-[11px] sm:text-xs">yrs exp</span>
                       </span>
                       {astrologer.total_consultations > 0 && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-3 py-1 border border-brand-500/30">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-2.5 py-1 sm:px-3 border border-brand-500/30">
                           <Sparkles className="size-3.5 text-brand-700" />
                           <span className="font-semibold text-foreground">{formatNumber(astrologer.total_consultations)}</span>
-                          <span className="text-muted-foreground text-xs">consults</span>
+                          <span className="text-muted-foreground text-[11px] sm:text-xs">consults</span>
                         </span>
                       )}
                     </div>
 
                     {astrologer.languages.length > 0 && (
-                      <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                      <p className="mt-3 flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
                         <Languages className="size-3.5 shrink-0 text-brand-700" />
                         <span>{astrologer.languages.join(" · ")}</span>
                       </p>
@@ -183,7 +182,25 @@ export default function AstrologerDetailPage() {
                   </div>
                 </div>
               </div>
+            </div>
 
+            {/* 2. Consultation options (Right on desktop, right below hero on mobile) */}
+            <aside className="lg:col-span-1 lg:row-span-2 lg:sticky lg:top-24 lg:self-start">
+              <Card className="border-brand-500/30 shadow-soft">
+                <CardHeader>
+                  <CardTitle className="text-base sm:text-lg">Start a consultation</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">
+                    Connect instantly via live chat, audio, or video.
+                  </CardDescription>
+                </CardHeader>
+                <CardBody className="space-y-3 pt-0">
+                  <ConsultationOptions astrologer={astrologer} />
+                </CardBody>
+              </Card>
+            </aside>
+
+            {/* 3. Main details: Specialities, Bio, Qualifications, Reviews, Gallery */}
+            <div className="space-y-5 lg:col-span-2">
               {astrologer.skills.length > 0 && (
                 <Card>
                   <CardHeader>
@@ -273,18 +290,6 @@ export default function AstrologerDetailPage() {
                 </Card>
               )}
             </div>
-
-            {/* ------------------------------------------------ aside */}
-            <aside className="lg:sticky lg:top-24 lg:self-start">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Start a consultation</CardTitle>
-                </CardHeader>
-                <CardBody className="space-y-3 pt-0">
-                  <ConsultationOptions astrologer={astrologer} />
-                </CardBody>
-              </Card>
-            </aside>
           </article>
         ) : null}
       </main>
