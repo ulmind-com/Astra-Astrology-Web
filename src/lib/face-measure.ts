@@ -100,8 +100,14 @@ export type MeasureResult = {
  * measured. Yaw is estimated from how far the nose tip sits from the midpoint
  * of the cheekbones, relative to face width; roll from the tilt of the eye
  * line.
+ *
+ * Thresholds are deliberately generous. The original 0.09 yaw divisor meant
+ * even a 5° head turn scored zero — people sitting in front of a webcam
+ * almost never hit that, because the camera angle itself adds offset. Now
+ * 0.15 for yaw and 0.25 for roll give a natural tolerance that still rejects
+ * obviously turned shots.
  */
-function assessPose(pts: Pt[]): { quality: number; warning: string | null } {
+export function assessPose(pts: Pt[]): { quality: number; warning: string | null } {
   const faceW = dist(pts[P.cheekRight], pts[P.cheekLeft]);
   if (faceW <= 0) return { quality: 0, warning: "No face was found in that photo." };
 
@@ -112,15 +118,18 @@ function assessPose(pts: Pt[]): { quality: number; warning: string | null } {
   const eyeL = pts[P.lEyeOuter];
   const roll = Math.abs(eyeL.y - eyeR.y) / Math.max(dist(eyeR, eyeL), 1e-6);
 
-  // Both scaled so a comfortably straight-on photo lands near 1.
-  const yawScore = Math.max(0, 1 - yaw / 0.09);
-  const rollScore = Math.max(0, 1 - roll / 0.18);
+  // Divisors: yaw 0.15 means a yaw offset of 15% of face width scores zero;
+  // roll 0.25 means a 25% tilt of the inter-eye distance scores zero.
+  // These are generous enough for a typical webcam selfie while still
+  // rejecting obviously turned or tilted faces.
+  const yawScore = Math.max(0, 1 - yaw / 0.15);
+  const rollScore = Math.max(0, 1 - roll / 0.25);
   const quality = Math.min(yawScore, rollScore);
 
   let warning: string | null = null;
-  if (yawScore < rollScore && yawScore < 0.75) {
+  if (yawScore < rollScore && yawScore < 0.55) {
     warning = "Your head is turned to one side. Look straight at the camera.";
-  } else if (rollScore < 0.75) {
+  } else if (rollScore < 0.55) {
     warning = "Your head is tilted. Keep it level.";
   }
   return { quality, warning };
@@ -222,12 +231,13 @@ export function measureFrom(pts: Pt[]): MeasureResult {
 }
 
 // --------------------------------------------------------------- the model
-let landmarkerPromise: Promise<FaceLandmarker> | null = null;
+let landmarkerImagePromise: Promise<FaceLandmarker> | null = null;
+let landmarkerVideoPromise: Promise<FaceLandmarker> | null = null;
 
-/** Loads the landmark model once. ~3 MB, fetched on first use only. */
+/** Loads the IMAGE-mode landmark model once. ~3 MB, fetched on first use only. */
 export async function getLandmarker(): Promise<FaceLandmarker> {
-  if (!landmarkerPromise) {
-    landmarkerPromise = (async () => {
+  if (!landmarkerImagePromise) {
+    landmarkerImagePromise = (async () => {
       const { FaceLandmarker, FilesetResolver } = await import("@mediapipe/tasks-vision");
       const vision = await FilesetResolver.forVisionTasks(
         "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.1/wasm",
@@ -243,7 +253,29 @@ export async function getLandmarker(): Promise<FaceLandmarker> {
       });
     })();
   }
-  return landmarkerPromise;
+  return landmarkerImagePromise;
+}
+
+/** Loads a VIDEO-mode landmarker for real-time tracking. */
+export async function getVideoLandmarker(): Promise<FaceLandmarker> {
+  if (!landmarkerVideoPromise) {
+    landmarkerVideoPromise = (async () => {
+      const { FaceLandmarker, FilesetResolver } = await import("@mediapipe/tasks-vision");
+      const vision = await FilesetResolver.forVisionTasks(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.1.1/wasm",
+      );
+      return FaceLandmarker.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath:
+            "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+          delegate: "GPU",
+        },
+        runningMode: "VIDEO",
+        numFaces: 1,
+      });
+    })();
+  }
+  return landmarkerVideoPromise;
 }
 
 export class NoFaceError extends Error {
@@ -262,4 +294,52 @@ export async function measureImage(
   const faces = result.faceLandmarks ?? [];
   if (faces.length === 0) throw new NoFaceError();
   return measureFrom(faces[0] as Pt[]);
+}
+
+/**
+ * Lightweight live-frame result for the real-time feedback loop.
+ * Returns face detected status, quality score, warning, and bounding box
+ * so the UI can show alignment feedback without running the full measurement.
+ */
+export type LiveFaceStatus = {
+  detected: boolean;
+  quality: number;
+  warning: string | null;
+  /** Normalised bounding box of the detected face [0–1]. */
+  bbox: { x: number; y: number; w: number; h: number } | null;
+};
+
+/**
+ * Runs a single frame through the VIDEO-mode landmarker.
+ * Returns a lightweight status suitable for a 10–15 fps feedback loop.
+ */
+export async function detectFromVideo(
+  video: HTMLVideoElement,
+  timestampMs: number,
+): Promise<LiveFaceStatus> {
+  const landmarker = await getVideoLandmarker();
+  const result = landmarker.detectForVideo(video, timestampMs);
+  const faces = result.faceLandmarks ?? [];
+
+  if (faces.length === 0) {
+    return { detected: false, quality: 0, warning: "No face found — move into frame.", bbox: null };
+  }
+
+  const pts = faces[0] as Pt[];
+  const { quality, warning } = assessPose(pts);
+
+  // Compute a rough bounding box from the face width/height landmarks.
+  const xs = [pts[P.cheekRight].x, pts[P.cheekLeft].x, pts[P.foreheadTop].x, pts[P.chinBottom].x];
+  const ys = [pts[P.cheekRight].y, pts[P.cheekLeft].y, pts[P.foreheadTop].y, pts[P.chinBottom].y];
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+  const minY = Math.min(...ys);
+  const maxY = Math.max(...ys);
+
+  return {
+    detected: true,
+    quality,
+    warning,
+    bbox: { x: minX, y: minY, w: maxX - minX, h: maxY - minY },
+  };
 }
