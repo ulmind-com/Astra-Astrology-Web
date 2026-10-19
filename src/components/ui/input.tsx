@@ -14,7 +14,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       ref={ref}
       aria-invalid={invalid || undefined}
       className={cn(
-        "h-[51px] w-full rounded-full border bg-surface px-5 text-base text-foreground",
+        "h-[51px] w-full max-w-full min-w-0 rounded-full border bg-surface px-5 text-base text-foreground",
         "placeholder:text-muted-foreground/70",
         "transition-colors disabled:cursor-not-allowed disabled:opacity-60",
         invalid ? "border-danger/60" : "border-border hover:border-border-strong",
@@ -34,7 +34,7 @@ export const Textarea = React.forwardRef<
     ref={ref}
     aria-invalid={invalid || undefined}
     className={cn(
-      "w-full rounded-2xl border bg-surface px-5 py-3.5 text-base text-foreground",
+      "w-full max-w-full min-w-0 rounded-2xl border bg-surface px-5 py-3.5 text-base text-foreground",
       "placeholder:text-muted-foreground/70 transition-colors disabled:opacity-60",
       invalid ? "border-danger/60" : "border-border hover:border-border-strong",
       className,
@@ -52,7 +52,7 @@ export const Select = React.forwardRef<
     ref={ref}
     aria-invalid={invalid || undefined}
     className={cn(
-      "h-[51px] w-full rounded-full border bg-surface px-5 text-base text-foreground",
+      "h-[51px] w-full max-w-full min-w-0 rounded-full border bg-surface px-5 text-base text-foreground",
       "transition-colors disabled:opacity-60",
       invalid ? "border-danger/60" : "border-border hover:border-border-strong",
       className,

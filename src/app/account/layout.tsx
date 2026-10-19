@@ -29,13 +29,13 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
     <>
       <SiteHeader />
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:py-10">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:py-10 min-w-0">
         {!ready ? (
           <LoadingBlock label="Checking your session…" />
         ) : (
-          <div className="grid gap-6 md:gap-8 md:grid-cols-[220px_1fr]">
-            <nav className="md:sticky md:top-24 md:self-start">
-              <div className="relative -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="flex flex-col md:grid md:grid-cols-[220px_1fr] gap-6 md:gap-8 min-w-0 w-full">
+            <nav className="w-full min-w-0 md:sticky md:top-24 md:self-start">
+              <div className="relative -mx-4 px-4 sm:mx-0 sm:px-0 overflow-hidden sm:overflow-visible">
                 <ul className="flex gap-2 overflow-x-auto pb-3 pt-1 scrollbar-none md:flex-col md:overflow-visible md:p-0 md:gap-1.5">
                   {NAV.map((item) => {
                     const active = pathname === item.href;
@@ -47,7 +47,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
                           className={cn(
                             "flex items-center gap-2.5 rounded-full md:rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium transition-all whitespace-nowrap",
                             active
-                              ? "bg-brand-300 text-brand-950 font-semibold shadow-soft border border-brand-400/60 ring-2 ring-brand-400/20"
+                              ? "bg-brand-300 text-brand-950 font-semibold shadow-soft border border-brand-400/60"
                               : "bg-surface border border-border/80 text-muted-foreground hover:border-border-strong hover:bg-surface-muted hover:text-foreground",
                           )}
                         >
@@ -61,7 +61,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
               </div>
             </nav>
 
-            <div className="min-w-0">{children}</div>
+            <div className="w-full min-w-0">{children}</div>
           </div>
         )}
       </main>

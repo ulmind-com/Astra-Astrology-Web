@@ -118,17 +118,16 @@ export default function ProfilePage() {
 
       {/* ------------------------------------------------------- picture */}
       <Card>
-        <CardBody className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-5">
+        <CardBody className="flex items-start gap-3.5 sm:gap-5">
           <div className="relative shrink-0">
-            <Avatar src={profile.avatar_url} name={profile.full_name} size="lg" className="sm:hidden" />
-            <Avatar src={profile.avatar_url} name={profile.full_name} size="xl" className="hidden sm:inline-flex" />
+            <Avatar src={profile.avatar_url} name={profile.full_name} size="lg" />
           </div>
 
           <div className="min-w-0 flex-1">
-            <p className="font-semibold text-foreground text-base sm:text-lg">{profile.full_name}</p>
+            <p className="font-semibold text-foreground text-base sm:text-lg truncate">{profile.full_name}</p>
             <p className="truncate text-xs sm:text-sm text-muted-foreground mt-0.5">{profile.email}</p>
 
-            <div className="mt-3.5 flex flex-wrap items-center justify-center sm:justify-start gap-2">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               <input
                 ref={fileRef}
                 type="file"
@@ -141,9 +140,9 @@ export default function ProfilePage() {
                 size="sm"
                 loading={uploading}
                 onClick={() => fileRef.current?.click()}
-                className="h-9 px-3.5 text-xs sm:text-sm"
+                className="h-8 sm:h-9 px-3 text-xs sm:text-sm"
               >
-                <Camera className="size-3.5 sm:size-4" />
+                <Camera className="size-3.5" />
                 {profile.avatar_url ? "Change picture" : "Upload picture"}
               </Button>
 
@@ -153,9 +152,9 @@ export default function ProfilePage() {
                   size="sm"
                   disabled={uploading}
                   onClick={removeAvatar}
-                  className="text-danger hover:bg-danger/15 h-9 px-3 text-xs sm:text-sm"
+                  className="text-danger hover:bg-danger/15 h-8 sm:h-9 px-2.5 text-xs sm:text-sm"
                 >
-                  <Trash2 className="size-3.5 sm:size-4" />
+                  <Trash2 className="size-3.5" />
                   Remove
                 </Button>
               )}
@@ -171,7 +170,7 @@ export default function ProfilePage() {
             <CardTitle>Your details</CardTitle>
           </CardHeader>
 
-          <CardBody className="grid gap-4 pt-0 sm:grid-cols-2">
+          <CardBody className="grid grid-cols-1 gap-4 pt-0 sm:grid-cols-2">
             <Field label="First name" htmlFor="first_name" required error={fieldErrors.first_name}>
               <Input
                 id="first_name"

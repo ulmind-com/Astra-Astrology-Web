@@ -6,7 +6,7 @@ export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElemen
   return (
     <div
       className={cn(
-        "card-surface overflow-hidden",
+        "card-surface overflow-hidden w-full min-w-0",
         className,
       )}
       {...props}
