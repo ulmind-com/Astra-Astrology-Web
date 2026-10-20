@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Clock,
   Compass,
+  ExternalLink,
   GraduationCap,
   Languages,
   MessageSquare,
@@ -119,9 +120,14 @@ function AppointmentsContent() {
   const { isSignedIn } = useAuth();
 
   // 1. Data fetching: Bookable astrologers
-  const { data: astrologersData, isLoading: loadingAstrologers } = useQuery({
+  const {
+    data: astrologersData,
+    isLoading: loadingAstrologers,
+    error: astrologersError,
+    refetch: refetchAstrologers,
+  } = useQuery({
     queryKey: ["astrologers", { appointments: true }],
-    queryFn: () => astrologerApi.list({ limit: 100 }),
+    queryFn: () => astrologerApi.list({ limit: 50 }),
   });
 
   const bookableAstrologers = React.useMemo(
@@ -195,11 +201,47 @@ function AppointmentsContent() {
 
   const pad = (n: number) => String(n).padStart(2, "0");
   const todayKey = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+
+  const tomorrow = React.useMemo(() => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + 1);
+    return d;
+  }, [today]);
+  const tomorrowKey = `${tomorrow.getFullYear()}-${pad(tomorrow.getMonth() + 1)}-${pad(tomorrow.getDate())}`;
+
+  const quickDays = React.useMemo(() => {
+    const list: { key: string; label: string; date: Date; isToday: boolean; isTomorrow: boolean }[] = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today);
+      d.setDate(d.getDate() + i);
+      const k = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+      const label =
+        i === 0
+          ? "Today"
+          : i === 1
+          ? "Tomorrow"
+          : d.toLocaleDateString("en-US", { weekday: "short", day: "numeric" });
+      list.push({ key: k, label, date: d, isToday: i === 0, isTomorrow: i === 1 });
+    }
+    return list;
+  }, [today]);
+
   const [selectedDayKey, setSelectedDayKey] = React.useState<string>(todayKey);
   const [selectedSlot, setSelectedSlot] = React.useState<Date | null>(null);
   const [minutes, setMinutes] = React.useState<number>(30);
   const [userNote, setUserNote] = React.useState("");
   const [isConfirmModalOpen, setIsConfirmModalOpen] = React.useState(false);
+
+  const handleSelectDay = (key: string) => {
+    setSelectedDayKey(key);
+    try {
+      const [y, m] = key.split("-").map(Number);
+      if (visibleMonth.getFullYear() !== y || visibleMonth.getMonth() !== m - 1) {
+        const vm = new Date(y, m - 1, 1);
+        setVisibleMonth(vm);
+      }
+    } catch {}
+  };
 
   // Sync minutes to astrologer's default slot duration if configured
   React.useEffect(() => {
@@ -464,6 +506,19 @@ function AppointmentsContent() {
                 <div className="rounded-2xl border border-border/80 bg-card p-6 animate-pulse h-96" />
               </div>
             </div>
+          ) : astrologersError ? (
+            <div className="rounded-3xl border border-red-500/20 bg-red-500/5 p-12 text-center my-8">
+              <AlertTriangle className="mx-auto size-12 text-red-500/80 mb-3" />
+              <h3 className="font-display text-lg font-bold text-foreground">Failed to load astrologers</h3>
+              <p className="mt-1 text-sm text-muted-foreground max-w-md mx-auto">
+                {(astrologersError as Error)?.message || "Something went wrong while fetching appointment availability."}
+              </p>
+              <div className="mt-5">
+                <Button size="sm" onClick={() => refetchAstrologers()}>
+                  Retry Loading
+                </Button>
+              </div>
+            </div>
           ) : bookableAstrologers.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-border bg-card p-12 text-center my-8">
               <CalendarDays className="mx-auto size-12 text-brand-600/70 mb-3" />
@@ -574,7 +629,7 @@ function AppointmentsContent() {
                             </div>
                           </div>
 
-                          <div className="mt-3.5">
+                          <div className="mt-3.5 flex items-center gap-2">
                             <button
                               type="button"
                               onClick={(e) => {
@@ -582,7 +637,7 @@ function AppointmentsContent() {
                                 handleSelectAstrologer(astrologer);
                               }}
                               className={cn(
-                                "w-full rounded-xl py-2 text-xs font-semibold transition-all duration-200 text-center shadow-2xs",
+                                "flex-1 rounded-xl py-2 text-xs font-semibold transition-all duration-200 text-center shadow-2xs",
                                 isSelected
                                   ? "bg-brand-600 text-white shadow-xs"
                                   : "bg-surface-muted text-foreground hover:bg-brand-600 hover:text-white border border-border/60",
@@ -590,6 +645,14 @@ function AppointmentsContent() {
                             >
                               {isSelected ? "Selected" : "Book an appointment"}
                             </button>
+                            <Link
+                              href={`/appointments/${astrologer.slug ?? astrologer.id}`}
+                              onClick={(e) => e.stopPropagation()}
+                              title="Open dedicated booking page"
+                              className="rounded-xl p-2 text-muted-foreground hover:text-brand-600 hover:bg-surface-muted border border-border/60 transition-all shrink-0"
+                            >
+                              <ExternalLink className="size-3.5" />
+                            </Link>
                           </div>
                         </div>
                       );
@@ -651,7 +714,7 @@ function AppointmentsContent() {
                         </div>
 
                         {/* Top-Right CTA */}
-                        <div className="shrink-0 self-end sm:self-center">
+                        <div className="shrink-0 self-end sm:self-center flex flex-col items-end gap-1.5">
                           <Button
                             size="sm"
                             onClick={() => {
@@ -663,6 +726,12 @@ function AppointmentsContent() {
                           >
                             Book an appointment
                           </Button>
+                          <Link
+                            href={`/appointments/${selectedAstrologer.slug ?? selectedAstrologer.id}`}
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-600 dark:text-brand-400 hover:underline"
+                          >
+                            Dedicated booking page <ExternalLink className="size-3" />
+                          </Link>
                         </div>
                       </div>
 
@@ -911,7 +980,7 @@ function AppointmentsContent() {
                               type="button"
                               disabled={isPast || !isCurrentMonth}
                               onClick={() => {
-                                setSelectedDayKey(key);
+                                handleSelectDay(key);
                               }}
                               className={cn(
                                 "relative flex size-8 sm:size-9 items-center justify-center mx-auto rounded-full text-xs font-medium transition-all",
@@ -926,6 +995,33 @@ function AppointmentsContent() {
                             </button>
                           );
                         })}
+                      </div>
+
+                      {/* Quick Upcoming Days Strip */}
+                      <div className="mt-4 pt-3 border-t border-border/60">
+                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                          Quick Date Select
+                        </p>
+                        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                          {quickDays.map((qd) => {
+                            const isSelected = qd.key === selectedDayKey;
+                            return (
+                              <button
+                                key={qd.key}
+                                type="button"
+                                onClick={() => handleSelectDay(qd.key)}
+                                className={cn(
+                                  "shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-semibold transition-all border shadow-2xs",
+                                  isSelected
+                                    ? "bg-brand-600 text-white border-brand-600 shadow-xs"
+                                    : "bg-surface-muted text-muted-foreground hover:text-foreground border-border/70 hover:border-brand-500/40",
+                                )}
+                              >
+                                {qd.label}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
 
@@ -954,14 +1050,28 @@ function AppointmentsContent() {
                           <LoadingBlock label="Checking available slots…" />
                         </div>
                       ) : availableSlots.length === 0 ? (
-                        <div className="rounded-xl border border-border/60 bg-surface-muted/30 p-5 text-center">
-                          <Clock className="mx-auto size-7 text-muted-foreground/70 mb-2" />
+                        <div className="rounded-xl border border-border/60 bg-surface-muted/30 p-5 text-center space-y-2">
+                          <Clock className="mx-auto size-7 text-muted-foreground/70 mb-1" />
                           <p className="text-xs font-semibold text-foreground">
-                            No slots available for this day
+                            No slots available on {selectedDateLabel}
                           </p>
-                          <p className="mt-1 text-[11px] text-muted-foreground">
-                            The astrologer has no open windows or all slots are taken. Please pick another date above.
+                          <p className="text-[11px] text-muted-foreground max-w-xs mx-auto">
+                            {selectedDayKey === todayKey
+                              ? "Today's consultation hours are closed or fully booked."
+                              : "The astrologer has no open availability windows on this date. Please pick another date above."}
                           </p>
+                          {selectedDayKey === todayKey && (
+                            <div className="pt-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleSelectDay(tomorrowKey)}
+                                className="text-xs font-semibold"
+                              >
+                                View Tomorrow&apos;s Slots ({tomorrow.toLocaleDateString("en-US", { month: "short", day: "numeric" })}) →
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-56 overflow-y-auto pr-1">
