@@ -79,16 +79,6 @@ export const endpoints = {
     rule: (id: string) => `/admin/face-reading/rules/${id}`,
   },
 
-  palmReading: {
-    availability: "/palm-reading/availability",
-    submit: "/palm-reading",
-    scan: "/palm-reading/scan",
-    mine: "/palm-reading/mine",
-    detail: (id: string) => `/palm-reading/${id}`,
-    rules: "/admin/palm-reading/rules",
-    rule: (id: string) => `/admin/palm-reading/rules/${id}`,
-  },
-
 
   reviews: {
     leave: "/reviews",

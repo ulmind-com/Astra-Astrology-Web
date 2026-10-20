@@ -7,9 +7,6 @@ import type {
   FaceReadingAvailability,
   FaceReading,
   FaceScanResponse,
-  PalmReadingAvailability,
-  PalmReading,
-  PalmScanResponse,
   ReviewPage,
 
   ReviewKind,
@@ -352,52 +349,5 @@ export const faceReadingApi = {
   mine: () => api.get<FaceReading[]>(endpoints.faceReading.mine),
 
   get: (id: string) => api.get<FaceReading>(endpoints.faceReading.detail(id)),
-};
-
-// ------------------------------------------------------------ palm reading
-export const palmReadingApi = {
-  /** Cost and availability check before starting camera. */
-  availability: () =>
-    api.get<PalmReadingAvailability>(endpoints.palmReading.availability),
-
-  /** Production 3D MediaPipe Hand Landmarker + OpenCV palm scanning pipeline */
-  scan: (
-    image: File | Blob | string,
-    options?: { gender?: string; hand?: string },
-  ) => {
-    if (typeof image === "string") {
-      return api.post<PalmScanResponse>(endpoints.palmReading.scan, {
-        image,
-        gender: options?.gender ?? "male",
-        hand: options?.hand ?? "auto",
-      });
-    }
-    const form = new FormData();
-    form.append("file", image, image instanceof File ? image.name : "palm_capture.jpg");
-    if (options?.gender) form.append("gender", options.gender);
-    if (options?.hand) form.append("hand", options.hand);
-    return apiFetch<PalmScanResponse>(endpoints.palmReading.scan, {
-      method: "POST",
-      body: form,
-    });
-  },
-
-  /** Sends measurements only. */
-  submit: (
-    measurements: Record<string, number>,
-    quality: number,
-    handScanned = "left",
-    gender = "male",
-  ) =>
-    api.post<PalmReading>(endpoints.palmReading.submit, {
-      measurements,
-      quality,
-      hand_scanned: handScanned,
-      gender,
-    }),
-
-  mine: () => api.get<PalmReading[]>(endpoints.palmReading.mine),
-
-  get: (id: string) => api.get<PalmReading>(endpoints.palmReading.detail(id)),
 };
 
