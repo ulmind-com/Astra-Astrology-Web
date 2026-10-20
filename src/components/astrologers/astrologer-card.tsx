@@ -78,7 +78,8 @@ export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic })
 
   const primarySkill = astrologer.skills[0];
   const remainingSkillsCount = Math.max(0, astrologer.skills.length - 1);
-  const bannerSrc = getAstrologerBanner(astrologer.id);
+  const hasCustomBanner = Boolean(astrologer.banner_image_url);
+  const bannerSrc = astrologer.banner_image_url || getAstrologerBanner(astrologer.id);
 
   return (
     <Link
@@ -97,6 +98,7 @@ export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic })
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          unoptimized={hasCustomBanner}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
 
