@@ -20,7 +20,7 @@ const BANNERS = [
   "/banners/banner-1.jpg",
 ];
 
-function getAstrologerBanner(id: string): string {
+export function getAstrologerBanner(id: string): string {
   let hash = 0;
   for (let i = 0; i < id.length; i++) {
     hash = (hash << 5) - hash + id.charCodeAt(i);
