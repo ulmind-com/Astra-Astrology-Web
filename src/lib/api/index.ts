@@ -13,6 +13,8 @@ import type {
   RashiCalculateResult,
   NakshatraCalculatePayload,
   NakshatraCalculateResult,
+  KPCalculatePayload,
+  KPCalculateResult,
 
   ReviewKind,
   Review,
@@ -367,6 +369,9 @@ export const astrologyApi = {
     api.post<NakshatraCalculateResult>(endpoints.astrology.nakshatra, body, { auth: false }),
 
   nakshatras: () => api.get<any[]>(endpoints.astrology.nakshatras, { auth: false }),
+
+  calculateKp: (body: KPCalculatePayload) =>
+    api.post<KPCalculateResult>(endpoints.astrology.kp, body, { auth: false }),
 
   geoSearch: (q: string) =>
     api.get<GeoSearchResult[]>(endpoints.astrology.geoSearch, {

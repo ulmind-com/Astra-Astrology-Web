@@ -237,3 +237,124 @@ export interface NakshatraCalculateResult {
   translations: Record<string, any>;
 }
 
+// =============================================================================
+// KP Astrology (Krishnamurti Paddhati) Types
+// =============================================================================
+
+export interface KPCalculatePayload {
+  name: string;
+  gender: "male" | "female" | "other";
+  day: number;
+  month: number;
+  year: number;
+  hour?: number;
+  minute?: number;
+  second?: number;
+  period?: "AM" | "PM" | "24H";
+  place: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  timezone: number;
+  ayanamsa?: AyanamsaType;
+  house_system?: HouseSystemType;
+  language?: AstrologyLanguage;
+}
+
+export interface KPPanchang {
+  julian_day: number;
+  ayanamsa_name: string;
+  ayanamsa_degrees: number;
+  house_system: string;
+  sunrise: string;
+  sunset: string;
+  tithi: string;
+  yoga: string;
+  karana: string;
+  day_name: string;
+  vedic_day_name: string;
+  balance_dasha: string;
+  ascendant_sign: string;
+  ascendant_lord: string;
+  ascendant_degree: number;
+  ascendant_degree_formatted: string;
+  moon_rashi: string;
+  moon_rashi_lord: string;
+  moon_nakshatra: string;
+  moon_nakshatra_lord: string;
+  moon_degree_formatted: string;
+}
+
+export interface KPRulingPlanets {
+  lagna_rashi_lord: string;
+  lagna_nakshatra_lord: string;
+  lagna_sub_lord: string;
+  moon_rashi_lord: string;
+  moon_nakshatra_lord: string;
+  moon_sub_lord: string;
+  day_lord: string;
+  date_formatted: string;
+  time_formatted: string;
+}
+
+export interface KPCuspDetail {
+  cusp: number;
+  longitude: number;
+  degree_formatted: string;
+  sign: string;
+  sign_index: number;
+  sign_lord: string;
+  star_lord: string;
+  sub_lord: string;
+}
+
+export interface KPPlanetDetail {
+  name: string;
+  symbol: string;
+  code: string;
+  longitude: number;
+  degree_in_sign: number;
+  degree_formatted: string;
+  sign: string;
+  sign_index: number;
+  nakshatra: string;
+  pada: number;
+  sign_lord: string;
+  star_lord: string;
+  sub_lord: string;
+  rashi_house: number;
+  bhav_house: number;
+  is_retrograde: boolean;
+}
+
+export interface KPDashaPeriod {
+  lord: string;
+  level: number;
+  start_date: string;
+  end_date: string;
+  duration: string;
+  is_current: boolean;
+  sub_periods?: KPDashaPeriod[];
+}
+
+export interface KPCalculateResult {
+  name: string;
+  gender: string;
+  birth_date_formatted: string;
+  birth_time_formatted: string;
+  birth_place: string;
+  latitude: number;
+  longitude: number;
+  timezone: number;
+
+  panchang: KPPanchang;
+  ruling_planets_dob: KPRulingPlanets;
+  ruling_planets_casting: KPRulingPlanets;
+  cusps: KPCuspDetail[];
+  planets: KPPlanetDetail[];
+  dashas: KPDashaPeriod[];
+
+  selected_language: AstrologyLanguage;
+  translations: Record<string, any>;
+}
+
+

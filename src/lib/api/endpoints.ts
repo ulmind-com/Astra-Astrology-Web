@@ -120,6 +120,7 @@ export const endpoints = {
     rashis: "/astrology/rashis",
     nakshatra: "/astrology/nakshatra",
     nakshatras: "/astrology/nakshatras",
+    kp: "/astrology/kp",
     geoSearch: "/astrology/geo-search",
   },
 } as const;

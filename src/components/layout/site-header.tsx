@@ -17,6 +17,7 @@ const LINKS = [
   { href: "/face-reading", label: "Face reading" },
   { href: "/rashi-calculator", label: "Rashi Calculator" },
   { href: "/nakshatra-calculator", label: "Nakshatra Calculator" },
+  { href: "/kp-calculator", label: "KP Astrology" },
   { href: "/#services", label: "Services" },
   { href: "/#how-it-works", label: "How it works" },
 ];
