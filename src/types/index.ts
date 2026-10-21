@@ -385,3 +385,4 @@ export type FaceScanResponse = {
   error_message: string | null;
 };
 
+export * from "./astrology";

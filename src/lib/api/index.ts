@@ -7,7 +7,10 @@ import type {
   FaceReadingAvailability,
   FaceReading,
   FaceScanResponse,
+  GeoSearchResult,
   ReviewPage,
+  RashiCalculatePayload,
+  RashiCalculateResult,
 
   ReviewKind,
   Review,
@@ -349,5 +352,19 @@ export const faceReadingApi = {
   mine: () => api.get<FaceReading[]>(endpoints.faceReading.mine),
 
   get: (id: string) => api.get<FaceReading>(endpoints.faceReading.detail(id)),
+};
+
+// -------------------------------------------------------------- astrology
+export const astrologyApi = {
+  calculateRashi: (body: RashiCalculatePayload) =>
+    api.post<RashiCalculateResult>(endpoints.astrology.rashi, body, { auth: false }),
+
+  rashis: () => api.get<any[]>(endpoints.astrology.rashis, { auth: false }),
+
+  geoSearch: (q: string) =>
+    api.get<GeoSearchResult[]>(endpoints.astrology.geoSearch, {
+      query: { q },
+      auth: false,
+    }),
 };
 

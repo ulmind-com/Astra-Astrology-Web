@@ -114,4 +114,10 @@ export const endpoints = {
     payments: "/admin/wallets/payments",
     paymentReconcile: (orderId: string) => `/admin/wallets/payments/${orderId}/reconcile`,
   },
+
+  astrology: {
+    rashi: "/astrology/rashi",
+    rashis: "/astrology/rashis",
+    geoSearch: "/astrology/geo-search",
+  },
 } as const;
