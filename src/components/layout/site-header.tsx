@@ -18,6 +18,7 @@ const LINKS = [
   { href: "/rashi-calculator", label: "Rashi Calculator" },
   { href: "/nakshatra-calculator", label: "Nakshatra Calculator" },
   { href: "/kp-calculator", label: "KP Astrology" },
+  { href: "/dasha-calculator", label: "Dasha Calculator" },
   { href: "/#services", label: "Services" },
   { href: "/#how-it-works", label: "How it works" },
 ];

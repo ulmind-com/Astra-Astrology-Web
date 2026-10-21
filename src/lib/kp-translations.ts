@@ -1287,4 +1287,93 @@ export const KP_LOCALIZED_DASHA_INSIGHTS: Record<
       gayatri_mantra: "ॐ बुधग्रहाय विद्महे इन्दुपुत्राय धीमहि तन्नो सौम्यः प्रचोदयात्",
     },
   },
+  Asc: {
+    en: {
+      overview:
+        "The Ascendant (Lagna) represents your vital force, personal identity, mental orientation, and life direction. It shapes how the world perceives you and how you initiate action.",
+      career_and_wealth:
+        "Leadership roles, independent ventures, personal branding, authority, and ventures built through individual merit and charisma.",
+      favorable_actions: [
+        "Focus on physical fitness, posture, and vital energy cultivation",
+        "Take self-initiative, proactive leadership, and decisive career steps",
+        "Align your daily routine with morning sunlight and mindful reflection",
+        "Lead with authentic integrity, courage, and clear vision",
+      ],
+      cautions_and_pitfalls: [
+        "Avoid aggressive egoism, stubborn pride, and intolerance towards others",
+        "Do not overexert without sufficient physical rest and hydration",
+        "Refrain from taking impulsive, uncalculated life gambles",
+        "Do not measure your self-worth solely through external validation",
+      ],
+      remedies: [
+        "Offer Arghya (pure water in a copper vessel) to the rising morning Sun",
+        "Chant the Maha Gayatri Mantra at sunrise: 'Om Bhur Bhuvah Svaha, Tat Savitur Varenyam...'",
+        "Apply a gentle sandalwood or kesar tilak on your forehead after bathing",
+        "Worship your Ishta Devata daily for spiritual grounding and vitality",
+      ],
+      lucky_day: "Sunday",
+      lucky_color: "Golden Yellow / Bright Amber",
+      deity: "Lord Surya / Ishta Devata",
+      beej_mantra: "Om Hreem Suryaya Namaha",
+      gayatri_mantra: "Om Bhur Bhuvah Svaha, Tat Savitur Varenyam, Bhargo Devasya Dheemahi, Dhiyo Yo Nah Prachodayat",
+    },
+    bn: {
+      overview:
+        "লগ্ন বা অ্যাসেন্ড্যান্ট আপনার শারীরিক জীবনীশক্তি, ব্যক্তিত্ব, আত্মপরিচয় এবং জীবনযাত্রার মূল চালিকাশক্তিকে নির্দেশ করে। এটি আপনার জীবনের সামগ্রিক ভিত্তি।",
+      career_and_wealth:
+        "ব্যক্তিগত নেতৃত্ব, নিজস্ব উদ্যোগ, স্বাধীন পেশা, প্রশাসনিক প্রভাব এবং নিজস্ব যোগ্যতায় অর্থনৈতিক প্রতিষ্ঠা।",
+      favorable_actions: [
+        "শারীরিক সুস্থতা, প্রাত্যহিক ব্যায়াম ও প্রাণায়ামে মনোনিবেশ করা",
+        "আত্মবিশ্বাস ও স্বাধীন সিদ্ধান্ত গ্রহণের মাধ্যমে নতুন কাজ শুরু করা",
+        "সকালের রোদ গায়ে লাগানো ও স্বাস্থ্যকর খাদ্যাভ্যাস গড়ে তোলা",
+        "সততা, ধৈর্য ও স্পষ্ট দূরদর্শিতার সাথে জীবন পরিচালনা করা",
+      ],
+      cautions_and_pitfalls: [
+        "অতিরিক্ত অহংকার, জেদ এবং অন্যের প্রতি অসহিষ্ণুতা এড়িয়ে চলুন",
+        "পর্যাপ্ত বিশ্রাম ছাড়া শরীরকে অতিরিক্ত ক্লান্ত করবেন না",
+        "হঠাৎ কোনো দীর্ঘমেয়াদী ঝুঁকিপূর্ণ সিদ্ধান্ত নেওয়া থেকে বিরত থাকুন",
+        "অন্যের প্রশংসার ওপর অতিরিক্ত নির্ভরশীল হবেন না",
+      ],
+      remedies: [
+        "প্রতিদিন সকালে তামার পাত্রে সূর্যদেবকে জল অর্পণ (সূর্য অর্ঘ্য) করুন",
+        "সকালে গায়ত্রী মন্ত্র জপ করুন: 'ওঁ ভূর্ভুবঃ স্বঃ তৎসবিতুর্বরেণ্যং ভর্গো দেবস্য ধীমহি ধিয়ো য়ো নঃ প্রচোদয়াৎ'",
+        "স্নানের পর কপালে চন্দন বা কেশরের ফোঁটা ধারণ করুন",
+        "ইষ্টদেবের স্মরণ ও পিতা-মাতাকে প্রণাম করে দিন শুরু করুন",
+      ],
+      lucky_day: "রবিবার",
+      lucky_color: "স্বর্ণালী হলুদ / উজ্জ্বল গেরুয়া",
+      deity: "ভগবান শ্রী সূর্যদেব / ইষ্ট দেবতা",
+      beej_mantra: "ওঁ হ্রীং সূর্যায় নমঃ",
+      gayatri_mantra: "ওঁ ভূর্ভুবঃ স্বঃ তৎসবিতুর্বরেণ্যং ভর্গো দেবস্য ধীমহি ধিয়ো য়ো নঃ প্রচোদয়াৎ",
+    },
+    hi: {
+      overview:
+        "लग्न (Ascendant) आपके शरीर, जीवन शक्ति, आत्मसम्मान, व्यक्तित्व और समग्र जीवन दिशा का प्रतीक है। यह आपकी आंतरिक ऊर्जा और संकल्प शक्ति को दर्शाता है।",
+      career_and_wealth:
+        "व्यक्तिगत नेतृत्व, स्वतंत्र व्यवसाय, प्रशासनिक प्रभाव, आत्म-प्रयास और प्रतिष्ठा में श्रेष्ठ सफलता।",
+      favorable_actions: [
+        "शारीरिक स्वास्थ्य, योग, प्राणायाम और नियमित दिनचर्या पर ध्यान दें",
+        "आत्मविश्वास और स्वतंत्र निर्णय क्षमता के साथ नए कार्य आरंभ करें",
+        "प्रातःकाल सूर्योदय के समय योग व ध्यान का अभ्यास करें",
+        "सच्चाई, स्पष्टता और दूरदर्शिता के साथ नेतृत्व करें",
+      ],
+      cautions_and_pitfalls: [
+        "अहंकार, अति-उत्साह और दूसरों के प्रति अधीरता से बचें",
+        "बिना पर्याप्त विश्राम के शारीरिक क्षमता से अधिक कार्य न करें",
+        "जल्दबाजी में कोई बड़ा जीवन निर्णय न लें",
+        "दूसरों की राय पर अधिक निर्भर न रहें",
+      ],
+      remedies: [
+        "प्रतिदिन प्रातःकाल तांबे के लोटे से भगवान सूर्य को जल (अर्घ्य) अर्पित करें",
+        "प्रातः गायत्री मंत्र का जप करें: 'ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं भर्गो देवस्य धीमहि धियो यो नः प्रचोदयात्'",
+        "माथे पर चंदन या केसर का तिलक लगाएं",
+        "अपने इष्टदेव का नित्य स्मरण करें और माता-पिता का आशीर्वाद लें",
+      ],
+      lucky_day: "रविवार",
+      lucky_color: "स्वर्णिम पीला / केसरिया",
+      deity: "भगवान सूर्यदेव / इष्टदेव",
+      beej_mantra: "ॐ ह्रीं सूर्याय नमः",
+      gayatri_mantra: "ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं भर्गो देवस्य धीमहि धियो यो नः प्रचोदयात्",
+    },
+  },
 };
