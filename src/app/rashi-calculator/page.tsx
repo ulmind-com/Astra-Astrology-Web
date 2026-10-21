@@ -1154,48 +1154,48 @@ export default function RashiCalculatorPage() {
 
               {/* Attribute Cards Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
-                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60">
+                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
-                    <Gem className="size-3 text-amber-600" />{" "}
+                    <Gem className="size-3 text-amber-600 shrink-0" />{" "}
                     <span>{language === "bn" ? "শুভ রত্ন" : language === "hi" ? "शुभ रत्न" : "Lucky Gem"}</span>
                   </p>
-                  <p className="mt-1 font-extrabold text-ink-950">{activeTraits.lucky_gemstone}</p>
+                  <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{activeTraits.lucky_gemstone}</p>
                 </div>
 
-                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60">
+                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
-                    <Palette className="size-3 text-indigo-600" />{" "}
+                    <Palette className="size-3 text-indigo-600 shrink-0" />{" "}
                     <span>{language === "bn" ? "শুভ বর্ণ" : language === "hi" ? "शुभ रंग" : "Lucky Colors"}</span>
                   </p>
-                  <p className="mt-1 font-extrabold text-ink-950 truncate">{activeTraits.lucky_color}</p>
+                  <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{activeTraits.lucky_color}</p>
                 </div>
 
-                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60">
+                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase">
                     {language === "bn" ? "শুভ সংখ্যা" : language === "hi" ? "शुभ अंक" : "Lucky Numbers"}
                   </p>
-                  <p className="mt-1 font-extrabold text-ink-950">{result.traits.lucky_numbers.join(", ")}</p>
+                  <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{result.traits.lucky_numbers.join(", ")}</p>
                 </div>
 
-                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60">
+                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase">
                     {language === "bn" ? "শুভ বার" : language === "hi" ? "शुभ दिन" : "Lucky Day"}
                   </p>
-                  <p className="mt-1 font-extrabold text-ink-950">{activeTraits.lucky_day}</p>
+                  <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{activeTraits.lucky_day}</p>
                 </div>
 
-                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60">
+                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase">
                     {language === "bn" ? "উপাস্য দেবতা" : language === "hi" ? "पूज्य देवता" : "Ruling Deity"}
                   </p>
-                  <p className="mt-1 font-extrabold text-ink-950 truncate">{activeTraits.ruling_deity}</p>
+                  <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{activeTraits.ruling_deity}</p>
                 </div>
 
-                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60">
+                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase">
                     {language === "bn" ? "অনুকূল রাশি" : language === "hi" ? "अनुकूल राशियां" : "Compatible Signs"}
                   </p>
-                  <p className="mt-1 font-extrabold text-ink-950 truncate">
+                  <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">
                     {activeTraits.compatible_rashis?.join(", ") || result.traits.compatible_rashis.join(", ")}
                   </p>
                 </div>
