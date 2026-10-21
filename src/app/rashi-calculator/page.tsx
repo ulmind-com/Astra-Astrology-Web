@@ -1059,7 +1059,7 @@ export default function RashiCalculatorPage() {
 
               <div className="flex justify-center py-4">
                 <MoonSignWheel
-                  activeSignIndex={result.rashi_index}
+                  activeRashiIndex={result.rashi_index}
                   activeNakshatraIndex={result.nakshatra_index}
                 />
               </div>
@@ -1071,8 +1071,10 @@ export default function RashiCalculatorPage() {
         <LocationPickerModal
           open={isMapModalOpen}
           onClose={() => setIsMapModalOpen(false)}
-          onSelectLocation={handleLocationSelect}
-          initialPlace={place}
+          onSelect={handleLocationSelect}
+          currentPlace={place}
+          currentLat={getDecimalCoords().lat}
+          currentLon={getDecimalCoords().lon}
         />
       </main>
 
