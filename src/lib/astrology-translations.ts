@@ -21,7 +21,7 @@ export interface LocalizedTraits {
   lucky_day: string;
   ruling_deity: string;
   compatible_rashis: string[];
-}
+} 
 
 export const CLIENT_RASHI_TRANSLATIONS: Record<number, Record<"en" | "bn" | "hi", LocalizedTraits>> = {
   // 0. ARIES
