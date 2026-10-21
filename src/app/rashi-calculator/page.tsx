@@ -64,11 +64,11 @@ export default function RashiCalculatorPage() {
   const [month, setMonth] = React.useState("");
   const [year, setYear] = React.useState("");
 
-  // Time (HH:mm:ss AM/PM)
+  // Time (HH:mm:ss AM/PM) - Optional
   const [hour, setHour] = React.useState("");
   const [minute, setMinute] = React.useState("");
-  const [second, setSecond] = React.useState("00");
-  const [period, setPeriod] = React.useState<"AM" | "PM">("AM");
+  const [second, setSecond] = React.useState("");
+  const [period, setPeriod] = React.useState<"AM" | "PM">("PM");
 
   // Place
   const [place, setPlace] = React.useState("");
@@ -223,8 +223,8 @@ export default function RashiCalculatorPage() {
     setYear("");
     setHour("");
     setMinute("");
-    setSecond("00");
-    setPeriod("AM");
+    setSecond("");
+    setPeriod("PM");
     setPlace("");
     setLatDeg("");
     setLatMin("");
@@ -311,34 +311,51 @@ export default function RashiCalculatorPage() {
       return;
     }
 
+    // 1. Mandatory Date of Birth (DOB) Validation
     const d = parseInt(day, 10);
     const m = parseInt(month, 10);
     const y = parseInt(year, 10);
-    const h = parseInt(hour, 10);
-    const min = parseInt(minute, 10);
-    const sec = parseInt(second, 10) || 0;
 
     if (isNaN(d) || d < 1 || d > 31 || isNaN(m) || m < 1 || m > 12 || isNaN(y) || y < 1900) {
       toast.error(
         language === "bn"
-          ? "অনুগ্রহ করে সঠিক জন্মতারিখ দিন (DD-MM-YYYY)"
+          ? "অনুগ্রহ করে সঠিক জন্মতারিখ দিন (DD-MM-YYYY) — জন্মতারিখ বাধ্যতামূলক"
           : language === "hi"
-          ? "कृपया सही जन्म तिथि दर्ज करें (DD-MM-YYYY)"
-          : "Please enter a valid birth date (DD-MM-YYYY)"
-      );
-      return;
-    }
-    if (isNaN(h) || h < 1 || h > 12 || isNaN(min) || min < 0 || min > 59) {
-      toast.error(
-        language === "bn"
-          ? "অনুগ্রহ করে সঠিক জন্মসময় দিন (HH:MM)"
-          : language === "hi"
-          ? "कृपया सही जन्म समय दर्ज करें (HH:MM)"
-          : "Please enter a valid birth time (HH:MM)"
+          ? "कृपया सही जन्म तिथि दर्ज करें (DD-MM-YYYY) — जन्म तिथि अनिवार्य है"
+          : "Please enter a valid birth date (DD-MM-YYYY) — DOB is required"
       );
       return;
     }
 
+    // 2. Optional Birth Time (Time of Birth)
+    // If not provided, smoothly default to 12:00 PM (Noon) as per standard Vedic astrology convention
+    let finalHour = 12;
+    let finalMin = 0;
+    let finalSec = 0;
+    let finalPeriod: "AM" | "PM" = "PM";
+
+    if (hour.trim() !== "") {
+      const parsedH = parseInt(hour, 10);
+      const parsedMin = minute.trim() !== "" ? parseInt(minute, 10) : 0;
+      const parsedSec = second.trim() !== "" ? parseInt(second, 10) : 0;
+
+      if (isNaN(parsedH) || parsedH < 1 || parsedH > 12 || isNaN(parsedMin) || parsedMin < 0 || parsedMin > 59) {
+        toast.error(
+          language === "bn"
+            ? "অনুগ্রহ করে সঠিক জন্মসময় দিন (০১-১২ ঘন্টা, ০০-৫৯ মিনিট)"
+            : language === "hi"
+            ? "कृपया सही जन्म समय दर्ज करें (01-12 घंटे, 00-59 मिनट)"
+            : "Please enter a valid birth time (01-12 hours, 00-59 minutes)"
+        );
+        return;
+      }
+      finalHour = parsedH;
+      finalMin = parsedMin;
+      finalSec = parsedSec;
+      finalPeriod = period;
+    }
+
+    // 3. Birth Place Validation
     if (!place.trim()) {
       toast.error(
         language === "bn"
@@ -358,10 +375,10 @@ export default function RashiCalculatorPage() {
       day: d,
       month: m,
       year: y,
-      hour: h,
-      minute: min,
-      second: sec,
-      period,
+      hour: finalHour,
+      minute: finalMin,
+      second: finalSec,
+      period: finalPeriod,
       place: place.trim(),
       latitude: lat,
       longitude: lon,
@@ -607,13 +624,15 @@ export default function RashiCalculatorPage() {
                 </div>
               </div>
 
-              {/* 3. Birth Day (DD-MM-YYYY in 3 separate inputs) */}
+              {/* 3. Birth Day (DD-MM-YYYY in 3 separate inputs) - MANDATORY */}
               <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                 <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
                   <Calendar className="size-4 text-amber-600" />
                   <span>
                     {language === "bn" ? "জন্মতারিখ" : language === "hi" ? "जन्म तिथि" : "Birth Day"}
-                    <span className="text-[11px] font-normal text-rose-500 ml-1">(DD-MM-YYYY)</span>
+                    <span className="text-[11px] font-bold text-rose-600 ml-1.5">
+                      * ({language === "bn" ? "বাধ্যতামূলক" : language === "hi" ? "अनिवार्य" : "Required"})
+                    </span>
                   </span>
                 </label>
                 <div className="sm:col-span-9 grid grid-cols-3 gap-2">
@@ -647,13 +666,15 @@ export default function RashiCalculatorPage() {
                 </div>
               </div>
 
-              {/* 4. Birth Time (HH:mm:ss in 3 inputs + AM/PM) */}
+              {/* 4. Birth Time (HH:mm:ss in 3 inputs + AM/PM) - OPTIONAL */}
               <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                 <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
                   <Clock className="size-4 text-emerald-600" />
                   <span>
                     {language === "bn" ? "জন্মসময়" : language === "hi" ? "जन्म समय" : "Birth Time"}
-                    <span className="text-[11px] font-normal text-rose-500 ml-1">(HH:MM:SS)</span>
+                    <span className="text-[11px] font-semibold text-emerald-700 ml-1.5">
+                      ({language === "bn" ? "ঐচ্ছিক" : language === "hi" ? "वैकल्पिक" : "Optional"})
+                    </span>
                   </span>
                 </label>
                 <div className="sm:col-span-9 grid grid-cols-4 gap-2">

@@ -19,10 +19,10 @@ export interface RashiCalculatePayload {
   day: number;
   month: number;
   year: number;
-  hour: number;
-  minute: number;
-  second: number;
-  period: "AM" | "PM" | "24H";
+  hour?: number;
+  minute?: number;
+  second?: number;
+  period?: "AM" | "PM" | "24H";
   place: string;
   latitude?: number | null;
   longitude?: number | null;
