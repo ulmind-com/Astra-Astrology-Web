@@ -96,6 +96,14 @@ export default function RashiCalculatorPage() {
   const resultsRef = React.useRef<HTMLDivElement>(null);
   const hasAutoFilled = React.useRef(false);
 
+  // Focus navigation refs for smooth input
+  const dayRef = React.useRef<HTMLInputElement>(null);
+  const monthRef = React.useRef<HTMLInputElement>(null);
+  const yearRef = React.useRef<HTMLInputElement>(null);
+  const hourRef = React.useRef<HTMLInputElement>(null);
+  const minuteRef = React.useRef<HTMLInputElement>(null);
+  const secondRef = React.useRef<HTMLInputElement>(null);
+
   // Helper to extract and format profile birth details
   const populateFromProfileData = React.useCallback(
     (p: UserProfile, u?: UserPublic | null) => {
@@ -255,6 +263,109 @@ export default function RashiCalculatorPage() {
           : "Loaded details from your profile."
       );
     }
+  };
+
+  // Input formatting & auto-advance navigation handlers
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    prevRef?: React.RefObject<HTMLInputElement | null>
+  ) => {
+    if (e.key === "Backspace" && (e.target as HTMLInputElement).value === "" && prevRef?.current) {
+      prevRef.current.focus();
+    }
+  };
+
+  const handleDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 2) val = val.slice(0, 2);
+    const num = parseInt(val, 10);
+    if (!isNaN(num) && num > 31) val = "31";
+    setDay(val);
+    if (val.length === 2 && monthRef.current) {
+      monthRef.current.focus();
+    }
+  };
+
+  const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 2) val = val.slice(0, 2);
+    const num = parseInt(val, 10);
+    if (!isNaN(num) && num > 12) val = "12";
+    setMonth(val);
+    if (val.length === 2 && yearRef.current) {
+      yearRef.current.focus();
+    }
+  };
+
+  const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 4) val = val.slice(0, 4);
+    setYear(val);
+    if (val.length === 4 && hourRef.current) {
+      hourRef.current.focus();
+    }
+  };
+
+  const handleHourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 2) val = val.slice(0, 2);
+    const num = parseInt(val, 10);
+    if (!isNaN(num) && num > 12) val = "12";
+    setHour(val);
+    if (val.length === 2 && minuteRef.current) {
+      minuteRef.current.focus();
+    }
+  };
+
+  const handleMinuteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 2) val = val.slice(0, 2);
+    const num = parseInt(val, 10);
+    if (!isNaN(num) && num > 59) val = "59";
+    setMinute(val);
+    if (val.length === 2 && secondRef.current) {
+      secondRef.current.focus();
+    }
+  };
+
+  const handleSecondChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 2) val = val.slice(0, 2);
+    const num = parseInt(val, 10);
+    if (!isNaN(num) && num > 59) val = "59";
+    setSecond(val);
+  };
+
+  const handleLonDegChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 3) val = val.slice(0, 3);
+    const num = parseInt(val, 10);
+    if (!isNaN(num) && num > 180) val = "180";
+    setLonDeg(val);
+  };
+
+  const handleLonMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 2) val = val.slice(0, 2);
+    const num = parseInt(val, 10);
+    if (!isNaN(num) && num > 59) val = "59";
+    setLonMin(val);
+  };
+
+  const handleLatDegChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 2) val = val.slice(0, 2);
+    const num = parseInt(val, 10);
+    if (!isNaN(num) && num > 90) val = "90";
+    setLatDeg(val);
+  };
+
+  const handleLatMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 2) val = val.slice(0, 2);
+    const num = parseInt(val, 10);
+    if (!isNaN(num) && num > 59) val = "59";
+    setLatMin(val);
   };
 
   // Auto-fill coordinates helper from location picker
@@ -637,31 +748,39 @@ export default function RashiCalculatorPage() {
                 </label>
                 <div className="sm:col-span-9 grid grid-cols-3 gap-2">
                   <input
-                    type="number"
-                    min="1"
-                    max="31"
+                    ref={dayRef}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={2}
                     value={day}
-                    onChange={(e) => setDay(e.target.value)}
+                    onChange={handleDayChange}
                     placeholder="DD"
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                   <input
-                    type="number"
-                    min="1"
-                    max="12"
+                    ref={monthRef}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={2}
                     value={month}
-                    onChange={(e) => setMonth(e.target.value)}
+                    onChange={handleMonthChange}
+                    onKeyDown={(e) => handleKeyDown(e, dayRef)}
                     placeholder="MM"
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                   <input
-                    type="number"
-                    min="1900"
-                    max="2100"
+                    ref={yearRef}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={4}
                     value={year}
-                    onChange={(e) => setYear(e.target.value)}
+                    onChange={handleYearChange}
+                    onKeyDown={(e) => handleKeyDown(e, monthRef)}
                     placeholder="YYYY"
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
               </div>
@@ -679,31 +798,39 @@ export default function RashiCalculatorPage() {
                 </label>
                 <div className="sm:col-span-9 grid grid-cols-4 gap-2">
                   <input
-                    type="number"
-                    min="1"
-                    max="12"
+                    ref={hourRef}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={2}
                     value={hour}
-                    onChange={(e) => setHour(e.target.value)}
+                    onChange={handleHourChange}
                     placeholder="HH"
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                   <input
-                    type="number"
-                    min="0"
-                    max="59"
+                    ref={minuteRef}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={2}
                     value={minute}
-                    onChange={(e) => setMinute(e.target.value)}
+                    onChange={handleMinuteChange}
+                    onKeyDown={(e) => handleKeyDown(e, hourRef)}
                     placeholder="MM"
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                   <input
-                    type="number"
-                    min="0"
-                    max="59"
+                    ref={secondRef}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={2}
                     value={second}
-                    onChange={(e) => setSecond(e.target.value)}
+                    onChange={handleSecondChange}
+                    onKeyDown={(e) => handleKeyDown(e, minuteRef)}
                     placeholder="SS"
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                   <select
                     value={period}
@@ -778,18 +905,24 @@ export default function RashiCalculatorPage() {
                     </label>
                     <div className="sm:col-span-9 grid grid-cols-3 gap-2">
                       <input
-                        type="number"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={3}
                         value={lonDeg}
-                        onChange={(e) => setLonDeg(e.target.value)}
+                        onChange={handleLonDegChange}
                         placeholder="Deg"
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500"
+                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                       <input
-                        type="number"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={2}
                         value={lonMin}
-                        onChange={(e) => setLonMin(e.target.value)}
+                        onChange={handleLonMinChange}
                         placeholder="Min"
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500"
+                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                       <select
                         value={lonDir}
@@ -810,18 +943,24 @@ export default function RashiCalculatorPage() {
                     </label>
                     <div className="sm:col-span-9 grid grid-cols-3 gap-2">
                       <input
-                        type="number"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={2}
                         value={latDeg}
-                        onChange={(e) => setLatDeg(e.target.value)}
+                        onChange={handleLatDegChange}
                         placeholder="Deg"
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500"
+                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                       <input
-                        type="number"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={2}
                         value={latMin}
-                        onChange={(e) => setLatMin(e.target.value)}
+                        onChange={handleLatMinChange}
                         placeholder="Min"
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500"
+                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                       <select
                         value={latDir}
