@@ -9,8 +9,12 @@ import type { ProfileUpdate, UserProfile } from "@/types";
 
 export const PROFILE_KEY = ["profile"] as const;
 
-export function useProfile() {
-  return useQuery({ queryKey: PROFILE_KEY, queryFn: userApi.profile });
+export function useProfile(options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: PROFILE_KEY,
+    queryFn: userApi.profile,
+    enabled: options?.enabled,
+  });
 }
 
 /** Shared by every profile form, so success and failure behave the same way. */

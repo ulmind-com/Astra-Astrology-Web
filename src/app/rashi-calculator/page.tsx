@@ -23,6 +23,7 @@ import {
   RotateCcw,
   Languages,
   Compass,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -33,6 +34,8 @@ import { LocationPickerModal } from "@/components/astrology/location-picker-moda
 import { MoonSignWheel } from "@/components/astrology/moon-sign-wheel";
 import { KundaliChart } from "@/components/astrology/kundali-chart";
 import { getClientRashiTraits } from "@/lib/astrology-translations";
+import { useAuth } from "@/providers/auth-provider";
+import { useProfile } from "@/hooks/use-profile";
 import type {
   AstrologyLanguage,
   AyanamsaType,
@@ -40,39 +43,45 @@ import type {
   HouseSystemType,
   RashiCalculatePayload,
   RashiCalculateResult,
+  UserProfile,
+  UserPublic,
 } from "@/types";
 
 export default function RashiCalculatorPage() {
+  // Auth & Profile hooks for dynamic data fetching
+  const { user, isSignedIn } = useAuth();
+  const { data: profile } = useProfile({ enabled: isSignedIn });
+
   // Global Language Selection for Output & UI (English, বাংলা, हिन्दी)
   const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
 
-  // Form State
-  const [name, setName] = React.useState("Samiran");
+  // Form State - initialized empty, dynamically populated from logged-in profile
+  const [name, setName] = React.useState("");
   const [gender, setGender] = React.useState<"male" | "female" | "other">("male");
 
   // Birth Day (DD-MM-YYYY)
-  const [day, setDay] = React.useState("30");
-  const [month, setMonth] = React.useState("06");
-  const [year, setYear] = React.useState("2004");
+  const [day, setDay] = React.useState("");
+  const [month, setMonth] = React.useState("");
+  const [year, setYear] = React.useState("");
 
   // Time (HH:mm:ss AM/PM)
-  const [hour, setHour] = React.useState("06");
-  const [minute, setMinute] = React.useState("48");
-  const [second, setSecond] = React.useState("20");
-  const [period, setPeriod] = React.useState<"AM" | "PM">("PM");
+  const [hour, setHour] = React.useState("");
+  const [minute, setMinute] = React.useState("");
+  const [second, setSecond] = React.useState("00");
+  const [period, setPeriod] = React.useState<"AM" | "PM">("AM");
 
   // Place
-  const [place, setPlace] = React.useState("Kolkata, West Bengal, India");
+  const [place, setPlace] = React.useState("");
   const [isMapModalOpen, setIsMapModalOpen] = React.useState(false);
 
   // Advance Settings (Optional)
   const [showAdvance, setShowAdvance] = React.useState(false);
-  const [lonDeg, setLonDeg] = React.useState("87");
-  const [lonMin, setLonMin] = React.useState("51");
+  const [lonDeg, setLonDeg] = React.useState("");
+  const [lonMin, setLonMin] = React.useState("");
   const [lonDir, setLonDir] = React.useState<"E" | "W">("E");
 
-  const [latDeg, setLatDeg] = React.useState("22");
-  const [latMin, setLatMin] = React.useState("26");
+  const [latDeg, setLatDeg] = React.useState("");
+  const [latMin, setLatMin] = React.useState("");
   const [latDir, setLatDir] = React.useState<"N" | "S">("N");
 
   const [timezone, setTimezone] = React.useState("5.5");
@@ -85,6 +94,168 @@ export default function RashiCalculatorPage() {
   const [result, setResult] = React.useState<RashiCalculateResult | null>(null);
 
   const resultsRef = React.useRef<HTMLDivElement>(null);
+  const hasAutoFilled = React.useRef(false);
+
+  // Helper to extract and format profile birth details
+  const populateFromProfileData = React.useCallback(
+    (p: UserProfile, u?: UserPublic | null) => {
+      // 1. Full name
+      const fullName =
+        p.full_name ||
+        [p.first_name, p.middle_name, p.last_name].filter(Boolean).join(" ").trim() ||
+        u?.full_name ||
+        "";
+      if (fullName) setName(fullName);
+
+      // 2. Gender
+      if (p.gender) {
+        const g = p.gender.toLowerCase();
+        if (g === "female") setGender("female");
+        else if (g === "other") setGender("other");
+        else setGender("male");
+      }
+
+      // 3. Birth details
+      const b = p.birth;
+      if (b) {
+        if (b.date_of_birth) {
+          const isoMatch = b.date_of_birth.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+          if (isoMatch) {
+            setYear(isoMatch[1]);
+            setMonth(isoMatch[2].padStart(2, "0"));
+            setDay(isoMatch[3].padStart(2, "0"));
+          } else {
+            const dmyMatch = b.date_of_birth.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+            if (dmyMatch) {
+              setDay(dmyMatch[1].padStart(2, "0"));
+              setMonth(dmyMatch[2].padStart(2, "0"));
+              setYear(dmyMatch[3]);
+            }
+          }
+        }
+
+        if (b.time_of_birth) {
+          const timeMatch = b.time_of_birth.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?/i);
+          if (timeMatch) {
+            const rawHour = parseInt(timeMatch[1], 10);
+            const rawMin = timeMatch[2];
+            const rawSec = timeMatch[3] || "00";
+            const periodStr = timeMatch[4]?.toUpperCase() as "AM" | "PM" | undefined;
+
+            if (periodStr) {
+              setHour(String(rawHour).padStart(2, "0"));
+              setMinute(rawMin);
+              setSecond(rawSec);
+              setPeriod(periodStr);
+            } else {
+              if (rawHour >= 12) {
+                setPeriod("PM");
+                const h12 = rawHour > 12 ? rawHour - 12 : 12;
+                setHour(String(h12).padStart(2, "0"));
+              } else {
+                setPeriod("AM");
+                const h12 = rawHour === 0 ? 12 : rawHour;
+                setHour(String(h12).padStart(2, "0"));
+              }
+              setMinute(rawMin);
+              setSecond(rawSec);
+            }
+          }
+        }
+
+        const placeName = b.place || [b.city, b.state, b.country].filter(Boolean).join(", ");
+        if (placeName) {
+          setPlace(placeName);
+        }
+
+        if (b.latitude != null && b.longitude != null) {
+          const absLat = Math.abs(b.latitude);
+          const dLat = Math.floor(absLat);
+          const mLat = Math.round((absLat - dLat) * 60);
+          setLatDeg(String(dLat));
+          setLatMin(String(mLat));
+          setLatDir(b.latitude >= 0 ? "N" : "S");
+
+          const absLon = Math.abs(b.longitude);
+          const dLon = Math.floor(absLon);
+          const mLon = Math.round((absLon - dLon) * 60);
+          setLonDeg(String(dLon));
+          setLonMin(String(mLon));
+          setLonDir(b.longitude >= 0 ? "E" : "W");
+        }
+
+        if (b.timezone_offset != null) {
+          setTimezone(String(b.timezone_offset));
+        } else if (b.timezone) {
+          if (b.timezone.includes("Kolkata") || b.timezone.includes("Calcutta")) {
+            setTimezone("5.5");
+          } else if (b.timezone.includes("Dhaka")) {
+            setTimezone("6.0");
+          } else if (b.timezone.includes("Kathmandu")) {
+            setTimezone("5.75");
+          } else if (b.timezone.includes("Dubai")) {
+            setTimezone("4.0");
+          }
+        }
+      }
+    },
+    []
+  );
+
+  // Automatically populate when user profile is loaded
+  React.useEffect(() => {
+    if (!isSignedIn) return;
+
+    if (profile && !hasAutoFilled.current) {
+      hasAutoFilled.current = true;
+      populateFromProfileData(profile, user);
+    } else if (user && !name && !hasAutoFilled.current) {
+      setName(user.full_name || user.first_name || "");
+    }
+  }, [isSignedIn, profile, user, name, populateFromProfileData]);
+
+  // Reset form helper
+  const handleResetForm = () => {
+    setName("");
+    setGender("male");
+    setDay("");
+    setMonth("");
+    setYear("");
+    setHour("");
+    setMinute("");
+    setSecond("00");
+    setPeriod("AM");
+    setPlace("");
+    setLatDeg("");
+    setLatMin("");
+    setLatDir("N");
+    setLonDeg("");
+    setLonMin("");
+    setLonDir("E");
+    setTimezone("5.5");
+    setResult(null);
+    toast.info(
+      language === "bn"
+        ? "ফর্ম খালি করা হয়েছে।"
+        : language === "hi"
+        ? "फ़ॉर्म साफ़ कर दिया गया है।"
+        : "Form cleared."
+    );
+  };
+
+  // Re-sync with profile
+  const handleReloadFromProfile = () => {
+    if (profile) {
+      populateFromProfileData(profile, user);
+      toast.success(
+        language === "bn"
+          ? "প্রোফাইল থেকে তথ্য পুনরায় লোড করা হয়েছে।"
+          : language === "hi"
+          ? "प्रोफ़ाइल से विवरण पुनः लोड किया गया।"
+          : "Loaded details from your profile."
+      );
+    }
+  };
 
   // Auto-fill coordinates helper from location picker
   const handleLocationSelect = (loc: {
@@ -112,6 +283,10 @@ export default function RashiCalculatorPage() {
   };
 
   const getDecimalCoords = () => {
+    if (!latDeg && !lonDeg) {
+      // Default fallback coordinates if user leaves advanced empty
+      return { lat: 22.5726, lon: 88.3639 };
+    }
     const lat = (Number(latDeg) || 0) + (Number(latMin) || 0) / 60;
     const finalLat = latDir === "S" ? -lat : lat;
 
@@ -125,6 +300,17 @@ export default function RashiCalculatorPage() {
     if (e) e.preventDefault();
 
     // Validation
+    if (!name.trim()) {
+      toast.error(
+        language === "bn"
+          ? "অনুগ্রহ করে আপনার নাম লিখুন"
+          : language === "hi"
+          ? "कृपया अपना नाम दर्ज करें"
+          : "Please enter your name"
+      );
+      return;
+    }
+
     const d = parseInt(day, 10);
     const m = parseInt(month, 10);
     const y = parseInt(year, 10);
@@ -145,10 +331,21 @@ export default function RashiCalculatorPage() {
     if (isNaN(h) || h < 1 || h > 12 || isNaN(min) || min < 0 || min > 59) {
       toast.error(
         language === "bn"
-          ? "অনুগ্রহ করে সঠিক জন্মসময় দিন (HH:mm:ss)"
+          ? "অনুগ্রহ করে সঠিক জন্মসময় দিন (HH:MM)"
           : language === "hi"
-          ? "कृपया सही जन्म समय दर्ज करें (HH:mm:ss)"
-          : "Please enter a valid birth time (HH:mm:ss)"
+          ? "कृपया सही जन्म समय दर्ज करें (HH:MM)"
+          : "Please enter a valid birth time (HH:MM)"
+      );
+      return;
+    }
+
+    if (!place.trim()) {
+      toast.error(
+        language === "bn"
+          ? "অনুগ্রহ করে জন্মস্থান লিখুন বা ম্যাপ থেকে নির্বাচন করুন"
+          : language === "hi"
+          ? "कृपया जन्म स्थान दर्ज करें या मानचित्र से चुनें"
+          : "Please enter birth place or pick from map"
       );
       return;
     }
@@ -165,7 +362,7 @@ export default function RashiCalculatorPage() {
       minute: min,
       second: sec,
       period,
-      place: place.trim() || "Kolkata, India",
+      place: place.trim(),
       latitude: lat,
       longitude: lon,
       timezone: parseFloat(timezone) || 5.5,
@@ -290,13 +487,88 @@ export default function RashiCalculatorPage() {
         ========================================================================= */}
         <div className="mx-auto max-w-3xl px-4 pt-7 sm:px-6">
           <div className="rounded-[28px] border border-amber-300/70 bg-card p-6 sm:p-9 shadow-[0_12px_40px_-15px_rgba(26,18,8,0.08)] backdrop-blur-md">
-            <h2 className="text-center font-display text-xl sm:text-2xl font-bold text-foreground mb-8">
+            <h2 className="text-center font-display text-xl sm:text-2xl font-bold text-foreground mb-4">
               {language === "bn"
                 ? "আপনার জন্ম বিবরণ প্রবেশ করান"
                 : language === "hi"
                 ? "अपना जन्म विवरण दर्ज करें"
                 : "Enter Your Birth Details"}
             </h2>
+
+            {/* Dynamic Profile Sync Status Banner */}
+            {isSignedIn && (
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-amber-500/10 border border-amber-300/80 px-4 py-3 text-xs text-amber-950 font-medium shadow-2xs">
+                <div className="flex items-center gap-2.5">
+                  <div className="size-6 rounded-full bg-emerald-500/20 text-emerald-700 flex items-center justify-center font-bold text-[11px]">
+                    ✓
+                  </div>
+                  <div>
+                    <span className="font-bold">
+                      {language === "bn"
+                        ? `স্বাগত, ${profile?.full_name || user?.full_name || user?.first_name || "সম্মানিত ব্যবহারকারী"}!`
+                        : language === "hi"
+                        ? `स्वागत है, ${profile?.full_name || user?.full_name || user?.first_name || "उपयोगकर्ता"}!`
+                        : `Welcome, ${profile?.full_name || user?.full_name || user?.first_name || "User"}!`}
+                    </span>
+                    <span className="text-muted-foreground ml-1.5 block sm:inline">
+                      {profile?.birth?.date_of_birth
+                        ? language === "bn"
+                          ? "আপনার প্রোফাইল থেকে সংরক্ষিত জন্ম বিবরণ স্বয়ংক্রিয়ভাবে লোড করা হয়েছে।"
+                          : language === "hi"
+                          ? "आपकी प्रोफ़ाइल से सहेजा गया जन्म विवरण स्वतः भर दिया गया है।"
+                          : "Saved birth details loaded from your profile."
+                        : language === "bn"
+                        ? "আপনার প্রোফাইলের নাম লোড করা হয়েছে।"
+                        : language === "hi"
+                        ? "आपकी प्रोफ़ाइल का नाम लोड किया गया है।"
+                        : "Name loaded from your profile."}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 ml-auto">
+                  {profile && (
+                    <button
+                      type="button"
+                      onClick={handleReloadFromProfile}
+                      className="inline-flex items-center gap-1 rounded-xl bg-white/90 hover:bg-white px-2.5 py-1 text-[11px] font-bold text-amber-900 border border-amber-300 shadow-2xs transition-colors cursor-pointer"
+                    >
+                      <RefreshCw className="size-3 text-amber-700" />
+                      <span>{language === "bn" ? "রিলোড" : language === "hi" ? "रीलोड" : "Reload"}</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleResetForm}
+                    className="inline-flex items-center gap-1 rounded-xl bg-white/90 hover:bg-white px-2.5 py-1 text-[11px] font-bold text-rose-800 border border-rose-300 shadow-2xs transition-colors cursor-pointer"
+                  >
+                    <RotateCcw className="size-3 text-rose-600" />
+                    <span>{language === "bn" ? "খালি করুন" : language === "hi" ? "साफ़ करें" : "Clear"}</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!isSignedIn && (
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-surface-muted/50 border border-border/80 px-4 py-3 text-xs text-muted-foreground shadow-2xs">
+                <div className="flex items-center gap-2">
+                  <User className="size-4 text-amber-600 shrink-0" />
+                  <span>
+                    {language === "bn"
+                      ? "লগ-ইন করলে আপনার প্রোফাইলের সেভ করা জন্ম বিবরণ সরাসরি এখানে পূরণ হয়ে যাবে।"
+                      : language === "hi"
+                      ? "लॉग-इन करने पर आपकी प्रोफ़ाइल का विवरण स्वतः यहाँ भर जाएगा।"
+                      : "Sign in to automatically load your saved profile and birth details."}
+                  </span>
+                </div>
+                <Link
+                  href="/login"
+                  className="rounded-xl bg-amber-500 text-amber-950 px-3 py-1 text-[11px] font-bold shadow-2xs hover:bg-amber-400 transition-colors ml-auto"
+                >
+                  {language === "bn" ? "লগ-ইন করুন" : language === "hi" ? "लॉग-इन करें" : "Sign In"}
+                </Link>
+              </div>
+            )}
 
             <form onSubmit={handleCalculate} className="space-y-5 text-xs sm:text-sm">
               {/* 1. Name */}
