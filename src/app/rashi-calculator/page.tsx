@@ -7,33 +7,34 @@ import {
   Calendar,
   Clock,
   MapPin,
-  Compass,
   Sliders,
   ChevronDown,
   ChevronUp,
   AlertTriangle,
   CheckCircle2,
-  ShieldCheck,
   Star,
   Globe,
   ArrowRight,
   User,
   HeartHandshake,
-  HelpCircle,
   Gem,
   Palette,
   Eye,
   RotateCcw,
+  Languages,
+  Compass,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
-import { Button, LoadingBlock } from "@/components/ui";
+import { Button } from "@/components/ui";
 import { astrologyApi } from "@/lib/api";
 import { LocationPickerModal } from "@/components/astrology/location-picker-modal";
 import { MoonSignWheel } from "@/components/astrology/moon-sign-wheel";
 import { KundaliChart } from "@/components/astrology/kundali-chart";
+import { getClientRashiTraits } from "@/lib/astrology-translations";
 import type {
+  AstrologyLanguage,
   AyanamsaType,
   ChartStyleType,
   HouseSystemType,
@@ -42,6 +43,9 @@ import type {
 } from "@/types";
 
 export default function RashiCalculatorPage() {
+  // Global Language Selection for Output & UI (English, বাংলা, हिन्दी)
+  const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
+
   // Form State
   const [name, setName] = React.useState("Samiran");
   const [gender, setGender] = React.useState<"male" | "female" | "other">("male");
@@ -92,7 +96,6 @@ export default function RashiCalculatorPage() {
     setPlace(loc.place);
     setTimezone(String(loc.timezone));
 
-    // Latitude
     const absLat = Math.abs(loc.latitude);
     const dLat = Math.floor(absLat);
     const mLat = Math.round((absLat - dLat) * 60);
@@ -100,20 +103,14 @@ export default function RashiCalculatorPage() {
     setLatMin(String(mLat));
     setLatDir(loc.latitude >= 0 ? "N" : "S");
 
-    // Longitude
     const absLon = Math.abs(loc.longitude);
     const dLon = Math.floor(absLon);
     const mLon = Math.round((absLon - dLon) * 60);
     setLonDeg(String(dLon));
     setLonMin(String(mLon));
     setLonDir(loc.longitude >= 0 ? "E" : "W");
-
-    toast.success("Coordinates updated from map", {
-      description: `${loc.place} (Lat: ${dLat}°${mLat}'${loc.latitude >= 0 ? "N" : "S"}, Lon: ${dLon}°${mLon}'${loc.longitude >= 0 ? "E" : "W"})`,
-    });
   };
 
-  // Convert DMS to decimal
   const getDecimalCoords = () => {
     const lat = (Number(latDeg) || 0) + (Number(latMin) || 0) / 60;
     const finalLat = latDir === "S" ? -lat : lat;
@@ -136,11 +133,23 @@ export default function RashiCalculatorPage() {
     const sec = parseInt(second, 10) || 0;
 
     if (isNaN(d) || d < 1 || d > 31 || isNaN(m) || m < 1 || m > 12 || isNaN(y) || y < 1900) {
-      toast.error("Please enter a valid birth date (DD-MM-YYYY)");
+      toast.error(
+        language === "bn"
+          ? "অনুগ্রহ করে সঠিক জন্মতারিখ দিন (DD-MM-YYYY)"
+          : language === "hi"
+          ? "कृपया सही जन्म तिथि दर्ज करें (DD-MM-YYYY)"
+          : "Please enter a valid birth date (DD-MM-YYYY)"
+      );
       return;
     }
     if (isNaN(h) || h < 1 || h > 12 || isNaN(min) || min < 0 || min > 59) {
-      toast.error("Please enter a valid birth time (HH:mm:ss)");
+      toast.error(
+        language === "bn"
+          ? "অনুগ্রহ করে সঠিক জন্মসময় দিন (HH:mm:ss)"
+          : language === "hi"
+          ? "कृपया सही जन्म समय दर्ज करें (HH:mm:ss)"
+          : "Please enter a valid birth time (HH:mm:ss)"
+      );
       return;
     }
 
@@ -163,6 +172,7 @@ export default function RashiCalculatorPage() {
       ayanamsa,
       house_system: houseSystem,
       chart_style: chartStyle,
+      language,
     };
 
     setLoading(true);
@@ -170,7 +180,13 @@ export default function RashiCalculatorPage() {
       const res = await astrologyApi.calculateRashi(payload);
       if (res) {
         setResult(res);
-        toast.success(`Calculated Moon Sign: ${res.rashi_name_en} (${res.rashi_name_hi})`);
+        toast.success(
+          language === "bn"
+            ? `চন্দ্রের অবস্থান: ${res.rashi_name_bn} রাশি (${res.nakshatra_name} নক্ষত্র)`
+            : language === "hi"
+            ? `गणना पूर्ण: ${res.rashi_name_hi} राशि (${res.nakshatra_name} नक्षत्र)`
+            : `Calculated Moon Sign: ${res.rashi_name_en} (${res.rashi_name_hi})`
+        );
         setTimeout(() => {
           resultsRef.current?.scrollIntoView({ behavior: "smooth" });
         }, 100);
@@ -182,51 +198,120 @@ export default function RashiCalculatorPage() {
     }
   };
 
+  // Derive localized traits dynamically whenever language or result changes
+  // Guarantees INSTANT 0ms multilingual switching!
+  const activeTraits = React.useMemo(() => {
+    if (!result) return null;
+    return getClientRashiTraits(result.rashi_index, language, result.traits, result.translations);
+  }, [result, language]);
+
   return (
     <>
       <SiteHeader />
 
       <main className="min-h-screen bg-surface-muted/30 pb-20">
         {/* =========================================================================
-            HEADER & BREADCRUMBS (Matching screenshot 1)
+            HEADER & BREADCRUMBS
         ========================================================================= */}
-        <div className="mx-auto max-w-5xl px-4 pt-10 sm:px-6 lg:px-8 text-center">
+        <div className="mx-auto max-w-5xl px-4 pt-10 sm:px-6 lg:px-8 text-center space-y-3">
+          <div className="inline-flex items-center gap-2 rounded-full bg-amber-100/90 text-amber-950 border border-amber-300 font-bold px-4 py-1.5 text-xs shadow-2xs">
+            <Sparkles className="size-3.5 text-amber-600" />
+            <span>
+              {language === "bn"
+                ? "বৈদিক জ্যোতিষশাস্ত্র ভিত্তিক নির্ভুল রাশি ক্যালকুলেটর"
+                : language === "hi"
+                ? "वैदिक ज्योतिष सम्मत सटीक चंद्र राशि कैलकुलेटर"
+                : "Vedic Sidereal Moon Sign & Nakshatra Calculator"}
+            </span>
+          </div>
+
           <h1 className="font-display text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
-            Find Your Rashi by Date of Birth - Accurate Rashi Calculator & Rashi Finder Free
+            {language === "bn"
+              ? "জন্মতারিখ দিয়ে নিজের রাশি ও প্রতিকার জানুন — সম্পূর্ণ ফ্রি"
+              : language === "hi"
+              ? "जन्मतिथि से जानें अपनी राशि, सावधानियां एवं अचूक उपाय"
+              : "Find Your Rashi by Date of Birth - Accurate Moon Sign Calculator"}
           </h1>
 
-          <div className="mt-3 flex items-center justify-center gap-2 text-xs font-medium text-muted-foreground">
-            <Link href="/" className="hover:text-brand-600 transition-colors">
-              Home
-            </Link>
-            <span className="text-amber-500 font-bold">—</span>
-            <span className="text-foreground font-semibold">Find Your Rashi</span>
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto">
+            {language === "bn"
+              ? "সঠিক চন্দ্রের অবস্থান, ২৭ নক্ষত্র, ৪ পদ, কৃষ্ণমূর্তি (KP) সাব-লর্ড, কী কী থেকে সাবধান থাকবেন এবং কী করলে সৌভাগ্য বৃদ্ধি পাবে তার পূর্ণাঙ্গ বিশ্লেষণ।"
+              : language === "hi"
+              ? "सटीक चंद्र स्थिति, २७ नक्षत्र, ४ चरण, केपी सब-लॉर्ड, किन बातों से सावधान रहें और किन उपायों से भाग्य चमकेगा—सब कुछ विस्तार से जानें।"
+              : "Accurate planetary calculations powered by Vedic Sidereal Ephemeris with KP Sub-Lord, astrological warnings, and Vedic remedies."}
+          </p>
+
+          {/* Interactive Language Switcher Bar */}
+          <div className="pt-2 flex items-center justify-center gap-2">
+            <div className="inline-flex items-center gap-1.5 p-1 rounded-2xl bg-white border border-amber-300/80 shadow-xs">
+              <span className="text-[11px] font-bold text-muted-foreground px-2 flex items-center gap-1">
+                <Languages className="size-3 text-amber-600" />
+                <span>ভাষা / Language:</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setLanguage("bn")}
+                className={`rounded-xl px-3 py-1 text-xs font-bold transition-all ${
+                  language === "bn"
+                    ? "bg-amber-500 text-amber-950 shadow-xs scale-105 font-black"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                বাংলা
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage("hi")}
+                className={`rounded-xl px-3 py-1 text-xs font-bold transition-all ${
+                  language === "hi"
+                    ? "bg-amber-500 text-amber-950 shadow-xs scale-105 font-black"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                हिन्दी
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage("en")}
+                className={`rounded-xl px-3 py-1 text-xs font-bold transition-all ${
+                  language === "en"
+                    ? "bg-amber-500 text-amber-950 shadow-xs scale-105 font-black"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                English
+              </button>
+            </div>
           </div>
         </div>
 
         {/* =========================================================================
-            FORM SECTION (Matching screenshot 1 & 2)
+            FORM SECTION
         ========================================================================= */}
-        <div className="mx-auto max-w-3xl px-4 pt-8 sm:px-6">
-          <div className="rounded-[28px] border border-border/80 bg-card p-6 sm:p-9 shadow-[0_12px_40px_-15px_rgba(26,18,8,0.08)] backdrop-blur-md">
+        <div className="mx-auto max-w-3xl px-4 pt-7 sm:px-6">
+          <div className="rounded-[28px] border border-amber-300/70 bg-card p-6 sm:p-9 shadow-[0_12px_40px_-15px_rgba(26,18,8,0.08)] backdrop-blur-md">
             <h2 className="text-center font-display text-xl sm:text-2xl font-bold text-foreground mb-8">
-              Enter Your Details
+              {language === "bn"
+                ? "আপনার জন্ম বিবরণ প্রবেশ করান"
+                : language === "hi"
+                ? "अपना जन्म विवरण दर्ज करें"
+                : "Enter Your Birth Details"}
             </h2>
 
             <form onSubmit={handleCalculate} className="space-y-5 text-xs sm:text-sm">
               {/* 1. Name */}
               <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                 <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
-                  <User className="size-4 text-amber-500" />
-                  <span>Name</span>
+                  <User className="size-4 text-amber-600" />
+                  <span>{language === "bn" ? "নাম" : language === "hi" ? "नाम" : "Name"}</span>
                 </label>
                 <div className="sm:col-span-9">
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter your name..."
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500 shadow-2xs"
+                    placeholder={language === "bn" ? "আপনার নাম লিখুন..." : language === "hi" ? "अपना नाम लिखें..." : "Enter your name..."}
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs font-medium"
                   />
                 </div>
               </div>
@@ -234,18 +319,18 @@ export default function RashiCalculatorPage() {
               {/* 2. Gender */}
               <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                 <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
-                  <HeartHandshake className="size-4 text-indigo-400" />
-                  <span>Gender</span>
+                  <HeartHandshake className="size-4 text-indigo-500" />
+                  <span>{language === "bn" ? "লিঙ্গ" : language === "hi" ? "लिंग" : "Gender"}</span>
                 </label>
                 <div className="sm:col-span-9">
                   <select
                     value={gender}
                     onChange={(e) => setGender(e.target.value as any)}
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500 shadow-2xs cursor-pointer"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs cursor-pointer font-medium"
                   >
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
+                    <option value="male">{language === "bn" ? "পুরুষ (Male)" : language === "hi" ? "पुरुष (Male)" : "Male"}</option>
+                    <option value="female">{language === "bn" ? "মহিলা (Female)" : language === "hi" ? "महिला (Female)" : "Female"}</option>
+                    <option value="other">{language === "bn" ? "অন্যান্য (Other)" : language === "hi" ? "अन्य (Other)" : "Other"}</option>
                   </select>
                 </div>
               </div>
@@ -253,9 +338,10 @@ export default function RashiCalculatorPage() {
               {/* 3. Birth Day (DD-MM-YYYY in 3 separate inputs) */}
               <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                 <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
-                  <Calendar className="size-4 text-amber-500" />
+                  <Calendar className="size-4 text-amber-600" />
                   <span>
-                    Birth Day<span className="text-[11px] font-normal text-rose-500 ml-1">(DD-MM-YYYY)</span>
+                    {language === "bn" ? "জন্মতারিখ" : language === "hi" ? "जन्म तिथि" : "Birth Day"}
+                    <span className="text-[11px] font-normal text-rose-500 ml-1">(DD-MM-YYYY)</span>
                   </span>
                 </label>
                 <div className="sm:col-span-9 grid grid-cols-3 gap-2">
@@ -266,7 +352,7 @@ export default function RashiCalculatorPage() {
                     value={day}
                     onChange={(e) => setDay(e.target.value)}
                     placeholder="DD"
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500 shadow-2xs"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
                   />
                   <input
                     type="number"
@@ -275,26 +361,27 @@ export default function RashiCalculatorPage() {
                     value={month}
                     onChange={(e) => setMonth(e.target.value)}
                     placeholder="MM"
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500 shadow-2xs"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
                   />
                   <input
                     type="number"
                     min="1900"
-                    max="2035"
+                    max="2100"
                     value={year}
                     onChange={(e) => setYear(e.target.value)}
                     placeholder="YYYY"
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500 shadow-2xs"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
                   />
                 </div>
               </div>
 
-              {/* 4. Time (HH:mm:ss in 3 inputs + AM/PM dropdown) */}
+              {/* 4. Birth Time (HH:mm:ss in 3 inputs + AM/PM) */}
               <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                 <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
-                  <Clock className="size-4 text-amber-500" />
+                  <Clock className="size-4 text-emerald-600" />
                   <span>
-                    Time<span className="text-[11px] font-normal text-rose-500 ml-1">(HH:mm:ss)</span>
+                    {language === "bn" ? "জন্মসময়" : language === "hi" ? "जन्म समय" : "Birth Time"}
+                    <span className="text-[11px] font-normal text-rose-500 ml-1">(HH:MM:SS)</span>
                   </span>
                 </label>
                 <div className="sm:col-span-9 grid grid-cols-4 gap-2">
@@ -305,7 +392,7 @@ export default function RashiCalculatorPage() {
                     value={hour}
                     onChange={(e) => setHour(e.target.value)}
                     placeholder="HH"
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2.5 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500 shadow-2xs"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
                   />
                   <input
                     type="number"
@@ -313,8 +400,8 @@ export default function RashiCalculatorPage() {
                     max="59"
                     value={minute}
                     onChange={(e) => setMinute(e.target.value)}
-                    placeholder="mm"
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2.5 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500 shadow-2xs"
+                    placeholder="MM"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
                   />
                   <input
                     type="number"
@@ -322,13 +409,13 @@ export default function RashiCalculatorPage() {
                     max="59"
                     value={second}
                     onChange={(e) => setSecond(e.target.value)}
-                    placeholder="ss"
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2.5 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500 shadow-2xs"
+                    placeholder="SS"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
                   />
                   <select
                     value={period}
                     onChange={(e) => setPeriod(e.target.value as any)}
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-bold text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500 shadow-2xs cursor-pointer"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-bold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs cursor-pointer"
                   >
                     <option value="AM">AM</option>
                     <option value="PM">PM</option>
@@ -336,66 +423,64 @@ export default function RashiCalculatorPage() {
                 </div>
               </div>
 
-              {/* 5. Birth Place & Map trigger */}
+              {/* 5. Birth Place with direct Location Picker modal button */}
               <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                 <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
-                  <MapPin className="size-4 text-amber-500" />
-                  <span>Birth Place</span>
+                  <MapPin className="size-4 text-rose-500" />
+                  <span>{language === "bn" ? "জন্মস্থান" : language === "hi" ? "जन्म स्थान" : "Birth Place"}</span>
                 </label>
-                <div className="sm:col-span-9 flex items-center gap-2">
+                <div className="sm:col-span-9 flex gap-2">
                   <input
                     type="text"
                     value={place}
                     onChange={(e) => setPlace(e.target.value)}
-                    placeholder="Enter your Birth Place..."
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500 shadow-2xs"
+                    placeholder={language === "bn" ? "শহরের নাম লিখুন..." : language === "hi" ? "शहर का नाम लिखें..." : "Search city or town..."}
+                    className="flex-1 rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs font-medium"
                   />
-                  <button
+                  <Button
                     type="button"
+                    variant="outline"
                     onClick={() => setIsMapModalOpen(true)}
-                    className="shrink-0 rounded-xl border border-brand-500/40 bg-brand-500/10 px-3 py-2.5 text-xs font-semibold text-brand-700 dark:text-brand-300 hover:bg-brand-500/20 transition-all flex items-center gap-1.5 shadow-2xs"
-                    title="Select on interactive map"
+                    className="shrink-0 rounded-xl px-3 border-amber-300/80 bg-white text-xs font-bold text-amber-950 hover:bg-amber-50"
                   >
-                    <Globe className="size-3.5" />
-                    <span className="hidden sm:inline">Pick on Map</span>
-                  </button>
+                    <MapPin className="size-3.5 text-rose-500 mr-1" />
+                    <span>{language === "bn" ? "ম্যাপ" : language === "hi" ? "मानचित्र" : "Map"}</span>
+                  </Button>
                 </div>
               </div>
 
-              {/* Toggle Advance Setting */}
+              {/* Collapsible Advance Settings Toggle */}
               <div className="pt-2">
                 <button
                   type="button"
-                  onClick={() => setShowAdvance(!showAdvance)}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-600 dark:text-rose-400 hover:underline"
+                  onClick={() => setShowAdvance((prev) => !prev)}
+                  className="w-full flex items-center justify-between rounded-xl bg-surface-muted/60 hover:bg-surface-muted px-4 py-3 text-xs font-bold text-foreground transition-colors border border-border/60"
                 >
+                  <span className="flex items-center gap-2 text-amber-900">
+                    <Sliders className="size-4 text-amber-600" />
+                    <span>
+                      {language === "bn"
+                        ? "উন্নত সেটিংস (ঐচ্ছিক)"
+                        : language === "hi"
+                        ? "उन्नत सेटिंग्स (वैकल्पिक)"
+                        : "Advance Settings (Optional)"}
+                    </span>
+                  </span>
                   {showAdvance ? (
-                    <>
-                      <ChevronUp className="size-3.5" />
-                      <span>[-] Advance Setting</span>
-                    </>
+                    <ChevronUp className="size-4 text-muted-foreground" />
                   ) : (
-                    <>
-                      <ChevronDown className="size-3.5" />
-                      <span>[+] Advance Setting</span>
-                    </>
+                    <ChevronDown className="size-4 text-muted-foreground" />
                   )}
                 </button>
               </div>
 
-              {/* =====================================================================
-                  ADVANCE SETTINGS SECTION (Matching screenshot 2 & 5)
-              ===================================================================== */}
+              {/* Advance Settings Body */}
               {showAdvance && (
-                <div className="mt-4 pt-4 border-t border-border/80 space-y-4 animate-in fade-in-50 duration-200">
-                  <h3 className="text-center font-display text-base font-bold text-foreground mb-4">
-                    Advanced Settings
-                  </h3>
-
+                <div className="rounded-2xl border border-border/80 bg-surface-muted/20 p-4 sm:p-5 space-y-4 animate-in fade-in-50 duration-200">
                   {/* Longitude */}
                   <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                     <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
-                      <Compass className="size-4 text-sky-500" />
+                      <Compass className="size-4 text-indigo-500" />
                       <span>Longitude</span>
                     </label>
                     <div className="sm:col-span-9 grid grid-cols-3 gap-2">
@@ -403,23 +488,23 @@ export default function RashiCalculatorPage() {
                         type="number"
                         value={lonDeg}
                         onChange={(e) => setLonDeg(e.target.value)}
-                        placeholder="Deg (87)"
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500"
+                        placeholder="Deg"
+                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500"
                       />
                       <input
                         type="number"
                         value={lonMin}
                         onChange={(e) => setLonMin(e.target.value)}
-                        placeholder="Min (51)"
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500"
+                        placeholder="Min"
+                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500"
                       />
                       <select
                         value={lonDir}
                         onChange={(e) => setLonDir(e.target.value as any)}
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-bold text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500 cursor-pointer"
+                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-bold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer"
                       >
-                        <option value="E">E</option>
-                        <option value="W">W</option>
+                        <option value="E">East</option>
+                        <option value="W">West</option>
                       </select>
                     </div>
                   </div>
@@ -427,7 +512,7 @@ export default function RashiCalculatorPage() {
                   {/* Latitude */}
                   <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                     <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
-                      <Compass className="size-4 text-sky-500" />
+                      <Compass className="size-4 text-rose-500" />
                       <span>Latitude</span>
                     </label>
                     <div className="sm:col-span-9 grid grid-cols-3 gap-2">
@@ -435,59 +520,66 @@ export default function RashiCalculatorPage() {
                         type="number"
                         value={latDeg}
                         onChange={(e) => setLatDeg(e.target.value)}
-                        placeholder="Deg (22)"
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500"
+                        placeholder="Deg"
+                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500"
                       />
                       <input
                         type="number"
                         value={latMin}
                         onChange={(e) => setLatMin(e.target.value)}
-                        placeholder="Min (26)"
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500"
+                        placeholder="Min"
+                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500"
                       />
                       <select
                         value={latDir}
                         onChange={(e) => setLatDir(e.target.value as any)}
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-bold text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500 cursor-pointer"
+                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-bold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer"
                       >
-                        <option value="N">N</option>
-                        <option value="S">S</option>
+                        <option value="N">North</option>
+                        <option value="S">South</option>
                       </select>
                     </div>
                   </div>
 
-                  {/* Time Zone */}
+                  {/* Timezone */}
                   <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                     <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
-                      <Clock className="size-4 text-amber-500" />
+                      <Globe className="size-4 text-emerald-500" />
                       <span>Time Zone</span>
                     </label>
                     <div className="sm:col-span-9">
-                      <input
-                        type="text"
+                      <select
                         value={timezone}
                         onChange={(e) => setTimezone(e.target.value)}
-                        placeholder="5.5 (IST)"
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2 text-xs font-semibold text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500"
-                      />
+                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2 text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer"
+                      >
+                        <option value="5.5">India (+05:30 IST)</option>
+                        <option value="6.0">Bangladesh (+06:00 BST)</option>
+                        <option value="5.75">Nepal (+05:45 NPT)</option>
+                        <option value="5.0">Pakistan (+05:00 PKT)</option>
+                        <option value="4.0">UAE / Gulf (+04:00 GST)</option>
+                        <option value="0.0">UTC / GMT (00:00)</option>
+                        <option value="-5.0">US Eastern (-05:00 EST)</option>
+                        <option value="-8.0">US Pacific (-08:00 PST)</option>
+                      </select>
                     </div>
                   </div>
 
-                  {/* Ayanamsa (Exact 7 options from screenshot 5) */}
+                  {/* Ayanamsa */}
                   <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                     <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
-                      <Sliders className="size-4 text-amber-500" />
+                      <Sliders className="size-4 text-indigo-400" />
                       <span>Ayanamsa</span>
                     </label>
                     <div className="sm:col-span-9">
                       <select
                         value={ayanamsa}
                         onChange={(e) => setAyanamsa(e.target.value as any)}
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2 text-xs font-semibold text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500 cursor-pointer"
+                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2 text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer"
                       >
-                        <option value="lahiri">Lahiri (Default - Chitra Paksha)</option>
-                        <option value="bv_raman">BV Raman</option>
-                        <option value="krishnamurti">Krishnamurti (KP)</option>
+                        <option value="lahiri">Lahiri (Chitra Paksha - Most Popular)</option>
+                        <option value="bv_raman">B.V. Raman</option>
+                        <option value="krishnamurti">Krishnamurti (KP Standard)</option>
                         <option value="yukteshwar">Yukteshwar</option>
                         <option value="suryasiddhanta">Suryasiddhanta</option>
                         <option value="true_pushya">True Pushya (PVRN Rao)</option>
@@ -506,7 +598,7 @@ export default function RashiCalculatorPage() {
                       <select
                         value={houseSystem}
                         onChange={(e) => setHouseSystem(e.target.value as any)}
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2 text-xs font-semibold text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500 cursor-pointer"
+                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2 text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer"
                       >
                         <option value="placidus">Placidus (Standard in KP)</option>
                         <option value="equal">Equal House</option>
@@ -526,32 +618,45 @@ export default function RashiCalculatorPage() {
                       <select
                         value={chartStyle}
                         onChange={(e) => setChartStyle(e.target.value as any)}
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2 text-xs font-semibold text-foreground focus:outline-hidden focus:ring-1 focus:ring-brand-500 cursor-pointer"
+                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2 text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer"
                       >
                         <option value="north_indian">North Indian (Diamond)</option>
-                        <option value="south_indian">South Indian (Square)</option>
-                        <option value="east_indian">East Indian (Bengali)</option>
+                        <option value="south_indian">South Indian (Square Grid)</option>
+                        <option value="east_indian">East Indian (Bengali ছক)</option>
                       </select>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Submit CTA (Matching button in screenshot 2) */}
+              {/* Submit CTA */}
               <div className="pt-4 flex justify-center">
                 <Button
                   type="submit"
                   size="lg"
                   disabled={loading}
-                  className="px-8 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-brand-500 to-amber-600 text-ink-950 font-black text-sm shadow-[0_8px_24px_rgba(234,179,8,0.35)] hover:shadow-[0_12px_32px_rgba(234,179,8,0.45)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  className="px-9 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-ink-950 font-black text-sm shadow-[0_8px_24px_rgba(234,179,8,0.35)] hover:shadow-[0_12px_32px_rgba(234,179,8,0.45)] hover:scale-[1.02] active:scale-[0.98] transition-all"
                 >
                   {loading ? (
                     <span className="flex items-center gap-2">
-                      <span className="animate-spin text-base">✦</span> Calculating Moon Sign…
+                      <span className="animate-spin text-base">✦</span>
+                      <span>
+                        {language === "bn"
+                          ? "চন্দ্র রাশি গণনা করা হচ্ছে…"
+                          : language === "hi"
+                          ? "चंद्र राशि की गणना हो रही है…"
+                          : "Calculating Moon Sign…"}
+                      </span>
                     </span>
                   ) : (
                     <span className="flex items-center gap-2">
-                      <span>Know Your Rashi</span>
+                      <span>
+                        {language === "bn"
+                          ? "আপনার রাশি জানুন"
+                          : language === "hi"
+                          ? "अपनी राशि जानें"
+                          : "Know Your Rashi"}
+                      </span>
                       <ArrowRight className="size-4" />
                     </span>
                   )}
@@ -564,49 +669,67 @@ export default function RashiCalculatorPage() {
         {/* =========================================================================
             RESULTS DASHBOARD (When Calculated)
         ========================================================================= */}
-        {result && (
+        {result && activeTraits && (
           <div ref={resultsRef} className="mx-auto max-w-5xl px-4 pt-12 sm:px-6 lg:px-8 space-y-8 animate-in fade-in-50 duration-300">
             {/* 1. Main Rashi Announcement Hero Card */}
-            <div className="rounded-[32px] border border-amber-500/30 bg-gradient-to-br from-card via-brand-500/[0.04] to-card p-6 sm:p-10 shadow-[0_20px_50px_-20px_rgba(234,179,8,0.18)] text-center relative overflow-hidden">
-              <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent" />
+            <div className="rounded-[32px] border border-amber-400/80 bg-gradient-to-br from-card via-[#fffdf0] to-card p-6 sm:p-10 shadow-[0_20px_50px_-20px_rgba(234,179,8,0.22)] text-center relative overflow-hidden">
+              <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-transparent via-amber-500 to-transparent" />
 
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1 text-xs font-bold text-amber-700 dark:text-amber-300 border border-amber-500/25 mb-4 shadow-2xs">
-                <Sparkles className="size-3.5" />
-                <span>Vedic Moon Sign Calculated for {result.name}</span>
+              {/* Top Banner with High-Contrast Text */}
+              <div className="inline-flex items-center gap-2 rounded-full bg-amber-100 text-amber-950 border border-amber-300 font-extrabold px-4 py-1.5 text-xs shadow-2xs mb-4">
+                <Sparkles className="size-3.5 text-amber-700" />
+                <span>
+                  {language === "bn"
+                    ? `${result.name} এর জন্য বৈদিক চন্দ্র রাশি গণনা সম্পন্ন`
+                    : language === "hi"
+                    ? `${result.name} के लिए वैदिक चंद्र राशि गणना पूर्ण`
+                    : `Vedic Moon Sign Calculated for ${result.name}`}
+                </span>
               </div>
 
-              {/* Big Sign Name & Glyphs */}
+              {/* Big Sign Symbol & Typography */}
               <div className="flex flex-col items-center justify-center">
-                <span className="text-6xl sm:text-7xl font-extrabold select-none mb-2 text-amber-500 drop-shadow-md">
-                  {result.rashi_symbol}
-                </span>
-                <h2 className="font-display text-3xl sm:text-5xl font-black text-foreground tracking-tight">
-                  {result.rashi_name_en}{" "}
-                  <span className="text-amber-600 dark:text-amber-400 font-bold text-2xl sm:text-3xl">
-                    ({result.rashi_name_hi} / {result.rashi_name_bn})
+                <div className="size-20 sm:size-24 rounded-3xl bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-900 flex items-center justify-center text-4xl sm:text-5xl text-white shadow-lg shadow-indigo-500/25 border-2 border-white/40 mb-3">
+                  <span>{result.rashi_symbol}</span>
+                </div>
+
+                <h2 className="font-display text-3xl sm:text-5xl font-black text-ink-950 tracking-tight">
+                  {language === "bn"
+                    ? `${result.rashi_name_bn} রাশি`
+                    : language === "hi"
+                    ? `${result.rashi_name_hi} राशि`
+                    : result.rashi_name_en}
+                  <span className="text-amber-600 font-extrabold text-2xl sm:text-3xl ml-2">
+                    ({language === "bn" ? result.rashi_name_en : `${result.rashi_name_hi} / ${result.rashi_name_bn}`})
                   </span>
                 </h2>
-                <p className="mt-2 text-xs sm:text-sm text-muted-foreground max-w-xl">
-                  {result.traits.overview}
+
+                <p className="mt-3 text-xs sm:text-[13px] text-ink-700 max-w-2xl leading-relaxed font-medium">
+                  {activeTraits.overview}
                 </p>
               </div>
 
-              {/* Badges strip */}
-              <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs font-semibold">
-                <span className="rounded-xl bg-surface-muted px-3 py-1.5 text-foreground border border-border/80">
-                  Ruling Lord: <strong className="text-amber-600 dark:text-amber-400">{result.rashi_lord}</strong>
+              {/* High-Contrast Badges Strip */}
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs font-bold">
+                <span className="rounded-xl bg-white px-3.5 py-1.5 text-ink-950 border border-border/80 shadow-2xs">
+                  {language === "bn" ? "অধিপতি গ্রহ:" : language === "hi" ? "स्वामी ग्रह:" : "Ruling Lord:"}{" "}
+                  <strong className="text-amber-700">{result.rashi_lord}</strong>
                 </span>
-                <span className="rounded-xl bg-surface-muted px-3 py-1.5 text-foreground border border-border/80">
-                  Moon Position: <strong className="tabular-nums">{result.moon_degree_formatted}</strong>
+                <span className="rounded-xl bg-white px-3.5 py-1.5 text-ink-950 border border-border/80 shadow-2xs">
+                  {language === "bn" ? "চন্দ্রের অবস্থান:" : language === "hi" ? "चंद्रमा स्थिति:" : "Moon Position:"}{" "}
+                  <strong className="tabular-nums text-amber-700">{result.moon_degree_formatted}</strong>
                 </span>
-                <span className="rounded-xl bg-surface-muted px-3 py-1.5 text-foreground border border-border/80">
-                  Element: <strong>{result.traits.element}</strong>
+                <span className="rounded-xl bg-white px-3.5 py-1.5 text-ink-950 border border-border/80 shadow-2xs">
+                  {language === "bn" ? "তত্ত্ব:" : language === "hi" ? "तत्व:" : "Element:"}{" "}
+                  <strong className="text-ink-900">{activeTraits.element}</strong>
                 </span>
-                <span className="rounded-xl bg-surface-muted px-3 py-1.5 text-foreground border border-border/80">
-                  Modality: <strong>{result.traits.modality}</strong>
+                <span className="rounded-xl bg-white px-3.5 py-1.5 text-ink-950 border border-border/80 shadow-2xs">
+                  {language === "bn" ? "স্বভাব:" : language === "hi" ? "स्वभाव:" : "Modality:"}{" "}
+                  <strong className="text-ink-900">{activeTraits.modality}</strong>
                 </span>
-                <span className="rounded-xl bg-surface-muted px-3 py-1.5 text-foreground border border-border/80">
-                  Polarity: <strong>{result.traits.polarity}</strong>
+                <span className="rounded-xl bg-white px-3.5 py-1.5 text-ink-950 border border-border/80 shadow-2xs">
+                  {language === "bn" ? "প্রকৃতি:" : language === "hi" ? "प्रकृति:" : "Polarity:"}{" "}
+                  <strong className="text-ink-900">{activeTraits.polarity}</strong>
                 </span>
               </div>
             </div>
@@ -614,45 +737,50 @@ export default function RashiCalculatorPage() {
             {/* 2. Nakshatra & KP Sub-Lord Metrics Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
               <div className="rounded-2xl border border-border/80 bg-card p-4 text-center shadow-2xs">
-                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                  Nakshatra & Pada
+                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                  {language === "bn" ? "নক্ষত্র ও পদ" : language === "hi" ? "नक्षत्र एवं चरण" : "Nakshatra & Pada"}
                 </p>
-                <p className="mt-1 font-display text-base sm:text-lg font-bold text-foreground">
+                <p className="mt-1 font-display text-base sm:text-lg font-black text-ink-950">
                   {result.nakshatra_name}
                 </p>
-                <span className="inline-block mt-0.5 rounded-full bg-brand-500/10 px-2 py-0.2 text-[10px] font-bold text-brand-700 dark:text-brand-300">
-                  Pada {result.nakshatra_pada}
+                {/* Fixed High-Contrast Pada Badge */}
+                <span className="inline-block mt-1.5 rounded-full bg-amber-100 text-amber-950 border border-amber-300 px-3 py-0.5 text-xs font-black shadow-2xs">
+                  {language === "bn" ? `${result.nakshatra_pada} নং পদ` : language === "hi" ? `चरण ${result.nakshatra_pada}` : `Pada ${result.nakshatra_pada}`}
                 </span>
               </div>
 
               <div className="rounded-2xl border border-border/80 bg-card p-4 text-center shadow-2xs">
-                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                  Star Lord (KP)
+                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                  {language === "bn" ? "নক্ষত্রাধিপতি (KP)" : language === "hi" ? "नक्षत्र स्वामी" : "Star Lord (KP)"}
                 </p>
-                <p className="mt-1 font-display text-base sm:text-lg font-bold text-foreground">
+                <p className="mt-1 font-display text-base sm:text-lg font-black text-ink-950">
                   {result.nakshatra_lord}
                 </p>
-                <span className="text-[10px] text-muted-foreground">Governs Result</span>
+                <span className="text-[10px] font-semibold text-muted-foreground">
+                  {language === "bn" ? "ফল নির্দেশক" : language === "hi" ? "फल का स्रोत" : "Governs Result"}
+                </span>
               </div>
 
               <div className="rounded-2xl border border-border/80 bg-card p-4 text-center shadow-2xs">
-                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                  KP Sub-Lord
+                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                  {language === "bn" ? "উপ-অধিপতি (KP Sub)" : language === "hi" ? "उप-स्वामी (KP Sub)" : "KP Sub-Lord"}
                 </p>
-                <p className="mt-1 font-display text-base sm:text-lg font-bold text-foreground">
+                <p className="mt-1 font-display text-base sm:text-lg font-black text-amber-700">
                   {result.kp_sub_lord}
                 </p>
-                <span className="text-[10px] text-muted-foreground">Qualifies Outcome</span>
+                <span className="text-[10px] font-semibold text-muted-foreground">
+                  {language === "bn" ? "ফলাফল নির্ধারক" : language === "hi" ? "अंतिम परिणाम" : "Qualifies Outcome"}
+                </span>
               </div>
 
               <div className="rounded-2xl border border-border/80 bg-card p-4 text-center shadow-2xs">
-                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                  Ascendant (Lagna)
+                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                  {language === "bn" ? "লগ্ন (Ascendant)" : language === "hi" ? "लग्न (Ascendant)" : "Ascendant (Lagna)"}
                 </p>
-                <p className="mt-1 font-display text-base sm:text-lg font-bold text-foreground">
+                <p className="mt-1 font-display text-base sm:text-lg font-black text-ink-950">
                   {result.ascendant_rashi_name_en}
                 </p>
-                <span className="text-[10px] font-mono text-muted-foreground">
+                <span className="text-[10px] font-mono font-bold text-amber-700">
                   {result.ascendant_degree_formatted}
                 </span>
               </div>
@@ -661,28 +789,37 @@ export default function RashiCalculatorPage() {
             {/* 3. CRITICAL SECTION REQUESTED BY USER:
                 - What to Be Cautious About (কি কি থেকে সাবধান থাকতে হবে)
                 - What is Beneficial & Auspicious (কি করলে ভালো হবে)
+                - Fully Localized in the Selected Language (BN / HI / EN)
             */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Warnings & Cautions (সাবধানতা ও দুর্বলতা) */}
-              <div className="rounded-[26px] border border-rose-500/25 bg-gradient-to-br from-rose-500/[0.04] via-card to-card p-6 shadow-sm space-y-4">
-                <div className="flex items-center gap-2.5 pb-2 border-b border-rose-500/15">
-                  <div className="flex size-9 items-center justify-center rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-400">
+              <div className="rounded-[26px] border border-rose-500/30 bg-gradient-to-br from-rose-500/[0.05] via-card to-card p-6 sm:p-7 shadow-sm space-y-4">
+                <div className="flex items-center gap-3 pb-3 border-b border-rose-500/20">
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-rose-500/15 text-rose-700 shadow-xs">
                     <AlertTriangle className="size-5" />
                   </div>
                   <div>
-                    <h3 className="font-display text-base font-bold text-foreground">
-                      কী কী থেকে সাবধান থাকবেন (Cautions & Pitfalls)
+                    <h3 className="font-display text-base sm:text-lg font-extrabold text-ink-950">
+                      {language === "bn"
+                        ? "কী কী থেকে সাবধান থাকবেন (সতর্কতা)"
+                        : language === "hi"
+                        ? "किन-किन बातों से सावधान रहें (सावधानियां)"
+                        : "Cautions & Pitfalls (What to Avoid)"}
                     </h3>
-                    <p className="text-[11px] text-muted-foreground">
-                      আপনার রাশির স্বভাবজাত দুর্বলতা ও প্রতিকূল ক্ষেত্র
+                    <p className="text-[11px] font-semibold text-rose-700/90">
+                      {language === "bn"
+                        ? "আপনার রাশির স্বভাবজাত দুর্বলতা ও প্রতিকূল ক্ষেত্র"
+                        : language === "hi"
+                        ? "आपकी राशि की स्वाभाविक कमजोरियां और प्रतिकूल क्षेत्र"
+                        : "Innate vulnerabilities and traits to be mindful of"}
                     </p>
                   </div>
                 </div>
 
-                <ul className="space-y-2.5 text-xs sm:text-[13px] text-foreground/90">
-                  {result.traits.cautions_and_pitfalls.map((caution, idx) => (
-                    <li key={idx} className="flex items-start gap-2.5">
-                      <span className="mt-1 size-1.5 shrink-0 rounded-full bg-rose-500" />
+                <ul className="space-y-3 text-xs sm:text-[13px] text-ink-950">
+                  {activeTraits.cautions_and_pitfalls.map((caution, idx) => (
+                    <li key={idx} className="flex items-start gap-2.5 font-medium">
+                      <span className="mt-1.5 size-2 shrink-0 rounded-full bg-rose-600 shadow-xs" />
                       <span className="leading-relaxed">{caution}</span>
                     </li>
                   ))}
@@ -690,25 +827,33 @@ export default function RashiCalculatorPage() {
               </div>
 
               {/* Beneficial Actions & Remedies (করণীয় ও বৈদিক প্রতিকার) */}
-              <div className="rounded-[26px] border border-emerald-500/25 bg-gradient-to-br from-emerald-500/[0.04] via-card to-card p-6 shadow-sm space-y-4">
-                <div className="flex items-center gap-2.5 pb-2 border-b border-emerald-500/15">
-                  <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+              <div className="rounded-[26px] border border-emerald-500/30 bg-gradient-to-br from-emerald-500/[0.05] via-card to-card p-6 sm:p-7 shadow-sm space-y-4">
+                <div className="flex items-center gap-3 pb-3 border-b border-emerald-500/20">
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-700 shadow-xs">
                     <CheckCircle2 className="size-5" />
                   </div>
                   <div>
-                    <h3 className="font-display text-base font-bold text-foreground">
-                      কী করলে আপনার ভালো হবে (Beneficial Remedies)
+                    <h3 className="font-display text-base sm:text-lg font-extrabold text-ink-950">
+                      {language === "bn"
+                        ? "কী করলে আপনার ভালো হবে (শুভ প্রতিকার)"
+                        : language === "hi"
+                        ? "क्या करने से आपका कल्याण होगा (शुभ उपाय)"
+                        : "Beneficial Actions & Remedies (What to Do)"}
                     </h3>
-                    <p className="text-[11px] text-muted-foreground">
-                      সৌভাগ্য বৃদ্ধি, মানসিক শান্তি ও সাফল্যের বৈদিক উপায়
+                    <p className="text-[11px] font-semibold text-emerald-700/90">
+                      {language === "bn"
+                        ? "সৌভাগ্য বৃদ্ধি, মানসিক শান্তি ও সাফল্যের বৈদিক উপায়"
+                        : language === "hi"
+                        ? "सौभाग्य, मानसिक शांति और सफलता के अचूक उपाय"
+                        : "Auspicious Vedic practices to enhance luck and peace"}
                     </p>
                   </div>
                 </div>
 
-                <ul className="space-y-2.5 text-xs sm:text-[13px] text-foreground/90">
-                  {result.traits.beneficial_actions_and_remedies.map((remedy, idx) => (
-                    <li key={idx} className="flex items-start gap-2.5">
-                      <span className="mt-1 size-1.5 shrink-0 rounded-full bg-emerald-500" />
+                <ul className="space-y-3 text-xs sm:text-[13px] text-ink-950">
+                  {activeTraits.beneficial_actions_and_remedies.map((remedy, idx) => (
+                    <li key={idx} className="flex items-start gap-2.5 font-medium">
+                      <span className="mt-1.5 size-2 shrink-0 rounded-full bg-emerald-600 shadow-xs" />
                       <span className="leading-relaxed">{remedy}</span>
                     </li>
                   ))}
@@ -717,86 +862,117 @@ export default function RashiCalculatorPage() {
             </div>
 
             {/* 4. Lucky Attributes & Strengths */}
-            <div className="rounded-[26px] border border-border/80 bg-card p-6 sm:p-7 shadow-2xs space-y-5">
-              <div className="flex items-center justify-between pb-3 border-b border-border/60">
-                <h3 className="font-display text-base font-bold text-foreground flex items-center gap-2">
+            <div className="rounded-[26px] border border-amber-300/80 bg-card p-6 sm:p-7 shadow-2xs space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-3 border-b border-border/60">
+                <h3 className="font-display text-base sm:text-lg font-extrabold text-ink-950 flex items-center gap-2">
                   <Star className="size-4 text-amber-500 fill-amber-500" />
-                  <span>Lucky Attributes & Key Strengths</span>
+                  <span>
+                    {language === "bn"
+                      ? "শুভ বৈশিষ্ট্য ও রাশির কারকতা"
+                      : language === "hi"
+                      ? "शुभ गुण एवं राशि की विशेषताएं"
+                      : "Lucky Attributes & Key Strengths"}
+                  </span>
                 </h3>
                 <span className="text-xs text-muted-foreground">
-                  Body Governance: <strong className="text-foreground">{result.traits.body_parts}</strong>
+                  {language === "bn" ? "শারীরিক শাসন:" : language === "hi" ? "शारीरिक नियंत्रण:" : "Body Governance:"}{" "}
+                  <strong className="text-ink-950">{activeTraits.body_parts}</strong>
                 </span>
               </div>
 
+              {/* Attribute Cards Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
-                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/50">
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase flex items-center gap-1">
-                    <Gem className="size-3 text-amber-500" /> Lucky Gem
+                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
+                    <Gem className="size-3 text-amber-600" />{" "}
+                    <span>{language === "bn" ? "শুভ রত্ন" : language === "hi" ? "शुभ रत्न" : "Lucky Gem"}</span>
                   </p>
-                  <p className="mt-1 font-bold text-foreground">{result.traits.lucky_gemstone}</p>
+                  <p className="mt-1 font-extrabold text-ink-950">{activeTraits.lucky_gemstone}</p>
                 </div>
 
-                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/50">
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase flex items-center gap-1">
-                    <Palette className="size-3 text-brand-600" /> Lucky Colors
+                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
+                    <Palette className="size-3 text-indigo-600" />{" "}
+                    <span>{language === "bn" ? "শুভ বর্ণ" : language === "hi" ? "शुभ रंग" : "Lucky Colors"}</span>
                   </p>
-                  <p className="mt-1 font-bold text-foreground truncate">{result.traits.lucky_color}</p>
+                  <p className="mt-1 font-extrabold text-ink-950 truncate">{activeTraits.lucky_color}</p>
                 </div>
 
-                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/50">
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase">Lucky Numbers</p>
-                  <p className="mt-1 font-bold text-foreground">{result.traits.lucky_numbers.join(", ")}</p>
+                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                    {language === "bn" ? "শুভ সংখ্যা" : language === "hi" ? "शुभ अंक" : "Lucky Numbers"}
+                  </p>
+                  <p className="mt-1 font-extrabold text-ink-950">{result.traits.lucky_numbers.join(", ")}</p>
                 </div>
 
-                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/50">
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase">Lucky Day</p>
-                  <p className="mt-1 font-bold text-foreground">{result.traits.lucky_day}</p>
+                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                    {language === "bn" ? "শুভ বার" : language === "hi" ? "शुभ दिन" : "Lucky Day"}
+                  </p>
+                  <p className="mt-1 font-extrabold text-ink-950">{activeTraits.lucky_day}</p>
                 </div>
 
-                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/50">
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase">Ruling Deity</p>
-                  <p className="mt-1 font-bold text-foreground truncate">{result.traits.ruling_deity}</p>
+                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                    {language === "bn" ? "উপাস্য দেবতা" : language === "hi" ? "पूज्य देवता" : "Ruling Deity"}
+                  </p>
+                  <p className="mt-1 font-extrabold text-ink-950 truncate">{activeTraits.ruling_deity}</p>
                 </div>
 
-                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/50">
-                  <p className="text-[10px] font-semibold text-muted-foreground uppercase">Compatible Signs</p>
-                  <p className="mt-1 font-bold text-foreground truncate">{result.traits.compatible_rashis.join(", ")}</p>
+                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                    {language === "bn" ? "অনুকূল রাশি" : language === "hi" ? "अनुकूल राशियां" : "Compatible Signs"}
+                  </p>
+                  <p className="mt-1 font-extrabold text-ink-950 truncate">
+                    {activeTraits.compatible_rashis?.join(", ") || result.traits.compatible_rashis.join(", ")}
+                  </p>
                 </div>
               </div>
 
-              {/* Strengths Pills */}
+              {/* Strengths Pills with Crisp High-Contrast Text */}
               <div className="pt-2">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                  Personality Strengths
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2.5">
+                  {language === "bn" ? "ব্যক্তিত্বের প্রধান শক্তিসমূহ" : language === "hi" ? "व्यक्तित्व की प्रमुख विशेषताएं" : "Personality Strengths"}
                 </p>
                 <div className="flex flex-wrap gap-2 text-xs">
-                  {result.traits.strengths.map((str, idx) => (
+                  {activeTraits.strengths.map((str, idx) => (
                     <span
                       key={idx}
-                      className="rounded-xl bg-brand-500/10 px-3 py-1 font-semibold text-brand-800 dark:text-brand-300 border border-brand-500/20"
+                      className="rounded-xl bg-white text-ink-950 px-3.5 py-1.5 font-bold border border-amber-300/80 shadow-2xs hover:border-amber-400 transition-colors"
                     >
-                      ✦ {str}
+                      <span className="text-amber-600 mr-1.5 font-black">✦</span>
+                      <span>{str}</span>
                     </span>
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* 5. Kundali Chart Visualization with Style Switcher */}
-            <div className="rounded-[28px] border border-border/80 bg-card p-6 sm:p-8 shadow-2xs space-y-6">
+            {/* 5. Kundali Chart Visualization with Consistent Aesthetic */}
+            <div className="rounded-[28px] border border-amber-300/80 bg-card p-6 sm:p-8 shadow-2xs space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-border/60">
                 <div>
-                  <h3 className="font-display text-lg font-bold text-foreground flex items-center gap-2">
-                    <Eye className="size-4 text-amber-500" />
-                    <span>Birth Kundali Chart Visualization</span>
+                  <h3 className="font-display text-lg font-bold text-ink-950 flex items-center gap-2">
+                    <Eye className="size-4 text-amber-600" />
+                    <span>
+                      {language === "bn"
+                        ? "জন্ম কোষ্ঠী চক্র (Birth Kundali Chart)"
+                        : language === "hi"
+                        ? "जन्म कुंडली चक्र (Birth Kundali)"
+                        : "Birth Kundali Chart Visualization"}
+                    </span>
                   </h3>
                   <p className="text-xs text-muted-foreground">
-                    Ascendant (Lagna) and Moon placement calculated with {result.ayanamsa_name}
+                    {language === "bn"
+                      ? `${result.ayanamsa_name} অয়নামশা অনুযায়ী লগ্ন ও ৯টি গ্রহের সঠিক অবস্থান`
+                      : language === "hi"
+                      ? `${result.ayanamsa_name} अयनांश अनुसार लग्न और ९ ग्रहों की सही स्थिति`
+                      : `Ascendant (Lagna) and Moon placement calculated with ${result.ayanamsa_name}`}
                   </p>
                 </div>
 
                 {/* Style selector pills */}
-                <div className="flex items-center gap-1.5 rounded-xl border border-border bg-surface-muted p-1 text-xs font-semibold">
+                <div className="flex items-center gap-1.5 rounded-xl border border-border bg-surface-muted p-1 text-xs font-bold">
                   {(["north_indian", "south_indian", "east_indian"] as ChartStyleType[]).map((style) => (
                     <button
                       key={style}
@@ -804,7 +980,7 @@ export default function RashiCalculatorPage() {
                       onClick={() => setChartStyle(style)}
                       className={`rounded-lg px-2.5 py-1 transition-all ${
                         chartStyle === style
-                          ? "bg-brand-600 text-white shadow-2xs"
+                          ? "bg-amber-500 text-amber-950 font-black shadow-2xs"
                           : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
@@ -812,22 +988,23 @@ export default function RashiCalculatorPage() {
                         ? "North Indian"
                         : style === "south_indian"
                         ? "South Indian"
-                        : "East Indian"}
+                        : "East Indian (বাংলা)"}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Chart Renderer */}
+              {/* Chart Renderer with Consistent Parchment/Cosmic Background */}
               <div className="py-2">
                 <KundaliChart
                   planets={result.planets}
                   ascendantRashiIndex={result.ascendant_rashi_index}
                   chartStyle={chartStyle}
+                  language={language}
                 />
               </div>
 
-              {/* Re-calculate or Consult Callouts */}
+              {/* Re-calculate Callouts */}
               <div className="pt-4 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <button
                   type="button"
@@ -835,160 +1012,67 @@ export default function RashiCalculatorPage() {
                     setResult(null);
                     window.scrollTo({ top: 150, behavior: "smooth" });
                   }}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground"
                 >
                   <RotateCcw className="size-3.5" />
-                  <span>Recalculate with different details</span>
+                  <span>
+                    {language === "bn"
+                      ? "অন্য জন্ম বিবরণ দিয়ে পুনরায় গণনা করুন"
+                      : language === "hi"
+                      ? "अन्य जन्म विवरण से पुनः गणना करें"
+                      : "Recalculate with different details"}
+                  </span>
                 </button>
 
                 <div className="flex items-center gap-2">
                   <Link href="/appointments">
-                    <Button size="sm">
-                      Consult an Astrologer for Detailed Kundali
+                    <Button size="sm" className="bg-amber-500 text-amber-950 font-black hover:bg-amber-400">
+                      {language === "bn"
+                        ? "অভিজ্ঞ জ্যোতিষীর সাথে বিস্তারিত পরামর্শ করুন"
+                        : language === "hi"
+                        ? "विस्तृत कुंडली विश्लेषण के लिए ज्योतिषी से परामर्श लें"
+                        : "Consult an Astrologer for Detailed Kundali"}
                     </Button>
                   </Link>
                 </div>
               </div>
             </div>
-          </div>
-        )}
 
-        {/* =========================================================================
-            EDUCATIONAL & SEO CONTENT (Matching screenshot 3, 4 & user image wheel)
-        ========================================================================= */}
-        <div className="mx-auto max-w-5xl px-4 pt-16 sm:px-6 lg:px-8 space-y-12">
-          {/* Section 1: What is Rashi? & How It Works */}
-          <div className="rounded-[30px] border border-border/80 bg-card p-6 sm:p-10 shadow-xs space-y-8">
-            <div>
-              <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-foreground">
-                Rashi Calculator - Discover Your Moon Sign by Date of Birth
-              </h2>
-              <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Are you searching for &quot;What is my rashi?&quot; or want to know your authentic rashi name by date of birth?
-                In Indian Vedic and KP astrology, your **Rashi** (Moon Sign or Chandra Rashi) refers to the exact zodiac sign
-                in which the Moon was traversing at the precise moment and geographic coordinates of your birth.
-              </p>
-            </div>
+            {/* 6. Interactive Moon Sign Wheel Diagram */}
+            <div className="rounded-[28px] border border-border/80 bg-card p-6 sm:p-8 shadow-2xs space-y-6">
+              <div className="text-center space-y-1">
+                <h3 className="font-display text-lg sm:text-xl font-bold text-foreground">
+                  {language === "bn"
+                    ? "১২ রাশি ও ২৭ নক্ষত্রের মহাজাগতিক চক্র (Zodiac Wheel)"
+                    : language === "hi"
+                    ? "१२ राशि एवं २७ नक्षत्रों का ब्रह्मांडीय चक्र"
+                    : "12 Zodiac Signs & 27 Nakshatras Interactive Wheel"}
+                </h3>
+                <p className="text-xs text-muted-foreground max-w-xl mx-auto">
+                  {language === "bn"
+                    ? "আপনার রাশি ও নক্ষত্রের তাৎক্ষণিক মহাজাগতিক অবস্থান নিচে আলোকিত করে নির্দেশ করা হয়েছে।"
+                    : language === "hi"
+                    ? "आपकी राशि एवं नक्षत्र की खगोलीय स्थिति नीचे चक्र में प्रदर्शित है।"
+                    : "Your calculated Moon Sign and Nakshatra are illuminated on the zodiac mandala below."}
+                </p>
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-              {/* Left Column: Interactive Moon Sign Wheel from user screenshot */}
-              <div className="md:col-span-6 flex justify-center">
+              <div className="flex justify-center py-4">
                 <MoonSignWheel
-                  activeRashiIndex={result?.rashi_index ?? null}
-                  activeNakshatraIndex={result?.nakshatra_index ?? null}
+                  activeSignIndex={result.rashi_index}
+                  activeNakshatraIndex={result.nakshatra_index}
                 />
               </div>
-
-              {/* Right Column: Explanatory text */}
-              <div className="md:col-span-6 space-y-5 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                <div>
-                  <h3 className="font-display text-lg font-bold text-foreground mb-1.5">
-                    What is Rashi? (Moon Sign)
-                  </h3>
-                  <p>
-                    In Indian astrology, there are 12 zodiac signs: Aries (Mesha), Taurus (Vrisha), Gemini (Mithuna),
-                    Cancer (Karka), Leo (Simha), Virgo (Kanya), Libra (Tula), Scorpio (Vrischika), Sagittarius (Dhanu),
-                    Capricorn (Makara), Aquarius (Kumbha), and Pisces (Meena). Unlike Western astrology which primarily focuses
-                    on the Sun sign, Vedic astrology places paramount importance on the Moon Sign because the Moon governs your mind
-                    (Manas), emotional subconscious, mental peace, and life fortunes.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="font-display text-lg font-bold text-foreground mb-1.5">
-                    How the Rashi Calculator Works
-                  </h3>
-                  <p>
-                    Our high-precision calculator determines the exact mathematical degree of the Moon using ephemeris data.
-                    It computes the sidereal Nirayana zodiac by subtracting the correct Ayanamsa (such as Lahiri, KP Krishnamurti,
-                    or BV Raman), taking into account exact local coordinates and timezone offsets.
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-brand-500/20 bg-brand-500/[0.04] p-4 text-foreground/90">
-                  <p className="font-semibold text-xs text-brand-700 dark:text-brand-300 mb-1 flex items-center gap-1.5">
-                    <ShieldCheck className="size-4 text-brand-600" />
-                    <span>Astronomical Precision Guarantee</span>
-                  </p>
-                  <p className="text-[11px] text-muted-foreground">
-                    Calculated directly using Swiss Ephemeris with sub-arcsecond accuracy, aligning with genuine Hindu panchangam
-                    and KP astrological principles.
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
-
-          {/* Section 2: FAQ Accordion (Screenshot 4) */}
-          <div className="rounded-[30px] border border-border/80 bg-card p-6 sm:p-10 shadow-xs space-y-6">
-            <div className="text-center">
-              <h3 className="font-display text-xl sm:text-2xl font-bold text-foreground">
-                FAQ — Frequently Asked Questions
-              </h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Common questions about finding your accurate Moon Sign and Nakshatra
-              </p>
-            </div>
-
-            <div className="space-y-3 pt-2 text-xs sm:text-sm">
-              <details className="group rounded-2xl border border-border/80 bg-surface-muted/30 p-4 transition-all open:bg-surface-muted/60">
-                <summary className="flex cursor-pointer items-center justify-between font-bold text-foreground list-none">
-                  <span>What is the difference between Moon Sign (Rashi) and Sun Sign?</span>
-                  <ChevronDown className="size-4 text-muted-foreground transition-transform duration-200 group-open:rotate-180" />
-                </summary>
-                <p className="mt-3 text-muted-foreground leading-relaxed">
-                  Your Sun Sign represents your outer ego, conscious personality, and career drives based on which zodiac sign
-                  the Sun was in (taking approximately 30 days per sign). Your Moon Sign (Rashi) represents your inner soul,
-                  emotional nature, subconscious patterns, and mental health. Because the Moon changes signs every 2.25 days,
-                  it is vastly more personalized and accurate for daily predictions and matchmaking in Vedic astrology.
-                </p>
-              </details>
-
-              <details className="group rounded-2xl border border-border/80 bg-surface-muted/30 p-4 transition-all open:bg-surface-muted/60">
-                <summary className="flex cursor-pointer items-center justify-between font-bold text-foreground list-none">
-                  <span>Why is birth time so important for finding my Rashi?</span>
-                  <ChevronDown className="size-4 text-muted-foreground transition-transform duration-200 group-open:rotate-180" />
-                </summary>
-                <p className="mt-3 text-muted-foreground leading-relaxed">
-                  The Moon travels roughly 13 degrees per day (more than half a degree every hour). If you were born on a day
-                  when the Moon was transitioning between two signs (for instance, moving from Libra to Scorpio), even a few minutes
-                  can shift your Moon Sign and Nakshatra Pada. Providing an exact time of birth ensures 100% astronomical accuracy.
-                </p>
-              </details>
-
-              <details className="group rounded-2xl border border-border/80 bg-surface-muted/30 p-4 transition-all open:bg-surface-muted/60">
-                <summary className="flex cursor-pointer items-center justify-between font-bold text-foreground list-none">
-                  <span>What is Ayanamsa and which one should I choose?</span>
-                  <ChevronDown className="size-4 text-muted-foreground transition-transform duration-200 group-open:rotate-180" />
-                </summary>
-                <p className="mt-3 text-muted-foreground leading-relaxed">
-                  Ayanamsa is the angular difference between the Tropical (Sayana) and Sidereal (Nirayana) zodiac caused by the precession
-                  of equinoxes. **Lahiri (Chitra Paksha)** is the official standard adopted by the Government of India and the majority of
-                  Vedic astrologers. If you practice KP Astrology, choose **Krishnamurti (KP)**. If following Dr. B.V. Raman&apos;s system, select **BV Raman**.
-                </p>
-              </details>
-
-              <details className="group rounded-2xl border border-border/80 bg-surface-muted/30 p-4 transition-all open:bg-surface-muted/60">
-                <summary className="flex cursor-pointer items-center justify-between font-bold text-foreground list-none">
-                  <span>How does my Rashi affect my daily life and decisions?</span>
-                  <ChevronDown className="size-4 text-muted-foreground transition-transform duration-200 group-open:rotate-180" />
-                </summary>
-                <p className="mt-3 text-muted-foreground leading-relaxed">
-                  Your Rashi determines your innate mental temperament, how you react to stress, your emotional triggers,
-                  compatibility in romantic relationships, and favorable timings for major life decisions (Gochar / transits of planets
-                  like Saturn, Jupiter, and Rahu are always read from your Moon sign).
-                </p>
-              </details>
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Location Picker Modal */}
         <LocationPickerModal
           open={isMapModalOpen}
           onClose={() => setIsMapModalOpen(false)}
-          onSelect={handleLocationSelect}
-          currentPlace={place}
+          onSelectLocation={handleLocationSelect}
+          initialPlace={place}
         />
       </main>
 

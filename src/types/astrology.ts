@@ -11,6 +11,8 @@ export type HouseSystemType = "placidus" | "equal" | "whole_sign" | "koch";
 
 export type ChartStyleType = "north_indian" | "south_indian" | "east_indian";
 
+export type AstrologyLanguage = "en" | "bn" | "hi";
+
 export interface RashiCalculatePayload {
   name: string;
   gender: "male" | "female" | "other";
@@ -28,6 +30,7 @@ export interface RashiCalculatePayload {
   ayanamsa: AyanamsaType;
   house_system: HouseSystemType;
   chart_style: ChartStyleType;
+  language?: AstrologyLanguage;
 }
 
 export interface PlanetPosition {
@@ -100,6 +103,8 @@ export interface RashiCalculateResult {
   planets: PlanetPosition[];
   house_system: string;
   chart_style: ChartStyleType;
+  selected_language?: AstrologyLanguage;
+  translations?: Record<string, any>;
 }
 
 export interface GeoSearchResult {
