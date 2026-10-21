@@ -11,6 +11,8 @@ import type {
   ReviewPage,
   RashiCalculatePayload,
   RashiCalculateResult,
+  NakshatraCalculatePayload,
+  NakshatraCalculateResult,
 
   ReviewKind,
   Review,
@@ -360,6 +362,11 @@ export const astrologyApi = {
     api.post<RashiCalculateResult>(endpoints.astrology.rashi, body, { auth: false }),
 
   rashis: () => api.get<any[]>(endpoints.astrology.rashis, { auth: false }),
+
+  calculateNakshatra: (body: NakshatraCalculatePayload) =>
+    api.post<NakshatraCalculateResult>(endpoints.astrology.nakshatra, body, { auth: false }),
+
+  nakshatras: () => api.get<any[]>(endpoints.astrology.nakshatras, { auth: false }),
 
   geoSearch: (q: string) =>
     api.get<GeoSearchResult[]>(endpoints.astrology.geoSearch, {

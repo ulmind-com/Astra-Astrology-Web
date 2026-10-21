@@ -116,3 +116,124 @@ export interface GeoSearchResult {
   state?: string;
   city?: string;
 }
+
+// =============================================================================
+// Nakshatra (Birth Star) Types
+// =============================================================================
+
+export interface NakshatraCalculatePayload {
+  name: string;
+  gender: "male" | "female" | "other";
+  day: number;
+  month: number;
+  year: number;
+  hour?: number;
+  minute?: number;
+  second?: number;
+  period?: "AM" | "PM" | "24H";
+  place: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  timezone: number;
+  ayanamsa: AyanamsaType;
+  language?: AstrologyLanguage;
+}
+
+export interface AvakahadaChakra {
+  gana: string;
+  yoni: string;
+  yoni_animal: string;
+  nadi: string;
+  varna: string;
+  vashya: string;
+  tatva: string;
+  paya: string;
+}
+
+export interface NakshatraPadaDetail {
+  pada: number;
+  rashi_index: number;
+  rashi_name_en: string;
+  rashi_name_bn: string;
+  rashi_name_hi: string;
+  navamsha_sign: string;
+  namakshar: string;
+  namakshar_en: string;
+  namakshar_bn: string;
+  namakshar_hi: string;
+  is_native_pada: boolean;
+}
+
+export interface TarabalaItem {
+  tara_index: number;
+  tara_name: string;
+  tara_name_bn: string;
+  tara_name_hi: string;
+  is_auspicious: boolean;
+  significance: string;
+  nakshatras: string[];
+}
+
+export interface NakshatraTraits {
+  overview: string;
+  strengths: string[];
+  cautions_and_pitfalls: string[];
+  beneficial_actions_and_remedies: string[];
+  career_fields: string[];
+  lucky_color: string;
+  lucky_numbers: number[];
+  lucky_gemstone: string;
+  ruling_deity: string;
+  symbol: string;
+  sacred_tree: string;
+  beej_mantra: string;
+}
+
+export interface NakshatraCalculateResult {
+  name: string;
+  gender: string;
+  birth_date_formatted: string;
+  birth_time_formatted: string;
+  birth_place: string;
+  latitude: number;
+  longitude: number;
+  timezone: number;
+  ayanamsa_name: string;
+  ayanamsa_degrees: number;
+
+  nakshatra_index: number;
+  nakshatra_name_en: string;
+  nakshatra_name_bn: string;
+  nakshatra_name_hi: string;
+  pada: number;
+  star_lord: string;
+  kp_sub_lord: string;
+
+  moon_sidereal_longitude: number;
+  moon_degree_in_nakshatra: number;
+  moon_degree_in_nakshatra_formatted: string;
+  moon_degree_in_pada: number;
+  moon_degree_in_pada_formatted: string;
+  nakshatra_elapsed_percentage: number;
+
+  rashi_index: number;
+  rashi_name_en: string;
+  rashi_name_bn: string;
+  rashi_name_hi: string;
+  rashi_lord: string;
+
+  symbol: string;
+  deity: string;
+  sacred_tree: string;
+  beej_mantra: string;
+  current_namakshar: string;
+
+  avakahada: AvakahadaChakra;
+  padas: NakshatraPadaDetail[];
+  tarabala: TarabalaItem[];
+  traits: NakshatraTraits;
+
+  selected_language: AstrologyLanguage;
+  translations: Record<string, any>;
+}
+
