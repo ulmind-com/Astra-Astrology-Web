@@ -35,6 +35,7 @@ import {
   KP_UI_TRANSLATIONS,
   KP_PLANET_NAMES,
   KP_SIGN_NAMES,
+  KP_LOCALIZED_DASHA_INSIGHTS,
 } from "@/lib/kp-translations";
 import { useAuth } from "@/providers/auth-provider";
 import { useProfile } from "@/hooks/use-profile";
@@ -87,6 +88,7 @@ export default function KPCalculatorPage() {
   // Dasha Accordion states
   const [expandedMD, setExpandedMD] = React.useState<string | null>(null);
   const [expandedAD, setExpandedAD] = React.useState<string | null>(null);
+  const [expandedInsightMD, setExpandedInsightMD] = React.useState<string | null>(null);
 
   const resultsRef = React.useRef<HTMLDivElement>(null);
   const hasAutoFilled = React.useRef(false);
@@ -375,6 +377,7 @@ export default function KPCalculatorPage() {
       const activeMD = resp.dashas?.find((d: KPDashaPeriod) => d.is_current);
       if (activeMD) {
         setExpandedMD(activeMD.lord);
+        setExpandedInsightMD(activeMD.lord);
         const activeAD = activeMD.sub_periods?.find((ad: KPDashaPeriod) => ad.is_current);
         if (activeAD) setExpandedAD(activeAD.lord);
       }
@@ -1114,52 +1117,189 @@ export default function KPCalculatorPage() {
                 <p className="text-xs text-slate-600 mt-0.5">{ui.dashaSubheading}</p>
               </div>
 
-              <div className="p-4 sm:p-6 space-y-3">
+              <div className="p-4 sm:p-6 space-y-4">
                 {result.dashas?.map((md: KPDashaPeriod) => {
                   const isMDExpanded = expandedMD === md.lord;
+                  const isInsightExpanded = expandedInsightMD === md.lord;
+                  const insight =
+                    KP_LOCALIZED_DASHA_INSIGHTS[md.lord]?.[language] ||
+                    md.insight ||
+                    KP_LOCALIZED_DASHA_INSIGHTS[md.lord]?.["en"];
+
                   return (
                     <div
                       key={`md-${md.lord}`}
-                      className={`rounded-xl border transition-all ${
+                      className={`rounded-2xl border transition-all overflow-hidden ${
                         md.is_current
-                          ? "border-amber-400 bg-amber-50/40 shadow-xs"
-                          : "border-slate-200 bg-white"
+                          ? "border-amber-400 bg-amber-50/30 shadow-md ring-1 ring-amber-400/50"
+                          : "border-slate-200 bg-white shadow-xs"
                       }`}
                     >
                       {/* Mahadasha Header */}
-                      <button
-                        type="button"
-                        onClick={() => setExpandedMD(isMDExpanded ? null : md.lord)}
-                        className="w-full px-4 py-3.5 flex flex-wrap items-center justify-between gap-3 text-left hover:bg-amber-100/40 rounded-xl transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
+                      <div className="p-3.5 sm:p-4 flex flex-wrap items-center justify-between gap-3 bg-white">
+                        <button
+                          type="button"
+                          onClick={() => setExpandedMD(isMDExpanded ? null : md.lord)}
+                          className="flex items-center gap-2.5 text-left hover:opacity-80 transition-opacity"
+                        >
                           {isMDExpanded ? (
-                            <ChevronDown className="w-4 h-4 text-amber-600" />
+                            <ChevronDown className="w-4 h-4 text-amber-600 shrink-0" />
                           ) : (
-                            <ChevronRight className="w-4 h-4 text-slate-400" />
+                            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
                           )}
                           <div>
-                            <span className="text-sm font-extrabold text-slate-900">
-                              {md.lord} {ui.mahadashaTitle}
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm sm:text-base font-extrabold text-slate-900">
+                                {md.lord} {ui.mahadashaTitle}
+                              </span>
+                              <span className="text-xs font-semibold text-slate-500">
+                                ({md.duration})
+                              </span>
+                              {md.is_current && (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs animate-pulse">
+                                  <Sparkles className="w-2.5 h-2.5" />
+                                  <span>{ui.activeStatus}</span>
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[11px] font-mono text-slate-500 mt-0.5">
+                              {md.start_date} → {md.end_date}
+                            </div>
+                          </div>
+                        </button>
+
+                        {/* Action Buttons: Insights toggle */}
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setExpandedInsightMD(isInsightExpanded ? null : md.lord)
+                            }
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                              isInsightExpanded
+                                ? "bg-amber-600 text-white border-amber-700 shadow-xs"
+                                : md.is_current
+                                ? "bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300"
+                                : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
+                            }`}
+                          >
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span>
+                              {isInsightExpanded ? ui.hideInsightsBtn : ui.viewInsightsBtn}
                             </span>
-                            <span className="ml-2 text-xs font-semibold text-slate-500">
-                              ({md.duration})
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Detailed Insights & Guidance Card */}
+                      {isInsightExpanded && insight && (
+                        <div className="p-4 sm:p-6 bg-gradient-to-b from-amber-50/60 to-white border-t border-amber-200/80 space-y-4 animate-in fade-in duration-200">
+                          {/* Meta tags bar */}
+                          <div className="flex flex-wrap items-center gap-2 pb-3 border-b border-amber-200/50 text-xs">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-100/80 text-amber-900 font-semibold border border-amber-300">
+                              <span>📿 {ui.luckyDeity}:</span>
+                              <strong className="font-extrabold">{insight.deity}</strong>
+                            </span>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-900 font-semibold border border-blue-200">
+                              <span>🗓️ {ui.luckyDay}:</span>
+                              <strong className="font-extrabold">{insight.lucky_day}</strong>
+                            </span>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-50 text-purple-900 font-semibold border border-purple-200">
+                              <span>🎨 {ui.luckyColor}:</span>
+                              <strong className="font-extrabold">{insight.lucky_color}</strong>
                             </span>
                           </div>
-                          {md.is_current && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500 text-white shadow-xs animate-pulse">
-                              <Sparkles className="w-2.5 h-2.5" />
-                              <span>{ui.activeStatus}</span>
-                            </span>
-                          )}
-                        </div>
 
-                        <div className="text-xs font-mono text-slate-600 flex items-center gap-2">
-                          <span>{md.start_date}</span>
-                          <span className="text-slate-400">→</span>
-                          <span>{md.end_date}</span>
+                          {/* Overview / What to Expect */}
+                          <div className="bg-white/80 rounded-xl p-4 border border-amber-200/80 shadow-xs">
+                            <h4 className="text-xs font-extrabold text-amber-900 uppercase tracking-wider flex items-center gap-2 mb-1.5">
+                              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                              <span>{ui.overviewTitle}</span>
+                            </h4>
+                            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
+                              {insight.overview}
+                            </p>
+                          </div>
+
+                          {/* Career & Wealth */}
+                          <div className="bg-white/80 rounded-xl p-4 border border-amber-200/80 shadow-xs">
+                            <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-2 mb-1.5">
+                              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>{ui.careerWealthTitle}</span>
+                            </h4>
+                            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
+                              {insight.career_and_wealth}
+                            </p>
+                          </div>
+
+                          {/* 2-Column Grid: Do's & Don'ts */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Do's (Favorable Actions) */}
+                            <div className="bg-emerald-50/50 rounded-xl p-4 border border-emerald-200 shadow-xs">
+                              <h4 className="text-xs font-extrabold text-emerald-900 uppercase tracking-wider flex items-center gap-2 mb-3">
+                                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                                <span>{ui.favorableTitle}</span>
+                              </h4>
+                              <ul className="space-y-2 text-xs text-slate-700">
+                                {insight.favorable_actions.map((act, idx) => (
+                                  <li key={`fav-${idx}`} className="flex items-start gap-2">
+                                    <span className="text-emerald-600 font-bold shrink-0 mt-0.5">✦</span>
+                                    <span className="font-medium leading-relaxed">{act}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+
+                            {/* Don'ts (Cautions & Pitfalls) */}
+                            <div className="bg-rose-50/50 rounded-xl p-4 border border-rose-200 shadow-xs">
+                              <h4 className="text-xs font-extrabold text-rose-900 uppercase tracking-wider flex items-center gap-2 mb-3">
+                                <ShieldCheck className="w-4 h-4 text-rose-600 shrink-0" />
+                                <span>{ui.cautionsTitle}</span>
+                              </h4>
+                              <ul className="space-y-2 text-xs text-slate-700">
+                                {insight.cautions_and_pitfalls.map((pit, idx) => (
+                                  <li key={`pit-${idx}`} className="flex items-start gap-2">
+                                    <span className="text-rose-600 font-bold shrink-0 mt-0.5">⚠</span>
+                                    <span className="font-medium leading-relaxed">{pit}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+
+                          {/* Remedies & Upayas */}
+                          <div className="bg-amber-100/40 rounded-xl p-4 sm:p-5 border border-amber-300/80 shadow-xs">
+                            <h4 className="text-xs font-extrabold text-amber-950 uppercase tracking-wider flex items-center gap-2 mb-3">
+                              <BookOpen className="w-4 h-4 text-amber-700 shrink-0" />
+                              <span>{ui.remediesTitle}</span>
+                            </h4>
+                            <ul className="space-y-2 text-xs text-slate-800">
+                              {insight.remedies.map((rem, idx) => (
+                                <li key={`rem-${idx}`} className="flex items-start gap-2.5">
+                                  <span className="text-amber-700 font-extrabold shrink-0 mt-0.5">🪔</span>
+                                  <span className="font-semibold leading-relaxed">{rem}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          {/* Sacred Mantras */}
+                          <div className="bg-gradient-to-r from-amber-500/10 via-amber-600/10 to-amber-500/10 rounded-xl p-4 border border-amber-400/60 shadow-xs space-y-2">
+                            <div className="text-xs font-bold text-amber-900">
+                              <span className="text-slate-500">{ui.beejMantra}:</span>{" "}
+                              <span className="font-extrabold font-serif text-amber-950">
+                                {insight.beej_mantra}
+                              </span>
+                            </div>
+                            <div className="text-xs font-bold text-amber-900 pt-1 border-t border-amber-200/50">
+                              <span className="text-slate-500">{ui.gayatriMantra}:</span>{" "}
+                              <span className="font-extrabold font-serif text-amber-950 italic">
+                                {insight.gayatri_mantra}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                      </button>
+                      )}
 
                       {/* Level 2: Antardashas */}
                       {isMDExpanded && md.sub_periods && (

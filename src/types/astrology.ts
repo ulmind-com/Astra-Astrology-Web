@@ -326,6 +326,19 @@ export interface KPPlanetDetail {
   is_retrograde: boolean;
 }
 
+export interface KPDashaInsight {
+  overview: string;
+  career_and_wealth: string;
+  favorable_actions: string[];
+  cautions_and_pitfalls: string[];
+  remedies: string[];
+  lucky_day: string;
+  lucky_color: string;
+  deity: string;
+  beej_mantra: string;
+  gayatri_mantra: string;
+}
+
 export interface KPDashaPeriod {
   lord: string;
   level: number;
@@ -333,6 +346,7 @@ export interface KPDashaPeriod {
   end_date: string;
   duration: string;
   is_current: boolean;
+  insight?: KPDashaInsight;
   sub_periods?: KPDashaPeriod[];
 }
 
