@@ -15,6 +15,7 @@ const LINKS = [
   { href: "/astrologers", label: "Astrologers" },
   { href: "/appointments", label: "Appointments" },
   { href: "/face-reading", label: "Face reading" },
+  { href: "/rashi-calculator", label: "Rashi Calculator" },
   { href: "/#services", label: "Services" },
   { href: "/#how-it-works", label: "How it works" },
 ];
