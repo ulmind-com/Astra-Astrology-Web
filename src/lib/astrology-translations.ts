@@ -5,7 +5,7 @@
  */
 
 export interface LocalizedTraits {
-  name: string;
+  name: string; 
   element: string;
   modality: string;
   polarity: string;
