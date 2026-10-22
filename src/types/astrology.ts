@@ -488,4 +488,136 @@ export interface KPCalculateResult {
   translations: Record<string, any>;
 }
 
+// =============================================================================
+// Kundli & Planetary Position Types
+// =============================================================================
+
+export interface KundliCalculatePayload {
+  name: string;
+  gender: "male" | "female" | "other";
+  day: number;
+  month: number;
+  year: number;
+  hour?: number;
+  minute?: number;
+  second?: number;
+  period?: "AM" | "PM" | "24H";
+  place: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  timezone: number;
+  ayanamsa?: AyanamsaType;
+  house_system?: HouseSystemType;
+  chart_style?: ChartStyleType;
+  language?: AstrologyLanguage;
+}
+
+export interface KundliPersonalDetails {
+  name: string;
+  gender: string;
+  date_of_birth: string;
+  time_of_birth: string;
+  day: string;
+  vedic_day: string;
+}
+
+export interface KundliAstronomicalInfo {
+  julian_day: number;
+  ayan_type: string;
+  house_system: string;
+  place: string;
+  longitude_formatted: string;
+  latitude_formatted: string;
+}
+
+export interface KundliAstroPositions {
+  asc_lord: string;
+  asc: string;
+  yoga: string;
+  tithi: string;
+  sunset: string;
+  sunrise: string;
+}
+
+export interface KundliPlanetaryInfo {
+  bal_dasa: string;
+  karan: string;
+  nakshatra_lord: string;
+  nakshatra: string;
+  rasi_lord: string;
+  rasi: string;
+}
+
+export interface KundliChartPlanet {
+  name: string;
+  symbol: string;
+  code: string;
+  degree: number;
+  sign_num: number;
+  house_num: number;
+  d9_sign_num: number;
+  d9_house_num: number;
+  is_retrograde: boolean;
+}
+
+export interface KundliTableRow {
+  name: string;
+  longitude_formatted: string;
+  sign: string;
+  nakshatra: string;
+  nakshatra_lord: string;
+  pada: number;
+  sub_lord: string;
+  full_degree_formatted: string;
+}
+
+export interface KundliDashaAntar {
+  lord: string;
+  duration: string;
+  end_date: string;
+}
+
+export interface KundliDashaCard {
+  title: string;
+  lord: string;
+  years: number;
+  antardashas: KundliDashaAntar[];
+}
+
+export interface KundliYogaItem {
+  name: string;
+  is_present: boolean;
+  description: string;
+  auspicious: boolean;
+}
+
+export interface KundliActiveYogaDetail {
+  name: string;
+  description: string;
+  effects: string;
+}
+
+export interface KundliCalculateResult {
+  personal_details: KundliPersonalDetails;
+  astronomical_info: KundliAstronomicalInfo;
+  astro_positions: KundliAstroPositions;
+  planetary_info: KundliPlanetaryInfo;
+
+  d1_planets: KundliChartPlanet[];
+  d9_planets: KundliChartPlanet[];
+  d1_asc_sign: number;
+  d9_asc_sign: number;
+
+  planets_table: KundliTableRow[];
+  houses_table: KundliTableRow[];
+  dashas_grid: KundliDashaCard[];
+
+  yogas_status: KundliYogaItem[];
+  active_yogas_details: KundliActiveYogaDetail[];
+
+  selected_language: AstrologyLanguage;
+  translations?: Record<string, any>;
+}
+
+
 

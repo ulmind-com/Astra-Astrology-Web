@@ -12,13 +12,14 @@ import { cn } from "@/lib/utils";
 import { formatCoins } from "@/types";
 
 const LINKS = [
+  { href: "/kundli", label: "Kundli" },
+  { href: "/kp-calculator", label: "KP Astrology" },
+  { href: "/dasha-calculator", label: "Dasha Calculator" },
+  { href: "/rashi-calculator", label: "Rashi Calculator" },
+  { href: "/nakshatra-calculator", label: "Nakshatra Calculator" },
   { href: "/astrologers", label: "Astrologers" },
   { href: "/appointments", label: "Appointments" },
   { href: "/face-reading", label: "Face reading" },
-  { href: "/rashi-calculator", label: "Rashi Calculator" },
-  { href: "/nakshatra-calculator", label: "Nakshatra Calculator" },
-  { href: "/kp-calculator", label: "KP Astrology" },
-  { href: "/dasha-calculator", label: "Dasha Calculator" },
   { href: "/#services", label: "Services" },
   { href: "/#how-it-works", label: "How it works" },
 ];

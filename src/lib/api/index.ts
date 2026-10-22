@@ -19,6 +19,8 @@ import type {
   NakshatraCalculateResult,
   KPCalculatePayload,
   KPCalculateResult,
+  KundliCalculatePayload,
+  KundliCalculateResult,
 
   ReviewKind,
   Review,
@@ -376,6 +378,9 @@ export const astrologyApi = {
 
   calculateKp: (body: KPCalculatePayload) =>
     api.post<KPCalculateResult>(endpoints.astrology.kp, body, { auth: false }),
+
+  calculateKundli: (body: KundliCalculatePayload) =>
+    api.post<KundliCalculateResult>(endpoints.astrology.kundli, body, { auth: false }),
 
   /**
    * Geocode a birth place. Passing the birth date makes the returned offset the one
