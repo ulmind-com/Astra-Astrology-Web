@@ -352,6 +352,84 @@ export interface NakshatraCalculateResult {
 
   selected_language: AstrologyLanguage;
   translations: Record<string, any>;
+
+  /** Panchang elements the client's own reference report lists. */
+  panchang?: BirthPanchang | null;
+  /** Computed, but it disagrees with the client's reference - see DisputedValue. */
+  paya?: DisputedValue | null;
+  /** Techniques from the client's nakshatra books, evaluated against this chart. */
+  client_rules?: ClientNakshatraRules | null;
+  /** Classifications for the Moon's rashi, from the client's 01.pdf. */
+  rashi_client_rules?: ClientSignProfile | null;
+
+  timezone_resolution?: TimezoneResolution | null;
+  calculation?: CalculationMeta | null;
+
+  planets?: PlanetPosition[];
+  ascendant_longitude?: number | null;
+  ascendant_rashi_name_en?: string | null;
+  ascendant_nakshatra_name?: string | null;
+}
+
+export interface PanchangElement {
+  index: number;
+  name: string;
+  name_en: string;
+  percentage_elapsed?: number | null;
+}
+
+export interface TithiDetail extends PanchangElement {
+  paksha: string;
+  paksha_en: string;
+}
+
+export interface BirthPanchang {
+  tithi: TithiDetail;
+  yoga: PanchangElement;
+  karana: PanchangElement;
+  yunja: PanchangElement;
+  sunrise?: string | null;
+  sunset?: string | null;
+}
+
+/** A value we compute but cannot source, where our answer is known to be contested. */
+export interface DisputedValue {
+  value: string;
+  is_disputed: boolean;
+  notice?: string | null;
+  evidence: string[];
+}
+
+export interface NakshatraTechnique {
+  technique_no: number;
+  theme: string;
+  rule: string;
+  /** Book and technique number, so it can be checked against the original. */
+  source: string;
+  /** Why this technique applies to this particular chart. */
+  because: string[];
+}
+
+export interface NakshatraBookReference {
+  lord: string;
+  deity: string;
+  symbol: string;
+  padas: string;
+  source: string;
+}
+
+export interface ClientNakshatraRules {
+  nakshatra_index: number;
+  nakshatra_name: string;
+  /** False for Mula to Revati: the volume covering them was never supplied. */
+  has_client_source: boolean;
+  matched: NakshatraTechnique[];
+  not_matched: NakshatraTechnique[];
+  total_available: number;
+  is_afflicted: boolean;
+  affliction_reasons: string[];
+  book_reference?: NakshatraBookReference | null;
+  unavailable_note?: string | null;
 }
 
 // =============================================================================
@@ -372,6 +450,8 @@ export interface KPCalculatePayload {
   latitude?: number | null;
   longitude?: number | null;
   timezone: number;
+  /** IANA zone name; lets the backend resolve the exact offset at the birth instant. */
+  timezone_name?: string | null;
   ayanamsa?: AyanamsaType;
   house_system?: HouseSystemType;
   language?: AstrologyLanguage;
