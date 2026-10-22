@@ -1,29 +1,29 @@
 "use client";
 
+/**
+ * The site chrome.
+ *
+ * On desktop this renders the vertical rail and nothing else: the rail carries the
+ * brand, every destination and the account controls, so a top bar would only repeat
+ * them. On mobile it renders a slim top bar holding the brand, the coin balance and
+ * a menu, because the floating bottom bar only has room for five of the eleven
+ * destinations and the other six still have to be reachable.
+ *
+ * Pages import this one component, so neither the rail nor the mobile bar has to be
+ * wired into each page separately.
+ */
+
 import { Coins, LogOut, Menu, Sparkles, User, Wallet, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 
 import { Avatar, Button } from "@/components/ui";
+import { RAIL_LINKS, SiteRail } from "@/components/layout/site-rail";
 import { useAuth } from "@/providers/auth-provider";
 import { useWallet } from "@/hooks/use-wallet";
 import { cn } from "@/lib/utils";
 import { formatCoins } from "@/types";
-
-const LINKS = [
-  { href: "/kundli", label: "Kundli" },
-  { href: "/kundli-matching", label: "Kundli Matching" },
-  { href: "/kp-calculator", label: "KP Astrology" },
-  { href: "/dasha-calculator", label: "Dasha Calculator" },
-  { href: "/rashi-calculator", label: "Rashi Calculator" },
-  { href: "/nakshatra-calculator", label: "Nakshatra Calculator" },
-  { href: "/astrologers", label: "Astrologers" },
-  { href: "/appointments", label: "Appointments" },
-  { href: "/face-reading", label: "Face reading" },
-  { href: "/#services", label: "Services" },
-  { href: "/#how-it-works", label: "How it works" },
-];
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -32,225 +32,218 @@ export function SiteHeader() {
   const coinsBalance = walletData?.wallet?.balance_coins;
   const [open, setOpen] = React.useState(false);
 
-  React.useEffect(() => setOpen(false), [pathname]);
+  // Navigating closes the sheet. Adjusted during render rather than in an effect,
+  // so the new page never paints for a frame with the old page's menu still over it.
+  const [lastPath, setLastPath] = React.useState(pathname);
+  if (pathname !== lastPath) {
+    setLastPath(pathname);
+    if (open) setOpen(false);
+  }
 
-  // Lock body scroll when mobile menu is open
+  // Lock the page behind the sheet, and restore on the way out.
   React.useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = previous;
     };
+  }, [open]);
+
+  // Escape closes the sheet, which a tap-outside alone does not cover for keyboards.
+  React.useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-xl border-b border-border/60">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
-          <Link
-            href="/"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-2.5 font-semibold group shrink-0"
-          >
-            <span className="medallion flex size-9 items-center justify-center rounded-xl text-ink-900 shadow-soft transition-all duration-300 group-hover:scale-105">
-              <Sparkles className="size-4" />
+      <SiteRail />
+
+      {/* Mobile top bar */}
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-xl md:hidden">
+        <div className="flex h-14 items-center justify-between gap-3 px-4">
+          <Link href="/" className="group flex shrink-0 items-center gap-2.5">
+            <span className="medallion flex size-8 items-center justify-center rounded-xl text-ink-900 shadow-soft transition-transform duration-300 group-active:scale-95">
+              <Sparkles className="size-[15px]" />
             </span>
-            <span className="font-display text-[15px] font-bold tracking-wide text-foreground">
+            <span className="font-display text-[14px] font-bold tracking-wide text-foreground">
               Astra Astrology
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-0.5 md:flex">
-            {LINKS.map((link) => (
+          <div className="flex items-center gap-2">
+            {isSignedIn && (
+              <Link
+                href="/account/wallet"
+                aria-label="Wallet and coin balance"
+                className="flex items-center gap-1.5 rounded-full border border-brand-400/50 bg-brand-100/80 px-2.5 py-1 text-xs font-bold text-brand-950 shadow-2xs transition-all active:scale-95"
+              >
+                <Coins className="size-3.5 text-brand-800" />
+                <span className="tabular-nums">
+                  {coinsBalance !== undefined ? formatCoins(coinsBalance) : "—"}
+                </span>
+              </Link>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-label={open ? "Close menu" : "Open menu"}
+              aria-expanded={open}
+              className="relative flex size-9 items-center justify-center rounded-xl text-foreground transition-colors hover:bg-surface-muted active:scale-95"
+            >
+              {/* Both icons are mounted so they can cross-fade and rotate into
+                  each other rather than popping. */}
+              <Menu
+                className={cn(
+                  "absolute size-5 transition-all duration-300",
+                  open ? "rotate-90 scale-75 opacity-0" : "rotate-0 scale-100 opacity-100",
+                )}
+              />
+              <X
+                className={cn(
+                  "absolute size-5 transition-all duration-300",
+                  open ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-75 opacity-0",
+                )}
+              />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Backdrop */}
+      <div
+        onClick={() => setOpen(false)}
+        aria-hidden
+        className={cn(
+          "fixed inset-0 z-40 bg-ink-950/25 backdrop-blur-[2px] transition-opacity duration-300 md:hidden",
+          open ? "opacity-100" : "pointer-events-none opacity-0",
+        )}
+      />
+
+      {/* Menu sheet. It is always mounted so it can slide rather than appear. */}
+      <div
+        id="mobile-menu"
+        className={cn(
+          "fixed inset-x-0 top-14 z-40 md:hidden",
+          "max-h-[calc(100dvh-7.5rem)] overflow-y-auto overscroll-contain",
+          "rounded-b-[28px] border-b border-border/80 bg-surface/98 px-4 pb-6 pt-4 shadow-2xl backdrop-blur-2xl",
+          "transition-all duration-[360ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
+          open
+            ? "translate-y-0 opacity-100"
+            : "pointer-events-none -translate-y-4 opacity-0",
+        )}
+        {...(open ? {} : { inert: "" as unknown as boolean })}
+      >
+        {isSignedIn && user && (
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-brand-500/20 bg-cream-100/90 p-3.5">
+            <div className="flex min-w-0 items-center gap-3">
+              <Avatar src={user.avatar_url} name={user.full_name} size="md" />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold text-ink-950">
+                  {user.full_name || "Welcome"}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+              </div>
+            </div>
+            <Link
+              href="/account/wallet"
+              className="flex shrink-0 items-center gap-1.5 rounded-xl bg-brand-300 px-3 py-1.5 text-xs font-bold text-ink-950 shadow-2xs transition-colors hover:bg-brand-400"
+            >
+              <Coins className="size-3.5 text-brand-800" />
+              <span>
+                {coinsBalance !== undefined ? `${formatCoins(coinsBalance)} coins` : "Wallet"}
+              </span>
+            </Link>
+          </div>
+        )}
+
+        <nav aria-label="All destinations" className="grid grid-cols-2 gap-2">
+          {RAIL_LINKS.map((link, index) => {
+            const Icon = link.icon;
+            const active =
+              !link.href.startsWith("/#") &&
+              (pathname === link.href || pathname.startsWith(`${link.href}/`));
+            return (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "rounded-xl px-3.5 py-2 text-sm font-medium transition-all duration-200",
-                  pathname === link.href
-                    ? "bg-brand-200/60 text-ink-800 ring-1 ring-brand-500/35 shadow-soft"
-                    : "text-muted-foreground hover:bg-surface-muted hover:text-foreground",
+                  "flex min-h-[52px] items-center gap-2.5 rounded-2xl border px-3 py-2.5 text-[13px] font-semibold",
+                  "transition-all duration-300",
+                  active
+                    ? "border-brand-500/40 bg-brand-200/70 text-ink-950"
+                    : "border-border/70 bg-surface-muted/60 text-ink-700 active:scale-[0.97]",
+                  // Rows stagger in behind the sheet so the list arrives rather
+                  // than snapping into place all at once.
+                  open ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0",
                 )}
+                style={{ transitionDelay: open ? `${60 + index * 22}ms` : "0ms" }}
               >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-2 sm:gap-2.5">
-            {isSignedIn ? (
-              <>
-                {/* Quick Wallet Button - Visible on Desktop & Mobile */}
-                <Link
-                  href="/account/wallet"
+                <Icon
                   className={cn(
-                    "flex items-center gap-1.5 rounded-full border transition-all duration-200",
-                    "border-brand-400/50 bg-brand-100/80 hover:bg-brand-200/90 text-brand-950 font-bold",
-                    "px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs shadow-2xs hover:shadow-soft active:scale-95",
+                    "size-4 shrink-0",
+                    active ? "stroke-[2.3] text-brand-900" : "stroke-[1.9] text-ink-500",
                   )}
-                  title="My Wallet & Coin Balance"
-                  aria-label="Wallet"
-                >
-                  <Coins className="size-3.5 text-brand-800" />
-                  <span className="tabular-nums font-bold">
-                    {coinsBalance !== undefined ? formatCoins(coinsBalance) : "—"}
-                  </span>
-                  <span className="hidden sm:inline text-[11px] font-medium text-ink-700">
-                    coins
-                  </span>
-                </Link>
+                />
+                <span className="leading-tight">{link.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
 
-                <Link
-                  href="/account"
-                  className="flex items-center gap-2 rounded-full p-0.5 hover:ring-2 hover:ring-brand-400 transition-all shrink-0"
-                  aria-label="My account"
-                >
-                  <Avatar src={user?.avatar_url} name={user?.full_name} size="sm" />
-                </Link>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="hidden md:inline-flex"
-                  onClick={() => signOut({ redirectTo: "/" })}
-                >
-                  <LogOut className="size-4" />
-                  Sign out
+        <div className="mt-4 border-t border-border/60 pt-4">
+          {isSignedIn ? (
+            <div className="space-y-1">
+              <Link
+                href="/account"
+                className="flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm font-semibold text-ink-800 transition-colors hover:bg-surface-muted"
+              >
+                <User className="size-4 text-brand-700" /> My Account &amp; Settings
+              </Link>
+              <Link
+                href="/account/wallet"
+                className="flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-ink-800 transition-colors hover:bg-surface-muted"
+              >
+                <span className="flex items-center gap-2.5">
+                  <Wallet className="size-4 text-brand-700" /> Wallet &amp; Recharge
+                </span>
+                <span className="rounded-full bg-brand-200/80 px-2.5 py-0.5 text-xs font-bold tabular-nums text-brand-900">
+                  {coinsBalance !== undefined ? `${formatCoins(coinsBalance)} coins` : "Recharge"}
+                </span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  signOut({ redirectTo: "/" });
+                }}
+                className="flex w-full items-center gap-2.5 rounded-xl px-4 py-3 text-left text-sm font-semibold text-danger transition-colors hover:bg-danger/10"
+              >
+                <LogOut className="size-4" /> Sign out
+              </button>
+            </div>
+          ) : (
+            <div className="flex gap-2.5">
+              <Link href="/login" className="flex-1">
+                <Button variant="secondary" className="h-11 w-full text-sm font-semibold">
+                  Sign in
                 </Button>
-              </>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Link href="/login">
-                  <Button variant="ghost" size="sm" className="h-9 px-3 text-xs sm:text-sm">
-                    Sign in
-                  </Button>
-                </Link>
-                <Link href="/register" className="hidden sm:inline-flex">
-                  <Button size="sm" className="h-9 px-3.5 text-xs sm:text-sm">Get started</Button>
-                </Link>
-              </div>
-            )}
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden rounded-xl size-10"
-              onClick={() => setOpen((v) => !v)}
-              aria-label={open ? "Close menu" : "Open menu"}
-              aria-expanded={open}
-            >
-              {open ? <X className="size-5" /> : <Menu className="size-5" />}
-            </Button>
-          </div>
+              </Link>
+              <Link href="/register" className="flex-1">
+                <Button className="h-11 w-full text-sm font-semibold shadow-glow">
+                  Get started
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
-
-        {/* Mobile Dropdown Menu Sheet */}
-        {open && (
-          <div className="md:hidden border-t border-border/80 bg-surface/98 backdrop-blur-2xl px-4 py-4 shadow-xl max-h-[calc(100dvh-4rem)] overflow-y-auto">
-            {/* Signed-in user card on mobile */}
-            {isSignedIn && user && (
-              <div className="mb-4 rounded-2xl bg-cream-100/90 p-3.5 border border-brand-500/20 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <Avatar src={user.avatar_url} name={user.full_name} size="md" />
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-bold text-ink-950">{user.full_name || "Welcome"}</p>
-                    <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-                  </div>
-                </div>
-                <Link
-                  href="/account/wallet"
-                  onClick={() => setOpen(false)}
-                  className="shrink-0 flex items-center gap-1.5 rounded-xl bg-brand-300 px-3 py-1.5 text-xs font-bold text-ink-950 hover:bg-brand-400 transition-colors shadow-2xs"
-                >
-                  <Coins className="size-3.5 text-brand-800" />
-                  <span>{coinsBalance !== undefined ? `${formatCoins(coinsBalance)} coins` : "Wallet"}</span>
-                </Link>
-              </div>
-            )}
-
-            <nav className="flex flex-col gap-1">
-              {LINKS.map((link) => {
-                const active = pathname === link.href;
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setOpen(false)}
-                    className={cn(
-                      "flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-all",
-                      active
-                        ? "bg-brand-200/70 text-ink-950 font-bold"
-                        : "text-ink-700 hover:bg-surface-muted hover:text-foreground",
-                    )}
-                  >
-                    <span>{link.label}</span>
-                    {active && <span className="size-1.5 rounded-full bg-brand-700" />}
-                  </Link>
-                );
-              })}
-
-              <div className="mt-3 border-t border-border/60 pt-3">
-                {isSignedIn ? (
-                  <div className="space-y-1">
-                    <Link
-                      href="/account"
-                      onClick={() => setOpen(false)}
-                      className="flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm font-semibold hover:bg-surface-muted transition-colors text-ink-800"
-                    >
-                      <User className="size-4 text-brand-700" /> My Account & Settings
-                    </Link>
-                    <Link
-                      href="/account/wallet"
-                      onClick={() => setOpen(false)}
-                      className="flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold hover:bg-surface-muted transition-colors text-ink-800"
-                    >
-                      <span className="flex items-center gap-2.5">
-                        <Wallet className="size-4 text-brand-700" /> Wallet & Recharge
-                      </span>
-                      <span className="text-xs font-bold text-brand-900 bg-brand-200/80 px-2.5 py-0.5 rounded-full tabular-nums">
-                        {coinsBalance !== undefined ? `${formatCoins(coinsBalance)} coins` : "Recharge"}
-                      </span>
-                    </Link>
-                    <button
-                      onClick={() => {
-                        setOpen(false);
-                        signOut({ redirectTo: "/" });
-                      }}
-                      className="flex w-full items-center gap-2.5 rounded-xl px-4 py-3 text-left text-sm font-semibold text-danger hover:bg-danger/10 transition-colors"
-                    >
-                      <LogOut className="size-4" /> Sign out
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex gap-2.5 pt-1">
-                    <Link href="/login" onClick={() => setOpen(false)} className="flex-1">
-                      <Button variant="secondary" className="w-full h-11 text-sm font-semibold">
-                        Sign in
-                      </Button>
-                    </Link>
-                    <Link href="/register" onClick={() => setOpen(false)} className="flex-1">
-                      <Button className="w-full h-11 text-sm font-semibold shadow-glow">
-                        Get started
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </nav>
-          </div>
-        )}
-      </header>
-
-      {/* Dim backdrop when drawer is open */}
-      {open && (
-        <div
-          onClick={() => setOpen(false)}
-          className="fixed inset-0 top-16 z-30 bg-ink-950/20 backdrop-blur-2xs md:hidden"
-          aria-hidden
-        />
-      )}
+      </div>
     </>
   );
 }

@@ -44,7 +44,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning className={`${poppins.variable} ${geistMono.variable} h-full`}>
-      <body className="min-h-full pb-20 md:pb-0">
+      <body className="min-h-full pb-[104px] md:pb-0">
         <ThemeProvider>
           <QueryProvider>
             <RealtimeProvider>

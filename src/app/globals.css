@@ -420,6 +420,58 @@
   }
 }
 
+/* --------------------------------------------------------------------------
+   Mobile bar notch.
+
+   The active destination is lifted out of the bar into a circle, and the bar has a
+   circular bite taken out beneath it so the page shows through rather than a disc
+   of one fixed colour sitting on top - which only looks right when whatever is
+   behind the bar happens to be that colour.
+
+   The bite is a radial-gradient mask. A plain custom property cannot be animated,
+   so `--notch-x` is registered with a type: that makes it interpolable, and the
+   notch then travels with the circle instead of jumping to the new tab. Where
+   @property is unsupported the mask still renders, it just snaps.
+   -------------------------------------------------------------------------- */
+@property --notch-x {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 50%;
+}
+
+.nav-notch {
+  --notch-radius: 33px;
+  -webkit-mask-image: radial-gradient(
+    circle var(--notch-radius) at var(--notch-x) -2px,
+    transparent calc(var(--notch-radius) - 1px),
+    #000 var(--notch-radius)
+  );
+  mask-image: radial-gradient(
+    circle var(--notch-radius) at var(--notch-x) -2px,
+    transparent calc(var(--notch-radius) - 1px),
+    #000 var(--notch-radius)
+  );
+  transition: --notch-x 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* --------------------------------------------------------------------------
+   Navigation rail offset.
+
+   The rail is fixed, so pages have to be pushed clear of it. Keying the padding
+   off `:has()` rather than a class on <body> means no page has to know the rail
+   exists, and pages that do not render it - login, register, the live call and
+   chat screens - keep the full width automatically.
+
+   The width matches the rail's collapsed width. The rail expands over the page on
+   hover rather than pushing it, so the content never reflows while you are
+   reading it.
+   -------------------------------------------------------------------------- */
+@media (min-width: 768px) {
+  body:has([data-site-rail]) {
+    padding-left: 76px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
