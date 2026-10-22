@@ -23,6 +23,8 @@ import type {
   KundliCalculateResult,
   KundliMatchingPayload,
   KundliMatchingResult,
+  DailyHoroscopePayload,
+  DailyHoroscopeResult,
 
   ReviewKind,
   Review,
@@ -422,6 +424,14 @@ export const astrologyApi = {
     api.get<ClientSignProfile & { kp_reference: KpReference }>(
       endpoints.astrology.clientRules(signIndex),
       { query: { language }, auth: false },
+    ),
+
+  /** 100% In-house Vedic Daily Horoscope (Moon Transit Gochar & Panchang). */
+  dailyHoroscope: (payload?: DailyHoroscopePayload) =>
+    api.post<DailyHoroscopeResult>(
+      endpoints.astrology.dailyHoroscope,
+      payload || {},
+      { auth: false },
     ),
 };
 

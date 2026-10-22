@@ -45,6 +45,7 @@ import { useAuth } from "@/providers/auth-provider";
 import { formatCoins } from "@/types";
 
 export const RAIL_LINKS = [
+  { href: "/daily-horoscope", label: "Daily Horoscope", icon: Sparkles },
   { href: "/kundli", label: "Kundli", icon: ScrollText },
   { href: "/kundli-matching", label: "Kundli Matching", icon: HeartHandshake },
   { href: "/kp-calculator", label: "KP Astrology", icon: Orbit },

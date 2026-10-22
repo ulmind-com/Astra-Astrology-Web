@@ -780,6 +780,74 @@ export interface KundliMatchingResult {
   translations?: Record<string, any>;
 }
 
+export interface DailyHoroscopePayload {
+  date?: string | null;
+  sign?: string | null;
+  language?: AstrologyLanguage;
+  latitude?: number;
+  longitude?: number;
+  timezone?: number;
+}
+
+export interface DailySignHoroscope {
+  sign_index: number;
+  sign_name: string;
+  sign_name_sanskrit: string;
+  symbol: string;
+  transit_house: number;
+  transit_house_name: string;
+  gochar_verdict: string;
+  overall_score: number;
+  career_score: number;
+  love_score: number;
+  finance_score: number;
+  health_score: number;
+  summary: string;
+  career_prediction: string;
+  love_prediction: string;
+  finance_prediction: string;
+  health_prediction: string;
+  lucky_number: number;
+  lucky_color: string;
+  lucky_time: string;
+  remedy: string;
+  favorable_direction: string;
+}
+
+export interface DailyPanchangSummary {
+  tithi: string;
+  paksha: string;
+  nakshatra: string;
+  nakshatra_pada: number;
+  yoga: string;
+  karana: string;
+  vara: string;
+  sunrise: string;
+  sunset: string;
+  abhijit_muhurat: string;
+  rahu_kaal: string;
+}
+
+export interface DailyHoroscopeResult {
+  date: string;
+  day_of_week: string;
+  vara_lord: string;
+  moon_sign: string;
+  moon_sign_sanskrit: string;
+  moon_degree: string;
+  sun_sign: string;
+  panchang: DailyPanchangSummary;
+  signs: DailySignHoroscope[];
+  calculation_meta: {
+    engine: string;
+    ayanamsha: string;
+    calculation_method: string;
+    precision: string;
+    observer_coordinates: string;
+  };
+}
+
+
 
 
 

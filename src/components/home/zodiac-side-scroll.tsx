@@ -270,7 +270,7 @@ export function ZodiacSideScroll() {
             return (
               <Link
                 key={sign.id}
-                href={`/rashi-calculator?sign=${sign.id}`}
+                href={`/daily-horoscope?sign=${sign.id}`}
                 className={`group shrink-0 snap-start w-[270px] sm:w-[290px] rounded-2xl border border-[#ebd7c8] bg-[#fdf9f4] p-5 transition-all duration-300 hover:-translate-y-1.5 ${style.glow}`}
               >
                 {/* Top: Symbol Glyphs & Element Badge */}

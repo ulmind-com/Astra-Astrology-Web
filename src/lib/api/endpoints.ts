@@ -126,5 +126,6 @@ export const endpoints = {
     geoSearch: "/astrology/geo-search",
     timezone: "/astrology/timezone",
     clientRules: (signIndex: number) => `/astrology/client-rules/${signIndex}`,
+    dailyHoroscope: "/astrology/horoscope/daily",
   },
 } as const;
