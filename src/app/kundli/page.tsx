@@ -340,68 +340,7 @@ export default function KundliPage() {
           </div>
         </div>
 
-        {/* Top Horizontal Carousel Tab Bar matching Screenshot 1 */}
-        <div className="relative rounded-2xl bg-white/90 dark:bg-stone-900/90 border border-amber-200/80 p-2 shadow-xs">
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 px-1">
-            <button
-              type="button"
-              className="shrink-0 inline-flex items-center gap-2 rounded-xl border border-amber-400 bg-amber-100/90 dark:bg-amber-950/60 px-4 py-2 text-xs font-bold text-amber-950 dark:text-amber-200 shadow-xs"
-            >
-              <span>📕</span>
-              <span>Kundli</span>
-            </button>
 
-            <Link
-              href="/rashi-calculator"
-              className="shrink-0 inline-flex items-center gap-2 rounded-xl border border-stone-200 dark:border-stone-800 bg-surface px-4 py-2 text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-            >
-              <span>⭐</span>
-              <span>Rashi</span>
-            </Link>
-
-            <Link
-              href="/kp-calculator"
-              className="shrink-0 inline-flex items-center gap-2 rounded-xl border border-stone-200 dark:border-stone-800 bg-surface px-4 py-2 text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-            >
-              <span>📕</span>
-              <span>KP</span>
-            </Link>
-
-            <Link
-              href="/dasha-calculator"
-              className="shrink-0 inline-flex items-center gap-2 rounded-xl border border-stone-200 dark:border-stone-800 bg-surface px-4 py-2 text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-            >
-              <span>⚙️</span>
-              <span>Dasha</span>
-            </Link>
-
-            <button
-              type="button"
-              onClick={() => d9Ref.current?.scrollIntoView({ behavior: "smooth" })}
-              className="shrink-0 inline-flex items-center gap-2 rounded-xl border border-stone-200 dark:border-stone-800 bg-surface px-4 py-2 text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-            >
-              <span>☸️</span>
-              <span>Navamsa(D9)</span>
-            </button>
-
-            <Link
-              href="/nakshatra-calculator"
-              className="shrink-0 inline-flex items-center gap-2 rounded-xl border border-stone-200 dark:border-stone-800 bg-surface px-4 py-2 text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-            >
-              <span>🌙</span>
-              <span>Nakshatra</span>
-            </Link>
-
-            <button
-              type="button"
-              onClick={() => yogaRef.current?.scrollIntoView({ behavior: "smooth" })}
-              className="shrink-0 inline-flex items-center gap-2 rounded-xl border border-stone-200 dark:border-stone-800 bg-surface px-4 py-2 text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-            >
-              <span>🔥</span>
-              <span>Mangal Dosh</span>
-            </button>
-          </div>
-        </div>
 
         {/* Profile Card matching Screenshot 1 */}
         <div className="rounded-2xl border-2 border-amber-300/80 bg-white dark:bg-stone-900 p-6 shadow-sm text-center">
