@@ -10,30 +10,26 @@ import {
   RotateCcw,
   RefreshCw,
   Sliders,
-  ChevronLeft,
-  ChevronRight,
-  Sun,
-  ShieldCheck,
-  CheckCircle2,
-  ArrowRight,
+  ChevronDown,
+  ChevronUp,
+  HeartHandshake,
+  Languages,
   User,
-  Compass,
   Download,
   MessageCircle,
   Lock,
   Edit,
   FilePlus,
-  Flame,
-  Star,
-  BookOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { astrologyApi } from "@/lib/api";
-import { LocationPickerModal } from "@/components/astrology/location-picker-modal";
+import {
+  BirthPlaceField,
+  type SelectedPlace,
+} from "@/components/astrology/birth-place-field";
 import { KundliDiamondChart } from "@/components/astrology/kundli-diamond-chart";
-import { KPChartViewer } from "@/components/astrology/kp-chart-viewer";
 import { useAuth } from "@/providers/auth-provider";
 import { useProfile } from "@/hooks/use-profile";
 import type {
@@ -81,29 +77,30 @@ export default function KundliPage() {
   const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
 
   // Form State
-  const [name, setName] = React.useState("Samiran Samanta");
+  const [name, setName] = React.useState("");
   const [gender, setGender] = React.useState<"male" | "female" | "other">("male");
 
   // Mandatory DOB (DD-MM-YYYY)
-  const [day, setDay] = React.useState("30");
-  const [month, setMonth] = React.useState("06");
-  const [year, setYear] = React.useState("2004");
+  const [day, setDay] = React.useState("");
+  const [month, setMonth] = React.useState("");
+  const [year, setYear] = React.useState("");
 
   // Optional Time (HH:MM:SS AM/PM)
-  const [hour, setHour] = React.useState("10");
-  const [minute, setMinute] = React.useState("01");
-  const [second, setSecond] = React.useState("28");
-  const [period, setPeriod] = React.useState<"AM" | "PM">("AM");
+  const [hour, setHour] = React.useState("");
+  const [minute, setMinute] = React.useState("");
+  const [second, setSecond] = React.useState("");
+  const [period, setPeriod] = React.useState<"AM" | "PM">("PM");
 
   // Place & Coordinates
-  const [place, setPlace] = React.useState("Kolaghat, West Bengal, India");
-  const [latitude, setLatitude] = React.useState<number | null>(22.4333);
-  const [longitude, setLongitude] = React.useState<number | null>(87.8500);
+  const [place, setPlace] = React.useState("");
+  const [selectedPlace, setSelectedPlace] = React.useState<SelectedPlace | null>(null);
+  const [placeTouched, setPlaceTouched] = React.useState(false);
+  const [latitude, setLatitude] = React.useState<number | null>(null);
+  const [longitude, setLongitude] = React.useState<number | null>(null);
   const [timezone, setTimezone] = React.useState("5.5");
   const [ayanamsa, setAyanamsa] = React.useState<AyanamsaType>("lahiri");
-  const [isMapModalOpen, setIsMapModalOpen] = React.useState(false);
+  const [houseSystem, setHouseSystem] = React.useState<"placidus" | "equal" | "whole_sign">("placidus");
   const [showAdvance, setShowAdvance] = React.useState(false);
-  const [showForm, setShowForm] = React.useState(false);
 
   // Chart Style Selector: "north" | "east" | "south" | "wheel"
   const [chartStyle, setChartStyle] = React.useState<"north" | "east" | "south" | "wheel">("north");
@@ -112,6 +109,7 @@ export default function KundliPage() {
   const [loading, setLoading] = React.useState(false);
   const [result, setResult] = React.useState<KundliCalculateResult | null>(null);
 
+  const formRef = React.useRef<HTMLDivElement>(null);
   const resultsRef = React.useRef<HTMLDivElement>(null);
   const d9Ref = React.useRef<HTMLDivElement>(null);
   const yogaRef = React.useRef<HTMLDivElement>(null);
@@ -190,10 +188,23 @@ export default function KundliPage() {
         }
 
         const placeName = b.place || [b.city, b.state, b.country].filter(Boolean).join(", ");
-        if (placeName) setPlace(placeName);
-        if (b.latitude != null && b.longitude != null) {
-          setLatitude(Number(b.latitude));
-          setLongitude(Number(b.longitude));
+        if (placeName) {
+          setPlace(placeName);
+          const lat = b.latitude != null ? Number(b.latitude) : 22.5726;
+          const lon = b.longitude != null ? Number(b.longitude) : 88.3639;
+          setLatitude(lat);
+          setLongitude(lon);
+          setSelectedPlace({
+            place: placeName,
+            displayName: placeName,
+            latitude: lat,
+            longitude: lon,
+            timezoneName: null,
+            timezoneOffset: b.timezone != null ? Number(b.timezone) : 5.5,
+            timezoneLabel: null,
+            timezoneAbbreviation: null,
+            isDst: false,
+          });
         }
         if (b.timezone != null) setTimezone(String(b.timezone));
       }
@@ -208,21 +219,142 @@ export default function KundliPage() {
     }
   }, [profile, user, populateFromProfileData]);
 
-  // Initial auto calculation for sample demonstration
-  React.useEffect(() => {
-    if (!result) {
-      runCalculation();
+  // Input Handlers with auto-focus
+  const handleDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 2) val = val.slice(0, 2);
+    const num = parseInt(val, 10);
+    if (!isNaN(num) && num > 31) val = "31";
+    setDay(val);
+    if (val.length === 2 && monthRef.current) {
+      monthRef.current.focus();
     }
-  }, []);
+  };
 
-  const runCalculation = async () => {
+  const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 2) val = val.slice(0, 2);
+    const num = parseInt(val, 10);
+    if (!isNaN(num) && num > 12) val = "12";
+    setMonth(val);
+    if (val.length === 2 && yearRef.current) {
+      yearRef.current.focus();
+    }
+  };
+
+  const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 4) val = val.slice(0, 4);
+    setYear(val);
+  };
+
+  const handleHourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 2) val = val.slice(0, 2);
+    const num = parseInt(val, 10);
+    if (!isNaN(num) && num > 12) val = "12";
+    setHour(val);
+    if (val.length === 2 && minuteRef.current) {
+      minuteRef.current.focus();
+    }
+  };
+
+  const handleMinuteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 2) val = val.slice(0, 2);
+    const num = parseInt(val, 10);
+    if (!isNaN(num) && num > 59) val = "59";
+    setMinute(val);
+    if (val.length === 2 && secondRef.current) {
+      secondRef.current.focus();
+    }
+  };
+
+  const handleSecondChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, "");
+    if (val.length > 2) val = val.slice(0, 2);
+    const num = parseInt(val, 10);
+    if (!isNaN(num) && num > 59) val = "59";
+    setSecond(val);
+  };
+
+  const handleResetForm = () => {
+    setName("");
+    setDay("");
+    setMonth("");
+    setYear("");
+    setHour("");
+    setMinute("");
+    setSecond("");
+    setPlace("");
+    setSelectedPlace(null);
+    setPlaceTouched(false);
+  };
+
+  const handleReloadFromProfile = () => {
+    if (profile) {
+      populateFromProfileData(profile, user);
+      toast.success(
+        language === "bn"
+          ? "প্রোফাইল থেকে তথ্য লোড করা হয়েছে"
+          : "Details reloaded from your profile",
+      );
+    }
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!name.trim()) {
+      toast.error(
+        language === "bn"
+          ? "অনুগ্রহ করে আপনার নাম লিখুন"
+          : language === "hi"
+          ? "कृपया अपना नाम दर्ज करें"
+          : "Please enter your name",
+      );
+      return;
+    }
+
     const d = parseInt(day, 10);
     const m = parseInt(month, 10);
     const y = parseInt(year, 10);
 
-    if (!day || isNaN(d) || d < 1 || d > 31) return;
-    if (!month || isNaN(m) || m < 1 || m > 12) return;
-    if (!year || isNaN(y) || y < 1800 || y > 2100) return;
+    if (
+      !day ||
+      isNaN(d) ||
+      d < 1 ||
+      d > 31 ||
+      !month ||
+      isNaN(m) ||
+      m < 1 ||
+      m > 12 ||
+      !year ||
+      isNaN(y) ||
+      y < 1800 ||
+      y > 2100
+    ) {
+      toast.error(
+        language === "bn"
+          ? "সঠিক জন্মতারিখ (দিন, মাস ও সাল) প্রদান করুন"
+          : language === "hi"
+          ? "कृपया मान्य जन्म तिथि दर्ज करें"
+          : "Please enter a valid birth date (DD, MM, YYYY)",
+      );
+      return;
+    }
+
+    if (!selectedPlace && !place.trim()) {
+      setPlaceTouched(true);
+      toast.error(
+        language === "bn"
+          ? "অনুগ্রহ করে তালিকা থেকে আপনার জন্মস্থান নির্বাচন করুন"
+          : language === "hi"
+          ? "कृपया सूची से अपना जन्म स्थान चुनें"
+          : "Please choose your birth place from the list",
+      );
+      return;
+    }
 
     let parsedHour = 12;
     let parsedMinute = 0;
@@ -236,8 +368,13 @@ export default function KundliPage() {
       effectivePeriod = period;
     }
 
+    const effectiveLat = selectedPlace?.latitude ?? latitude ?? 22.5726;
+    const effectiveLon = selectedPlace?.longitude ?? longitude ?? 88.3639;
+    const effectiveTz = selectedPlace?.timezoneOffset ?? parseFloat(timezone) ?? 5.5;
+    const effectivePlace = selectedPlace?.place ?? (place.trim() || "Kolkata, West Bengal, India");
+
     const payload: KundliCalculatePayload = {
-      name: name.trim() || "Samiran Samanta",
+      name: name.trim(),
       gender,
       day: d,
       month: m,
@@ -246,11 +383,20 @@ export default function KundliPage() {
       minute: parsedMinute,
       second: parsedSecond,
       period: effectivePeriod,
-      place: place.trim() || "Kolaghat, West Bengal, India",
-      latitude: latitude !== null ? latitude : 22.4333,
-      longitude: longitude !== null ? longitude : 87.8500,
-      timezone: parseFloat(timezone) || 5.5,
+      place: effectivePlace,
+      latitude: effectiveLat,
+      longitude: effectiveLon,
+      timezone: effectiveTz,
       ayanamsa,
+      house_system: houseSystem,
+      chart_style:
+        chartStyle === "wheel"
+          ? "north_indian"
+          : chartStyle === "south"
+          ? "south_indian"
+          : chartStyle === "east"
+          ? "east_indian"
+          : "north_indian",
       language,
     };
 
@@ -258,25 +404,20 @@ export default function KundliPage() {
     try {
       const resp = await astrologyApi.calculateKundli(payload);
       setResult(resp);
+      toast.success(
+        language === "bn"
+          ? "কুন্ডলী ও গ্রহের অবস্থান সফলভাবে গণনা সম্পন্ন হয়েছে!"
+          : "Kundli & Planetary Position calculated successfully!",
+      );
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 150);
     } catch (err: any) {
       console.error("Kundli calculation error:", err);
       toast.error(err?.message || "Failed to calculate Kundli.");
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await runCalculation();
-    toast.success(
-      language === "bn"
-        ? "কুন্ডলী ও গ্রহের অবস্থান নির্ভুল গণনা সম্পন্ন হয়েছে!"
-        : "Kundli & Planetary Position calculated successfully!",
-    );
-    setTimeout(() => {
-      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 150);
   };
 
   // Printable Download PDF Handler
@@ -353,291 +494,403 @@ export default function KundliPage() {
           </div>
         </div>
 
-        {/* Profile Card matching Screenshot 1 with Astra Calm Glow Theme */}
-        <div className="rounded-3xl border border-amber-200/80 bg-white p-6 sm:p-8 shadow-soft text-center space-y-4">
-          <h2 className="font-display text-2xl font-bold tracking-tight text-foreground">
-            {language === "bn" ? "প্রোফাইল" : "Profile"}
-          </h2>
-          <GoldDiamondDivider />
+        {/* =========================================================================
+            FORM SECTION (Always visible first, matching Image 2 & Rashi Calculator)
+        ========================================================================= */}
+        <div ref={formRef} className="mx-auto max-w-3xl w-full">
+          <div className="rounded-[28px] border border-amber-300/70 bg-card p-6 sm:p-9 shadow-[0_12px_40px_-15px_rgba(26,18,8,0.08)] backdrop-blur-md">
+            <h2 className="text-center font-display text-xl sm:text-2xl font-bold text-foreground mb-4">
+              {language === "bn"
+                ? "আপনার জন্ম বিবরণ প্রবেশ করান"
+                : language === "hi"
+                ? "अपना जन्म विवरण दर्ज करें"
+                : "Enter Your Birth Details"}
+            </h2>
 
-          {/* Rashi Graphic Symbol Box */}
-          <div className="mx-auto size-24 rounded-2xl border-2 border-amber-300 bg-amber-50/80 flex items-center justify-center p-2 shadow-xs">
-            <span className="text-5xl select-none" role="img" aria-label="Scorpio">
-              🦂
-            </span>
-          </div>
+            {/* Dynamic Profile Sync Status Banner */}
+            {isSignedIn && (
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-amber-500/10 border border-amber-300/80 px-4 py-3 text-xs text-amber-950 font-medium shadow-2xs">
+                <div className="flex items-center gap-2.5">
+                  <div className="size-6 rounded-full bg-emerald-500/20 text-emerald-700 flex items-center justify-center font-bold text-[11px]">
+                    ✓
+                  </div>
+                  <div>
+                    <span className="font-bold">
+                      {language === "bn"
+                        ? `স্বাগত, ${profile?.full_name || user?.full_name || user?.first_name || "সম্মানিত ব্যবহারকারী"}!`
+                        : language === "hi"
+                        ? `स्वागत है, ${profile?.full_name || user?.full_name || user?.first_name || "उपयोगकर्ता"}!`
+                        : `Welcome, ${profile?.full_name || user?.full_name || user?.first_name || "User"}!`}
+                    </span>
+                    <span className="text-muted-foreground ml-1.5 block sm:inline">
+                      {profile?.birth?.date_of_birth
+                        ? language === "bn"
+                          ? "আপনার প্রোফাইল থেকে সংরক্ষিত জন্ম বিবরণ স্বয়ংক্রিয়ভাবে লোড করা হয়েছে।"
+                          : language === "hi"
+                          ? "आपकी प्रोफ़ाइल से सहेजा गया जन्म विवरण स्वतः भर दिया गया है।"
+                          : "Saved birth details loaded from your profile."
+                        : language === "bn"
+                        ? "আপনার প্রোফাইলের নাম লোড করা হয়েছে।"
+                        : language === "hi"
+                        ? "आपकी प्रोफ़ाइल का नाम लोड किया गया है।"
+                        : "Name loaded from your profile."}
+                    </span>
+                  </div>
+                </div>
 
-          <div>
-            <span className="inline-block rounded-full bg-amber-100 text-amber-950 border border-amber-300 font-bold text-xs px-4 py-1.5 shadow-2xs">
-              {isSignedIn ? user?.full_name || name : name}
-            </span>
-          </div>
-
-          {/* Profile Action Buttons */}
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={() => setShowForm((v) => !v)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50/80 hover:bg-amber-100 px-4 py-2 text-xs font-bold text-amber-950 transition-colors shadow-2xs"
-            >
-              <FilePlus className="size-4 text-amber-600" />
-              <span>{language === "bn" ? "নতুন কুন্ডলী তৈরি করুন" : "Create New Kundli"}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => toast.success("Kundli saved to your profile!")}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50/80 hover:bg-amber-100 px-4 py-2 text-xs font-bold text-amber-950 transition-colors shadow-2xs"
-            >
-              <Lock className="size-4 text-amber-600" />
-              <span>{language === "bn" ? "কুন্ডলী সংরক্ষণ করুন" : "Save Kundli"}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowForm(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50/80 hover:bg-amber-100 px-4 py-2 text-xs font-bold text-amber-950 transition-colors shadow-2xs"
-            >
-              <Edit className="size-4 text-amber-600" />
-              <span>{language === "bn" ? "বিবরণ পরিবর্তন করুন" : "Edit Details"}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Collapsible Birth Input Form matching Image 2 */}
-        {showForm && (
-          <div className="rounded-3xl border border-amber-200/80 bg-white p-6 sm:p-8 shadow-soft animate-in fade-in duration-200 space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-amber-100">
-              <h3 className="font-display text-xl font-bold text-foreground">
-                {language === "bn" ? "আপনার জন্ম বিবরণ প্রবেশ করান" : "Enter Your Birth Details"}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setShowForm(false)}
-                className="text-xs font-bold text-foreground-muted hover:text-foreground"
-              >
-                ✕ {language === "bn" ? "বন্ধ করুন" : "Close"}
-              </button>
-            </div>
-
-            {/* Profile greeting banner matching Image 2 */}
-            <div className="rounded-2xl border border-amber-300/80 bg-amber-50/70 p-3 text-xs text-amber-950 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="flex size-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">✓</span>
-                <span>
-                  {language === "bn"
-                    ? `স্বাগত, ${name}! আপনার প্রোফাইলের তথ্য লোড করা হয়েছে।`
-                    : `Welcome, ${name}! Profile details have been loaded.`}
-                </span>
+                <div className="flex items-center gap-2 ml-auto">
+                  {profile && (
+                    <button
+                      type="button"
+                      onClick={handleReloadFromProfile}
+                      className="inline-flex items-center gap-1 rounded-xl bg-white/90 hover:bg-white px-2.5 py-1 text-[11px] font-bold text-amber-900 border border-amber-300 shadow-2xs transition-colors cursor-pointer"
+                    >
+                      <RefreshCw className="size-3 text-amber-700" />
+                      <span>{language === "bn" ? "রিলোড" : language === "hi" ? "रीलोड" : "Reload"}</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleResetForm}
+                    className="inline-flex items-center gap-1 rounded-xl bg-white/90 hover:bg-white px-2.5 py-1 text-[11px] font-bold text-rose-800 border border-rose-300 shadow-2xs transition-colors cursor-pointer"
+                  >
+                    <RotateCcw className="size-3 text-rose-600" />
+                    <span>{language === "bn" ? "খালি করুন" : language === "hi" ? "साफ़ करें" : "Clear"}</span>
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (profile) populateFromProfileData(profile, user);
-                  }}
-                  className="rounded-lg border border-amber-300 bg-white px-2.5 py-1 text-[11px] font-bold text-amber-950 hover:bg-amber-50 transition-colors"
-                >
-                  🔄 {language === "bn" ? "রিলোড" : "Reload"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setName("");
-                    setDay("");
-                    setMonth("");
-                    setYear("");
-                    setHour("");
-                    setMinute("");
-                    setSecond("");
-                    setPlace("");
-                  }}
-                  className="rounded-lg border border-amber-300 bg-white px-2.5 py-1 text-[11px] font-bold text-red-700 hover:bg-red-50 transition-colors"
-                >
-                  ↺ {language === "bn" ? "খালি করুন" : "Clear"}
-                </button>
-              </div>
-            </div>
+            )}
 
-            <form onSubmit={handleFormSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* Name */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                    <User className="size-3.5 text-amber-600" />
-                    <span>{language === "bn" ? "নাম" : "Full Name"}</span>
-                  </label>
+            {!isSignedIn && (
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-surface-muted/50 border border-border/80 px-4 py-3 text-xs text-muted-foreground shadow-2xs">
+                <div className="flex items-center gap-2">
+                  <User className="size-4 text-amber-600 shrink-0" />
+                  <span>
+                    {language === "bn"
+                      ? "লগ-ইন করলে আপনার প্রোফাইলের সেভ করা জন্ম বিবরণ সরাসরি এখানে পূরণ হয়ে যাবে।"
+                      : language === "hi"
+                      ? "लॉग-इन करने पर आपकी प्रोफ़ाइल का विवरण स्वतः यहाँ भर जाएगा।"
+                      : "Sign in to automatically load your saved profile and birth details."}
+                  </span>
+                </div>
+                <Link
+                  href="/login"
+                  className="rounded-xl bg-amber-500 text-amber-950 px-3 py-1 text-[11px] font-bold shadow-2xs hover:bg-amber-400 transition-colors ml-auto"
+                >
+                  {language === "bn" ? "লগ-ইন করুন" : language === "hi" ? "लॉग-इन करें" : "Sign In"}
+                </Link>
+              </div>
+            )}
+
+            <form onSubmit={handleFormSubmit} className="space-y-5 text-xs sm:text-sm">
+              {/* 1. Name */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
+                <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
+                  <User className="size-4 text-amber-600" />
+                  <span>{language === "bn" ? "নাম" : language === "hi" ? "नाम" : "Name"}</span>
+                </label>
+                <div className="sm:col-span-9">
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full rounded-xl border border-amber-200 bg-amber-50/20 px-3 py-2 text-sm text-foreground focus:border-amber-500 focus:outline-none shadow-2xs"
+                    placeholder={
+                      language === "bn"
+                        ? "আপনার নাম লিখুন..."
+                        : language === "hi"
+                        ? "अपना नाम लिखें..."
+                        : "Enter your name..."
+                    }
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs font-medium"
                   />
-                </div>
-
-                {/* Gender */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-foreground">
-                    {language === "bn" ? "লিঙ্গ" : "Gender"}
-                  </label>
-                  <div className="grid grid-cols-3 gap-1 rounded-xl bg-amber-50/40 p-1 border border-amber-200">
-                    {(["male", "female", "other"] as const).map((g) => (
-                      <button
-                        key={g}
-                        type="button"
-                        onClick={() => setGender(g)}
-                        className={`rounded-lg py-1.5 text-xs font-bold capitalize transition-all ${
-                          gender === g ? "bg-amber-500 text-white shadow-2xs" : "text-foreground-muted hover:text-foreground"
-                        }`}
-                      >
-                        {g === "male" ? (language === "bn" ? "পুরুষ" : "Male") : g === "female" ? (language === "bn" ? "মহিলা" : "Female") : (language === "bn" ? "অন্যান্য" : "Other")}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Date of Birth */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                    <Calendar className="size-3.5 text-amber-600" />
-                    <span>{language === "bn" ? "জন্মতারিখ *" : "Date of Birth *"}</span>
-                  </label>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    <input
-                      ref={dayRef}
-                      type="text"
-                      placeholder="DD"
-                      value={day}
-                      onChange={(e) => setDay(e.target.value)}
-                      className="w-full rounded-xl border border-amber-200 bg-amber-50/20 px-2 py-2 text-center text-sm font-semibold text-foreground focus:border-amber-500 focus:outline-none shadow-2xs"
-                    />
-                    <input
-                      ref={monthRef}
-                      type="text"
-                      placeholder="MM"
-                      value={month}
-                      onChange={(e) => setMonth(e.target.value)}
-                      className="w-full rounded-xl border border-amber-200 bg-amber-50/20 px-2 py-2 text-center text-sm font-semibold text-foreground focus:border-amber-500 focus:outline-none shadow-2xs"
-                    />
-                    <input
-                      ref={yearRef}
-                      type="text"
-                      placeholder="YYYY"
-                      value={year}
-                      onChange={(e) => setYear(e.target.value)}
-                      className="w-full rounded-xl border border-amber-200 bg-amber-50/20 px-2 py-2 text-center text-sm font-semibold text-foreground focus:border-amber-500 focus:outline-none shadow-2xs"
-                    />
-                  </div>
-                </div>
-
-                {/* Time of Birth */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                    <Clock className="size-3.5 text-amber-600" />
-                    <span>{language === "bn" ? "জন্মসময় (ঐচ্ছিক)" : "Birth Time (Optional)"}</span>
-                  </label>
-                  <div className="grid grid-cols-4 gap-1">
-                    <input
-                      ref={hourRef}
-                      type="text"
-                      placeholder="HH"
-                      value={hour}
-                      onChange={(e) => setHour(e.target.value)}
-                      className="w-full rounded-xl border border-amber-200 bg-amber-50/20 px-1 py-2 text-center text-sm font-semibold text-foreground focus:border-amber-500 focus:outline-none shadow-2xs"
-                    />
-                    <input
-                      ref={minuteRef}
-                      type="text"
-                      placeholder="MM"
-                      value={minute}
-                      onChange={(e) => setMinute(e.target.value)}
-                      className="w-full rounded-xl border border-amber-200 bg-amber-50/20 px-1 py-2 text-center text-sm font-semibold text-foreground focus:border-amber-500 focus:outline-none shadow-2xs"
-                    />
-                    <input
-                      ref={secondRef}
-                      type="text"
-                      placeholder="SS"
-                      value={second}
-                      onChange={(e) => setSecond(e.target.value)}
-                      className="w-full rounded-xl border border-amber-200 bg-amber-50/20 px-1 py-2 text-center text-sm font-semibold text-foreground focus:border-amber-500 focus:outline-none shadow-2xs"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setPeriod((p) => (p === "AM" ? "PM" : "AM"))}
-                      className="w-full rounded-xl border border-amber-200 bg-amber-100/90 font-bold text-xs text-amber-950 hover:bg-amber-200 transition-colors"
-                    >
-                      {period}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Place */}
-                <div className="space-y-1.5 sm:col-span-2">
-                  <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                    <MapPin className="size-3.5 text-amber-600" />
-                    <span>{language === "bn" ? "জন্মস্থান *" : "Birth Place *"}</span>
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={place}
-                      onChange={(e) => setPlace(e.target.value)}
-                      placeholder="শহর বা গ্রামের নাম লিখুন..."
-                      className="w-full rounded-xl border border-amber-200 bg-amber-50/20 px-3 py-2 text-sm text-foreground focus:border-amber-500 focus:outline-none shadow-2xs"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setIsMapModalOpen(true)}
-                      className="shrink-0 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-950 hover:bg-amber-100 transition-colors"
-                    >
-                      ম্যাপ নির্বাচন
-                    </button>
-                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 pt-2">
+              {/* 2. Gender */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
+                <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
+                  <HeartHandshake className="size-4 text-indigo-500" />
+                  <span>{language === "bn" ? "লিঙ্গ" : language === "hi" ? "लिंग" : "Gender"}</span>
+                </label>
+                <div className="sm:col-span-9">
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value as any)}
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs cursor-pointer font-medium"
+                  >
+                    <option value="male">
+                      {language === "bn" ? "পুরুষ (Male)" : language === "hi" ? "पुरुष (Male)" : "Male"}
+                    </option>
+                    <option value="female">
+                      {language === "bn" ? "মহিলা (Female)" : language === "hi" ? "महिला (Female)" : "Female"}
+                    </option>
+                    <option value="other">
+                      {language === "bn" ? "অন্যান্য (Other)" : language === "hi" ? "अन्य (Other)" : "Other"}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              {/* 3. Birth Day */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
+                <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
+                  <Calendar className="size-4 text-amber-600" />
+                  <span>
+                    {language === "bn" ? "জন্মতারিখ" : language === "hi" ? "जन्म तिथि" : "Birth Day"}
+                    <span className="text-[11px] font-bold text-rose-600 ml-1.5">*</span>
+                  </span>
+                </label>
+                <div className="sm:col-span-9 grid grid-cols-3 gap-2">
+                  <input
+                    ref={dayRef}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={2}
+                    value={day}
+                    onChange={handleDayChange}
+                    placeholder="DD"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                  />
+                  <input
+                    ref={monthRef}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={2}
+                    value={month}
+                    onChange={handleMonthChange}
+                    placeholder="MM"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                  />
+                  <input
+                    ref={yearRef}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={4}
+                    value={year}
+                    onChange={handleYearChange}
+                    placeholder="YYYY"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                  />
+                </div>
+              </div>
+
+              {/* 4. Birth Time */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
+                <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
+                  <Clock className="size-4 text-emerald-600" />
+                  <span>
+                    {language === "bn" ? "জন্মসময়" : language === "hi" ? "जन्म समय" : "Birth Time"}
+                    <span className="text-[11px] font-semibold text-emerald-700 ml-1.5">
+                      ({language === "bn" ? "ঐচ্ছিক" : "Optional"})
+                    </span>
+                  </span>
+                </label>
+                <div className="sm:col-span-9 grid grid-cols-4 gap-2">
+                  <input
+                    ref={hourRef}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={2}
+                    value={hour}
+                    onChange={handleHourChange}
+                    placeholder="HH"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                  />
+                  <input
+                    ref={minuteRef}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={2}
+                    value={minute}
+                    onChange={handleMinuteChange}
+                    placeholder="MM"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                  />
+                  <input
+                    ref={secondRef}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={2}
+                    value={second}
+                    onChange={handleSecondChange}
+                    placeholder="SS"
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                  />
+                  <select
+                    value={period}
+                    onChange={(e) => setPeriod(e.target.value as any)}
+                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-bold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs cursor-pointer"
+                  >
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* 5. Birth Place with live geocoded autocomplete */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4">
+                <label className="sm:col-span-3 flex items-start gap-2 pt-3 font-bold text-foreground">
+                  <MapPin className="mt-0.5 size-4 shrink-0 text-rose-500" />
+                  <span>
+                    {language === "bn" ? "জন্মস্থান" : "Birth Place"}
+                    <span className="ml-1 text-rose-500">*</span>
+                  </span>
+                </label>
+                <div className="sm:col-span-9">
+                  <BirthPlaceField
+                    value={selectedPlace}
+                    onChange={(next) => {
+                      setSelectedPlace(next);
+                      if (next) {
+                        setPlace(next.place);
+                        setLatitude(next.latitude);
+                        setLongitude(next.longitude);
+                        if (next.timezoneOffset != null) setTimezone(String(next.timezoneOffset));
+                      }
+                    }}
+                    birthDate={{
+                      year: parseInt(year, 10) || undefined,
+                      month: parseInt(month, 10) || undefined,
+                      day: parseInt(day, 10) || undefined,
+                    }}
+                    language={language}
+                    invalid={placeTouched && !selectedPlace}
+                  />
+                </div>
+              </div>
+
+              {/* 6. Advanced Settings Toggle (Optional) */}
+              <div className="pt-2 border-t border-border/60">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvance((prev) => !prev)}
+                  className="flex items-center gap-1.5 text-xs font-bold text-amber-800 hover:text-amber-950 transition-colors cursor-pointer"
+                >
+                  <Sliders className="size-3.5" />
+                  <span>
+                    {language === "bn"
+                      ? "উন্নত সেটিংস (অয়নাংশ ও ভাব পদ্ধতি)"
+                      : "Advanced Settings (Ayanamsa & House System)"}
+                  </span>
+                  {showAdvance ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
+                </button>
+
+                {showAdvance && (
+                  <div className="mt-3 p-4 rounded-2xl bg-surface-muted/30 border border-border/80 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-200">
+                    <div>
+                      <label className="block text-xs font-bold text-foreground mb-1">Ayanamsa</label>
+                      <select
+                        value={ayanamsa}
+                        onChange={(e) => setAyanamsa(e.target.value as any)}
+                        className="w-full rounded-xl border border-border bg-white px-3 py-2 text-xs font-semibold cursor-pointer"
+                      >
+                        <option value="lahiri">Lahiri (Chitra Paksha - Classical Vedic)</option>
+                        <option value="krishnamurti">Krishnamurti (KP Astrology)</option>
+                        <option value="bv_raman">B.V. Raman</option>
+                        <option value="yukteshwar">Yukteshwar</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-foreground mb-1">House System</label>
+                      <select
+                        value={houseSystem}
+                        onChange={(e) => setHouseSystem(e.target.value as any)}
+                        className="w-full rounded-xl border border-border bg-white px-3 py-2 text-xs font-semibold cursor-pointer"
+                      >
+                        <option value="placidus">Placidus (Standard KP / Western)</option>
+                        <option value="whole_sign">Whole Sign (Equal Rashi)</option>
+                        <option value="equal">Equal House (30 deg each)</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Submit Button */}
+              <div className="pt-3">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 h-12 rounded-xl bg-brand-400 hover:bg-brand-500 text-ink-900 font-bold shadow-glow text-sm transition-all flex items-center justify-center gap-2"
+                  className="w-full h-12 rounded-xl bg-brand-400 hover:bg-brand-500 text-ink-900 font-bold shadow-glow text-base transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   <Sparkles className="size-4" />
-                  <span>{loading ? "গণনা করা হচ্ছে..." : "কুন্ডলী গণনা করুন"}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowForm(false)}
-                  className="rounded-xl border border-amber-200 bg-surface px-4 py-3 text-xs font-semibold text-foreground-muted hover:text-foreground"
-                >
-                  বন্ধ করুন
+                  <span>
+                    {loading
+                      ? language === "bn"
+                        ? "কুন্ডলী গণনা করা হচ্ছে..."
+                        : "Calculating Kundli..."
+                      : language === "bn"
+                      ? "কুন্ডলী গণনা করুন"
+                      : "Calculate Kundli"}
+                  </span>
                 </button>
               </div>
             </form>
           </div>
-        )}
-
-        {/* Location Picker Modal */}
-        <LocationPickerModal
-          open={isMapModalOpen}
-          onClose={() => setIsMapModalOpen(false)}
-          onSelect={(loc) => {
-            setPlace(loc.place);
-            setLatitude(loc.latitude);
-            setLongitude(loc.longitude);
-            if (loc.timezone != null) setTimezone(String(loc.timezone));
-            setIsMapModalOpen(false);
-          }}
-          currentPlace={place}
-          currentLat={latitude}
-          currentLon={longitude}
-        />
+        </div>
 
         {/* ─────────────────────────────────────────────────────────────
-            SECTION 2: Kundli Details & Chart (Screenshot 2)
+            SECTION 2: Kundli Results Section (Only rendered after calculation)
         ───────────────────────────────────────────────────────────── */}
         {result && (
-          <div ref={resultsRef} className="space-y-8">
+          <div ref={resultsRef} className="space-y-8 pt-4">
+            {/* Profile Card matching Screenshot 1 */}
+            <div className="rounded-3xl border border-amber-200/80 bg-white p-6 sm:p-8 shadow-soft text-center space-y-4">
+              <h2 className="font-display text-2xl font-bold tracking-tight text-foreground">
+                {language === "bn" ? "প্রোফাইল" : "Profile"}
+              </h2>
+              <GoldDiamondDivider />
+
+              {/* Rashi Graphic Symbol Box */}
+              <div className="mx-auto size-24 rounded-2xl border-2 border-amber-300 bg-amber-50/80 flex items-center justify-center p-2 shadow-xs">
+                <span className="text-5xl select-none" role="img" aria-label="Scorpio">
+                  {ZODIAC_SYMBOLS_MAP[result.planetary_info.rasi] || "🦂"}
+                </span>
+              </div>
+
+              <div>
+                <span className="inline-block rounded-full bg-amber-100 text-amber-950 border border-amber-300 font-bold text-xs px-4 py-1.5 shadow-2xs">
+                  {result.personal_details.name}
+                </span>
+              </div>
+
+              {/* Profile Action Buttons */}
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleResetForm();
+                    formRef.current?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50/80 hover:bg-amber-100 px-4 py-2 text-xs font-bold text-amber-950 transition-colors shadow-2xs cursor-pointer"
+                >
+                  <FilePlus className="size-4 text-amber-600" />
+                  <span>{language === "bn" ? "নতুন কুন্ডলী তৈরি করুন" : "Create New Kundli"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => toast.success("Kundli saved to your profile!")}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50/80 hover:bg-amber-100 px-4 py-2 text-xs font-bold text-amber-950 transition-colors shadow-2xs cursor-pointer"
+                >
+                  <Lock className="size-4 text-amber-600" />
+                  <span>{language === "bn" ? "কুন্ডলী সংরক্ষণ করুন" : "Save Kundli"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    formRef.current?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50/80 hover:bg-amber-100 px-4 py-2 text-xs font-bold text-amber-950 transition-colors shadow-2xs cursor-pointer"
+                >
+                  <Edit className="size-4 text-amber-600" />
+                  <span>{language === "bn" ? "বিবরণ পরিবর্তন করুন" : "Edit Details"}</span>
+                </button>
+              </div>
+            </div>
+
             <div className="text-center space-y-1">
               <h2 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
                 {language === "bn" ? "কুন্ডলী বিবরণ ও চার্ট" : "Kundli Details & Chart"}
