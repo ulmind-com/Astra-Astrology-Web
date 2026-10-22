@@ -315,15 +315,16 @@ export default function HomePage() {
                     className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#f6d7c2]/40 via-[#faebd9]/30 to-[#f9e5a8]/35 blur-3xl pointer-events-none"
                     aria-hidden
                   />
-                  {/* The exact chakra image uploaded by the user */}
+                  {/* The exact chakra SVG requested by the user */}
                   <div className="relative z-10 transition-transform duration-700 hover:scale-[1.015]">
                     <Image
-                      src="/zodiac-chakra.png"
+                      src="/zodiac-chakra.svg"
                       alt="Zodiac Chakra Wheel showing constellations, signs and lunar phases"
                       width={882}
                       height={882}
                       priority
-                      className="w-full h-auto drop-shadow-[0_12px_28px_rgba(176,109,78,0.12)] select-none"
+                      unoptimized
+                      className="w-full h-auto select-none"
                     />
                   </div>
                 </div>
