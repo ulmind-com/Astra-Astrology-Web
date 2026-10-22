@@ -108,7 +108,7 @@ const defaultPersonState: PersonFormState = {
   year: "",
   hour: "",
   minute: "",
-  second: "00",
+  second: "",
   period: "AM",
   place: "",
   selectedPlace: null,
@@ -129,49 +129,13 @@ export default function KundliMatchingPage() {
   // Stepper State: 1 = Groom, 2 = Bride
   const [step, setStep] = React.useState<1 | 2>(1);
 
-  const defaultPlace: SelectedPlace = {
-    place: "Kolkata",
-    displayName: "Kolkata, WB, India",
-    latitude: 22.5726,
-    longitude: 88.3639,
-    timezoneName: "Asia/Kolkata",
-    timezoneOffset: 5.5,
-    timezoneLabel: "UTC+05:30",
-    timezoneAbbreviation: "IST",
-    isDst: false,
-  };
-
-  // Forms State
+  // Forms State - always completely empty by default so user enters everything
   const [groom, setGroom] = React.useState<PersonFormState>({
     ...defaultPersonState,
-    name: "Samiran Samanta",
-    day: "22",
-    month: "10",
-    year: "1998",
-    hour: "10",
-    minute: "30",
-    second: "00",
-    period: "AM",
-    place: "Kolkata, WB, India",
-    selectedPlace: defaultPlace,
-    latitude: 22.5726,
-    longitude: 88.3639,
   });
 
   const [bride, setBride] = React.useState<PersonFormState>({
     ...defaultPersonState,
-    name: "Arunima Banik",
-    day: "15",
-    month: "05",
-    year: "2000",
-    hour: "04",
-    minute: "15",
-    second: "00",
-    period: "PM",
-    place: "Kolkata, WB, India",
-    selectedPlace: defaultPlace,
-    latitude: 22.5726,
-    longitude: 88.3639,
   });
 
   // Results & Tabs State
@@ -193,7 +157,7 @@ export default function KundliMatchingPage() {
       toast.error(`${label}: ${t.form.validationDob}`);
       return false;
     }
-    if (!p.place.trim()) {
+    if (!p.place.trim() && !p.selectedPlace) {
       toast.error(`${label}: ${t.form.validationPlace}`);
       return false;
     }
@@ -231,10 +195,16 @@ export default function KundliMatchingPage() {
           minute: groom.minute ? parseInt(groom.minute, 10) : 0,
           second: groom.second ? parseInt(groom.second, 10) : 0,
           period: groom.period,
-          place: groom.place,
-          latitude: groom.latitude ?? 22.5726,
-          longitude: groom.longitude ?? 88.3639,
-          timezone: parseFloat(groom.timezone) || 5.5,
+          place:
+            groom.selectedPlace?.displayName ||
+            groom.selectedPlace?.place ||
+            groom.place.trim(),
+          latitude: groom.selectedPlace?.latitude ?? groom.latitude ?? 22.5726,
+          longitude: groom.selectedPlace?.longitude ?? groom.longitude ?? 88.3639,
+          timezone:
+            groom.selectedPlace?.timezoneOffset != null
+              ? groom.selectedPlace.timezoneOffset
+              : parseFloat(groom.timezone) || 5.5,
           ayanamsa: groom.ayanamsa,
           house_system: groom.houseSystem,
         },
@@ -247,10 +217,16 @@ export default function KundliMatchingPage() {
           minute: bride.minute ? parseInt(bride.minute, 10) : 0,
           second: bride.second ? parseInt(bride.second, 10) : 0,
           period: bride.period,
-          place: bride.place,
-          latitude: bride.latitude ?? 22.5726,
-          longitude: bride.longitude ?? 88.3639,
-          timezone: parseFloat(bride.timezone) || 5.5,
+          place:
+            bride.selectedPlace?.displayName ||
+            bride.selectedPlace?.place ||
+            bride.place.trim(),
+          latitude: bride.selectedPlace?.latitude ?? bride.latitude ?? 22.5726,
+          longitude: bride.selectedPlace?.longitude ?? bride.longitude ?? 88.3639,
+          timezone:
+            bride.selectedPlace?.timezoneOffset != null
+              ? bride.selectedPlace.timezoneOffset
+              : parseFloat(bride.timezone) || 5.5,
           ayanamsa: bride.ayanamsa,
           house_system: bride.houseSystem,
         },
@@ -287,6 +263,8 @@ export default function KundliMatchingPage() {
   // Reset form
   const handleReset = () => {
     setResult(null);
+    setGroom({ ...defaultPersonState });
+    setBride({ ...defaultPersonState });
     setStep(1);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -407,7 +385,13 @@ export default function KundliMatchingPage() {
             <div className="space-y-6 animate-fadeIn">
               <div className="flex items-center gap-2 text-amber-800 font-semibold text-base sm:text-lg border-b border-amber-100 pb-2">
                 <span className="text-xl">♂</span>
-                <span>{t.step1Title}</span>
+                <span>
+                  {language === "bn"
+                    ? "বরের বিবরণ লিখুন"
+                    : language === "hi"
+                    ? "वर का विवरण दर्ज करें"
+                    : "Enter Groom's Details"}
+                </span>
               </div>
 
               {/* Full Name */}
@@ -631,7 +615,13 @@ export default function KundliMatchingPage() {
             <div className="space-y-6 animate-fadeIn">
               <div className="flex items-center gap-2 text-amber-800 font-semibold text-base sm:text-lg border-b border-amber-100 pb-2">
                 <span className="text-xl">♀</span>
-                <span>{t.step2Title}</span>
+                <span>
+                  {language === "bn"
+                    ? "কনের বিবরণ লিখুন"
+                    : language === "hi"
+                    ? "वधू का विवरण दर्ज करें"
+                    : "Enter Bride's Details"}
+                </span>
               </div>
 
               {/* Full Name */}

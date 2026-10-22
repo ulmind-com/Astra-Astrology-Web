@@ -126,8 +126,8 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
     pageTitle: "কুন্ডলী মিলন (৩৬ গুণ বিচার)",
     pageSubtitle:
       "কুন্ডলী মিলন বা যোটক বিচার হলো একটি প্রাচীন বৈদিক জ্যোতিষ বিজ্ঞান, যা বর ও কনের গ্রহাবস্থান ও অষ্টকূট (৩৬ গুণ) বিচার করে দাম্পত্য জীবনের সুখ, স্বাস্থ্য, মানসিক ঐক্য ও বংশবৃদ্ধির সামঞ্জস্য নির্ধারণ করে।",
-    step1Title: "১. বরের বিবরণ লিখুন ♂",
-    step2Title: "২. কনের বিবরণ লিখুন ♀",
+    step1Title: "বরের বিবরণ লিখুন ♂",
+    step2Title: "কনের বিবরণ লিখুন ♀",
     nextStepButton: "পরবর্তী: কনের বিবরণ ♀",
     backButton: "পেছনে যান",
     matchButton: "কুন্ডলী মিলন দেখুন ➔",
@@ -325,8 +325,8 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
     pageTitle: "कुंडली मिलान (३६ गुण मिलान)",
     pageSubtitle:
       "कुंडली मिलान या गुण मिलान एक प्राचीन वैदिक ज्योतिष विज्ञान है जो वर और वधू की जन्म कुंडली का तुलनात्मक विश्लेषण कर सुखी, समृद्ध और सामंजस्यपूर्ण वैवाहिक जीवन का मार्गदर्शन करता है।",
-    step1Title: "१. वर का विवरण दर्ज करें ♂",
-    step2Title: "२. वधू का विवरण दर्ज करें ♀",
+    step1Title: "वर का विवरण दर्ज करें ♂",
+    step2Title: "वधू का विवरण दर्ज करें ♀",
     nextStepButton: "अगला: वधू का विवरण ♀",
     backButton: "वापस",
     matchButton: "कुंडली मिलान करें ➔",
@@ -524,8 +524,8 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
     pageTitle: "Kundli Matching (36 Gun Milan)",
     pageSubtitle:
       "Kundli Matching or Horoscope Matching is an ancient Vedic science comparing the planetary positions of the prospective bride and groom to evaluate lifelong harmony, mutual health, spiritual affinity, and prosperous marital union.",
-    step1Title: "1. Enter Groom's Details ♂",
-    step2Title: "2. Enter Bride's Details ♀",
+    step1Title: "Enter Groom's Details ♂",
+    step2Title: "Enter Bride's Details ♀",
     nextStepButton: "Next: Bride's details ♀",
     backButton: "Back",
     matchButton: "Match Your Kundli ➔",
