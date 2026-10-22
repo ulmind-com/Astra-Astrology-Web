@@ -50,8 +50,8 @@ function GoldDiamondDivider({ className = "" }: { className?: string }) {
   return (
     <div className={`relative flex items-center justify-center my-3 ${className}`}>
       <div className="h-[2px] w-48 sm:w-64 bg-gradient-to-r from-transparent via-amber-400 to-transparent relative flex items-center justify-between">
-        <span className="size-2 rotate-45 border-2 border-amber-500 bg-white dark:bg-stone-900" />
-        <span className="size-2 rotate-45 border-2 border-amber-500 bg-white dark:bg-stone-900" />
+        <span className="size-2 rotate-45 border-2 border-amber-500 bg-white" />
+        <span className="size-2 rotate-45 border-2 border-amber-500 bg-white" />
       </div>
     </div>
   );
@@ -287,78 +287,89 @@ export default function KundliPage() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50/60 dark:bg-stone-950 text-foreground flex flex-col font-sans pb-24">
+    <div className="min-h-screen bg-surface-muted/30 text-foreground flex flex-col font-sans pb-24">
       <SiteHeader />
 
       {/* Main Container */}
-      <main className="mx-auto max-w-6xl px-3 sm:px-4 py-6 flex-1 w-full space-y-8">
-        {/* ─────────────────────────────────────────────────────────────
-            SECTION 1: Header, Carousel Navigation & Profile (Screenshot 1)
-        ───────────────────────────────────────────────────────────── */}
-        <div className="text-center space-y-2">
-          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-800 dark:text-stone-100">
-            {language === "bn"
-              ? "কুন্ডলী ও গ্রহের অবস্থান"
-              : language === "hi"
-              ? "कुंडली एवं ग्रह स्थिति"
-              : "Kundli & Planetary Position"}
-          </h1>
-
-          <GoldDiamondDivider />
-
-          {/* Breadcrumb */}
-          <div className="flex items-center justify-center gap-2 text-xs font-semibold text-muted-foreground">
-            <Link href="/" className="text-amber-800 dark:text-amber-400 hover:underline">
-              Home
-            </Link>
-            <span>➔</span>
-            <span className="text-foreground">AppliedJyotish Kundli</span>
+      <main className="mx-auto max-w-6xl px-3 sm:px-4 py-8 flex-1 w-full space-y-8">
+        {/* =========================================================================
+            HEADER & TITLE matching Astra Theme (Image 2)
+        ========================================================================= */}
+        <div className="mx-auto max-w-4xl text-center space-y-3">
+          <div className="inline-flex items-center gap-2 rounded-full bg-amber-100/90 text-amber-950 border border-amber-300 font-bold px-4 py-1.5 text-xs shadow-2xs">
+            <Sparkles className="size-3.5 text-amber-600" />
+            <span>
+              {language === "bn"
+                ? "বৈদিক জ্যোতিষশাস্ত্র ভিত্তিক নির্ভুল কুন্ডলী ক্যালকুলেটর"
+                : language === "hi"
+                ? "वैदिक ज्योतिष सम्मत सटीक जन्म कुंडली कैलकुलेटर"
+                : "Vedic Sidereal Accurate Birth Kundli Calculator"}
+            </span>
           </div>
 
-          {/* Language Switcher Bar */}
-          <div className="flex items-center justify-center gap-1.5 pt-2">
-            {(
-              [
-                { code: "bn", label: "বাংলা" },
-                { code: "en", label: "English" },
-                { code: "hi", label: "हिन्दी" },
-              ] as const
-            ).map((lang) => (
-              <button
-                key={lang.code}
-                type="button"
-                onClick={() => setLanguage(lang.code)}
-                className={`rounded-full px-3 py-1 text-xs font-bold transition-all ${
-                  language === lang.code
-                    ? "bg-amber-600 text-white shadow-xs"
-                    : "bg-surface border border-border/80 text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {lang.label}
-              </button>
-            ))}
+          <h1 className="font-display text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            {language === "bn"
+              ? "জন্মতারিখ দিয়ে কুন্ডলী ও গ্রহের অবস্থান — সম্পূর্ণ ফ্রি"
+              : language === "hi"
+              ? "जन्मतिथि से जानें जन्म कुंडली एवं ग्रह स्थिति — पूर्णतः निःशुल्क"
+              : "Find Your Kundli by Date of Birth - Complete Vedic Chart"}
+          </h1>
+
+          <p className="text-xs sm:text-sm text-foreground-muted max-w-2xl mx-auto">
+            {language === "bn"
+              ? "সঠিক লগ্ন, ১২টি ভাব, নবাংশ (D9) চার্ট, বিংশোত্তরী দশা ও বৈদিক যোগের পূর্ণাঙ্গ বিশ্লেষণ।"
+              : language === "hi"
+              ? "सटीक लग्न, १२ भाव, नवमांश (D9) चार्ट, विंशोत्तरी दशा एवं वैदिक योगों का संपूर्ण विश्लेषण।"
+              : "Accurate Ascendant, 12 Placidus House Cusps, Navamsha D9 Chart, Vimshottari Dashas and Classical Vedic Yogas."}
+          </p>
+
+          {/* Language Switcher Bar matching Image 2 */}
+          <div className="flex items-center justify-center gap-2 pt-2">
+            <span className="text-xs font-semibold text-foreground-muted">
+              {language === "bn" ? "ভাষা / Language:" : language === "hi" ? "भाषा / Language:" : "Language:"}
+            </span>
+            <div className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-white p-1 text-xs font-semibold shadow-2xs">
+              {(
+                [
+                  { code: "bn", label: "বাংলা" },
+                  { code: "hi", label: "हिन्दी" },
+                  { code: "en", label: "English" },
+                ] as const
+              ).map((lang) => (
+                <button
+                  key={lang.code}
+                  type="button"
+                  onClick={() => setLanguage(lang.code)}
+                  className={`rounded-full px-3 py-1 text-xs font-bold transition-all ${
+                    language === lang.code
+                      ? "bg-amber-500 text-white shadow-2xs"
+                      : "text-foreground-muted hover:text-foreground"
+                  }`}
+                >
+                  {lang.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-
-
-        {/* Profile Card matching Screenshot 1 */}
-        <div className="rounded-2xl border-2 border-amber-300/80 bg-white dark:bg-stone-900 p-6 shadow-sm text-center">
-          <h2 className="font-display text-2xl font-bold tracking-tight text-slate-800 dark:text-stone-100">
+        {/* Profile Card matching Screenshot 1 with Astra Calm Glow Theme */}
+        <div className="rounded-3xl border border-amber-200/80 bg-white p-6 sm:p-8 shadow-soft text-center space-y-4">
+          <h2 className="font-display text-2xl font-bold tracking-tight text-foreground">
             {language === "bn" ? "প্রোফাইল" : "Profile"}
           </h2>
           <GoldDiamondDivider />
 
           {/* Rashi Graphic Symbol Box */}
-          <div className="mx-auto my-4 size-24 rounded-xl border-2 border-amber-400 bg-amber-50/40 dark:bg-stone-800 flex items-center justify-center p-2 shadow-xs">
+          <div className="mx-auto size-24 rounded-2xl border-2 border-amber-300 bg-amber-50/80 flex items-center justify-center p-2 shadow-xs">
             <span className="text-5xl select-none" role="img" aria-label="Scorpio">
               🦂
             </span>
           </div>
 
-          <div className="my-3">
-            <span className="inline-block rounded-lg bg-slate-800 text-white font-bold text-xs px-4 py-1.5 shadow-xs">
-              {isSignedIn ? user?.full_name || "Logged In" : "Login"}
+          <div>
+            <span className="inline-block rounded-full bg-amber-100 text-amber-950 border border-amber-300 font-bold text-xs px-4 py-1.5 shadow-2xs">
+              {isSignedIn ? user?.full_name || name : name}
             </span>
           </div>
 
@@ -367,7 +378,7 @@ export default function KundliPage() {
             <button
               type="button"
               onClick={() => setShowForm((v) => !v)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/40 px-4 py-2 text-xs font-bold text-amber-950 dark:text-amber-200 hover:bg-amber-100 transition-colors shadow-2xs"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50/80 hover:bg-amber-100 px-4 py-2 text-xs font-bold text-amber-950 transition-colors shadow-2xs"
             >
               <FilePlus className="size-4 text-amber-600" />
               <span>{language === "bn" ? "নতুন কুন্ডলী তৈরি করুন" : "Create New Kundli"}</span>
@@ -376,7 +387,7 @@ export default function KundliPage() {
             <button
               type="button"
               onClick={() => toast.success("Kundli saved to your profile!")}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/40 px-4 py-2 text-xs font-bold text-amber-950 dark:text-amber-200 hover:bg-amber-100 transition-colors shadow-2xs"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50/80 hover:bg-amber-100 px-4 py-2 text-xs font-bold text-amber-950 transition-colors shadow-2xs"
             >
               <Lock className="size-4 text-amber-600" />
               <span>{language === "bn" ? "কুন্ডলী সংরক্ষণ করুন" : "Save Kundli"}</span>
@@ -385,7 +396,7 @@ export default function KundliPage() {
             <button
               type="button"
               onClick={() => setShowForm(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/40 px-4 py-2 text-xs font-bold text-amber-950 dark:text-amber-200 hover:bg-amber-100 transition-colors shadow-2xs"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50/80 hover:bg-amber-100 px-4 py-2 text-xs font-bold text-amber-950 transition-colors shadow-2xs"
             >
               <Edit className="size-4 text-amber-600" />
               <span>{language === "bn" ? "বিবরণ পরিবর্তন করুন" : "Edit Details"}</span>
@@ -393,57 +404,104 @@ export default function KundliPage() {
           </div>
         </div>
 
-        {/* Collapsible Birth Input Form */}
+        {/* Collapsible Birth Input Form matching Image 2 */}
         {showForm && (
-          <div className="rounded-2xl border-2 border-amber-400 bg-white dark:bg-stone-900 p-6 sm:p-8 shadow-sm animate-in fade-in duration-200">
-            <div className="flex items-center justify-between pb-4 border-b border-border">
-              <h3 className="font-display text-lg font-bold text-foreground">
-                {language === "bn" ? "জন্ম বিবরণ সম্পাদনা করুন" : "Edit Birth Details"}
+          <div className="rounded-3xl border border-amber-200/80 bg-white p-6 sm:p-8 shadow-soft animate-in fade-in duration-200 space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-amber-100">
+              <h3 className="font-display text-xl font-bold text-foreground">
+                {language === "bn" ? "আপনার জন্ম বিবরণ প্রবেশ করান" : "Enter Your Birth Details"}
               </h3>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="text-xs font-bold text-muted-foreground hover:text-foreground"
+                className="text-xs font-bold text-foreground-muted hover:text-foreground"
               >
                 ✕ {language === "bn" ? "বন্ধ করুন" : "Close"}
               </button>
             </div>
 
-            <form onSubmit={handleFormSubmit} className="mt-4 space-y-4">
+            {/* Profile greeting banner matching Image 2 */}
+            <div className="rounded-2xl border border-amber-300/80 bg-amber-50/70 p-3 text-xs text-amber-950 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="flex size-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">✓</span>
+                <span>
+                  {language === "bn"
+                    ? `স্বাগত, ${name}! আপনার প্রোফাইলের তথ্য লোড করা হয়েছে।`
+                    : `Welcome, ${name}! Profile details have been loaded.`}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (profile) populateFromProfileData(profile, user);
+                  }}
+                  className="rounded-lg border border-amber-300 bg-white px-2.5 py-1 text-[11px] font-bold text-amber-950 hover:bg-amber-50 transition-colors"
+                >
+                  🔄 {language === "bn" ? "রিলোড" : "Reload"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setName("");
+                    setDay("");
+                    setMonth("");
+                    setYear("");
+                    setHour("");
+                    setMinute("");
+                    setSecond("");
+                    setPlace("");
+                  }}
+                  className="rounded-lg border border-amber-300 bg-white px-2.5 py-1 text-[11px] font-bold text-red-700 hover:bg-red-50 transition-colors"
+                >
+                  ↺ {language === "bn" ? "খালি করুন" : "Clear"}
+                </button>
+              </div>
+            </div>
+
+            <form onSubmit={handleFormSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Name */}
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-foreground">Full Name</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <User className="size-3.5 text-amber-600" />
+                    <span>{language === "bn" ? "নাম" : "Full Name"}</span>
+                  </label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full rounded-xl border border-input bg-surface px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500"
+                    className="w-full rounded-xl border border-amber-200 bg-amber-50/20 px-3 py-2 text-sm text-foreground focus:border-amber-500 focus:outline-none shadow-2xs"
                   />
                 </div>
 
                 {/* Gender */}
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-foreground">Gender</label>
-                  <div className="grid grid-cols-3 gap-1 rounded-xl bg-surface-muted p-1 border border-input">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-foreground">
+                    {language === "bn" ? "লিঙ্গ" : "Gender"}
+                  </label>
+                  <div className="grid grid-cols-3 gap-1 rounded-xl bg-amber-50/40 p-1 border border-amber-200">
                     {(["male", "female", "other"] as const).map((g) => (
                       <button
                         key={g}
                         type="button"
                         onClick={() => setGender(g)}
-                        className={`rounded-lg py-1.5 text-xs font-bold capitalize ${
-                          gender === g ? "bg-amber-600 text-white" : "text-muted-foreground"
+                        className={`rounded-lg py-1.5 text-xs font-bold capitalize transition-all ${
+                          gender === g ? "bg-amber-500 text-white shadow-2xs" : "text-foreground-muted hover:text-foreground"
                         }`}
                       >
-                        {g}
+                        {g === "male" ? (language === "bn" ? "পুরুষ" : "Male") : g === "female" ? (language === "bn" ? "মহিলা" : "Female") : (language === "bn" ? "অন্যান্য" : "Other")}
                       </button>
                     ))}
                   </div>
                 </div>
 
                 {/* Date of Birth */}
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-foreground">Date of Birth (DD-MM-YYYY)</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <Calendar className="size-3.5 text-amber-600" />
+                    <span>{language === "bn" ? "জন্মতারিখ *" : "Date of Birth *"}</span>
+                  </label>
                   <div className="grid grid-cols-3 gap-1.5">
                     <input
                       ref={dayRef}
@@ -451,7 +509,7 @@ export default function KundliPage() {
                       placeholder="DD"
                       value={day}
                       onChange={(e) => setDay(e.target.value)}
-                      className="w-full rounded-xl border border-input bg-surface px-2 py-2 text-center text-sm font-semibold"
+                      className="w-full rounded-xl border border-amber-200 bg-amber-50/20 px-2 py-2 text-center text-sm font-semibold text-foreground focus:border-amber-500 focus:outline-none shadow-2xs"
                     />
                     <input
                       ref={monthRef}
@@ -459,7 +517,7 @@ export default function KundliPage() {
                       placeholder="MM"
                       value={month}
                       onChange={(e) => setMonth(e.target.value)}
-                      className="w-full rounded-xl border border-input bg-surface px-2 py-2 text-center text-sm font-semibold"
+                      className="w-full rounded-xl border border-amber-200 bg-amber-50/20 px-2 py-2 text-center text-sm font-semibold text-foreground focus:border-amber-500 focus:outline-none shadow-2xs"
                     />
                     <input
                       ref={yearRef}
@@ -467,40 +525,46 @@ export default function KundliPage() {
                       placeholder="YYYY"
                       value={year}
                       onChange={(e) => setYear(e.target.value)}
-                      className="w-full rounded-xl border border-input bg-surface px-2 py-2 text-center text-sm font-semibold"
+                      className="w-full rounded-xl border border-amber-200 bg-amber-50/20 px-2 py-2 text-center text-sm font-semibold text-foreground focus:border-amber-500 focus:outline-none shadow-2xs"
                     />
                   </div>
                 </div>
 
                 {/* Time of Birth */}
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-foreground">Time of Birth (HH:MM:SS)</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <Clock className="size-3.5 text-amber-600" />
+                    <span>{language === "bn" ? "জন্মসময় (ঐচ্ছিক)" : "Birth Time (Optional)"}</span>
+                  </label>
                   <div className="grid grid-cols-4 gap-1">
                     <input
                       ref={hourRef}
                       type="text"
+                      placeholder="HH"
                       value={hour}
                       onChange={(e) => setHour(e.target.value)}
-                      className="w-full rounded-xl border border-input bg-surface px-1 py-2 text-center text-sm font-semibold"
+                      className="w-full rounded-xl border border-amber-200 bg-amber-50/20 px-1 py-2 text-center text-sm font-semibold text-foreground focus:border-amber-500 focus:outline-none shadow-2xs"
                     />
                     <input
                       ref={minuteRef}
                       type="text"
+                      placeholder="MM"
                       value={minute}
                       onChange={(e) => setMinute(e.target.value)}
-                      className="w-full rounded-xl border border-input bg-surface px-1 py-2 text-center text-sm font-semibold"
+                      className="w-full rounded-xl border border-amber-200 bg-amber-50/20 px-1 py-2 text-center text-sm font-semibold text-foreground focus:border-amber-500 focus:outline-none shadow-2xs"
                     />
                     <input
                       ref={secondRef}
                       type="text"
+                      placeholder="SS"
                       value={second}
                       onChange={(e) => setSecond(e.target.value)}
-                      className="w-full rounded-xl border border-input bg-surface px-1 py-2 text-center text-sm font-semibold"
+                      className="w-full rounded-xl border border-amber-200 bg-amber-50/20 px-1 py-2 text-center text-sm font-semibold text-foreground focus:border-amber-500 focus:outline-none shadow-2xs"
                     />
                     <button
                       type="button"
                       onClick={() => setPeriod((p) => (p === "AM" ? "PM" : "AM"))}
-                      className="w-full rounded-xl border border-input bg-amber-50 font-bold text-xs text-amber-900"
+                      className="w-full rounded-xl border border-amber-200 bg-amber-100/90 font-bold text-xs text-amber-950 hover:bg-amber-200 transition-colors"
                     >
                       {period}
                     </button>
@@ -508,21 +572,25 @@ export default function KundliPage() {
                 </div>
 
                 {/* Place */}
-                <div className="space-y-1 sm:col-span-2">
-                  <label className="text-xs font-bold text-foreground">Birth Place</label>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <MapPin className="size-3.5 text-amber-600" />
+                    <span>{language === "bn" ? "জন্মস্থান *" : "Birth Place *"}</span>
+                  </label>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={place}
                       onChange={(e) => setPlace(e.target.value)}
-                      className="w-full rounded-xl border border-input bg-surface px-3 py-2 text-sm"
+                      placeholder="শহর বা গ্রামের নাম লিখুন..."
+                      className="w-full rounded-xl border border-amber-200 bg-amber-50/20 px-3 py-2 text-sm text-foreground focus:border-amber-500 focus:outline-none shadow-2xs"
                     />
                     <button
                       type="button"
                       onClick={() => setIsMapModalOpen(true)}
-                      className="shrink-0 rounded-xl border border-amber-400 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-900"
+                      className="shrink-0 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-950 hover:bg-amber-100 transition-colors"
                     >
-                      Map Select
+                      ম্যাপ নির্বাচন
                     </button>
                   </div>
                 </div>
@@ -532,16 +600,17 @@ export default function KundliPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="rounded-xl bg-amber-600 px-6 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-amber-700"
+                  className="flex-1 h-12 rounded-xl bg-brand-400 hover:bg-brand-500 text-ink-900 font-bold shadow-glow text-sm transition-all flex items-center justify-center gap-2"
                 >
-                  {loading ? "Calculating..." : "Update Kundli"}
+                  <Sparkles className="size-4" />
+                  <span>{loading ? "গণনা করা হচ্ছে..." : "কুন্ডলী গণনা করুন"}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="rounded-xl border border-input px-4 py-2.5 text-xs font-semibold text-muted-foreground"
+                  className="rounded-xl border border-amber-200 bg-surface px-4 py-3 text-xs font-semibold text-foreground-muted hover:text-foreground"
                 >
-                  Cancel
+                  বন্ধ করুন
                 </button>
               </div>
             </form>
@@ -569,114 +638,113 @@ export default function KundliPage() {
         ───────────────────────────────────────────────────────────── */}
         {result && (
           <div ref={resultsRef} className="space-y-8">
-            <div className="text-center">
-              <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-slate-800 dark:text-stone-100">
+            <div className="text-center space-y-1">
+              <h2 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
                 {language === "bn" ? "কুন্ডলী বিবরণ ও চার্ট" : "Kundli Details & Chart"}
               </h2>
+              <GoldDiamondDivider />
             </div>
 
             {/* 4 Side-by-side Info Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Card 1: PERSONAL DETAILS */}
-              <div className="rounded-xl border-2 border-amber-300 bg-white dark:bg-stone-900 p-4 shadow-2xs">
-                <div className="text-center font-display text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-200">
+              <div className="rounded-2xl border border-amber-200/80 bg-white p-5 shadow-soft space-y-3">
+                <div className="rounded-xl bg-amber-100/90 border border-amber-300/70 px-3 py-1.5 text-center font-display text-xs font-bold uppercase tracking-wider text-amber-950">
                   PERSONAL DETAILS
                 </div>
-                <GoldDiamondDivider className="my-1.5" />
-                <div className="mt-3 space-y-2 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Name
                     </span>
-                    <span className="font-semibold text-foreground truncate max-w-[120px]">
+                    <span className="font-bold text-foreground truncate max-w-[120px]">
                       {result.personal_details.name}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Gender
                     </span>
-                    <span className="font-semibold text-foreground">{result.personal_details.gender}</span>
+                    <span className="font-bold text-foreground">{result.personal_details.gender}</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Date of Birth
                     </span>
-                    <span className="font-semibold text-foreground tabular-nums">
+                    <span className="font-bold text-foreground tabular-nums">
                       {result.personal_details.date_of_birth}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Time of Birth
                     </span>
-                    <span className="font-semibold text-foreground tabular-nums">
+                    <span className="font-bold text-foreground tabular-nums">
                       {result.personal_details.time_of_birth}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Day
                     </span>
-                    <span className="font-semibold text-foreground">{result.personal_details.day}</span>
+                    <span className="font-bold text-foreground">{result.personal_details.day}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Vedic Day
                     </span>
-                    <span className="font-semibold text-foreground">{result.personal_details.vedic_day}</span>
+                    <span className="font-bold text-foreground">{result.personal_details.vedic_day}</span>
                   </div>
                 </div>
               </div>
 
               {/* Card 2: ASTRONOMICAL INFO */}
-              <div className="rounded-xl border-2 border-amber-300 bg-white dark:bg-stone-900 p-4 shadow-2xs">
-                <div className="text-center font-display text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-200">
+              <div className="rounded-2xl border border-amber-200/80 bg-white p-5 shadow-soft space-y-3">
+                <div className="rounded-xl bg-amber-100/90 border border-amber-300/70 px-3 py-1.5 text-center font-display text-xs font-bold uppercase tracking-wider text-amber-950">
                   ASTRONOMICAL INFO
                 </div>
-                <GoldDiamondDivider className="my-1.5" />
-                <div className="mt-3 space-y-2 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Julian Day
                     </span>
-                    <span className="font-semibold text-foreground tabular-nums">
+                    <span className="font-bold text-foreground tabular-nums">
                       {result.astronomical_info.julian_day}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Ayan Type
                     </span>
-                    <span className="font-semibold text-foreground">{result.astronomical_info.ayan_type}</span>
+                    <span className="font-bold text-foreground">{result.astronomical_info.ayan_type}</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> House
                     </span>
-                    <span className="font-semibold text-foreground">{result.astronomical_info.house_system}</span>
+                    <span className="font-bold text-foreground">{result.astronomical_info.house_system}</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Place
                     </span>
-                    <span className="font-semibold text-foreground truncate max-w-[120px]" title={result.astronomical_info.place}>
+                    <span className="font-bold text-foreground truncate max-w-[120px]" title={result.astronomical_info.place}>
                       {result.astronomical_info.place}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Longitude
                     </span>
-                    <span className="font-semibold text-foreground tabular-nums">
+                    <span className="font-bold text-foreground tabular-nums">
                       {result.astronomical_info.longitude_formatted}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Latitude
                     </span>
-                    <span className="font-semibold text-foreground tabular-nums">
+                    <span className="font-bold text-foreground tabular-nums">
                       {result.astronomical_info.latitude_formatted}
                     </span>
                   </div>
@@ -684,49 +752,48 @@ export default function KundliPage() {
               </div>
 
               {/* Card 3: ASTRO POSITIONS */}
-              <div className="rounded-xl border-2 border-amber-300 bg-white dark:bg-stone-900 p-4 shadow-2xs">
-                <div className="text-center font-display text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-200">
+              <div className="rounded-2xl border border-amber-200/80 bg-white p-5 shadow-soft space-y-3">
+                <div className="rounded-xl bg-amber-100/90 border border-amber-300/70 px-3 py-1.5 text-center font-display text-xs font-bold uppercase tracking-wider text-amber-950">
                   ASTRO POSITIONS
                 </div>
-                <GoldDiamondDivider className="my-1.5" />
-                <div className="mt-3 space-y-2 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Asc Lord
                     </span>
-                    <span className="font-semibold text-foreground">{result.astro_positions.asc_lord}</span>
+                    <span className="font-bold text-foreground">{result.astro_positions.asc_lord}</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Asc
                     </span>
-                    <span className="font-semibold text-foreground">{result.astro_positions.asc}</span>
+                    <span className="font-bold text-foreground">{result.astro_positions.asc}</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Yoga
                     </span>
-                    <span className="font-semibold text-foreground">{result.astro_positions.yoga}</span>
+                    <span className="font-bold text-foreground">{result.astro_positions.yoga}</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Tithi
                     </span>
-                    <span className="font-semibold text-foreground">{result.astro_positions.tithi}</span>
+                    <span className="font-bold text-foreground">{result.astro_positions.tithi}</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Sunset
                     </span>
-                    <span className="font-semibold text-foreground tabular-nums">
+                    <span className="font-bold text-foreground tabular-nums">
                       {result.astro_positions.sunset}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Sunrise
                     </span>
-                    <span className="font-semibold text-foreground tabular-nums">
+                    <span className="font-bold text-foreground tabular-nums">
                       {result.astro_positions.sunrise}
                     </span>
                   </div>
@@ -734,64 +801,63 @@ export default function KundliPage() {
               </div>
 
               {/* Card 4: PLANETARY INFO */}
-              <div className="rounded-xl border-2 border-amber-300 bg-white dark:bg-stone-900 p-4 shadow-2xs">
-                <div className="text-center font-display text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-200">
+              <div className="rounded-2xl border border-amber-200/80 bg-white p-5 shadow-soft space-y-3">
+                <div className="rounded-xl bg-amber-100/90 border border-amber-300/70 px-3 py-1.5 text-center font-display text-xs font-bold uppercase tracking-wider text-amber-950">
                   PLANETARY INFO
                 </div>
-                <GoldDiamondDivider className="my-1.5" />
-                <div className="mt-3 space-y-2 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Bal. Dasa
                     </span>
-                    <span className="font-semibold text-foreground tabular-nums">
+                    <span className="font-bold text-foreground tabular-nums">
                       {result.planetary_info.bal_dasa}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Karan
                     </span>
-                    <span className="font-semibold text-foreground">{result.planetary_info.karan}</span>
+                    <span className="font-bold text-foreground">{result.planetary_info.karan}</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Nakshatra Lord
                     </span>
-                    <span className="font-semibold text-foreground">
+                    <span className="font-bold text-foreground">
                       {result.planetary_info.nakshatra_lord}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Nakshatra
                     </span>
-                    <span className="font-semibold text-foreground">{result.planetary_info.nakshatra}</span>
+                    <span className="font-bold text-foreground">{result.planetary_info.nakshatra}</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                  <div className="flex items-center justify-between border-b border-amber-100/70 pb-1.5">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Rasi Lord
                     </span>
-                    <span className="font-semibold text-foreground">{result.planetary_info.rasi_lord}</span>
+                    <span className="font-bold text-foreground">{result.planetary_info.rasi_lord}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-stone-300">
+                    <span className="flex items-center gap-1.5 text-foreground-muted font-medium">
                       <span className="text-amber-600 text-[10px]">➔</span> Rasi
                     </span>
-                    <span className="font-semibold text-foreground">{result.planetary_info.rasi}</span>
+                    <span className="font-bold text-foreground">{result.planetary_info.rasi}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Chart Style Switcher matching Screenshot 2 */}
+            {/* Chart Style Switcher */}
             <div className="text-center space-y-3 pt-2">
-              <h3 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-slate-800 dark:text-stone-100">
-                {language === "bn" ? "চার্ট শৈলী নির্বাচন করুন" : "Chose Chart Style"}
+              <h3 className="font-display text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
+                {language === "bn" ? "চার্ট শৈলী নির্বাচন করুন" : "Choose Chart Style"}
               </h3>
               <GoldDiamondDivider />
 
-              <div className="inline-flex rounded-xl bg-amber-50/80 dark:bg-stone-900 p-1.5 border border-amber-300">
+              <div className="inline-flex rounded-xl bg-amber-50 p-1 border border-amber-300">
                 {(
                   [
                     { key: "north", label: "North" },
@@ -806,8 +872,8 @@ export default function KundliPage() {
                     onClick={() => setChartStyle(s.key)}
                     className={`rounded-lg px-4 py-1.5 text-xs font-bold transition-all ${
                       chartStyle === s.key
-                        ? "bg-amber-600 text-white shadow-xs"
-                        : "text-amber-950 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-stone-800"
+                        ? "bg-amber-500 text-white shadow-2xs"
+                        : "text-amber-950 hover:bg-amber-100"
                     }`}
                   >
                     {s.label}
@@ -817,7 +883,7 @@ export default function KundliPage() {
             </div>
 
             {/* Side-by-side Charts: Lagna Chart (D1) and Navamsa Chart (D9) */}
-            <div ref={d9Ref} className="rounded-2xl border-2 border-amber-300/80 bg-white dark:bg-stone-900 p-6 shadow-sm">
+            <div ref={d9Ref} className="rounded-3xl border border-amber-200/80 bg-white p-6 sm:p-8 shadow-soft">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center justify-items-center">
                 {/* 1. Lagna Chart (D1) */}
                 <div className="w-full flex flex-col items-center">
@@ -847,18 +913,18 @@ export default function KundliPage() {
                 SECTION 3: Planet & House Tables (Screenshot 3)
             ───────────────────────────────────────────────────────────── */}
             {/* Table 1: Planet Table */}
-            <div className="rounded-2xl border border-amber-200/80 bg-white dark:bg-stone-900 p-5 sm:p-6 shadow-sm space-y-4">
-              <div className="text-center">
-                <h3 className="font-display text-2xl font-bold tracking-tight text-slate-800 dark:text-stone-100">
-                  {language === "bn" ? "গ্রহের অবস্থান" : "Planet"}
+            <div className="rounded-3xl border border-amber-200/80 bg-white p-5 sm:p-6 shadow-soft space-y-4">
+              <div className="text-center space-y-1">
+                <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">
+                  {language === "bn" ? "গ্রহের অবস্থান" : "Planet Positions"}
                 </h3>
                 <GoldDiamondDivider />
               </div>
 
-              <div className="overflow-x-auto rounded-xl border border-stone-300 dark:border-stone-700">
+              <div className="overflow-x-auto rounded-2xl border border-amber-200/80">
                 <table className="w-full border-collapse text-left text-xs sm:text-sm">
                   <thead>
-                    <tr className="bg-[#c5c1a5] dark:bg-stone-700 text-stone-900 dark:text-stone-100 font-bold border-b border-stone-300">
+                    <tr className="bg-amber-100/90 text-amber-950 font-bold border-b border-amber-300">
                       <th className="py-3 px-4 font-bold text-center">Planet</th>
                       <th className="py-3 px-4 font-bold text-center">Longitude</th>
                       <th className="py-3 px-4 font-bold text-center">Nakshatra</th>
@@ -868,31 +934,31 @@ export default function KundliPage() {
                       <th className="py-3 px-4 font-bold text-center">Full Degree</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-stone-200 dark:divide-stone-800 bg-white dark:bg-stone-900">
+                  <tbody className="divide-y divide-amber-100/80 bg-white">
                     {result.planets_table.map((row, idx) => (
                       <tr
                         key={`planet-row-${idx}`}
-                        className="hover:bg-amber-50/40 dark:hover:bg-stone-800/60 transition-colors"
+                        className="hover:bg-amber-50/60 transition-colors"
                       >
                         <td className="py-3 px-4 text-center font-bold text-foreground">
                           {row.name}
                         </td>
-                        <td className="py-3 px-4 text-center font-semibold text-slate-800 dark:text-stone-200 tabular-nums">
+                        <td className="py-3 px-4 text-center font-bold text-foreground tabular-nums">
                           {row.longitude_formatted}
                         </td>
-                        <td className="py-3 px-4 text-center text-slate-700 dark:text-stone-300">
+                        <td className="py-3 px-4 text-center text-foreground-muted">
                           {row.nakshatra}
                         </td>
-                        <td className="py-3 px-4 text-center text-slate-700 dark:text-stone-300">
+                        <td className="py-3 px-4 text-center text-foreground-muted">
                           {row.nakshatra_lord}
                         </td>
-                        <td className="py-3 px-4 text-center font-bold text-amber-900 dark:text-amber-200 tabular-nums">
+                        <td className="py-3 px-4 text-center font-bold text-amber-800 tabular-nums">
                           {row.pada}
                         </td>
-                        <td className="py-3 px-4 text-center font-semibold text-foreground">
+                        <td className="py-3 px-4 text-center font-bold text-foreground">
                           {row.sub_lord}
                         </td>
-                        <td className="py-3 px-4 text-center text-slate-600 dark:text-stone-400 tabular-nums">
+                        <td className="py-3 px-4 text-center text-foreground-muted tabular-nums">
                           {row.full_degree_formatted}
                         </td>
                       </tr>
@@ -903,18 +969,18 @@ export default function KundliPage() {
             </div>
 
             {/* Table 2: House Table */}
-            <div className="rounded-2xl border border-amber-200/80 bg-white dark:bg-stone-900 p-5 sm:p-6 shadow-sm space-y-4">
-              <div className="text-center">
-                <h3 className="font-display text-2xl font-bold tracking-tight text-slate-800 dark:text-stone-100">
-                  {language === "bn" ? "ভাব বিবরণ" : "House"}
+            <div className="rounded-3xl border border-amber-200/80 bg-white p-5 sm:p-6 shadow-soft space-y-4">
+              <div className="text-center space-y-1">
+                <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">
+                  {language === "bn" ? "ভাব বিবরণ" : "House Positions"}
                 </h3>
                 <GoldDiamondDivider />
               </div>
 
-              <div className="overflow-x-auto rounded-xl border border-stone-300 dark:border-stone-700">
+              <div className="overflow-x-auto rounded-2xl border border-amber-200/80">
                 <table className="w-full border-collapse text-left text-xs sm:text-sm">
                   <thead>
-                    <tr className="bg-[#c5c1a5] dark:bg-stone-700 text-stone-900 dark:text-stone-100 font-bold border-b border-stone-300">
+                    <tr className="bg-amber-100/90 text-amber-950 font-bold border-b border-amber-300">
                       <th className="py-3 px-4 font-bold text-center">House</th>
                       <th className="py-3 px-4 font-bold text-center">Longitude</th>
                       <th className="py-3 px-4 font-bold text-center">Nakshatra</th>
@@ -924,31 +990,31 @@ export default function KundliPage() {
                       <th className="py-3 px-4 font-bold text-center">Full Degree</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-stone-200 dark:divide-stone-800 bg-white dark:bg-stone-900">
+                  <tbody className="divide-y divide-amber-100/80 bg-white">
                     {result.houses_table.map((row, idx) => (
                       <tr
                         key={`house-row-${idx}`}
-                        className="hover:bg-amber-50/40 dark:hover:bg-stone-800/60 transition-colors"
+                        className="hover:bg-amber-50/60 transition-colors"
                       >
                         <td className="py-3 px-4 text-center font-bold text-foreground">
                           {row.name}
                         </td>
-                        <td className="py-3 px-4 text-center font-semibold text-slate-800 dark:text-stone-200 tabular-nums">
+                        <td className="py-3 px-4 text-center font-bold text-foreground tabular-nums">
                           {row.longitude_formatted}
                         </td>
-                        <td className="py-3 px-4 text-center text-slate-700 dark:text-stone-300">
+                        <td className="py-3 px-4 text-center text-foreground-muted">
                           {row.nakshatra}
                         </td>
-                        <td className="py-3 px-4 text-center text-slate-700 dark:text-stone-300">
+                        <td className="py-3 px-4 text-center text-foreground-muted">
                           {row.nakshatra_lord}
                         </td>
-                        <td className="py-3 px-4 text-center font-bold text-amber-900 dark:text-amber-200 tabular-nums">
+                        <td className="py-3 px-4 text-center font-bold text-amber-800 tabular-nums">
                           {row.pada}
                         </td>
-                        <td className="py-3 px-4 text-center font-semibold text-foreground">
+                        <td className="py-3 px-4 text-center font-bold text-foreground">
                           {row.sub_lord}
                         </td>
-                        <td className="py-3 px-4 text-center text-slate-600 dark:text-stone-400 tabular-nums">
+                        <td className="py-3 px-4 text-center text-foreground-muted tabular-nums">
                           {row.full_degree_formatted}
                         </td>
                       </tr>
@@ -961,9 +1027,9 @@ export default function KundliPage() {
             {/* ─────────────────────────────────────────────────────────────
                 SECTION 4: Vimshottari Dasha 3x3 Grid (Screenshot 4)
             ───────────────────────────────────────────────────────────── */}
-            <div className="rounded-2xl border-2 border-amber-300/80 bg-white dark:bg-stone-900 p-6 sm:p-8 shadow-sm space-y-6">
-              <div className="text-center">
-                <h3 className="font-display text-2xl font-bold tracking-tight text-slate-800 dark:text-stone-100">
+            <div className="rounded-3xl border border-amber-200/80 bg-white p-6 sm:p-8 shadow-soft space-y-6">
+              <div className="text-center space-y-1">
+                <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">
                   {language === "bn" ? "বিংশোত্তরী দশা" : "Vimshottari Dasha"}
                 </h3>
                 <GoldDiamondDivider />
@@ -974,35 +1040,35 @@ export default function KundliPage() {
                 {result.dashas_grid.map((card, cIdx) => (
                   <div
                     key={`dasha-card-${cIdx}`}
-                    className="rounded-xl border border-amber-300/80 bg-amber-50/20 dark:bg-stone-800/50 p-4 shadow-2xs flex flex-col justify-between"
+                    className="rounded-2xl border border-amber-200/80 bg-amber-50/30 p-4 shadow-2xs flex flex-col justify-between"
                   >
                     <div>
-                      <h4 className="font-display text-center text-xs font-bold uppercase tracking-wider text-amber-950 dark:text-amber-200 pb-2 border-b border-amber-200">
+                      <h4 className="font-display text-center text-xs font-bold uppercase tracking-wider text-amber-950 pb-2 border-b border-amber-200">
                         {card.title}
                       </h4>
 
                       <div className="mt-3 overflow-x-auto">
                         <table className="w-full text-[11px] text-left">
                           <thead>
-                            <tr className="bg-[#c5c1a5] dark:bg-stone-700 text-stone-900 dark:text-stone-100 font-bold">
+                            <tr className="bg-amber-100/80 text-amber-950 font-bold">
                               <th className="py-1.5 px-2 font-bold">Antar Dasha</th>
                               <th className="py-1.5 px-2 font-bold text-center">Duration</th>
                               <th className="py-1.5 px-2 font-bold text-center">End Date</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-stone-200 dark:divide-stone-700">
+                          <tbody className="divide-y divide-amber-100/60 bg-white/70">
                             {card.antardashas.map((ant, aIdx) => (
-                              <tr key={`ant-${cIdx}-${aIdx}`} className="hover:bg-white/60">
+                              <tr key={`ant-${cIdx}-${aIdx}`} className="hover:bg-amber-50/60">
                                 <td className="py-1.5 px-2 font-bold text-foreground flex items-center gap-1">
                                   <span>{ant.lord}</span>
                                   {ant.duration !== "-" && (
                                     <span className="text-amber-600 text-[9px]">➔</span>
                                   )}
                                 </td>
-                                <td className="py-1.5 px-2 text-center text-slate-700 dark:text-stone-300 tabular-nums">
+                                <td className="py-1.5 px-2 text-center text-foreground-muted tabular-nums">
                                   {ant.duration}
                                 </td>
-                                <td className="py-1.5 px-2 text-center text-slate-700 dark:text-stone-300 tabular-nums">
+                                <td className="py-1.5 px-2 text-center text-foreground-muted tabular-nums">
                                   {ant.end_date}
                                 </td>
                               </tr>
@@ -1019,19 +1085,19 @@ export default function KundliPage() {
             {/* ─────────────────────────────────────────────────────────────
                 SECTION 5: Divisional Charts & Yoga (Screenshot 5)
             ───────────────────────────────────────────────────────────── */}
-            <div className="rounded-2xl border-2 border-amber-300/80 bg-white dark:bg-stone-900 p-6 sm:p-8 shadow-sm space-y-6">
-              <div className="text-center">
-                <h3 className="font-display text-2xl font-bold tracking-tight text-slate-800 dark:text-stone-100">
+            <div className="rounded-3xl border border-amber-200/80 bg-white p-6 sm:p-8 shadow-soft space-y-6">
+              <div className="text-center space-y-2">
+                <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">
                   {language === "bn" ? "বর্গ কুন্ডলী (Divisional Charts)" : "Divisional Charts"}
                 </h3>
                 <GoldDiamondDivider />
 
-                <div className="inline-flex rounded-xl bg-amber-50/80 dark:bg-stone-900 p-1 border border-amber-300 my-2">
+                <div className="inline-flex rounded-xl bg-amber-50 p-1 border border-amber-300 my-2">
                   {(["North", "South", "East"] as const).map((s) => (
                     <button
                       key={s}
                       type="button"
-                      className="rounded-lg px-4 py-1 text-xs font-bold bg-amber-600 text-white shadow-xs"
+                      className="rounded-lg px-4 py-1 text-xs font-bold bg-amber-500 text-white shadow-2xs"
                     >
                       {s}
                     </button>
@@ -1053,26 +1119,26 @@ export default function KundliPage() {
             </div>
 
             {/* Yoga Section matching Screenshot 5 */}
-            <div ref={yogaRef} className="rounded-2xl border-2 border-amber-300/80 bg-white dark:bg-stone-900 p-6 sm:p-8 shadow-sm space-y-6">
-              <div className="text-center">
-                <h3 className="font-display text-2xl font-bold tracking-tight text-slate-800 dark:text-stone-100">
-                  {language === "bn" ? "বৈদিক যোগ ও দোষ বিশ্লেষণ" : "Yoga"}
+            <div ref={yogaRef} className="rounded-3xl border border-amber-200/80 bg-white p-6 sm:p-8 shadow-soft space-y-6">
+              <div className="text-center space-y-1">
+                <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">
+                  {language === "bn" ? "বৈদিক যোগ ও দোষ বিশ্লেষণ" : "Yoga Analysis"}
                 </h3>
                 <GoldDiamondDivider />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                {/* Left Column: Kundil Yoga Status List */}
+                {/* Left Column: Kundli Yoga Status List */}
                 <div className="space-y-3">
-                  <div className="rounded-xl bg-amber-600 px-4 py-2 text-center font-bold text-xs uppercase tracking-wider text-white shadow-xs">
-                    Kundil Yoga - New User
+                  <div className="rounded-xl bg-amber-500 px-4 py-2.5 text-center font-bold text-xs uppercase tracking-wider text-white shadow-2xs">
+                    Kundli Yoga - {name}
                   </div>
 
                   <div className="space-y-2.5">
                     {result.yogas_status.map((y, idx) => (
                       <div
                         key={`yoga-stat-${idx}`}
-                        className="flex items-center justify-between rounded-xl border border-stone-200 dark:border-stone-800 bg-surface px-4 py-3 shadow-2xs"
+                        className="flex items-center justify-between rounded-xl border border-amber-200/80 bg-amber-50/40 px-4 py-3 shadow-2xs"
                       >
                         <div className="flex items-center gap-2.5">
                           <span className="flex size-5 items-center justify-center rounded-full bg-amber-100 border border-amber-300 text-xs">
@@ -1082,7 +1148,7 @@ export default function KundliPage() {
                             {y.is_present ? (
                               <span className="text-emerald-600 mr-1.5 font-bold">✔</span>
                             ) : (
-                              <span className="text-red-600 mr-1.5 font-bold">✖</span>
+                              <span className="text-rose-600 mr-1.5 font-bold">✖</span>
                             )}
                             {y.name}
                           </span>
@@ -1091,7 +1157,7 @@ export default function KundliPage() {
                           className={`text-xs font-bold rounded-lg px-2.5 py-0.5 border ${
                             y.is_present
                               ? "bg-emerald-50 text-emerald-800 border-emerald-300"
-                              : "bg-red-50 text-red-800 border-red-300"
+                              : "bg-rose-50 text-rose-800 border-rose-300"
                           }`}
                         >
                           {y.is_present ? "Present" : "Not Present"}
@@ -1106,12 +1172,12 @@ export default function KundliPage() {
                   {result.active_yogas_details.map((act, idx) => (
                     <div
                       key={`act-yoga-${idx}`}
-                      className="rounded-xl border border-amber-300/80 bg-amber-50/20 dark:bg-stone-900/60 p-4 space-y-1.5 shadow-2xs"
+                      className="rounded-2xl border border-amber-200/80 bg-amber-50/30 p-4 space-y-1.5 shadow-2xs"
                     >
-                      <h4 className="font-display text-base font-bold text-amber-900 dark:text-amber-200">
+                      <h4 className="font-display text-base font-bold text-amber-950">
                         {act.name}
                       </h4>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
+                      <p className="text-xs text-foreground-muted leading-relaxed">
                         {act.effects}
                       </p>
                     </div>
@@ -1126,11 +1192,11 @@ export default function KundliPage() {
       {/* Floating Action Bar at Bottom matching Screenshot 2 & 5 */}
       {result && (
         <div className="fixed bottom-4 inset-x-0 mx-auto max-w-md px-4 z-40">
-          <div className="rounded-2xl bg-white/95 dark:bg-stone-900/95 border-2 border-amber-400 shadow-xl p-2 flex items-center justify-between gap-2 backdrop-blur-md">
+          <div className="rounded-2xl bg-white/95 border-2 border-amber-300 shadow-xl p-2 flex items-center justify-between gap-2 backdrop-blur-md">
             <button
               type="button"
               onClick={() => toast.success("Kundli saved to your account!")}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-stone-200 bg-stone-100 hover:bg-stone-200 py-2 px-3 text-xs font-bold text-slate-800 transition-colors"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 py-2.5 px-3 text-xs font-bold text-amber-950 transition-colors shadow-2xs"
             >
               <Lock className="size-3.5 text-amber-600" />
               <span>Save Kundli</span>
@@ -1139,7 +1205,7 @@ export default function KundliPage() {
             <button
               type="button"
               onClick={handlePrintDownload}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 py-2 px-3 text-xs font-bold text-white shadow-xs transition-colors"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 py-2.5 px-3 text-xs font-bold text-white shadow-xs transition-colors"
             >
               <Download className="size-3.5" />
               <span>Download</span>
@@ -1147,9 +1213,9 @@ export default function KundliPage() {
 
             <Link
               href="/astrologers"
-              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 py-2 px-3 text-xs font-bold text-amber-900 transition-colors"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-400 hover:bg-brand-500 py-2.5 px-3 text-xs font-bold text-ink-900 shadow-glow transition-all"
             >
-              <MessageCircle className="size-3.5 text-amber-700" />
+              <MessageCircle className="size-3.5 text-ink-900" />
               <span>Consult</span>
             </Link>
           </div>

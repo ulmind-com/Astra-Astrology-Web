@@ -126,13 +126,13 @@ export function KundliDiamondChart({
     <div className={`flex flex-col items-center ${className}`}>
       {title && (
         <div className="mb-3">
-          <span className="inline-block rounded-lg border-2 border-amber-300 bg-amber-50/70 dark:bg-amber-950/40 px-4 py-1 text-sm font-bold text-amber-900 dark:text-amber-200 shadow-2xs">
+          <span className="inline-block rounded-full border border-amber-300 bg-amber-100/90 px-4 py-1 text-xs font-bold text-amber-950 shadow-2xs">
             {title}
           </span>
         </div>
       )}
 
-      <div className="relative w-full max-w-[360px] sm:max-w-[400px] aspect-square rounded-xl bg-white dark:bg-stone-900 shadow-xs border border-amber-200/80 p-2">
+      <div className="relative w-full max-w-[360px] sm:max-w-[400px] aspect-square rounded-2xl bg-white shadow-soft border border-amber-200/80 p-3">
         {chartStyle === "south" ? (
           // South Indian 4x4 Grid Chart
           <svg
