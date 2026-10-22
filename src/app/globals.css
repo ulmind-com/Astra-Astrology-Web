@@ -12,6 +12,23 @@
    surface, and a dark variant would be a different product.
    ========================================================================== */
 
+/* --------------------------------------------------------------------------
+   Neutralise the `dark:` variant.
+
+   Tailwind's default `dark:` follows the operating system's colour preference.
+   Astra has one theme and no dark mode, and `ThemeProvider` says as much by
+   stripping the `dark` class and pinning `color-scheme: light` - but a class it
+   removes has no bearing on a media query, so any `dark:` utility left in a page
+   still fired for every visitor whose OS was set to dark.
+
+   That is what turned the dasha calculator black while every other page stayed
+   cream: it carried 89 `dark:` utilities and the other calculators carried none.
+
+   Binding the variant to an explicit `.dark` class instead means those utilities
+   can never activate on their own, here or in any page written later.
+   -------------------------------------------------------------------------- */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* --- brand: the sunny yellow ----------------------------------------
      Pale at the low end for tints and chips, deepening into an olive that is

@@ -523,7 +523,7 @@ export default function NakshatraCalculatorPage() {
             </div>
 
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-700 dark:text-brand-300 text-xs font-semibold uppercase tracking-wider mb-4 shadow-2xs">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-700 text-xs font-semibold uppercase tracking-wider mb-4 shadow-2xs">
               <Sparkles className="size-3.5 text-brand-500 animate-pulse" />
               <span>{ui.badge}</span>
             </div>
@@ -544,14 +544,14 @@ export default function NakshatraCalculatorPage() {
             {/* Auto-fill banner if user is logged in */}
             {isSignedIn && profile && (
               <div className="px-5 py-3 bg-brand-500/10 border-b border-brand-500/20 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <div className="flex items-center gap-2 text-brand-900 dark:text-brand-200 font-medium">
+                <div className="flex items-center gap-2 text-brand-900 font-medium">
                   <CheckCircle2 className="size-4 text-brand-600 shrink-0" />
                   <span>{ui.syncProfileNotice}</span>
                 </div>
                 <button
                   type="button"
                   onClick={handleReloadFromProfile}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-brand-500/20 hover:bg-brand-500/30 text-brand-900 dark:text-brand-100 font-semibold transition-colors"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-brand-500/20 hover:bg-brand-500/30 text-brand-900 font-semibold transition-colors"
                 >
                   <RefreshCw className="size-3" />
                   <span>{ui.syncProfileBtn}</span>
@@ -596,7 +596,7 @@ export default function NakshatraCalculatorPage() {
                         onClick={() => setGender(g.id)}
                         className={`py-2.5 px-2 rounded-xl text-xs font-semibold border transition-all ${
                           gender === g.id
-                            ? "border-brand-500 bg-brand-500/15 text-brand-900 dark:text-brand-100 shadow-2xs"
+                            ? "border-brand-500 bg-brand-500/15 text-brand-900 shadow-2xs"
                             : "border-border bg-surface-muted/30 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
                         }`}
                       >
@@ -984,7 +984,7 @@ export default function NakshatraCalculatorPage() {
                     <Award className="size-3.5 text-amber-500" />
                     <span>{ui.currentNamaksharLabel}</span>
                   </div>
-                  <div className="text-lg sm:text-xl font-extrabold text-brand-600 dark:text-brand-400">
+                  <div className="text-lg sm:text-xl font-extrabold text-brand-600">
                     &ldquo;{result.current_namakshar}&rdquo;
                   </div>
                 </div>
@@ -1014,7 +1014,7 @@ export default function NakshatraCalculatorPage() {
                     <Flame className="size-3.5 text-amber-500" />
                     <span>{ui.beejMantraLabel}</span>
                   </div>
-                  <div className="text-sm font-bold text-amber-700 dark:text-amber-300 break-words leading-snug">
+                  <div className="text-sm font-bold text-amber-700 break-words leading-snug">
                     {result.traits.beej_mantra}
                   </div>
                 </div>
@@ -1105,7 +1105,7 @@ export default function NakshatraCalculatorPage() {
                       </span>
                     )}
                   </div>
-                  <div className="break-words text-sm font-bold leading-snug text-amber-700 dark:text-amber-300">
+                  <div className="break-words text-sm font-bold leading-snug text-amber-700">
                     {result.paya?.value ?? result.avakahada.paya}
                   </div>
                   {result.paya?.is_disputed && result.paya.notice && (
@@ -1175,7 +1175,7 @@ export default function NakshatraCalculatorPage() {
                           <div>
                             {language === "bn" ? p.rashi_name_bn : language === "hi" ? p.rashi_name_hi : p.rashi_name_en}
                           </div>
-                          <div className="font-semibold text-indigo-600 dark:text-indigo-400">
+                          <div className="font-semibold text-indigo-600">
                             {ui.navamshaSignLabel}: {p.navamsha_sign}
                           </div>
                         </div>
@@ -1199,7 +1199,7 @@ export default function NakshatraCalculatorPage() {
                 </div>
 
                 <div className="rounded-3xl border border-emerald-500/30 bg-emerald-500/5 p-6 shadow-sm">
-                  <h4 className="font-display text-lg font-bold text-emerald-800 dark:text-emerald-300 mb-3 flex items-center gap-2">
+                  <h4 className="font-display text-lg font-bold text-emerald-800 mb-3 flex items-center gap-2">
                     <CheckCircle2 className="size-5 text-emerald-600" />
                     <span>{ui.strengthsHeading}</span>
                   </h4>
@@ -1217,7 +1217,7 @@ export default function NakshatraCalculatorPage() {
               {/* Cautions & Remedies */}
               <div className="space-y-6">
                 <div className="rounded-3xl border border-rose-500/30 bg-rose-500/5 p-6 shadow-sm">
-                  <h4 className="font-display text-lg font-bold text-rose-800 dark:text-rose-300 mb-3 flex items-center gap-2">
+                  <h4 className="font-display text-lg font-bold text-rose-800 mb-3 flex items-center gap-2">
                     <AlertTriangle className="size-5 text-rose-600" />
                     <span>{ui.cautionsHeading}</span>
                   </h4>
@@ -1232,7 +1232,7 @@ export default function NakshatraCalculatorPage() {
                 </div>
 
                 <div className="rounded-3xl border border-amber-500/30 bg-amber-500/5 p-6 shadow-sm">
-                  <h4 className="font-display text-lg font-bold text-amber-800 dark:text-amber-300 mb-3 flex items-center gap-2">
+                  <h4 className="font-display text-lg font-bold text-amber-800 mb-3 flex items-center gap-2">
                     <Heart className="size-5 text-amber-600" />
                     <span>{ui.remediesHeading}</span>
                   </h4>
@@ -1258,7 +1258,7 @@ export default function NakshatraCalculatorPage() {
                 {result.traits.career_fields.map((career, idx) => (
                   <span
                     key={idx}
-                    className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-brand-500/10 text-brand-900 dark:text-brand-200 border border-brand-500/20 shadow-2xs"
+                    className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-brand-500/10 text-brand-900 border border-brand-500/20 shadow-2xs"
                   >
                     ✦ {career}
                   </span>
@@ -1291,8 +1291,8 @@ export default function NakshatraCalculatorPage() {
                       <span
                         className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                           t.is_auspicious
-                            ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30"
-                            : "bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/30"
+                            ? "bg-emerald-500/20 text-emerald-700 border border-emerald-500/30"
+                            : "bg-rose-500/20 text-rose-700 border border-rose-500/30"
                         }`}
                       >
                         {t.is_auspicious ? ui.auspiciousBadge : ui.inauspiciousBadge}

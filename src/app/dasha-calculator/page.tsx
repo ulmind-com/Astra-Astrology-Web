@@ -55,16 +55,16 @@ const PLANET_PILLS: Array<{
   color: string;
   bgClass: string;
 }> = [
-  { key: "Asc", code: "Asc", nameEn: "Ascendant", nameBn: "লগ্ন", nameHi: "लग्न", color: "#eab308", bgClass: "bg-amber-100 border-amber-400 text-amber-900" },
+  { key: "Asc", code: "Asc", nameEn: "Ascendant", nameBn: "লগ্ন", nameHi: "लग्न", color: "#eab308", bgClass: "bg-brand-100 border-brand-400 text-brand-900" },
   { key: "Sun", code: "Su", nameEn: "Sun", nameBn: "সূর্য", nameHi: "सूर्य", color: "#f97316", bgClass: "bg-orange-100 border-orange-400 text-orange-900" },
-  { key: "Moon", code: "Mo", nameEn: "Moon", nameBn: "চন্দ্র", nameHi: "चंद्र", color: "#64748b", bgClass: "bg-slate-100 border-slate-400 text-slate-900" },
+  { key: "Moon", code: "Mo", nameEn: "Moon", nameBn: "চন্দ্র", nameHi: "चंद्र", color: "#64748b", bgClass: "bg-surface-muted border-border-strong text-ink-950" },
   { key: "Mercury", code: "Me", nameEn: "Mercury", nameBn: "বুধ", nameHi: "बुध", color: "#10b981", bgClass: "bg-emerald-100 border-emerald-400 text-emerald-900" },
   { key: "Venus", code: "Ve", nameEn: "Venus", nameBn: "শুক্র", nameHi: "शुक्र", color: "#eab308", bgClass: "bg-yellow-100 border-yellow-400 text-yellow-900" },
   { key: "Mars", code: "Ma", nameEn: "Mars", nameBn: "মঙ্গল", nameHi: "मंगल", color: "#ef4444", bgClass: "bg-red-100 border-red-400 text-red-900" },
-  { key: "Jupiter", code: "Ju", nameEn: "Jupiter", nameBn: "বৃহস্পতি", nameHi: "बृहस्पति", color: "#f59e0b", bgClass: "bg-amber-100 border-amber-400 text-amber-900" },
+  { key: "Jupiter", code: "Ju", nameEn: "Jupiter", nameBn: "বৃহস্পতি", nameHi: "बृहस्पति", color: "#f59e0b", bgClass: "bg-brand-100 border-brand-400 text-brand-900" },
   { key: "Saturn", code: "Sa", nameEn: "Saturn", nameBn: "শনি", nameHi: "शनि", color: "#8b5cf6", bgClass: "bg-purple-100 border-purple-400 text-purple-900" },
   { key: "Rahu", code: "Ra", nameEn: "Rahu", nameBn: "রাহু", nameHi: "राहु", color: "#6366f1", bgClass: "bg-indigo-100 border-indigo-400 text-indigo-900" },
-  { key: "Ketu", code: "Ke", nameEn: "Ketu", nameBn: "কেতু", nameHi: "केतु", color: "#d97706", bgClass: "bg-stone-100 border-stone-400 text-stone-900" },
+  { key: "Ketu", code: "Ke", nameEn: "Ketu", nameBn: "কেতু", nameHi: "केतु", color: "#d97706", bgClass: "bg-surface-muted border-border-strong text-ink-950" },
 ];
 
 // Helper to format date strings to DD-MM-YYYY
@@ -91,9 +91,9 @@ function formatDateDisplay(dStr: string): string {
 function GoldDiamondDivider() {
   return (
     <div className="relative flex items-center justify-center my-4">
-      <div className="h-[2px] w-48 sm:w-64 bg-gradient-to-r from-transparent via-amber-400 to-transparent relative flex items-center justify-between">
-        <span className="size-2 rotate-45 border-2 border-amber-500 bg-white dark:bg-stone-900" />
-        <span className="size-2 rotate-45 border-2 border-amber-500 bg-white dark:bg-stone-900" />
+      <div className="h-[2px] w-48 sm:w-64 bg-gradient-to-r from-transparent via-brand-400 to-transparent relative flex items-center justify-between">
+        <span className="size-2 rotate-45 border-2 border-brand-500 bg-white" />
+        <span className="size-2 rotate-45 border-2 border-brand-500 bg-white" />
       </div>
     </div>
   );
@@ -485,11 +485,11 @@ export default function DashaCalculatorPage() {
   }, [selectedPlanetInsight, language]);
 
   return (
-    <div className="min-h-screen bg-stone-50/60 dark:bg-stone-950 text-foreground flex flex-col font-sans">
+    <div className="min-h-screen bg-background/60 text-foreground flex flex-col font-sans">
       <SiteHeader />
 
       {/* Hero Header */}
-      <div className="relative border-b border-amber-200/50 bg-gradient-to-b from-amber-500/10 via-amber-50/30 to-background dark:from-amber-950/20 dark:via-background dark:to-background py-8 sm:py-12">
+      <div className="relative border-b border-brand-200/50 bg-gradient-to-b from-brand-500/10 via-brand-50/30 to-background py-8 sm:py-12">
         <div className="mx-auto max-w-6xl px-4 text-center">
           {/* Language Switcher Bar */}
           <div className="flex items-center justify-center gap-1.5 mb-6">
@@ -509,7 +509,7 @@ export default function DashaCalculatorPage() {
                 onClick={() => setLanguage(lang.code)}
                 className={`rounded-full px-3 py-1 text-xs font-bold transition-all ${
                   language === lang.code
-                    ? "bg-amber-600 text-white shadow-xs"
+                    ? "bg-brand-400 text-ink-950 shadow-xs"
                     : "bg-surface border border-border/80 text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -518,12 +518,12 @@ export default function DashaCalculatorPage() {
             ))}
           </div>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-semibold text-amber-800 dark:text-amber-300">
-            <Sparkles className="size-3.5 text-amber-600" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-4 py-1.5 text-xs font-semibold text-brand-800">
+            <Sparkles className="size-3.5 text-brand-600" />
             <span>Vimshottari Dasha System (120-Year Vedic Cycle)</span>
           </div>
 
-          <h1 className="mt-4 font-display text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink-950 dark:text-stone-100">
+          <h1 className="mt-4 font-display text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink-950">
             {language === "bn"
               ? "দশা ক্যালকুলেটর - বিংশোত্তরী মহাদশা ও অন্তর্দশা ফলাফল"
               : language === "hi"
@@ -544,11 +544,11 @@ export default function DashaCalculatorPage() {
       {/* Main Content Area */}
       <main className="mx-auto max-w-6xl px-4 py-8 flex-1 w-full space-y-10">
         {/* Birth Details Input Form */}
-        <div className="rounded-2xl border border-amber-300/80 bg-white dark:bg-stone-900 p-5 sm:p-8 shadow-sm">
+        <div className="rounded-2xl border border-brand-300/80 bg-white p-5 sm:p-8 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border/60">
             <div>
               <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
-                <Calendar className="size-5 text-amber-600" />
+                <Calendar className="size-5 text-brand-600" />
                 {language === "bn"
                   ? "জন্ম বিবরণ লিখুন"
                   : language === "hi"
@@ -568,7 +568,7 @@ export default function DashaCalculatorPage() {
               <button
                 type="button"
                 onClick={handleReloadFromProfile}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:text-amber-800 bg-amber-50 dark:bg-amber-950/40 border border-amber-300/60 rounded-xl px-3 py-2 transition-colors self-start sm:self-auto"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-700 hover:text-brand-800 bg-brand-50 border border-brand-300/60 rounded-xl px-3 py-2 transition-colors self-start sm:self-auto"
               >
                 <RefreshCw className="size-3.5" />
                 {language === "bn" ? "প্রোফাইল থেকে লোড করুন" : language === "hi" ? "प्रोफ़ाइल से लोड करें" : "Sync Profile"}
@@ -590,7 +590,7 @@ export default function DashaCalculatorPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder={language === "bn" ? "আপনার নাম" : language === "hi" ? "अपना नाम" : "Your Name"}
-                    className="w-full rounded-xl border border-input bg-surface pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full rounded-xl border border-input bg-surface pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                   />
                 </div>
               </div>
@@ -608,7 +608,7 @@ export default function DashaCalculatorPage() {
                       onClick={() => setGender(g)}
                       className={`rounded-lg py-1.5 text-xs font-bold capitalize transition-all ${
                         gender === g
-                          ? "bg-amber-600 text-white shadow-xs"
+                          ? "bg-brand-400 text-ink-950 shadow-xs"
                           : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
@@ -640,7 +640,7 @@ export default function DashaCalculatorPage() {
                   <span>
                     {language === "bn" ? "জন্ম তারিখ *" : language === "hi" ? "जन्म तिथि *" : "Date of Birth *"}
                   </span>
-                  <span className="text-[11px] font-normal text-amber-700 dark:text-amber-400">
+                  <span className="text-[11px] font-normal text-brand-700">
                     DD - MM - YYYY
                   </span>
                 </label>
@@ -652,7 +652,7 @@ export default function DashaCalculatorPage() {
                     placeholder="DD"
                     value={day}
                     onChange={handleDayChange}
-                    className="w-full rounded-xl border border-input bg-surface px-2 py-2 text-center text-sm font-semibold tracking-wider focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full rounded-xl border border-input bg-surface px-2 py-2 text-center text-sm font-semibold tracking-wider focus:outline-none focus:ring-2 focus:ring-brand-500"
                   />
                   <input
                     ref={monthRef}
@@ -662,7 +662,7 @@ export default function DashaCalculatorPage() {
                     value={month}
                     onChange={handleMonthChange}
                     onKeyDown={(e) => handleKeyDown(e, dayRef)}
-                    className="w-full rounded-xl border border-input bg-surface px-2 py-2 text-center text-sm font-semibold tracking-wider focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full rounded-xl border border-input bg-surface px-2 py-2 text-center text-sm font-semibold tracking-wider focus:outline-none focus:ring-2 focus:ring-brand-500"
                   />
                   <input
                     ref={yearRef}
@@ -672,7 +672,7 @@ export default function DashaCalculatorPage() {
                     value={year}
                     onChange={handleYearChange}
                     onKeyDown={(e) => handleKeyDown(e, monthRef)}
-                    className="w-full rounded-xl border border-input bg-surface px-2 py-2 text-center text-sm font-semibold tracking-wider focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full rounded-xl border border-input bg-surface px-2 py-2 text-center text-sm font-semibold tracking-wider focus:outline-none focus:ring-2 focus:ring-brand-500"
                   />
                 </div>
               </div>
@@ -698,7 +698,7 @@ export default function DashaCalculatorPage() {
                     placeholder="12"
                     value={hour}
                     onChange={handleHourChange}
-                    className="w-full rounded-xl border border-input bg-surface px-1 py-2 text-center text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full rounded-xl border border-input bg-surface px-1 py-2 text-center text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500"
                   />
                   <input
                     ref={minuteRef}
@@ -708,7 +708,7 @@ export default function DashaCalculatorPage() {
                     value={minute}
                     onChange={handleMinuteChange}
                     onKeyDown={(e) => handleKeyDown(e, hourRef)}
-                    className="w-full rounded-xl border border-input bg-surface px-1 py-2 text-center text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full rounded-xl border border-input bg-surface px-1 py-2 text-center text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500"
                   />
                   <input
                     ref={secondRef}
@@ -718,12 +718,12 @@ export default function DashaCalculatorPage() {
                     value={second}
                     onChange={handleSecondChange}
                     onKeyDown={(e) => handleKeyDown(e, minuteRef)}
-                    className="w-full rounded-xl border border-input bg-surface px-1 py-2 text-center text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full rounded-xl border border-input bg-surface px-1 py-2 text-center text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500"
                   />
                   <button
                     type="button"
                     onClick={() => setPeriod((p) => (p === "AM" ? "PM" : "AM"))}
-                    className="w-full rounded-xl border border-input bg-amber-50 dark:bg-amber-950/40 font-bold text-xs text-amber-900 dark:text-amber-200 hover:bg-amber-100 transition-colors"
+                    className="w-full rounded-xl border border-input bg-brand-50 font-bold text-xs text-brand-900 hover:bg-brand-100 transition-colors"
                   >
                     {period}
                   </button>
@@ -737,7 +737,7 @@ export default function DashaCalculatorPage() {
                     {language === "bn" ? "জন্মস্থান *" : language === "hi" ? "जन्म स्थान *" : "Birth Place *"}
                   </span>
                   {latitude !== null && longitude !== null && (
-                    <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                    <span className="text-[11px] font-medium text-emerald-600">
                       ✓ {latitude.toFixed(2)}°, {longitude.toFixed(2)}°
                     </span>
                   )}
@@ -756,15 +756,15 @@ export default function DashaCalculatorPage() {
                           ? "शहर का नाम (जैसे: Kolaghat, Kolkata, Delhi)"
                           : "Search city or town (e.g. Kolaghat, Kolkata, Delhi)"
                       }
-                      className="w-full rounded-xl border border-input bg-surface pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className="w-full rounded-xl border border-input bg-surface pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={() => setIsMapModalOpen(true)}
-                    className="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-amber-400 bg-amber-50 dark:bg-amber-950/50 px-3 py-2 text-xs font-bold text-amber-900 dark:text-amber-200 hover:bg-amber-100 transition-colors"
+                    className="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-brand-400 bg-brand-50 px-3 py-2 text-xs font-bold text-brand-900 hover:bg-brand-100 transition-colors"
                   >
-                    <Compass className="size-4 text-amber-600" />
+                    <Compass className="size-4 text-brand-600" />
                     <span className="hidden sm:inline">
                       {language === "bn" ? "ম্যাপ নির্বাচন" : language === "hi" ? "मानचित्र" : "Map Select"}
                     </span>
@@ -801,7 +801,7 @@ export default function DashaCalculatorPage() {
                     <select
                       value={ayanamsa}
                       onChange={(e) => setAyanamsa(e.target.value as AyanamsaType)}
-                      className="w-full rounded-xl border border-input bg-surface px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className="w-full rounded-xl border border-input bg-surface px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500"
                     >
                       <option value="krishnamurti">Krishnamurti (KP Original)</option>
                       <option value="lahiri">Lahiri (Chitra Paksha / AppliedJyotish)</option>
@@ -819,7 +819,7 @@ export default function DashaCalculatorPage() {
                       value={timezone}
                       onChange={(e) => setTimezone(e.target.value)}
                       placeholder="+5.5 for IST"
-                      className="w-full rounded-xl border border-input bg-surface px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className="w-full rounded-xl border border-input bg-surface px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500"
                     />
                   </div>
                 </div>
@@ -831,7 +831,7 @@ export default function DashaCalculatorPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-3 text-sm font-bold text-white shadow-md hover:from-amber-600 hover:to-amber-700 active:scale-98 transition-all disabled:opacity-60"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-brand-300 px-8 py-3 text-sm font-bold text-ink-950 shadow-glow hover:bg-brand-400 active:scale-98 transition-all disabled:opacity-60"
               >
                 {loading ? (
                   <>
@@ -891,8 +891,8 @@ export default function DashaCalculatorPage() {
             {/* ─────────────────────────────────────────────────────────
                 SECTION 1: Your Details Card (Matching Screenshot 1)
             ───────────────────────────────────────────────────────── */}
-            <div className="max-w-xl mx-auto rounded-2xl border-2 border-amber-400/90 bg-white dark:bg-stone-900 p-6 shadow-sm">
-              <h2 className="text-center font-display text-2xl font-bold tracking-tight text-slate-800 dark:text-stone-100">
+            <div className="max-w-xl mx-auto rounded-2xl border-2 border-brand-400/90 bg-white p-6 shadow-sm">
+              <h2 className="text-center font-display text-2xl font-bold tracking-tight text-foreground">
                 {language === "bn" ? "আপনার বিবরণ" : language === "hi" ? "आपका विवरण" : "Your Details"}
               </h2>
 
@@ -900,49 +900,49 @@ export default function DashaCalculatorPage() {
 
               <div className="mt-4 space-y-3 px-2 sm:px-6">
                 <div className="flex items-center justify-between text-sm sm:text-base">
-                  <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-stone-200">
-                    <span className="flex size-4 items-center justify-center rounded-full bg-amber-500 text-white text-[10px]">
+                  <div className="flex items-center gap-2 font-bold text-foreground">
+                    <span className="flex size-4 items-center justify-center rounded-full bg-brand-300 text-ink-950 text-[10px]">
                       ➔
                     </span>
                     <span>{language === "bn" ? "নাম:" : "Name:"}</span>
                   </div>
-                  <span className="font-semibold text-slate-700 dark:text-stone-300">
+                  <span className="font-semibold text-muted-foreground">
                     {result.name || name || "Native"}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between text-sm sm:text-base">
-                  <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-stone-200">
-                    <span className="flex size-4 items-center justify-center rounded-full bg-amber-500 text-white text-[10px]">
+                  <div className="flex items-center gap-2 font-bold text-foreground">
+                    <span className="flex size-4 items-center justify-center rounded-full bg-brand-300 text-ink-950 text-[10px]">
                       ➔
                     </span>
                     <span>{language === "bn" ? "লিঙ্গ:" : "Gender:"}</span>
                   </div>
-                  <span className="font-semibold text-slate-700 dark:text-stone-300 capitalize">
+                  <span className="font-semibold text-muted-foreground capitalize">
                     {result.gender || gender}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between text-sm sm:text-base">
-                  <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-stone-200">
-                    <span className="flex size-4 items-center justify-center rounded-full bg-amber-500 text-white text-[10px]">
+                  <div className="flex items-center gap-2 font-bold text-foreground">
+                    <span className="flex size-4 items-center justify-center rounded-full bg-brand-300 text-ink-950 text-[10px]">
                       ➔
                     </span>
                     <span>{language === "bn" ? "জন্ম তারিখ:" : "Date of Birth:"}</span>
                   </div>
-                  <span className="font-semibold text-slate-700 dark:text-stone-300 tabular-nums">
+                  <span className="font-semibold text-muted-foreground tabular-nums">
                     {result.birth_date_formatted || `${day.padStart(2, "0")}/${month.padStart(2, "0")}/${year}`}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between text-sm sm:text-base">
-                  <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-stone-200">
-                    <span className="flex size-4 items-center justify-center rounded-full bg-amber-500 text-white text-[10px]">
+                  <div className="flex items-center gap-2 font-bold text-foreground">
+                    <span className="flex size-4 items-center justify-center rounded-full bg-brand-300 text-ink-950 text-[10px]">
                       ➔
                     </span>
                     <span>{language === "bn" ? "জন্ম সময়:" : "Time of Birth:"}</span>
                   </div>
-                  <span className="font-semibold text-slate-700 dark:text-stone-300 tabular-nums">
+                  <span className="font-semibold text-muted-foreground tabular-nums">
                     {result.birth_time_formatted || `${hour.padStart(2, "0")}h:${minute.padStart(2, "0")}m:${second.padStart(2, "0")}s`}
                   </span>
                 </div>
@@ -952,22 +952,22 @@ export default function DashaCalculatorPage() {
             {/* ─────────────────────────────────────────────────────────
                 SECTION 2: Current Dasha 3 Cards (Matching Screenshot 1)
             ───────────────────────────────────────────────────────── */}
-            <div className="rounded-2xl border-2 border-amber-300/80 bg-white dark:bg-stone-900 p-6 sm:p-8 shadow-sm">
+            <div className="rounded-2xl border-2 border-brand-300/80 bg-white p-6 sm:p-8 shadow-sm">
               <div className="text-center">
-                <h3 className="font-display text-2xl font-bold tracking-tight text-amber-900 dark:text-amber-200 flex items-center justify-center gap-2">
-                  <Calendar className="size-6 text-amber-700" />
+                <h3 className="font-display text-2xl font-bold tracking-tight text-brand-900 flex items-center justify-center gap-2">
+                  <Calendar className="size-6 text-brand-700" />
                   <span>{language === "bn" ? "বর্তমান দশা" : language === "hi" ? "वर्तमान दशा" : "Current Dasha"}</span>
                 </h3>
               </div>
 
               <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-5">
                 {/* 1. Mahadasha Card (Blue Border) */}
-                <div className="rounded-xl border-2 border-blue-400 bg-blue-50/20 dark:bg-blue-950/20 p-5 shadow-xs flex flex-col justify-between">
+                <div className="rounded-xl border-2 border-blue-400 bg-blue-50/20 p-5 shadow-xs flex flex-col justify-between">
                   <div>
-                    <h4 className="font-display text-base font-bold text-blue-600 dark:text-blue-400">
+                    <h4 className="font-display text-base font-bold text-blue-600">
                       {language === "bn" ? "মহাদশা (Mahadasha)" : "Mahadasha"}
                     </h4>
-                    <div className="h-px bg-blue-200 dark:bg-blue-800 my-2.5" />
+                    <div className="h-px bg-blue-200 my-2.5" />
                     <div className="flex items-center gap-3 mt-3">
                       <div className="size-10 rounded-full bg-orange-100 border border-orange-300 flex items-center justify-center text-lg">
                         🪐
@@ -984,7 +984,7 @@ export default function DashaCalculatorPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-blue-100 dark:border-blue-900/60 text-xs text-slate-700 dark:text-stone-300 space-y-1 tabular-nums font-medium">
+                  <div className="mt-4 pt-3 border-t border-blue-100 text-xs text-muted-foreground space-y-1 tabular-nums font-medium">
                     <p>
                       <span className="font-semibold text-foreground">Start:</span>{" "}
                       {formatDateDisplay(currentMahadasha?.start_date || "2025-06-27")}
@@ -997,12 +997,12 @@ export default function DashaCalculatorPage() {
                 </div>
 
                 {/* 2. Antar Dasha Card (Green Border) */}
-                <div className="rounded-xl border-2 border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20 p-5 shadow-xs flex flex-col justify-between">
+                <div className="rounded-xl border-2 border-emerald-500 bg-emerald-50/20 p-5 shadow-xs flex flex-col justify-between">
                   <div>
-                    <h4 className="font-display text-base font-bold text-emerald-600 dark:text-emerald-400">
+                    <h4 className="font-display text-base font-bold text-emerald-600">
                       {language === "bn" ? "অন্তর্দশা (Antar Dasha)" : "Antar Dasha"}
                     </h4>
-                    <div className="h-px bg-emerald-200 dark:bg-emerald-800 my-2.5" />
+                    <div className="h-px bg-emerald-200 my-2.5" />
                     <div className="flex items-center gap-3 mt-3">
                       <div className="size-10 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center text-lg">
                         ✨
@@ -1019,7 +1019,7 @@ export default function DashaCalculatorPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-emerald-100 dark:border-emerald-900/60 text-xs text-slate-700 dark:text-stone-300 space-y-1 tabular-nums font-medium">
+                  <div className="mt-4 pt-3 border-t border-emerald-100 text-xs text-muted-foreground space-y-1 tabular-nums font-medium">
                     <p>
                       <span className="font-semibold text-foreground">Start:</span>{" "}
                       {formatDateDisplay(currentAntardasha?.start_date || "2025-06-27")}
@@ -1032,12 +1032,12 @@ export default function DashaCalculatorPage() {
                 </div>
 
                 {/* 3. Pratyantar Dasha Card (Gold Border) */}
-                <div className="rounded-xl border-2 border-amber-400 bg-amber-50/20 dark:bg-amber-950/20 p-5 shadow-xs flex flex-col justify-between">
+                <div className="rounded-xl border-2 border-brand-400 bg-brand-50/20 p-5 shadow-xs flex flex-col justify-between">
                   <div>
-                    <h4 className="font-display text-base font-bold text-amber-700 dark:text-amber-300">
+                    <h4 className="font-display text-base font-bold text-brand-700">
                       {language === "bn" ? "প্রত্যন্তর্দশা (Pratyantar Dasha)" : "Pratyantar Dasha"}
                     </h4>
-                    <div className="h-px bg-amber-200 dark:bg-amber-800 my-2.5" />
+                    <div className="h-px bg-brand-200 my-2.5" />
                     <div className="flex items-center gap-3 mt-3">
                       <div className="size-10 rounded-full bg-indigo-100 border border-indigo-300 flex items-center justify-center text-lg">
                         🔮
@@ -1054,7 +1054,7 @@ export default function DashaCalculatorPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-amber-100 dark:border-amber-900/60 text-xs text-slate-700 dark:text-stone-300 space-y-1 tabular-nums font-medium">
+                  <div className="mt-4 pt-3 border-t border-brand-100 text-xs text-muted-foreground space-y-1 tabular-nums font-medium">
                     <p>
                       <span className="font-semibold text-foreground">Start:</span>{" "}
                       {formatDateDisplay(currentPratyantardasha?.start_date || "2026-08-31")}
@@ -1072,9 +1072,9 @@ export default function DashaCalculatorPage() {
                 SECTION 3: Vimshottari Dasha 3-Level Stepper & Interactive Table
                 (Matching Screenshot 2)
             ───────────────────────────────────────────────────────── */}
-            <div className="rounded-2xl border border-amber-200/80 bg-white dark:bg-stone-900 p-5 sm:p-8 shadow-sm">
+            <div className="rounded-2xl border border-brand-200/80 bg-white p-5 sm:p-8 shadow-sm">
               <div className="text-center">
-                <h3 className="font-display text-2xl font-bold tracking-tight text-slate-800 dark:text-stone-100">
+                <h3 className="font-display text-2xl font-bold tracking-tight text-foreground">
                   {language === "bn" ? "বিংশোত্তরী দশা" : language === "hi" ? "विंशोत्तरी दशा" : "Vimshottari Dasha"}
                 </h3>
                 <GoldDiamondDivider />
@@ -1090,22 +1090,22 @@ export default function DashaCalculatorPage() {
                     <span
                       className={`flex size-7 items-center justify-center rounded-full text-xs font-bold transition-all ${
                         activeStep === 1
-                          ? "bg-amber-500 text-white shadow-xs"
-                          : "border border-stone-300 bg-white text-stone-600 hover:border-amber-400"
+                          ? "bg-brand-300 text-ink-950 shadow-xs"
+                          : "border border-border bg-white text-muted-foreground hover:border-brand-400"
                       }`}
                     >
                       1
                     </span>
                     <span
                       className={`text-xs sm:text-sm font-bold ${
-                        activeStep === 1 ? "text-amber-950 dark:text-amber-300" : "text-muted-foreground group-hover:text-foreground"
+                        activeStep === 1 ? "text-brand-950" : "text-muted-foreground group-hover:text-foreground"
                       }`}
                     >
                       {language === "bn" ? "মহাদশা" : "Mahadasha"}
                     </span>
                   </button>
 
-                  <div className="h-0.5 w-6 sm:w-12 bg-stone-300 dark:bg-stone-700" />
+                  <div className="h-0.5 w-6 sm:w-12 bg-border-strong" />
 
                   {/* Step 2: Antar Dasha */}
                   <button
@@ -1117,22 +1117,22 @@ export default function DashaCalculatorPage() {
                     <span
                       className={`flex size-7 items-center justify-center rounded-full text-xs font-bold transition-all ${
                         activeStep === 2
-                          ? "bg-amber-500 text-white shadow-xs"
-                          : "border border-stone-300 bg-white text-stone-600 hover:border-amber-400"
+                          ? "bg-brand-300 text-ink-950 shadow-xs"
+                          : "border border-border bg-white text-muted-foreground hover:border-brand-400"
                       }`}
                     >
                       2
                     </span>
                     <span
                       className={`text-xs sm:text-sm font-bold ${
-                        activeStep === 2 ? "text-amber-950 dark:text-amber-300" : "text-muted-foreground group-hover:text-foreground"
+                        activeStep === 2 ? "text-brand-950" : "text-muted-foreground group-hover:text-foreground"
                       }`}
                     >
                       {language === "bn" ? "অন্তর্দশা" : "Antar Dasha"}
                     </span>
                   </button>
 
-                  <div className="h-0.5 w-6 sm:w-12 bg-stone-300 dark:bg-stone-700" />
+                  <div className="h-0.5 w-6 sm:w-12 bg-border-strong" />
 
                   {/* Step 3: Pratyantar Dasha */}
                   <button
@@ -1144,15 +1144,15 @@ export default function DashaCalculatorPage() {
                     <span
                       className={`flex size-7 items-center justify-center rounded-full text-xs font-bold transition-all ${
                         activeStep === 3
-                          ? "bg-amber-500 text-white shadow-xs"
-                          : "border border-stone-300 bg-white text-stone-600 hover:border-amber-400"
+                          ? "bg-brand-300 text-ink-950 shadow-xs"
+                          : "border border-border bg-white text-muted-foreground hover:border-brand-400"
                       }`}
                     >
                       3
                     </span>
                     <span
                       className={`text-xs sm:text-sm font-bold ${
-                        activeStep === 3 ? "text-amber-950 dark:text-amber-300" : "text-muted-foreground group-hover:text-foreground"
+                        activeStep === 3 ? "text-brand-950" : "text-muted-foreground group-hover:text-foreground"
                       }`}
                     >
                       {language === "bn" ? "প্রত্যন্তর্দশা" : "Pratyantar Dasha"}
@@ -1166,7 +1166,7 @@ export default function DashaCalculatorPage() {
                 <div className="flex items-center gap-1.5">
                   <span
                     onClick={() => setActiveStep(1)}
-                    className="hover:underline cursor-pointer text-amber-800 dark:text-amber-400"
+                    className="hover:underline cursor-pointer text-brand-800"
                   >
                     Mahadashas
                   </span>
@@ -1175,7 +1175,7 @@ export default function DashaCalculatorPage() {
                       <span>➔</span>
                       <span
                         onClick={() => setActiveStep(2)}
-                        className="hover:underline cursor-pointer text-amber-800 dark:text-amber-400"
+                        className="hover:underline cursor-pointer text-brand-800"
                       >
                         {selectedMD.lord}
                       </span>
@@ -1194,10 +1194,10 @@ export default function DashaCalculatorPage() {
               </div>
 
               {/* Interactive Table with Olive Green Header matching Screenshot */}
-              <div className="mt-3 overflow-x-auto rounded-xl border border-stone-300 dark:border-stone-700">
+              <div className="mt-3 overflow-x-auto rounded-xl border border-border">
                 <table className="w-full border-collapse text-left text-sm">
                   <thead>
-                    <tr className="bg-[#c5c1a5] dark:bg-stone-700 text-stone-900 dark:text-stone-100 font-bold border-b border-stone-300 dark:border-stone-600">
+                    <tr className="bg-border-strong text-ink-950 font-bold border-b border-border">
                       <th className="py-3 px-4 font-bold">
                         {activeStep === 1
                           ? language === "bn" ? "মহাদশা" : "Mahadasha"
@@ -1216,7 +1216,7 @@ export default function DashaCalculatorPage() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-stone-200 dark:divide-stone-800 bg-white dark:bg-stone-900">
+                  <tbody className="divide-y divide-border bg-white">
                     {/* Render Level 1: 9 Mahadashas */}
                     {activeStep === 1 &&
                       result.dashas?.map((md, idx) => {
@@ -1232,32 +1232,32 @@ export default function DashaCalculatorPage() {
                             }}
                             className={`group cursor-pointer transition-colors ${
                               isCurrent
-                                ? "bg-amber-50/70 dark:bg-amber-950/20 font-semibold"
-                                : "hover:bg-amber-50/40 dark:hover:bg-stone-800/60"
+                                ? "bg-brand-50/70 font-semibold"
+                                : "hover:bg-brand-50/40"
                             }`}
                           >
                             <td className="py-3.5 px-4">
                               <div className="flex items-center gap-2.5">
-                                <span className="flex size-4 items-center justify-center rounded-full bg-amber-500 text-white text-[9px] group-hover:scale-110 transition-transform">
+                                <span className="flex size-4 items-center justify-center rounded-full bg-brand-300 text-ink-950 text-[9px] group-hover:scale-110 transition-transform">
                                   ➔
                                 </span>
                                 <span className="font-bold text-foreground">
                                   {KP_PLANET_NAMES[md.lord]?.[language] || md.lord}
                                 </span>
                                 {isCurrent && (
-                                  <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:text-emerald-300 border border-emerald-300">
+                                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-300">
                                     {language === "bn" ? "বর্তমান" : "Current"}
                                   </span>
                                 )}
                               </div>
                             </td>
-                            <td className="py-3.5 px-4 text-center tabular-nums text-slate-700 dark:text-stone-300">
+                            <td className="py-3.5 px-4 text-center tabular-nums text-muted-foreground">
                               {formatDateDisplay(md.start_date)}
                             </td>
-                            <td className="py-3.5 px-4 text-center tabular-nums text-slate-700 dark:text-stone-300">
+                            <td className="py-3.5 px-4 text-center tabular-nums text-muted-foreground">
                               {formatDateDisplay(md.end_date)}
                             </td>
-                            <td className="py-3.5 px-4 text-center font-medium text-slate-800 dark:text-stone-200">
+                            <td className="py-3.5 px-4 text-center font-medium text-foreground">
                               {md.duration}
                             </td>
                           </tr>
@@ -1278,8 +1278,8 @@ export default function DashaCalculatorPage() {
                             }}
                             className={`group cursor-pointer transition-colors ${
                               isCurrent
-                                ? "bg-emerald-50/70 dark:bg-emerald-950/20 font-semibold"
-                                : "hover:bg-amber-50/40 dark:hover:bg-stone-800/60"
+                                ? "bg-emerald-50/70 font-semibold"
+                                : "hover:bg-brand-50/40"
                             }`}
                           >
                             <td className="py-3.5 px-4">
@@ -1291,19 +1291,19 @@ export default function DashaCalculatorPage() {
                                   {KP_PLANET_NAMES[ad.lord]?.[language] || ad.lord}
                                 </span>
                                 {isCurrent && (
-                                  <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:text-emerald-300 border border-emerald-300">
+                                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-300">
                                     {language === "bn" ? "বর্তমান" : "Current"}
                                   </span>
                                 )}
                               </div>
                             </td>
-                            <td className="py-3.5 px-4 text-center tabular-nums text-slate-700 dark:text-stone-300">
+                            <td className="py-3.5 px-4 text-center tabular-nums text-muted-foreground">
                               {formatDateDisplay(ad.start_date)}
                             </td>
-                            <td className="py-3.5 px-4 text-center tabular-nums text-slate-700 dark:text-stone-300">
+                            <td className="py-3.5 px-4 text-center tabular-nums text-muted-foreground">
                               {formatDateDisplay(ad.end_date)}
                             </td>
-                            <td className="py-3.5 px-4 text-center font-medium text-slate-800 dark:text-stone-200">
+                            <td className="py-3.5 px-4 text-center font-medium text-foreground">
                               {ad.duration}
                             </td>
                           </tr>
@@ -1320,32 +1320,32 @@ export default function DashaCalculatorPage() {
                             onClick={() => setSelectedPlanetInsight(pad.lord)}
                             className={`group cursor-pointer transition-colors ${
                               isCurrent
-                                ? "bg-amber-50/70 dark:bg-amber-950/20 font-semibold"
-                                : "hover:bg-amber-50/40 dark:hover:bg-stone-800/60"
+                                ? "bg-brand-50/70 font-semibold"
+                                : "hover:bg-brand-50/40"
                             }`}
                           >
                             <td className="py-3.5 px-4">
                               <div className="flex items-center gap-2.5">
-                                <span className="flex size-4 items-center justify-center rounded-full bg-amber-500 text-white text-[9px]">
+                                <span className="flex size-4 items-center justify-center rounded-full bg-brand-300 text-ink-950 text-[9px]">
                                   ➔
                                 </span>
                                 <span className="font-bold text-foreground">
                                   {KP_PLANET_NAMES[pad.lord]?.[language] || pad.lord}
                                 </span>
                                 {isCurrent && (
-                                  <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:text-emerald-300 border border-emerald-300">
+                                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-300">
                                     {language === "bn" ? "বর্তমান" : "Current"}
                                   </span>
                                 )}
                               </div>
                             </td>
-                            <td className="py-3.5 px-4 text-center tabular-nums text-slate-700 dark:text-stone-300">
+                            <td className="py-3.5 px-4 text-center tabular-nums text-muted-foreground">
                               {formatDateDisplay(pad.start_date)}
                             </td>
-                            <td className="py-3.5 px-4 text-center tabular-nums text-slate-700 dark:text-stone-300">
+                            <td className="py-3.5 px-4 text-center tabular-nums text-muted-foreground">
                               {formatDateDisplay(pad.end_date)}
                             </td>
-                            <td className="py-3.5 px-4 text-center font-medium text-slate-800 dark:text-stone-200">
+                            <td className="py-3.5 px-4 text-center font-medium text-foreground">
                               {pad.duration}
                             </td>
                           </tr>
@@ -1361,7 +1361,7 @@ export default function DashaCalculatorPage() {
             ───────────────────────────────────────────────────────── */}
             <div className="space-y-4">
               <div className="text-center">
-                <h3 className="font-display text-2xl font-bold tracking-tight text-slate-800 dark:text-stone-100">
+                <h3 className="font-display text-2xl font-bold tracking-tight text-foreground">
                   {language === "bn"
                     ? "রাশি কুন্ডলী চার্ট শৈলী নির্বাচন করুন"
                     : language === "hi"
@@ -1390,7 +1390,7 @@ export default function DashaCalculatorPage() {
                 SECTION 5: "Is Your Life Suddenly Changing? It Could Be Your Mahadasha."
                 (Matching Screenshot 5)
             ───────────────────────────────────────────────────────── */}
-            <div className="rounded-2xl border-2 border-amber-300/80 bg-white dark:bg-stone-900 p-6 sm:p-10 shadow-sm space-y-8">
+            <div className="rounded-2xl border-2 border-brand-300/80 bg-white p-6 sm:p-10 shadow-sm space-y-8">
               {/* Top Planet Pill Selectors matching Screenshot 5 */}
               <div className="flex flex-wrap items-center justify-center gap-2">
                 {PLANET_PILLS.map((pill) => {
@@ -1402,8 +1402,8 @@ export default function DashaCalculatorPage() {
                       onClick={() => setSelectedPlanetInsight(pill.key)}
                       className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold border transition-all ${
                         isSelected
-                          ? "ring-2 ring-amber-500 scale-105 shadow-xs " + pill.bgClass
-                          : "border-stone-200 dark:border-stone-800 bg-surface-muted text-muted-foreground hover:text-foreground"
+                          ? "ring-2 ring-brand-500 scale-105 shadow-xs " + pill.bgClass
+                          : "border-border bg-surface-muted text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       <span
@@ -1418,8 +1418,8 @@ export default function DashaCalculatorPage() {
 
               {/* Title Header */}
               <div className="text-center space-y-2">
-                <h3 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-slate-800 dark:text-stone-100 flex items-center justify-center gap-2">
-                  <Clock className="size-7 text-amber-600 inline-block" />
+                <h3 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center justify-center gap-2">
+                  <Clock className="size-7 text-brand-600 inline-block" />
                   <span>
                     {language === "bn"
                       ? "আপনার জীবন কি হঠাৎ বদলে যাচ্ছে? এটি হতে পারে আপনার মহাদশা।"
@@ -1453,13 +1453,13 @@ export default function DashaCalculatorPage() {
                   )}
                 </p>
 
-                <p className="font-semibold text-slate-800 dark:text-stone-200">
-                  <span className="text-amber-800 dark:text-amber-400">
+                <p className="font-semibold text-foreground">
+                  <span className="text-brand-800">
                     {language === "bn" ? "মহাদশা (Mahadasha)" : "Mahadasha"}
                   </span>{" "}
                   – {language === "bn" ? "প্রধান জীবনচক্র" : "the major planetary period"}{" "}
                   |{" "}
-                  <span className="text-emerald-700 dark:text-emerald-400">
+                  <span className="text-emerald-700">
                     {language === "bn" ? "অন্তর্দশা (Antardasha)" : "Antardasha"}
                   </span>{" "}
                   – {language === "bn" ? "মহাদশার অন্তর্গত উপ-পর্যায়" : "the sub-period within Mahadasha"}
@@ -1480,8 +1480,8 @@ export default function DashaCalculatorPage() {
               </div>
 
               {/* Consultation Booking CTA Card */}
-              <div className="max-w-2xl mx-auto rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-amber-500/10 border-2 border-amber-400/80 p-6 text-center space-y-4">
-                <p className="text-sm sm:text-base font-semibold text-slate-800 dark:text-stone-200">
+              <div className="max-w-2xl mx-auto rounded-2xl bg-gradient-to-r from-brand-500/10 via-brand-500/5 to-brand-500/10 border-2 border-brand-400/80 p-6 text-center space-y-4">
+                <p className="text-sm sm:text-base font-semibold text-foreground">
                   🎯{" "}
                   {language === "bn"
                     ? "আমাদের অভিজ্ঞ বৈদিক জ্যোতিষীদের সাথে সরাসরি কথা বলুন — মহাদশা, অন্তর্দশার নির্ভুল বিশ্লেষণ, সঠিক সময়জ্ঞান এবং প্রামাণ্য বৈদিক প্রতিকার।"
@@ -1489,19 +1489,19 @@ export default function DashaCalculatorPage() {
                 </p>
 
                 <div className="pt-1">
-                  <p className="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 mb-2">
+                  <p className="text-xs font-bold uppercase tracking-wider text-brand-800 mb-2">
                     🔗 {language === "bn" ? "আপনার দশা কনসাল্টেশন বুক করুন:" : "Book Your Dasha Consultation Now:"}
                   </p>
                   <Link
                     href="/astrologers"
-                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-2.5 text-sm font-bold text-white shadow-soft hover:from-amber-600 hover:to-amber-700 active:scale-98 transition-all"
+                    className="inline-flex items-center gap-2 rounded-xl bg-brand-300 px-6 py-2.5 text-sm font-bold text-ink-950 shadow-glow hover:bg-brand-400 active:scale-98 transition-all"
                   >
                     <span>👉 {language === "bn" ? "জ্যোতিষী নির্বাচন করুন" : "Find an Astrologer"}</span>
                     <ArrowRight className="size-4" />
                   </Link>
                 </div>
 
-                <p className="text-xs font-bold text-amber-900 dark:text-amber-300">
+                <p className="text-xs font-bold text-brand-900">
                   🛡️{" "}
                   {language === "bn"
                     ? "জানুন কোন গ্রহ আপনার জীবন নিয়ন্ত্রণ করছে — এবং প্রতিকারের মাধ্যমে পরিস্থিতিকে নিজের অনুকূলে আনুন।"
@@ -1511,10 +1511,10 @@ export default function DashaCalculatorPage() {
 
               {/* Selected Planet Insights Card */}
               {activeInsight && (
-                <div className="mt-8 rounded-2xl border border-amber-200/90 bg-amber-50/20 dark:bg-stone-900/60 p-6 sm:p-8 space-y-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-amber-200/60">
+                <div className="mt-8 rounded-2xl border border-brand-200/90 bg-brand-50/20 p-6 sm:p-8 space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-200/60">
                     <div>
-                      <span className="text-xs font-bold uppercase tracking-widest text-amber-700">
+                      <span className="text-xs font-bold uppercase tracking-widest text-brand-700">
                         {language === "bn" ? "নির্বাচিত গ্রহের গভীর অন্তর্দৃষ্টি" : "Dasha Insights & Authentic Remedies"}
                       </span>
                       <h4 className="font-display text-2xl font-bold text-foreground mt-0.5">
@@ -1524,7 +1524,7 @@ export default function DashaCalculatorPage() {
                     </div>
 
                     <div className="flex items-center gap-3 text-xs">
-                      <span className="rounded-lg bg-amber-100 dark:bg-amber-950/60 border border-amber-300 px-3 py-1 font-bold text-amber-900 dark:text-amber-300">
+                      <span className="rounded-lg bg-brand-100 border border-brand-300 px-3 py-1 font-bold text-brand-900">
                         {language === "bn" ? "শুভ বার: " : "Lucky Day: "}
                         {activeInsight.lucky_day}
                       </span>
@@ -1538,7 +1538,7 @@ export default function DashaCalculatorPage() {
                   {/* Overview */}
                   <div className="space-y-1.5">
                     <h5 className="text-sm font-bold text-foreground flex items-center gap-2">
-                      <Sparkles className="size-4 text-amber-600" />
+                      <Sparkles className="size-4 text-brand-600" />
                       <span>{language === "bn" ? "সাধারণ প্রভাব ও মনস্তত্ত্ব" : "General Overview & Mindset"}</span>
                     </h5>
                     <p className="text-sm text-muted-foreground leading-relaxed">
@@ -1549,7 +1549,7 @@ export default function DashaCalculatorPage() {
                   {/* Career & Wealth */}
                   <div className="space-y-1.5">
                     <h5 className="text-sm font-bold text-foreground flex items-center gap-2">
-                      <Layers className="size-4 text-amber-600" />
+                      <Layers className="size-4 text-brand-600" />
                       <span>{language === "bn" ? "কর্মজীবন ও আর্থিক স্থিতি" : "Career & Wealth Guidance"}</span>
                     </h5>
                     <p className="text-sm text-muted-foreground leading-relaxed">
@@ -1560,12 +1560,12 @@ export default function DashaCalculatorPage() {
                   {/* Do's and Don'ts */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
                     {/* Favorable actions */}
-                    <div className="rounded-xl border border-emerald-300/80 bg-emerald-50/40 dark:bg-emerald-950/20 p-4 space-y-2.5">
-                      <h5 className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                    <div className="rounded-xl border border-emerald-300/80 bg-emerald-50/40 p-4 space-y-2.5">
+                      <h5 className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
                         <CheckCircle2 className="size-4 text-emerald-600" />
                         <span>{language === "bn" ? "কী কী করা উচিত (Do's)" : "Favorable Actions (Do's)"}</span>
                       </h5>
-                      <ul className="space-y-1.5 text-xs text-slate-700 dark:text-stone-300">
+                      <ul className="space-y-1.5 text-xs text-muted-foreground">
                         {activeInsight.favorable_actions?.map((item, idx) => (
                           <li key={idx} className="flex items-start gap-2">
                             <span className="text-emerald-600 font-bold">✓</span>
@@ -1576,12 +1576,12 @@ export default function DashaCalculatorPage() {
                     </div>
 
                     {/* Cautions */}
-                    <div className="rounded-xl border border-red-300/80 bg-red-50/40 dark:bg-red-950/20 p-4 space-y-2.5">
-                      <h5 className="text-xs font-bold uppercase tracking-wider text-red-800 dark:text-red-300 flex items-center gap-1.5">
+                    <div className="rounded-xl border border-red-300/80 bg-red-50/40 p-4 space-y-2.5">
+                      <h5 className="text-xs font-bold uppercase tracking-wider text-red-800 flex items-center gap-1.5">
                         <AlertTriangle className="size-4 text-red-600" />
                         <span>{language === "bn" ? "কী কী বর্জনীয় (Don'ts)" : "Cautions & Pitfalls (Don'ts)"}</span>
                       </h5>
-                      <ul className="space-y-1.5 text-xs text-slate-700 dark:text-stone-300">
+                      <ul className="space-y-1.5 text-xs text-muted-foreground">
                         {activeInsight.cautions_and_pitfalls?.map((item, idx) => (
                           <li key={idx} className="flex items-start gap-2">
                             <span className="text-red-600 font-bold">✕</span>
@@ -1593,19 +1593,19 @@ export default function DashaCalculatorPage() {
                   </div>
 
                   {/* Authentic Vedic & KP Remedies from Chapter 9 */}
-                  <div className="rounded-xl border border-amber-300 bg-amber-50/60 dark:bg-amber-950/30 p-5 space-y-3">
-                    <h5 className="text-sm font-bold text-amber-900 dark:text-amber-200 flex items-center gap-2">
-                      <Flame className="size-4 text-amber-600" />
+                  <div className="rounded-xl border border-brand-300 bg-brand-50/60 p-5 space-y-3">
+                    <h5 className="text-sm font-bold text-brand-900 flex items-center gap-2">
+                      <Flame className="size-4 text-brand-600" />
                       <span>
                         {language === "bn"
                           ? "প্রামাণ্য কেপি ও বৈদিক প্রতিকার (Client's Vedic Remedies)"
                           : "Authentic KP & Vedic Remedies"}
                       </span>
                     </h5>
-                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-800 dark:text-stone-200">
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-foreground">
                       {activeInsight.remedies?.map((rem, idx) => (
-                        <li key={idx} className="flex items-start gap-2 bg-white/80 dark:bg-stone-900/80 p-2.5 rounded-lg border border-amber-200/80">
-                          <span className="text-amber-600 font-bold">❖</span>
+                        <li key={idx} className="flex items-start gap-2 bg-white/80 p-2.5 rounded-lg border border-brand-200/80">
+                          <span className="text-brand-600 font-bold">❖</span>
                           <span>{rem}</span>
                         </li>
                       ))}
@@ -1618,7 +1618,7 @@ export default function DashaCalculatorPage() {
                       <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                         {language === "bn" ? "বীজ মন্ত্র" : "Beej Mantra"}
                       </span>
-                      <p className="font-serif text-sm font-bold text-amber-900 dark:text-amber-300">
+                      <p className="font-serif text-sm font-bold text-brand-900">
                         {activeInsight.beej_mantra}
                       </p>
                     </div>
