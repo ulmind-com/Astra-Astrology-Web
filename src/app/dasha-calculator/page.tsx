@@ -682,6 +682,9 @@ export default function DashaCalculatorPage() {
                 <label className="text-xs font-bold text-foreground flex items-center justify-between">
                   <span>
                     {language === "bn" ? "জন্ম সময়" : language === "hi" ? "जन्म समय" : "Time of Birth"}
+                    <span className="text-[11px] font-semibold text-emerald-700 ml-1.5">
+                      ({language === "bn" ? "ঐচ্ছিক — না দিলে ১২:০০ PM" : language === "hi" ? "वैकल्पिक — 12:00 PM" : "Optional — 12:00 PM"})
+                    </span>
                   </span>
                   <span className="text-[11px] font-normal text-muted-foreground">
                     HH : MM : SS

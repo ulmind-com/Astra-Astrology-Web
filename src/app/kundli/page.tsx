@@ -701,7 +701,7 @@ export default function KundliPage() {
                   <span>
                     {language === "bn" ? "জন্মসময়" : language === "hi" ? "जन्म समय" : "Birth Time"}
                     <span className="text-[11px] font-semibold text-emerald-700 ml-1.5">
-                      ({language === "bn" ? "ঐচ্ছিক" : "Optional"})
+                      ({language === "bn" ? "ঐচ্ছিক — না দিলে ১২:০০ PM" : language === "hi" ? "वैकल्पिक — 12:00 PM" : "Optional — 12:00 PM"})
                     </span>
                   </span>
                 </label>

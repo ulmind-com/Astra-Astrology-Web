@@ -620,8 +620,8 @@ export default function NakshatraCalculatorPage() {
                       <Clock className="size-3.5 text-brand-500" />
                       <span>{ui.tobLabel}</span>
                     </label>
-                    <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
-                      {hour.trim() === "" ? (language === "bn" ? "ঐচ্ছিক (১২:০০ PM গণ্য হবে)" : language === "hi" ? "वैकल्पिक (12:00 PM)" : "Optional (12:00 PM)") : ""}
+                    <span className="text-[11px] text-emerald-700 font-semibold">
+                      {hour.trim() === "" ? (language === "bn" ? "ঐচ্ছিক — না দিলে ১২:০০ PM" : language === "hi" ? "वैकल्पिक — 12:00 PM" : "Optional — 12:00 PM") : ""}
                     </span>
                   </div>
                   <div className="grid grid-cols-4 gap-2">

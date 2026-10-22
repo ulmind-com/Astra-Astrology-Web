@@ -475,7 +475,10 @@ export default function KundliMatchingPage() {
               {/* Birth Time */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-slate-700 tracking-wide uppercase">
-                  {t.form.tobLabel}
+                  {t.form.tobLabel}{" "}
+                  <span className="text-[11px] font-semibold text-emerald-700 lowercase">
+                    ({language === "bn" ? "ঐচ্ছিক — না দিলে ১২:০০ PM" : language === "hi" ? "वैकल्पिक — 12:00 PM" : "optional — 12:00 PM"})
+                  </span>
                 </label>
                 <div className="grid grid-cols-4 gap-2 sm:gap-3">
                   <input
@@ -705,7 +708,10 @@ export default function KundliMatchingPage() {
               {/* Birth Time */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-slate-700 tracking-wide uppercase">
-                  {t.form.tobLabel}
+                  {t.form.tobLabel}{" "}
+                  <span className="text-[11px] font-semibold text-emerald-700 lowercase">
+                    ({language === "bn" ? "ঐচ্ছিক — না দিলে ১২:০০ PM" : language === "hi" ? "वैकल्पिक — 12:00 PM" : "optional — 12:00 PM"})
+                  </span>
                 </label>
                 <div className="grid grid-cols-4 gap-2 sm:gap-3">
                   <input
