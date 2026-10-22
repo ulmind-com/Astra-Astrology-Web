@@ -472,6 +472,26 @@
 }
 
 /* --------------------------------------------------------------------------
+   Celestial Horoscope Theme Utilities
+   -------------------------------------------------------------------------- */
+.font-cinzel {
+  font-family: var(--font-cinzel), serif;
+}
+.font-cinzel-decorative {
+  font-family: var(--font-cinzel-decorative), serif;
+}
+.text-stroke-terracotta {
+  color: transparent;
+  -webkit-text-stroke: 1.5px #b06d4e;
+  text-shadow: 0 0 1px rgba(176, 109, 78, 0.35);
+}
+@media (max-width: 640px) {
+  .text-stroke-terracotta {
+    -webkit-text-stroke: 1.2px #b06d4e;
+  }
+}
+
+/* --------------------------------------------------------------------------
    Navigation rail offset.
 
    The rail is fixed, so pages have to be pushed clear of it. Keying the padding

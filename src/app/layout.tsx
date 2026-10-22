@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Poppins } from "next/font/google";
+import { Cinzel, Cinzel_Decorative, Geist_Mono, Poppins } from "next/font/google";
 import { Toaster } from "sonner";
 
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
@@ -11,13 +11,20 @@ import { ThemeProvider } from "@/providers/theme-provider";
 import "./globals.css";
 
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
-// One family across the whole product. The weights are the ones the type
-// scale actually uses — 400 body, 500 headings and sub-heads, 600 labels and
-// display — so nothing is downloaded that never appears.
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
+});
+const cinzel = Cinzel({
+  variable: "--font-cinzel",
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+});
+const cinzelDecorative = Cinzel_Decorative({
+  variable: "--font-cinzel-decorative",
+  subsets: ["latin"],
+  weight: ["700", "900"],
 });
 
 export const viewport: Viewport = {
@@ -43,7 +50,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${poppins.variable} ${geistMono.variable} h-full`}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${poppins.variable} ${geistMono.variable} ${cinzel.variable} ${cinzelDecorative.variable} h-full`}
+    >
       <body className="min-h-full pb-[104px] md:pb-0">
         <ThemeProvider>
           <QueryProvider>
