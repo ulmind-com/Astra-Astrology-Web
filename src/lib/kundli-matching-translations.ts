@@ -273,7 +273,7 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
 
     form: {
       fullNameLabel: "পূর্ণ নাম",
-      fullNamePlaceholder: "উদা: সমীরণ সামন্ত",
+      fullNamePlaceholder: "পূর্ণ নাম লিখুন",
       dobLabel: "জন্ম তারিখ (দিন-মাস-বছর)",
       dayPlaceholder: "দিন (DD)",
       monthPlaceholder: "মাস (MM)",
@@ -283,7 +283,7 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
       minutePlaceholder: "মিনিট (MM)",
       secondPlaceholder: "সেকেন্ড (SS)",
       placeLabel: "জন্মস্থান (শহর / রাজ্য / দেশ)",
-      placePlaceholder: "উদা: Kolkata, WB, India",
+      placePlaceholder: "শহর বা স্থানের নাম লিখুন",
       advancedSettings: "উন্নত গণনা সেটিংস (অক্ষাংশ, দ্রাঘিমাংশ, অয়নাংশ)",
       hideAdvancedSettings: "উন্নত সেটিংস লুকান",
       latitude: "অক্ষাংশ (Lat)",
@@ -472,7 +472,7 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
 
     form: {
       fullNameLabel: "पूरा नाम",
-      fullNamePlaceholder: "उदा: समिरन सामंत",
+      fullNamePlaceholder: "पूरा नाम दर्ज करें",
       dobLabel: "जन्म तिथि (दिन-माह-वर्ष)",
       dayPlaceholder: "दिन (DD)",
       monthPlaceholder: "माह (MM)",
@@ -482,7 +482,7 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
       minutePlaceholder: "मिनट (MM)",
       secondPlaceholder: "सेकंड (SS)",
       placeLabel: "जन्म स्थान (शहर / राज्य / देश)",
-      placePlaceholder: "उदा: Kolkata, WB, India",
+      placePlaceholder: "शहर या स्थान का नाम दर्ज करें",
       advancedSettings: "उन्नत गणना सेटिंग्स (अक्षांश, रेखांश, अयनांश)",
       hideAdvancedSettings: "उन्नत सेटिंग्स छुपाएं",
       latitude: "अक्षांश (Lat)",
@@ -671,7 +671,7 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
 
     form: {
       fullNameLabel: "Full Name",
-      fullNamePlaceholder: "e.g. Samiran Samanta",
+      fullNamePlaceholder: "Enter full name",
       dobLabel: "Birth Date (Day-Month-Year)",
       dayPlaceholder: "Day (DD)",
       monthPlaceholder: "Month (MM)",
@@ -681,7 +681,7 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
       minutePlaceholder: "MM",
       secondPlaceholder: "SS",
       placeLabel: "Birth Place (City / State / Country)",
-      placePlaceholder: "e.g. Kolkata, WB, India",
+      placePlaceholder: "Enter city or town name",
       advancedSettings: "Advanced Coordinates & Settings (Lat, Lon, Ayanamsa)",
       hideAdvancedSettings: "Hide Advanced Settings",
       latitude: "Latitude",
