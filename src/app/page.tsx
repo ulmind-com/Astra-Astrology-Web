@@ -19,6 +19,9 @@ import * as React from "react";
 
 import { ChineseZodiacModal } from "@/components/astrology/chinese-zodiac-modal";
 import { ZodiacChakra } from "@/components/astrology/zodiac-chakra";
+import { ZodiacSideScroll } from "@/components/home/zodiac-side-scroll";
+import { AstrologersSideScroll } from "@/components/home/astrologers-side-scroll";
+import { ParallaxRibbon } from "@/components/home/parallax-ribbon";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Button } from "@/components/ui";
@@ -143,6 +146,22 @@ function AstrologicalHouseIcon({ className = "size-7" }: { className?: string })
 
 export default function HomePage() {
   const [isChineseModalOpen, setIsChineseModalOpen] = React.useState(false);
+  const [scrollY, setScrollY] = React.useState(0);
+
+  React.useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrollY(window.scrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <>
@@ -151,11 +170,12 @@ export default function HomePage() {
       <main>
         {/* ─────────────────────────────────────────── HERO (HOROSCOPE CHAKRA LAYOUT) */}
         <section className="relative overflow-hidden bg-[#fffaf5] border-b border-[#ebd7c8]/60 pt-6 pb-12 sm:pt-10 sm:pb-16 lg:py-16">
-          {/* Subtle Celestial Background Watermarks */}
-          <div className="pointer-events-none absolute inset-0 overflow-hidden select-none opacity-20" aria-hidden>
-            {/* Top-left smiling celestial sun */}
+          {/* Subtle Celestial Background Watermarks with Multi-Layer Parallax */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden select-none opacity-25" aria-hidden>
+            {/* Top-left smiling celestial sun with parallax drift */}
             <svg
-              className="absolute -top-6 -left-6 size-36 text-[#b06d4e]"
+              className="absolute -top-6 -left-6 size-36 text-[#b06d4e] transition-transform duration-75 ease-out will-change-transform"
+              style={{ transform: `translateY(${scrollY * 0.16}px)` }}
               viewBox="0 0 100 100"
               fill="none"
               stroke="currentColor"
@@ -164,14 +184,42 @@ export default function HomePage() {
               <circle cx="50" cy="50" r="16" strokeWidth="1" />
               <path d="M50 8V20M50 80V92M8 50H20M80 50H92M20 20L29 29M71 71L80 80M20 80L29 71M71 29L80 20" strokeWidth="1" />
             </svg>
-            {/* Floating stars & sparkles */}
-            <span className="absolute left-[8%] top-[45%] text-[#b06d4e] text-2xl font-serif">✦</span>
-            <span className="absolute left-[38%] top-[15%] text-[#b06d4e] text-lg font-serif">✧</span>
-            <span className="absolute left-[28%] bottom-[12%] text-[#b06d4e] text-xl font-serif">✦</span>
-            <span className="absolute right-[12%] top-[8%] text-[#b06d4e] text-2xl font-serif">✦</span>
-            <span className="absolute right-[45%] bottom-[8%] text-[#b06d4e] text-lg font-serif">✧</span>
+            {/* Floating stars & sparkles with independent parallax depth */}
+            <span
+              className="absolute left-[8%] top-[45%] text-[#b06d4e] text-2xl font-serif will-change-transform transition-transform duration-75 ease-out"
+              style={{ transform: `translateY(${scrollY * 0.22}px) rotate(${scrollY * 0.05}deg)` }}
+            >
+              ✦
+            </span>
+            <span
+              className="absolute left-[38%] top-[15%] text-[#b06d4e] text-lg font-serif will-change-transform transition-transform duration-75 ease-out"
+              style={{ transform: `translateY(${scrollY * 0.12}px)` }}
+            >
+              ✧
+            </span>
+            <span
+              className="absolute left-[28%] bottom-[12%] text-[#b06d4e] text-xl font-serif will-change-transform transition-transform duration-75 ease-out"
+              style={{ transform: `translateY(${scrollY * 0.28}px) rotate(-${scrollY * 0.04}deg)` }}
+            >
+              ✦
+            </span>
+            <span
+              className="absolute right-[12%] top-[8%] text-[#b06d4e] text-2xl font-serif will-change-transform transition-transform duration-75 ease-out"
+              style={{ transform: `translateY(${scrollY * 0.18}px)` }}
+            >
+              ✦
+            </span>
+            <span
+              className="absolute right-[45%] bottom-[8%] text-[#b06d4e] text-lg font-serif will-change-transform transition-transform duration-75 ease-out"
+              style={{ transform: `translateY(${scrollY * 0.24}px)` }}
+            >
+              ✧
+            </span>
             {/* Soft decorative background tint */}
-            <div className="absolute -top-40 right-[-10%] size-[600px] rounded-full bg-gradient-to-bl from-[#faecd9]/40 via-[#fcf1e5]/20 to-transparent blur-3xl" />
+            <div
+              className="absolute -top-40 right-[-10%] size-[600px] rounded-full bg-gradient-to-bl from-[#faecd9]/40 via-[#fcf1e5]/20 to-transparent blur-3xl will-change-transform"
+              style={{ transform: `translateY(${scrollY * 0.1}px)` }}
+            />
           </div>
 
           <div className="relative mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
@@ -308,8 +356,11 @@ export default function HomePage() {
 
               </div>
 
-              {/* RIGHT COLUMN: Interactive Rotating Celestial Zodiac Chakra */}
-              <div className="lg:col-span-6 xl:col-span-6 flex items-center justify-center lg:justify-end">
+              {/* RIGHT COLUMN: Interactive Rotating Celestial Zodiac Chakra with Parallax Lift */}
+              <div
+                className="lg:col-span-6 xl:col-span-6 flex items-center justify-center lg:justify-end will-change-transform transition-transform duration-75 ease-out"
+                style={{ transform: `translateY(${Math.min(scrollY * 0.06, 35)}px)` }}
+              >
                 <div className="relative w-full max-w-[500px] sm:max-w-[580px] lg:max-w-[660px] xl:max-w-[740px] 2xl:max-w-[800px] flex items-center justify-center">
                   <ZodiacChakra speedSeconds={60} />
                 </div>
@@ -338,6 +389,15 @@ export default function HomePage() {
 
           </div>
         </section>
+
+        {/* ─────────────────────────────────────────── PARALLAX SCROLL RIBBON */}
+        <ParallaxRibbon />
+
+        {/* ─────────────────────────────────────────── 12 ZODIAC SIGNS HORIZONTAL SIDE-SCROLL SHOWCASE */}
+        <ZodiacSideScroll />
+
+        {/* ─────────────────────────────────────────── VERIFIED ASTROLOGERS LIVE SIDE-SCROLL CAROUSEL */}
+        <AstrologersSideScroll />
 
         {/* ─────────────────────────────────────────── CHINESE ZODIAC MODAL */}
         <ChineseZodiacModal
