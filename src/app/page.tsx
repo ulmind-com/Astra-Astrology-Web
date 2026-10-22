@@ -18,6 +18,7 @@ import Link from "next/link";
 import * as React from "react";
 
 import { ChineseZodiacModal } from "@/components/astrology/chinese-zodiac-modal";
+import { ZodiacChakra } from "@/components/astrology/zodiac-chakra";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Button } from "@/components/ui";
@@ -173,11 +174,11 @@ export default function HomePage() {
             <div className="absolute -top-40 right-[-10%] size-[600px] rounded-full bg-gradient-to-bl from-[#faecd9]/40 via-[#fcf1e5]/20 to-transparent blur-3xl" />
           </div>
 
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+          <div className="relative mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-12 items-center">
               
               {/* LEFT COLUMN: Typography & 4 Feature Cards */}
-              <div className="lg:col-span-6 xl:col-span-7 flex flex-col justify-center">
+              <div className="lg:col-span-6 xl:col-span-6 flex flex-col justify-center">
                 
                 {/* 1. Explore the Horoscope Eyebrow */}
                 <div className="inline-flex items-center gap-2 text-[#b06d4e]">
@@ -307,26 +308,10 @@ export default function HomePage() {
 
               </div>
 
-              {/* RIGHT COLUMN: The Exact Zodiac Chakra Wheel Image */}
-              <div className="lg:col-span-6 xl:col-span-5 flex items-center justify-center">
-                <div className="relative w-full max-w-[440px] sm:max-w-[500px] lg:max-w-[560px] flex items-center justify-center">
-                  {/* Subtle celestial golden glow aura */}
-                  <div
-                    className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#f6d7c2]/40 via-[#faebd9]/30 to-[#f9e5a8]/35 blur-3xl pointer-events-none"
-                    aria-hidden
-                  />
-                  {/* The exact chakra SVG requested by the user */}
-                  <div className="relative z-10 transition-transform duration-700 hover:scale-[1.015]">
-                    <Image
-                      src="/zodiac-chakra.svg"
-                      alt="Zodiac Chakra Wheel showing constellations, signs and lunar phases"
-                      width={882}
-                      height={882}
-                      priority
-                      unoptimized
-                      className="w-full h-auto select-none"
-                    />
-                  </div>
+              {/* RIGHT COLUMN: Interactive Rotating Celestial Zodiac Chakra */}
+              <div className="lg:col-span-6 xl:col-span-6 flex items-center justify-center lg:justify-end">
+                <div className="relative w-full max-w-[500px] sm:max-w-[580px] lg:max-w-[660px] xl:max-w-[740px] 2xl:max-w-[800px] flex items-center justify-center">
+                  <ZodiacChakra speedSeconds={60} />
                 </div>
               </div>
 
