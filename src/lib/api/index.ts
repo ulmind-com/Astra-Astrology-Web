@@ -21,6 +21,8 @@ import type {
   KPCalculateResult,
   KundliCalculatePayload,
   KundliCalculateResult,
+  KundliMatchingPayload,
+  KundliMatchingResult,
 
   ReviewKind,
   Review,
@@ -381,6 +383,9 @@ export const astrologyApi = {
 
   calculateKundli: (body: KundliCalculatePayload) =>
     api.post<KundliCalculateResult>(endpoints.astrology.kundli, body, { auth: false }),
+
+  calculateKundliMatching: (body: KundliMatchingPayload) =>
+    api.post<KundliMatchingResult>(endpoints.astrology.kundliMatching, body, { auth: false }),
 
   /**
    * Geocode a birth place. Passing the birth date makes the returned offset the one

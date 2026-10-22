@@ -619,5 +619,83 @@ export interface KundliCalculateResult {
   translations?: Record<string, any>;
 }
 
+// ---------------------------------------------------------------- Kundli Matching
+export interface KundliMatchingPersonInput {
+  name: string;
+  day: number;
+  month: number;
+  year: number;
+  hour?: number;
+  minute?: number;
+  second?: number;
+  period?: "AM" | "PM" | "24H";
+  place: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  timezone: number;
+  ayanamsa?: AyanamsaType;
+  house_system?: HouseSystemType;
+}
+
+export interface KundliMatchingPayload {
+  groom: KundliMatchingPersonInput;
+  bride: KundliMatchingPersonInput;
+  language?: AstrologyLanguage;
+}
+
+export interface KundliMatchingPersonProfile {
+  name: string;
+  birth_date_time: string;
+  birth_place: string;
+  janam_rasi: string;
+  rasi_lord: string;
+  janam_nakshatra: string;
+  nakshatra_lord: string;
+  pada: number;
+  is_manglik: boolean;
+  manglik_status_text: string;
+  d1_planets: KundliChartPlanet[];
+  d1_asc_sign: number;
+  planets_table: KundliTableRow[];
+}
+
+export interface KundliMatchingKoota {
+  attribute: string;
+  male: string;
+  female: string;
+  out_of: number;
+  received: number;
+  area_of_life: string;
+  description: string;
+}
+
+export interface KundliMatchingDoshas {
+  ashtakoot_score: number;
+  ashtakoot_total: number;
+  rajjoo_dosha: boolean;
+  rajjoo_text: string;
+  vedha_dosha: boolean;
+  vedha_text: string;
+  manglik_match: boolean;
+  manglik_match_text: string;
+  boy_manglik_text: string;
+  girl_manglik_text: string;
+  verdict_summary: string;
+}
+
+export interface KundliMatchingResult {
+  groom: KundliMatchingPersonProfile;
+  bride: KundliMatchingPersonProfile;
+  doshas: KundliMatchingDoshas;
+  kootas: KundliMatchingKoota[];
+  total_received: number;
+  total_out_of: number;
+  is_compatible: boolean;
+  verdict: string;
+  selected_language: AstrologyLanguage;
+  translations?: Record<string, any>;
+}
+
+
 
 

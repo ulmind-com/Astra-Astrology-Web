@@ -13,6 +13,7 @@ import { formatCoins } from "@/types";
 
 const LINKS = [
   { href: "/kundli", label: "Kundli" },
+  { href: "/kundli-matching", label: "Kundli Matching" },
   { href: "/kp-calculator", label: "KP Astrology" },
   { href: "/dasha-calculator", label: "Dasha Calculator" },
   { href: "/rashi-calculator", label: "Rashi Calculator" },

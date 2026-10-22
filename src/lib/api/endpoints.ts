@@ -122,6 +122,7 @@ export const endpoints = {
     nakshatras: "/astrology/nakshatras",
     kp: "/astrology/kp",
     kundli: "/astrology/kundli",
+    kundliMatching: "/astrology/kundli-matching",
     geoSearch: "/astrology/geo-search",
     timezone: "/astrology/timezone",
     clientRules: (signIndex: number) => `/astrology/client-rules/${signIndex}`,
