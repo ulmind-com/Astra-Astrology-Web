@@ -109,7 +109,7 @@ const defaultPersonState: PersonFormState = {
   hour: "",
   minute: "",
   second: "",
-  period: "AM",
+  period: "PM",
   place: "",
   selectedPlace: null,
   latitude: null,
@@ -185,16 +185,41 @@ export default function KundliMatchingPage() {
 
     setIsLoading(true);
     try {
+      // Default to 12:00 PM (Noon) if birth time is not entered, conforming with Vedic convention and rashi-calculator
+      let groomHour = 12;
+      let groomMin = 0;
+      let groomSec = 0;
+      let groomPeriod: "AM" | "PM" = "PM";
+
+      if (groom.hour.trim() !== "") {
+        groomHour = parseInt(groom.hour, 10) || 12;
+        groomMin = groom.minute.trim() !== "" ? parseInt(groom.minute, 10) : 0;
+        groomSec = groom.second.trim() !== "" ? parseInt(groom.second, 10) : 0;
+        groomPeriod = groom.period;
+      }
+
+      let brideHour = 12;
+      let brideMin = 0;
+      let brideSec = 0;
+      let bridePeriod: "AM" | "PM" = "PM";
+
+      if (bride.hour.trim() !== "") {
+        brideHour = parseInt(bride.hour, 10) || 12;
+        brideMin = bride.minute.trim() !== "" ? parseInt(bride.minute, 10) : 0;
+        brideSec = bride.second.trim() !== "" ? parseInt(bride.second, 10) : 0;
+        bridePeriod = bride.period;
+      }
+
       const payload: KundliMatchingPayload = {
         groom: {
           name: groom.name.trim(),
           day: parseInt(groom.day, 10),
           month: parseInt(groom.month, 10),
           year: parseInt(groom.year, 10),
-          hour: groom.hour ? parseInt(groom.hour, 10) : 12,
-          minute: groom.minute ? parseInt(groom.minute, 10) : 0,
-          second: groom.second ? parseInt(groom.second, 10) : 0,
-          period: groom.period,
+          hour: groomHour,
+          minute: groomMin,
+          second: groomSec,
+          period: groomPeriod,
           place:
             groom.selectedPlace?.displayName ||
             groom.selectedPlace?.place ||
@@ -213,10 +238,10 @@ export default function KundliMatchingPage() {
           day: parseInt(bride.day, 10),
           month: parseInt(bride.month, 10),
           year: parseInt(bride.year, 10),
-          hour: bride.hour ? parseInt(bride.hour, 10) : 12,
-          minute: bride.minute ? parseInt(bride.minute, 10) : 0,
-          second: bride.second ? parseInt(bride.second, 10) : 0,
-          period: bride.period,
+          hour: brideHour,
+          minute: brideMin,
+          second: brideSec,
+          period: bridePeriod,
           place:
             bride.selectedPlace?.displayName ||
             bride.selectedPlace?.place ||
