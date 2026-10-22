@@ -252,6 +252,8 @@ export interface NakshatraCalculatePayload {
   latitude?: number | null;
   longitude?: number | null;
   timezone: number;
+  /** IANA zone name; lets the backend resolve the exact offset at the birth instant. */
+  timezone_name?: string | null;
   ayanamsa: AyanamsaType;
   language?: AstrologyLanguage;
 }

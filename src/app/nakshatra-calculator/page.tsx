@@ -37,7 +37,14 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Button } from "@/components/ui";
 import { astrologyApi } from "@/lib/api";
-import { LocationPickerModal } from "@/components/astrology/location-picker-modal";
+import {
+  BirthPlaceField,
+  type SelectedPlace,
+} from "@/components/astrology/birth-place-field";
+import { PanchangStrip } from "@/components/astrology/panchang-strip";
+import { NakshatraTechniquesPanel } from "@/components/astrology/nakshatra-techniques-panel";
+import { ClientRulesPanel } from "@/components/astrology/client-rules-panel";
+import { CalculationDetails } from "@/components/astrology/calculation-details";
 import { NakshatraWheel } from "@/components/astrology/nakshatra-wheel";
 import { NAKSHATRA_UI_TEXTS } from "@/lib/nakshatra-translations";
 import { useAuth } from "@/providers/auth-provider";
@@ -75,12 +82,31 @@ export default function NakshatraCalculatorPage() {
   const [period, setPeriod] = React.useState<"AM" | "PM">("PM");
 
   // Place & Coordinates
+  // `selectedPlace` is the authoritative source for coordinates and timezone. It is
+  // only ever set from a geocoded result, so a typed string can no longer be
+  // submitted against the old Kolkata fallback.
   const [place, setPlace] = React.useState("");
+  const [selectedPlace, setSelectedPlace] = React.useState<SelectedPlace | null>(null);
+  const [placeTouched, setPlaceTouched] = React.useState(false);
   const [latitude, setLatitude] = React.useState<number | null>(null);
   const [longitude, setLongitude] = React.useState<number | null>(null);
+  // Manual offset, used only when no place has been resolved.
   const [timezone, setTimezone] = React.useState("5.5");
+
+  const handlePlaceSelected = React.useCallback((next: SelectedPlace | null) => {
+    setSelectedPlace(next);
+    if (!next) {
+      setPlace("");
+      setLatitude(null);
+      setLongitude(null);
+      return;
+    }
+    setPlace(next.place);
+    setLatitude(next.latitude);
+    setLongitude(next.longitude);
+    if (next.timezoneOffset != null) setTimezone(String(next.timezoneOffset));
+  }, []);
   const [ayanamsa, setAyanamsa] = React.useState<AyanamsaType>("lahiri");
-  const [isMapModalOpen, setIsMapModalOpen] = React.useState(false);
   const [showAdvance, setShowAdvance] = React.useState(false);
 
   // Loading & Result
@@ -329,10 +355,24 @@ export default function NakshatraCalculatorPage() {
       effectivePeriod = period;
     }
 
-    // 3. Location validation / fallback
-    const placeName = place.trim() || "Kolkata, West Bengal, India";
-    const lat = latitude !== null ? latitude : 22.5726;
-    const lon = longitude !== null ? longitude : 88.3639;
+    // 3. Location. A typed name is not enough: without a geocoded selection the
+    // chart would silently fall back to Kolkata, which shifts the ascendant and
+    // every house placement the nakshatra techniques are evaluated against.
+    if (!selectedPlace && (latitude === null || longitude === null)) {
+      setPlaceTouched(true);
+      toast.error(
+        language === "bn"
+          ? "অনুগ্রহ করে তালিকা থেকে জন্মস্থান বেছে নিন — সঠিক লগ্ন ও সময়াঞ্চলের জন্য এটি প্রয়োজন"
+          : language === "hi"
+          ? "कृपया सूची से जन्म स्थान चुनें — सही लग्न एवं समय क्षेत्र हेतु यह आवश्यक है"
+          : "Please choose your birth place from the list — the ascendant and timezone depend on it"
+      );
+      return;
+    }
+
+    const placeName = (selectedPlace?.place || place).trim();
+    const lat = selectedPlace?.latitude ?? (latitude as number);
+    const lon = selectedPlace?.longitude ?? (longitude as number);
     const tz = parseFloat(timezone) || 5.5;
 
     const payload: NakshatraCalculatePayload = {
@@ -348,7 +388,10 @@ export default function NakshatraCalculatorPage() {
       place: placeName,
       latitude: lat,
       longitude: lon,
+      // The offset is a fallback only. With a zone name the backend resolves the
+      // exact offset at the birth instant, covering daylight saving and history.
       timezone: tz,
+      timezone_name: selectedPlace?.timezoneName ?? null,
       ayanamsa,
       language,
     };
@@ -669,40 +712,26 @@ export default function NakshatraCalculatorPage() {
                 </div>
               </div>
 
-              {/* Row 3: Birth Place */}
+              {/* Row 3: Birth Place - geocoded inline, with its real timezone */}
               <div>
-                <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-2">
-                  {ui.locationLabel}
+                <label
+                  htmlFor="nakshatra-birth-place"
+                  className="mb-2 block text-xs font-semibold uppercase tracking-wider text-foreground"
+                >
+                  {ui.locationLabel} <span className="text-rose-500">*</span>
                 </label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                    <input
-                      type="text"
-                      value={place}
-                      onChange={(e) => setPlace(e.target.value)}
-                      placeholder={ui.locationPlaceholder}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-surface-muted/50 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition-all placeholder:text-muted-foreground/60"
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsMapModalOpen(true)}
-                    className="shrink-0 px-4 rounded-xl gap-2 text-xs font-semibold"
-                  >
-                    <Compass className="size-4 text-brand-500" />
-                    <span>{ui.searchCity}</span>
-                  </Button>
-                </div>
-                {latitude !== null && longitude !== null && (
-                  <p className="mt-1.5 text-[11px] text-muted-foreground flex items-center gap-1.5">
-                    <CheckCircle2 className="size-3 text-emerald-500" />
-                    <span>
-                      Coordinates: {latitude.toFixed(4)}° N, {longitude.toFixed(4)}° E (Timezone: UTC+{timezone}h)
-                    </span>
-                  </p>
-                )}
+                <BirthPlaceField
+                  id="nakshatra-birth-place"
+                  value={selectedPlace}
+                  onChange={handlePlaceSelected}
+                  birthDate={{
+                    year: parseInt(year, 10) || undefined,
+                    month: parseInt(month, 10) || undefined,
+                    day: parseInt(day, 10) || undefined,
+                  }}
+                  language={language}
+                  invalid={placeTouched}
+                />
               </div>
 
               {/* Advanced Settings Accordion */}
@@ -739,16 +768,47 @@ export default function NakshatraCalculatorPage() {
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                        Timezone Offset (Hours from UTC)
+                      <label
+                        htmlFor="nakshatra-timezone"
+                        className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                      >
+                        {language === "bn"
+                          ? "সময়াঞ্চল"
+                          : language === "hi"
+                          ? "समय क्षेत्र"
+                          : "Timezone"}
                       </label>
-                      <input
-                        type="text"
-                        value={timezone}
-                        onChange={(e) => setTimezone(e.target.value)}
-                        placeholder="5.5 (for IST)"
-                        className="w-full py-2 px-3 rounded-lg border border-border bg-surface-elevated text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/40"
-                      />
+                      {selectedPlace?.timezoneName ? (
+                        <div className="rounded-lg border border-emerald-200 bg-emerald-50/70 px-3 py-2">
+                          <p className="flex flex-wrap items-center gap-x-1.5 text-[11px] font-bold text-emerald-900">
+                            <span>{selectedPlace.timezoneName}</span>
+                            {selectedPlace.timezoneLabel && (
+                              <span className="rounded bg-white px-1 tabular-nums">
+                                {selectedPlace.timezoneLabel}
+                              </span>
+                            )}
+                          </p>
+                          <p className="mt-0.5 text-[10px] leading-relaxed text-emerald-800/90">
+                            {language === "bn"
+                              ? "জন্মস্থান ও তারিখ অনুসারে নির্ণীত — ডেলাইট সেভিং ও ঐতিহাসিক পরিবর্তন সহ।"
+                              : language === "hi"
+                              ? "जन्म स्थान एवं तिथि अनुसार निर्धारित — डेलाइट सेविंग एवं ऐतिहासिक परिवर्तन सहित।"
+                              : "Resolved from your birth place and date, daylight saving and historical changes included."}
+                          </p>
+                        </div>
+                      ) : (
+                        <input
+                          id="nakshatra-timezone"
+                          type="text"
+                          inputMode="decimal"
+                          value={timezone}
+                          onChange={(e) =>
+                            setTimezone(e.target.value.replace(/[^0-9.+-]/g, ""))
+                          }
+                          placeholder="5.5 (for IST)"
+                          className="w-full rounded-lg border border-border bg-surface-elevated px-3 py-2 text-xs tabular-nums text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+                        />
+                      )}
                     </div>
                   </div>
                 )}
@@ -788,22 +848,6 @@ export default function NakshatraCalculatorPage() {
             </form>
           </div>
         </section>
-
-        {/* Location Picker Modal */}
-        <LocationPickerModal
-          open={isMapModalOpen}
-          onClose={() => setIsMapModalOpen(false)}
-          onSelect={(loc) => {
-            setPlace(loc.place);
-            setLatitude(loc.latitude);
-            setLongitude(loc.longitude);
-            setTimezone(String(loc.timezone));
-            setIsMapModalOpen(false);
-          }}
-          currentPlace={place}
-          currentLat={latitude}
-          currentLon={longitude}
-        />
 
         {/* =================================================================== */}
         {/* Results Dashboard Section */}
@@ -977,6 +1021,21 @@ export default function NakshatraCalculatorPage() {
               </div>
             </div>
 
+            {/* Panchang - the elements the client's reference report lists */}
+            {result.panchang && (
+              <PanchangStrip
+                panchang={result.panchang}
+                nakshatraName={
+                  language === "bn"
+                    ? result.nakshatra_name_bn
+                    : language === "hi"
+                      ? result.nakshatra_name_hi
+                      : result.nakshatra_name_en
+                }
+                language={language}
+              />
+            )}
+
             {/* Avakahada Chakra Section */}
             <div className="rounded-3xl border border-border/80 bg-surface-elevated p-6 sm:p-8 shadow-sm">
               <div className="flex items-center justify-between mb-6">
@@ -1022,11 +1081,56 @@ export default function NakshatraCalculatorPage() {
                   <div className="text-base font-bold text-foreground">{result.avakahada.tatva}</div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60 col-span-2">
-                  <div className="text-xs font-medium text-muted-foreground uppercase mb-1">{ui.payaLabel}</div>
-                  <div className="text-sm font-bold text-amber-700 dark:text-amber-300 break-words leading-snug">
-                    {result.avakahada.paya}
+                {/* Paya is the one Avakahada field that disagrees with the client's
+                    own reference report, and no supplied document defines the rule.
+                    It is still shown, but never as settled. */}
+                <div
+                  className={`col-span-2 rounded-2xl border p-4 ${
+                    result.paya?.is_disputed
+                      ? "border-amber-300 bg-amber-50"
+                      : "border-border/60 bg-surface-muted/40"
+                  }`}
+                >
+                  <div className="mb-1 flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-medium uppercase text-muted-foreground">
+                      {ui.payaLabel}
+                    </span>
+                    {result.paya?.is_disputed && (
+                      <span className="rounded-md bg-amber-200/70 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-900">
+                        {language === "bn"
+                          ? "অনিশ্চিত"
+                          : language === "hi"
+                          ? "अपुष्ट"
+                          : "Unconfirmed"}
+                      </span>
+                    )}
                   </div>
+                  <div className="break-words text-sm font-bold leading-snug text-amber-700 dark:text-amber-300">
+                    {result.paya?.value ?? result.avakahada.paya}
+                  </div>
+                  {result.paya?.is_disputed && result.paya.notice && (
+                    <details className="mt-2">
+                      <summary className="cursor-pointer text-[11px] font-semibold text-amber-900">
+                        {language === "bn"
+                          ? "কেন অনিশ্চিত"
+                          : language === "hi"
+                          ? "क्यों अपुष्ट"
+                          : "Why this is unconfirmed"}
+                      </summary>
+                      <p className="mt-1.5 text-[11px] leading-relaxed text-amber-900/90">
+                        {result.paya.notice}
+                      </p>
+                      {result.paya.evidence.length > 0 && (
+                        <ul className="mt-1.5 space-y-0.5 border-t border-amber-200 pt-1.5">
+                          {result.paya.evidence.map((item, index) => (
+                            <li key={index} className="text-[10px] leading-relaxed text-amber-900/80">
+                              • {item}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </details>
+                  )}
                 </div>
               </div>
             </div>
@@ -1208,6 +1312,20 @@ export default function NakshatraCalculatorPage() {
               </div>
             </div>
 
+            {/* The client's own nakshatra techniques, applied to this chart */}
+            {result.client_rules && (
+              <NakshatraTechniquesPanel rules={result.client_rules} language={language} />
+            )}
+
+            {/* Classifications for the Moon's rashi, from the client's 01.pdf */}
+            {result.rashi_client_rules && (
+              <ClientRulesPanel
+                profile={result.rashi_client_rules}
+                kpReference={undefined}
+                language={language}
+              />
+            )}
+
             {/* 27 Cosmic Constellations Wheel Section */}
             <div className="rounded-3xl border border-border/80 bg-surface-elevated p-6 sm:p-10 shadow-sm text-center">
               <h3 className="font-display text-2xl font-extrabold text-foreground mb-2 flex items-center justify-center gap-2">
@@ -1224,6 +1342,15 @@ export default function NakshatraCalculatorPage() {
                 language={language}
               />
             </div>
+
+            {/* How the chart was calculated - timezone provenance and caveats */}
+            <CalculationDetails
+              timezone={result.timezone_resolution}
+              calculation={result.calculation}
+              ayanamsaName={result.ayanamsa_name}
+              houseSystem="Whole Sign"
+              language={language}
+            />
           </section>
         )}
       </main>
