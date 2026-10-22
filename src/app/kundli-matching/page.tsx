@@ -28,6 +28,9 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { astrologyApi } from "@/lib/api";
+import { parseProfileBirthDetails } from "@/lib/birth-details";
+import { useAuth } from "@/providers/auth-provider";
+import { useProfile } from "@/hooks/use-profile";
 import {
   BirthPlaceField,
   type SelectedPlace,
@@ -90,7 +93,7 @@ interface PersonFormState {
   hour: string;
   minute: string;
   second: string;
-  period: "AM" | "PM";
+  period: "AM" | "PM" | null;
   place: string;
   selectedPlace: SelectedPlace | null;
   latitude: number | null;
@@ -109,7 +112,7 @@ const defaultPersonState: PersonFormState = {
   hour: "",
   minute: "",
   second: "",
-  period: "PM",
+  period: null,
   place: "",
   selectedPlace: null,
   latitude: null,
@@ -138,6 +141,33 @@ export default function KundliMatchingPage() {
     ...defaultPersonState,
   });
 
+  // Prefill the groom side from the signed-in user's saved birth details, the same
+  // source `/kundli` reads. Without this a signed-in user got their stored details
+  // on one page and a blank form on the other, and the two pages then disagreed
+  // about the same person.
+  const { isSignedIn, user } = useAuth();
+  const { data: profile } = useProfile({ enabled: Boolean(isSignedIn) });
+
+  // Prefill the groom side from the signed-in user's saved birth details, the same
+  // source `/kundli` reads. Without this a signed-in user got their stored details
+  // on one page and a blank form on the other, and the two pages then disagreed
+  // about the same person.
+  //
+  // Adjusted during render rather than in an effect so the form never paints blank
+  // for a frame and then jumps once the profile arrives.
+  const profileKey = profile ? (profile.email ?? profile.full_name ?? "profile") : null;
+  const [autoFilledFor, setAutoFilledFor] = React.useState<string | null>(null);
+  if (isSignedIn && profileKey && profileKey !== autoFilledFor) {
+    setAutoFilledFor(profileKey);
+    const parsed = parseProfileBirthDetails(profile?.birth);
+    setGroom((prev) => ({
+      ...prev,
+      ...parsed,
+      // Never overwrite something already typed.
+      name: prev.name || user?.full_name || prev.name,
+    }));
+  }
+
   // Results & Tabs State
   const [isLoading, setIsLoading] = React.useState(false);
   const [result, setResult] = React.useState<KundliMatchingResult | null>(null);
@@ -157,8 +187,19 @@ export default function KundliMatchingPage() {
       toast.error(`${label}: ${t.form.validationDob}`);
       return false;
     }
-    if (!p.place.trim() && !p.selectedPlace) {
+    if (!p.selectedPlace) {
       toast.error(`${label}: ${t.form.validationPlace}`);
+      return false;
+    }
+    // A time without AM or PM is ambiguous by twelve hours, so it is not accepted.
+    if (p.hour.trim() !== "" && p.period === null) {
+      toast.error(
+        language === "bn"
+          ? `${label}: জন্মসময়ের জন্য AM না PM বেছে নিন`
+          : language === "hi"
+          ? `${label}: जन्म समय हेतु AM अथवा PM चुनें`
+          : `${label}: choose AM or PM for the birth time`,
+      );
       return false;
     }
     return true;
@@ -189,25 +230,25 @@ export default function KundliMatchingPage() {
       let groomHour = 12;
       let groomMin = 0;
       let groomSec = 0;
-      let groomPeriod: "AM" | "PM" = "PM";
+      let groomPeriod: "AM" | "PM" = "PM";  // noon fallback when no time is given
 
       if (groom.hour.trim() !== "") {
         groomHour = parseInt(groom.hour, 10) || 12;
         groomMin = groom.minute.trim() !== "" ? parseInt(groom.minute, 10) : 0;
         groomSec = groom.second.trim() !== "" ? parseInt(groom.second, 10) : 0;
-        groomPeriod = groom.period;
+        groomPeriod = groom.period ?? "AM";
       }
 
       let brideHour = 12;
       let brideMin = 0;
       let brideSec = 0;
-      let bridePeriod: "AM" | "PM" = "PM";
+      let bridePeriod: "AM" | "PM" = "PM";  // noon fallback when no time is given
 
       if (bride.hour.trim() !== "") {
         brideHour = parseInt(bride.hour, 10) || 12;
         brideMin = bride.minute.trim() !== "" ? parseInt(bride.minute, 10) : 0;
         brideSec = bride.second.trim() !== "" ? parseInt(bride.second, 10) : 0;
-        bridePeriod = bride.period;
+        bridePeriod = bride.period ?? "AM";
       }
 
       const payload: KundliMatchingPayload = {
@@ -224,12 +265,15 @@ export default function KundliMatchingPage() {
             groom.selectedPlace?.displayName ||
             groom.selectedPlace?.place ||
             groom.place.trim(),
-          latitude: groom.selectedPlace?.latitude ?? groom.latitude ?? 22.5726,
-          longitude: groom.selectedPlace?.longitude ?? groom.longitude ?? 88.3639,
+          latitude: groom.selectedPlace!.latitude,
+          longitude: groom.selectedPlace!.longitude,
           timezone:
             groom.selectedPlace?.timezoneOffset != null
               ? groom.selectedPlace.timezoneOffset
               : parseFloat(groom.timezone) || 5.5,
+          // With a zone name the backend resolves the exact offset at the birth
+          // instant, so daylight saving and historical changes are handled.
+          timezone_name: groom.selectedPlace?.timezoneName ?? null,
           ayanamsa: groom.ayanamsa,
           house_system: groom.houseSystem,
         },
@@ -246,12 +290,15 @@ export default function KundliMatchingPage() {
             bride.selectedPlace?.displayName ||
             bride.selectedPlace?.place ||
             bride.place.trim(),
-          latitude: bride.selectedPlace?.latitude ?? bride.latitude ?? 22.5726,
-          longitude: bride.selectedPlace?.longitude ?? bride.longitude ?? 88.3639,
+          latitude: bride.selectedPlace!.latitude,
+          longitude: bride.selectedPlace!.longitude,
           timezone:
             bride.selectedPlace?.timezoneOffset != null
               ? bride.selectedPlace.timezoneOffset
               : parseFloat(bride.timezone) || 5.5,
+          // With a zone name the backend resolves the exact offset at the birth
+          // instant, so daylight saving and historical changes are handled.
+          timezone_name: bride.selectedPlace?.timezoneName ?? null,
           ayanamsa: bride.ayanamsa,
           house_system: bride.houseSystem,
         },
