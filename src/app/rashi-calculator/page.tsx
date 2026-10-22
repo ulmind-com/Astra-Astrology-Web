@@ -30,7 +30,6 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Button } from "@/components/ui";
 import { astrologyApi } from "@/lib/api";
-import { LocationPickerModal } from "@/components/astrology/location-picker-modal";
 import {
   BirthPlaceField,
   type SelectedPlace,
@@ -82,7 +81,6 @@ export default function RashiCalculatorPage() {
   const [place, setPlace] = React.useState("");
   const [selectedPlace, setSelectedPlace] = React.useState<SelectedPlace | null>(null);
   const [placeTouched, setPlaceTouched] = React.useState(false);
-  const [isMapModalOpen, setIsMapModalOpen] = React.useState(false);
 
   // Advance Settings (Optional)
   const [showAdvance, setShowAdvance] = React.useState(false);
@@ -395,31 +393,6 @@ export default function RashiCalculatorPage() {
     const num = parseInt(val, 10);
     if (!isNaN(num) && num > 59) val = "59";
     setLatMin(val);
-  };
-
-  // Auto-fill coordinates helper from location picker
-  const handleLocationSelect = (loc: {
-    place: string;
-    latitude: number;
-    longitude: number;
-    timezone: number;
-  }) => {
-    setPlace(loc.place);
-    setTimezone(String(loc.timezone));
-
-    const absLat = Math.abs(loc.latitude);
-    const dLat = Math.floor(absLat);
-    const mLat = Math.round((absLat - dLat) * 60);
-    setLatDeg(String(dLat));
-    setLatMin(String(mLat));
-    setLatDir(loc.latitude >= 0 ? "N" : "S");
-
-    const absLon = Math.abs(loc.longitude);
-    const dLon = Math.floor(absLon);
-    const mLon = Math.round((absLon - dLon) * 60);
-    setLonDeg(String(dLon));
-    setLonMin(String(mLon));
-    setLonDir(loc.longitude >= 0 ? "E" : "W");
   };
 
   // Choosing a place drives the coordinate and timezone fields, so the Advanced
@@ -1632,15 +1605,6 @@ export default function RashiCalculatorPage() {
           </div>
         )}
 
-        {/* Location Picker Modal */}
-        <LocationPickerModal
-          open={isMapModalOpen}
-          onClose={() => setIsMapModalOpen(false)}
-          onSelect={handleLocationSelect}
-          currentPlace={place}
-          currentLat={getDecimalCoords().lat}
-          currentLon={getDecimalCoords().lon}
-        />
       </main>
 
       <SiteFooter />

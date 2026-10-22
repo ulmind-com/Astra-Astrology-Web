@@ -141,23 +141,40 @@ export function BirthPlaceField({
   const requestSeq = React.useRef(0);
 
   // Keep the visible text in step when the parent resets or prefills the field.
-  React.useEffect(() => {
-    setQuery(value?.place ?? "");
-  }, [value?.place]);
+  // Adjusted during render rather than in an effect, so there is no second render
+  // pass showing the stale text first.
+  const externalPlace = value?.place ?? "";
+  const [lastExternalPlace, setLastExternalPlace] = React.useState(externalPlace);
+  if (externalPlace !== lastExternalPlace) {
+    setLastExternalPlace(externalPlace);
+    setQuery(externalPlace);
+  }
+
+  const trimmedQuery = query.trim();
+  // Nothing to search for while the box still holds the place already chosen,
+  // otherwise selecting a suggestion would immediately search for it again.
+  const shouldSearch = trimmedQuery.length >= 2 && trimmedQuery !== externalPlace;
+  // Derived rather than stored, so no state has to be cleared when the query
+  // becomes unsearchable.
+  const visibleResults = shouldSearch ? results : [];
+
+  // The birth date arrives as a fresh object literal on every parent render, so the
+  // primitives are what the effect depends on. Depending on the object itself would
+  // restart the debounce on every render and the search could never fire.
+  const { year: birthYear, month: birthMonth, day: birthDay } = birthDate;
 
   React.useEffect(() => {
-    const trimmed = query.trim();
-    if (trimmed.length < 2 || trimmed === value?.place) {
-      setResults([]);
-      setSearched(false);
-      return;
-    }
+    if (!shouldSearch) return;
 
     const seq = ++requestSeq.current;
-    setLoading(true);
     const timer = setTimeout(async () => {
+      setLoading(true);
       try {
-        const found = await astrologyApi.geoSearch(trimmed, birthDate);
+        const found = await astrologyApi.geoSearch(trimmedQuery, {
+          year: birthYear,
+          month: birthMonth,
+          day: birthDay,
+        });
         if (seq !== requestSeq.current) return;
         setResults(found ?? []);
         setActiveIndex((found ?? []).length > 0 ? 0 : -1);
@@ -174,7 +191,7 @@ export function BirthPlaceField({
     }, 320);
 
     return () => clearTimeout(timer);
-  }, [query, birthDate, value?.place]);
+  }, [trimmedQuery, shouldSearch, birthYear, birthMonth, birthDay]);
 
   // Close on an outside click so the dropdown never traps the page.
   React.useEffect(() => {
@@ -217,25 +234,25 @@ export function BirthPlaceField({
       setOpen(false);
       return;
     }
-    if (!open || results.length === 0) {
-      if (event.key === "ArrowDown" && results.length > 0) setOpen(true);
+    if (!open || visibleResults.length === 0) {
+      if (event.key === "ArrowDown" && visibleResults.length > 0) setOpen(true);
       return;
     }
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      setActiveIndex((i) => (i + 1) % results.length);
+      setActiveIndex((i) => (i + 1) % visibleResults.length);
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
-      setActiveIndex((i) => (i - 1 + results.length) % results.length);
+      setActiveIndex((i) => (i - 1 + visibleResults.length) % visibleResults.length);
     } else if (event.key === "Enter") {
       // Only intercept Enter while a suggestion is highlighted, so Enter still
       // submits the form once a place has been chosen.
-      if (activeIndex >= 0) {
+      if (activeIndex >= 0 && visibleResults[activeIndex]) {
         event.preventDefault();
-        select(results[activeIndex]);
+        select(visibleResults[activeIndex]);
       }
-    } else if (event.key === "Tab" && activeIndex >= 0) {
-      select(results[activeIndex]);
+    } else if (event.key === "Tab" && activeIndex >= 0 && visibleResults[activeIndex]) {
+      select(visibleResults[activeIndex]);
     }
   };
 
@@ -289,7 +306,8 @@ export function BirthPlaceField({
     );
   };
 
-  const showEmptyState = open && searched && !loading && results.length === 0;
+  const showEmptyState =
+    open && searched && shouldSearch && !loading && visibleResults.length === 0;
 
   return (
     <div className="space-y-2" ref={containerRef}>
@@ -322,7 +340,7 @@ export function BirthPlaceField({
               if (value) onChange(null);
             }}
             onFocus={() => {
-              if (results.length > 0) setOpen(true);
+              if (visibleResults.length > 0) setOpen(true);
             }}
             onKeyDown={handleKeyDown}
             placeholder={copy.placeholder}
@@ -350,7 +368,7 @@ export function BirthPlaceField({
             role="listbox"
             className="absolute z-50 mt-1.5 max-h-72 w-full overflow-y-auto rounded-2xl border border-border bg-white p-1.5 shadow-xl"
           >
-            {loading && results.length === 0 && (
+            {loading && visibleResults.length === 0 && (
               <p className="flex items-center gap-2 px-3 py-3 text-xs font-medium text-muted-foreground">
                 <Loader2 className="size-3.5 animate-spin" /> {copy.searching}
               </p>
@@ -362,7 +380,7 @@ export function BirthPlaceField({
               </p>
             )}
 
-            {results.map((item, index) => {
+            {visibleResults.map((item, index) => {
               const label =
                 item.place || item.city || item.display_name.split(",")[0] || item.display_name;
               const rest = item.display_name
