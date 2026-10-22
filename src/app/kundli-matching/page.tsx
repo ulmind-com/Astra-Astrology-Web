@@ -23,6 +23,12 @@ import {
   ShieldCheck,
   Flame,
   Info,
+  Heart,
+  Baby,
+  Coins,
+  Activity,
+  TrendingUp,
+  ShieldAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -171,7 +177,7 @@ export default function KundliMatchingPage() {
   // Results & Tabs State
   const [isLoading, setIsLoading] = React.useState(false);
   const [result, setResult] = React.useState<KundliMatchingResult | null>(null);
-  const [activeTab, setActiveTab] = React.useState<"dosha" | "planets" | "charts">("dosha");
+  const [activeTab, setActiveTab] = React.useState<"dosha" | "forecast" | "planets" | "charts">("dosha");
   const [chartStyle, setChartStyle] = React.useState<ChartStyleType>("north");
 
   // Validate Person
@@ -1142,11 +1148,11 @@ export default function KundliMatchingPage() {
             {/* 4. THREE INTERACTIVE TABS (Dosha, Planet Details, Lagna Charts) */}
             <div className="space-y-6">
               {/* Tab Navigation Pill Bar matching screenshot */}
-              <div className="flex border-b border-amber-200">
+              <div className="flex border-b border-amber-200 overflow-x-auto scrollbar-none">
                 <button
                   type="button"
                   onClick={() => setActiveTab("dosha")}
-                  className={`py-3 px-6 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
+                  className={`py-3 px-5 sm:px-6 text-sm font-bold border-b-2 transition-all flex items-center gap-2 shrink-0 ${
                     activeTab === "dosha"
                       ? "border-amber-500 text-amber-900 bg-amber-50/40"
                       : "border-transparent text-slate-500 hover:text-slate-800"
@@ -1157,8 +1163,20 @@ export default function KundliMatchingPage() {
                 </button>
                 <button
                   type="button"
+                  onClick={() => setActiveTab("forecast")}
+                  className={`py-3 px-5 sm:px-6 text-sm font-bold border-b-2 transition-all flex items-center gap-2 shrink-0 ${
+                    activeTab === "forecast"
+                      ? "border-amber-500 text-amber-900 bg-amber-50/40"
+                      : "border-transparent text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  <Heart className="size-4 text-rose-500" />
+                  <span>{t.tabs.forecast}</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => setActiveTab("planets")}
-                  className={`py-3 px-6 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
+                  className={`py-3 px-5 sm:px-6 text-sm font-bold border-b-2 transition-all flex items-center gap-2 shrink-0 ${
                     activeTab === "planets"
                       ? "border-amber-500 text-amber-900 bg-amber-50/40"
                       : "border-transparent text-slate-500 hover:text-slate-800"
@@ -1170,7 +1188,7 @@ export default function KundliMatchingPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("charts")}
-                  className={`py-3 px-6 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
+                  className={`py-3 px-5 sm:px-6 text-sm font-bold border-b-2 transition-all flex items-center gap-2 shrink-0 ${
                     activeTab === "charts"
                       ? "border-amber-500 text-amber-900 bg-amber-50/40"
                       : "border-transparent text-slate-500 hover:text-slate-800"
@@ -1401,6 +1419,245 @@ export default function KundliMatchingPage() {
                           </tr>
                         </tfoot>
                       </table>
+                    </div>
+                  </div>
+
+                  {/* Marriage Forecast Quick Teaser Banner */}
+                  {result.forecast && (
+                    <div className="rounded-2xl border border-amber-300/80 bg-gradient-to-r from-amber-50 via-amber-100/50 to-amber-50 p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
+                      <div className="flex items-center gap-3.5 text-center sm:text-left">
+                        <div className="size-11 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                          <Heart className="size-5" />
+                        </div>
+                        <div>
+                          <p className="font-serif font-bold text-amber-950 text-sm sm:text-base">
+                            {language === "bn"
+                              ? "দাম্পত্য ভবিষ্যৎ ও শুভ বিবাহের সময় গণনা প্রস্তুত"
+                              : language === "hi"
+                              ? "दांपत्य भविष्य एवं शुभ विवाह समय गणना उपलब्ध"
+                              : "Marriage Life Forecast & Auspicious Timing Ready"}
+                          </p>
+                          <p className="text-xs text-amber-800 mt-0.5">
+                            {language === "bn"
+                              ? `শুভ বছর: ${result.forecast.auspicious_marriage_years.map((y) => toLocalizedDigits(y, language)).join(", ")} • দাম্পত্য সুখ: ${toLocalizedDigits(result.forecast.marital_harmony_score, language)}% • সন্তান সুখ: ${toLocalizedDigits(result.forecast.children_progeny_score, language)}%`
+                              : `Auspicious Years: ${result.forecast.auspicious_marriage_years.join(", ")} • Harmony: ${result.forecast.marital_harmony_score}% • Progeny: ${result.forecast.children_progeny_score}%`}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("forecast")}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer"
+                      >
+                        <span>{language === "bn" ? "সম্পূর্ণ ভবিষ্যৎ বিশ্লেষণ দেখুন" : language === "hi" ? "संपूर्ण भविष्य देखें" : "View Full Forecast"}</span>
+                        <ArrowRight className="size-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* =================================================================
+                  TAB: MARRIAGE LIFE FORECAST & TIMING (7 Core Insights)
+                 ================================================================= */}
+              {activeTab === "forecast" && result.forecast && (
+                <div className="space-y-6 animate-fadeIn">
+                  {/* Top Banner: Ideal Age & Auspicious Years */}
+                  <div className="rounded-2xl border border-amber-300/80 bg-gradient-to-r from-amber-50 via-amber-100/60 to-amber-50 p-5 sm:p-6 shadow-xs">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-amber-200/80">
+                      <div>
+                        <div className="inline-flex items-center gap-2 text-amber-800 text-xs font-bold uppercase tracking-wider mb-1">
+                          <Calendar className="size-4" />
+                          <span>
+                            {language === "bn"
+                              ? "বৃহস্পতি গোচর ও গুরু বল গণনা"
+                              : language === "hi"
+                              ? "गुरु गोचर एवं गुरु बल गणना"
+                              : "Jupiter Transit (Guru Bala) & Timing"}
+                          </span>
+                        </div>
+                        <h3 className="font-serif text-xl sm:text-2xl font-bold text-amber-950">
+                          {language === "bn"
+                            ? "বিবাহের শুভ বছর ও সময়কাল"
+                            : language === "hi"
+                            ? "विवाह हेतु सर्वाधिक शुभ वर्ष"
+                            : "Most Auspicious Years for Marriage"}
+                        </h3>
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {result.forecast.auspicious_marriage_years.map((yr) => (
+                          <span
+                            key={yr}
+                            className="px-3.5 py-1.5 rounded-xl bg-amber-500 text-white font-bold text-sm shadow-xs"
+                          >
+                            {toLocalizedDigits(yr, language)}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="mt-3 text-xs sm:text-sm text-amber-900 leading-relaxed font-medium">
+                      {result.forecast.auspicious_marriage_years_text}
+                    </p>
+
+                    {/* Age Recommendations Row */}
+                    <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-amber-200/70">
+                      <div className="rounded-xl bg-white/85 border border-amber-200/80 p-3.5">
+                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                          {language === "bn" ? "বরের উপযুক্ত বিবাহ বয়স" : language === "hi" ? "वर की उपयुक्त विवाह आयु" : "Groom's Ideal Marriage Age"}
+                        </span>
+                        <p className="mt-1 font-bold text-slate-900 text-xs sm:text-sm">
+                          {result.forecast.ideal_marriage_age_groom}
+                        </p>
+                      </div>
+                      <div className="rounded-xl bg-white/85 border border-amber-200/80 p-3.5">
+                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                          {language === "bn" ? "কনের উপযুক্ত বিবাহ বয়স" : language === "hi" ? "वधू की उपयुक्त विवाह आयु" : "Bride's Ideal Marriage Age"}
+                        </span>
+                        <p className="mt-1 font-bold text-slate-900 text-xs sm:text-sm">
+                          {result.forecast.ideal_marriage_age_bride}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 4 Core Life Dimension Cards Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {/* 1. Marital Harmony */}
+                    <div className="rounded-2xl border border-amber-200/80 bg-white p-5 shadow-xs">
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+                        <div className="flex items-center gap-2 text-rose-600">
+                          <Heart className="size-5" />
+                          <h4 className="font-serif font-bold text-slate-900 text-base">
+                            {language === "bn" ? "দাম্পত্য জীবন ও প্রেম" : language === "hi" ? "दांपत्य जीवन एवं प्रेम" : "Marital Harmony & Love"}
+                          </h4>
+                        </div>
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-800 border border-rose-200">
+                          {toLocalizedDigits(result.forecast.marital_harmony_score, language)}%
+                        </span>
+                      </div>
+                      <span className="text-xs font-bold text-slate-800 block mb-1">
+                        {result.forecast.marital_harmony_verdict}
+                      </span>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        {result.forecast.marital_harmony_description}
+                      </p>
+                    </div>
+
+                    {/* 2. Children & Progeny (Nadi Koota) */}
+                    <div className="rounded-2xl border border-amber-200/80 bg-white p-5 shadow-xs">
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+                        <div className="flex items-center gap-2 text-indigo-600">
+                          <Baby className="size-5" />
+                          <h4 className="font-serif font-bold text-slate-900 text-base">
+                            {language === "bn" ? "সন্তানের স্বাস্থ্য ও বংশবৃদ্ধি" : language === "hi" ? "संतान सुख एवं स्वास्थ्य" : "Progeny & Child Health"}
+                          </h4>
+                        </div>
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-800 border border-indigo-200">
+                          {toLocalizedDigits(result.forecast.children_progeny_score, language)}%
+                        </span>
+                      </div>
+                      <span className="text-xs font-bold text-slate-800 block mb-1">
+                        {result.forecast.children_progeny_verdict}
+                      </span>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        {result.forecast.children_progeny_description}
+                      </p>
+                    </div>
+
+                    {/* 3. Conflict & Friction Control */}
+                    <div className="rounded-2xl border border-amber-200/80 bg-white p-5 shadow-xs">
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+                        <div className="flex items-center gap-2 text-amber-600">
+                          <Activity className="size-5" />
+                          <h4 className="font-serif font-bold text-slate-900 text-base">
+                            {language === "bn" ? "ঝগড়াঝাঁটি ও মেজাজের সামঞ্জস্য" : language === "hi" ? "विवाद एवं स्वभाव संतुलन" : "Temperament & Conflict Control"}
+                          </h4>
+                        </div>
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                          {toLocalizedDigits(result.forecast.conflict_friction_score, language)}%
+                        </span>
+                      </div>
+                      <span className="text-xs font-bold text-slate-800 block mb-1">
+                        {result.forecast.conflict_friction_verdict}
+                      </span>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        {result.forecast.conflict_friction_description}
+                      </p>
+                    </div>
+
+                    {/* 4. Financial Growth Post-Marriage (Bhakoot) */}
+                    <div className="rounded-2xl border border-amber-200/80 bg-white p-5 shadow-xs">
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+                        <div className="flex items-center gap-2 text-emerald-600">
+                          <Coins className="size-5" />
+                          <h4 className="font-serif font-bold text-slate-900 text-base">
+                            {language === "bn" ? "বিয়ের পর অর্থভাগ্য ও যৌথ সমৃদ্ধি" : language === "hi" ? "विवाह उपरांत धन-समृद्धि" : "Post-Marriage Wealth & Growth"}
+                          </h4>
+                        </div>
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                          {toLocalizedDigits(result.forecast.financial_prosperity_score, language)}%
+                        </span>
+                      </div>
+                      <span className="text-xs font-bold text-slate-800 block mb-1">
+                        {result.forecast.financial_prosperity_verdict}
+                      </span>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        {result.forecast.financial_prosperity_description}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 5. Future & Longevity Card */}
+                  <div className="rounded-2xl border border-amber-200/80 bg-white p-5 sm:p-6 shadow-xs">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+                      <div className="flex items-center gap-2 text-purple-700">
+                        <TrendingUp className="size-5" />
+                        <h4 className="font-serif font-bold text-slate-900 text-base sm:text-lg">
+                          {language === "bn" ? "উভয়ের যৌথ ভবিষ্যৎ ও দীর্ঘস্থায়িত্ব" : language === "hi" ? "संयुक्त भविष्य एवं दीर्घायु" : "Mutual Future & Longevity"}
+                        </h4>
+                      </div>
+                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-900 border border-purple-200">
+                        {toLocalizedDigits(result.forecast.future_longevity_score, language)}%
+                      </span>
+                    </div>
+                    <span className="text-sm font-bold text-slate-800 block mb-1">
+                      {result.forecast.future_longevity_verdict}
+                    </span>
+                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                      {result.forecast.future_longevity_description}
+                    </p>
+                  </div>
+
+                  {/* 6. Classical Vedic Remedies */}
+                  <div className="rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50/80 via-white to-amber-50/80 p-5 sm:p-6 shadow-xs">
+                    <div className="flex items-center gap-2.5 text-amber-900 mb-3">
+                      <ShieldCheck className="size-5 text-amber-600" />
+                      <h4 className="font-serif font-bold text-base sm:text-lg">
+                        {language === "bn" ? "শাস্ত্রীয় বৈদিক প্রতিকার ও মঙ্গল উপায়" : language === "hi" ? "शास्त्रीय वैदिक उपाय एवं शांति" : "Classical Vedic Remedies & Astrological Guidance"}
+                      </h4>
+                    </div>
+                    <ul className="space-y-2.5 text-xs sm:text-sm text-slate-700">
+                      {result.forecast.remedies_guidance.map((rem, idx) => (
+                        <li key={idx} className="flex items-start gap-2.5">
+                          <span className="size-1.5 rounded-full bg-amber-500 mt-2 shrink-0" />
+                          <span>{rem}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="mt-5 pt-4 border-t border-amber-200/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <p className="text-xs text-slate-500">
+                        {language === "bn"
+                          ? "সম্পূর্ণ জন্মছক মিলিয়ে আরও বিস্তারিত যোটক বিচারের জন্য আমাদের অভিজ্ঞ জ্যোতিষীদের সাথে সরাসরি কথা বলুন।"
+                          : "For in-depth personalized birth chart remedies, consult verified astrologers."}
+                      </p>
+                      <Link
+                        href="/astrologers"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 text-white font-bold text-xs hover:bg-amber-700 transition-colors shrink-0 shadow-2xs"
+                      >
+                        <span>{language === "bn" ? "জ্যোতিষীর পরামর্শ নিন" : "Talk to Astrologer"}</span>
+                        <ArrowRight className="size-3.5" />
+                      </Link>
                     </div>
                   </div>
                 </div>

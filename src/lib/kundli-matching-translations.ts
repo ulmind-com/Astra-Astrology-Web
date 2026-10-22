@@ -39,6 +39,7 @@ export interface KundliMatchingTranslations {
 
   tabs: {
     dosha: string;
+    forecast: string;
     planetDetails: string;
     lagnaCharts: string;
   };
@@ -157,6 +158,7 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
 
     tabs: {
       dosha: "দোষ ও অষ্টকূট",
+      forecast: "দাম্পত্য ভবিষ্যৎ ও শুভ সময়",
       planetDetails: "গ্রহের অবস্থান",
       lagnaCharts: "লগ্ন কুন্ডলী",
     },
@@ -356,6 +358,7 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
 
     tabs: {
       dosha: "दोष व अष्टकूट",
+      forecast: "दांपत्य भविष्य एवं शुभ समय",
       planetDetails: "ग्रह स्थिति",
       lagnaCharts: "लग्न कुंडली",
     },
@@ -555,6 +558,7 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
 
     tabs: {
       dosha: "Dosha",
+      forecast: "Marriage Forecast & Timing",
       planetDetails: "Planet Details",
       lagnaCharts: "Lagna Charts",
     },

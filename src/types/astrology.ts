@@ -767,6 +767,29 @@ export interface KundliMatchingDoshas {
   verdict_summary: string;
 }
 
+export interface MarriageLifeForecast {
+  ideal_marriage_age_groom: string;
+  ideal_marriage_age_bride: string;
+  auspicious_marriage_years: number[];
+  auspicious_marriage_years_text: string;
+  marital_harmony_score: number;
+  marital_harmony_verdict: string;
+  marital_harmony_description: string;
+  children_progeny_score: number;
+  children_progeny_verdict: string;
+  children_progeny_description: string;
+  conflict_friction_score: number;
+  conflict_friction_verdict: string;
+  conflict_friction_description: string;
+  financial_prosperity_score: number;
+  financial_prosperity_verdict: string;
+  financial_prosperity_description: string;
+  future_longevity_score: number;
+  future_longevity_verdict: string;
+  future_longevity_description: string;
+  remedies_guidance: string[];
+}
+
 export interface KundliMatchingResult {
   groom: KundliMatchingPersonProfile;
   bride: KundliMatchingPersonProfile;
@@ -778,7 +801,9 @@ export interface KundliMatchingResult {
   verdict: string;
   selected_language: AstrologyLanguage;
   translations?: Record<string, any>;
+  forecast?: MarriageLifeForecast | null;
 }
+
 
 export interface DailyHoroscopePayload {
   date?: string | null;
