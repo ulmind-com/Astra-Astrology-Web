@@ -1,0 +1,801 @@
+/**
+ * Complete Multilingual Localization (en, bn, hi) for Kundli Calculator
+ * Translates all cards, tables, dasha timeline, Vedic yogas, and planet details.
+ */
+
+export type KundliLanguage = "en" | "bn" | "hi";
+
+export const BENGALI_DIGITS = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+export const HINDI_DIGITS = ["०", "१", "२", "३", "४", "५", "६", "७", "८", "९"];
+
+export function toLocalizedDigits(str: string | number, lang: KundliLanguage): string {
+  const s = String(str);
+  if (lang === "bn") {
+    return s.replace(/\d/g, (d) => BENGALI_DIGITS[parseInt(d, 10)]);
+  }
+  if (lang === "hi") {
+    return s.replace(/\d/g, (d) => HINDI_DIGITS[parseInt(d, 10)]);
+  }
+  return s;
+}
+
+// 1. Planets (9 Vedic Grahas + Ascendant + outer planets)
+export const KUNDLI_PLANET_NAMES: Record<string, Record<KundliLanguage, string>> = {
+  Asc: { en: "Ascendant (Asc)", bn: "লগ্ন (Asc)", hi: "लग्न (Asc)" },
+  Ascendant: { en: "Ascendant", bn: "লগ্ন", hi: "लग्न" },
+  Sun: { en: "Sun", bn: "সূর্য", hi: "सूर्य" },
+  Moon: { en: "Moon", bn: "চন্দ্র", hi: "चन्द्र" },
+  Mars: { en: "Mars", bn: "মঙ্গল", hi: "मंगल" },
+  Mercury: { en: "Mercury", bn: "বুধ", hi: "बुध" },
+  Jupiter: { en: "Jupiter", bn: "বৃহস্পতি", hi: "बृहस्पति" },
+  Venus: { en: "Venus", bn: "শুক্র", hi: "शुक्र" },
+  Saturn: { en: "Saturn", bn: "শনি", hi: "शनि" },
+  Rahu: { en: "Rahu", bn: "রাহু", hi: "राहु" },
+  Ketu: { en: "Ketu", bn: "কেতু", hi: "केतु" },
+  Uranus: { en: "Uranus", bn: "ইউরেনাস", hi: "यूरेनस" },
+  Neptune: { en: "Neptune", bn: "নেপচুন", hi: "नेपच्यून" },
+  Pluto: { en: "Pluto", bn: "প্লুটো", hi: "प्लूटो" },
+};
+
+export function translatePlanetName(name: string, lang: KundliLanguage): string {
+  if (!name) return "";
+  const isRetro = name.includes("®") || name.includes("(R)");
+  const cleanName = name.replace(/[®()R]/g, "").trim();
+
+  const found =
+    KUNDLI_PLANET_NAMES[cleanName]?.[lang] ||
+    KUNDLI_PLANET_NAMES[cleanName.charAt(0).toUpperCase() + cleanName.slice(1).toLowerCase()]?.[lang] ||
+    cleanName;
+
+  if (isRetro) {
+    if (lang === "bn") return `${found} (বক্রী®)`;
+    if (lang === "hi") return `${found} (वक्री®)`;
+    return `${found} (R)`;
+  }
+  return found;
+}
+
+// 2. Rashis (12 Zodiac Signs)
+export const KUNDLI_RASHI_NAMES: Record<string, Record<KundliLanguage, string>> = {
+  Aries: { en: "Aries", bn: "মেষ", hi: "मेष" },
+  Taurus: { en: "Taurus", bn: "বৃষ", hi: "वृषभ" },
+  Gemini: { en: "Gemini", bn: "মিথুন", hi: "मिथुन" },
+  Cancer: { en: "Cancer", bn: "কর্কট", hi: "कर्क" },
+  Leo: { en: "Leo", bn: "সিংহ", hi: "सिंह" },
+  Virgo: { en: "Virgo", bn: "কন্যা", hi: "कन्या" },
+  Libra: { en: "Libra", bn: "তুলা", hi: "तुला" },
+  Scorpio: { en: "Scorpio", bn: "বৃশ্চিক", hi: "वृश्चिक" },
+  Sagittarius: { en: "Sagittarius", bn: "ধনু", hi: "धनु" },
+  Capricorn: { en: "Capricorn", bn: "মকর", hi: "मकर" },
+  Aquarius: { en: "Aquarius", bn: "কুম্ভ", hi: "कुंभ" },
+  Pisces: { en: "Pisces", bn: "মীন", hi: "मीन" },
+};
+
+export function translateRashiName(sign: string, lang: KundliLanguage): string {
+  if (!sign) return "";
+  const clean = sign.trim();
+  return KUNDLI_RASHI_NAMES[clean]?.[lang] || clean;
+}
+
+// 3. Nakshatras (27 Lunar Mansions)
+export const KUNDLI_NAKSHATRA_NAMES: Record<string, Record<KundliLanguage, string>> = {
+  Ashwini: { en: "Ashwini", bn: "অশ্বিনী", hi: "अश्विनी" },
+  Bharani: { en: "Bharani", bn: "ভরণী", hi: "भरणी" },
+  Krittika: { en: "Krittika", bn: "কৃত্তিকা", hi: "कृत्तिका" },
+  Rohini: { en: "Rohini", bn: "রোহিণী", hi: "रोहिणी" },
+  Mrigashira: { en: "Mrigashira", bn: "মৃগশিরা", hi: "मृगशिरा" },
+  Ardra: { en: "Ardra", bn: "আর্দ্রা", hi: "आर्द्रा" },
+  Punarvasu: { en: "Punarvasu", bn: "পুনর্বসু", hi: "पुनर्वसु" },
+  Pushya: { en: "Pushya", bn: "পুষ্যা", hi: "पुष्य" },
+  Ashlesha: { en: "Ashlesha", bn: "অশ্লেষা", hi: "आश्लेषा" },
+  Magha: { en: "Magha", bn: "মঘা", hi: "मघा" },
+  "Purva Phalguni": { en: "Purva Phalguni", bn: "পূর্ব ফাল্গুনী", hi: "पूर्वा फाल्गुनी" },
+  "Uttara Phalguni": { en: "Uttara Phalguni", bn: "উত্তর ফাল্গুনী", hi: "उत्तरा फाल्गुनी" },
+  Hasta: { en: "Hasta", bn: "হস্তা", hi: "हस्त" },
+  Chitra: { en: "Chitra", bn: "চিত্রা", hi: "चित्रा" },
+  Swati: { en: "Swati", bn: "স্বাতী", hi: "स्वाति" },
+  Vishakha: { en: "Vishakha", bn: "বিশাখা", hi: "विशाखा" },
+  Anuradha: { en: "Anuradha", bn: "অনুরাধা", hi: "अनुराधा" },
+  Jyeshtha: { en: "Jyeshtha", bn: "জ্যেষ্ঠা", hi: "ज्येष्ठा" },
+  Moola: { en: "Moola", bn: "মূলা", hi: "मूल" },
+  "Purva Ashadha": { en: "Purva Ashadha", bn: "পূর্বাষাঢ়া", hi: "पूर्वाषाढ़ा" },
+  "Uttara Ashadha": { en: "Uttara Ashadha", bn: "উত্তরাষাঢ়া", hi: "उत्तराषाढ़ा" },
+  Shravana: { en: "Shravana", bn: "শ্রবণা", hi: "श्रवण" },
+  Dhanishta: { en: "Dhanishta", bn: "ধনিষ্ঠা", hi: "धनिष्ठा" },
+  Shatabhisha: { en: "Shatabhisha", bn: "শতভিষা", hi: "शतभिषा" },
+  "Purva Bhadrapada": { en: "Purva Bhadrapada", bn: "পূর্বভাদ্রপদ", hi: "पूर्वा भाद्रपद" },
+  "Uttara Bhadrapada": { en: "Uttara Bhadrapada", bn: "উত্তরভাদ্রপদ", hi: "उत्तरा भाद्रपद" },
+  Revati: { en: "Revati", bn: "রেবতী", hi: "रेवती" },
+};
+
+export function translateNakshatraName(nak: string, lang: KundliLanguage): string {
+  if (!nak) return "";
+  const clean = nak.trim();
+  return KUNDLI_NAKSHATRA_NAMES[clean]?.[lang] || clean;
+}
+
+// 4. Days of Week
+export const KUNDLI_DAY_NAMES: Record<string, Record<KundliLanguage, string>> = {
+  Sunday: { en: "Sunday", bn: "রবিবার", hi: "रविवार" },
+  Monday: { en: "Monday", bn: "সোমবার", hi: "सोमवार" },
+  Tuesday: { en: "Tuesday", bn: "মঙ্গলবার", hi: "मंगलवार" },
+  Wednesday: { en: "Wednesday", bn: "বুধবার", hi: "बुधवार" },
+  Thursday: { en: "Thursday", bn: "বৃহস্পতিবার", hi: "गुरुवार" },
+  Friday: { en: "Friday", bn: "শুক্রবার", hi: "शुक्रवार" },
+  Saturday: { en: "Saturday", bn: "শনিবার", hi: "शनिवार" },
+};
+
+export function translateDayName(day: string, lang: KundliLanguage): string {
+  if (!day) return "";
+  const clean = day.trim();
+  return KUNDLI_DAY_NAMES[clean]?.[lang] || clean;
+}
+
+// 5. Gender
+export const KUNDLI_GENDER_NAMES: Record<string, Record<KundliLanguage, string>> = {
+  male: { en: "Male", bn: "পুরুষ", hi: "पुरुष" },
+  female: { en: "Female", bn: "মহিলা", hi: "महिला" },
+  other: { en: "Other", bn: "অন্যান্য", hi: "अन्य" },
+};
+
+// 6. Panchang Elements (Tithi, Karan, Yoga)
+export const KUNDLI_TITHI_NAMES: Record<string, Record<KundliLanguage, string>> = {
+  Pratipada: { en: "Pratipada", bn: "প্রতিপদ", hi: "प्रतिपदा" },
+  Dwitiya: { en: "Dwitiya", bn: "দ্বিতীয়া", hi: "द्वितीया" },
+  Tritiya: { en: "Tritiya", bn: "তৃতীয়া", hi: "तृतीया" },
+  Chaturthi: { en: "Chaturthi", bn: "চতুর্থী", hi: "चतुर्थी" },
+  Panchami: { en: "Panchami", bn: "পঞ্চমী", hi: "पंचमी" },
+  Shasthi: { en: "Shasthi", bn: "ষষ্ঠী", hi: "षष्ठी" },
+  Saptami: { en: "Saptami", bn: "সপ্তমী", hi: "सप्तमी" },
+  Ashtami: { en: "Ashtami", bn: "অষ্টমী", hi: "अष्टमी" },
+  Navami: { en: "Navami", bn: "নবমী", hi: "नवमी" },
+  Dashami: { en: "Dashami", bn: "দশমী", hi: "दशमी" },
+  Ekadashi: { en: "Ekadashi", bn: "একাদশী", hi: "एकादशी" },
+  Dwadashi: { en: "Dwadashi", bn: "দ্বাদশী", hi: "द्वादशी" },
+  Trayodashi: { en: "Trayodashi", bn: "ত্রয়োদশী", hi: "त्रयोदशी" },
+  Chaturdashi: { en: "Chaturdashi", bn: "চতুর্দশী", hi: "चतुर्दशी" },
+  Purnima: { en: "Purnima", bn: "পূর্ণিমা", hi: "पूर्णिमा" },
+  Amavasya: { en: "Amavasya", bn: "অমাবস্যা", hi: "अमावस्या" },
+};
+
+export function translateTithi(tithi: string, lang: KundliLanguage): string {
+  if (!tithi) return "";
+  let res = tithi;
+  if (lang === "bn") {
+    res = res.replace(/Shukla/gi, "শুক্ল").replace(/Krishna/gi, "কৃষ্ণ");
+    Object.entries(KUNDLI_TITHI_NAMES).forEach(([en, dict]) => {
+      res = res.replace(new RegExp(en, "gi"), dict.bn);
+    });
+  } else if (lang === "hi") {
+    res = res.replace(/Shukla/gi, "शुक्ल").replace(/Krishna/gi, "कृष्ण");
+    Object.entries(KUNDLI_TITHI_NAMES).forEach(([en, dict]) => {
+      res = res.replace(new RegExp(en, "gi"), dict.hi);
+    });
+  }
+  return res;
+}
+
+export const KUNDLI_KARAN_NAMES: Record<string, Record<KundliLanguage, string>> = {
+  Bava: { en: "Bava", bn: "বব", hi: "बव" },
+  Balava: { en: "Balava", bn: "বালব", hi: "बालव" },
+  Kaulava: { en: "Kaulava", bn: "কৌলব", hi: "कौलव" },
+  Taitila: { en: "Taitila", bn: "তৈতিল", hi: "तैतिल" },
+  Gara: { en: "Gara", bn: "গর", hi: "गर" },
+  Vanija: { en: "Vanija", bn: "বনিজ", hi: "वणिज" },
+  "Vishti (Bhadra)": { en: "Vishti (Bhadra)", bn: "ভাদ্রা (বিষ্টী)", hi: "भद्रा (विष्टि)" },
+  Vishti: { en: "Vishti", bn: "বিষ্টী", hi: "विष्टि" },
+  Shakuni: { en: "Shakuni", bn: "শকুনি", hi: "शकुनि" },
+  Chatushpada: { en: "Chatushpada", bn: "চতুস্পদ", hi: "चतुष्पद" },
+  Naga: { en: "Naga", bn: "নাগ", hi: "नाग" },
+  Kintughna: { en: "Kintughna", bn: "কিমস্তুঘ্ন", hi: "किंस्तुघ्न" },
+};
+
+export function translateKaran(karan: string, lang: KundliLanguage): string {
+  if (!karan) return "";
+  return KUNDLI_KARAN_NAMES[karan.trim()]?.[lang] || karan;
+}
+
+export const KUNDLI_PANCHANG_YOGAS: Record<string, Record<KundliLanguage, string>> = {
+  Vishkambha: { en: "Vishkambha", bn: "বিষ্কম্ভ", hi: "विष्कुंभ" },
+  Priti: { en: "Priti", bn: "প্রীতি", hi: "प्रीति" },
+  Ayushman: { en: "Ayushman", bn: "আয়ুষ্মান", hi: "आयुष्मान" },
+  Saubhagya: { en: "Saubhagya", bn: "সৌভাগ্য", hi: "सौभाग्य" },
+  Shobhana: { en: "Shobhana", bn: "শোভন", hi: "शोभन" },
+  Atiganda: { en: "Atiganda", bn: "অতিগণ্ড", hi: "अतिगण्ड" },
+  Sukarma: { en: "Sukarma", bn: "সুকর্মা", hi: "सुकर्मा" },
+  Dhriti: { en: "Dhriti", bn: "ধৃতি", hi: "धृति" },
+  Shula: { en: "Shula", bn: "শূল", hi: "शूल" },
+  Ganda: { en: "Ganda", bn: "গণ্ড", hi: "गण्ड" },
+  Vriddhi: { en: "Vriddhi", bn: "বৃদ্ধি", hi: "वृद्धि" },
+  Dhruva: { en: "Dhruva", bn: "ধ্রুব", hi: "ध्रुव" },
+  Vyaghata: { en: "Vyaghata", bn: "ব্যাঘাত", hi: "व्याघात" },
+  Harshana: { en: "Harshana", bn: "হর্ষণ", hi: "हर्षण" },
+  Vajra: { en: "Vajra", bn: "বজ্র", hi: "वज्र" },
+  Siddhi: { en: "Siddhi", bn: "সিদ্ধি", hi: "सिद्धि" },
+  Vyatipata: { en: "Vyatipata", bn: "ব্যতীপাত", hi: "व्यतीपात" },
+  Variyan: { en: "Variyan", bn: "বরীয়ান", hi: "वरीयान" },
+  Parigha: { en: "Parigha", bn: "পরিঘ", hi: "परिघ" },
+  Shiva: { en: "Shiva", bn: "শিব", hi: "शिव" },
+  Siddha: { en: "Siddha", bn: "সিদ্ধ", hi: "सिद्ध" },
+  Sadhya: { en: "Sadhya", bn: "সাধ্য", hi: "साध्य" },
+  Shubha: { en: "Shubha", bn: "শুভ", hi: "शुभ" },
+  Shukla: { en: "Shukla", bn: "শুক্ল", hi: "शुक्ल" },
+  Brahma: { en: "Brahma", bn: "ব্রহ্ম", hi: "ब्रह्म" },
+  Indra: { en: "Indra", bn: "ইন্দ্র", hi: "इन्द्र" },
+  Vaidhriti: { en: "Vaidhriti", bn: "বৈধৃতি", hi: "वैधृति" },
+};
+
+export function translateYoga(yoga: string, lang: KundliLanguage): string {
+  if (!yoga) return "";
+  return KUNDLI_PANCHANG_YOGAS[yoga.trim()]?.[lang] || yoga;
+}
+
+// 7. DMS & Degrees Translation (e.g., "21° Leo 35 ' 55\"" -> "২১° সিংহ ৩৫' ৫৫\"")
+export function translateDmsStyled(dms: string, lang: KundliLanguage): string {
+  if (!dms) return "";
+  if (lang === "en") return dms;
+
+  let localized = dms;
+  Object.entries(KUNDLI_RASHI_NAMES).forEach(([signEn, dict]) => {
+    localized = localized.replace(new RegExp(`\\b${signEn}\\b`, "g"), dict[lang]);
+  });
+  return toLocalizedDigits(localized, lang);
+}
+
+// 8. House Name Translation (e.g., "house 1" -> "১ম ভাব")
+export function translateHouseName(hName: string, lang: KundliLanguage): string {
+  if (!hName) return "";
+  const match = hName.match(/house\s*(\d+)/i);
+  if (!match) return hName;
+
+  const num = parseInt(match[1], 10);
+  if (lang === "bn") {
+    const suffixes: Record<number, string> = {
+      1: "১ম ভাব",
+      2: "২য় ভাব",
+      3: "৩য় ভাব",
+      4: "৪র্থ ভাব",
+      5: "৫ম ভাব",
+      6: "৬ষ্ঠ ভাব",
+      7: "৭ম ভাব",
+      8: "৮ম ভাব",
+      9: "৯ম ভাব",
+      10: "১০ম ভাব",
+      11: "১১তম ভাব",
+      12: "১২তম ভাব",
+    };
+    return suffixes[num] || `${toLocalizedDigits(num, "bn")}তম ভাব`;
+  }
+  if (lang === "hi") {
+    const hindiHouses: Record<number, string> = {
+      1: "प्रथम भाव (१)",
+      2: "द्वितीय भाव (२)",
+      3: "तृतीय भाव (३)",
+      4: "चतुर्थ भाव (४)",
+      5: "पंचम भाव (५)",
+      6: "षष्ठ भाव (६)",
+      7: "सप्तम भाव (७)",
+      8: "अष्टम भाव (८)",
+      9: "नवम भाव (९)",
+      10: "दशम भाव (१०)",
+      11: "एकादश भाव (११)",
+      12: "द्वादश भाव (१२)",
+    };
+    return hindiHouses[num] || `भाव ${toLocalizedDigits(num, "hi")}`;
+  }
+  return `House ${num}`;
+}
+
+// 9. Dasha Card Title Translation (e.g. "Balance Mahadasha: Ketu 3 Y 4 M 15 D" or "Mahadasha: Ketu - 7 Years")
+export function translateDashaCardTitle(title: string, lang: KundliLanguage): string {
+  if (!title) return "";
+  if (lang === "en") return title;
+
+  // Pattern 1: Balance Mahadasha: Ketu 3 Y 4 M 15 D
+  const balMatch = title.match(/Balance\s+Mahadasha:\s*(\w+)\s*(\d+)\s*Y\s*(\d+)\s*M\s*(\d+)\s*D/i);
+  if (balMatch) {
+    const p = translatePlanetName(balMatch[1], lang);
+    const y = toLocalizedDigits(balMatch[2], lang);
+    const m = toLocalizedDigits(balMatch[3], lang);
+    const d = toLocalizedDigits(balMatch[4], lang);
+    if (lang === "bn") return `জন্মকালীন ব্যালেন্স মহাদশা: ${p} (${y} বছর ${m} মাস ${d} দিন)`;
+    if (lang === "hi") return `जन्म समय महादशा शेष: ${p} (${y} वर्ष ${m} मास ${d} दिन)`;
+  }
+
+  // Pattern 2: Mahadasha: Ketu - 7 Years
+  const mdMatch = title.match(/Mahadasha:\s*(\w+)\s*[-–]\s*(\d+)\s*Years?/i);
+  if (mdMatch) {
+    const p = translatePlanetName(mdMatch[1], lang);
+    const y = toLocalizedDigits(mdMatch[2], lang);
+    if (lang === "bn") return `${p} মহাদশা — ${y} বছর`;
+    if (lang === "hi") return `${p} महादशा — ${y} वर्ष`;
+  }
+
+  return title;
+}
+
+// 10. Dasha Duration Translation (e.g. "0 Y, 4 M, 27 D" -> "০ বছর, ৪ মাস, ২৭ দিন")
+export function translateDashaDuration(dur: string, lang: KundliLanguage): string {
+  if (!dur || dur === "-") return "-";
+  if (lang === "en") return dur;
+
+  const match = dur.match(/(\d+)\s*Y,\s*(\d+)\s*M,\s*(\d+)\s*D/i);
+  if (match) {
+    const y = toLocalizedDigits(match[1], lang);
+    const m = toLocalizedDigits(match[2], lang);
+    const d = toLocalizedDigits(match[3], lang);
+    if (lang === "bn") return `${y} বছর, ${m} মাস, ${d} দিন`;
+    if (lang === "hi") return `${y} वर्ष, ${m} मास, ${d} दिन`;
+  }
+  return toLocalizedDigits(dur, lang);
+}
+
+// 11. Balance Dasha string (e.g., "Ketu 3 Y 4 M 15 D")
+export function translateBalDasa(str: string, lang: KundliLanguage): string {
+  if (!str) return "";
+  if (lang === "en") return str;
+
+  const match = str.match(/(\w+)\s*(\d+)\s*Y\s*(\d+)\s*M\s*(\d+)\s*D/i);
+  if (match) {
+    const p = translatePlanetName(match[1], lang);
+    const y = toLocalizedDigits(match[2], lang);
+    const m = toLocalizedDigits(match[3], lang);
+    const d = toLocalizedDigits(match[4], lang);
+    if (lang === "bn") return `${p} ${y} বছর ${m} মাস ${d} দিন`;
+    if (lang === "hi") return `${p} ${y} वर्ष ${m} मास ${d} दिन`;
+  }
+  return toLocalizedDigits(str, lang);
+}
+
+// 12. Classical Vedic Yogas & Doshas Translations
+export interface LocalizedYogaMeta {
+  name: string;
+  description: string;
+  effects: string;
+}
+
+export const KUNDLI_YOGAS_TRANSLATIONS: Record<string, Record<KundliLanguage, LocalizedYogaMeta>> = {
+  Mangalik: {
+    en: {
+      name: "Mangalik Dosha",
+      description: "Mars placement in relationship houses. In this chart, Mars is neutralized through Cancer debilitation & Kendra Jupiter aspect.",
+      effects: "Mars placement scrutinized for relationship equilibrium. Cancellation factors neutralize adverse planetary friction.",
+    },
+    bn: {
+      name: "মাঙ্গলিক দোষ বিচার",
+      description: "লগ্ন বা চন্দ্র হতে ১, ২, ৪, ৭, ৮ বা ১২তম ভাবে মঙ্গলের অবস্থান বিচার। এই কুন্ডলীতে শুভ গ্রহের দৃষ্টি বা নীচভঙ্গে মাঙ্গলিক প্রভাব প্রশমিত।",
+      effects: "মঙ্গলের অবস্থান বৈবাহিক ও কর্মক্ষেত্রে শক্তি দান করে। মিত্র ও শুভ গ্রহের কারণে প্রতিকূল দোষ প্রশমিত ও ভারসাম্যে পরিণত হয়েছে।",
+    },
+    hi: {
+      name: "मांगलिक दोष विचार",
+      description: "लग्न अथवा चन्द्र से १, २, ४, ७, ८, १२वें भाव में मंगल की स्थिति का विश्लेषण। शुभ दृष्टि से प्रभाव संतुलित है।",
+      effects: "मंगल का प्रभाव साहस एवं पराक्रम दिलाता है। शुभ ग्रहों के योग से दांपत्य एवं कार्यक्षेत्र में शांति बनी रहती है।",
+    },
+  },
+  "Kaal Sarp Dosh": {
+    en: {
+      name: "Kaal Sarp Dosh",
+      description: "Formed when all planets are placed between Rahu and Ketu axis.",
+      effects: "Indicates intense karmic destiny, transformation, and significant turning points after rigorous early efforts.",
+    },
+    bn: {
+      name: "কালসর্প দোষ বিচার",
+      description: "যখন সমস্ত গ্রহ রাহু ও কেতুর অক্ষের মধ্যে আবদ্ধ থাকে, তখন এই যোগ গঠিত হয়।",
+      effects: "এটি জীবনের প্রারম্ভিক পর্বে তীব্র কর্মের পরীক্ষা দেয় এবং পরবর্তীতে আধ্যাত্মিক জাগরণ ও বিশেষ সাফল্যের দ্বার উন্মোচন করে।",
+    },
+    hi: {
+      name: "कालसर्प दोष विचार",
+      description: "जब सभी सातों ग्रह राहु और केतु की धुरी के बीच स्थित हों।",
+      effects: "कठिन परिश्रम के पश्चात जीवन में अप्रत्याशित सफलता एवं आध्यात्मिक उन्नति के योग बनते हैं।",
+    },
+  },
+  "Budhaditya Yoga": {
+    en: {
+      name: "Budhaditya Yoga",
+      description: "Intellectual brilliance formed by close conjunction of Sun and Mercury.",
+      effects: "Sharp analytical intellect, public eloquence, administrative leadership, and executive prowess.",
+    },
+    bn: {
+      name: "বুধাদিত্য যোগ",
+      description: "রবি ও বুধের শুভ যুতির ফলে এই অত্যন্ত মর্যাদাপূর্ণ রাজযোগ গঠিত হয়।",
+      effects: "প্রখর বিশ্লেষণ ক্ষমতা, ব্যবসায়িক দূরদর্শিতা, প্রশাসনিক মেধা ও সমাজে উচ্চ বিদ্যাবত্তার সম্মান দান করে।",
+    },
+    hi: {
+      name: "बुधादित्य योग",
+      description: "सूर्य और बुध की शुभ युति से निर्मित प्रतिष्ठित राजयोग।",
+      effects: "प्रखर बुद्धिमत्ता, प्रशासनिक योग्यता, व्यापारिक चातुर्य एवं उच्च सम्मान की प्राप्ति कराता है।",
+    },
+  },
+  "Gaja Kesari Yoga": {
+    en: {
+      name: "Gaja Kesari Yoga",
+      description: "Powerful royal yoga formed when Jupiter is in Kendra (1st, 4th, 7th, 10th) from Moon.",
+      effects: "Grants high social reputation, enduring intellect, administrative respect, wealth, and moral authority in leadership.",
+    },
+    bn: {
+      name: "গজকেশরী যোগ",
+      description: "চন্দ্র হতে কেন্দ্র ভাবে (১ম, ৪র্থ, ৭ম বা ১০ম) দেবগুরু বৃহস্পতির অবস্থানে এই শক্তিশালী রাজযোগ গঠিত হয়।",
+      effects: "সমাজে সুউচ্চ প্রতিষ্ঠা, দীর্ঘস্থায়ী যশ, প্রখর প্রজ্ঞা, নেতৃত্ব, অর্থভাগ ও নীতিপরায়ণ নেতৃত্বের প্রভাব দান করে।",
+    },
+    hi: {
+      name: "गजकेसरी योग",
+      description: "चन्द्रमा से केन्द्र भाव (१, ४, ७, १०) में गुरु बृहस्पति की शुभ स्थिति।",
+      effects: "समाज में मान-सम्मान, उच्च पद, बौद्धिक क्षमता, प्रशासनिक नेतृत्व एवं स्थायी धन-संपदा प्रदान करता है।",
+    },
+  },
+  "Kemadruma Yoga": {
+    en: {
+      name: "Kemadruma Yoga",
+      description: "Absence of planets in 2nd and 12th from Moon; requires spiritual grounding and mental focus.",
+      effects: "Teaches self-reliance, mental detachment, and deep introspective focus. Practicing Shiva meditation and charity brings auspicious results.",
+    },
+    bn: {
+      name: "কেমদ্রুম যোগ",
+      description: "চন্দ্রের উভয় পার্শ্বে (২য় ও ১২তম ভাবে) কোনো শুভ গ্রহ না থাকলে এই যোগ তৈরি হয়।",
+      effects: "এটি আত্মনির্ভরশীলতা ও গভীর অন্তর্দৃষ্টি শেখায়। ভগবান শিবের আরাধনা ও সৎকর্মে মনের শান্তি এবং সৌভাগ্য ফিরে আসে।",
+    },
+    hi: {
+      name: "केमद्रुम योग",
+      description: "चन्द्रमा के आगे-पीछे (द्वितीय व द्वादश भाव) कोई ग्रह न होने पर निर्मित योग।",
+      effects: "यह स्वावलंबन एवं आत्म-चिंतन सिखाता है। भगवान शिव की आराधना एवं दान से इसके दोष दूर होते हैं।",
+    },
+  },
+  "Sinapha Yoga": {
+    en: {
+      name: "Sunapha Yoga",
+      description: "Benefic planetary disposition in the 2nd house from natal Moon.",
+      effects: "Provides self-earned prosperity, eloquence, sharp intelligence, and financial recovery after initial life struggles.",
+    },
+    bn: {
+      name: "সুনফা যোগ",
+      description: "চন্দ্র হতে দ্বিতীয় ভাবে শুভ গ্রহের অবস্থানের ফলে জাতক স্বোপার্জিত সম্পদে বলীয়ান হন।",
+      effects: "স্বোপার্জিত ধন-সম্পদ, বাকপটুতা, তীক্ষ্ণ বিচারবুদ্ধি এবং আত্মপ্রচেষ্টায় জীবনে ব্যাপক সমৃদ্ধি সূচিত করে।",
+    },
+    hi: {
+      name: "सुनफा योग",
+      description: "चन्द्रमा से दूसरे भाव में शुभ ग्रहों की उपस्थिति।",
+      effects: "स्व-अर्जित धन-धान्य, वाकपटुता, प्रखर बुद्धि एवं जीवन में आत्मनिर्भर प्रगति दिलाता है।",
+    },
+  },
+  "Sinapha Yoga 2": {
+    en: {
+      name: "Sunapha Yoga 2",
+      description: "Favorable disposition of wealth houses and lunar support.",
+      effects: "Provides self-earned prosperity, eloquence, sharp intelligence, and financial recovery after initial life struggles.",
+    },
+    bn: {
+      name: "সুনফা যোগ (২)",
+      description: "চন্দ্রের সাথে ধনভাব ও বাকস্থানের শুভ গ্রহের সংযোগ।",
+      effects: "আর্থিক স্বচ্ছলতা, সুবক্তা হওয়ার গুণ এবং জীবনের প্রারম্ভিক সংগ্রামের পর দীর্ঘমেয়াদী অর্থনৈতিক মুক্তি এনে দেয়।",
+    },
+    hi: {
+      name: "सुनफा योग (२)",
+      description: "धन भाव एवं चन्द्रमा के मध्य शुभ समन्वय।",
+      effects: "आर्थिक स्थिरता, उत्तम वक्तृत्व कला एवं संघर्ष के बाद सुदृढ़ वित्तीय संपन्नता।",
+    },
+  },
+  "Sinapha Yoga 3": {
+    en: {
+      name: "Sunapha Yoga 3",
+      description: "Planetary harmony connecting natal Moon with royal trines.",
+      effects: "Enhances mental peace, family stability, philosophical wisdom, and enduring societal respect.",
+    },
+    bn: {
+      name: "সুনফা যোগ (৩)",
+      description: "চন্দ্রের সাথে শুভ ত্রিকোণ ও রাজগ্রহের সামঞ্জস্য।",
+      effects: "মানসিক স্থৈর্য, পারিবারিক সম্প্রীতি, দার্শনিক দৃষ্টিভঙ্গি এবং সমাজে দীর্ঘস্থায়ী শ্রদ্ধা ও সম্মান বৃদ্ধি করে।",
+    },
+    hi: {
+      name: "सुनफा योग (३)",
+      description: "चन्द्र एवं त्रिकोण ग्रहों का शुभ योग।",
+      effects: "मानसिक शांति, पारिवारिक संतुलन एवं समाज में दीर्घकालिक प्रतिष्ठा प्रदान करता है।",
+    },
+  },
+};
+
+export function translateYogaName(name: string, lang: KundliLanguage): string {
+  if (!name) return "";
+  const found = KUNDLI_YOGAS_TRANSLATIONS[name.trim()]?.[lang]?.name;
+  return found || name;
+}
+
+export function translateYogaDetails(
+  name: string,
+  desc: string,
+  effects: string,
+  lang: KundliLanguage
+): { name: string; description: string; effects: string } {
+  const meta = KUNDLI_YOGAS_TRANSLATIONS[name.trim()]?.[lang];
+  if (meta) {
+    return {
+      name: meta.name,
+      description: meta.description,
+      effects: meta.effects,
+    };
+  }
+  return { name, description: desc, effects };
+}
+
+// 13. UI Elements Dictionary
+export interface KundliUiStrings {
+  badge: string;
+  title: string;
+  subtitle: string;
+  formTitle: string;
+  nameLabel: string;
+  namePlaceholder: string;
+  genderLabel: string;
+  dobLabel: string;
+  tobLabel: string;
+  placeLabel: string;
+  advancedSettings: string;
+  ayanamsaLabel: string;
+  houseSystemLabel: string;
+  calculateBtn: string;
+  calculating: string;
+  createNewKundli: string;
+  saveKundli: string;
+  editDetails: string;
+  profileTitle: string;
+  kundliDetailsTitle: string;
+  personalDetailsCard: string;
+  astronomicalInfoCard: string;
+  astroPositionsCard: string;
+  planetaryInfoCard: string;
+  chartStyleTitle: string;
+  lagnaChartTitle: string;
+  navamsaChartTitle: string;
+  rasiChartTitle: string;
+  divisionalChartsTitle: string;
+  planetTableTitle: string;
+  houseTableTitle: string;
+  vimshottariDashaTitle: string;
+  yogaAnalysisTitle: string;
+  kundliYogaBanner: string;
+  presentBadge: string;
+  notPresentBadge: string;
+  downloadBtn: string;
+  consultBtn: string;
+  thPlanet: string;
+  thHouse: string;
+  thLongitude: string;
+  thNakshatra: string;
+  thNakshatraLord: string;
+  thPada: string;
+  thSubLord: string;
+  thFullDegree: string;
+  thAntarDasha: string;
+  thDuration: string;
+  thEndDate: string;
+  lblAscLord: string;
+  lblAsc: string;
+  lblYoga: string;
+  lblTithi: string;
+  lblSunset: string;
+  lblSunrise: string;
+  lblBalDasa: string;
+  lblKaran: string;
+  lblRasiLord: string;
+  lblRasi: string;
+  lblJulianDay: string;
+  lblAyanType: string;
+  lblHouseSystem: string;
+  lblPlace: string;
+  lblLatitude: string;
+  lblLongitude: string;
+  lblDay: string;
+  lblVedicDay: string;
+}
+
+export const KUNDLI_UI_STRINGS: Record<KundliLanguage, KundliUiStrings> = {
+  bn: {
+    badge: "বৈদিক জ্যোতিষশাস্ত্র ভিত্তিক নির্ভুল কুন্ডলী ক্যালকুলেটর",
+    title: "জন্মতারিখ দিয়ে কুন্ডলী ও গ্রহের অবস্থান — সম্পূর্ণ ফ্রি",
+    subtitle:
+      "সঠিক লগ্ন, ১২টি ভাব, নবাংশ (D9) চার্ট, বিংশোত্তরী দশা ও বৈদিক যোগের পূর্ণাঙ্গ বিশ্লেষণ।",
+    formTitle: "আপনার জন্ম বিবরণ পূরণ করুন",
+    nameLabel: "নাম",
+    namePlaceholder: "আপনার নাম লিখুন...",
+    genderLabel: "লিঙ্গ",
+    dobLabel: "জন্মতারিখ",
+    tobLabel: "জন্মসময়",
+    placeLabel: "জন্মস্থান",
+    advancedSettings: "উন্নত সেটিংস (অয়নাংশ ও ভাব পদ্ধতি)",
+    ayanamsaLabel: "অয়নাংশ পদ্ধতি",
+    houseSystemLabel: "ভাব গণনা পদ্ধতি",
+    calculateBtn: "কুন্ডলী গণনা করুন",
+    calculating: "কুন্ডলী গণনা করা হচ্ছে...",
+    createNewKundli: "নতুন কুন্ডলী তৈরি করুন",
+    saveKundli: "কুন্ডলী সংরক্ষণ করুন",
+    editDetails: "বিবরণ পরিবর্তন করুন",
+    profileTitle: "প্রোফাইল",
+    kundliDetailsTitle: "কুন্ডলী বিবরণ ও চার্ট",
+    personalDetailsCard: "ব্যক্তিগত বিবরণ",
+    astronomicalInfoCard: "জ্যোতির্বৈজ্ঞানিক তথ্য",
+    astroPositionsCard: "জ্যোতিষ অবস্থান",
+    planetaryInfoCard: "গ্রহ ও নক্ষত্র তথ্য",
+    chartStyleTitle: "চার্ট শৈলী নির্বাচন করুন",
+    lagnaChartTitle: "লগ্ন কুন্ডলী (D1)",
+    navamsaChartTitle: "নবাংশ চার্ট (D9)",
+    rasiChartTitle: "পূর্ণ রাশি চক্র (D1)",
+    divisionalChartsTitle: "বর্গ কুন্ডলী (Divisional Charts)",
+    planetTableTitle: "গ্রহের অবস্থান ও সাব লর্ড",
+    houseTableTitle: "ভাব চালিত বিবরণ",
+    vimshottariDashaTitle: "বিংশোত্তরী দশা",
+    yogaAnalysisTitle: "বৈদিক যোগ ও দোষ বিশ্লেষণ",
+    kundliYogaBanner: "কুন্ডলী যোগ ও দোষ",
+    presentBadge: "উপস্থিত",
+    notPresentBadge: "অনুপস্থিত",
+    downloadBtn: "ডাউনলোড",
+    consultBtn: "জ্যোতিষীর পরামর্শ",
+    thPlanet: "গ্রহ",
+    thHouse: "ভাব",
+    thLongitude: "ডিগ্রি ও রাশি",
+    thNakshatra: "নক্ষত্র",
+    thNakshatraLord: "নক্ষত্র পতি",
+    thPada: "পদ",
+    thSubLord: "সাব লর্ড",
+    thFullDegree: "মোট দ্রাঘিমা",
+    thAntarDasha: "অন্তর্দশা",
+    thDuration: "মেয়াদ",
+    thEndDate: "শেষের তারিখ",
+    lblAscLord: "লগ্ন অধিপতি",
+    lblAsc: "লগ্ন",
+    lblYoga: "যোগ",
+    lblTithi: "তিথি",
+    lblSunset: "সূর্যাস্ত",
+    lblSunrise: "সূর্যোদয়",
+    lblBalDasa: "জন্মকালীন দশা ব্যালেন্স",
+    lblKaran: "করণ",
+    lblRasiLord: "রাশি অধিপতি",
+    lblRasi: "চন্দ্র রাশি",
+    lblJulianDay: "জুলিয়ান দিন",
+    lblAyanType: "অয়নাংশ",
+    lblHouseSystem: "ভাব পদ্ধতি",
+    lblPlace: "জন্মস্থান",
+    lblLatitude: "অক্ষাংশ",
+    lblLongitude: "দ্রাঘিমাংশ",
+    lblDay: "বার (দিন)",
+    lblVedicDay: "বৈদিক বার",
+  },
+  hi: {
+    badge: "वैदिक ज्योतिष शास्त्र आधारित सटीक कुण्डली कैलकुलेटर",
+    title: "जन्म तिथि से कुण्डली एवं ग्रह स्थिति — पूर्णतः निःशुल्क",
+    subtitle:
+      "सटीक लग्न, १२ भाव, नवांश (D9) चक्र, विंशोत्तरी दशा एवं वैदिक योगों का संपूर्ण विश्लेषण।",
+    formTitle: "अपना जन्म विवरण दर्ज करें",
+    nameLabel: "नाम",
+    namePlaceholder: "अपना नाम लिखें...",
+    genderLabel: "लिंग",
+    dobLabel: "जन्म तिथि",
+    tobLabel: "जन्म समय",
+    placeLabel: "जन्म स्थान",
+    advancedSettings: "उन्नत सेटिंग्स (अयनांश एवं भाव पद्धति)",
+    ayanamsaLabel: "अयनांश प्रणाली",
+    houseSystemLabel: "भाव गणना पद्धति",
+    calculateBtn: "कुण्डली की गणना करें",
+    calculating: "कुण्डली की गणना हो रही है...",
+    createNewKundli: "नई कुण्डली बनाएं",
+    saveKundli: "कुण्डली सहेजें",
+    editDetails: "विवरण बदलें",
+    profileTitle: "प्रोफ़ाइल",
+    kundliDetailsTitle: "कुण्डली विवरण एवं चक्र",
+    personalDetailsCard: "व्यक्तिगत विवरण",
+    astronomicalInfoCard: "खगोलीय जानकारी",
+    astroPositionsCard: "ज्योतिष स्थिति",
+    planetaryInfoCard: "ग्रह व नक्षत्र स्थिति",
+    chartStyleTitle: "चार्ट शैली चुनें",
+    lagnaChartTitle: "लग्न कुण्डली (D1)",
+    navamsaChartTitle: "नवांश कुण्डली (D9)",
+    rasiChartTitle: "पूर्ण राशि चक्र (D1)",
+    divisionalChartsTitle: "वर्ग कुण्डली (Divisional Charts)",
+    planetTableTitle: "ग्रह स्थिति एवं सब लॉर्ड",
+    houseTableTitle: "भाव चलित विवरण",
+    vimshottariDashaTitle: "विंशोत्तरी दशा",
+    yogaAnalysisTitle: "वैदिक योग एवं दोष विश्लेषण",
+    kundliYogaBanner: "कुण्डली योग एवं दोष",
+    presentBadge: "उपस्थित",
+    notPresentBadge: "अनुपस्थित",
+    downloadBtn: "डाउनलोड",
+    consultBtn: "ज्योतिषी परामर्श",
+    thPlanet: "ग्रह",
+    thHouse: "भाव",
+    thLongitude: "अंश व राशि",
+    thNakshatra: "नक्षत्र",
+    thNakshatraLord: "नक्षत्र स्वामी",
+    thPada: "चरण / पद",
+    thSubLord: "सब लॉर्ड",
+    thFullDegree: "पूर्ण रेखांश",
+    thAntarDasha: "अंतर्दशा",
+    thDuration: "अवधि",
+    thEndDate: "समाप्ति तिथि",
+    lblAscLord: "लग्न स्वामी",
+    lblAsc: "लग्न",
+    lblYoga: "योग",
+    lblTithi: "तिथि",
+    lblSunset: "सूर्यास्त",
+    lblSunrise: "सूर्योदय",
+    lblBalDasa: "जन्म समय दशा शेष",
+    lblKaran: "करण",
+    lblRasiLord: "राशि स्वामी",
+    lblRasi: "चन्द्र राशि",
+    lblJulianDay: "जूलियन दिन",
+    lblAyanType: "अयनांश",
+    lblHouseSystem: "भाव पद्धति",
+    lblPlace: "जन्म स्थान",
+    lblLatitude: "अक्षांश",
+    lblLongitude: "रेखांश",
+    lblDay: "वार (दिन)",
+    lblVedicDay: "वैदिक वार",
+  },
+  en: {
+    badge: "Vedic Astrology Certified Accurate Kundli Calculator",
+    title: "Birth Chart & Planetary Position — 100% Free",
+    subtitle:
+      "Accurate Lagna, 12 Bhavas, Navamsha (D9) Chart, Vimshottari Dasha, and Classical Vedic Yogas.",
+    formTitle: "Enter Birth Details",
+    nameLabel: "Name",
+    namePlaceholder: "Enter your name...",
+    genderLabel: "Gender",
+    dobLabel: "Birth Date",
+    tobLabel: "Birth Time",
+    placeLabel: "Birth Place",
+    advancedSettings: "Advanced Settings (Ayanamsa & House System)",
+    ayanamsaLabel: "Ayanamsa System",
+    houseSystemLabel: "House System",
+    calculateBtn: "Calculate Kundli",
+    calculating: "Calculating Kundli...",
+    createNewKundli: "Create New Kundli",
+    saveKundli: "Save Kundli",
+    editDetails: "Edit Details",
+    profileTitle: "Profile",
+    kundliDetailsTitle: "Kundli Details & Chart",
+    personalDetailsCard: "PERSONAL DETAILS",
+    astronomicalInfoCard: "ASTRONOMICAL INFO",
+    astroPositionsCard: "ASTRO POSITIONS",
+    planetaryInfoCard: "PLANETARY INFO",
+    chartStyleTitle: "Choose Chart Style",
+    lagnaChartTitle: "Lagna Chart (D1)",
+    navamsaChartTitle: "Navamsa Chart (D9)",
+    rasiChartTitle: "RASI CHART (D1)",
+    divisionalChartsTitle: "Divisional Charts",
+    planetTableTitle: "Planet Positions",
+    houseTableTitle: "House Positions",
+    vimshottariDashaTitle: "Vimshottari Dasha",
+    yogaAnalysisTitle: "Vedic Yoga & Dosha Analysis",
+    kundliYogaBanner: "Kundli Yoga",
+    presentBadge: "Present",
+    notPresentBadge: "Not Present",
+    downloadBtn: "Download",
+    consultBtn: "Consult",
+    thPlanet: "Planet",
+    thHouse: "House",
+    thLongitude: "Longitude",
+    thNakshatra: "Nakshatra",
+    thNakshatraLord: "Nakshatra Lord",
+    thPada: "Pada",
+    thSubLord: "Sub Lord",
+    thFullDegree: "Full Degree",
+    thAntarDasha: "Antar Dasha",
+    thDuration: "Duration",
+    thEndDate: "End Date",
+    lblAscLord: "Asc Lord",
+    lblAsc: "Asc",
+    lblYoga: "Yoga",
+    lblTithi: "Tithi",
+    lblSunset: "Sunset",
+    lblSunrise: "Sunrise",
+    lblBalDasa: "Bal. Dasa",
+    lblKaran: "Karan",
+    lblRasiLord: "Rasi Lord",
+    lblRasi: "Rasi",
+    lblJulianDay: "Julian Day",
+    lblAyanType: "Ayan Type",
+    lblHouseSystem: "House",
+    lblPlace: "Place",
+    lblLatitude: "Latitude",
+    lblLongitude: "Longitude",
+    lblDay: "Day",
+    lblVedicDay: "Vedic Day",
+  },
+};
