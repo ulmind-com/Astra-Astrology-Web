@@ -31,6 +31,12 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { Button } from "@/components/ui";
 import { astrologyApi } from "@/lib/api";
 import { LocationPickerModal } from "@/components/astrology/location-picker-modal";
+import {
+  BirthPlaceField,
+  type SelectedPlace,
+} from "@/components/astrology/birth-place-field";
+import { ClientRulesPanel } from "@/components/astrology/client-rules-panel";
+import { CalculationDetails } from "@/components/astrology/calculation-details";
 import { MoonSignWheel } from "@/components/astrology/moon-sign-wheel";
 import { KundaliChart } from "@/components/astrology/kundali-chart";
 import { getClientRashiTraits } from "@/lib/astrology-translations";
@@ -70,8 +76,12 @@ export default function RashiCalculatorPage() {
   const [second, setSecond] = React.useState("");
   const [period, setPeriod] = React.useState<"AM" | "PM">("PM");
 
-  // Place
+  // Place. `selectedPlace` is the authoritative source for coordinates and
+  // timezone: it is only ever set by choosing a real geocoded result, so a typed
+  // string can no longer be submitted against the old Kolkata fallback.
   const [place, setPlace] = React.useState("");
+  const [selectedPlace, setSelectedPlace] = React.useState<SelectedPlace | null>(null);
+  const [placeTouched, setPlaceTouched] = React.useState(false);
   const [isMapModalOpen, setIsMapModalOpen] = React.useState(false);
 
   // Advance Settings (Optional)
@@ -84,6 +94,9 @@ export default function RashiCalculatorPage() {
   const [latMin, setLatMin] = React.useState("");
   const [latDir, setLatDir] = React.useState<"N" | "S">("N");
 
+  // Manual timezone override, used only when no place has been resolved. Free-form
+  // rather than an eight-option select, so offsets the old list could not express -
+  // +05:53:20 for a pre-1906 Kolkata birth, +06:30, +09:00 - are reachable.
   const [timezone, setTimezone] = React.useState("5.5");
   const [ayanamsa, setAyanamsa] = React.useState<AyanamsaType>("lahiri");
   const [houseSystem, setHouseSystem] = React.useState<HouseSystemType>("placidus");
@@ -192,6 +205,20 @@ export default function RashiCalculatorPage() {
           setLonDir(b.longitude >= 0 ? "E" : "W");
         }
 
+        if (b.latitude != null && b.longitude != null) {
+          setSelectedPlace({
+            place: placeName || "Saved birth place",
+            displayName: placeName || "Saved birth place",
+            latitude: b.latitude,
+            longitude: b.longitude,
+            timezoneName: typeof b.timezone === "string" ? b.timezone : null,
+            timezoneOffset: b.timezone_offset ?? null,
+            timezoneLabel: null,
+            timezoneAbbreviation: null,
+            isDst: false,
+          });
+        }
+
         if (b.timezone_offset != null) {
           setTimezone(String(b.timezone_offset));
         } else if (b.timezone) {
@@ -224,6 +251,8 @@ export default function RashiCalculatorPage() {
 
   // Reset form helper
   const handleResetForm = () => {
+    setSelectedPlace(null);
+    setPlaceTouched(false);
     setName("");
     setGender("male");
     setDay("");
@@ -393,6 +422,31 @@ export default function RashiCalculatorPage() {
     setLonDir(loc.longitude >= 0 ? "E" : "W");
   };
 
+  // Choosing a place drives the coordinate and timezone fields, so the Advanced
+  // panel always shows what will actually be sent.
+  const handlePlaceSelected = React.useCallback((next: SelectedPlace | null) => {
+    setSelectedPlace(next);
+    if (!next) {
+      setPlace("");
+      return;
+    }
+    setPlace(next.place);
+
+    const absLat = Math.abs(next.latitude);
+    const degLat = Math.floor(absLat);
+    setLatDeg(String(degLat));
+    setLatMin(String(Math.round((absLat - degLat) * 60)));
+    setLatDir(next.latitude >= 0 ? "N" : "S");
+
+    const absLon = Math.abs(next.longitude);
+    const degLon = Math.floor(absLon);
+    setLonDeg(String(degLon));
+    setLonMin(String(Math.round((absLon - degLon) * 60)));
+    setLonDir(next.longitude >= 0 ? "E" : "W");
+
+    if (next.timezoneOffset != null) setTimezone(String(next.timezoneOffset));
+  }, []);
+
   const getDecimalCoords = () => {
     if (!latDeg && !lonDeg) {
       // Default fallback coordinates if user leaves advanced empty
@@ -467,18 +521,24 @@ export default function RashiCalculatorPage() {
     }
 
     // 3. Birth Place Validation
-    if (!place.trim()) {
+    // A typed place name is not enough. Without a geocoded selection the chart
+    // would be cast for whatever coordinates happen to be in the Advanced fields,
+    // which used to default to Kolkata and shifted the ascendant silently.
+    if (!selectedPlace && !(latDeg && lonDeg)) {
+      setPlaceTouched(true);
       toast.error(
         language === "bn"
-          ? "অনুগ্রহ করে জন্মস্থান লিখুন বা ম্যাপ থেকে নির্বাচন করুন"
+          ? "অনুগ্রহ করে তালিকা থেকে জন্মস্থান বেছে নিন — সঠিক লগ্ন ও সময়াঞ্চলের জন্য এটি প্রয়োজন"
           : language === "hi"
-          ? "कृपया जन्म स्थान दर्ज करें या मानचित्र से चुनें"
-          : "Please enter birth place or pick from map"
+          ? "कृपया सूची से जन्म स्थान चुनें — सही लग्न एवं समय क्षेत्र हेतु यह आवश्यक है"
+          : "Please choose your birth place from the list — the ascendant and timezone depend on it"
       );
       return;
     }
 
-    const { lat, lon } = getDecimalCoords();
+    const { lat, lon } = selectedPlace
+      ? { lat: selectedPlace.latitude, lon: selectedPlace.longitude }
+      : getDecimalCoords();
 
     const payload: RashiCalculatePayload = {
       name: name.trim() || "Seeker",
@@ -490,10 +550,14 @@ export default function RashiCalculatorPage() {
       minute: finalMin,
       second: finalSec,
       period: finalPeriod,
-      place: place.trim(),
+      place: (selectedPlace?.place || place).trim(),
       latitude: lat,
       longitude: lon,
+      // The offset is a fallback only. When a zone name is present the backend
+      // resolves the exact offset at the birth instant, which is what makes
+      // daylight saving and historical changes come out right.
       timezone: parseFloat(timezone) || 5.5,
+      timezone_name: selectedPlace?.timezoneName ?? null,
       ayanamsa,
       house_system: houseSystem,
       chart_style: chartStyle,
@@ -843,29 +907,35 @@ export default function RashiCalculatorPage() {
                 </div>
               </div>
 
-              {/* 5. Birth Place with direct Location Picker modal button */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
-                <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
-                  <MapPin className="size-4 text-rose-500" />
-                  <span>{language === "bn" ? "জন্মস্থান" : language === "hi" ? "जन्म स्थान" : "Birth Place"}</span>
+              {/* 5. Birth Place - geocoded inline, with the resolved timezone shown */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4">
+                <label
+                  htmlFor="birth-place"
+                  className="sm:col-span-3 flex items-start gap-2 pt-3 font-bold text-foreground"
+                >
+                  <MapPin className="mt-0.5 size-4 shrink-0 text-rose-500" />
+                  <span>
+                    {language === "bn"
+                      ? "জন্মস্থান"
+                      : language === "hi"
+                        ? "जन्म स्थान"
+                        : "Birth Place"}
+                    <span className="ml-1 text-rose-500">*</span>
+                  </span>
                 </label>
-                <div className="sm:col-span-9 flex gap-2">
-                  <input
-                    type="text"
-                    value={place}
-                    onChange={(e) => setPlace(e.target.value)}
-                    placeholder={language === "bn" ? "শহরের নাম লিখুন..." : language === "hi" ? "शहर का नाम लिखें..." : "Search city or town..."}
-                    className="flex-1 rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs font-medium"
+                <div className="sm:col-span-9">
+                  <BirthPlaceField
+                    id="birth-place"
+                    value={selectedPlace}
+                    onChange={handlePlaceSelected}
+                    birthDate={{
+                      year: parseInt(year, 10) || undefined,
+                      month: parseInt(month, 10) || undefined,
+                      day: parseInt(day, 10) || undefined,
+                    }}
+                    language={language}
+                    invalid={placeTouched}
                   />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsMapModalOpen(true)}
-                    className="shrink-0 rounded-xl px-3 border-amber-300/80 bg-white text-xs font-bold text-amber-950 hover:bg-amber-50"
-                  >
-                    <MapPin className="size-3.5 text-rose-500 mr-1" />
-                    <span>{language === "bn" ? "ম্যাপ" : language === "hi" ? "मानचित्र" : "Map"}</span>
-                  </Button>
                 </div>
               </div>
 
@@ -973,27 +1043,70 @@ export default function RashiCalculatorPage() {
                     </div>
                   </div>
 
-                  {/* Timezone */}
-                  <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
-                    <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
+                  {/* Timezone. Read-only once a place is chosen, because the
+                      backend resolves the exact offset from the zone at the birth
+                      instant; editable as a free-form override otherwise, so any
+                      offset is reachable rather than only eight preset ones. */}
+                  <div className="grid grid-cols-1 sm:grid-cols-12 items-start gap-2 sm:gap-4">
+                    <label
+                      htmlFor="timezone"
+                      className="sm:col-span-3 flex items-center gap-2 pt-2 font-bold text-foreground"
+                    >
                       <Globe className="size-4 text-emerald-500" />
-                      <span>Time Zone</span>
+                      <span>
+                        {language === "bn"
+                          ? "সময়াঞ্চল"
+                          : language === "hi"
+                            ? "समय क्षेत्र"
+                            : "Time Zone"}
+                      </span>
                     </label>
                     <div className="sm:col-span-9">
-                      <select
-                        value={timezone}
-                        onChange={(e) => setTimezone(e.target.value)}
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2 text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer"
-                      >
-                        <option value="5.5">India (+05:30 IST)</option>
-                        <option value="6.0">Bangladesh (+06:00 BST)</option>
-                        <option value="5.75">Nepal (+05:45 NPT)</option>
-                        <option value="5.0">Pakistan (+05:00 PKT)</option>
-                        <option value="4.0">UAE / Gulf (+04:00 GST)</option>
-                        <option value="0.0">UTC / GMT (00:00)</option>
-                        <option value="-5.0">US Eastern (-05:00 EST)</option>
-                        <option value="-8.0">US Pacific (-08:00 PST)</option>
-                      </select>
+                      {selectedPlace?.timezoneName ? (
+                        <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 px-3.5 py-2.5">
+                          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-bold text-emerald-900">
+                            <span>{selectedPlace.timezoneName}</span>
+                            {selectedPlace.timezoneLabel && (
+                              <span className="rounded-md bg-white px-1.5 py-0.5 tabular-nums">
+                                {selectedPlace.timezoneLabel}
+                              </span>
+                            )}
+                            {selectedPlace.timezoneAbbreviation && (
+                              <span className="font-semibold text-emerald-700">
+                                {selectedPlace.timezoneAbbreviation}
+                              </span>
+                            )}
+                          </p>
+                          <p className="mt-1 text-[11px] leading-relaxed text-emerald-800/90">
+                            {language === "bn"
+                              ? "জন্মস্থান ও জন্মতারিখ অনুসারে সঠিক সময়াঞ্চল নির্ণীত — ডেলাইট সেভিং ও ঐতিহাসিক পরিবর্তন সহ।"
+                              : language === "hi"
+                                ? "जन्म स्थान एवं जन्म तिथि अनुसार सही समय क्षेत्र निर्धारित — डेलाइट सेविंग एवं ऐतिहासिक परिवर्तन सहित।"
+                                : "Resolved from your birth place and date, including daylight saving and historical changes."}
+                          </p>
+                        </div>
+                      ) : (
+                        <>
+                          <input
+                            id="timezone"
+                            type="text"
+                            inputMode="decimal"
+                            value={timezone}
+                            onChange={(e) =>
+                              setTimezone(e.target.value.replace(/[^0-9.+-]/g, ""))
+                            }
+                            placeholder="5.5"
+                            className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs font-semibold tabular-nums text-foreground shadow-2xs focus:outline-hidden focus:ring-2 focus:ring-amber-500 sm:text-sm"
+                          />
+                          <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">
+                            {language === "bn"
+                              ? "UTC থেকে ঘণ্টার হিসেবে, যেমন ভারত 5.5, বাংলাদেশ 6, নেপাল 5.75। তালিকা থেকে জন্মস্থান বেছে নিলে এটি স্বয়ংক্রিয়ভাবে ঠিক হয়ে যাবে।"
+                              : language === "hi"
+                                ? "UTC से घंटों में, जैसे भारत 5.5, बांग्लादेश 6, नेपाल 5.75। सूची से जन्म स्थान चुनने पर यह स्वतः सही हो जाएगा।"
+                                : "Hours from UTC, e.g. India 5.5, Bangladesh 6, Nepal 5.75. Choosing your birth place from the list sets this automatically."}
+                          </p>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -1380,6 +1493,16 @@ export default function RashiCalculatorPage() {
               </div>
             </div>
 
+            {/* 4b. Classical rules, every one traceable to a client document */}
+            {result.client_rules && (
+              <ClientRulesPanel
+                profile={result.client_rules}
+                ascendantProfile={result.ascendant_client_rules}
+                kpReference={result.kp_reference}
+                language={language}
+              />
+            )}
+
             {/* 5. Kundali Chart Visualization with Consistent Aesthetic */}
             <div className="rounded-[28px] border border-amber-300/80 bg-card p-6 sm:p-8 shadow-2xs space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-border/60">
@@ -1496,6 +1619,16 @@ export default function RashiCalculatorPage() {
                 />
               </div>
             </div>
+
+            {/* 7. How the chart was calculated - timezone, cusps and any caveat */}
+            <CalculationDetails
+              timezone={result.timezone_resolution}
+              cusps={result.house_cusps}
+              calculation={result.calculation}
+              ayanamsaName={result.ayanamsa_name}
+              houseSystem={result.house_system}
+              language={language}
+            />
           </div>
         )}
 

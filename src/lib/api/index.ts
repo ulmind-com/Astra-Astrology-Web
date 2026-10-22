@@ -8,6 +8,10 @@ import type {
   FaceReading,
   FaceScanResponse,
   GeoSearchResult,
+  TimezoneLookupResult,
+  ClientSignProfile,
+  KpReference,
+  AstrologyLanguage,
   ReviewPage,
   RashiCalculatePayload,
   RashiCalculateResult,
@@ -373,10 +377,41 @@ export const astrologyApi = {
   calculateKp: (body: KPCalculatePayload) =>
     api.post<KPCalculateResult>(endpoints.astrology.kp, body, { auth: false }),
 
-  geoSearch: (q: string) =>
+  /**
+   * Geocode a birth place. Passing the birth date makes the returned offset the one
+   * actually in force then, so daylight saving and historical changes are reflected.
+   */
+  geoSearch: (q: string, birthDate?: { year?: number; month?: number; day?: number }) =>
     api.get<GeoSearchResult[]>(endpoints.astrology.geoSearch, {
-      query: { q },
+      query: {
+        q,
+        ...(birthDate?.year ? { year: birthDate.year } : {}),
+        ...(birthDate?.month ? { month: birthDate.month } : {}),
+        ...(birthDate?.day ? { day: birthDate.day } : {}),
+      },
       auth: false,
     }),
+
+  /** Exact UTC offset for one coordinate at one local wall-clock instant. */
+  lookupTimezone: (params: {
+    latitude: number;
+    longitude: number;
+    year: number;
+    month: number;
+    day: number;
+    hour?: number;
+    minute?: number;
+  }) =>
+    api.get<TimezoneLookupResult>(endpoints.astrology.timezone, {
+      query: params as unknown as Record<string, string | number>,
+      auth: false,
+    }),
+
+  /** The client-sourced rule set for one sign, with a citation on every group. */
+  clientRules: (signIndex: number, language: AstrologyLanguage = "en") =>
+    api.get<ClientSignProfile & { kp_reference: KpReference }>(
+      endpoints.astrology.clientRules(signIndex),
+      { query: { language }, auth: false },
+    ),
 };
 

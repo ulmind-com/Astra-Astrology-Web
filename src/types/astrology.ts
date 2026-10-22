@@ -27,6 +27,12 @@ export interface RashiCalculatePayload {
   latitude?: number | null;
   longitude?: number | null;
   timezone: number;
+  /**
+   * IANA zone name for the birth place, e.g. "Asia/Dhaka". When sent, the backend
+   * resolves the exact offset at the birth instant, so daylight saving and
+   * historical zone changes are handled and `timezone` is ignored.
+   */
+  timezone_name?: string | null;
   ayanamsa: AyanamsaType;
   house_system: HouseSystemType;
   chart_style: ChartStyleType;
@@ -105,16 +111,127 @@ export interface RashiCalculateResult {
   chart_style: ChartStyleType;
   selected_language?: AstrologyLanguage;
   translations?: Record<string, any>;
+
+  /** Rules traceable to the client's own resource documents, with citations. */
+  client_rules?: ClientSignProfile | null;
+  ascendant_client_rules?: ClientSignProfile | null;
+  kp_reference?: KpReference;
+
+  /** How the UTC offset used for this chart was arrived at. */
+  timezone_resolution?: TimezoneResolution | null;
+  /** The real house cusps for the selected house system. */
+  house_cusps?: HouseCusp[];
+  calculation?: CalculationMeta | null;
 }
 
 export interface GeoSearchResult {
   display_name: string;
+  /** Short label for the place, e.g. "Dhaka". */
+  place?: string;
   latitude: number;
   longitude: number;
-  timezone: number;
+  /** IANA zone name the coordinates fall in, e.g. "Asia/Dhaka". */
+  timezone_name?: string | null;
+  /** Offset in hours at the supplied birth date, or null when unknown. */
+  timezone: number | null;
+  /** Pre-formatted offset, e.g. "UTC+06:00". */
+  timezone_label?: string | null;
+  /** Zone abbreviation in force at that date, e.g. "IST", "BST". */
+  timezone_abbreviation?: string | null;
+  is_dst?: boolean;
   country?: string;
   state?: string;
   city?: string;
+}
+
+export interface TimezoneLookupResult {
+  timezone_name: string | null;
+  timezone: number | null;
+  timezone_label?: string | null;
+  timezone_abbreviation?: string | null;
+  is_dst?: boolean;
+  note?: string | null;
+}
+
+/** One classification group transcribed from a client resource document. */
+export interface ClientRuleEntry {
+  key: string;
+  label: string;
+  value: string;
+  definition: string;
+  /** Client file and page this group came from, e.g. "01.pdf p.10". */
+  source: string;
+  /** The client's own stated predictive use, where they gave one. */
+  application?: string | null;
+}
+
+export interface GunaReading {
+  source: string;
+  value: string;
+  note: string;
+}
+
+export interface DisputedGuna {
+  readings: GunaReading[];
+  is_disputed: boolean;
+  notice?: string | null;
+}
+
+export interface ClientSignProfile {
+  index: number;
+  name_en: string;
+  name_sa: string;
+  name_bn: string;
+  name_hi: string;
+  lord: string;
+  classifications: ClientRuleEntry[];
+  guna: DisputedGuna;
+  body_parts: string;
+  places: string[];
+  trait_keywords: string[];
+  sources: string[];
+}
+
+export interface TimezoneResolution {
+  offset_hours: number;
+  offset_label: string;
+  zone_name?: string | null;
+  abbreviation?: string | null;
+  /** "iana" when derived from the birth place, "manual" when supplied, "default" otherwise. */
+  source: string;
+  is_dst: boolean;
+  note?: string | null;
+}
+
+export interface HouseCusp {
+  house: number;
+  longitude: number;
+  sign: string;
+  sign_index: number;
+  degree_in_sign: number;
+  degree_formatted: string;
+}
+
+export interface CalculationMeta {
+  engine: string;
+  engine_version?: string | null;
+  ephemeris: string;
+  ayanamsa_key: string;
+  house_system_key: string;
+  node_type: string;
+  julian_day_ut: number;
+  warnings: string[];
+}
+
+export interface KpHouseSignification {
+  house: number;
+  signification: string;
+}
+
+export interface KpReference {
+  basic_rules?: string[];
+  house_significations?: KpHouseSignification[];
+  source?: string;
 }
 
 // =============================================================================

@@ -158,7 +158,7 @@ export function LocationPickerModal({
                       place: item.city || item.display_name.split(",")[0] || item.display_name,
                       latitude: item.latitude,
                       longitude: item.longitude,
-                      timezone: item.timezone,
+                      timezone: item.timezone ?? 5.5,
                     })
                   }
                   className={`w-full text-left p-3 rounded-xl border transition-all flex items-start gap-2.5 text-xs ${
@@ -171,7 +171,7 @@ export function LocationPickerModal({
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-foreground truncate">{item.display_name}</p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
-                      Lat: {formatCoord(item.latitude, true)} · Lon: {formatCoord(item.longitude, false)} · UTC{item.timezone >= 0 ? "+" : ""}{item.timezone}h
+                      Lat: {formatCoord(item.latitude, true)} · Lon: {formatCoord(item.longitude, false)} · {item.timezone_label ?? `UTC${(item.timezone ?? 0) >= 0 ? "+" : ""}${item.timezone ?? "?"}h`}
                     </p>
                   </div>
                   {isSelected && <Check className="size-4 text-brand-600 shrink-0 mt-0.5" />}
