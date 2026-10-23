@@ -386,3 +386,4 @@ export type FaceScanResponse = {
 };
 
 export * from "./astrology";
+export * from "./palm-reading";

@@ -8,6 +8,9 @@ import type {
   FaceReading,
   FaceScanResponse,
   GeoSearchResult,
+  PalmReadingAvailability,
+  PalmScanResponse,
+  PalmReadingRecord,
   TimezoneLookupResult,
   ClientSignProfile,
   KpReference,
@@ -341,6 +344,29 @@ export const reviewApi = {
 };
 
 // ------------------------------------------------------------ face reading
+export const palmReadingApi = {
+  /** Cost and availability, plus the photo guidance, asked before the camera opens. */
+  availability: () =>
+    api.get<PalmReadingAvailability>(endpoints.palmReading.availability),
+
+  /** Scan a palm photo. Nothing is charged unless a reading is produced. */
+  scan: (image: File | Blob | string) => {
+    if (typeof image === "string") {
+      return api.post<PalmScanResponse>(endpoints.palmReading.scan, { image });
+    }
+    const form = new FormData();
+    form.append("file", image, image instanceof File ? image.name : "palm_capture.jpg");
+    return apiFetch<PalmScanResponse>(endpoints.palmReading.scan, {
+      method: "POST",
+      body: form,
+    });
+  },
+
+  mine: () => api.get<PalmReadingRecord[]>(endpoints.palmReading.mine),
+
+  detail: (id: string) => api.get<PalmReadingRecord>(endpoints.palmReading.detail(id)),
+};
+
 export const faceReadingApi = {
   /** Cost and availability, asked before the camera opens. */
   availability: () =>

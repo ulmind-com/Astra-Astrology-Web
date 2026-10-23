@@ -22,6 +22,7 @@ import {
   Coins,
   Compass,
   HeartHandshake,
+  Hand,
   HelpCircle,
   Hourglass,
   LayoutGrid,
@@ -55,6 +56,7 @@ export const RAIL_LINKS = [
   { href: "/astrologers", label: "Astrologers", icon: Compass },
   { href: "/appointments", label: "Appointments", icon: CalendarDays },
   { href: "/face-reading", label: "Face reading", icon: ScanFace },
+  { href: "/palm-reading", label: "Palm reading", icon: Hand },
   { href: "/#services", label: "Services", icon: LayoutGrid },
   { href: "/#how-it-works", label: "How it works", icon: HelpCircle },
 ] as const;

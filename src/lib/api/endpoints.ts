@@ -69,6 +69,12 @@ export const endpoints = {
     mySchedule: "/appointments/me/schedule",
   },
 
+  palmReading: {
+    availability: "/palm-reading/availability",
+    scan: "/palm-reading/scan",
+    mine: "/palm-reading/mine",
+    detail: (id: string) => `/palm-reading/mine/${id}`,
+  },
   faceReading: {
     availability: "/face-reading/availability",
     submit: "/face-reading",
