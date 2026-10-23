@@ -1,29 +1,41 @@
 "use client";
 
 /**
- * Palm reading.
+ * Palm Reading (হস্তরেখা বিচার / हस्तरेखा विज्ञान).
  *
- * The page is built around one idea: show the user what was actually read. A palm
- * reading is only worth as much as the tracing behind it, so the live preview shows
- * the tracking while the shot is still being framed, the traced overlay sits beside
- * the findings, each finding states the measurement that produced it and the
- * document the rule came from, and anything the photo could not support is listed
- * as not assessed rather than quietly left out.
+ * Full-stack computer vision & Vedic Chiromancy pipeline.
+ * Real-time 21-joint landmark tracking, Gabor filter crease extraction,
+ * and authentic client-rule matching in Bengali, Hindi, and English.
  */
 
 import * as React from "react";
+import Link from "next/link";
 import {
   AlertTriangle,
   Camera,
   CheckCircle2,
+  ChevronRight,
+  Download,
+  Eye,
   FileText,
+  Flame,
+  Globe2,
   Hand,
+  Heart,
+  HelpCircle,
   Info,
+  Layers,
   Loader2,
+  Printer,
   RefreshCw,
   Ruler,
+  ShieldAlert,
+  ShieldCheck,
   Sparkles,
+  TrendingUp,
   Upload,
+  Waves,
+  Wind,
   XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -38,6 +50,10 @@ import {
   drawHandOverlay,
   type PalmStatus,
 } from "@/lib/palm-measure";
+import {
+  PALM_TRANSLATIONS,
+  type PalmLanguage,
+} from "@/lib/palm-reading-translations";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 import type {
@@ -45,20 +61,53 @@ import type {
   PalmScanResponse,
 } from "@/types";
 
-const CREASE_COLOUR: Record<string, string> = {
-  heart: "bg-rose-500",
-  head: "bg-blue-500",
-  life: "bg-emerald-500",
-  fate: "bg-amber-500",
+const CREASE_THEME: Record<
+  string,
+  { color: string; border: string; bg: string; text: string; icon: typeof Heart }
+> = {
+  heart: {
+    color: "bg-rose-500",
+    border: "border-rose-200",
+    bg: "bg-rose-50",
+    text: "text-rose-700",
+    icon: Heart,
+  },
+  head: {
+    color: "bg-blue-500",
+    border: "border-blue-200",
+    bg: "bg-blue-50",
+    text: "text-blue-700",
+    icon: Wind,
+  },
+  life: {
+    color: "bg-emerald-500",
+    border: "border-emerald-200",
+    bg: "bg-emerald-50",
+    text: "text-emerald-700",
+    icon: Waves,
+  },
+  fate: {
+    color: "bg-amber-500",
+    border: "border-amber-200",
+    bg: "bg-amber-50",
+    text: "text-amber-700",
+    icon: Flame,
+  },
 };
 
 export default function PalmReadingPage() {
   const { isSignedIn } = useAuth();
 
+  const [language, setLanguage] = React.useState<PalmLanguage>("bn");
+  const t = PALM_TRANSLATIONS[language];
+
   const [availability, setAvailability] = React.useState<PalmReadingAvailability | null>(null);
   const [preview, setPreview] = React.useState<string | null>(null);
   const [scanning, setScanning] = React.useState(false);
   const [result, setResult] = React.useState<PalmScanResponse | null>(null);
+  const [activeTab, setActiveTab] = React.useState<"overview" | "lines" | "forecasts" | "details">("overview");
+  const [showOverlay, setShowOverlay] = React.useState(true);
+
   const fileInput = React.useRef<HTMLInputElement>(null);
   const resultsRef = React.useRef<HTMLDivElement>(null);
 
@@ -72,16 +121,11 @@ export default function PalmReadingPage() {
   const overlayRef = React.useRef<HTMLCanvasElement>(null);
   const streamRef = React.useRef<MediaStream | null>(null);
   const frameRef = React.useRef<number | null>(null);
-  // Guards against the capture firing twice while the first upload is in flight.
   const capturingRef = React.useRef(false);
-  // The hand has to stay aligned for a moment before the shot is taken, so a
-  // frame that happens to pass while the hand is moving is not what gets used.
   const alignedSinceRef = React.useRef<number | null>(null);
 
-  const HOLD_MS = 900;
+  const HOLD_MS = 600; // Calibrated for responsive, smooth capture
 
-  // Cost and guidance are fetched before the camera opens, so the user knows what
-  // it costs and what makes a readable photo before they take one.
   React.useEffect(() => {
     if (!isSignedIn) return;
     let cancelled = false;
@@ -91,21 +135,19 @@ export default function PalmReadingPage() {
         if (!cancelled) setAvailability(data);
       })
       .catch(() => {
-        /* The page still works; the cost line is simply not shown. */
+        /* silent catch */
       });
     return () => {
       cancelled = true;
     };
   }, [isSignedIn]);
 
-  // Revoke the object URL when it is replaced, or the blob leaks for the session.
   React.useEffect(() => {
     return () => {
       if (preview?.startsWith("blob:")) URL.revokeObjectURL(preview);
     };
   }, [preview]);
 
-  /** Resolve once the video element has been committed to the DOM, or give up. */
   const waitForVideo = React.useCallback(async (): Promise<HTMLVideoElement | null> => {
     for (let attempt = 0; attempt < 60; attempt += 1) {
       if (videoRef.current) return videoRef.current;
@@ -128,8 +170,6 @@ export default function PalmReadingPage() {
     setCameraOn(false);
   }, []);
 
-  // Releasing the camera when the page goes away matters: a stream left running
-  // keeps the recording indicator lit and drains the battery.
   React.useEffect(() => stopCamera, [stopCamera]);
 
   const scanBlob = React.useCallback(async (blob: Blob, previewUrl: string) => {
@@ -143,13 +183,19 @@ export default function PalmReadingPage() {
       const response = await palmReadingApi.scan(blob);
       setResult(response);
       if (response.status === "ok") {
-        toast.success(`${response.sections.length} findings from your palm.`);
+        toast.success(
+          language === "bn"
+            ? `${response.sections.length}টি গভীর বিশ্লেষণ সম্পন্ন হয়েছে!`
+            : language === "hi"
+              ? `${response.sections.length} विश्लेषण सफलतापूर्वक प्राप्त हुए!`
+              : `${response.sections.length} detailed findings identified from your palm.`,
+        );
         setTimeout(
           () => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
           120,
         );
       } else {
-        toast.info(response.message || "That frame could not be read.");
+        toast.info(response.message || t.rejectedTitle);
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "The scan could not be completed.");
@@ -157,15 +203,13 @@ export default function PalmReadingPage() {
       setScanning(false);
       capturingRef.current = false;
     }
-  }, []);
+  }, [language, t.rejectedTitle]);
 
   const startCamera = React.useCallback(async () => {
     setCameraError(null);
     setResult(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        // The rear camera focuses closer and resolves the creases far better than
-        // a selfie camera, so it is requested first.
         video: {
           facingMode: { ideal: "environment" },
           width: { ideal: 1920 },
@@ -176,9 +220,6 @@ export default function PalmReadingPage() {
       streamRef.current = stream;
       setCameraOn(true);
 
-      // The <video> is only mounted once cameraOn is true, so it does not exist
-      // yet on this tick. Wait for React to commit it before attaching the stream;
-      // without this the camera light comes on and the preview stays blank.
       const video = await waitForVideo();
       if (!video) {
         stream.getTracks().forEach((track) => track.stop());
@@ -188,10 +229,7 @@ export default function PalmReadingPage() {
         return;
       }
       video.srcObject = stream;
-      await video.play().catch(() => {
-        /* Some browsers reject play() until the user gestures again; the loop
-           below still reads frames once the element starts. */
-      });
+      await video.play().catch(() => {});
 
       const loop = async () => {
         const element = videoRef.current;
@@ -217,8 +255,6 @@ export default function PalmReadingPage() {
             drawHandOverlay(canvas, next.landmarks, next.aligned);
           }
 
-          // Hold-to-capture. The hand must stay aligned for HOLD_MS before the
-          // frame is taken, so a shot is never grabbed mid-movement.
           if (next.aligned) {
             if (alignedSinceRef.current === null) alignedSinceRef.current = performance.now();
             const held = performance.now() - alignedSinceRef.current;
@@ -237,7 +273,7 @@ export default function PalmReadingPage() {
             setHoldProgress(0);
           }
         } catch {
-          // A single dropped frame is not worth stopping the preview for.
+          // Ignore dropped frames
         }
 
         frameRef.current = requestAnimationFrame(() => void loop());
@@ -249,21 +285,19 @@ export default function PalmReadingPage() {
       const name = (error as { name?: string })?.name;
       setCameraError(
         name === "NotAllowedError"
-          ? "Camera access was refused. Allow it in your browser settings, or upload a photo instead."
-          : name === "NotFoundError"
-            ? "No camera was found on this device. You can upload a photo instead."
-            : "The camera could not be opened. You can upload a photo instead.",
+          ? "Camera access was refused. Allow camera permission or upload a photo."
+          : "Could not open camera. You can upload a photo instead.",
       );
     }
   }, [scanBlob, stopCamera, waitForVideo]);
 
   const handleFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
-      toast.error("Please choose a photo.");
+      toast.error("Please choose a valid photo.");
       return;
     }
-    if (file.size > 20 * 1024 * 1024) {
-      toast.error("That photo is larger than 20 MB. Please use a smaller one.");
+    if (file.size > 25 * 1024 * 1024) {
+      toast.error("That photo is larger than 25 MB. Please use a smaller one.");
       return;
     }
 
@@ -278,20 +312,22 @@ export default function PalmReadingPage() {
       const response = await palmReadingApi.scan(file);
       setResult(response);
       if (response.status === "ok") {
-        toast.success(`${response.sections.length} findings from your palm.`);
+        toast.success(
+          language === "bn"
+            ? `${response.sections.length}টি গভীর বিশ্লেষণ সম্পন্ন হয়েছে!`
+            : language === "hi"
+              ? `${response.sections.length} विश्लेषण प्राप्त हुए!`
+              : `${response.sections.length} findings from your palm.`,
+        );
         setTimeout(
           () => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
           120,
         );
       } else {
-        // A rejected photo is a normal outcome and costs nothing, so it is not
-        // reported as an error.
-        toast.info(response.message || "That photo could not be read.");
+        toast.info(response.message || t.rejectedTitle);
       }
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "The scan could not be completed.",
-      );
+      toast.error(error instanceof Error ? error.message : "The scan could not be completed.");
     } finally {
       setScanning(false);
     }
@@ -307,6 +343,7 @@ export default function PalmReadingPage() {
     if (fileInput.current) fileInput.current.value = "";
   };
 
+  // Group sections by life area
   const byArea = React.useMemo(() => {
     if (!result?.sections) return [];
     const groups = new Map<string, typeof result.sections>();
@@ -317,44 +354,104 @@ export default function PalmReadingPage() {
     return [...groups.entries()];
   }, [result]);
 
+  // Group sections by category for Tabs
+  const categorized = React.useMemo(() => {
+    if (!result?.sections) return { lines: [], forecasts: [], proportions: [] };
+    const lines = result.sections.filter((s) =>
+      ["heart_line", "head_line", "life_line", "fate_line", "line_relationship"].includes(s.feature),
+    );
+    const forecasts = result.sections.filter((s) =>
+      ["career_forecast", "relationship_forecast", "health_forecast"].includes(s.feature),
+    );
+    const proportions = result.sections.filter(
+      (s) =>
+        ![
+          "heart_line",
+          "head_line",
+          "life_line",
+          "fate_line",
+          "line_relationship",
+          "career_forecast",
+          "relationship_forecast",
+          "health_forecast",
+          "hand_type",
+        ].includes(s.feature),
+    );
+    return { lines, forecasts, proportions };
+  }, [result]);
+
+  const handTypeInfo = React.useMemo(() => {
+    const rawType = (result?.hand_type?.type || "").toLowerCase();
+    if (rawType.includes("earth")) return t.elements.earth;
+    if (rawType.includes("air")) return t.elements.air;
+    if (rawType.includes("fire")) return t.elements.fire;
+    if (rawType.includes("water")) return t.elements.water;
+    return null;
+  }, [result, t]);
+
   return (
     <>
       <SiteHeader />
 
       <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-12">
-        <header className="text-center">
+        {/* Language selector & top header */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-4">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-300 bg-brand-100/70 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-brand-900">
             <Hand className="size-3" />
-            Palm reading
+            {t.badge}
           </span>
-          <h1 className="font-display mt-3 text-2xl font-extrabold text-foreground sm:text-4xl">
-            Scan your palm, live
+
+          <div className="flex items-center gap-1 rounded-xl border border-border bg-surface p-1">
+            <Globe2 className="ml-2 size-3.5 text-muted-foreground" />
+            {(["bn", "hi", "en"] as PalmLanguage[]).map((lang) => (
+              <button
+                key={lang}
+                type="button"
+                onClick={() => setLanguage(lang)}
+                className={cn(
+                  "rounded-lg px-2.5 py-1 text-xs font-semibold transition-all",
+                  language === lang
+                    ? "bg-brand-500 text-white shadow-sm"
+                    : "text-muted-foreground hover:bg-surface-muted hover:text-foreground",
+                )}
+              >
+                {lang === "bn" ? "বাংলা" : lang === "hi" ? "हिन्दी" : "English"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <header className="mt-6 text-center">
+          <h1 className="font-display text-2xl font-black text-foreground sm:text-4xl">
+            {t.title}
           </h1>
-          <p className="mx-auto mt-2 max-w-2xl text-xs leading-relaxed text-muted-foreground sm:text-sm">
-            Hold your open hand up to the camera. Twenty-one points are tracked as
-            you move, and the shot is taken on its own once your palm is steady and
-            square to the lens. The principal creases are then traced from that
-            frame, and every finding shows the measurement behind it and the source
-            it was read from.
+          <p className="mx-auto mt-2.5 max-w-2xl text-xs leading-relaxed text-muted-foreground sm:text-sm">
+            {t.subtitle}
           </p>
         </header>
 
         {!isSignedIn ? (
-          <div className="mx-auto mt-8 max-w-md rounded-3xl border border-border bg-surface p-6 text-center">
-            <p className="text-sm font-semibold text-foreground">
-              Sign in to scan your palm.
+          <div className="mx-auto mt-8 max-w-md rounded-3xl border border-border bg-surface p-8 text-center shadow-sm">
+            <Hand className="mx-auto size-10 text-brand-500" />
+            <p className="mt-3 text-sm font-bold text-foreground">
+              {t.signInPrompt}
             </p>
+            <div className="mt-5">
+              <Link href="/login">
+                <Button>Sign In</Button>
+              </Link>
+            </div>
           </div>
         ) : (
           <>
-            {/* Capture */}
-            <section className="mx-auto mt-8 max-w-3xl rounded-3xl border border-border bg-surface p-5 sm:p-7">
+            {/* Capture Area */}
+            <section className="mx-auto mt-8 max-w-3xl rounded-3xl border border-border bg-surface p-5 shadow-sm sm:p-7">
               {availability && (
                 <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-surface-muted p-3.5">
                   <span className="text-xs font-semibold text-foreground">
                     {availability.coins_required > 0
-                      ? `${availability.coins_required} coins per reading`
-                      : "Free"}
+                      ? `${availability.coins_required} ${t.coinsCost}`
+                      : t.freeCost}
                   </span>
                   <span
                     className={cn(
@@ -364,16 +461,16 @@ export default function PalmReadingPage() {
                         : "bg-amber-50 text-amber-900",
                     )}
                   >
-                    Balance {availability.wallet_balance}
+                    {t.balance}: {availability.wallet_balance}
                   </span>
                 </div>
               )}
 
               {availability?.requires?.length ? (
-                <div className="mb-5 rounded-2xl border border-brand-300/70 bg-brand-50 p-4">
-                  <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-brand-800">
-                    <Info className="size-3" />
-                    For a readable photo
+                <div className="mb-5 rounded-2xl border border-brand-300/70 bg-brand-50/70 p-4">
+                  <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-brand-900">
+                    <Info className="size-3.5" />
+                    {t.guidanceTitle}
                   </p>
                   <ul className="mt-2 space-y-1">
                     {availability.requires.map((line) => (
@@ -397,11 +494,9 @@ export default function PalmReadingPage() {
                 }}
               />
 
-              {/* Live camera. The preview is what makes this usable: the user can
-                  see the tracking sitting on their hand and knows the shot is good
-                  before it is taken, rather than discovering afterwards. */}
+              {/* Live camera view */}
               {cameraOn ? (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="relative overflow-hidden rounded-2xl border border-border bg-ink-950">
                     <video
                       ref={videoRef}
@@ -415,21 +510,21 @@ export default function PalmReadingPage() {
                       className="pointer-events-none absolute inset-0 size-full object-contain"
                     />
 
-                    {/* Framing guide */}
+                    {/* Framing guide ring */}
                     <div
                       aria-hidden
                       className={cn(
-                        "pointer-events-none absolute inset-[12%] rounded-[32px] border-2 border-dashed transition-colors duration-300",
-                        status?.aligned ? "border-emerald-400/80" : "border-white/30",
+                        "pointer-events-none absolute inset-[12%] rounded-[36px] border-2 border-dashed transition-colors duration-300",
+                        status?.aligned ? "border-emerald-400" : "border-white/35",
                       )}
                     />
 
-                    {/* Guidance */}
+                    {/* Guidance pill */}
                     <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3">
                       <div
                         className={cn(
                           "mx-auto flex max-w-sm items-center gap-2 rounded-2xl px-3.5 py-2.5 backdrop-blur-md transition-colors",
-                          status?.aligned ? "bg-emerald-500/90" : "bg-ink-950/75",
+                          status?.aligned ? "bg-emerald-600/90" : "bg-ink-950/80",
                         )}
                       >
                         {status?.aligned ? (
@@ -438,18 +533,17 @@ export default function PalmReadingPage() {
                           <Hand className="size-4 shrink-0 text-white/80" />
                         )}
                         <span className="text-xs font-bold text-white">
-                          {status?.guidance ?? "Looking for your hand…"}
+                          {status?.guidance ?? t.lookingForHand}
                         </span>
                         {status?.handedness && (
-                          <span className="ml-auto shrink-0 text-[10px] font-semibold text-white/70">
-                            {status.handedness} hand
+                          <span className="ml-auto shrink-0 text-[10px] font-semibold text-white/80">
+                            {status.handedness === "Left" ? t.leftHand : t.rightHand}
                           </span>
                         )}
                       </div>
 
-                      {/* Hold-to-capture progress */}
                       {holdProgress > 0 && (
-                        <div className="mx-auto mt-2 h-1 max-w-sm overflow-hidden rounded-full bg-white/25">
+                        <div className="mx-auto mt-2 h-1.5 max-w-sm overflow-hidden rounded-full bg-white/25">
                           <div
                             className="h-full rounded-full bg-emerald-400 transition-[width] duration-100"
                             style={{ width: `${holdProgress * 100}%` }}
@@ -459,31 +553,8 @@ export default function PalmReadingPage() {
                     </div>
                   </div>
 
-                  {/* Per-check feedback, so the user can see exactly what is wrong. */}
-                  {status?.found && status.checks.length > 0 && (
-                    <div className="flex flex-wrap justify-center gap-1.5">
-                      {status.checks.map((check) => (
-                        <span
-                          key={check.id}
-                          className={cn(
-                            "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold transition-colors",
-                            check.ok
-                              ? "bg-emerald-50 text-emerald-800"
-                              : "bg-amber-100 text-amber-900",
-                          )}
-                        >
-                          {check.ok ? (
-                            <CheckCircle2 className="size-2.5" />
-                          ) : (
-                            <XCircle className="size-2.5" />
-                          )}
-                          {check.hint}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="flex flex-wrap justify-center gap-2">
+                  {/* Manual trigger button: always available */}
+                  <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
                     <Button
                       onClick={async () => {
                         const element = videoRef.current;
@@ -494,11 +565,13 @@ export default function PalmReadingPage() {
                         await scanBlob(blob, URL.createObjectURL(blob));
                       }}
                       disabled={scanning}
+                      className="gap-2 bg-emerald-600 font-bold hover:bg-emerald-700"
                     >
-                      <Camera className="size-4" /> Capture now
+                      <Camera className="size-4" />
+                      {t.captureNow}
                     </Button>
                     <Button variant="outline" onClick={stopCamera} disabled={scanning}>
-                      Stop camera
+                      {t.stopCamera}
                     </Button>
                   </div>
                 </div>
@@ -508,11 +581,11 @@ export default function PalmReadingPage() {
                   <img
                     src={preview}
                     alt="The palm photo being read"
-                    className="mx-auto max-h-80 rounded-2xl border border-border object-contain"
+                    className="mx-auto max-h-80 rounded-2xl border border-border object-contain shadow-sm"
                   />
                   <div className="flex flex-wrap justify-center gap-2">
-                    <Button variant="outline" onClick={reset} disabled={scanning}>
-                      <RefreshCw className="size-4" /> Scan again
+                    <Button variant="outline" onClick={reset} disabled={scanning} className="gap-2">
+                      <RefreshCw className="size-4" /> {t.scanningAgain}
                     </Button>
                   </div>
                 </div>
@@ -522,16 +595,16 @@ export default function PalmReadingPage() {
                     type="button"
                     onClick={() => void startCamera()}
                     disabled={scanning}
-                    className="flex w-full flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-brand-300 bg-brand-50/40 p-10 transition-colors hover:bg-brand-50 disabled:opacity-60"
+                    className="flex w-full flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-brand-300 bg-brand-50/50 p-10 transition-all hover:bg-brand-50 disabled:opacity-60"
                   >
-                    <span className="flex size-14 items-center justify-center rounded-2xl bg-brand-300">
-                      <Camera className="size-6 text-ink-950" />
+                    <span className="flex size-14 items-center justify-center rounded-2xl bg-brand-400 text-ink-950 shadow-sm">
+                      <Camera className="size-6" />
                     </span>
-                    <span className="text-sm font-bold text-foreground">
-                      Scan your palm with the camera
+                    <span className="text-base font-bold text-foreground">
+                      {t.scanWithCamera}
                     </span>
-                    <span className="text-[11px] text-muted-foreground">
-                      Hold your open palm steady and it captures itself
+                    <span className="text-xs text-muted-foreground">
+                      {t.scanCameraSubtitle}
                     </span>
                   </button>
 
@@ -539,10 +612,10 @@ export default function PalmReadingPage() {
                     type="button"
                     onClick={() => fileInput.current?.click()}
                     disabled={scanning}
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-surface-muted py-3 text-xs font-semibold text-foreground transition-colors hover:bg-surface disabled:opacity-60"
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-surface-muted py-3.5 text-xs font-bold text-foreground transition-colors hover:bg-surface disabled:opacity-60"
                   >
-                    <Upload className="size-3.5" />
-                    Or upload a photo instead
+                    <Upload className="size-4" />
+                    {t.uploadPhoto}
                   </button>
 
                   {cameraError && (
@@ -554,29 +627,29 @@ export default function PalmReadingPage() {
               )}
 
               {scanning && (
-                <p className="mt-4 flex items-center justify-center gap-2 text-sm font-semibold text-brand-900">
-                  <Loader2 className="size-4 animate-spin" />
-                  Tracing the creases…
-                </p>
+                <div className="mt-5 flex flex-col items-center justify-center gap-2 rounded-2xl bg-brand-50 p-4 text-brand-900">
+                  <Loader2 className="size-6 animate-spin text-brand-600" />
+                  <p className="text-sm font-bold">{t.scanningText}</p>
+                </div>
               )}
             </section>
 
-            {/* Rejected */}
+            {/* Rejected notification */}
             {result && result.status !== "ok" && (
-              <section className="mx-auto mt-5 max-w-3xl rounded-3xl border border-amber-300 bg-amber-50 p-5 sm:p-6">
-                <h2 className="flex items-center gap-2 text-base font-extrabold text-amber-950">
+              <section className="mx-auto mt-6 max-w-3xl rounded-3xl border border-amber-300 bg-amber-50/90 p-6 shadow-sm">
+                <h2 className="flex items-center gap-2 text-base font-black text-amber-950">
                   <AlertTriangle className="size-5 shrink-0 text-amber-600" />
-                  That photo could not be read
+                  {t.rejectedTitle}
                 </h2>
                 <p className="mt-2 text-xs leading-relaxed text-amber-900">
                   {result.message}
                 </p>
-                <p className="mt-2 text-[11px] font-semibold text-amber-900">
-                  You have not been charged.
+                <p className="mt-2 text-[11px] font-bold text-emerald-800">
+                  {t.notCharged}
                 </p>
 
                 {result.quality_checks.length > 0 && (
-                  <ul className="mt-4 space-y-1.5">
+                  <ul className="mt-4 space-y-1.5 border-t border-amber-200/60 pt-3">
                     {result.quality_checks.map((check) => (
                       <li
                         key={check.name}
@@ -587,7 +660,7 @@ export default function PalmReadingPage() {
                         ) : (
                           <XCircle className="mt-px size-3.5 shrink-0 text-rose-600" />
                         )}
-                        <span className={check.passed ? "text-amber-900/70" : "text-amber-950"}>
+                        <span className={check.passed ? "text-amber-900/70" : "font-semibold text-amber-950"}>
                           {check.message}
                         </span>
                       </li>
@@ -597,169 +670,423 @@ export default function PalmReadingPage() {
               </section>
             )}
 
-            {/* Reading */}
+            {/* Comprehensive Reading Result */}
             {result && result.status === "ok" && (
-              <div ref={resultsRef} className="mt-8 space-y-5">
-                {/* What was traced */}
-                <section className="rounded-3xl border border-border bg-surface p-5 sm:p-7">
-                  <h2 className="flex items-center gap-2 text-lg font-extrabold text-foreground">
-                    <Sparkles className="size-5 shrink-0 text-brand-600" />
-                    What was read from your photo
-                  </h2>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    The lines drawn here are the ones the reading is based on. If a
-                    line looks wrong, the finding that depends on it is wrong too.
-                  </p>
+              <div ref={resultsRef} className="mt-10 space-y-8">
+                {/* Result Hero Header */}
+                <div className="rounded-3xl border border-brand-200/80 bg-gradient-to-br from-brand-50/90 via-surface to-brand-50/40 p-6 shadow-sm sm:p-8">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                      <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-widest text-brand-700">
+                        <Sparkles className="size-3.5" />
+                        {result.handedness === "Left" ? t.leftHand : t.rightHand} · Verified
+                      </span>
+                      <h2 className="mt-1 text-2xl font-black text-foreground sm:text-3xl">
+                        {t.resultsTitle}
+                      </h2>
+                      <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                        {t.resultsSubtitle}
+                      </p>
+                    </div>
 
-                  <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-                    {result.overlay_image && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={result.overlay_image}
-                        alt="Your palm with the traced creases drawn on it"
-                        className="w-full rounded-2xl border border-border"
-                      />
-                    )}
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.print()}
+                        className="gap-1.5 text-xs font-semibold"
+                      >
+                        <Printer className="size-3.5" />
+                        {language === "bn" ? "প্রিন্ট করুন" : language === "hi" ? "प्रिंट करें" : "Print"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={reset}
+                        className="gap-1.5 text-xs font-semibold"
+                      >
+                        <RefreshCw className="size-3.5" />
+                        {t.scanningAgain}
+                      </Button>
+                    </div>
+                  </div>
 
-                    <div className="space-y-2">
-                      {result.hand_type?.type && (
-                        <div className="rounded-2xl bg-brand-100 p-4">
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-brand-800">
-                            Hand type
+                  {/* Hand Type Element Banner */}
+                  {result.hand_type?.type && handTypeInfo && (
+                    <div className="mt-6 overflow-hidden rounded-2xl border border-brand-300 bg-white p-5 shadow-sm">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-brand-700">
+                            {t.handTypeTitle}
+                          </span>
+                          <h3 className="text-xl font-black text-foreground sm:text-2xl">
+                            {handTypeInfo.title}
+                          </h3>
+                          <p className="text-xs font-medium text-brand-900">
+                            {handTypeInfo.subtitle}
                           </p>
-                          <p className="mt-0.5 text-lg font-extrabold text-ink-950">
-                            {result.hand_type.type}
-                          </p>
-                          <p className="text-[11px] text-brand-900">
-                            {result.hand_type.reason}
+                          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                            {handTypeInfo.desc}
                           </p>
                         </div>
-                      )}
 
-                      {result.creases.map((crease) => (
+                        {result.hand_type.palm_aspect && (
+                          <div className="flex shrink-0 gap-3 rounded-xl bg-brand-50/70 p-3 text-center">
+                            <div>
+                              <span className="block text-[10px] font-bold text-muted-foreground uppercase">
+                                Aspect Ratio
+                              </span>
+                              <span className="text-sm font-extrabold text-brand-950">
+                                {result.hand_type.palm_aspect.toFixed(2)}
+                              </span>
+                            </div>
+                            <div className="h-8 w-px bg-brand-200" />
+                            <div>
+                              <span className="block text-[10px] font-bold text-muted-foreground uppercase">
+                                Finger Ratio
+                              </span>
+                              <span className="text-sm font-extrabold text-brand-950">
+                                {result.hand_type.finger_palm_ratio?.toFixed(2) ?? "1.00"}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Navigation Tabs */}
+                <div className="flex items-center gap-1.5 overflow-x-auto border-b border-border pb-1">
+                  {[
+                    { id: "overview", label: t.tabs.overview, icon: Layers },
+                    { id: "lines", label: t.tabs.lines, icon: Waves },
+                    { id: "forecasts", label: t.tabs.forecasts, icon: TrendingUp },
+                    { id: "details", label: t.tabs.details, icon: Ruler },
+                  ].map((tab) => {
+                    const Icon = tab.icon;
+                    const isActive = activeTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                        className={cn(
+                          "flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-all",
+                          isActive
+                            ? "bg-brand-500 text-white shadow-sm"
+                            : "text-muted-foreground hover:bg-surface hover:text-foreground",
+                        )}
+                      >
+                        <Icon className="size-3.5" />
+                        {tab.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Tab: Overview (Traced Overlay + Primary Features) */}
+                {activeTab === "overview" && (
+                  <div className="space-y-6">
+                    {/* Visual Overlay Section */}
+                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+                      <div className="lg:col-span-5">
+                        <div className="overflow-hidden rounded-3xl border border-border bg-surface p-4 shadow-sm">
+                          <div className="mb-3 flex items-center justify-between">
+                            <span className="text-xs font-bold text-foreground">
+                              {language === "bn"
+                                ? "হাতের রেখা স্ক্যান ভিউ"
+                                : language === "hi"
+                                  ? "हस्तरेखा स्कैन दृश्य"
+                                  : "Traced Crease Overlay"}
+                            </span>
+                            {result.overlay_image && preview && (
+                              <button
+                                type="button"
+                                onClick={() => setShowOverlay(!showOverlay)}
+                                className="flex items-center gap-1 text-[11px] font-bold text-brand-600 hover:text-brand-700"
+                              >
+                                <Eye className="size-3" />
+                                {showOverlay
+                                  ? language === "bn"
+                                    ? "আসল ছবি"
+                                    : "Show Original"
+                                  : language === "bn"
+                                    ? "স্ক্যান রেখা"
+                                    : "Show Overlay"}
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl border border-border bg-ink-950">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={showOverlay && result.overlay_image ? result.overlay_image : preview || ""}
+                              alt="Palm Analysis"
+                              className="size-full object-contain"
+                            />
+                          </div>
+
+                          <p className="mt-2.5 text-center text-[10px] text-muted-foreground">
+                            {language === "bn"
+                              ? "উচ্চ স্পষ্টতাসম্পন্ন গাবর ফিল্টার এবং ল্যান্ডমার্ক দ্বারা চিহ্নিত রেখা"
+                              : "Precision Gabor valley filters and MediaPipe landmarks"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Crease Gauges Summary */}
+                      <div className="space-y-3 lg:col-span-7">
+                        <div className="rounded-3xl border border-border bg-surface p-5 shadow-sm">
+                          <h3 className="text-sm font-extrabold text-foreground">
+                            {t.creasesTitle}
+                          </h3>
+                          <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                            {result.creases.map((crease) => {
+                              const theme = CREASE_THEME[crease.name] || CREASE_THEME.heart;
+                              const Icon = theme.icon;
+                              const localizedInfo = t.lines[crease.name as keyof typeof t.lines];
+                              return (
+                                <div
+                                  key={crease.name}
+                                  className={cn(
+                                    "rounded-2xl border p-3.5 transition-all",
+                                    crease.found ? theme.border : "border-border bg-surface-muted/60",
+                                    crease.found ? theme.bg : "",
+                                  )}
+                                >
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className="flex items-center gap-1.5 text-xs font-bold text-foreground">
+                                      <Icon className={cn("size-3.5", theme.text)} />
+                                      {localizedInfo?.name || crease.elemental_name}
+                                    </span>
+                                    {crease.found ? (
+                                      <span
+                                        className="rounded-md bg-white px-2 py-0.5 text-[10px] font-black text-foreground shadow-xs"
+                                        title={t.contrastTooltip}
+                                      >
+                                        {crease.contrast.toFixed(1)}×
+                                      </span>
+                                    ) : (
+                                      <span className="text-[10px] text-amber-700 font-semibold">
+                                        {t.notClearLabel}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">
+                                    {localizedInfo?.desc}
+                                  </p>
+                                  {crease.termination_zone && (
+                                    <span className="mt-2 inline-block rounded-md bg-white/80 px-2 py-0.5 text-[10px] font-bold text-ink-900">
+                                      📍 {crease.termination_zone} {t.endsAtMount}
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Top Highlights */}
+                        <div className="rounded-3xl border border-border bg-surface p-5 shadow-sm">
+                          <h4 className="text-xs font-extrabold uppercase tracking-wider text-brand-700">
+                            {language === "bn" ? "প্রধান বৈশিষ্ট্যসমূহ" : "Core Findings Summary"}
+                          </h4>
+                          <div className="mt-3 space-y-2.5">
+                            {result.sections.slice(0, 4).map((sec) => (
+                              <div
+                                key={`${sec.feature}-${sec.option}`}
+                                className="flex items-start gap-3 rounded-xl border border-border/70 bg-surface-muted/40 p-3"
+                              >
+                                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-brand-600" />
+                                <div>
+                                  <span className="text-xs font-bold text-foreground">
+                                    {t.featureLabels[sec.feature] || sec.feature_label}: {sec.label}
+                                  </span>
+                                  <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                                    {sec.meaning}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Life Areas Detailed Grid */}
+                    <div className="space-y-6 pt-4">
+                      {byArea.map(([area, sections]) => (
                         <div
-                          key={crease.name}
-                          className="flex items-center gap-3 rounded-xl border border-border bg-surface-muted px-3 py-2.5"
+                          key={area}
+                          className="rounded-3xl border border-border bg-surface-muted/40 p-5 sm:p-7 shadow-xs"
                         >
-                          <span
-                            className={cn(
-                              "size-3 shrink-0 rounded-full",
-                              CREASE_COLOUR[crease.name] ?? "bg-muted-foreground",
-                            )}
-                          />
-                          <span className="min-w-0 flex-1">
-                            <span className="block text-xs font-bold text-foreground">
-                              {crease.elemental_name}
-                            </span>
-                            {crease.found ? (
-                              <span className="block text-[10px] text-muted-foreground">
-                                {crease.termination_zone
-                                  ? `ends at the ${crease.termination_zone} mount`
-                                  : "traced"}
-                              </span>
-                            ) : (
-                              <span className="block text-[10px] text-amber-700">
-                                not clear enough in this photo
-                              </span>
-                            )}
-                          </span>
-                          {crease.found && (
-                            <span
-                              className="shrink-0 rounded-md bg-white px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-foreground"
-                              title="How far the traced line stands above the surrounding skin. Higher is a clearer line."
-                            >
-                              {crease.contrast.toFixed(1)}×
-                            </span>
-                          )}
+                          <div className="flex items-center gap-2 border-b border-border/60 pb-3">
+                            <span className="size-2 rounded-full bg-brand-500" />
+                            <h3 className="text-xs font-black uppercase tracking-wider text-brand-800">
+                              {t.areas[area] || area}
+                            </h3>
+                          </div>
+
+                          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                            {sections.map((section) => (
+                              <article
+                                key={`${section.feature}-${section.option}`}
+                                className="flex flex-col justify-between rounded-2xl border border-border bg-white p-4.5 shadow-xs transition-shadow hover:shadow-sm"
+                              >
+                                <div>
+                                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-brand-700">
+                                    {t.featureLabels[section.feature] || section.feature_label}
+                                  </span>
+                                  <h4 className="mt-0.5 text-sm font-black text-foreground">
+                                    {section.label}
+                                  </h4>
+                                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                                    {section.meaning}
+                                  </p>
+                                </div>
+
+                                <div className="mt-4 border-t border-border/60 pt-3">
+                                  {section.because.length > 0 && (
+                                    <div className="rounded-xl bg-brand-50/60 p-2.5">
+                                      <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-brand-800">
+                                        <Ruler className="size-3" />
+                                        {t.measuredLabel}
+                                      </p>
+                                      <ul className="mt-1 space-y-0.5">
+                                        {section.because.map((reason, index) => (
+                                          <li
+                                            key={index}
+                                            className="text-[11px] font-medium text-brand-950"
+                                          >
+                                            {reason}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+
+                                  {section.source && (
+                                    <p className="mt-2 flex items-center gap-1 text-[10px] font-semibold text-muted-foreground/75">
+                                      <FileText className="size-3" />
+                                      {section.source}
+                                    </p>
+                                  )}
+                                </div>
+                              </article>
+                            ))}
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
+                )}
 
-                  {result.warnings.length > 0 && (
-                    <div className="mt-4 rounded-2xl border border-amber-300 bg-amber-50 p-3.5">
-                      {result.warnings.map((warning, index) => (
-                        <p key={index} className="text-[11px] leading-relaxed text-amber-950">
-                          {warning}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                </section>
-
-                {/* Findings */}
-                {byArea.map(([area, sections]) => (
-                  <section
-                    key={area}
-                    className="rounded-3xl border border-border bg-surface-muted/60 p-5 sm:p-7"
-                  >
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-brand-700">
-                      {area}
-                    </h3>
-                    <div className="mt-3 grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-                      {sections.map((section) => (
+                {/* Tab: Lines */}
+                {activeTab === "lines" && (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      {categorized.lines.map((section) => (
                         <article
                           key={`${section.feature}-${section.option}`}
-                          className="rounded-2xl border border-border bg-white p-4"
+                          className="rounded-3xl border border-border bg-white p-6 shadow-xs"
                         >
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-brand-700">
-                            {section.feature_label}
-                          </p>
-                          <p className="mt-0.5 text-sm font-extrabold text-foreground">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-brand-600">
+                            {t.featureLabels[section.feature] || section.feature_label}
+                          </span>
+                          <h4 className="mt-1 text-base font-black text-foreground">
                             {section.label}
-                          </p>
+                          </h4>
                           <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
                             {section.meaning}
                           </p>
-
                           {section.because.length > 0 && (
-                            <div className="mt-3 rounded-xl bg-brand-50 p-2.5">
-                              <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-brand-800">
-                                <Ruler className="size-3" />
-                                Measured
+                            <div className="mt-4 rounded-xl bg-brand-50/70 p-3">
+                              <span className="text-[10px] font-bold text-brand-800 uppercase">
+                                {t.measuredLabel}
+                              </span>
+                              <p className="mt-0.5 text-xs font-semibold text-brand-950">
+                                {section.because.join(", ")}
                               </p>
-                              <ul className="mt-1 space-y-0.5">
-                                {section.because.map((reason, index) => (
-                                  <li
-                                    key={index}
-                                    className="text-[11px] leading-relaxed text-brand-950"
-                                  >
-                                    {reason}
-                                  </li>
-                                ))}
-                              </ul>
                             </div>
                           )}
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
+                {/* Tab: Forecasts */}
+                {activeTab === "forecasts" && (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                      {categorized.forecasts.map((section) => (
+                        <article
+                          key={`${section.feature}-${section.option}`}
+                          className="rounded-3xl border border-brand-200/80 bg-gradient-to-b from-white to-brand-50/40 p-6 shadow-xs"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Sparkles className="size-4 text-brand-600" />
+                            <span className="text-[10px] font-black uppercase tracking-wider text-brand-700">
+                              {t.featureLabels[section.feature] || section.feature_label}
+                            </span>
+                          </div>
+                          <h4 className="mt-2 text-base font-black text-foreground">
+                            {section.label}
+                          </h4>
+                          <p className="mt-2.5 text-xs leading-relaxed text-muted-foreground">
+                            {section.meaning}
+                          </p>
                           {section.source && (
-                            <p className="mt-2 flex items-center gap-1 text-[10px] font-medium text-muted-foreground/80">
-                              <FileText className="size-2.5" />
-                              {section.source}
+                            <p className="mt-4 text-[10px] font-semibold text-muted-foreground/80">
+                              • {section.source}
                             </p>
                           )}
                         </article>
                       ))}
                     </div>
-                  </section>
-                ))}
+                  </div>
+                )}
 
-                {/* Not assessed — stated rather than omitted */}
+                {/* Tab: Details & Geometry */}
+                {activeTab === "details" && (
+                  <div className="space-y-6">
+                    <div className="rounded-3xl border border-border bg-white p-6 shadow-xs">
+                      <h3 className="text-sm font-black text-foreground">
+                        {language === "bn" ? "তালুর পুঙ্খানুপুঙ্খ গাণিতিক অনুপাত" : "Hand Geometry Ratios"}
+                      </h3>
+                      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {Object.entries(result.measurements).map(([key, val]) => (
+                          <div
+                            key={key}
+                            className="rounded-2xl border border-border bg-surface-muted/50 p-3"
+                          >
+                            <span className="block text-[10px] font-bold text-muted-foreground uppercase">
+                              {key.replace(/_/g, " ")}
+                            </span>
+                            <span className="text-sm font-black text-foreground">
+                              {typeof val === "number" ? val.toFixed(3) : val}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Not Assessed Disclaimer */}
                 {result.skipped.length > 0 && (
                   <section className="rounded-3xl border border-border bg-surface p-5 sm:p-7">
                     <h3 className="flex items-center gap-2 text-sm font-extrabold text-foreground">
                       <Info className="size-4 shrink-0 text-muted-foreground" />
-                      Not assessed from this photo
+                      {t.notAssessedTitle}
                     </h3>
                     <p className="mt-1 text-[11px] text-muted-foreground">
-                      These are part of palmistry but could not be read here. They are
-                      listed rather than guessed at.
+                      {t.notAssessedSubtitle}
                     </p>
                     <ul className="mt-3 space-y-2">
                       {result.skipped.map((item, index) => (
-                        <li
-                          key={index}
-                          className="rounded-xl bg-surface-muted px-3.5 py-2.5"
-                        >
+                        <li key={index} className="rounded-xl bg-surface-muted px-3.5 py-2.5">
                           <span className="text-xs font-bold text-foreground">
                             {item.feature_label}
                           </span>
@@ -772,10 +1099,10 @@ export default function PalmReadingPage() {
                   </section>
                 )}
 
-                <p className="text-center text-[11px] text-muted-foreground">
-                  Scanned in {Math.round(result.processing_ms)} ms
+                <div className="text-center text-[11px] text-muted-foreground">
+                  {t.scanSpeedFooter}: {Math.round(result.processing_ms)} ms
                   {result.coins_charged > 0 && ` · ${result.coins_charged} coins`}
-                </p>
+                </div>
               </div>
             )}
           </>

@@ -48,15 +48,14 @@ const FINGER_CHAINS: ReadonlyArray<readonly [number, number]> = [
 ];
 
 /**
- * Thresholds copied from the server's `PalmScanConfig`. Kept slightly stricter
- * here than there, so a shot the preview accepts is one the server will too —
- * being told "ready" and then rejected is the failure worth avoiding.
+ * Thresholds mirrored from the server's `PalmScanConfig`. Calibrated to be forgiving
+ * on handheld mobile cameras while ensuring high-quality, readable crease frames.
  */
-const MAX_TILT_DEGREES = 28;      // server allows 32
-const MAX_ROLL_DEGREES = 38;      // server allows 45
-const MIN_FINGER_EXTENSION = 0.6; // server allows 0.55
-const MIN_PALM_AREA_RATIO = 0.055; // server allows 0.045
-const MAX_PALM_AREA_RATIO = 0.75;  // too close to hold the whole palm in frame
+const MAX_TILT_DEGREES = 32;      // server allows 36
+const MAX_ROLL_DEGREES = 42;      // server allows 45
+const MIN_FINGER_EXTENSION = 0.50; // server allows 0.50
+const MIN_PALM_AREA_RATIO = 0.038; // server allows 0.035
+const MAX_PALM_AREA_RATIO = 0.85;  // allows closer framing
 
 export type PalmCheck = {
   id: string;
