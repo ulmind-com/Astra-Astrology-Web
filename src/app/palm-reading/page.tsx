@@ -117,16 +117,13 @@ export default function PalmReadingPage() {
   const [cameraOn, setCameraOn] = React.useState(false);
   const [cameraError, setCameraError] = React.useState<string | null>(null);
   const [status, setStatus] = React.useState<PalmStatus | null>(null);
-  const [holdProgress, setHoldProgress] = React.useState(0);
+  const [flashActive, setFlashActive] = React.useState(false);
 
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const overlayRef = React.useRef<HTMLCanvasElement>(null);
   const streamRef = React.useRef<MediaStream | null>(null);
   const frameRef = React.useRef<number | null>(null);
   const capturingRef = React.useRef(false);
-  const alignedSinceRef = React.useRef<number | null>(null);
-
-  const HOLD_MS = 600; // Calibrated for responsive, smooth capture
 
   React.useEffect(() => {
     if (!isSignedIn) return;
@@ -166,10 +163,9 @@ export default function PalmReadingPage() {
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
     if (videoRef.current) videoRef.current.srcObject = null;
-    alignedSinceRef.current = null;
-    setHoldProgress(0);
     setStatus(null);
     setCameraOn(false);
+    capturingRef.current = false;
   }, []);
 
   React.useEffect(() => stopCamera, [stopCamera]);
@@ -256,24 +252,6 @@ export default function PalmReadingPage() {
             }
             drawHandOverlay(canvas, next.landmarks, next.aligned);
           }
-
-          if (next.aligned) {
-            if (alignedSinceRef.current === null) alignedSinceRef.current = performance.now();
-            const held = performance.now() - alignedSinceRef.current;
-            setHoldProgress(Math.min(1, held / HOLD_MS));
-
-            if (held >= HOLD_MS && !capturingRef.current) {
-              capturingRef.current = true;
-              setHoldProgress(1);
-              const blob = await captureFrame(element);
-              stopCamera();
-              await scanBlob(blob, URL.createObjectURL(blob));
-              return;
-            }
-          } else {
-            alignedSinceRef.current = null;
-            setHoldProgress(0);
-          }
         } catch {
           // Ignore dropped frames
         }
@@ -344,6 +322,25 @@ export default function PalmReadingPage() {
     setResult(null);
     if (fileInput.current) fileInput.current.value = "";
   };
+
+  const handleManualCapture = React.useCallback(async () => {
+    const element = videoRef.current;
+    if (!element || capturingRef.current || scanning) return;
+    capturingRef.current = true;
+
+    // Camera flash effect
+    setFlashActive(true);
+    setTimeout(() => setFlashActive(false), 240);
+
+    try {
+      const blob = await captureFrame(element);
+      stopCamera();
+      await scanBlob(blob, URL.createObjectURL(blob));
+    } catch (error) {
+      capturingRef.current = false;
+      toast.error(error instanceof Error ? error.message : "Failed to capture photo.");
+    }
+  }, [scanBlob, scanning, stopCamera]);
 
   // Group sections by life area
   const byArea = React.useMemo(() => {
@@ -499,80 +496,131 @@ export default function PalmReadingPage() {
               {/* Live camera view */}
               {cameraOn ? (
                 <div className="space-y-4">
-                  <div className="relative overflow-hidden rounded-2xl border border-border bg-ink-950">
+                  <div className="relative aspect-[3/4] max-h-[72vh] w-full max-w-lg mx-auto overflow-hidden rounded-3xl border-2 border-brand-300/40 bg-ink-950 shadow-2xl">
+                    {/* Camera Flash Overlay */}
+                    <div
+                      className={cn(
+                        "pointer-events-none absolute inset-0 z-30 bg-white transition-opacity duration-200",
+                        flashActive ? "opacity-95" : "opacity-0",
+                      )}
+                    />
+
+                    {/* Camera Live Video */}
                     <video
                       ref={videoRef}
                       playsInline
                       muted
                       autoPlay
-                      className="block max-h-[70vh] w-full object-contain"
+                      className="size-full object-cover"
                     />
+
+                    {/* Live 3D Hand Skeleton & Mount Topography Overlay */}
                     <canvas
                       ref={overlayRef}
-                      className="pointer-events-none absolute inset-0 size-full object-contain"
+                      className="pointer-events-none absolute inset-0 size-full object-cover z-[15]"
                     />
 
-                    {/* Framing guide ring */}
-                    <div
-                      aria-hidden
-                      className={cn(
-                        "pointer-events-none absolute inset-[12%] rounded-[36px] border-2 border-dashed transition-colors duration-300",
-                        status?.aligned ? "border-emerald-400" : "border-white/35",
-                      )}
-                    />
+                    {/* Biometric Laser Scanline */}
+                    <div className="laser-scanline" />
 
-                    {/* Guidance pill */}
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 p-3">
+                    {/* Biometric Alignment Oval & Corner Crosshairs */}
+                    <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center p-4">
                       <div
                         className={cn(
-                          "mx-auto flex max-w-sm items-center gap-2 rounded-2xl px-3.5 py-2.5 backdrop-blur-md transition-colors",
-                          status?.aligned ? "bg-emerald-600/90" : "bg-ink-950/80",
+                          "relative aspect-[3/4] w-52 sm:w-64 rounded-[40px] border-2 transition-all duration-300",
+                          status?.aligned
+                            ? "border-emerald-400 shadow-[0_0_30px_rgba(52,211,153,0.65)] scale-[1.02]"
+                            : status?.found
+                              ? "border-amber-400/90 shadow-[0_0_15px_rgba(251,191,36,0.35)]"
+                              : "border-white/35 border-dashed",
                         )}
                       >
+                        {/* Corner crosshairs */}
+                        <span className="absolute -top-1 left-1/2 -translate-x-1/2 h-0.5 w-8 bg-white/80" />
+                        <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-8 bg-white/80" />
+                        <span className="absolute top-1/2 -left-1 -translate-y-1/2 h-8 w-0.5 bg-white/80" />
+                        <span className="absolute top-1/2 -right-1 -translate-y-1/2 h-8 w-0.5 bg-white/80" />
+
+                        {/* Top Planetary Mount Targets */}
+                        <div className="absolute inset-x-2 top-2 flex justify-between px-2 text-[9px] font-black text-white/70">
+                          <span>♃ Jupiter</span>
+                          <span>♄ Saturn</span>
+                          <span>☉ Apollo</span>
+                          <span>☿ Mercury</span>
+                        </div>
+                      </div>
+
+                      {/* Live Alignment Feedback Pill */}
+                      <div className="mt-4 flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-bold tracking-wide shadow-lg backdrop-blur-md transition-all">
                         {status?.aligned ? (
-                          <CheckCircle2 className="size-4 shrink-0 text-white" />
+                          <span className="flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-950/80 px-4 py-1.5 text-emerald-200 shadow-[0_0_15px_rgba(52,211,153,0.3)]">
+                            <CheckCircle2 className="size-4 text-emerald-400" />
+                            {t.alignedReady}
+                          </span>
+                        ) : status?.found ? (
+                          <span className="flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-950/80 px-4 py-1.5 text-amber-200">
+                            <Hand className="size-4 text-amber-400" />
+                            {status.guidance || t.handFramingGuide}
+                          </span>
                         ) : (
-                          <Hand className="size-4 shrink-0 text-white/80" />
+                          <span className="flex items-center gap-2 rounded-full border border-white/20 bg-black/70 px-4 py-1.5 text-white/80">
+                            <Hand className="size-4 text-white/60" />
+                            {t.lookingForHand}
+                          </span>
                         )}
-                        <span className="text-xs font-bold text-white">
-                          {status?.guidance ?? t.lookingForHand}
-                        </span>
                         {status?.handedness && (
-                          <span className="ml-auto shrink-0 text-[10px] font-semibold text-white/80">
+                          <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold text-white/90">
                             {status.handedness === "Left" ? t.leftHand : t.rightHand}
                           </span>
                         )}
                       </div>
+                    </div>
 
-                      {holdProgress > 0 && (
-                        <div className="mx-auto mt-2 h-1.5 max-w-sm overflow-hidden rounded-full bg-white/25">
-                          <div
-                            className="h-full rounded-full bg-emerald-400 transition-[width] duration-100"
-                            style={{ width: `${holdProgress * 100}%` }}
-                          />
-                        </div>
-                      )}
+                    {/* Circular On-screen Mobile Shutter Button */}
+                    <div className="absolute inset-x-0 bottom-4 z-20 flex justify-center">
+                      <button
+                        type="button"
+                        onClick={handleManualCapture}
+                        disabled={scanning}
+                        aria-label="Capture palm scan"
+                        className={cn(
+                          "group relative flex size-16 items-center justify-center rounded-full border-4 border-white/80 shadow-2xl transition-all active:scale-95 disabled:opacity-50",
+                          status?.aligned
+                            ? "bg-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.7)]"
+                            : "bg-white/30 backdrop-blur-md hover:bg-white/40",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "size-11 rounded-full transition-all",
+                            status?.aligned ? "bg-white group-hover:scale-105" : "bg-white/80 group-hover:bg-white",
+                          )}
+                        />
+                      </button>
                     </div>
                   </div>
 
-                  {/* Manual trigger button: always available */}
-                  <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+                  {/* Primary Manual Trigger Buttons Matching Face Scan */}
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                     <Button
-                      onClick={async () => {
-                        const element = videoRef.current;
-                        if (!element || capturingRef.current) return;
-                        capturingRef.current = true;
-                        const blob = await captureFrame(element);
-                        stopCamera();
-                        await scanBlob(blob, URL.createObjectURL(blob));
-                      }}
+                      onClick={handleManualCapture}
                       disabled={scanning}
-                      className="gap-2 bg-emerald-600 font-bold hover:bg-emerald-700"
+                      className={cn(
+                        "h-12 w-full sm:w-auto px-8 text-base font-black shadow-lg transition-all",
+                        status?.aligned
+                          ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-[0_0_25px_rgba(16,185,129,0.5)] animate-pulse"
+                          : "bg-brand-500 hover:bg-brand-600 text-ink-950",
+                      )}
                     >
-                      <Camera className="size-4" />
-                      {t.captureNow}
+                      <Camera className="size-5" />
+                      {status?.aligned ? t.captureReady : t.captureManual}
                     </Button>
-                    <Button variant="outline" onClick={stopCamera} disabled={scanning}>
+                    <Button
+                      variant="outline"
+                      onClick={stopCamera}
+                      disabled={scanning}
+                      className="h-12 w-full sm:w-auto font-bold"
+                    >
                       {t.stopCamera}
                     </Button>
                   </div>

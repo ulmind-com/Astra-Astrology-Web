@@ -13,6 +13,10 @@ export interface PalmTranslations {
   scanCameraSubtitle: string;
   uploadPhoto: string;
   captureNow: string;
+  captureReady: string;
+  captureManual: string;
+  alignedReady: string;
+  handFramingGuide: string;
   stopCamera: string;
   scanningAgain: string;
   scanningText: string;
@@ -78,9 +82,13 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
     subtitle:
       "ক্যামেরার সামনে আপনার উন্মুক্ত হাতটি সোজা করে ধরুন। হাতের ২১টি বিন্দু শনাক্ত করে স্বয়ংক্রিয়ভাবে রেখাগুলো স্ক্যান করা হবে এবং ক্লায়েন্টের বৈদিক হস্তরেখা নিয়মাবলি অনুসারে পুঙ্খানুপুঙ্খ ফলাফল প্রদান করা হবে।",
     scanWithCamera: "ক্যামেরা দিয়ে সরাসরি স্ক্যান করুন",
-    scanCameraSubtitle: "আপনার খোলা হাতের তালু স্থির রাখুন, স্বয়ংক্রিয়ভাবে স্ক্যান হবে",
+    scanCameraSubtitle: "আপনার খোলা হাতের তালু ফ্রেমের মধ্যে সোজা রাখুন এবং প্রস্তুত হলে ক্যাপচার বাটনে চাপ দিন",
     uploadPhoto: "অথবা হাতের স্পষ্ট ছবি আপলোড করুন",
     captureNow: "এখনই ছবি তুলুন",
+    captureReady: "হাতের তালু প্রস্তুত! ক্যাপচার ও ৩ডি স্ক্যান করুন",
+    captureManual: "ছবি তুলুন ও ৩ডি স্ক্যান করুন",
+    alignedReady: "হাতের অবস্থান সম্পূর্ণ সঠিক! ক্যাপচার বাটনে চাপ দিন",
+    handFramingGuide: "হাতের তালু নির্দেশক ফ্রেমের ভেতরে সোজা রাখুন",
     stopCamera: "ক্যামেরা বন্ধ করুন",
     scanningAgain: "পুনরায় স্ক্যান করুন",
     scanningText: "হস্তরেখা ও সূক্ষ্ম গভীরতা বিশ্লেষণ করা হচ্ছে…",
@@ -212,9 +220,13 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
     subtitle:
       "कैमरे के सामने अपनी खुली हथेली को सीधा रखें। इक्कीस मुख्य बिंदुओं को ट्रैक करके वैदिक हस्तरेखा सिद्धांतों के अनुसार आपकी रेखाओं और पर्वतों का सटीक, प्रामाणिक विश्लेषण किया जाएगा।",
     scanWithCamera: "कैमरे से लाइव स्कैन करें",
-    scanCameraSubtitle: "अपनी खुली हथेली स्थिर रखें, अपने आप कैप्चर हो जाएगा",
+    scanCameraSubtitle: "अपनी खुली हथेली को फ्रेम में सीधा रखें और तैयार होने पर कैप्चर बटन दबाएं",
     uploadPhoto: "या हथेली की स्पष्ट फोटो अपलोड करें",
     captureNow: "अभी फोटो लें",
+    captureReady: "हथेली संरेखित! कैप्चर एवं 3D स्कैन करें",
+    captureManual: "फोटो लें और 3D स्कैन करें",
+    alignedReady: "हथेली सही स्थिति में है! कैप्चर बटन दबाएं",
+    handFramingGuide: "हथेली को गाइड फ्रेम के अंदर सीधा रखें",
     stopCamera: "कैमरा बंद करें",
     scanningAgain: "फिर से स्कैन करें",
     scanningText: "हस्तरेखाओं का सूक्ष्म विश्लेषण जारी है…",
@@ -346,9 +358,13 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
     subtitle:
       "Hold your open palm steady in front of the camera. Twenty-one anatomical points are tracked in real time, the primary creases are precisely traced, and a 100% personalized reading is generated based on authentic Vedic palmistry principles.",
     scanWithCamera: "Scan with Live Camera",
-    scanCameraSubtitle: "Hold your open palm steady and it captures itself automatically",
+    scanCameraSubtitle: "Hold open palm flat inside frame, then click capture when ready",
     uploadPhoto: "Or upload a high-resolution palm photo",
     captureNow: "Capture Photo Now",
+    captureReady: "Palm Aligned! Capture & 3D Scan",
+    captureManual: "Capture & 3D Scan",
+    alignedReady: "Palm perfectly aligned! Ready to capture",
+    handFramingGuide: "Position palm flat within the guide frame",
     stopCamera: "Stop Camera",
     scanningAgain: "Scan Another Hand",
     scanningText: "Tracing creases and measuring depth…",

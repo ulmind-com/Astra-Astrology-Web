@@ -275,34 +275,84 @@ export function drawHandOverlay(
   const toX = (x: number) => x * canvas.width;
   const toY = (y: number) => y * canvas.height;
   const accent = aligned ? "#34d399" : "#fbbf24";
+  const glowColor = aligned ? "rgba(52, 211, 153, 0.6)" : "rgba(251, 191, 36, 0.4)";
 
-  ctx.lineWidth = Math.max(2, canvas.width / 260);
-  ctx.lineCap = "round";
-  ctx.strokeStyle = accent;
-  ctx.shadowColor = accent;
-  ctx.shadowBlur = aligned ? 14 : 6;
-
+  // Draw 3D anatomical bone connections with depth-based gradient
   for (const [a, b] of HAND_CONNECTIONS) {
+    const pa = points[a];
+    const pb = points[b];
+    if (!pa || !pb) continue;
+
+    const xa = toX(pa.x);
+    const ya = toY(pa.y);
+    const xb = toX(pb.x);
+    const yb = toY(pb.y);
+
+    const grad = ctx.createLinearGradient(xa, ya, xb, yb);
+    if (aligned) {
+      grad.addColorStop(0, "#34d399");
+      grad.addColorStop(1, "#38bdf8");
+    } else {
+      grad.addColorStop(0, "#fbbf24");
+      grad.addColorStop(1, "#f59e0b");
+    }
+
+    ctx.save();
     ctx.beginPath();
-    ctx.moveTo(toX(points[a].x), toY(points[a].y));
-    ctx.lineTo(toX(points[b].x), toY(points[b].y));
+    ctx.moveTo(xa, ya);
+    ctx.lineTo(xb, yb);
+    ctx.lineWidth = Math.max(2.5, canvas.width / 240);
+    ctx.lineCap = "round";
+    ctx.strokeStyle = grad;
+    ctx.shadowColor = glowColor;
+    ctx.shadowBlur = aligned ? 12 : 6;
     ctx.stroke();
+    ctx.restore();
   }
 
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = "#ffffff";
-  const dot = Math.max(2.5, canvas.width / 320);
-  for (const point of points) {
+  // Draw 21 3D joint nodes with depth spheres
+  for (let i = 0; i < points.length; i += 1) {
+    const pt = points[i];
+    const px = toX(pt.x);
+    const py = toY(pt.y);
+    const baseRadius = Math.max(3.5, canvas.width / 280);
+    // Relative depth size factor
+    const zFactor = 1 - Math.max(-0.5, Math.min(0.5, pt.z || 0)) * 0.4;
+    const r = baseRadius * zFactor;
+
+    ctx.save();
+    const nodeGrad = ctx.createRadialGradient(
+      px - r * 0.3,
+      py - r * 0.3,
+      r * 0.1,
+      px,
+      py,
+      r,
+    );
+    if (aligned) {
+      nodeGrad.addColorStop(0, "#ffffff");
+      nodeGrad.addColorStop(0.4, "#34d399");
+      nodeGrad.addColorStop(1, "#059669");
+    } else {
+      nodeGrad.addColorStop(0, "#ffffff");
+      nodeGrad.addColorStop(0.4, "#fcd34d");
+      nodeGrad.addColorStop(1, "#d97706");
+    }
+
     ctx.beginPath();
-    ctx.arc(toX(point.x), toY(point.y), dot, 0, Math.PI * 2);
+    ctx.arc(px, py, r, 0, Math.PI * 2);
+    ctx.fillStyle = nodeGrad;
+    ctx.shadowColor = accent;
+    ctx.shadowBlur = aligned ? 8 : 4;
     ctx.fill();
+    ctx.restore();
   }
 
-  // Outline the palm region the creases will be traced inside, so the part of the
-  // hand that actually matters is obvious while framing.
-  ctx.strokeStyle = aligned ? "rgba(52,211,153,0.9)" : "rgba(251,191,36,0.55)";
-  ctx.lineWidth = Math.max(1.5, canvas.width / 400);
-  ctx.setLineDash([8, 6]);
+  // Outline the palm region (Plain of Mars hollow boundary)
+  ctx.save();
+  ctx.strokeStyle = aligned ? "rgba(52, 211, 153, 0.85)" : "rgba(251, 191, 36, 0.6)";
+  ctx.lineWidth = Math.max(1.8, canvas.width / 360);
+  ctx.setLineDash([6, 5]);
   ctx.beginPath();
   for (const [i, index] of [WRIST, INDEX_MCP, MIDDLE_MCP, RING_MCP, PINKY_MCP].entries()) {
     const point = points[index];
@@ -312,6 +362,69 @@ export function drawHandOverlay(
   ctx.closePath();
   ctx.stroke();
   ctx.setLineDash([]);
+  ctx.restore();
+
+  // If aligned, draw 3D Plain of Mars hollow crosshair & mount beacons
+  if (aligned) {
+    const wrist = points[WRIST];
+    const idxMcp = points[INDEX_MCP];
+    const midMcp = points[MIDDLE_MCP];
+    const pnkMcp = points[PINKY_MCP];
+    if (wrist && idxMcp && midMcp && pnkMcp) {
+      const mx = (toX(wrist.x) + toX(idxMcp.x) + toX(midMcp.x) + toX(pnkMcp.x)) / 4;
+      const my = (toY(wrist.y) + toY(idxMcp.y) + toY(midMcp.y) + toY(pnkMcp.y)) / 4;
+
+      ctx.save();
+      // Holographic depth ring at Plain of Mars
+      ctx.strokeStyle = "rgba(56, 189, 248, 0.75)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(mx, my, 18, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Crosshairs
+      ctx.beginPath();
+      ctx.moveTo(mx - 12, my);
+      ctx.lineTo(mx + 12, my);
+      ctx.moveTo(mx, my - 12);
+      ctx.lineTo(mx, my + 12);
+      ctx.stroke();
+
+      ctx.font = "bold 9px sans-serif";
+      ctx.fillStyle = "#38bdf8";
+      ctx.fillText("Plain of Mars", mx + 8, my - 8);
+      ctx.restore();
+    }
+
+    // Mount planetary beacons
+    const mounts = [
+      { idx: INDEX_MCP, sym: "♃", name: "Jupiter" },
+      { idx: MIDDLE_MCP, sym: "♄", name: "Saturn" },
+      { idx: RING_MCP, sym: "☉", name: "Apollo" },
+      { idx: PINKY_MCP, sym: "☿", name: "Mercury" },
+      { idx: THUMB_MCP, sym: "♀", name: "Venus" },
+    ];
+
+    ctx.save();
+    ctx.font = "bold 11px sans-serif";
+    for (const m of mounts) {
+      const pt = points[m.idx];
+      if (!pt) continue;
+      const x = toX(pt.x);
+      const y = toY(pt.y);
+
+      // Mini planetary beacon ring
+      ctx.strokeStyle = "rgba(52, 211, 153, 0.8)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(x, y - 10, 8, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText(m.sym, x - 4, y - 6);
+    }
+    ctx.restore();
+  }
 }
 
 /** Grab the current video frame as a JPEG, at full sensor resolution. */
