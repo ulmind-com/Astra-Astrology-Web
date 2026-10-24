@@ -75,6 +75,24 @@ export interface PalmScanResponse {
   sections: PalmReadingSection[];
   /** What the client's material covers but this photo could not support. */
   skipped: PalmSkippedFeature[];
+
+  /** 3D world scan coordinates, mount elevations, and depth metrics */
+  landmarks_3d?: number[][];
+  world_landmarks_mm?: number[][];
+  mount_elevations_3d?: Record<string, number>;
+  palm_cup_depth_mm?: number;
+  finger_flexibility_3d?: {
+    dorsiflexion_deg?: number;
+    is_spontaneous_flexible?: boolean;
+    is_stiff_fingers?: boolean;
+    saturn_sun_tilt_deg?: number;
+    saturn_leaning_sun?: boolean;
+    jupiter_thumb_angle_deg?: number;
+    thumb_gap_wide?: boolean;
+    [key: string]: unknown;
+  };
+  finger_inclinations_3d?: Record<string, number>;
+
   overlay_image: string | null;
   response_image: string | null;
   coins_charged: number;
@@ -90,9 +108,18 @@ export interface PalmReadingRecord {
   hand_type: Record<string, unknown>;
   sections: PalmReadingSection[];
   skipped: PalmSkippedFeature[];
+
+  landmarks_3d?: number[][];
+  world_landmarks_mm?: number[][];
+  mount_elevations_3d?: Record<string, number>;
+  palm_cup_depth_mm?: number;
+  finger_flexibility_3d?: Record<string, unknown>;
+  finger_inclinations_3d?: Record<string, number>;
+
   overlay_image: string | null;
   coins_charged: number;
   quality_score: number;
   warnings: string[];
   created_at: string;
 }
+

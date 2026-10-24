@@ -50,6 +50,7 @@ export interface PalmTranslations {
     lines: string;
     forecasts: string;
     details: string;
+    scan3d: string;
   };
 
   elements: {
@@ -117,6 +118,7 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
       lines: "প্রধান রেখা",
       forecasts: "ভবিষ্যদ্বাণী",
       details: "জ্যামিতিক পরিমাপ",
+      scan3d: "ত্রিমাত্রিক ৩ডি স্ক্যান",
     },
 
     elements: {
@@ -175,6 +177,9 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
       Relationships: "প্রেম ও দাম্পত্য সম্পর্ক",
       Vitality: "শারীরিক শক্তি ও স্বাস্থ্য",
       Orientation: "জীবনের অভিমুখ",
+      Mounts: "গ্রহ পর্বত ও উচ্চতা",
+      Flexibility: "আঙুলের নমনীয়তা ও গতি",
+      Fortitude: "অভ্যন্তরীণ স্থায়িত্ব ও মঙ্গল তল",
     },
 
     featureLabels: {
@@ -195,6 +200,9 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
       career_forecast: "কর্মজীবন ও আর্থিক পূর্বাভাস",
       relationship_forecast: "দাম্পত্য ও সম্পর্কের পূর্বাভাস",
       health_forecast: "স্বাস্থ্য ও জীবনীশক্তির পূর্বাভাস",
+      mounts_3d: "ত্রিমাত্রিক গ্রহ পর্বত ও উচ্চতা (3D Mounts)",
+      finger_flexibility_3d: "ত্রিমাত্রিক আঙুলের নমনীয়তা ও গতিশীলতা (3D Flexibility)",
+      palm_hollow_3d: "ত্রিমাত্রিক তালুর গভীরতা ও মঙ্গল তল (Plain of Mars)",
     },
   },
 
@@ -244,6 +252,7 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
       lines: "मुख्य रेखाएं",
       forecasts: "भविष्यवाणी",
       details: "माप और अनुपात",
+      scan3d: "त्रिविमीय 3D स्कैन",
     },
 
     elements: {
@@ -302,6 +311,9 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
       Relationships: "प्रेम एवं दांपत्य",
       Vitality: "स्वास्थ्य एवं जीवन ऊर्जा",
       Orientation: "जीवन की प्राथमिकताएं",
+      Mounts: "ग्रह पर्वत एवं उभार",
+      Flexibility: "उंगलियों का लचीलापन",
+      Fortitude: "आंतरिक सहनशक्ति (मंगल तल)",
     },
 
     featureLabels: {
@@ -322,6 +334,9 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
       career_forecast: "करियर एवं धन संबंधी भविष्यवाणी",
       relationship_forecast: "दांपत्य एवं संबंध संबंधी भविष्यवाणी",
       health_forecast: "स्वास्थ्य एवं ऊर्जा संबंधी भविष्यवाणी",
+      mounts_3d: "3D ग्रह पर्वत और उभार",
+      finger_flexibility_3d: "3D उंगलियों का लचीलापन",
+      palm_hollow_3d: "3D हथेली का गड्ढा एवं मंगल तल",
     },
   },
 
@@ -371,6 +386,7 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
       lines: "Major Lines",
       forecasts: "Life Forecasts",
       details: "Measurements",
+      scan3d: "3D Palm Scan",
     },
 
     elements: {
@@ -429,6 +445,9 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
       Relationships: "Love & Partnership",
       Vitality: "Vitality & Health",
       Orientation: "Energy Orientation",
+      Mounts: "Planetary Mounts",
+      Flexibility: "Joint Flexibility",
+      Fortitude: "Core Fortitude (Mars)",
     },
 
     featureLabels: {
@@ -449,6 +468,9 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
       career_forecast: "Career & Financial Synthesis",
       relationship_forecast: "Love & Marriage Synthesis",
       health_forecast: "Vitality & Wellness Synthesis",
+      mounts_3d: "3D Mount Topography & Planetary Energies",
+      finger_flexibility_3d: "3D Joint Flexibility & Spontaneity",
+      palm_hollow_3d: "3D Plain of Mars & Core Fortitude",
     },
   },
 };

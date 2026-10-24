@@ -26,6 +26,7 @@ import {
   Info,
   Layers,
   Loader2,
+  Move3d,
   Printer,
   RefreshCw,
   Ruler,
@@ -42,6 +43,7 @@ import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { Palm3DViewer } from "@/components/palm-reading/Palm3DViewer";
 import { Button } from "@/components/ui";
 import { palmReadingApi } from "@/lib/api";
 import {
@@ -105,7 +107,7 @@ export default function PalmReadingPage() {
   const [preview, setPreview] = React.useState<string | null>(null);
   const [scanning, setScanning] = React.useState(false);
   const [result, setResult] = React.useState<PalmScanResponse | null>(null);
-  const [activeTab, setActiveTab] = React.useState<"overview" | "lines" | "forecasts" | "details">("overview");
+  const [activeTab, setActiveTab] = React.useState<"overview" | "scan3d" | "lines" | "forecasts" | "details">("overview");
   const [showOverlay, setShowOverlay] = React.useState(true);
 
   const fileInput = React.useRef<HTMLInputElement>(null);
@@ -760,6 +762,7 @@ export default function PalmReadingPage() {
                 <div className="flex items-center gap-1.5 overflow-x-auto border-b border-border pb-1">
                   {[
                     { id: "overview", label: t.tabs.overview, icon: Layers },
+                    { id: "scan3d", label: t.tabs.scan3d, icon: Move3d },
                     { id: "lines", label: t.tabs.lines, icon: Waves },
                     { id: "forecasts", label: t.tabs.forecasts, icon: TrendingUp },
                     { id: "details", label: t.tabs.details, icon: Ruler },
@@ -788,6 +791,39 @@ export default function PalmReadingPage() {
                 {/* Tab: Overview (Traced Overlay + Primary Features) */}
                 {activeTab === "overview" && (
                   <div className="space-y-6">
+                    {/* 3D Scan Teaser Banner */}
+                    <div className="overflow-hidden rounded-3xl border border-brand-300/80 bg-gradient-to-r from-ink-950 via-brand-950 to-ink-950 p-5 text-white shadow-lg sm:p-6">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="space-y-1.5">
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-400/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-brand-300">
+                            <Sparkles className="size-3" />
+                            {language === "bn" ? "নতুন ত্রিমাত্রিক প্রযুক্তি" : "Precision 3D Biometrics"}
+                          </span>
+                          <h3 className="text-lg font-black sm:text-xl">
+                            {language === "bn"
+                              ? "আপনার হাতের পূর্ণ ত্রিমাত্রিক (3D) স্ক্যান প্রস্তুত"
+                              : language === "hi"
+                                ? "आपकी हथेली का पूर्ण 3D स्कैन तैयार है"
+                                : "Your Full 3D Palm Scan is Ready"}
+                          </h3>
+                          <p className="text-xs text-white/70">
+                            {language === "bn"
+                              ? "গ্রহ পর্বতের উচ্চতা (mm), মঙ্গল তলের গভীরতা এবং আঙুলের নমনীয়তার ৩৬০° ত্রিমাত্রিক মডেল দেখুন।"
+                              : language === "hi"
+                                ? "ग्रह पर्वतों की ऊंचाई (mm), गहराई और 360° त्रि-आयामी मॉडल देखें।"
+                                : "Explore millimeter mount topography, hollow depth, and 360° interactive 3D skeleton."}
+                          </p>
+                        </div>
+                        <Button
+                          onClick={() => setActiveTab("scan3d")}
+                          className="shrink-0 gap-2 bg-brand-500 font-bold text-white hover:bg-brand-600"
+                        >
+                          <Move3d className="size-4" />
+                          {language === "bn" ? "৩ডি স্ক্যান দেখুন" : language === "hi" ? "3D स्कैन देखें" : "View 3D Scan"}
+                        </Button>
+                      </div>
+                    </div>
+
                     {/* Visual Overlay Section */}
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
                       <div className="lg:col-span-5">
@@ -979,6 +1015,87 @@ export default function PalmReadingPage() {
                         </div>
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {/* Tab: 3D Palm Scan & Topography */}
+                {activeTab === "scan3d" && (
+                  <div className="space-y-6">
+                    <Palm3DViewer
+                      landmarks3D={result.landmarks_3d}
+                      worldLandmarksMm={result.world_landmarks_mm}
+                      mountElevations={result.mount_elevations_3d}
+                      palmCupDepthMm={result.palm_cup_depth_mm}
+                      flexibilityData={result.finger_flexibility_3d}
+                      fingerInclinations={result.finger_inclinations_3d}
+                      handedness={result.handedness}
+                      language={language}
+                    />
+
+                    {/* 3D Reading Findings Sections */}
+                    {result.sections.filter((s) =>
+                      ["mounts_3d", "finger_flexibility_3d", "palm_hollow_3d"].includes(s.feature),
+                    ).length > 0 && (
+                      <div className="space-y-4">
+                        <h3 className="text-sm font-black text-foreground">
+                          {language === "bn"
+                            ? "ত্রিমাত্রিক পরিমাপভিত্তিক শাস্ত্রীয় ফলাফল"
+                            : language === "hi"
+                              ? "3D माप आधारित शास्त्रीय निष्कर्ष"
+                              : "3D Metric-Derived Interpretations"}
+                        </h3>
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                          {result.sections
+                            .filter((s) =>
+                              ["mounts_3d", "finger_flexibility_3d", "palm_hollow_3d"].includes(s.feature),
+                            )
+                            .map((section, idx) => (
+                              <article
+                                key={idx}
+                                className="flex flex-col justify-between rounded-3xl border border-brand-200/80 bg-surface p-5 shadow-sm transition-all hover:border-brand-400"
+                              >
+                                <div className="space-y-2.5">
+                                  <div className="flex flex-wrap items-center justify-between gap-2">
+                                    <span className="rounded-full bg-brand-500/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-brand-700">
+                                      {t.featureLabels[section.feature] ?? section.feature_label}
+                                    </span>
+                                    {section.area && (
+                                      <span className="text-[10px] font-semibold text-muted-foreground">
+                                        {t.areas[section.area] ?? section.area}
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  <h4 className="text-base font-black text-foreground">
+                                    {section.label}
+                                  </h4>
+
+                                  <p className="text-xs leading-relaxed text-muted-foreground">
+                                    {section.meaning}
+                                  </p>
+                                </div>
+
+                                <div className="mt-4 border-t border-border/60 pt-3 text-[10px]">
+                                  {section.because.length > 0 && (
+                                    <p className="font-mono text-muted-foreground">
+                                      <span className="font-bold text-foreground">
+                                        {t.measuredLabel}:
+                                      </span>{" "}
+                                      {section.because.join(", ")}
+                                    </p>
+                                  )}
+                                  {section.source && (
+                                    <p className="mt-1 text-muted-foreground/80">
+                                      <span className="font-semibold">{t.sourceDocLabel}:</span>{" "}
+                                      {section.source}
+                                    </p>
+                                  )}
+                                </div>
+                              </article>
+                            ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
