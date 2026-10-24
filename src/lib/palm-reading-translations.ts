@@ -51,6 +51,8 @@ export interface PalmTranslations {
 
   tabs: {
     overview: string;
+    timeline: string;
+    sacred_marks: string;
     lines: string;
     forecasts: string;
     details: string;
@@ -69,6 +71,9 @@ export interface PalmTranslations {
     head: { name: string; element: string; desc: string };
     life: { name: string; element: string; desc: string };
     fate: { name: string; element: string; desc: string };
+    sun: { name: string; element: string; desc: string };
+    mercury: { name: string; element: string; desc: string };
+    mars: { name: string; element: string; desc: string };
   };
 
   areas: Record<string, string>;
@@ -123,7 +128,9 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
 
     tabs: {
       overview: "সামগ্রিক বিবরণ",
-      lines: "প্রধান রেখা",
+      timeline: "আয়ু ও কালক্রম",
+      sacred_marks: "পবিত্র চিহ্ন ও যোগ",
+      lines: "রেখাসমূহ",
       forecasts: "ভবিষ্যদ্বাণী",
       details: "জ্যামিতিক পরিমাপ",
       scan3d: "ত্রিমাত্রিক ৩ডি স্ক্যান",
@@ -173,6 +180,21 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
         element: "অগ্নি তত্ত্ব",
         desc: "কর্মজীবন, আত্মপ্রতিষ্ঠা, পেশাগত লক্ষ্য ও সমাজে সাফল্যের গতিপথ নির্দেশ করে।",
       },
+      sun: {
+        name: "রবি রেখা (Sun Line / Apollo)",
+        element: "সূর্য তত্ত্ব",
+        desc: "খ্যাতি, সামাজিক মর্যাদা, অর্থনৈতিক সাফল্য, সৃজনশীল প্রতিভা ও রাজকীয় স্বীকৃতি নির্দেশ করে।",
+      },
+      mercury: {
+        name: "বুধ রেখা (Health / Mercury Line)",
+        element: "বুধ তত্ত্ব",
+        desc: "শারীরিক পরিপাকতন্ত্র, স্নায়বিক সুস্থতা, ব্যবসায়িক দূরদর্শিতা ও বাগ্মিতা নির্দেশ করে।",
+      },
+      mars: {
+        name: "মঙ্গল রেখা (Sanjeevani / Sister Life)",
+        element: "মঙ্গল তত্ত্ব",
+        desc: "দৈব সুরক্ষা কবচ, সংকটে অপ্রত্যাশিত সাহায্য, রোগমুক্তি ও দীর্ঘায়ু নির্দেশ করে।",
+      },
     },
 
     areas: {
@@ -211,6 +233,10 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
       mounts_3d: "ত্রিমাত্রিক গ্রহ পর্বত ও উচ্চতা (3D Mounts)",
       finger_flexibility_3d: "ত্রিমাত্রিক আঙুলের নমনীয়তা ও গতিশীলতা (3D Flexibility)",
       palm_hollow_3d: "ত্রিমাত্রিক তালুর গভীরতা ও মঙ্গল তল (Plain of Mars)",
+      sun_line: "রবি রেখা (Sun Line / Apollo)",
+      mars_line: "মঙ্গল ও সঞ্জীবনী রেখা (Divine Shield)",
+      sacred_marks: "পবিত্র বৈদিক শুভ যোগ ও চিহ্ন",
+      skin_vitality: "আয়ুর্বেদিক ওজঃ ও কান্তি বিচার",
     },
   },
 
@@ -261,7 +287,9 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
 
     tabs: {
       overview: "समग्र विवरण",
-      lines: "मुख्य रेखाएं",
+      timeline: "आयु एवं कालक्रम",
+      sacred_marks: "पवित्र चिह्न एवं योग",
+      lines: "हस्तरेखाएं",
       forecasts: "भविष्यवाणी",
       details: "माप और अनुपात",
       scan3d: "त्रिविमीय 3D स्कैन",
@@ -311,6 +339,21 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
         element: "अग्नि तत्व",
         desc: "आजीविका, करियर की दिशा, सफलता और जिम्मेदारियों का मार्ग।",
       },
+      sun: {
+        name: "सूर्य रेखा (Sun Line / Apollo)",
+        element: "सूर्य तत्व",
+        desc: "यश, सामाजिक प्रतिष्ठा, वित्तीय समृद्धि, रचनात्मक प्रतिभा और राजयोग का प्रतीक है।",
+      },
+      mercury: {
+        name: "बुध रेखा (Health / Mercury Line)",
+        element: "बुध तत्व",
+        desc: "शारीरिक स्वास्थ्य, तंत्रिका तंत्र, व्यापारिक कुशलता और वाकपटुता को दर्शाती है।",
+      },
+      mars: {
+        name: "मंगल रेखा (संजीवनी / Sister Life Line)",
+        element: "मंगल तत्व",
+        desc: "दैवीय सुरक्षा कवच, जीवन संकटों से रक्षा, रोग मुक्ति और दीर्घायु प्रदान करती है।",
+      },
     },
 
     areas: {
@@ -349,6 +392,10 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
       mounts_3d: "3D ग्रह पर्वत और उभार",
       finger_flexibility_3d: "3D उंगलियों का लचीलापन",
       palm_hollow_3d: "3D हथेली का गड्ढा एवं मंगल तल",
+      sun_line: "सूर्य रेखा (Sun Line / Apollo)",
+      mars_line: "मंगल एवं संजीवनी रेखा (Mars Line)",
+      sacred_marks: "पवित्र वैदिक शुभ चिह्न एवं योग",
+      skin_vitality: "आयुर्वेदिक ओज एवं कांति विचार",
     },
   },
 
@@ -399,7 +446,9 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
 
     tabs: {
       overview: "Overview",
-      lines: "Major Lines",
+      timeline: "Age Timeline",
+      sacred_marks: "Sacred Marks",
+      lines: "Palm Creases",
       forecasts: "Life Forecasts",
       details: "Measurements",
       scan3d: "3D Palm Scan",
@@ -449,6 +498,21 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
         element: "Fire Element",
         desc: "Traces vocational trajectory, self-directed ambition, public recognition, and life path.",
       },
+      sun: {
+        name: "Sun Line (Apollo / Ravi Rekha)",
+        element: "Solar Element",
+        desc: "Governs public recognition, brilliance, financial prosperity, artistic legacy, and charisma.",
+      },
+      mercury: {
+        name: "Mercury Line (Health / Budha Rekha)",
+        element: "Mercurial Element",
+        desc: "Indicates nervous system vitality, digestive constitution, commercial sharpness, and eloquence.",
+      },
+      mars: {
+        name: "Mars Line (Sanjeevani / Sister Life)",
+        element: "Martian Element",
+        desc: "Divine shielding, crisis resilience, regenerative immunity, and extended vitality.",
+      },
     },
 
     areas: {
@@ -487,6 +551,10 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
       mounts_3d: "3D Mount Topography & Planetary Energies",
       finger_flexibility_3d: "3D Joint Flexibility & Spontaneity",
       palm_hollow_3d: "3D Plain of Mars & Core Fortitude",
+      sun_line: "Sun Line (Apollo / Ravi Rekha)",
+      mars_line: "Mars Line (Sanjeevani / Divine Shield)",
+      sacred_marks: "Sacred Vedic Marks & Auspicious Yogas",
+      skin_vitality: "Ayurvedic Prana & Vitality Tone",
     },
   },
 };

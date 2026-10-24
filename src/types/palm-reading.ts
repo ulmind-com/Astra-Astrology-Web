@@ -93,6 +93,44 @@ export interface PalmScanResponse {
   };
   finger_inclinations_3d?: Record<string, number>;
 
+  /** Astrological additions: Secondary lines, sacred marks, chronological timeline, skin vitality, karmic summary */
+  secondary_lines?: Record<string, PalmCrease>;
+  sacred_marks?: Array<{
+    id: string;
+    name: string;
+    sanskrit_name: string;
+    found: boolean;
+    location_norm: number[];
+    significance: string;
+    rarity: string;
+    auspicious: boolean;
+  }>;
+  timeline?: Array<{
+    age: number;
+    age_range: string;
+    phase: string;
+    primary_line: string;
+    vitality_pct: number;
+    focus: string;
+    forecast: string;
+    auspicious: boolean;
+  }>;
+  skin_vitality?: {
+    flush_tone: string;
+    ayurvedic_dosha: string;
+    vitality_score: number;
+    circulation_rating: string;
+    temperament: string;
+    rgb_ratios: Record<string, number>;
+  };
+  karmic_summary?: {
+    hand: string;
+    role: string;
+    role_meaning: string;
+    counterpart_role: string;
+    karmic_harmony: string;
+  };
+
   overlay_image: string | null;
   response_image: string | null;
   coins_charged: number;
@@ -115,6 +153,43 @@ export interface PalmReadingRecord {
   palm_cup_depth_mm?: number;
   finger_flexibility_3d?: Record<string, unknown>;
   finger_inclinations_3d?: Record<string, number>;
+
+  secondary_lines?: Record<string, PalmCrease>;
+  sacred_marks?: Array<{
+    id: string;
+    name: string;
+    sanskrit_name: string;
+    found: boolean;
+    location_norm: number[];
+    significance: string;
+    rarity: string;
+    auspicious: boolean;
+  }>;
+  timeline?: Array<{
+    age: number;
+    age_range: string;
+    phase: string;
+    primary_line: string;
+    vitality_pct: number;
+    focus: string;
+    forecast: string;
+    auspicious: boolean;
+  }>;
+  skin_vitality?: {
+    flush_tone: string;
+    ayurvedic_dosha: string;
+    vitality_score: number;
+    circulation_rating: string;
+    temperament: string;
+    rgb_ratios: Record<string, number>;
+  };
+  karmic_summary?: {
+    hand: string;
+    role: string;
+    role_meaning: string;
+    counterpart_role: string;
+    karmic_harmony: string;
+  };
 
   overlay_image: string | null;
   coins_charged: number;

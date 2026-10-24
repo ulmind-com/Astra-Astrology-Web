@@ -11,14 +11,20 @@
 import * as React from "react";
 import Link from "next/link";
 import {
+  Activity,
   AlertTriangle,
+  Award,
+  Calendar,
   Camera,
   CheckCircle2,
   ChevronRight,
+  Clock,
+  Compass,
   Download,
   Eye,
   FileText,
   Flame,
+  Gem,
   Globe2,
   Hand,
   Heart,
@@ -30,14 +36,17 @@ import {
   Printer,
   RefreshCw,
   Ruler,
+  Shield,
   ShieldAlert,
   ShieldCheck,
   Sparkles,
+  Sun,
   TrendingUp,
   Upload,
   Waves,
   Wind,
   XCircle,
+  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -65,7 +74,7 @@ import type {
 
 const CREASE_THEME: Record<
   string,
-  { color: string; border: string; bg: string; text: string; icon: typeof Heart }
+  { color: string; border: string; bg: string; text: string; icon: React.ComponentType<{ className?: string }> }
 > = {
   heart: {
     color: "bg-rose-500",
@@ -95,6 +104,27 @@ const CREASE_THEME: Record<
     text: "text-amber-700",
     icon: Flame,
   },
+  sun: {
+    color: "bg-yellow-500",
+    border: "border-yellow-200",
+    bg: "bg-yellow-50",
+    text: "text-yellow-700",
+    icon: Sun,
+  },
+  mercury: {
+    color: "bg-cyan-500",
+    border: "border-cyan-200",
+    bg: "bg-cyan-50",
+    text: "text-cyan-700",
+    icon: Activity,
+  },
+  mars: {
+    color: "bg-orange-500",
+    border: "border-orange-200",
+    bg: "bg-orange-50",
+    text: "text-orange-700",
+    icon: ShieldCheck,
+  },
 };
 
 export default function PalmReadingPage() {
@@ -107,7 +137,10 @@ export default function PalmReadingPage() {
   const [preview, setPreview] = React.useState<string | null>(null);
   const [scanning, setScanning] = React.useState(false);
   const [result, setResult] = React.useState<PalmScanResponse | null>(null);
-  const [activeTab, setActiveTab] = React.useState<"overview" | "scan3d" | "lines" | "forecasts" | "details">("overview");
+  const [activeTab, setActiveTab] = React.useState<
+    "overview" | "timeline" | "sacred_marks" | "lines" | "scan3d" | "forecasts" | "details"
+  >("overview");
+  const [selectedAge, setSelectedAge] = React.useState<number>(30);
   const [showOverlay, setShowOverlay] = React.useState(true);
 
   const fileInput = React.useRef<HTMLInputElement>(null);
@@ -357,7 +390,15 @@ export default function PalmReadingPage() {
   const categorized = React.useMemo(() => {
     if (!result?.sections) return { lines: [], forecasts: [], proportions: [] };
     const lines = result.sections.filter((s) =>
-      ["heart_line", "head_line", "life_line", "fate_line", "line_relationship"].includes(s.feature),
+      [
+        "heart_line",
+        "head_line",
+        "life_line",
+        "fate_line",
+        "sun_line",
+        "mars_line",
+        "line_relationship",
+      ].includes(s.feature),
     );
     const forecasts = result.sections.filter((s) =>
       ["career_forecast", "relationship_forecast", "health_forecast"].includes(s.feature),
@@ -369,11 +410,15 @@ export default function PalmReadingPage() {
           "head_line",
           "life_line",
           "fate_line",
+          "sun_line",
+          "mars_line",
           "line_relationship",
           "career_forecast",
           "relationship_forecast",
           "health_forecast",
           "hand_type",
+          "sacred_marks",
+          "skin_vitality",
         ].includes(s.feature),
     );
     return { lines, forecasts, proportions };
@@ -810,8 +855,10 @@ export default function PalmReadingPage() {
                 <div className="flex items-center gap-1.5 overflow-x-auto border-b border-border pb-1">
                   {[
                     { id: "overview", label: t.tabs.overview, icon: Layers },
-                    { id: "scan3d", label: t.tabs.scan3d, icon: Move3d },
+                    { id: "timeline", label: t.tabs.timeline, icon: Calendar },
+                    { id: "sacred_marks", label: t.tabs.sacred_marks, icon: Sparkles },
                     { id: "lines", label: t.tabs.lines, icon: Waves },
+                    { id: "scan3d", label: t.tabs.scan3d, icon: Move3d },
                     { id: "forecasts", label: t.tabs.forecasts, icon: TrendingUp },
                     { id: "details", label: t.tabs.details, icon: Ruler },
                   ].map((tab) => {
@@ -839,6 +886,103 @@ export default function PalmReadingPage() {
                 {/* Tab: Overview (Traced Overlay + Primary Features) */}
                 {activeTab === "overview" && (
                   <div className="space-y-6">
+                    {/* Ayurvedic Prana & Karmic Energy Matrix */}
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      {/* Karmic Hand Role */}
+                      {result.karmic_summary && (
+                        <div className="relative overflow-hidden rounded-3xl border border-brand-200 bg-gradient-to-br from-white via-brand-50/30 to-amber-50/40 p-5 shadow-xs">
+                          <div className="flex items-center justify-between">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-brand-700">
+                              <Compass className="size-3 text-brand-600" />
+                              {language === "bn" ? "কার্মিক হস্ত বিধান" : language === "hi" ? "कर्म विधान" : "Karmic Axis"}
+                            </span>
+                            <span className="text-xs font-black text-brand-800">
+                              {result.karmic_summary.role}
+                            </span>
+                          </div>
+                          <h4 className="mt-2.5 text-base font-black text-foreground">
+                            {result.handedness === "Left" ? t.leftHand : t.rightHand} · {result.karmic_summary.role}
+                          </h4>
+                          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                            {result.karmic_summary.role_meaning}
+                          </p>
+                          <div className="mt-3.5 rounded-2xl border border-brand-200/60 bg-white/80 p-3 text-xs">
+                            <span className="font-bold text-brand-950">
+                              {language === "bn" ? "কার্মিক সামঞ্জস্য:" : "Karmic Balance:"}
+                            </span>{" "}
+                            <span className="text-muted-foreground">
+                              {result.karmic_summary.karmic_harmony}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Ayurvedic Skin Flush & Prana Vitality */}
+                      {result.skin_vitality && (
+                        <div className="relative overflow-hidden rounded-3xl border border-rose-200/80 bg-gradient-to-br from-white via-rose-50/30 to-orange-50/40 p-5 shadow-xs">
+                          <div className="flex items-center justify-between">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-rose-700">
+                              <Activity className="size-3 text-rose-600" />
+                              {language === "bn" ? "আয়ুর্বেদিক ওজঃ ও কান্তি" : "Ayurvedic Prana Flush"}
+                            </span>
+                            <span className="rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-black text-rose-800">
+                              {result.skin_vitality.vitality_score}% Vitality
+                            </span>
+                          </div>
+                          <div className="mt-2.5 flex items-baseline gap-2">
+                            <h4 className="text-base font-black text-foreground capitalize">
+                              {result.skin_vitality.flush_tone.replace(/_/g, " ")}
+                            </h4>
+                            <span className="text-xs font-bold text-rose-600">
+                              · {result.skin_vitality.ayurvedic_dosha}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                            {result.skin_vitality.temperament}
+                          </p>
+                          <div className="mt-3.5 flex items-center justify-between rounded-2xl border border-rose-200/60 bg-white/80 p-3 text-xs">
+                            <span className="font-bold text-ink-950">
+                              {language === "bn" ? "রক্তসঞ্চালন ও প্রাণবায়ু:" : "Circulation Rating:"}
+                            </span>
+                            <span className="font-extrabold text-rose-700 capitalize">
+                              {result.skin_vitality.circulation_rating}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Sacred Marks Spotlight Banner */}
+                    {result.sacred_marks && result.sacred_marks.filter((m) => m.found).length > 0 && (
+                      <div className="overflow-hidden rounded-3xl border border-amber-300 bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 p-5 text-white shadow-md sm:p-6">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="space-y-1">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-100">
+                              <Sparkles className="size-3 text-amber-200" />
+                              {language === "bn" ? "দুর্লভ বৈদিক শুভ যোগ সনাক্ত" : "Auspicious Sacred Yogas Detected"}
+                            </span>
+                            <h3 className="text-lg font-black sm:text-xl">
+                              {result.sacred_marks.filter((m) => m.found).length}{" "}
+                              {language === "bn" ? "টি পবিত্র শুভ চিহ্ন আপনার হাতে বিদ্যমান" : "Sacred Vedic Marks Found"}
+                            </h3>
+                            <p className="text-xs text-amber-100/90">
+                              {result.sacred_marks
+                                .filter((m) => m.found)
+                                .map((m) => `${m.sanskrit_name} (${m.name})`)
+                                .join(" · ")}
+                            </p>
+                          </div>
+                          <Button
+                            onClick={() => setActiveTab("sacred_marks")}
+                            className="shrink-0 gap-2 bg-white font-black text-amber-950 shadow hover:bg-amber-50"
+                          >
+                            <Gem className="size-4 text-amber-600" />
+                            {language === "bn" ? "চিহ্নগুলোর মহিমা দেখুন" : "Explore Sacred Marks"}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
                     {/* 3D Scan Teaser Banner */}
                     <div className="overflow-hidden rounded-3xl border border-brand-300/80 bg-gradient-to-r from-ink-950 via-brand-950 to-ink-950 p-5 text-white shadow-lg sm:p-6">
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -922,11 +1066,23 @@ export default function PalmReadingPage() {
                       {/* Crease Gauges Summary */}
                       <div className="space-y-3 lg:col-span-7">
                         <div className="rounded-3xl border border-border bg-surface p-5 shadow-sm">
-                          <h3 className="text-sm font-extrabold text-foreground">
-                            {t.creasesTitle}
-                          </h3>
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-extrabold text-foreground">
+                              {t.creasesTitle}
+                            </h3>
+                            <span className="text-[11px] font-bold text-brand-700">
+                              {result.creases.filter((c) => c.found).length +
+                                (result.secondary_lines
+                                  ? Object.values(result.secondary_lines).filter((c) => c.found).length
+                                  : 0)}{" "}
+                              {language === "bn" ? "টি রেখা চিহ্নিত" : "Traced Lines"}
+                            </span>
+                          </div>
                           <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-                            {result.creases.map((crease) => {
+                            {[
+                              ...result.creases,
+                              ...(result.secondary_lines ? Object.values(result.secondary_lines) : []),
+                            ].map((crease) => {
                               const theme = CREASE_THEME[crease.name] || CREASE_THEME.heart;
                               const Icon = theme.icon;
                               const localizedInfo = t.lines[crease.name as keyof typeof t.lines];
@@ -1066,6 +1222,289 @@ export default function PalmReadingPage() {
                   </div>
                 )}
 
+                {/* Tab: Chronological Age Timeline (আয়ু ও জীবনরেখা কালক্রম) */}
+                {activeTab === "timeline" && (
+                  <div className="space-y-6">
+                    {/* Header */}
+                    <div className="overflow-hidden rounded-3xl border border-brand-200 bg-gradient-to-br from-brand-950 via-ink-950 to-brand-950 p-6 text-white shadow-lg">
+                      <div className="flex flex-col gap-2">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-400/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-brand-300 w-fit">
+                          <Clock className="size-3" />
+                          {language === "bn" ? "সমুদ্রিক শাস্ত্রীয় আয়ু নির্ণয়" : "Samudrika Shastra Chronological Timeline"}
+                        </span>
+                        <h3 className="text-xl font-black sm:text-2xl">
+                          {language === "bn"
+                            ? "জীবন ও ভাগ্যরেখা ভিত্তিক কালানুক্রমিক জীবনচক্র"
+                            : language === "hi"
+                              ? "जीवन एवं भाग्य रेखा आधारित कालक्रम"
+                              : "Age Milestones & Vitality Timeline"}
+                        </h3>
+                        <p className="text-xs text-white/70 max-w-2xl leading-relaxed">
+                          {language === "bn"
+                            ? "জীবনরেখার প্রারম্ভ (বৃদ্ধাঙ্গুলি ও তর্জনীর মধ্যস্থল) থেকে মণিবন্ধ এবং ভাগ্যরেখার বিস্তার পরিমাপ করে ৬টি বয়সের গুরুত্বপূর্ণ সন্ধিক্ষণ নির্ধারণ করা হয়েছে।"
+                            : "Proportional projection along the Life corridor and central Saturn axis divides your life path into 6 distinct karmic epochs."}
+                        </p>
+                      </div>
+                    </div>
+
+                    {result.timeline && result.timeline.length > 0 ? (
+                      <div className="space-y-6">
+                        {/* Interactive Age Selector */}
+                        <div className="rounded-3xl border border-border bg-white p-6 shadow-xs space-y-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                              <span className="text-[10px] font-black uppercase tracking-wider text-brand-700">
+                                {language === "bn" ? "ইন্টারেক্টিভ বয়স নির্দেশক" : "Interactive Age Selector"}
+                              </span>
+                              <h4 className="text-base font-black text-foreground">
+                                {language === "bn" ? "বয়স নির্বাচন করুন:" : "Select an Age Epoch:"}{" "}
+                                <span className="text-brand-600 font-extrabold">{selectedAge} {language === "bn" ? "বছর" : "Years"}</span>
+                              </h4>
+                            </div>
+
+                            {/* Milestone Quick Buttons */}
+                            <div className="flex flex-wrap gap-2">
+                              {result.timeline.map((m) => (
+                                <button
+                                  key={m.age}
+                                  type="button"
+                                  onClick={() => setSelectedAge(m.age)}
+                                  className={cn(
+                                    "rounded-xl px-3 py-1.5 text-xs font-bold transition-all",
+                                    selectedAge === m.age
+                                      ? "bg-brand-500 text-white shadow-sm scale-105"
+                                      : "bg-surface-muted text-muted-foreground hover:bg-brand-50 hover:text-brand-700",
+                                  )}
+                                >
+                                  {m.age} {language === "bn" ? "বছর" : "yrs"}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Range Slider */}
+                          <div className="space-y-2 pt-2">
+                            <input
+                              type="range"
+                              min={18}
+                              max={75}
+                              value={selectedAge}
+                              onChange={(e) => setSelectedAge(Number(e.target.value))}
+                              className="w-full accent-brand-500 cursor-pointer h-2 bg-brand-100 rounded-lg appearance-none"
+                            />
+                            <div className="flex justify-between text-[10px] font-bold text-muted-foreground">
+                              <span>18 {language === "bn" ? "বছর (কৈশোর)" : "yrs"}</span>
+                              <span>35 {language === "bn" ? "বছর (যৌবন)" : "yrs"}</span>
+                              <span>50 {language === "bn" ? "বছর (প্রৌঢ়)" : "yrs"}</span>
+                              <span>75+ {language === "bn" ? "বছর (বার্ধক্য)" : "yrs"}</span>
+                            </div>
+                          </div>
+
+                          {/* Selected Age Milestone Details */}
+                          {(() => {
+                            // Find closest milestone
+                            const activeMilestone = result.timeline.reduce((prev, curr) =>
+                              Math.abs(curr.age - selectedAge) < Math.abs(prev.age - selectedAge) ? curr : prev,
+                            );
+                            return (
+                              <div className="mt-4 rounded-2xl border border-brand-200 bg-brand-50/50 p-5 space-y-3">
+                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className="rounded-full bg-brand-500 text-white px-3 py-1 text-xs font-black">
+                                      {activeMilestone.age_range}
+                                    </span>
+                                    <span className="text-xs font-bold text-brand-900">
+                                      {activeMilestone.phase}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-muted-foreground">
+                                      {language === "bn" ? "জীবনীশক্তি অনুপাত:" : "Vitality Ratio:"}
+                                    </span>
+                                    <span className="rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-black text-emerald-800">
+                                      {activeMilestone.vitality_pct}%
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                  <h5 className="text-sm font-black text-foreground">
+                                    {language === "bn" ? "প্রধান কেন্দ্রবিন্দু:" : "Core Focus:"} {activeMilestone.focus}
+                                  </h5>
+                                  <p className="text-xs leading-relaxed text-muted-foreground">
+                                    {activeMilestone.forecast}
+                                  </p>
+                                </div>
+
+                                <div className="flex items-center gap-3 border-t border-brand-200/60 pt-3 text-[11px] text-muted-foreground">
+                                  <span className="font-semibold">
+                                    📍 {language === "bn" ? "নিয়ামক রেখা:" : "Governing Axis:"} {activeMilestone.primary_line}
+                                  </span>
+                                  <span>•</span>
+                                  <span className="font-semibold text-emerald-700">
+                                    {activeMilestone.auspicious
+                                      ? language === "bn" ? "✓ শুভ ফলদায়ক সময়কাল" : "Auspicious Phase"
+                                      : language === "bn" ? "সতর্কতা ও আত্মশুদ্ধি প্রয়োজন" : "Caution Recommended"}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </div>
+
+                        {/* Full Chronological Milestones Grid */}
+                        <div className="space-y-3">
+                          <h4 className="text-xs font-extrabold uppercase tracking-wider text-brand-700">
+                            {language === "bn" ? "পূর্ণ ৬টি পর্যায়ক্রমিক কালচক্র" : "All 6 Chronological Epochs"}
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {result.timeline.map((m) => (
+                              <div
+                                key={m.age}
+                                onClick={() => setSelectedAge(m.age)}
+                                className={cn(
+                                  "cursor-pointer rounded-3xl border p-5 transition-all shadow-xs",
+                                  selectedAge === m.age
+                                    ? "border-brand-500 bg-brand-50/70 shadow-md ring-2 ring-brand-300"
+                                    : "border-border bg-white hover:border-brand-300 hover:bg-surface-muted/50",
+                                )}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="rounded-full bg-brand-100 text-brand-800 px-2.5 py-0.5 text-[11px] font-black">
+                                    {m.age_range}
+                                  </span>
+                                  <span className="text-[11px] font-bold text-emerald-700">
+                                    {m.vitality_pct}% {language === "bn" ? "প্রাণশক্তি" : "Vitality"}
+                                  </span>
+                                </div>
+                                <h5 className="mt-2 text-sm font-black text-foreground">
+                                  {m.phase}
+                                </h5>
+                                <p className="mt-1 text-[11px] font-semibold text-brand-700">
+                                  {m.focus}
+                                </p>
+                                <p className="mt-2 text-xs leading-relaxed text-muted-foreground line-clamp-3">
+                                  {m.forecast}
+                                </p>
+                                <div className="mt-3 border-t border-border/50 pt-2 text-[10px] text-muted-foreground flex justify-between">
+                                  <span>{m.primary_line}</span>
+                                  <span className="font-bold text-brand-600">
+                                    {selectedAge === m.age ? "✓ নির্বাচিত" : "নির্বাচন করুন →"}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl border border-dashed border-border bg-surface-muted p-8 text-center text-xs text-muted-foreground">
+                        {language === "bn"
+                          ? "জীবনরেখার স্পষ্টতার অভাবে কালানুক্রমিক কালচক্র নির্ধারণ করা যায়নি।"
+                          : "Timeline milestones require a distinct Life or Fate line corridor."}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Tab: Sacred Marks & Auspicious Yogas (পবিত্র বৈদিক শুভ যোগ ও চিহ্ন) */}
+                {activeTab === "sacred_marks" && (
+                  <div className="space-y-6">
+                    {/* Header */}
+                    <div className="overflow-hidden rounded-3xl border border-amber-300 bg-gradient-to-r from-amber-600 via-brand-600 to-amber-700 p-6 text-white shadow-lg">
+                      <div className="flex flex-col gap-2">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-amber-100 w-fit">
+                          <Gem className="size-3 text-amber-200" />
+                          {language === "bn" ? "পবিত্র সমুদ্রিক লক্ষণ" : "Authentic Vedic Sacred Signs"}
+                        </span>
+                        <h3 className="text-xl font-black sm:text-2xl">
+                          {language === "bn"
+                            ? "তালুর পবিত্র শুভ যোগ ও দুর্লভ ঈশ্বরীয় চিহ্ন"
+                            : language === "hi"
+                              ? "हथेली के पवित्र शुभ चिह्न एवं राजयोग"
+                              : "Sacred Marks & Auspicious Vedic Yogas"}
+                        </h3>
+                        <p className="text-xs text-amber-100/90 max-w-2xl leading-relaxed">
+                          {language === "bn"
+                            ? "প্রাচীন সমুদ্রিক শাস্ত্র অনুসারে হাতের তালুতে বিশেষ জ্যামিতিক রেখা সংযোগে গঠিত গুপ্ত চতুষ্কোণ, ত্রিশূল, মৎস্য এবং রক্ষা কবচ জাতকের পূর্বজন্মের পুণ্যফল ও দৈব আশীর্বাদ নির্দেশ করে।"
+                            : "Vedic Chiromancy identifies divine geometric formations—the Mystic Cross, Shiva Trishula, Matsya, and Protective Square—as signatures of spiritual evolution and divine protection."}
+                        </p>
+                      </div>
+                    </div>
+
+                    {result.sacred_marks && result.sacred_marks.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        {result.sacred_marks.map((mark) => (
+                          <div
+                            key={mark.id}
+                            className={cn(
+                              "relative overflow-hidden rounded-3xl border p-6 transition-all shadow-xs",
+                              mark.found
+                                ? "border-amber-300 bg-gradient-to-b from-white via-amber-50/20 to-amber-50/50 shadow-sm"
+                                : "border-border bg-surface-muted/40 opacity-70",
+                            )}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="space-y-1">
+                                <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-amber-700">
+                                  <Sparkles className="size-3 text-amber-600" />
+                                  {mark.sanskrit_name}
+                                </span>
+                                <h4 className="text-lg font-black text-foreground">
+                                  {mark.name}
+                                </h4>
+                              </div>
+
+                              <span
+                                className={cn(
+                                  "rounded-full px-3 py-1 text-[11px] font-black",
+                                  mark.found
+                                    ? "bg-amber-100 text-amber-900 border border-amber-300 shadow-xs"
+                                    : "bg-surface text-muted-foreground border border-border",
+                                )}
+                              >
+                                {mark.found
+                                  ? language === "bn" ? "✓ সনাক্ত হয়েছে" : "Found"
+                                  : language === "bn" ? "সুপ্ত বা অনুপস্থিত" : "Not Present"}
+                              </span>
+                            </div>
+
+                            <div className="mt-3.5 space-y-2">
+                              <div className="flex items-center gap-2 text-xs">
+                                <span className="font-bold text-muted-foreground">
+                                  {language === "bn" ? "প্রকৃতি ও বিরলতা:" : "Rarity Index:"}
+                                </span>
+                                <span className="font-black text-amber-800">
+                                  {mark.rarity}
+                                </span>
+                              </div>
+
+                              <p className="text-xs leading-relaxed text-muted-foreground">
+                                {mark.significance}
+                              </p>
+                            </div>
+
+                            <div className="mt-4 border-t border-amber-200/60 pt-3 flex items-center justify-between text-[11px]">
+                              <span className="font-mono text-muted-foreground">
+                                📍 {language === "bn" ? "তালু স্থানাঙ্ক:" : "Coords:"} [{mark.location_norm.map((n) => n.toFixed(2)).join(", ")}]
+                              </span>
+                              <span className="font-bold text-amber-700">
+                                {mark.auspicious ? "★ পরম কল্যাণকর যোগ" : "নিরীক্ষণাধীন"}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl border border-dashed border-border bg-surface-muted p-8 text-center text-xs text-muted-foreground">
+                        {language === "bn"
+                          ? "এই ফটোতে কোনো বিশেষ বৈদিক চিহ্ন স্পষ্টভাবে ধরা পড়েনি।"
+                          : "No distinct sacred marks were visible at this resolution."}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Tab: 3D Palm Scan & Topography */}
                 {activeTab === "scan3d" && (
                   <div className="space-y-6">
@@ -1150,6 +1589,51 @@ export default function PalmReadingPage() {
                 {/* Tab: Lines */}
                 {activeTab === "lines" && (
                   <div className="space-y-6">
+                    {/* Secondary Lines Spotlight */}
+                    {result.secondary_lines && Object.values(result.secondary_lines).some((l) => l.found) && (
+                      <div className="rounded-3xl border border-amber-200 bg-amber-50/50 p-6 shadow-xs">
+                        <div className="flex items-center gap-2 border-b border-amber-200/70 pb-3">
+                          <Sparkles className="size-4 text-amber-600" />
+                          <h4 className="text-xs font-black uppercase tracking-wider text-amber-900">
+                            {language === "bn" ? "চিহ্নিত অপ্রধান ও বিশেষ রেখাসমূহ" : "Traced Secondary & Auxiliary Creases"}
+                          </h4>
+                        </div>
+                        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          {Object.values(result.secondary_lines)
+                            .filter((l) => l.found)
+                            .map((line) => {
+                              const theme = CREASE_THEME[line.name] || CREASE_THEME.sun;
+                              const Icon = theme.icon;
+                              const localized = t.lines[line.name as keyof typeof t.lines];
+                              return (
+                                <div
+                                  key={line.name}
+                                  className="rounded-2xl border border-amber-200/80 bg-white p-4 shadow-xs"
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <span className="flex items-center gap-1.5 text-xs font-bold text-foreground">
+                                      <Icon className={cn("size-3.5", theme.text)} />
+                                      {localized?.name || line.elemental_name}
+                                    </span>
+                                    <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-black text-amber-900">
+                                      {line.contrast.toFixed(1)}×
+                                    </span>
+                                  </div>
+                                  <p className="mt-2 text-xs text-muted-foreground">
+                                    {localized?.desc}
+                                  </p>
+                                  {line.termination_zone && (
+                                    <span className="mt-2 inline-block text-[10px] font-bold text-amber-800">
+                                      📍 {line.termination_zone} {t.endsAtMount}
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       {categorized.lines.map((section) => (
                         <article
