@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    agentUpgrade: "security",
+  },
   // `cacheComponents` (on by default in the scaffold) refuses to prerender any
   // route that reads request-time state. This app is signed-in and
   // client-rendered — `useSearchParams`, `useParams` and the auth context are
