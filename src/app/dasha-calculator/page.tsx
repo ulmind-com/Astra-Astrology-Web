@@ -35,6 +35,12 @@ import {
 } from "@/lib/kp-translations";
 import { useAuth } from "@/providers/auth-provider";
 import { useProfile } from "@/hooks/use-profile";
+import { useFeaturePricing } from "@/hooks/use-feature-pricing";
+import {
+  FeatureCoinBadge,
+  FeatureDisabledAlert,
+  FeatureCoinModal,
+} from "@/components/astrology/feature-pricing-banner";
 import type {
   AstrologyLanguage,
   AyanamsaType,
@@ -102,6 +108,10 @@ function GoldDiamondDivider() {
 export default function DashaCalculatorPage() {
   const { user, isSignedIn } = useAuth();
   const { data: profile } = useProfile({ enabled: isSignedIn });
+  const { getFeature, checkAccess, walletBalance, refresh: refreshWallet } = useFeaturePricing();
+  const dashaFeature = getFeature("dasha_calculator");
+  const [coinModalOpen, setCoinModalOpen] = React.useState(false);
+  const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
 
   // Language state
   const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
@@ -420,9 +430,24 @@ export default function DashaCalculatorPage() {
       language,
     };
 
+    const access = checkAccess("dasha_calculator");
+    if (!access.allowed) {
+      if (access.reason === "disabled") {
+        toast.error(
+          language === "bn"
+            ? "দশা ক্যালকুলেটর ফিচারটি বর্তমানে অ্যাডমিন দ্বারা বন্ধ রয়েছে।"
+            : "Dasha calculator feature is temporarily unavailable.",
+        );
+        return;
+      }
+      setCoinModalReason(access.reason || "insufficient_coins");
+      setCoinModalOpen(true);
+      return;
+    }
+
     setLoading(true);
     try {
-      const resp = await astrologyApi.calculateKp(payload);
+      const resp = await astrologyApi.calculateDasha(payload);
       setResult(resp);
 
       // Auto-set active Mahadasha & Antardasha
@@ -437,27 +462,44 @@ export default function DashaCalculatorPage() {
       }
       setActiveStep(1);
 
-      toast.success(
-        language === "bn"
-          ? "বিংশোত্তরী দশা নির্ভুল গণনা সম্পন্ন হয়েছে!"
-          : language === "hi"
-          ? "विंशोत्तरी दशा की सटीक गणना संपन्न!"
-          : "Vimshottari Dasha calculated successfully!",
-      );
+      if (access.requiredCoins > 0) {
+        toast.success(
+          language === "bn"
+            ? `বিংশোত্তরী দশা গণনা সম্পন্ন হয়েছে! (${access.requiredCoins} কয়েন খরচ হয়েছে)`
+            : `Dasha calculated! (${access.requiredCoins} coins used)`,
+        );
+        refreshWallet();
+      } else {
+        toast.success(
+          language === "bn"
+            ? "বিংশোত্তরী দশা নির্ভুল গণনা সম্পন্ন হয়েছে!"
+            : language === "hi"
+            ? "विंशोत्तरी दशा की सटीक गणना संपन्न!"
+            : "Vimshottari Dasha calculated successfully!",
+        );
+      }
 
       setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 150);
     } catch (err: any) {
       console.error("Dasha Calculation Error:", err);
-      toast.error(
-        err?.message ||
-          (language === "bn"
-            ? "দশা নির্ণয়ে সমস্যা হয়েছে। আবার চেষ্টা করুন।"
-            : language === "hi"
-            ? "दशा गणना में त्रुटि हुई। कृपया पुनः प्रयास करें।"
-            : "Failed to calculate Dasha timeline."),
-      );
+      if (err?.code === "insufficient_coins") {
+        setCoinModalReason("insufficient_coins");
+        setCoinModalOpen(true);
+      } else if (err?.code === "authentication_required" || err?.status === 401) {
+        setCoinModalReason("unauthorized");
+        setCoinModalOpen(true);
+      } else {
+        toast.error(
+          err?.message ||
+            (language === "bn"
+              ? "দশা নির্ণয়ে সমস্যা হয়েছে। আবার চেষ্টা করুন।"
+              : language === "hi"
+              ? "दशा गणना में त्रुटि हुई। कृपया पुनः प्रयास करें।"
+              : "Failed to calculate Dasha timeline."),
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -538,6 +580,14 @@ export default function DashaCalculatorPage() {
               ? "सटीक अयनांश गणना के साथ अपनी विंशोत्तरी महादशा, अंतर्दशा एवं प्रत्यंतर्दशा की समयसीमा और वैदिक उपाय जानें।"
               : "Discover your exact active planetary periods (Mahadasha, Antardasha, Pratyantardasha) with 100% astronomical accuracy and authentic Vedic remedies."}
           </p>
+
+          <div className="pt-4 flex justify-center">
+            <FeatureCoinBadge
+              feature={dashaFeature}
+              walletBalance={walletBalance}
+              language={language}
+            />
+          </div>
         </div>
       </div>
 
@@ -545,6 +595,15 @@ export default function DashaCalculatorPage() {
       <main className="mx-auto max-w-6xl px-4 py-8 flex-1 w-full space-y-10">
         {/* Birth Details Input Form */}
         <div className="rounded-2xl border border-brand-300/80 bg-white p-5 sm:p-8 shadow-sm">
+          {dashaFeature && !dashaFeature.enabled && (
+            <div className="mb-6">
+              <FeatureDisabledAlert
+                featureName={language === "bn" ? "দশা ক্যালকুলেটর" : "Dasha Calculator"}
+                language={language}
+              />
+            </div>
+          )}
+
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border/60">
             <div>
               <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
@@ -827,39 +886,52 @@ export default function DashaCalculatorPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 pt-3">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-brand-300 px-8 py-3 text-sm font-bold text-ink-950 shadow-glow hover:bg-brand-400 active:scale-98 transition-all disabled:opacity-60"
-              >
-                {loading ? (
-                  <>
-                    <RefreshCw className="size-4 animate-spin" />
-                    <span>{language === "bn" ? "দশা গণনা চলছে..." : "Calculating Dasha..."}</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="size-4" />
-                    <span>
-                      {language === "bn"
-                        ? "বিংশোত্তরী দশা গণনা করুন"
-                        : language === "hi"
-                        ? "विंशोत्तरी दशा की गणना करें"
-                        : "Calculate Vimshottari Dasha"}
-                    </span>
-                  </>
-                )}
-              </button>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3">
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <button
+                  type="submit"
+                  disabled={loading || (dashaFeature ? !dashaFeature.enabled : false)}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-brand-300 px-8 py-3 text-sm font-bold text-ink-950 shadow-glow hover:bg-brand-400 active:scale-98 transition-all disabled:opacity-50"
+                >
+                  {loading ? (
+                    <>
+                      <RefreshCw className="size-4 animate-spin" />
+                      <span>{language === "bn" ? "দশা গণনা চলছে..." : "Calculating Dasha..."}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="size-4" />
+                      <span>
+                        {dashaFeature && !dashaFeature.enabled
+                          ? language === "bn"
+                            ? "ফিচারটি বন্ধ রয়েছে"
+                            : "Feature Unavailable"
+                          : language === "bn"
+                          ? "বিংশোত্তরী দশা গণনা করুন"
+                          : language === "hi"
+                          ? "विंशोत्तरी दशा की गणना करें"
+                          : "Calculate Vimshottari Dasha"}
+                      </span>
+                    </>
+                  )}
+                </button>
 
-              <button
-                type="button"
-                onClick={handleReset}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-input bg-surface px-5 py-3 text-sm font-semibold text-muted-foreground hover:bg-surface-muted hover:text-foreground transition-colors"
-              >
-                <RotateCcw className="size-4" />
-                <span>{language === "bn" ? "রিসেট" : "Reset"}</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-input bg-surface px-5 py-3 text-sm font-semibold text-muted-foreground hover:bg-surface-muted hover:text-foreground transition-colors"
+                >
+                  <RotateCcw className="size-4" />
+                  <span>{language === "bn" ? "রিসেট" : "Reset"}</span>
+                </button>
+              </div>
+
+              <FeatureCoinBadge
+                feature={dashaFeature}
+                walletBalance={walletBalance}
+                language={language}
+                showWallet={false}
+              />
             </div>
           </form>
         </div>
@@ -1638,6 +1710,16 @@ export default function DashaCalculatorPage() {
           </div>
         )}
       </main>
+
+      <FeatureCoinModal
+        open={coinModalOpen}
+        onClose={() => setCoinModalOpen(false)}
+        featureName={dashaFeature?.name || (language === "bn" ? "দশা ক্যালকুলেটর" : "Dasha Calculator")}
+        requiredCoins={dashaFeature?.coins ?? 15}
+        walletBalance={walletBalance}
+        reason={coinModalReason}
+        language={language}
+      />
 
       <SiteFooter />
     </div>

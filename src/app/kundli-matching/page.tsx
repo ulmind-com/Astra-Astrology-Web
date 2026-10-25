@@ -37,6 +37,12 @@ import { astrologyApi } from "@/lib/api";
 import { parseProfileBirthDetails } from "@/lib/birth-details";
 import { useAuth } from "@/providers/auth-provider";
 import { useProfile } from "@/hooks/use-profile";
+import { useFeaturePricing } from "@/hooks/use-feature-pricing";
+import {
+  FeatureCoinBadge,
+  FeatureDisabledAlert,
+  FeatureCoinModal,
+} from "@/components/astrology/feature-pricing-banner";
 import {
   BirthPlaceField,
   type SelectedPlace,
@@ -153,6 +159,10 @@ export default function KundliMatchingPage() {
   // about the same person.
   const { isSignedIn, user } = useAuth();
   const { data: profile } = useProfile({ enabled: Boolean(isSignedIn) });
+  const { getFeature, checkAccess, walletBalance, refresh: refreshWallet } = useFeaturePricing();
+  const matchingFeature = getFeature("kundli_matching");
+  const [coinModalOpen, setCoinModalOpen] = React.useState(false);
+  const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
 
   // Prefill the groom side from the signed-in user's saved birth details, the same
   // source `/kundli` reads. Without this a signed-in user got their stored details
@@ -311,28 +321,61 @@ export default function KundliMatchingPage() {
         language,
       };
 
+      const access = checkAccess("kundli_matching");
+      if (!access.allowed) {
+        if (access.reason === "disabled") {
+          toast.error(
+            language === "bn"
+              ? "কুন্ডলী মিলন ফিচারটি বর্তমানে বন্ধ রাখা হয়েছে।"
+              : "Kundli matching feature is temporarily unavailable.",
+          );
+          return;
+        }
+        setCoinModalReason(access.reason || "insufficient_coins");
+        setCoinModalOpen(true);
+        return;
+      }
+
+      setIsLoading(true);
       const res = await astrologyApi.calculateKundliMatching(payload);
       if (res) {
         setResult(res);
-        toast.success(
-          language === "bn"
-            ? "কুন্ডলী মিলন গণনা সফলভাবে সম্পন্ন হয়েছে!"
-            : language === "hi"
-            ? "कुंडली मिलान सफलतापूर्वक पूरा हुआ!"
-            : "Kundli matching calculated successfully!"
-        );
+        if (access.requiredCoins > 0) {
+          toast.success(
+            language === "bn"
+              ? `কুন্ডলী মিলন গণনা সম্পন্ন হয়েছে! (${access.requiredCoins} কয়েন খরচ হয়েছে)`
+              : `Kundli matching calculated! (${access.requiredCoins} coins used)`,
+          );
+          refreshWallet();
+        } else {
+          toast.success(
+            language === "bn"
+              ? "কুন্ডলী মিলন গণনা সফলভাবে সম্পন্ন হয়েছে!"
+              : language === "hi"
+              ? "कुंडली मिलान सफलतापूर्वक पूरा हुआ!"
+              : "Kundli matching calculated successfully!",
+          );
+        }
         setTimeout(() => {
           document.getElementById("matching-results")?.scrollIntoView({ behavior: "smooth" });
         }, 150);
       }
     } catch (err: any) {
       console.error("Kundli Matching Error:", err);
-      toast.error(
-        err?.message ||
-          (language === "bn"
-            ? "কুন্ডলী মিলন গণনা করতে সমস্যা হয়েছে। তথ্য পরীক্ষা করুন।"
-            : "Failed to calculate Kundli matching. Please check inputs.")
-      );
+      if (err?.code === "insufficient_coins") {
+        setCoinModalReason("insufficient_coins");
+        setCoinModalOpen(true);
+      } else if (err?.code === "authentication_required" || err?.status === 401) {
+        setCoinModalReason("unauthorized");
+        setCoinModalOpen(true);
+      } else {
+        toast.error(
+          err?.message ||
+            (language === "bn"
+              ? "কুন্ডলী মিলন গণনা করতে সমস্যা হয়েছে। তথ্য পরীক্ষা করুন।"
+              : "Failed to calculate Kundli matching. Please check inputs."),
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -370,6 +413,15 @@ export default function KundliMatchingPage() {
           </p>
 
           <GoldDiamondDivider />
+
+          {/* Feature Coin Badge */}
+          <div className="flex justify-center pt-1">
+            <FeatureCoinBadge
+              feature={matchingFeature}
+              walletBalance={walletBalance}
+              language={language}
+            />
+          </div>
 
           {/* Language Switcher Bar */}
           <div className="inline-flex items-center p-1 rounded-full border border-amber-200/80 bg-white/90 shadow-sm gap-1 text-xs font-medium">
@@ -913,34 +965,58 @@ export default function KundliMatchingPage() {
               </div>
 
               {/* Action Buttons for Step 2 */}
-              <div className="pt-4 flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm transition-all"
-                >
-                  <ArrowLeft className="size-4" />
-                  <span>{t.backButton}</span>
-                </button>
+              <div className="pt-4 space-y-3">
+                {matchingFeature && !matchingFeature.enabled && (
+                  <FeatureDisabledAlert
+                    featureName={language === "bn" ? "কুন্ডলী মিলন" : "Kundli Matching"}
+                    language={language}
+                  />
+                )}
 
-                <button
-                  type="button"
-                  disabled={isLoading}
-                  onClick={handleCalculateMatch}
-                  className="inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all disabled:opacity-50 cursor-pointer"
-                >
-                  {isLoading ? (
-                    <>
-                      <RefreshCw className="size-4 animate-spin" />
-                      <span>{language === "bn" ? "গণনা করা হচ্ছে..." : "Calculating..."}</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>{t.matchButton}</span>
-                      <HeartHandshake className="size-4" />
-                    </>
-                  )}
-                </button>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm transition-all"
+                  >
+                    <ArrowLeft className="size-4" />
+                    <span>{t.backButton}</span>
+                  </button>
+
+                  <div className="flex items-center gap-3">
+                    <FeatureCoinBadge
+                      feature={matchingFeature}
+                      walletBalance={walletBalance}
+                      language={language}
+                      showWallet={false}
+                    />
+
+                    <button
+                      type="button"
+                      disabled={isLoading || (matchingFeature ? !matchingFeature.enabled : false)}
+                      onClick={handleCalculateMatch}
+                      className="inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all disabled:opacity-50 cursor-pointer"
+                    >
+                      {isLoading ? (
+                        <>
+                          <RefreshCw className="size-4 animate-spin" />
+                          <span>{language === "bn" ? "গণনা করা হচ্ছে..." : "Calculating..."}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>
+                            {matchingFeature && !matchingFeature.enabled
+                              ? language === "bn"
+                                ? "ফিচারটি বন্ধ রয়েছে"
+                                : "Feature Disabled"
+                              : t.matchButton}
+                          </span>
+                          <HeartHandshake className="size-4" />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -1899,6 +1975,16 @@ export default function KundliMatchingPage() {
           </div>
         )}
       </main>
+
+      <FeatureCoinModal
+        open={coinModalOpen}
+        onClose={() => setCoinModalOpen(false)}
+        featureName={matchingFeature?.name || (language === "bn" ? "কুন্ডলী মিলন" : "Kundli Matching")}
+        requiredCoins={matchingFeature?.coins ?? 20}
+        walletBalance={walletBalance}
+        reason={coinModalReason}
+        language={language}
+      />
 
       <SiteFooter />
     </div>

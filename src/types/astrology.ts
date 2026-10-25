@@ -872,6 +872,19 @@ export interface DailyHoroscopeResult {
   };
 }
 
+export interface FeaturePricingItem {
+  feature_id: string;
+  name: string;
+  name_bn?: string;
+  description: string;
+  coins: number;
+  is_free: boolean;
+  enabled: boolean;
+}
+
+export type FeaturePricingMap = Record<string, FeaturePricingItem>;
+
+
 
 
 

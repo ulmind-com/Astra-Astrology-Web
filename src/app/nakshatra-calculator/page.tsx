@@ -49,6 +49,12 @@ import { NakshatraWheel } from "@/components/astrology/nakshatra-wheel";
 import { NAKSHATRA_UI_TEXTS } from "@/lib/nakshatra-translations";
 import { useAuth } from "@/providers/auth-provider";
 import { useProfile } from "@/hooks/use-profile";
+import { useFeaturePricing } from "@/hooks/use-feature-pricing";
+import {
+  FeatureCoinBadge,
+  FeatureDisabledAlert,
+  FeatureCoinModal,
+} from "@/components/astrology/feature-pricing-banner";
 import type {
   AstrologyLanguage,
   AyanamsaType,
@@ -61,6 +67,10 @@ import type {
 export default function NakshatraCalculatorPage() {
   const { user, isSignedIn } = useAuth();
   const { data: profile } = useProfile({ enabled: isSignedIn });
+  const { getFeature, checkAccess, walletBalance, refresh: refreshWallet } = useFeaturePricing();
+  const nakshatraFeature = getFeature("nakshatra_calculator");
+  const [coinModalOpen, setCoinModalOpen] = React.useState(false);
+  const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
 
   // Language state: 'bn' (Bengali), 'en' (English), 'hi' (Hindi)
   const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
@@ -396,25 +406,57 @@ export default function NakshatraCalculatorPage() {
       language,
     };
 
+    const access = checkAccess("nakshatra_calculator");
+    if (!access.allowed) {
+      if (access.reason === "disabled") {
+        toast.error(
+          language === "bn"
+            ? "নক্ষত্র ক্যালকুলেটর ফিচারটি বর্তমানে বন্ধ রাখা হয়েছে।"
+            : "Nakshatra calculator feature is temporarily unavailable.",
+        );
+        return;
+      }
+      setCoinModalReason(access.reason || "insufficient_coins");
+      setCoinModalOpen(true);
+      return;
+    }
+
     setLoading(true);
     try {
       const resp = await astrologyApi.calculateNakshatra(payload);
       setResult(resp);
-      toast.success(
-        language === "bn"
-          ? `আপনার জন্ম নক্ষত্র: ${resp.nakshatra_name_bn} (পদ ${resp.pada})`
-          : language === "hi"
-          ? `आपका जन्म नक्षत्र: ${resp.nakshatra_name_hi} (पद ${resp.pada})`
-          : `Calculated Birth Star: ${resp.nakshatra_name_en} (Pada ${resp.pada})`,
-      );
+      if (access.requiredCoins > 0) {
+        toast.success(
+          language === "bn"
+            ? `আপনার জন্ম নক্ষত্র নির্ণয় সম্পন্ন হয়েছে! (${access.requiredCoins} কয়েন খরচ হয়েছে)`
+            : `Nakshatra calculated! (${access.requiredCoins} coins used)`,
+        );
+        refreshWallet();
+      } else {
+        toast.success(
+          language === "bn"
+            ? `আপনার জন্ম নক্ষত্র: ${resp.nakshatra_name_bn} (পদ ${resp.pada})`
+            : language === "hi"
+            ? `आपका जन्म नक्षत्र: ${resp.nakshatra_name_hi} (पद ${resp.pada})`
+            : `Calculated Birth Star: ${resp.nakshatra_name_en} (Pada ${resp.pada})`,
+        );
+      }
 
       // Smooth scroll to results
       setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 150);
     } catch (err: any) {
-      const msg = err?.message || "Failed to calculate Birth Star. Please try again.";
-      toast.error(msg);
+      if (err?.code === "insufficient_coins") {
+        setCoinModalReason("insufficient_coins");
+        setCoinModalOpen(true);
+      } else if (err?.code === "authentication_required" || err?.status === 401) {
+        setCoinModalReason("unauthorized");
+        setCoinModalOpen(true);
+      } else {
+        const msg = err?.message || "Failed to calculate Birth Star. Please try again.";
+        toast.error(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -535,12 +577,29 @@ export default function NakshatraCalculatorPage() {
             <p className="mt-4 text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               {ui.subtitle}
             </p>
+
+            <div className="pt-4 flex justify-center">
+              <FeatureCoinBadge
+                feature={nakshatraFeature}
+                walletBalance={walletBalance}
+                language={language}
+              />
+            </div>
           </div>
         </section>
 
         {/* Calculator Form Section */}
         <section className="max-w-4xl mx-auto px-4 -mt-6">
           <div className="rounded-2xl border border-border/80 bg-surface-elevated/95 backdrop-blur-xl shadow-xl overflow-hidden">
+            {nakshatraFeature && !nakshatraFeature.enabled && (
+              <div className="p-4 bg-amber-500/10 border-b border-amber-300">
+                <FeatureDisabledAlert
+                  featureName={language === "bn" ? "নক্ষত্র ক্যালকুলেটর" : "Nakshatra Calculator"}
+                  language={language}
+                />
+              </div>
+            )}
+
             {/* Auto-fill banner if user is logged in */}
             {isSignedIn && profile && (
               <div className="px-5 py-3 bg-brand-500/10 border-b border-brand-500/20 flex flex-wrap items-center justify-between gap-3 text-xs">
@@ -815,35 +874,48 @@ export default function NakshatraCalculatorPage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full sm:flex-1 py-3 text-sm font-bold bg-brand-500 hover:bg-brand-600 text-white rounded-xl shadow-soft hover:shadow-glow transition-all duration-200"
-                >
-                  {loading ? (
-                    <span className="flex items-center gap-2">
-                      <RefreshCw className="size-4 animate-spin" />
-                      {ui.calculating}
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      <Star className="size-4 fill-amber-300 text-amber-300" />
-                      {ui.calculateBtn}
-                      <ArrowRight className="size-4" />
-                    </span>
-                  )}
-                </Button>
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:flex-1">
+                  <Button
+                    type="submit"
+                    disabled={loading || (nakshatraFeature ? !nakshatraFeature.enabled : false)}
+                    className="w-full sm:flex-1 py-3 text-sm font-bold bg-brand-500 hover:bg-brand-600 text-white rounded-xl shadow-soft hover:shadow-glow transition-all duration-200 disabled:opacity-50"
+                  >
+                    {loading ? (
+                      <span className="flex items-center gap-2">
+                        <RefreshCw className="size-4 animate-spin" />
+                        {ui.calculating}
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2">
+                        <Star className="size-4 fill-amber-300 text-amber-300" />
+                        {nakshatraFeature && !nakshatraFeature.enabled
+                          ? language === "bn"
+                            ? "ফিচারটি বন্ধ রয়েছে"
+                            : "Feature Disabled"
+                          : ui.calculateBtn}
+                        <ArrowRight className="size-4" />
+                      </span>
+                    )}
+                  </Button>
 
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleResetForm}
-                  className="w-full sm:w-auto px-5 py-3 rounded-xl text-xs font-semibold"
-                >
-                  <RotateCcw className="size-3.5 mr-1.5" />
-                  {ui.resetBtn}
-                </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleResetForm}
+                    className="w-full sm:w-auto px-5 py-3 rounded-xl text-xs font-semibold"
+                  >
+                    <RotateCcw className="size-3.5 mr-1.5" />
+                    {ui.resetBtn}
+                  </Button>
+                </div>
+
+                <FeatureCoinBadge
+                  feature={nakshatraFeature}
+                  walletBalance={walletBalance}
+                  language={language}
+                  showWallet={false}
+                />
               </div>
             </form>
           </div>
@@ -1354,6 +1426,16 @@ export default function NakshatraCalculatorPage() {
           </section>
         )}
       </main>
+
+      <FeatureCoinModal
+        open={coinModalOpen}
+        onClose={() => setCoinModalOpen(false)}
+        featureName={nakshatraFeature?.name || (language === "bn" ? "নক্ষত্র ক্যালকুলেটর" : "Nakshatra Calculator")}
+        requiredCoins={nakshatraFeature?.coins ?? 10}
+        walletBalance={walletBalance}
+        reason={coinModalReason}
+        language={language}
+      />
 
       <SiteFooter />
     </div>

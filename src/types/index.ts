@@ -150,7 +150,7 @@ export type WalletBalance = S["WalletBalance"];
 export type WalletSummary = S["WalletSummary"];
 export type WalletTransaction = S["TransactionOut"];
 export type TransactionDirection = S["TransactionDirection"];
-export type TransactionReason = S["TransactionReason"];
+export type TransactionReason = S["TransactionReason"] | "feature_usage";
 export type RechargeOptions = S["RechargeOptions"];
 export type RechargePack = S["RechargePack"];
 export type CreateOrderResponse = S["CreateOrderResponse"];
@@ -171,6 +171,7 @@ export const TRANSACTION_REASON_LABELS: Record<TransactionReason, string> = {
   payout: "Payout",
   reversal: "Reversal",
   appointment_deposit: "Appointment booking",
+  feature_usage: "Feature usage",
 };
 
 export const PAYMENT_STATUS_LABELS: Record<PaymentOrderStatus, string> = {

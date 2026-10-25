@@ -35,6 +35,12 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Button } from "@/components/ui";
 import { astrologyApi } from "@/lib/api";
+import { useFeaturePricing } from "@/hooks/use-feature-pricing";
+import {
+  FeatureCoinBadge,
+  FeatureDisabledAlert,
+  FeatureCoinModal,
+} from "@/components/astrology/feature-pricing-banner";
 import type {
   AstrologyLanguage,
   DailyHoroscopeResult,
@@ -96,6 +102,11 @@ function HoroscopeContent() {
   const searchParams = useSearchParams();
   const initialSign = searchParams?.get("sign") || "aries";
 
+  const { getFeature, checkAccess, walletBalance, refresh: refreshWallet } = useFeaturePricing();
+  const horoscopeFeature = getFeature("daily_horoscope");
+  const [coinModalOpen, setCoinModalOpen] = React.useState(false);
+  const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
+
   // State
   const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
   const [selectedDate, setSelectedDate] = React.useState<string>(() => formatDateToYMD(new Date()));
@@ -125,6 +136,16 @@ function HoroscopeContent() {
 
   // Fetch daily horoscope
   const fetchHoroscope = React.useCallback(async (date: string, lang: AstrologyLanguage) => {
+    if (horoscopeFeature && !horoscopeFeature.enabled) {
+      setLoading(false);
+      setError(
+        lang === "bn"
+          ? "দৈনিক রাশিফল ফিচারটি বর্তমানে বন্ধ রাখা হয়েছে।"
+          : "Daily horoscope is currently disabled by administrator.",
+      );
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -138,12 +159,19 @@ function HoroscopeContent() {
       setHoroscopeData(data);
     } catch (err: any) {
       console.error("Daily horoscope fetch error:", err);
+      if (err?.code === "insufficient_coins") {
+        setCoinModalReason("insufficient_coins");
+        setCoinModalOpen(true);
+      } else if (err?.code === "authentication_required" || err?.status === 401) {
+        setCoinModalReason("unauthorized");
+        setCoinModalOpen(true);
+      }
       setError(err?.message || "Failed to calculate daily horoscope.");
       toast.error(err?.message || "Could not fetch horoscope data.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [horoscopeFeature]);
 
   React.useEffect(() => {
     fetchHoroscope(selectedDate, language);
@@ -337,6 +365,15 @@ function HoroscopeContent() {
               {t.subtitle}
             </p>
 
+            {/* Feature Coin Badge */}
+            <div className="pt-3 flex justify-center">
+              <FeatureCoinBadge
+                feature={horoscopeFeature}
+                walletBalance={walletBalance}
+                language={language}
+              />
+            </div>
+
             {/* Controls Bar: Language + Date Switchers */}
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               {/* Language Switcher */}
@@ -425,6 +462,15 @@ function HoroscopeContent() {
               </button>
             </div>
           </div>
+
+          {horoscopeFeature && !horoscopeFeature.enabled && (
+            <div className="mb-8">
+              <FeatureDisabledAlert
+                featureName={language === "bn" ? "দৈনিক রাশিফল" : "Daily Horoscope"}
+                language={language}
+              />
+            </div>
+          )}
 
           {/* Daily Panchang Banner */}
           {horoscopeData?.panchang && (
@@ -850,6 +896,16 @@ function HoroscopeContent() {
 
         </div>
       </main>
+
+      <FeatureCoinModal
+        open={coinModalOpen}
+        onClose={() => setCoinModalOpen(false)}
+        featureName={horoscopeFeature?.name || (language === "bn" ? "দৈনিক রাশিফল" : "Daily Horoscope")}
+        requiredCoins={horoscopeFeature?.coins ?? 0}
+        walletBalance={walletBalance}
+        reason={coinModalReason}
+        language={language}
+      />
 
       <SiteFooter />
     </div>
