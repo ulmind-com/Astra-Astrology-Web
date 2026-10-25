@@ -812,6 +812,59 @@ export interface DailyHoroscopePayload {
   latitude?: number;
   longitude?: number;
   timezone?: number;
+  birth_nakshatra_index?: number | null;
+  birth_date?: string | null;
+  birth_time?: string | null;
+  birth_rashi_index?: number | null;
+}
+
+export interface HoraItem {
+  hora_index: number;
+  hora_number: number;
+  is_day: boolean;
+  start_time: string;
+  end_time: string;
+  planet: string;
+  planet_bn: string;
+  planet_hi: string;
+  planet_sa: string;
+  is_auspicious: boolean;
+  category: string;
+  category_bn: string;
+  category_hi: string;
+  verdict: string;
+  verdict_bn?: string;
+  verdict_hi?: string;
+  best_activities: string;
+  best_activities_bn: string;
+  best_activities_hi: string;
+}
+
+export interface TaraBalaSummary {
+  tara_index: number;
+  tara_name: string;
+  tara_name_bn: string;
+  tara_name_hi: string;
+  is_auspicious: boolean;
+  score_percent: number;
+  verdict: string;
+  verdict_bn: string;
+  verdict_hi: string;
+  guidance: string;
+  guidance_bn: string;
+  guidance_hi: string;
+}
+
+export interface PersonalizedNakshatraProfile {
+  birth_nakshatra_index: number;
+  birth_nakshatra_name: string;
+  birth_nakshatra_name_bn: string;
+  birth_nakshatra_name_hi: string;
+  birth_nakshatra_lord: string;
+  birth_nakshatra_deity: string;
+  sacred_tree: string;
+  beej_mantra: string;
+  tara_bala: TaraBalaSummary;
 }
 
 export interface DailySignHoroscope {
@@ -837,6 +890,17 @@ export interface DailySignHoroscope {
   lucky_time: string;
   remedy: string;
   favorable_direction: string;
+  // Classical Vedic expansions
+  is_chandrashtama?: boolean;
+  chandrashtama_advice?: string | null;
+  vedha_active?: boolean;
+  vedha_planet?: string | null;
+  vedha_description?: string | null;
+  sade_sati_status?: string | null;
+  guru_gochar_verdict?: string | null;
+  beej_mantra?: string;
+  charity_dana?: string;
+  tara_bala?: TaraBalaSummary | null;
 }
 
 export interface DailyPanchangSummary {
@@ -851,6 +915,10 @@ export interface DailyPanchangSummary {
   sunset: string;
   abhijit_muhurat: string;
   rahu_kaal: string;
+  disha_shoola?: string;
+  disha_remedy?: string;
+  favorable_chandra_rashis?: string[];
+  horas?: HoraItem[];
 }
 
 export interface DailyHoroscopeResult {
@@ -863,6 +931,7 @@ export interface DailyHoroscopeResult {
   sun_sign: string;
   panchang: DailyPanchangSummary;
   signs: DailySignHoroscope[];
+  personalized_profile?: PersonalizedNakshatraProfile | null;
   calculation_meta: {
     engine: string;
     ayanamsha: string;
