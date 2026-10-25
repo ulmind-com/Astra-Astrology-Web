@@ -32,7 +32,6 @@ function RegisterForm() {
     last_name: "",
   });
   const [code, setCode] = React.useState("");
-  const [devCode, setDevCode] = React.useState<string | null>(null);
   const [error, setError] = React.useState<ApiError | null>(null);
   const [busy, setBusy] = React.useState(false);
   const [resendIn, setResendIn] = React.useState(0);
@@ -64,7 +63,6 @@ function RegisterForm() {
         middle_name: form.middle_name || null,
         last_name: form.last_name || null,
       });
-      setDevCode(sent.dev_code ?? null);
       startCooldown(sent.resend_available_at);
       setStep("code");
       toast.success(`We sent a code to ${sent.email}`);
@@ -95,7 +93,6 @@ function RegisterForm() {
     setError(null);
     try {
       const sent = await authApi.resendCode(form.email);
-      setDevCode(sent.dev_code ?? null);
       startCooldown(sent.resend_available_at);
       toast.success("A new code is on its way.");
     } catch (caught) {
@@ -133,13 +130,6 @@ function RegisterForm() {
           We sent a six-digit code to{" "}
           <span className="font-medium text-foreground">{form.email}</span>.
         </p>
-
-        {devCode && (
-          <Alert tone="info" title="Development mode" className="mt-5">
-            Your code is <span className="font-mono font-semibold">{devCode}</span>. This
-            only appears because the server has <code>OTP_DEV_MODE</code> on.
-          </Alert>
-        )}
 
         {error && (
           <Alert tone="error" className="mt-5">
