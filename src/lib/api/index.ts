@@ -468,4 +468,56 @@ export const astrologyApi = {
     api.get<Record<string, FeaturePricingItem>>(endpoints.astrology.featuresPricing, { auth: false }),
 };
 
+// ------------------------------------------------------------ AI Vedic Astrologer
+export interface AIChatMessage {
+  id?: string;
+  role: "user" | "assistant" | "system";
+  content: string;
+  tools_called?: string[];
+  citations?: Array<{ source: string; category: string; snippet: string }>;
+  suggested_followups?: string[];
+  timestamp?: string;
+}
+
+export interface AIChatResponse {
+  session_id: string;
+  reply: string;
+  language: string;
+  tools_called: string[];
+  citations: Array<{ source: string; category: string; snippet: string }>;
+  suggested_followups: string[];
+}
+
+export interface AIChatSessionData {
+  session_id: string;
+  title: string;
+  birth_details?: Record<string, unknown>;
+  messages: AIChatMessage[];
+  updated_at: string;
+}
+
+export const aiAstrologerApi = {
+  chat: (body: {
+    message: string;
+    session_id?: string;
+    birth_date?: string;
+    birth_time?: string;
+    birth_place?: string;
+    latitude?: number;
+    longitude?: number;
+    preferred_language?: string;
+  }) => api.post<AIChatResponse>(endpoints.aiAstrologer.chat, body),
+
+  getSession: (sessionId: string) =>
+    api.get<AIChatSessionData>(endpoints.aiAstrologer.session(sessionId)),
+
+  sendFeedback: (body: {
+    session_id: string;
+    user_query: string;
+    ai_response: string;
+    rating: number;
+    feedback_reason?: string;
+  }) => api.post<{ status: string }>(endpoints.aiAstrologer.feedback, body),
+};
+
 
