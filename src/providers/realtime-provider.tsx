@@ -47,9 +47,12 @@ export type ChatEvent =
 
 type ChatListener = (event: ChatEvent) => void;
 
+import type { FeaturePricingItem } from "@/types";
+
 type RealtimeValue = {
   astrologers: Map<string, LiveAstrologer>;
   platform: LivePlatform | null;
+  featurePricing: Record<string, FeaturePricingItem> | null;
   connected: boolean;
   /** Subscribe to chat traffic. Returns the unsubscribe function. */
   onChat: (listener: ChatListener) => () => void;
@@ -58,6 +61,7 @@ type RealtimeValue = {
 const RealtimeContext = React.createContext<RealtimeValue>({
   astrologers: new Map(),
   platform: null,
+  featurePricing: null,
   connected: false,
   onChat: () => () => {},
 });
@@ -195,6 +199,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
   const [astrologers, setAstrologers] = React.useState<Map<string, LiveAstrologer>>(new Map());
   const [platform, setPlatform] = React.useState<LivePlatform | null>(null);
+  const [featurePricing, setFeaturePricing] = React.useState<Record<string, FeaturePricingItem> | null>(null);
   const [connected, setConnected] = React.useState(false);
 
   // Held in a ref as well as state: the decay timer needs the latest map
@@ -242,6 +247,11 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
           setPlatform(message.data);
           break;
 
+        case "feature_pricing":
+          setFeaturePricing(message.data);
+          queryClient.setQueryData(["features", "pricing"], message.data);
+          break;
+
         case "wallet":
           // Patched rather than invalidated: an invalidation would refetch and
           // briefly show the old number again before the new one lands. The
@@ -285,8 +295,8 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
   }, [queryClient]);
 
   const value = React.useMemo(
-    () => ({ astrologers, platform, connected, onChat }),
-    [astrologers, platform, connected, onChat],
+    () => ({ astrologers, platform, featurePricing, connected, onChat }),
+    [astrologers, platform, featurePricing, connected, onChat],
   );
 
   return <RealtimeContext.Provider value={value}>{children}</RealtimeContext.Provider>;
@@ -299,6 +309,11 @@ export function useRealtime(): RealtimeValue {
 /** The live platform numbers, or null until the first message lands. */
 export function usePlatform(): LivePlatform | null {
   return useRealtime().platform;
+}
+
+/** The live feature pricing map over WebSocket, updated instantly on admin changes. */
+export function useLiveFeaturePricing(): Record<string, FeaturePricingItem> | null {
+  return useRealtime().featurePricing;
 }
 
 /** The live view of one astrologer, or null if nothing has been said about them. */

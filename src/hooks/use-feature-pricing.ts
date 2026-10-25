@@ -6,6 +6,7 @@ import * as React from "react";
 import { astrologyApi } from "@/lib/api";
 import { useAuth } from "@/providers/auth-provider";
 import { useWallet, WALLET_KEY } from "@/hooks/use-wallet";
+import { useLiveFeaturePricing, useRealtime } from "@/providers/realtime-provider";
 import type { FeaturePricingItem } from "@/types";
 
 export const FEATURE_PRICING_KEY = ["features", "pricing"] as const;
@@ -23,16 +24,22 @@ export function useFeaturePricing() {
   const queryClient = useQueryClient();
   const { isSignedIn } = useAuth();
   const { data: walletSummary } = useWallet(isSignedIn);
+  const livePricing = useLiveFeaturePricing();
+  const { connected: isRealtimeConnected } = useRealtime();
 
   const {
-    data: pricing,
-    isLoading,
+    data: queryPricing,
+    isLoading: isQueryLoading,
     refetch,
   } = useQuery({
     queryKey: FEATURE_PRICING_KEY,
     queryFn: astrologyApi.featuresPricing,
     staleTime: 60 * 1000, // 1 minute fresh cache
   });
+
+  // Real-time WebSocket pricing takes precedence immediately, with queryPricing as fallback
+  const pricing = livePricing || queryPricing;
+  const isLoading = !pricing && isQueryLoading;
 
   const walletBalance = walletSummary?.wallet.balance_coins ?? 0;
 
@@ -145,6 +152,7 @@ export function useFeaturePricing() {
   return {
     pricing,
     isLoading,
+    isRealtimeConnected,
     walletBalance,
     getFeature,
     coins,
