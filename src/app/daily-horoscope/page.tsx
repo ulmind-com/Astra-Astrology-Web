@@ -22,13 +22,17 @@ import {
   Info,
   Sun,
   Moon,
+  Share2,
+  ArrowRight,
+  Copy,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  UserCheck,
   Flame,
   Droplets,
   Wind,
   Mountain,
-  Share2,
-  ArrowRight,
-  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -45,6 +49,8 @@ import type {
   AstrologyLanguage,
   DailyHoroscopeResult,
   DailySignHoroscope,
+  HoraItem,
+  PersonalizedNakshatraProfile,
 } from "@/types";
 
 // 12 Zodiac signs metadata
@@ -63,29 +69,46 @@ const ZODIAC_LIST = [
   { id: "pisces", index: 11, en: "Pisces", bn: "মীন", hi: "मीन", sa: "Meena", symbol: "♓", element: "Water", ruler: "Jupiter" },
 ];
 
-const ELEMENT_COLORS: Record<string, { badge: string; text: string; bg: string }> = {
-  Fire: { badge: "bg-amber-500/10 text-amber-700 border-amber-500/25", text: "text-amber-600", bg: "bg-amber-50" },
-  Earth: { badge: "bg-emerald-500/10 text-emerald-800 border-emerald-500/25", text: "text-emerald-700", bg: "bg-emerald-50" },
-  Air: { badge: "bg-sky-500/10 text-sky-800 border-sky-500/25", text: "text-sky-700", bg: "bg-sky-50" },
-  Water: { badge: "bg-indigo-500/10 text-indigo-800 border-indigo-500/25", text: "text-indigo-700", bg: "bg-indigo-50" },
-};
-
-function getScoreColor(score: number) {
-  if (score >= 80) return "text-emerald-600 bg-emerald-500";
-  if (score >= 60) return "text-blue-600 bg-blue-500";
-  if (score >= 40) return "text-amber-600 bg-amber-500";
-  return "text-rose-600 bg-rose-500";
-}
+// 27 Nakshatras list for quick personalization
+const NAKSHATRA_OPTIONS = [
+  { index: 0, en: "Ashwini", bn: "অশ্বিনী", hi: "अश्विनी", lord: "Ketu", rashi: "Aries" },
+  { index: 1, en: "Bharani", bn: "ভরণী", hi: "भरणी", lord: "Venus", rashi: "Aries" },
+  { index: 2, en: "Krittika", bn: "কৃত্তিকা", hi: "कृत्तिका", lord: "Sun", rashi: "Aries / Taurus" },
+  { index: 3, en: "Rohini", bn: "রোহিণী", hi: "रोहिणी", lord: "Moon", rashi: "Taurus" },
+  { index: 4, en: "Mrigashira", bn: "মৃগশিরা", hi: "मृगशिरा", lord: "Mars", rashi: "Taurus / Gemini" },
+  { index: 5, en: "Ardra", bn: "আর্দ্রা", hi: "आर्द्रा", lord: "Rahu", rashi: "Gemini" },
+  { index: 6, en: "Punarvasu", bn: "পুনর্বসু", hi: "पुनर्वसु", lord: "Jupiter", rashi: "Gemini / Cancer" },
+  { index: 7, en: "Pushya", bn: "পুষ্যা", hi: "पुष्य", lord: "Saturn", rashi: "Cancer" },
+  { index: 8, en: "Ashlesha", bn: "অশ্লেষা", hi: "आश्लेषा", lord: "Mercury", rashi: "Cancer" },
+  { index: 9, en: "Magha", bn: "মঘা", hi: "मघा", lord: "Ketu", rashi: "Leo" },
+  { index: 10, en: "Purva Phalguni", bn: "পূর্ব ফাল্গুনী", hi: "पूर्वा फाल्गुनी", lord: "Venus", rashi: "Leo" },
+  { index: 11, en: "Uttara Phalguni", bn: "উত্তর ফাল্গুনী", hi: "उत्तरा फाल्गुनी", lord: "Sun", rashi: "Leo / Virgo" },
+  { index: 12, en: "Hasta", bn: "হস্তা", hi: "हस्त", lord: "Moon", rashi: "Virgo" },
+  { index: 13, en: "Chitra", bn: "চিত্রা", hi: "चित्रा", lord: "Mars", rashi: "Virgo / Libra" },
+  { index: 14, en: "Swati", bn: "স্বাতী", hi: "स्वाति", lord: "Rahu", rashi: "Libra" },
+  { index: 15, en: "Vishakha", bn: "বিশাখা", hi: "विशाखा", lord: "Jupiter", rashi: "Libra / Scorpio" },
+  { index: 16, en: "Anuradha", bn: "অনুরাধা", hi: "अनुराधा", lord: "Saturn", rashi: "Scorpio" },
+  { index: 17, en: "Jyeshtha", bn: "জ্যেষ্ঠা", hi: "ज्येष्ठा", lord: "Mercury", rashi: "Scorpio" },
+  { index: 18, en: "Mula", bn: "মূলা", hi: "मूल", lord: "Ketu", rashi: "Sagittarius" },
+  { index: 19, en: "Purva Ashadha", bn: "পূর্বাষাঢ়া", hi: "पूर्वाषाढ़ा", lord: "Venus", rashi: "Sagittarius" },
+  { index: 20, en: "Uttara Ashadha", bn: "উত্তরাষাঢ়া", hi: "उत्तराषाढ़ा", lord: "Sun", rashi: "Sagittarius / Capricorn" },
+  { index: 21, en: "Shravana", bn: "শ্রবণা", hi: "श्रवण", lord: "Moon", rashi: "Capricorn" },
+  { index: 22, en: "Dhanishta", bn: "ধনিষ্ঠা", hi: "धनिष्ठा", lord: "Mars", rashi: "Capricorn / Aquarius" },
+  { index: 23, en: "Shatabhisha", bn: "শতভিষা", hi: "शतभिषा", lord: "Rahu", rashi: "Aquarius" },
+  { index: 24, en: "Purva Bhadrapada", bn: "পূর্ব ভাদ্রপদ", hi: "पूर्वा भाद्रपद", lord: "Jupiter", rashi: "Aquarius / Pisces" },
+  { index: 25, en: "Uttara Bhadrapada", bn: "উত্তর ভাদ্রপদ", hi: "उत्तरा भाद्रपद", lord: "Saturn", rashi: "Pisces" },
+  { index: 26, en: "Revati", bn: "রেবতী", hi: "रेवती", lord: "Mercury", rashi: "Pisces" },
+];
 
 function getVerdictBadgeClass(verdict: string) {
   const lower = verdict.toLowerCase();
-  if (lower.includes("highly") || lower.includes("পরম") || lower.includes("अत्यंत")) {
+  if (lower.includes("highly") || lower.includes("পরম") || lower.includes("অত্যন্ত") || lower.includes("अत्यंत")) {
     return "bg-emerald-100 text-emerald-800 border-emerald-300";
   }
   if (lower.includes("favorable") || lower.includes("শুভ") || lower.includes("शुभ")) {
     return "bg-blue-100 text-blue-800 border-blue-300";
   }
-  if (lower.includes("caution") || lower.includes("সতর্ক") || lower.includes("सावधानी")) {
+  if (lower.includes("caution") || lower.includes("সতর্ক") || lower.includes("সাৰধান") || lower.includes("सावधानी")) {
     return "bg-amber-100 text-amber-800 border-amber-300";
   }
   return "bg-stone-100 text-stone-700 border-stone-300";
@@ -117,6 +140,19 @@ function HoroscopeContent() {
     return found >= 0 ? found : 0;
   });
 
+  // Personalization State
+  const [selectedNakshatra, setSelectedNakshatra] = React.useState<number | null>(null);
+  const [showPersonalize, setShowPersonalize] = React.useState<boolean>(false);
+  const [birthDateInput, setBirthDateInput] = React.useState<string>("");
+  const [birthTimeInput, setBirthTimeInput] = React.useState<string>("");
+
+  // 24 Horas Timeline state
+  const [showHoras, setShowHoras] = React.useState<boolean>(false);
+  const [horaViewPeriod, setHoraViewPeriod] = React.useState<"day" | "night">("day");
+
+  // Copied mantra toast state
+  const [copiedMantra, setCopiedMantra] = React.useState<boolean>(false);
+
   const [loading, setLoading] = React.useState<boolean>(true);
   const [horoscopeData, setHoroscopeData] = React.useState<DailyHoroscopeResult | null>(null);
   const [error, setError] = React.useState<string | null>(null);
@@ -135,47 +171,59 @@ function HoroscopeContent() {
   }, []);
 
   // Fetch daily horoscope
-  const fetchHoroscope = React.useCallback(async (date: string, lang: AstrologyLanguage) => {
-    if (horoscopeFeature && !horoscopeFeature.enabled) {
-      setLoading(false);
-      setError(
-        lang === "bn"
-          ? "দৈনিক রাশিফল ফিচারটি বর্তমানে বন্ধ রাখা হয়েছে।"
-          : "Daily horoscope is currently disabled by administrator.",
-      );
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await astrologyApi.dailyHoroscope({
-        date,
-        language: lang,
-        latitude: 22.5726,
-        longitude: 88.3639,
-        timezone: 5.5,
-      });
-      setHoroscopeData(data);
-    } catch (err: any) {
-      console.error("Daily horoscope fetch error:", err);
-      if (err?.code === "insufficient_coins") {
-        setCoinModalReason("insufficient_coins");
-        setCoinModalOpen(true);
-      } else if (err?.code === "authentication_required" || err?.status === 401) {
-        setCoinModalReason("unauthorized");
-        setCoinModalOpen(true);
+  const fetchHoroscope = React.useCallback(
+    async (date: string, lang: AstrologyLanguage, nakIdx: number | null, bDate?: string, bTime?: string) => {
+      if (horoscopeFeature && !horoscopeFeature.enabled) {
+        setLoading(false);
+        setError(
+          lang === "bn"
+            ? "দৈনিক রাশিফল ফিচারটি বর্তমানে বন্ধ রাখা হয়েছে।"
+            : "Daily horoscope is currently disabled by administrator.",
+        );
+        return;
       }
-      setError(err?.message || "Failed to calculate daily horoscope.");
-      toast.error(err?.message || "Could not fetch horoscope data.");
-    } finally {
-      setLoading(false);
-    }
-  }, [horoscopeFeature]);
+
+      setLoading(true);
+      setError(null);
+      try {
+        const payload: any = {
+          date,
+          language: lang,
+          latitude: 22.5726,
+          longitude: 88.3639,
+          timezone: 5.5,
+        };
+
+        if (nakIdx !== null && nakIdx !== undefined) {
+          payload.birth_nakshatra_index = nakIdx;
+        } else if (bDate) {
+          payload.birth_date = bDate;
+          if (bTime) payload.birth_time = bTime;
+        }
+
+        const data = await astrologyApi.dailyHoroscope(payload);
+        setHoroscopeData(data);
+      } catch (err: any) {
+        console.error("Daily horoscope fetch error:", err);
+        if (err?.code === "insufficient_coins") {
+          setCoinModalReason("insufficient_coins");
+          setCoinModalOpen(true);
+        } else if (err?.code === "authentication_required" || err?.status === 401) {
+          setCoinModalReason("unauthorized");
+          setCoinModalOpen(true);
+        }
+        setError(err?.message || "Failed to calculate daily horoscope.");
+        toast.error(err?.message || "Could not fetch horoscope data.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [horoscopeFeature]
+  );
 
   React.useEffect(() => {
-    fetchHoroscope(selectedDate, language);
-  }, [fetchHoroscope, selectedDate, language]);
+    fetchHoroscope(selectedDate, language, selectedNakshatra, birthDateInput, birthTimeInput);
+  }, [fetchHoroscope, selectedDate, language, selectedNakshatra, birthDateInput, birthTimeInput]);
 
   // Sync active sign from query param if changed
   React.useEffect(() => {
@@ -188,9 +236,9 @@ function HoroscopeContent() {
     }
   }, [searchParams]);
 
-  const activeSignData: DailySignHoroscope | undefined = horoscopeData?.signs?.find(
-    (s) => s.sign_index === activeSignIndex
-  ) || horoscopeData?.signs?.[activeSignIndex];
+  const activeSignData: DailySignHoroscope | undefined =
+    horoscopeData?.signs?.find((s) => s.sign_index === activeSignIndex) ||
+    horoscopeData?.signs?.[activeSignIndex];
 
   const currentMeta = ZODIAC_LIST[activeSignIndex];
 
@@ -198,8 +246,8 @@ function HoroscopeContent() {
   const t = {
     bn: {
       title: "দৈনিক রাশিফল",
-      subtitle: "সুইস এফিমেরিস ভিত্তিক নিখুঁত চন্দ্র গোচর ও দৈনিক পঞ্চাঙ্গ",
-      tag: "১০০% নিজস্ব জ্যোতিষীয় গণনা • কোনো থার্ড পার্টি API নেই",
+      subtitle: "সুইস এফিমেরিস ভিত্তিক নিখুঁত চন্দ্র গোচর, বৈদিক হোরা ও নবতারা বল",
+      tag: "১০০% নিজস্ব জ্যোতিষীয় গণনা • কোনো থার্ড পার্টি API নেই • শাস্ত্রীয় নির্ভুলতা",
       yesterday: "গতকাল",
       today: "আজ",
       tomorrow: "আগামীকাল",
@@ -234,15 +282,34 @@ function HoroscopeContent() {
       rulingLord: "অধিপতি গ্রহ",
       element: "তত্ত্ব",
       remedyTitle: "বৈদিক প্রতিকার ও মঙ্গল উপায়",
-      accuracyTitle: "১০০% নির্ভুল বৈদিক গোচর প্রযুক্তি",
-      accuracyDesc: "এই দৈনিক রাশিফল সুইস এফিমেরিস ২.১০ (Swiss Ephemeris) এর মাধ্যমে লাহিড়ী অয়নাংশ ব্যবহার করে চন্দ্রের রিয়েল-টাইম রাশি গোচর ও দ্বাদশ ভাব অবস্থান অনুসারে নির্ভুলভাবে গণনাকৃত।",
+      accuracyTitle: "১০০% শাস্ত্রীয় নির্ভুল বৈদিক গোচর প্রযুক্তি",
+      accuracyDesc: "এই দৈনিক রাশিফল সুইস এফিমেরিস ২.১০ (Swiss Ephemeris) এর মাধ্যমে লাহিড়ী অয়নাংশ ব্যবহার করে চন্দ্রের রিয়েল-টাইম রাশি গোচর, দ্বাদশ ভাব ফল, ক্লাসিক্যাল গোচর বেধ ও ২৪ হোরা চক্র অনুসারে নির্ভুলভাবে গণনাকৃত।",
       consultCta: "অভিজ্ঞ জ্যোতিষীর সাথে বিস্তারিত কুষ্ঠি বিচার করুন",
       share: "রাশিফল শেয়ার করুন",
+      horaBtn: "২৪ ঘণ্টা বৈদিক হোরা চক্র দেখুন",
+      horaTitle: "২৪ ঘণ্টা গ্রহ হোরা চক্র (Planetary Horas)",
+      horaDesc: "সূর্যোদয় থেকে দিন ও রাতের ২৪টি হোরা। শুভ হোরায় জরুরি কাজের সূচনা করলে সাফল্য নিশ্চিত হয়।",
+      dayHoras: "দিবা হোরা (দিনের ১২ হোরা)",
+      nightHoras: "রাত্রি হোরা (রাতের ১২ হোরা)",
+      personalizeTitle: "আমার জন্ম নক্ষত্র দিয়ে ফলাফল পার্সোনালাইজ করুন",
+      personalizeSub: "নবতারা চক্র (Navatara Chakra) অনুসারে আজকের গোচরে আপনার জন্ম নক্ষত্রের শুভাশুভ বল ও ব্যক্তিগত প্রতিকার দেখুন।",
+      selectNakshatra: "জন্ম নক্ষত্র নির্বাচন করুন",
+      clearPersonalize: "রিসেট করুন",
+      dishaShoolaTitle: "দিশাশূল (ভ্রমণ নির্দেশিকা)",
+      dishaRemedyTitle: "যাত্রার শাস্ত্রীয় শুভ প্রতিকার",
+      favorableChandraTitle: "আজকের চন্দ্রবল যুক্ত শুভ রাশি",
+      beejMantraTitle: "রাশি অধিপতির মূল বৈদিক বীজ মন্ত্র",
+      charityTitle: "আজকের বিশেষ দান ও সৎকর্ম (দান মাহাত্ম্য)",
+      copyMantra: "মন্ত্র কপি করুন",
+      copied: "কপি হয়েছে!",
+      taraBalaBadge: "নবতারা বল",
+      sadeSatiLabel: "শনি গোচর / সাড়ে সাতি",
+      guruLabel: "বৃহস্পতি গোচর",
     },
     hi: {
       title: "दैनिक राशिफल",
-      subtitle: "स्विस एफेमेरिस आधारित सटीक चंद्र गोचर और दैनिक पंचांग",
-      tag: "100% इन-हाउस ज्योतिषीय गणना • कोई तृतीय-पक्ष API नहीं",
+      subtitle: "स्विस एफेमेरिस आधारित सटीक चंद्र गोचर, वैदिक होरा और नवतारा बल",
+      tag: "100% इन-हाउस ज्योतिषीय गणना • कोई तृतीय-पक्ष API नहीं • पूर्ण शास्त्रीय प्रामाणिकता",
       yesterday: "कल (बीता)",
       today: "आज",
       tomorrow: "कल (आने वाला)",
@@ -278,14 +345,33 @@ function HoroscopeContent() {
       element: "तत्व",
       remedyTitle: "वैदिक उपाय और शांति मंत्र",
       accuracyTitle: "100% सटीक वैदिक गोचर प्रणाली",
-      accuracyDesc: "यह दैनिक राशिफल स्विस एफेमेरिस 2.10 द्वारा लाहिड़ी अयनांश के आधार पर चंद्रमा की वर्तमान स्थिति व द्वादश भाव गोचर के शास्त्रीय नियमों से पूर्णतः प्रामाणिक है।",
+      accuracyDesc: "यह दैनिक राशिफल स्विस एफेमेरिस 2.10 द्वारा लाहिड़ी अयनांश के आधार पर चंद्रमा की वर्तमान स्थिति, द्वादश भाव गोचर, शास्त्रीय गोचर वेध और 24 होरा चक्र के नियमों से पूर्णतः प्रामाणिक है।",
       consultCta: "विशेषज्ञ ज्योतिषी से अपनी कुंडली का संपूर्ण विश्लेषण कराएं",
       share: "राशिफल साझा करें",
+      horaBtn: "24 घंटे का वैदिक होरा चक्र देखें",
+      horaTitle: "24 घंटे का ग्रह होरा चक्र",
+      horaDesc: "सूर्योदय से दिन और रात की 24 होराएं। शुभ होरा में महत्वपूर्ण कार्य करने से सफलता मिलती है।",
+      dayHoras: "दिन की होरा (12 होराएं)",
+      nightHoras: "रात्रि की होरा (12 होराएं)",
+      personalizeTitle: "अपने जन्म नक्षत्र से परिणाम पर्सनलाइज़ करें",
+      personalizeSub: "नवतारा चक्र के अनुसार आज के गोचर में अपने जन्म नक्षत्र का तारा बल और व्यक्तिगत उपाय देखें।",
+      selectNakshatra: "जन्म नक्षत्र चुनें",
+      clearPersonalize: "रीसेट करें",
+      dishaShoolaTitle: "दिशाशूल (यात्रा मार्गदर्शन)",
+      dishaRemedyTitle: "यात्रा का शास्त्रीय उपाय",
+      favorableChandraTitle: "आज चंद्रबल युक्त शुभ राशियां",
+      beejMantraTitle: "राशि स्वामी का मूल वैदिक बीज मंत्र",
+      charityTitle: "आज का विशेष दान एवं सत्कर्म",
+      copyMantra: "मंत्र कॉपी करें",
+      copied: "कॉपी हुआ!",
+      taraBalaBadge: "नवतारा बल",
+      sadeSatiLabel: "शनि गोचर / साढ़े साती",
+      guruLabel: "गुरु गोचर",
     },
     en: {
       title: "Daily Horoscope",
-      subtitle: "Precision Vedic Moon Transit (Gochar) & Daily Panchang",
-      tag: "100% In-House Astrological Engine • Zero 3rd-Party APIs",
+      subtitle: "Precision Vedic Moon Transit (Gochar), 24 Planetary Horas & Navatara Bala",
+      tag: "100% In-House Astrological Engine • Zero 3rd-Party APIs • Classical Authenticity",
       yesterday: "Yesterday",
       today: "Today",
       tomorrow: "Tomorrow",
@@ -321,9 +407,28 @@ function HoroscopeContent() {
       element: "Element",
       remedyTitle: "Classical Vedic Remedy & Action",
       accuracyTitle: "100% Mathematical & Ephemeris Accuracy",
-      accuracyDesc: "Calculated strictly with Swiss Ephemeris 2.10 sidereal coordinates using Lahiri Ayanamsha and classical Vedic Moon transit houses relative to your Janma Rashi.",
+      accuracyDesc: "Calculated strictly with Swiss Ephemeris 2.10 sidereal coordinates using Lahiri Ayanamsha, Moon transit houses, classical Gochar Vedha, and 24 planetary horas.",
       consultCta: "Consult Verified Astrologers for In-depth Kundli Reading",
       share: "Share Horoscope",
+      horaBtn: "View 24-Hour Planetary Horas",
+      horaTitle: "24-Hour Planetary Hora Timeline",
+      horaDesc: "24 Planetary Horas calculated from local sunrise. Initiate important ventures during auspicious horas for optimal success.",
+      dayHoras: "Daytime Horas (12 Horas)",
+      nightHoras: "Nighttime Horas (12 Horas)",
+      personalizeTitle: "Personalize with Your Birth Nakshatra",
+      personalizeSub: "Discover your exact Navatara Tara Bala, personal score boost, and birth-star remedies for today's planetary transit.",
+      selectNakshatra: "Select Birth Nakshatra",
+      clearPersonalize: "Reset",
+      dishaShoolaTitle: "Disha Shoola (Travel Direction)",
+      dishaRemedyTitle: "Travel Shastra Remedy",
+      favorableChandraTitle: "Chandra Bala Favorable Signs Today",
+      beejMantraTitle: "Sign Lord Vedic Beej Mantra",
+      charityTitle: "Recommended Charity & Dana Today",
+      copyMantra: "Copy Mantra",
+      copied: "Copied!",
+      taraBalaBadge: "Navatara Bala",
+      sadeSatiLabel: "Saturn Transit / Sade Sati",
+      guruLabel: "Jupiter Transit",
     },
   }[language];
 
@@ -333,6 +438,15 @@ function HoroscopeContent() {
       toast.success(
         language === "bn" ? "লিংক কপি করা হয়েছে!" : language === "hi" ? "लिंक कॉपी हो गया!" : "Link copied to clipboard!"
       );
+    }
+  };
+
+  const handleCopyMantra = (mantraText: string) => {
+    if (typeof window !== "undefined") {
+      navigator.clipboard.writeText(mantraText);
+      setCopiedMantra(true);
+      toast.success(language === "bn" ? "বীজ মন্ত্র কপি করা হয়েছে!" : "Mantra copied to clipboard!");
+      setTimeout(() => setCopiedMantra(false), 2500);
     }
   };
 
@@ -348,105 +462,139 @@ function HoroscopeContent() {
           <div className="absolute top-[60%] -right-48 size-[450px] rounded-full bg-[#f3ded0]/30 blur-3xl" />
         </div>
 
-        <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           
-          {/* Top Banner / Header */}
-          <div className="text-center max-w-3xl mx-auto pt-4 sm:pt-8 mb-8">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#ebd7c8]/60 border border-[#ddc4b2] text-[#8c5035] text-xs font-semibold tracking-wide shadow-2xs mb-4">
+          {/* Header Hero Section */}
+          <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#d6b7a2] bg-[#fbf1e7]/80 px-3.5 py-1 text-xs font-semibold text-[#8c5035] shadow-xs backdrop-blur-xs mb-3">
               <Sparkles className="size-3.5 text-[#b06d4e]" />
               <span>{t.tag}</span>
             </div>
-            
-            <h1 className="font-cinzel text-3xl sm:text-5xl font-bold tracking-tight text-[#4D4664]">
+
+            <h1 className="font-cinzel text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#4D4664]">
               {t.title}
             </h1>
-            
-            <p className="mt-3 text-sm sm:text-base text-[#6b6278] leading-relaxed">
+            <p className="mt-2 text-sm sm:text-base text-[#6f637b] leading-relaxed">
               {t.subtitle}
             </p>
+          </div>
 
-            {/* Feature Coin Badge */}
-            <div className="pt-3 flex justify-center">
+          {/* Pricing coin pill banner */}
+          {horoscopeFeature && (
+            <div className="mb-6 flex justify-center">
               <FeatureCoinBadge
                 feature={horoscopeFeature}
                 walletBalance={walletBalance}
                 language={language}
               />
             </div>
+          )}
 
-            {/* Controls Bar: Language + Date Switchers */}
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-              {/* Language Switcher */}
-              <div className="inline-flex items-center p-1 rounded-xl bg-[#f0e3d5] border border-[#e2d0bf] shadow-2xs">
-                {(["bn", "en", "hi"] as AstrologyLanguage[]).map((lang) => (
-                  <button
-                    key={lang}
-                    type="button"
-                    onClick={() => setLanguage(lang)}
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 ${
-                      language === lang
-                        ? "bg-[#b06d4e] text-white shadow-sm"
-                        : "text-[#5e5369] hover:text-[#b06d4e]"
-                    }`}
-                  >
-                    {lang === "bn" ? "বাংলা" : lang === "hi" ? "हिन्दी" : "English"}
-                  </button>
-                ))}
-              </div>
+          {/* Toolbar: Language Switcher + Date Navigation */}
+          <div className="mb-8 flex flex-col md:flex-row items-center justify-between gap-4 rounded-2xl border border-[#ebd7c8] bg-[#fbf5ee]/90 p-3 sm:p-4 shadow-sm backdrop-blur-xs">
+            
+            {/* Left: Quick Date Preset Pills */}
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-center sm:justify-start">
+              <button
+                type="button"
+                onClick={() => setSelectedDate(yesterdayStr)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                  selectedDate === yesterdayStr
+                    ? "bg-[#b06d4e] text-white shadow-xs"
+                    : "bg-[#f5ece3] text-[#5e5369] hover:bg-[#ebdccf]"
+                }`}
+              >
+                {t.yesterday}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedDate(todayStr)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  selectedDate === todayStr
+                    ? "bg-[#b06d4e] text-white shadow-xs ring-2 ring-[#b06d4e]/30"
+                    : "bg-[#f5ece3] text-[#5e5369] hover:bg-[#ebdccf]"
+                }`}
+              >
+                {t.today}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedDate(tomorrowStr)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                  selectedDate === tomorrowStr
+                    ? "bg-[#b06d4e] text-white shadow-xs"
+                    : "bg-[#f5ece3] text-[#5e5369] hover:bg-[#ebdccf]"
+                }`}
+              >
+                {t.tomorrow}
+              </button>
 
-              {/* Date Presets */}
-              <div className="inline-flex items-center p-1 rounded-xl bg-[#f0e3d5] border border-[#e2d0bf] shadow-2xs">
-                <button
-                  type="button"
-                  onClick={() => setSelectedDate(yesterdayStr)}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 ${
-                    selectedDate === yesterdayStr
-                      ? "bg-[#4D4664] text-white shadow-sm"
-                      : "text-[#5e5369] hover:text-[#4D4664]"
-                  }`}
-                >
-                  {t.yesterday}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSelectedDate(todayStr)}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 ${
-                    selectedDate === todayStr
-                      ? "bg-[#4D4664] text-white shadow-sm"
-                      : "text-[#5e5369] hover:text-[#4D4664]"
-                  }`}
-                >
-                  {t.today}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSelectedDate(tomorrowStr)}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 ${
-                    selectedDate === tomorrowStr
-                      ? "bg-[#4D4664] text-white shadow-sm"
-                      : "text-[#5e5369] hover:text-[#4D4664]"
-                  }`}
-                >
-                  {t.tomorrow}
-                </button>
-              </div>
-
-              {/* Custom Date Picker */}
-              <div className="relative inline-flex items-center">
+              {/* Custom Date Input */}
+              <div className="flex items-center gap-1.5 ml-1 sm:ml-2 pl-2 border-l border-[#e2d0bf]">
+                <Calendar className="size-3.5 text-[#8c7e97]" />
                 <input
                   type="date"
                   value={selectedDate}
                   onChange={(e) => {
                     if (e.target.value) setSelectedDate(e.target.value);
                   }}
-                  className="rounded-xl border border-[#e2d0bf] bg-[#fbf4ec] px-3 py-1.5 text-xs font-medium text-[#4D4664] focus:outline-none focus:ring-2 focus:ring-[#b06d4e]/40 shadow-2xs cursor-pointer"
+                  className="rounded-lg border border-[#e2d0bf] bg-[#fffaf5] px-2 py-1 text-xs text-[#4D4664] focus:outline-none focus:ring-1 focus:ring-[#b06d4e]"
                 />
               </div>
+            </div>
 
-              {/* Share & Refresh */}
+            {/* Right: Language switch + Personalize Toggle + Refresh & Share */}
+            <div className="flex items-center gap-2 flex-wrap">
+              
+              {/* Personalize Button */}
               <button
                 type="button"
-                onClick={() => fetchHoroscope(selectedDate, language)}
+                onClick={() => setShowPersonalize(!showPersonalize)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all shadow-2xs ${
+                  showPersonalize || selectedNakshatra !== null
+                    ? "border-[#b06d4e] bg-[#fbf1e7] text-[#b06d4e] ring-2 ring-[#b06d4e]/20"
+                    : "border-[#e2d0bf] bg-[#fbf4ec] text-[#5e5369] hover:text-[#b06d4e]"
+                }`}
+              >
+                <Sparkles className="size-3.5 text-[#b06d4e]" />
+                <span>{selectedNakshatra !== null ? NAKSHATRA_OPTIONS[selectedNakshatra]?.bn : (language === "bn" ? "জন্ম নক্ষত্র যোগ করুন" : "Personalize")}</span>
+                {showPersonalize ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
+              </button>
+
+              {/* Language Selector */}
+              <div className="flex items-center rounded-xl border border-[#e2d0bf] bg-[#fbf4ec] p-0.5 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setLanguage("bn")}
+                  className={`px-2.5 py-1 rounded-lg transition-colors font-medium ${
+                    language === "bn" ? "bg-[#b06d4e] text-white shadow-2xs" : "text-[#5e5369] hover:text-[#332c39]"
+                  }`}
+                >
+                  বাংলা
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLanguage("hi")}
+                  className={`px-2.5 py-1 rounded-lg transition-colors font-medium ${
+                    language === "hi" ? "bg-[#b06d4e] text-white shadow-2xs" : "text-[#5e5369] hover:text-[#332c39]"
+                  }`}
+                >
+                  हिन्दी
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLanguage("en")}
+                  className={`px-2.5 py-1 rounded-lg transition-colors font-medium ${
+                    language === "en" ? "bg-[#b06d4e] text-white shadow-2xs" : "text-[#5e5369] hover:text-[#332c39]"
+                  }`}
+                >
+                  EN
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => fetchHoroscope(selectedDate, language, selectedNakshatra, birthDateInput, birthTimeInput)}
                 title="Refresh"
                 className="flex size-8 items-center justify-center rounded-xl border border-[#e2d0bf] bg-[#fbf4ec] text-[#5e5369] hover:text-[#b06d4e] transition-colors shadow-2xs"
               >
@@ -462,6 +610,139 @@ function HoroscopeContent() {
               </button>
             </div>
           </div>
+
+          {/* Personalization Drawer / Panel */}
+          {showPersonalize && (
+            <div className="mb-8 rounded-2xl border border-[#d6b7a2] bg-gradient-to-r from-[#fdf7f0] via-[#fbf1e6] to-[#fdf7f0] p-5 shadow-sm transition-all animate-in fade-in slide-in-from-top-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-[#ebd7c8]">
+                <div className="flex items-center gap-2">
+                  <UserCheck className="size-5 text-[#b06d4e]" />
+                  <div>
+                    <h3 className="font-cinzel text-base font-bold text-[#4D4664]">{t.personalizeTitle}</h3>
+                    <p className="text-xs text-[#7d7388]">{t.personalizeSub}</p>
+                  </div>
+                </div>
+                {selectedNakshatra !== null && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedNakshatra(null);
+                      setBirthDateInput("");
+                      setBirthTimeInput("");
+                    }}
+                    className="text-xs font-semibold text-rose-700 hover:underline"
+                  >
+                    {t.clearPersonalize}
+                  </button>
+                )}
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                {/* Method 1: Direct Nakshatra Selector */}
+                <div>
+                  <label className="block text-xs font-bold text-[#4D4664] mb-1">
+                    {language === "bn" ? "১. সরাসরি জন্ম নক্ষত্র নির্বাচন করুন:" : "1. Select Birth Star (Nakshatra):"}
+                  </label>
+                  <select
+                    value={selectedNakshatra !== null ? selectedNakshatra : ""}
+                    onChange={(e) => {
+                      const val = e.target.value === "" ? null : Number(e.target.value);
+                      setSelectedNakshatra(val);
+                    }}
+                    className="w-full rounded-xl border border-[#e2d0bf] bg-[#fffaf5] px-3 py-2 text-xs text-[#4D4664] focus:outline-none focus:ring-1 focus:ring-[#b06d4e]"
+                  >
+                    <option value="">-- {t.selectNakshatra} --</option>
+                    {NAKSHATRA_OPTIONS.map((n) => (
+                      <option key={n.index} value={n.index}>
+                        #{n.index + 1} {language === "bn" ? n.bn : language === "hi" ? n.hi : n.en} ({n.en} • {n.lord})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Method 2: Birth Date & Time to Auto-detect */}
+                <div>
+                  <label className="block text-xs font-bold text-[#4D4664] mb-1">
+                    {language === "bn" ? "২. অথবা জন্ম তারিখ ও সময় দিয়ে গণনা করুন:" : "2. Or Auto-Detect from Birth Date & Time:"}
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="date"
+                      value={birthDateInput}
+                      onChange={(e) => setBirthDateInput(e.target.value)}
+                      placeholder="Birth Date"
+                      className="w-1/2 rounded-xl border border-[#e2d0bf] bg-[#fffaf5] px-2.5 py-1.5 text-xs text-[#4D4664] focus:outline-none focus:ring-1 focus:ring-[#b06d4e]"
+                    />
+                    <input
+                      type="time"
+                      value={birthTimeInput}
+                      onChange={(e) => setBirthTimeInput(e.target.value)}
+                      placeholder="Birth Time"
+                      className="w-1/2 rounded-xl border border-[#e2d0bf] bg-[#fffaf5] px-2.5 py-1.5 text-xs text-[#4D4664] focus:outline-none focus:ring-1 focus:ring-[#b06d4e]"
+                    />
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          )}
+
+          {/* Personalized Profile Banner (If generated) */}
+          {horoscopeData?.personalized_profile && (
+            <div className="mb-8 rounded-2xl border-2 border-[#b06d4e]/40 bg-gradient-to-r from-[#fbf2e7] via-[#f7e6d5] to-[#fbf2e7] p-4 sm:p-5 shadow-sm">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                
+                <div className="flex items-center gap-3">
+                  <div className="flex size-11 items-center justify-center rounded-2xl bg-[#b06d4e] text-white shadow-sm">
+                    <Sparkles className="size-6" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs uppercase font-bold text-[#b06d4e] tracking-wider">
+                        {language === "bn" ? "ব্যক্তিগত জন্ম নক্ষত্র প্রোফাইল" : "Personalized Nakshatra Profile"}
+                      </span>
+                      <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[#b06d4e]/15 text-[#8c4f34] border border-[#b06d4e]/30">
+                        {horoscopeData.personalized_profile.birth_nakshatra_name_bn} ({horoscopeData.personalized_profile.birth_nakshatra_name})
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#594c65] mt-0.5">
+                      {language === "bn" ? "অধিপতি" : "Lord"}: <strong className="text-[#4D4664]">{horoscopeData.personalized_profile.birth_nakshatra_lord}</strong> • {language === "bn" ? "দেবতা" : "Deity"}: <strong className="text-[#4D4664]">{horoscopeData.personalized_profile.birth_nakshatra_deity}</strong> • {language === "bn" ? "বৃক্ষ" : "Tree"}: <strong className="text-[#4D4664]">{horoscopeData.personalized_profile.sacred_tree}</strong>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Navatara Tara Bala Badge */}
+                <div className="flex items-center gap-3 bg-[#fffaf5] border border-[#e5ccba] rounded-2xl p-3 sm:px-4 shadow-2xs">
+                  <div className="text-right">
+                    <span className="text-[10px] font-bold text-[#8c7e97] uppercase tracking-wider block">
+                      {t.taraBalaBadge}
+                    </span>
+                    <strong className="text-xs text-[#4D4664] block font-cinzel">
+                      {horoscopeData.personalized_profile.tara_bala.tara_name_bn}
+                    </strong>
+                  </div>
+                  <div className={`px-2.5 py-1 rounded-xl text-xs font-bold border ${
+                    horoscopeData.personalized_profile.tara_bala.is_auspicious
+                      ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                      : "bg-amber-100 text-amber-800 border-amber-300"
+                  }`}>
+                    {horoscopeData.personalized_profile.tara_bala.score_percent}%
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Tara Guidance Message */}
+              <div className="mt-3 pt-3 border-t border-[#ebd0be] text-xs text-[#6e5f7a] flex items-start gap-2">
+                <Info className="size-4 text-[#b06d4e] shrink-0 mt-0.5" />
+                <p>
+                  <strong>{language === "bn" ? "আজকের তারা বলের তাৎপর্য" : "Tara Bala Guidance"}:</strong>{" "}
+                  {language === "bn" ? horoscopeData.personalized_profile.tara_bala.guidance_bn : horoscopeData.personalized_profile.tara_bala.guidance}
+                </p>
+              </div>
+            </div>
+          )}
 
           {horoscopeFeature && !horoscopeFeature.enabled && (
             <div className="mb-8">
@@ -490,7 +771,7 @@ function HoroscopeContent() {
                   </div>
                 </div>
 
-                {/* Muhurat Quick Badges */}
+                {/* Muhurat Quick Badges + 24 Horas Toggle Button */}
                 <div className="flex items-center gap-2.5 flex-wrap text-xs">
                   <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-800 border border-emerald-500/25">
                     <CheckCircle2 className="size-3.5 text-emerald-600" />
@@ -500,6 +781,15 @@ function HoroscopeContent() {
                     <AlertTriangle className="size-3.5 text-rose-600" />
                     <span>{t.rahuKaal}: <strong className="font-semibold">{horoscopeData.panchang.rahu_kaal}</strong></span>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowHoras(!showHoras)}
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#b06d4e]/10 text-[#8c5035] border border-[#b06d4e]/30 hover:bg-[#b06d4e]/20 transition-colors font-medium shadow-2xs"
+                  >
+                    <Clock className="size-3.5 text-[#b06d4e]" />
+                    <span>{t.horaBtn}</span>
+                    {showHoras ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
+                  </button>
                 </div>
               </div>
 
@@ -531,6 +821,108 @@ function HoroscopeContent() {
                   <span className="text-[#8c7e97] block font-medium">{t.vara}</span>
                   <p className="mt-0.5 font-bold text-[#4D4664] truncate">{horoscopeData.panchang.vara}</p>
                 </div>
+              </div>
+
+              {/* Disha Shoola & Chandra Bala Favorable Signs Sub-Row */}
+              <div className="mt-3.5 pt-3 border-t border-[#ebd7c8]/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-[#6e5f7a]">
+                <div className="flex items-center gap-2">
+                  <Compass className="size-4 text-[#b06d4e] shrink-0" />
+                  <span>
+                    <strong>{t.dishaShoolaTitle}:</strong> <span className="font-bold text-rose-700">{horoscopeData.panchang.disha_shoola}</span> — {horoscopeData.panchang.disha_remedy}
+                  </span>
+                </div>
+                {horoscopeData.panchang.favorable_chandra_rashis && horoscopeData.panchang.favorable_chandra_rashis.length > 0 && (
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[#8c7e97]">{t.favorableChandraTitle}:</span>
+                    {horoscopeData.panchang.favorable_chandra_rashis.map((r, i) => (
+                      <span key={i} className="px-2 py-0.5 rounded-md bg-[#fff7ef] border border-[#edd7c4] text-[#8c5035] font-semibold text-[11px]">
+                        {r}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Interactive 24-Hour Planetary Hora Timeline Drawer */}
+          {showHoras && horoscopeData?.panchang.horas && (
+            <div className="mb-8 rounded-3xl border border-[#d6b7a2] bg-gradient-to-br from-[#fbf4eb] via-[#f8ebe0] to-[#fbf4eb] p-6 shadow-sm animate-in fade-in slide-in-from-top-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[#ebd7c8]">
+                <div>
+                  <h3 className="font-cinzel text-lg font-bold text-[#4D4664] flex items-center gap-2">
+                    <Clock className="size-5 text-[#b06d4e]" />
+                    <span>{t.horaTitle}</span>
+                  </h3>
+                  <p className="text-xs text-[#7d7388] mt-0.5">{t.horaDesc}</p>
+                </div>
+
+                <div className="flex items-center rounded-xl border border-[#e2d0bf] bg-[#fbf4ec] p-0.5 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setHoraViewPeriod("day")}
+                    className={`px-3 py-1 rounded-lg transition-colors font-semibold ${
+                      horaViewPeriod === "day" ? "bg-[#b06d4e] text-white shadow-xs" : "text-[#5e5369]"
+                    }`}
+                  >
+                    ☀️ {t.dayHoras}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setHoraViewPeriod("night")}
+                    className={`px-3 py-1 rounded-lg transition-colors font-semibold ${
+                      horaViewPeriod === "night" ? "bg-[#b06d4e] text-white shadow-xs" : "text-[#5e5369]"
+                    }`}
+                  >
+                    🌙 {t.nightHoras}
+                  </button>
+                </div>
+              </div>
+
+              {/* 12 Horas Grid for Selected Period */}
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {horoscopeData.panchang.horas
+                  .filter((h) => (horaViewPeriod === "day" ? h.is_day : !h.is_day))
+                  .map((hora) => (
+                    <div
+                      key={hora.hora_index}
+                      className={`rounded-2xl border p-3.5 transition-all text-xs ${
+                        hora.is_auspicious
+                          ? "bg-[#fffcf9] border-emerald-500/25 hover:border-emerald-500/50 shadow-2xs"
+                          : "bg-[#fffaf5] border-amber-500/25 hover:border-amber-500/50 shadow-2xs"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="font-bold text-[#4D4664]">
+                          {hora.start_time} – {hora.end_time}
+                        </span>
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                            hora.is_auspicious
+                              ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                              : "bg-amber-100 text-amber-800 border-amber-300"
+                          }`}
+                        >
+                          {language === "bn" ? hora.category_bn : language === "hi" ? hora.category_hi : hora.category}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-sm font-bold text-[#b06d4e] mb-1">
+                        <span>
+                          #{hora.hora_number} {language === "bn" ? hora.planet_bn : language === "hi" ? hora.planet_hi : hora.planet} হোরা
+                        </span>
+                        <span className="text-xs font-normal text-[#8c7e97]">{hora.planet_sa}</span>
+                      </div>
+
+                      <p className="text-[11px] font-medium text-[#4D4664] mb-1">
+                        {language === "bn" ? hora.verdict_bn : language === "hi" ? hora.verdict_hi : hora.verdict}
+                      </p>
+
+                      <p className="text-[10px] leading-relaxed text-[#736881]">
+                        {language === "bn" ? hora.best_activities_bn : language === "hi" ? hora.best_activities_hi : hora.best_activities}
+                      </p>
+                    </div>
+                  ))}
               </div>
             </div>
           )}
@@ -603,7 +995,7 @@ function HoroscopeContent() {
               <Button
                 variant="outline"
                 className="mt-4"
-                onClick={() => fetchHoroscope(selectedDate, language)}
+                onClick={() => fetchHoroscope(selectedDate, language, selectedNakshatra, birthDateInput, birthTimeInput)}
               >
                 Retry Calculation
               </Button>
@@ -611,6 +1003,40 @@ function HoroscopeContent() {
           ) : activeSignData ? (
             <div className="space-y-6">
               
+              {/* Chandrashtama High-Priority Alert Banner (If Moon in 8th House) */}
+              {activeSignData.is_chandrashtama && activeSignData.chandrashtama_advice && (
+                <div className="rounded-2xl border-2 border-amber-500/50 bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-amber-500/10 p-5 shadow-xs animate-pulse">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="size-6 text-amber-700 shrink-0 mt-0.5" />
+                    <div>
+                      <h3 className="font-cinzel text-base font-bold text-amber-900">
+                        {language === "bn" ? "⚠️ অষ্টম চন্দ্র গোচর (চন্দ্রাষ্টম) সতর্কবার্তা" : "⚠️ Chandrashtama Gochar Caution"}
+                      </h3>
+                      <p className="mt-1 text-xs sm:text-sm text-amber-950 leading-relaxed font-medium">
+                        {activeSignData.chandrashtama_advice}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Classical Gochar Vedha Alert (If Auspicious house is obstructed) */}
+              {activeSignData.vedha_active && activeSignData.vedha_description && (
+                <div className="rounded-2xl border border-blue-400/40 bg-blue-50/80 p-4 shadow-2xs">
+                  <div className="flex items-start gap-2.5">
+                    <Info className="size-5 text-blue-700 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="font-cinzel text-xs font-bold text-blue-900 uppercase tracking-wider">
+                        {language === "bn" ? "গোচর বেধ (বাধা) পর্যবেক্ষণ" : "Gochar Vedha Active"}
+                      </h4>
+                      <p className="text-xs text-blue-950 mt-0.5 leading-relaxed">
+                        {activeSignData.vedha_description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Active Sign Header & Score Overview Card */}
               <div className="rounded-3xl border border-[#e5cebd] bg-gradient-to-br from-[#fbf4eb] via-[#f8ede2] to-[#faf1e6] p-6 sm:p-8 shadow-sm">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 pb-6 border-b border-[#e5cebd]">
@@ -632,9 +1058,24 @@ function HoroscopeContent() {
                           {activeSignData.gochar_verdict}
                         </span>
                       </div>
+
                       <p className="mt-1 text-xs sm:text-sm text-[#736780]">
                         <strong>{activeSignData.transit_house_name}</strong> • {t.rulingLord}: <strong className="text-[#4D4664]">{currentMeta.ruler}</strong> • {t.element}: <strong className="text-[#4D4664]">{currentMeta.element}</strong>
                       </p>
+
+                      {/* Saturn Sade Sati & Jupiter Status Badges */}
+                      <div className="mt-2.5 flex items-center gap-2 flex-wrap text-xs">
+                        {activeSignData.sade_sati_status && (
+                          <span className="px-2.5 py-0.5 rounded-full bg-[#f3e7dc] border border-[#d9c4b2] text-[#6d4d3d] font-semibold text-[11px]">
+                            🪐 {t.sadeSatiLabel}: {activeSignData.sade_sati_status}
+                          </span>
+                        )}
+                        {activeSignData.guru_gochar_verdict && (
+                          <span className="px-2.5 py-0.5 rounded-full bg-[#fbf3db] border border-[#ebd6a4] text-[#73581c] font-semibold text-[11px]">
+                            🌟 {t.guruLabel}: {activeSignData.guru_gochar_verdict}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -814,7 +1255,7 @@ function HoroscopeContent() {
 
               </div>
 
-              {/* Lucky Elements + Vedic Remedy Row */}
+              {/* Lucky Elements + Vedic Remedy & Beej Mantra Row */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
                 
                 {/* Lucky Attributes Card */}
@@ -835,14 +1276,24 @@ function HoroscopeContent() {
                       <span className="text-[#8c7e97] font-medium">{t.luckyTime}</span>
                       <strong className="text-[#4D4664] font-semibold">{activeSignData.lucky_time}</strong>
                     </div>
-                    <div className="flex items-center justify-between py-1.5">
+                    <div className="flex items-center justify-between py-1.5 border-b border-[#ebd7c8]">
                       <span className="text-[#8c7e97] font-medium">{t.direction}</span>
                       <strong className="text-[#4D4664] font-semibold">{activeSignData.favorable_direction}</strong>
                     </div>
+                    {activeSignData.tara_bala && (
+                      <div className="flex items-center justify-between py-1.5">
+                        <span className="text-[#8c7e97] font-medium">{t.taraBalaBadge}</span>
+                        <span className={`px-2 py-0.5 rounded-md font-bold text-[11px] border ${
+                          activeSignData.tara_bala.is_auspicious ? "bg-emerald-100 text-emerald-800 border-emerald-300" : "bg-amber-100 text-amber-800 border-amber-300"
+                        }`}>
+                          {activeSignData.tara_bala.tara_name_bn} ({activeSignData.tara_bala.score_percent}%)
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Vedic Remedy Card (From client's resources) */}
+                {/* Vedic Remedy, Beej Mantra & Dana Card (From client's resources) */}
                 <div className="lg:col-span-2 rounded-2xl border border-[#d8bead] bg-gradient-to-br from-[#f8ebe0] via-[#f7e7da] to-[#f8ebe0] p-5 sm:p-6 shadow-2xs">
                   <div className="flex items-center gap-2 text-[#8c5035] mb-2.5">
                     <ShieldCheck className="size-5 text-[#b06d4e]" />
@@ -850,12 +1301,46 @@ function HoroscopeContent() {
                       {t.remedyTitle}
                     </h3>
                   </div>
-                  <p className="text-sm leading-relaxed text-[#594f63] font-medium">
+                  
+                  {/* Classical Remedy */}
+                  <p className="text-sm leading-relaxed text-[#594f63] font-medium mb-3">
                     {activeSignData.remedy}
                   </p>
+
+                  {/* Beej Mantra Box */}
+                  {activeSignData.beej_mantra && (
+                    <div className="mt-3 rounded-xl border border-[#e5ccba] bg-[#fffaf5] p-3 flex items-center justify-between gap-3">
+                      <div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#b06d4e] block">
+                          {t.beejMantraTitle}
+                        </span>
+                        <p className="font-serif text-sm font-bold text-[#4D4664] mt-0.5">
+                          {activeSignData.beej_mantra}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleCopyMantra(activeSignData.beej_mantra!)}
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#d6bca8] bg-[#fbf3e9] text-[#8c5035] hover:bg-[#b06d4e] hover:text-white transition-colors text-xs font-semibold shrink-0"
+                      >
+                        {copiedMantra ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+                        <span>{copiedMantra ? t.copied : t.copyMantra}</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Specific Charity Dana Box */}
+                  {activeSignData.charity_dana && (
+                    <div className="mt-3 rounded-xl border border-[#edd7c4] bg-[#fdf8f2] p-3 text-xs text-[#594f63]">
+                      <span className="font-bold text-[#8c5035] block mb-0.5">
+                        {t.charityTitle}:
+                      </span>
+                      <p>{activeSignData.charity_dana}</p>
+                    </div>
+                  )}
                   
                   {/* CTA Banner inside remedy */}
-                  <div className="mt-5 pt-4 border-t border-[#e2cdbf] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="mt-4 pt-4 border-t border-[#e2cdbf] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <span className="text-xs text-[#7d7088]">
                       Want a detailed birth chart remedy for doshas and dasha?
                     </span>
