@@ -28,6 +28,7 @@ import type {
   KundliMatchingResult,
   DailyHoroscopePayload,
   DailyHoroscopeResult,
+  FeaturePricingItem,
 
   ReviewKind,
   Review,
@@ -397,23 +398,26 @@ export const faceReadingApi = {
 // -------------------------------------------------------------- astrology
 export const astrologyApi = {
   calculateRashi: (body: RashiCalculatePayload) =>
-    api.post<RashiCalculateResult>(endpoints.astrology.rashi, body, { auth: false }),
+    api.post<RashiCalculateResult>(endpoints.astrology.rashi, body),
 
   rashis: () => api.get<any[]>(endpoints.astrology.rashis, { auth: false }),
 
   calculateNakshatra: (body: NakshatraCalculatePayload) =>
-    api.post<NakshatraCalculateResult>(endpoints.astrology.nakshatra, body, { auth: false }),
+    api.post<NakshatraCalculateResult>(endpoints.astrology.nakshatra, body),
 
   nakshatras: () => api.get<any[]>(endpoints.astrology.nakshatras, { auth: false }),
 
   calculateKp: (body: KPCalculatePayload) =>
-    api.post<KPCalculateResult>(endpoints.astrology.kp, body, { auth: false }),
+    api.post<KPCalculateResult>(endpoints.astrology.kp, body),
+
+  calculateDasha: (body: KPCalculatePayload) =>
+    api.post<KPCalculateResult>(endpoints.astrology.dasha, body),
 
   calculateKundli: (body: KundliCalculatePayload) =>
-    api.post<KundliCalculateResult>(endpoints.astrology.kundli, body, { auth: false }),
+    api.post<KundliCalculateResult>(endpoints.astrology.kundli, body),
 
   calculateKundliMatching: (body: KundliMatchingPayload) =>
-    api.post<KundliMatchingResult>(endpoints.astrology.kundliMatching, body, { auth: false }),
+    api.post<KundliMatchingResult>(endpoints.astrology.kundliMatching, body),
 
   /**
    * Geocode a birth place. Passing the birth date makes the returned offset the one
@@ -457,7 +461,11 @@ export const astrologyApi = {
     api.post<DailyHoroscopeResult>(
       endpoints.astrology.dailyHoroscope,
       payload || {},
-      { auth: false },
     ),
+
+  /** Get current feature pricing and availability for all astrology tools. */
+  featuresPricing: () =>
+    api.get<Record<string, FeaturePricingItem>>(endpoints.astrology.featuresPricing, { auth: false }),
 };
+
 

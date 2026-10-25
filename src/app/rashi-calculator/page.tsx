@@ -41,6 +41,12 @@ import { KundaliChart } from "@/components/astrology/kundali-chart";
 import { getClientRashiTraits } from "@/lib/astrology-translations";
 import { useAuth } from "@/providers/auth-provider";
 import { useProfile } from "@/hooks/use-profile";
+import { useFeaturePricing } from "@/hooks/use-feature-pricing";
+import {
+  FeatureCoinBadge,
+  FeatureDisabledAlert,
+  FeatureCoinModal,
+} from "@/components/astrology/feature-pricing-banner";
 import type {
   AstrologyLanguage,
   AyanamsaType,
@@ -56,6 +62,10 @@ export default function RashiCalculatorPage() {
   // Auth & Profile hooks for dynamic data fetching
   const { user, isSignedIn } = useAuth();
   const { data: profile } = useProfile({ enabled: isSignedIn });
+  const { getFeature, checkAccess, walletBalance, refresh: refreshWallet } = useFeaturePricing();
+  const rashiFeature = getFeature("rashi_calculator");
+  const [coinModalOpen, setCoinModalOpen] = React.useState(false);
+  const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
 
   // Global Language Selection for Output & UI (English, বাংলা, हिन्दी)
   const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
@@ -537,24 +547,56 @@ export default function RashiCalculatorPage() {
       language,
     };
 
+    const access = checkAccess("rashi_calculator");
+    if (!access.allowed) {
+      if (access.reason === "disabled") {
+        toast.error(
+          language === "bn"
+            ? "রাশি ক্যালকুলেটর ফিচারটি বর্তমানে বন্ধ রাখা হয়েছে।"
+            : "Rashi calculator feature is temporarily unavailable.",
+        );
+        return;
+      }
+      setCoinModalReason(access.reason || "insufficient_coins");
+      setCoinModalOpen(true);
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await astrologyApi.calculateRashi(payload);
       if (res) {
         setResult(res);
-        toast.success(
-          language === "bn"
-            ? `চন্দ্রের অবস্থান: ${res.rashi_name_bn} রাশি (${res.nakshatra_name} নক্ষত্র)`
-            : language === "hi"
-            ? `गणना पूर्ण: ${res.rashi_name_hi} राशि (${res.nakshatra_name} नक्षत्र)`
-            : `Calculated Moon Sign: ${res.rashi_name_en} (${res.rashi_name_hi})`
-        );
+        if (access.requiredCoins > 0) {
+          toast.success(
+            language === "bn"
+              ? `রাশি গণনা সম্পন্ন হয়েছে! (${access.requiredCoins} কয়েন খরচ হয়েছে)`
+              : `Rashi calculated! (${access.requiredCoins} coins used)`,
+          );
+          refreshWallet();
+        } else {
+          toast.success(
+            language === "bn"
+              ? `চন্দ্রের অবস্থান: ${res.rashi_name_bn} রাশি (${res.nakshatra_name} নক্ষত্র)`
+              : language === "hi"
+              ? `गणना पूर्ण: ${res.rashi_name_hi} राशि (${res.nakshatra_name} नक्षत्र)`
+              : `Calculated Moon Sign: ${res.rashi_name_en} (${res.rashi_name_hi})`,
+          );
+        }
         setTimeout(() => {
           resultsRef.current?.scrollIntoView({ behavior: "smooth" });
         }, 100);
       }
     } catch (err: any) {
-      toast.error(err.message || "Failed to calculate Rashi. Please check inputs.");
+      if (err?.code === "insufficient_coins") {
+        setCoinModalReason("insufficient_coins");
+        setCoinModalOpen(true);
+      } else if (err?.code === "authentication_required" || err?.status === 401) {
+        setCoinModalReason("unauthorized");
+        setCoinModalOpen(true);
+      } else {
+        toast.error(err?.message || "Failed to calculate Rashi. Please check inputs.");
+      }
     } finally {
       setLoading(false);
     }
@@ -602,6 +644,15 @@ export default function RashiCalculatorPage() {
               ? "सटीक चंद्र स्थिति, २७ नक्षत्र, ४ चरण, केपी सब-लॉर्ड, किन बातों से सावधान रहें और किन उपायों से भाग्य चमकेगा—सब कुछ विस्तार से जानें।"
               : "Accurate planetary calculations powered by Vedic Sidereal Ephemeris with KP Sub-Lord, astrological warnings, and Vedic remedies."}
           </p>
+
+          {/* Feature Coin Badge */}
+          <div className="pt-2 flex justify-center">
+            <FeatureCoinBadge
+              feature={rashiFeature}
+              walletBalance={walletBalance}
+              language={language}
+            />
+          </div>
 
           {/* Interactive Language Switcher Bar */}
           <div className="pt-2 flex items-center justify-center gap-2">
@@ -659,6 +710,15 @@ export default function RashiCalculatorPage() {
                 ? "अपना जन्म विवरण दर्ज करें"
                 : "Enter Your Birth Details"}
             </h2>
+
+            {rashiFeature && !rashiFeature.enabled && (
+              <div className="mb-6">
+                <FeatureDisabledAlert
+                  featureName={language === "bn" ? "রাশি ক্যালকুলেটর" : "Rashi Calculator"}
+                  language={language}
+                />
+              </div>
+            )}
 
             {/* Dynamic Profile Sync Status Banner */}
             {isSignedIn && (
@@ -1148,12 +1208,19 @@ export default function RashiCalculatorPage() {
               )}
 
               {/* Submit CTA */}
-              <div className="pt-4 flex justify-center">
+              <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <FeatureCoinBadge
+                  feature={rashiFeature}
+                  walletBalance={walletBalance}
+                  language={language}
+                  showWallet={false}
+                />
+
                 <Button
                   type="submit"
                   size="lg"
-                  disabled={loading}
-                  className="px-9 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-ink-950 font-black text-sm shadow-[0_8px_24px_rgba(234,179,8,0.35)] hover:shadow-[0_12px_32px_rgba(234,179,8,0.45)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  disabled={loading || (rashiFeature ? !rashiFeature.enabled : false)}
+                  className="px-9 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-ink-950 font-black text-sm shadow-[0_8px_24px_rgba(234,179,8,0.35)] hover:shadow-[0_12px_32px_rgba(234,179,8,0.45)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
                 >
                   {loading ? (
                     <span className="flex items-center gap-2">
@@ -1169,7 +1236,11 @@ export default function RashiCalculatorPage() {
                   ) : (
                     <span className="flex items-center gap-2">
                       <span>
-                        {language === "bn"
+                        {rashiFeature && !rashiFeature.enabled
+                          ? language === "bn"
+                            ? "ফিচারটি বন্ধ রয়েছে"
+                            : "Feature Disabled"
+                          : language === "bn"
                           ? "আপনার রাশি জানুন"
                           : language === "hi"
                           ? "अपनी राशि जानें"
@@ -1606,6 +1677,16 @@ export default function RashiCalculatorPage() {
         )}
 
       </main>
+
+      <FeatureCoinModal
+        open={coinModalOpen}
+        onClose={() => setCoinModalOpen(false)}
+        featureName={rashiFeature?.name || (language === "bn" ? "রাশি ক্যালকুলেটর" : "Rashi Calculator")}
+        requiredCoins={rashiFeature?.coins ?? 10}
+        walletBalance={walletBalance}
+        reason={coinModalReason}
+        language={language}
+      />
 
       <SiteFooter />
     </>

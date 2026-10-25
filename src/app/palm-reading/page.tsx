@@ -67,6 +67,12 @@ import {
 } from "@/lib/palm-reading-translations";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
+import { useFeaturePricing } from "@/hooks/use-feature-pricing";
+import {
+  FeatureCoinBadge,
+  FeatureDisabledAlert,
+  FeatureCoinModal,
+} from "@/components/astrology/feature-pricing-banner";
 import type {
   PalmReadingAvailability,
   PalmScanResponse,
@@ -129,6 +135,10 @@ const CREASE_THEME: Record<
 
 export default function PalmReadingPage() {
   const { isSignedIn } = useAuth();
+  const { getFeature, checkAccess, walletBalance, refresh: refreshWallet } = useFeaturePricing();
+  const palmFeature = getFeature("palm_reading");
+  const [coinModalOpen, setCoinModalOpen] = React.useState(false);
+  const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
 
   const [language, setLanguage] = React.useState<PalmLanguage>("bn");
   const t = PALM_TRANSLATIONS[language];
@@ -204,6 +214,21 @@ export default function PalmReadingPage() {
   React.useEffect(() => stopCamera, [stopCamera]);
 
   const scanBlob = React.useCallback(async (blob: Blob, previewUrl: string) => {
+    const access = checkAccess("palm_reading");
+    if (!access.allowed) {
+      if (access.reason === "disabled") {
+        toast.error(
+          language === "bn"
+            ? "পাম রিডিং ফিচারটি বর্তমানে বন্ধ রাখা হয়েছে।"
+            : "Palm reading feature is temporarily unavailable.",
+        );
+        return;
+      }
+      setCoinModalReason(access.reason || "insufficient_coins");
+      setCoinModalOpen(true);
+      return;
+    }
+
     setPreview((old) => {
       if (old?.startsWith("blob:")) URL.revokeObjectURL(old);
       return previewUrl;
@@ -214,13 +239,22 @@ export default function PalmReadingPage() {
       const response = await palmReadingApi.scan(blob);
       setResult(response);
       if (response.status === "ok") {
-        toast.success(
-          language === "bn"
-            ? `${response.sections.length}টি গভীর বিশ্লেষণ সম্পন্ন হয়েছে!`
-            : language === "hi"
-              ? `${response.sections.length} विश्लेषण सफलतापूर्वक प्राप्त हुए!`
-              : `${response.sections.length} detailed findings identified from your palm.`,
-        );
+        if (access.requiredCoins > 0) {
+          toast.success(
+            language === "bn"
+              ? `পাম রিডিং বিশ্লেষণ সম্পন্ন হয়েছে! (${access.requiredCoins} কয়েন খরচ হয়েছে)`
+              : `Palm scan completed! (${access.requiredCoins} coins used)`,
+          );
+          refreshWallet();
+        } else {
+          toast.success(
+            language === "bn"
+              ? `${response.sections.length}টি গভীর বিশ্লেষণ সম্পন্ন হয়েছে!`
+              : language === "hi"
+                ? `${response.sections.length} विश्लेषण सफलतापूर्वक प्राप्त हुए!`
+                : `${response.sections.length} detailed findings identified from your palm.`,
+          );
+        }
         setTimeout(
           () => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
           120,
@@ -228,13 +262,21 @@ export default function PalmReadingPage() {
       } else {
         toast.info(response.message || t.rejectedTitle);
       }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "The scan could not be completed.");
+    } catch (error: any) {
+      if (error?.code === "insufficient_coins" || error?.message?.includes("insufficient_coins")) {
+        setCoinModalReason("insufficient_coins");
+        setCoinModalOpen(true);
+      } else if (error?.status === 401 || error?.code === "authentication_required") {
+        setCoinModalReason("unauthorized");
+        setCoinModalOpen(true);
+      } else {
+        toast.error(error instanceof Error ? error.message : "The scan could not be completed.");
+      }
     } finally {
       setScanning(false);
       capturingRef.current = false;
     }
-  }, [language, t.rejectedTitle]);
+  }, [checkAccess, language, refreshWallet, t.rejectedTitle]);
 
   const startCamera = React.useCallback(async () => {
     setCameraError(null);
@@ -305,6 +347,21 @@ export default function PalmReadingPage() {
   }, [scanBlob, stopCamera, waitForVideo]);
 
   const handleFile = async (file: File) => {
+    const access = checkAccess("palm_reading");
+    if (!access.allowed) {
+      if (access.reason === "disabled") {
+        toast.error(
+          language === "bn"
+            ? "পাম রিডিং ফিচারটি বর্তমানে বন্ধ রাখা হয়েছে।"
+            : "Palm reading feature is temporarily unavailable.",
+        );
+        return;
+      }
+      setCoinModalReason(access.reason || "insufficient_coins");
+      setCoinModalOpen(true);
+      return;
+    }
+
     if (!file.type.startsWith("image/")) {
       toast.error("Please choose a valid photo.");
       return;
@@ -325,13 +382,22 @@ export default function PalmReadingPage() {
       const response = await palmReadingApi.scan(file);
       setResult(response);
       if (response.status === "ok") {
-        toast.success(
-          language === "bn"
-            ? `${response.sections.length}টি গভীর বিশ্লেষণ সম্পন্ন হয়েছে!`
-            : language === "hi"
-              ? `${response.sections.length} विश्लेषण प्राप्त हुए!`
-              : `${response.sections.length} findings from your palm.`,
-        );
+        if (access.requiredCoins > 0) {
+          toast.success(
+            language === "bn"
+              ? `পাম রিডিং বিশ্লেষণ সম্পন্ন হয়েছে! (${access.requiredCoins} কয়েন খরচ হয়েছে)`
+              : `Palm scan completed! (${access.requiredCoins} coins used)`,
+          );
+          refreshWallet();
+        } else {
+          toast.success(
+            language === "bn"
+              ? `${response.sections.length}টি গভীর বিশ্লেষণ সম্পন্ন হয়েছে!`
+              : language === "hi"
+                ? `${response.sections.length} विश्लेषण प्राप्त हुए!`
+                : `${response.sections.length} findings from your palm.`,
+          );
+        }
         setTimeout(
           () => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
           120,
@@ -339,8 +405,16 @@ export default function PalmReadingPage() {
       } else {
         toast.info(response.message || t.rejectedTitle);
       }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "The scan could not be completed.");
+    } catch (error: any) {
+      if (error?.code === "insufficient_coins" || error?.message?.includes("insufficient_coins")) {
+        setCoinModalReason("insufficient_coins");
+        setCoinModalOpen(true);
+      } else if (error?.status === 401 || error?.code === "authentication_required") {
+        setCoinModalReason("unauthorized");
+        setCoinModalOpen(true);
+      } else {
+        toast.error(error instanceof Error ? error.message : "The scan could not be completed.");
+      }
     } finally {
       setScanning(false);
     }
@@ -472,6 +546,14 @@ export default function PalmReadingPage() {
           <p className="mx-auto mt-2.5 max-w-2xl text-xs leading-relaxed text-muted-foreground sm:text-sm">
             {t.subtitle}
           </p>
+
+          <div className="pt-4 flex justify-center">
+            <FeatureCoinBadge
+              feature={palmFeature}
+              walletBalance={walletBalance}
+              language={language}
+            />
+          </div>
         </header>
 
         {!isSignedIn ? (
@@ -490,6 +572,14 @@ export default function PalmReadingPage() {
           <>
             {/* Capture Area */}
             <section className="mx-auto mt-8 max-w-3xl rounded-3xl border border-border bg-surface p-5 shadow-sm sm:p-7">
+              {palmFeature && !palmFeature.enabled && (
+                <div className="mb-5">
+                  <FeatureDisabledAlert
+                    featureName={language === "bn" ? "পাম রিডিং (হস্তরেখা বিচার)" : "Palm Reading"}
+                    language={language}
+                  />
+                </div>
+              )}
               {availability && (
                 <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-surface-muted p-3.5">
                   <span className="text-xs font-semibold text-foreground">
@@ -689,14 +779,18 @@ export default function PalmReadingPage() {
                   <button
                     type="button"
                     onClick={() => void startCamera()}
-                    disabled={scanning}
-                    className="flex w-full flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-brand-300 bg-brand-50/50 p-10 transition-all hover:bg-brand-50 disabled:opacity-60"
+                    disabled={scanning || (palmFeature ? !palmFeature.enabled : false)}
+                    className="flex w-full flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-brand-300 bg-brand-50/50 p-10 transition-all hover:bg-brand-50 disabled:opacity-50"
                   >
                     <span className="flex size-14 items-center justify-center rounded-2xl bg-brand-400 text-ink-950 shadow-sm">
                       <Camera className="size-6" />
                     </span>
                     <span className="text-base font-bold text-foreground">
-                      {t.scanWithCamera}
+                      {palmFeature && !palmFeature.enabled
+                        ? language === "bn"
+                          ? "ফিচারটি বর্তমানে বন্ধ রয়েছে"
+                          : "Feature Disabled"
+                        : t.scanWithCamera}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {t.scanCameraSubtitle}
@@ -706,8 +800,8 @@ export default function PalmReadingPage() {
                   <button
                     type="button"
                     onClick={() => fileInput.current?.click()}
-                    disabled={scanning}
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-surface-muted py-3.5 text-xs font-bold text-foreground transition-colors hover:bg-surface disabled:opacity-60"
+                    disabled={scanning || (palmFeature ? !palmFeature.enabled : false)}
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-surface-muted py-3.5 text-xs font-bold text-foreground transition-colors hover:bg-surface disabled:opacity-50"
                   >
                     <Upload className="size-4" />
                     {t.uploadPhoto}
@@ -1757,6 +1851,16 @@ export default function PalmReadingPage() {
           </>
         )}
       </main>
+
+      <FeatureCoinModal
+        open={coinModalOpen}
+        onClose={() => setCoinModalOpen(false)}
+        featureName={palmFeature?.name || (language === "bn" ? "পাম রিডিং" : "Palm Reading")}
+        requiredCoins={palmFeature?.coins ?? 25}
+        walletBalance={walletBalance}
+        reason={coinModalReason}
+        language={language}
+      />
 
       <SiteFooter />
     </>

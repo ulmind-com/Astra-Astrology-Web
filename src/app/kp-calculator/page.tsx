@@ -39,6 +39,12 @@ import {
 } from "@/lib/kp-translations";
 import { useAuth } from "@/providers/auth-provider";
 import { useProfile } from "@/hooks/use-profile";
+import { useFeaturePricing } from "@/hooks/use-feature-pricing";
+import {
+  FeatureCoinBadge,
+  FeatureDisabledAlert,
+  FeatureCoinModal,
+} from "@/components/astrology/feature-pricing-banner";
 import type {
   AstrologyLanguage,
   AyanamsaType,
@@ -52,6 +58,10 @@ import type {
 export default function KPCalculatorPage() {
   const { user, isSignedIn } = useAuth();
   const { data: profile } = useProfile({ enabled: isSignedIn });
+  const { getFeature, checkAccess, walletBalance, refresh: refreshWallet } = useFeaturePricing();
+  const kpFeature = getFeature("kp_calculator");
+  const [coinModalOpen, setCoinModalOpen] = React.useState(false);
+  const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
 
   // Language state: 'bn' (Bengali), 'en' (English), 'hi' (Hindi)
   const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
@@ -368,6 +378,21 @@ export default function KPCalculatorPage() {
       language,
     };
 
+    const access = checkAccess("kp_calculator");
+    if (!access.allowed) {
+      if (access.reason === "disabled") {
+        toast.error(
+          language === "bn"
+            ? "কেপি অ্যাস্ট্রোলজি ফিচারটি বর্তমানে অ্যাডমিন দ্বারা বন্ধ রয়েছে।"
+            : "KP Astrology feature is temporarily unavailable.",
+        );
+        return;
+      }
+      setCoinModalReason(access.reason || "insufficient_coins");
+      setCoinModalOpen(true);
+      return;
+    }
+
     setLoading(true);
     try {
       const resp = await astrologyApi.calculateKp(payload);
@@ -382,13 +407,22 @@ export default function KPCalculatorPage() {
         if (activeAD) setExpandedAD(activeAD.lord);
       }
 
-      toast.success(
-        language === "bn"
-          ? `কেপি নির্ভুল চার্ট নির্ণয় সম্পন্ন হয়েছে!`
-          : language === "hi"
-          ? `केपी ज्योतिष गणना सफलतापूर्वक संपन्न!`
-          : `KP Astrology Chart calculated successfully!`,
-      );
+      if (access.requiredCoins > 0) {
+        toast.success(
+          language === "bn"
+            ? `কেপি নির্ভুল চার্ট নির্ণয় সম্পন্ন হয়েছে! (${access.requiredCoins} কয়েন খরচ হয়েছে)`
+            : `KP Chart calculated! (${access.requiredCoins} coins used)`,
+        );
+        refreshWallet();
+      } else {
+        toast.success(
+          language === "bn"
+            ? `কেপি নির্ভুল চার্ট নির্ণয় সম্পন্ন হয়েছে!`
+            : language === "hi"
+            ? `केपी ज्योतिष गणना सफलतापूर्वक संपन्न!`
+            : `KP Astrology Chart calculated successfully!`,
+        );
+      }
 
       // Smooth scroll to results
       setTimeout(() => {
@@ -396,14 +430,22 @@ export default function KPCalculatorPage() {
       }, 150);
     } catch (err: any) {
       console.error("KP Calculation Error:", err);
-      toast.error(
-        err?.message ||
-          (language === "bn"
-            ? "কেপি চার্ট গণনায় ত্রুটি হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।"
-            : language === "hi"
-            ? "केपी चक्र गणना में त्रुटि हुई। कृपया पुनः प्रयास करें।"
-            : "Failed to calculate KP Chart. Please try again."),
-      );
+      if (err?.code === "insufficient_coins") {
+        setCoinModalReason("insufficient_coins");
+        setCoinModalOpen(true);
+      } else if (err?.code === "authentication_required" || err?.status === 401) {
+        setCoinModalReason("unauthorized");
+        setCoinModalOpen(true);
+      } else {
+        toast.error(
+          err?.message ||
+            (language === "bn"
+              ? "কেপি চার্ট গণনায় ত্রুটি হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।"
+              : language === "hi"
+              ? "केपी चक्र गणना में त्रुटि हुई। कृपया पुनः प्रयास करें।"
+              : "Failed to calculate KP Chart. Please try again."),
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -443,6 +485,13 @@ export default function KPCalculatorPage() {
             <p className="mt-1 text-sm sm:text-base text-slate-600 max-w-2xl">
               {ui.subtitle}
             </p>
+            <div className="pt-2">
+              <FeatureCoinBadge
+                feature={kpFeature}
+                walletBalance={walletBalance}
+                language={language}
+              />
+            </div>
           </div>
 
           {/* Language Switcher */}
@@ -483,6 +532,15 @@ export default function KPCalculatorPage() {
               </button>
             )}
           </div>
+
+          {kpFeature && !kpFeature.enabled && (
+            <div className="mb-6">
+              <FeatureDisabledAlert
+                featureName={language === "bn" ? "কেপি অ্যাস্ট্রোলজি" : "KP Astrology"}
+                language={language}
+              />
+            </div>
+          )}
 
           <form onSubmit={handleCalculate} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -737,23 +795,38 @@ export default function KPCalculatorPage() {
                 <span>{ui.resetBtn}</span>
               </button>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-extrabold text-sm shadow-md hover:shadow-lg transition-all disabled:opacity-50 order-1 sm:order-2"
-              >
-                {loading ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>{ui.calculating}</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4" />
-                    <span>{ui.calculateBtn}</span>
-                  </>
-                )}
-              </button>
+              <div className="flex items-center gap-3 w-full sm:w-auto justify-end order-1 sm:order-2">
+                <FeatureCoinBadge
+                  feature={kpFeature}
+                  walletBalance={walletBalance}
+                  language={language}
+                  showWallet={false}
+                />
+
+                <button
+                  type="submit"
+                  disabled={loading || (kpFeature ? !kpFeature.enabled : false)}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-extrabold text-sm shadow-md hover:shadow-lg transition-all disabled:opacity-50"
+                >
+                  {loading ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>{ui.calculating}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      <span>
+                        {kpFeature && !kpFeature.enabled
+                          ? language === "bn"
+                            ? "ফিচারটি বন্ধ রয়েছে"
+                            : "Feature Unavailable"
+                          : ui.calculateBtn}
+                      </span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </form>
         </div>
@@ -1389,6 +1462,16 @@ export default function KPCalculatorPage() {
           </div>
         )}
       </main>
+
+      <FeatureCoinModal
+        open={coinModalOpen}
+        onClose={() => setCoinModalOpen(false)}
+        featureName={kpFeature?.name || (language === "bn" ? "কেপি অ্যাস্ট্রোলজি" : "KP Astrology")}
+        requiredCoins={kpFeature?.coins ?? 20}
+        walletBalance={walletBalance}
+        reason={coinModalReason}
+        language={language}
+      />
 
       <SiteFooter />
     </div>

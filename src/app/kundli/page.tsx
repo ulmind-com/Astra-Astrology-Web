@@ -32,6 +32,12 @@ import {
 import { KundliDiamondChart } from "@/components/astrology/kundli-diamond-chart";
 import { useAuth } from "@/providers/auth-provider";
 import { useProfile } from "@/hooks/use-profile";
+import { useFeaturePricing } from "@/hooks/use-feature-pricing";
+import {
+  FeatureCoinBadge,
+  FeatureDisabledAlert,
+  FeatureCoinModal,
+} from "@/components/astrology/feature-pricing-banner";
 import {
   KUNDLI_UI_STRINGS,
   KUNDLI_GENDER_NAMES,
@@ -91,6 +97,10 @@ const ZODIAC_SYMBOLS_MAP: Record<string, string> = {
 export default function KundliPage() {
   const { user, isSignedIn } = useAuth();
   const { data: profile } = useProfile({ enabled: isSignedIn });
+  const { getFeature, checkAccess, walletBalance, refresh: refreshWallet } = useFeaturePricing();
+  const kundliFeature = getFeature("kundli");
+  const [coinModalOpen, setCoinModalOpen] = React.useState(false);
+  const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
 
   // Language state
   const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
@@ -420,21 +430,53 @@ export default function KundliPage() {
       language,
     };
 
+    const access = checkAccess("kundli");
+    if (!access.allowed) {
+      if (access.reason === "disabled") {
+        toast.error(
+          language === "bn"
+            ? "কুন্ডলী ফিচারটি বর্তমানে অ্যাডমিন দ্বারা বন্ধ রাখা হয়েছে।"
+            : "Kundli feature is temporarily unavailable.",
+        );
+        return;
+      }
+      setCoinModalReason(access.reason || "insufficient_coins");
+      setCoinModalOpen(true);
+      return;
+    }
+
     setLoading(true);
     try {
       const resp = await astrologyApi.calculateKundli(payload);
       setResult(resp);
-      toast.success(
-        language === "bn"
-          ? "কুন্ডলী ও গ্রহের অবস্থান সফলভাবে গণনা সম্পন্ন হয়েছে!"
-          : "Kundli & Planetary Position calculated successfully!",
-      );
+      if (access.requiredCoins > 0) {
+        toast.success(
+          language === "bn"
+            ? `কুন্ডলী গণনা সম্পন্ন হয়েছে! (${access.requiredCoins} কয়েন খরচ হয়েছে)`
+            : `Kundli calculated! (${access.requiredCoins} coins used)`,
+        );
+        refreshWallet();
+      } else {
+        toast.success(
+          language === "bn"
+            ? "কুন্ডলী ও গ্রহের অবস্থান সফলভাবে গণনা সম্পন্ন হয়েছে!"
+            : "Kundli & Planetary Position calculated successfully!",
+        );
+      }
       setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 150);
     } catch (err: any) {
       console.error("Kundli calculation error:", err);
-      toast.error(err?.message || "Failed to calculate Kundli.");
+      if (err?.code === "insufficient_coins") {
+        setCoinModalReason("insufficient_coins");
+        setCoinModalOpen(true);
+      } else if (err?.code === "authentication_required" || err?.status === 401) {
+        setCoinModalReason("unauthorized");
+        setCoinModalOpen(true);
+      } else {
+        toast.error(err?.message || "Failed to calculate Kundli.");
+      }
     } finally {
       setLoading(false);
     }
@@ -483,6 +525,15 @@ export default function KundliPage() {
               ? "सटीक लग्न, १२ भाव, नवमांश (D9) चार्ट, विंशोत्तरी दशा एवं वैदिक योगों का संपूर्ण विश्लेषण।"
               : "Accurate Ascendant, 12 Placidus House Cusps, Navamsha D9 Chart, Vimshottari Dashas and Classical Vedic Yogas."}
           </p>
+
+          {/* Feature Coin Badge */}
+          <div className="flex justify-center pt-1">
+            <FeatureCoinBadge
+              feature={kundliFeature}
+              walletBalance={walletBalance}
+              language={language}
+            />
+          </div>
 
           {/* Language Switcher Bar matching Image 2 */}
           <div className="flex items-center justify-center gap-2 pt-2">
@@ -827,12 +878,34 @@ export default function KundliPage() {
                 )}
               </div>
 
-              {/* Submit Button */}
-              <div className="pt-3">
+              {/* Feature Disabled Alert if applicable */}
+              {kundliFeature && !kundliFeature.enabled && (
+                <div className="pt-2">
+                  <FeatureDisabledAlert
+                    featureName={language === "bn" ? "কুন্ডলী গণনা" : "Kundli Calculation"}
+                    language={language}
+                  />
+                </div>
+              )}
+
+              {/* Submit Button & Fee Info */}
+              <div className="pt-3 space-y-2">
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-[11px] font-medium text-foreground-muted">
+                    {language === "bn" ? "গণনা খরচ" : "Calculation Fee"}:
+                  </span>
+                  <FeatureCoinBadge
+                    feature={kundliFeature}
+                    walletBalance={walletBalance}
+                    language={language}
+                    showWallet={false}
+                  />
+                </div>
+
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="w-full h-12 rounded-xl bg-brand-400 hover:bg-brand-500 text-ink-900 font-bold shadow-glow text-base transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+                  disabled={loading || (kundliFeature ? !kundliFeature.enabled : false)}
+                  className="w-full h-12 rounded-xl bg-brand-400 hover:bg-brand-500 text-ink-900 font-bold shadow-glow text-base transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Sparkles className="size-4" />
                   <span>
@@ -840,6 +913,10 @@ export default function KundliPage() {
                       ? language === "bn"
                         ? "কুন্ডলী গণনা করা হচ্ছে..."
                         : "Calculating Kundli..."
+                      : kundliFeature && !kundliFeature.enabled
+                      ? language === "bn"
+                        ? "ফিচারটি বন্ধ রয়েছে"
+                        : "Feature Unavailable"
                       : language === "bn"
                       ? "কুন্ডলী গণনা করুন"
                       : "Calculate Kundli"}
@@ -1546,6 +1623,16 @@ export default function KundliPage() {
           </div>
         </div>
       )}
+
+      <FeatureCoinModal
+        open={coinModalOpen}
+        onClose={() => setCoinModalOpen(false)}
+        featureName={kundliFeature?.name || (language === "bn" ? "কুন্ডলী (জন্ম ছক)" : "Kundli Chart")}
+        requiredCoins={kundliFeature?.coins ?? 20}
+        walletBalance={walletBalance}
+        reason={coinModalReason}
+        language={language}
+      />
 
       <SiteFooter />
     </div>

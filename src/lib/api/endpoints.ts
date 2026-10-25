@@ -127,11 +127,13 @@ export const endpoints = {
     nakshatra: "/astrology/nakshatra",
     nakshatras: "/astrology/nakshatras",
     kp: "/astrology/kp",
+    dasha: "/astrology/dasha",
     kundli: "/astrology/kundli",
     kundliMatching: "/astrology/kundli-matching",
     geoSearch: "/astrology/geo-search",
     timezone: "/astrology/timezone",
     clientRules: (signIndex: number) => `/astrology/client-rules/${signIndex}`,
     dailyHoroscope: "/astrology/horoscope/daily",
+    featuresPricing: "/astrology/features/pricing",
   },
 } as const;
