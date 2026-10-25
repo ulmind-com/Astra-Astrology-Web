@@ -679,6 +679,133 @@ export interface KundliActiveYogaDetail {
   effects: string;
 }
 
+export interface PlanetaryDignityItem {
+  planet: string;
+  planet_bn: string;
+  planet_hi: string;
+  sign: string;
+  sign_bn: string;
+  house: number;
+  degree: number;
+  degree_formatted: string;
+  dignity: string;
+  dignity_bn: string;
+  dignity_hi: string;
+  is_combust: boolean;
+  is_retrograde: boolean;
+  avastha: string;
+  avastha_bn: string;
+  avastha_hi: string;
+  neechabhanga: boolean;
+  neechabhanga_reason?: string | null;
+}
+
+export interface HousePredictionItem {
+  house_number: number;
+  house_name: string;
+  house_name_bn: string;
+  house_name_hi: string;
+  sign: string;
+  sign_bn: string;
+  sign_lord: string;
+  sign_lord_bn: string;
+  lord_placement_house: number;
+  occupants: string[];
+  occupants_bn: string[];
+  overview: string;
+  overview_bn: string;
+  overview_hi: string;
+  career_wealth_effect: string;
+  career_wealth_effect_bn: string;
+  career_wealth_effect_hi: string;
+  relationship_family_effect: string;
+  relationship_family_effect_bn: string;
+  relationship_family_effect_hi: string;
+}
+
+export interface ExtendedYogaItem {
+  name: string;
+  name_bn: string;
+  name_hi: string;
+  category: string;
+  category_bn: string;
+  is_present: boolean;
+  description: string;
+  description_bn: string;
+  description_hi: string;
+  effects: string;
+  effects_bn: string;
+  effects_hi: string;
+}
+
+export interface DoshaAnalysisItem {
+  dosha_name: string;
+  dosha_name_bn: string;
+  dosha_name_hi: string;
+  is_present: boolean;
+  severity: string;
+  severity_bn: string;
+  specific_type?: string | null;
+  specific_type_bn?: string | null;
+  cancellation_reason?: string | null;
+  cancellation_reason_bn?: string | null;
+  remedy: string;
+  remedy_bn: string;
+  remedy_hi: string;
+}
+
+export interface GemstoneItem {
+  category: string;
+  category_bn: string;
+  stone_name: string;
+  stone_name_bn: string;
+  stone_name_hi: string;
+  sanskrit_name: string;
+  ruling_planet: string;
+  ruling_planet_bn: string;
+  metal: string;
+  metal_bn: string;
+  finger: string;
+  finger_bn: string;
+  wearing_day: string;
+  wearing_day_bn: string;
+  beej_mantra: string;
+  benefit: string;
+  benefit_bn: string;
+}
+
+export interface PersonalRemedies {
+  life_stone: GemstoneItem;
+  lucky_stone: GemstoneItem;
+  career_stone: GemstoneItem;
+  rudraksha_recommendation: string;
+  rudraksha_recommendation_bn: string;
+  rudraksha_recommendation_hi: string;
+  ishta_devata: string;
+  ishta_devata_bn: string;
+  ishta_devata_hi: string;
+  lucky_colors: string[];
+  lucky_colors_bn: string[];
+  lucky_numbers: number[];
+  favorable_direction: string;
+  favorable_direction_bn: string;
+}
+
+export interface CurrentDashaInfo {
+  mahadasha_lord: string;
+  mahadasha_lord_bn: string;
+  antardasha_lord: string;
+  antardasha_lord_bn: string;
+  start_date: string;
+  end_date: string;
+  verdict: string;
+  verdict_bn: string;
+  verdict_hi: string;
+  guidance: string;
+  guidance_bn: string;
+  guidance_hi: string;
+}
+
 export interface KundliCalculateResult {
   personal_details: KundliPersonalDetails;
   astronomical_info: KundliAstronomicalInfo;
@@ -690,12 +817,24 @@ export interface KundliCalculateResult {
   d1_asc_sign: number;
   d9_asc_sign: number;
 
+  d10_planets?: KundliChartPlanet[];
+  d10_asc_sign?: number;
+  d7_planets?: KundliChartPlanet[];
+  d7_asc_sign?: number;
+
   planets_table: KundliTableRow[];
   houses_table: KundliTableRow[];
   dashas_grid: KundliDashaCard[];
 
   yogas_status: KundliYogaItem[];
   active_yogas_details: KundliActiveYogaDetail[];
+
+  planetary_dignities?: PlanetaryDignityItem[];
+  house_predictions?: HousePredictionItem[];
+  extended_yogas?: ExtendedYogaItem[];
+  doshas_analysis?: DoshaAnalysisItem[];
+  remedies?: PersonalRemedies;
+  current_dasha?: CurrentDashaInfo;
 
   selected_language: AstrologyLanguage;
   translations?: Record<string, any>;

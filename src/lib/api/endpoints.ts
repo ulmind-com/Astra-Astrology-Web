@@ -136,4 +136,10 @@ export const endpoints = {
     dailyHoroscope: "/astrology/horoscope/daily",
     featuresPricing: "/astrology/features/pricing",
   },
+
+  aiAstrologer: {
+    chat: "/ai-astrologer/chat",
+    session: (id: string) => `/ai-astrologer/session/${id}`,
+    feedback: "/ai-astrologer/feedback",
+  },
 } as const;

@@ -18,6 +18,7 @@
  */
 
 import {
+  Bot,
   CalendarDays,
   Coins,
   Compass,
@@ -46,6 +47,7 @@ import { useAuth } from "@/providers/auth-provider";
 import { formatCoins } from "@/types";
 
 export const RAIL_LINKS = [
+  { href: "/ai-astrologer", label: "AI Astrologer", icon: Bot },
   { href: "/daily-horoscope", label: "Daily Horoscope", icon: Sparkles },
   { href: "/kundli", label: "Kundli", icon: ScrollText },
   { href: "/kundli-matching", label: "Kundli Matching", icon: HeartHandshake },
