@@ -24,6 +24,15 @@ import {
   Languages,
   Compass,
   RefreshCw,
+  Shield,
+  Zap,
+  BookOpen,
+  Award,
+  Activity,
+  Flame,
+  Layers,
+  Radio,
+  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -113,6 +122,10 @@ export default function RashiCalculatorPage() {
   // Calculation State
   const [loading, setLoading] = React.useState(false);
   const [result, setResult] = React.useState<RashiCalculateResult | null>(null);
+
+  // Tab & Chart Toggle State
+  const [activeTab, setActiveTab] = React.useState<"core" | "rules" | "kundali" | "transit" | "predictions">("core");
+  const [chartMode, setChartMode] = React.useState<"chandra" | "lagna">("chandra");
 
   const resultsRef = React.useRef<HTMLDivElement>(null);
   const hasAutoFilled = React.useRef(false);
@@ -1296,6 +1309,20 @@ export default function RashiCalculatorPage() {
                 <p className="mt-3 text-xs sm:text-[13px] text-ink-700 max-w-2xl leading-relaxed font-medium">
                   {activeTraits.overview}
                 </p>
+
+                {/* Vargottama Moon Badge */}
+                {result.is_vargottama && (
+                  <div className="mt-3.5 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500/20 via-purple-500/20 to-amber-500/20 border-2 border-amber-400 px-4 py-1.5 text-xs font-black text-amber-950 shadow-sm animate-pulse">
+                    <Award className="size-4 text-amber-600 fill-amber-500 shrink-0" />
+                    <span>
+                      {language === "bn"
+                        ? "পরম শুভ বর্গোত্তম চন্দ্র (Vargottama Moon) — জন্ম রাশি (D1) ও নবাংশ (D9) উভয় চক্রেই একই রাশিতে অবস্থিত!"
+                        : language === "hi"
+                        ? "परम शुभ वर्गोत्तम चंद्र (Vargottama Moon) — लग्न (D1) एवं नवांश (D9) दोनों चक्रों में एक ही राशि में स्थित!"
+                        : "Sacred Vargottama Moon — Positioned in the same sign in both D1 & D9 Navamsha!"}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* High-Contrast Badges Strip */}
@@ -1332,7 +1359,6 @@ export default function RashiCalculatorPage() {
                 <p className="mt-1 font-display text-base sm:text-lg font-black text-ink-950">
                   {result.nakshatra_name}
                 </p>
-                {/* Fixed High-Contrast Pada Badge */}
                 <span className="inline-block mt-1.5 rounded-full bg-amber-100 text-amber-950 border border-amber-300 px-3 py-0.5 text-xs font-black shadow-2xs">
                   {language === "bn" ? `${result.nakshatra_pada} নং পদ` : language === "hi" ? `चरण ${result.nakshatra_pada}` : `Pada ${result.nakshatra_pada}`}
                 </span>
@@ -1375,296 +1401,802 @@ export default function RashiCalculatorPage() {
               </div>
             </div>
 
-            {/* 3. CRITICAL SECTION REQUESTED BY USER:
-                - What to Be Cautious About (কি কি থেকে সাবধান থাকতে হবে)
-                - What is Beneficial & Auspicious (কি করলে ভালো হবে)
-                - Fully Localized in the Selected Language (BN / HI / EN)
-            */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Warnings & Cautions (সাবধানতা ও দুর্বলতা) */}
-              <div className="rounded-[26px] border border-rose-500/30 bg-gradient-to-br from-rose-500/[0.05] via-card to-card p-6 sm:p-7 shadow-sm space-y-4">
-                <div className="flex items-center gap-3 pb-3 border-b border-rose-500/20">
-                  <div className="flex size-10 items-center justify-center rounded-xl bg-rose-500/15 text-rose-700 shadow-xs">
-                    <AlertTriangle className="size-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-display text-base sm:text-lg font-extrabold text-ink-950">
-                      {language === "bn"
-                        ? "কী কী থেকে সাবধান থাকবেন (সতর্কতা)"
-                        : language === "hi"
-                        ? "किन-किन बातों से सावधान रहें (सावधानियां)"
-                        : "Cautions & Pitfalls (What to Avoid)"}
-                    </h3>
-                    <p className="text-[11px] font-semibold text-rose-700/90">
-                      {language === "bn"
-                        ? "আপনার রাশির স্বভাবজাত দুর্বলতা ও প্রতিকূল ক্ষেত্র"
-                        : language === "hi"
-                        ? "आपकी राशि की स्वाभाविक कमजोरियां और प्रतिकूल क्षेत्र"
-                        : "Innate vulnerabilities and traits to be mindful of"}
-                    </p>
-                  </div>
-                </div>
-
-                <ul className="space-y-3 text-xs sm:text-[13px] text-ink-950">
-                  {activeTraits.cautions_and_pitfalls.map((caution, idx) => (
-                    <li key={idx} className="flex items-start gap-2.5 font-medium">
-                      <span className="mt-1.5 size-2 shrink-0 rounded-full bg-rose-600 shadow-xs" />
-                      <span className="leading-relaxed">{caution}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Beneficial Actions & Remedies (করণীয় ও বৈদিক প্রতিকার) */}
-              <div className="rounded-[26px] border border-emerald-500/30 bg-gradient-to-br from-emerald-500/[0.05] via-card to-card p-6 sm:p-7 shadow-sm space-y-4">
-                <div className="flex items-center gap-3 pb-3 border-b border-emerald-500/20">
-                  <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-700 shadow-xs">
-                    <CheckCircle2 className="size-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-display text-base sm:text-lg font-extrabold text-ink-950">
-                      {language === "bn"
-                        ? "কী করলে আপনার ভালো হবে (শুভ প্রতিকার)"
-                        : language === "hi"
-                        ? "क्या करने से आपका कल्याण होगा (शुभ उपाय)"
-                        : "Beneficial Actions & Remedies (What to Do)"}
-                    </h3>
-                    <p className="text-[11px] font-semibold text-emerald-700/90">
-                      {language === "bn"
-                        ? "সৌভাগ্য বৃদ্ধি, মানসিক শান্তি ও সাফল্যের বৈদিক উপায়"
-                        : language === "hi"
-                        ? "सौभाग्य, मानसिक शांति और सफलता के अचूक उपाय"
-                        : "Auspicious Vedic practices to enhance luck and peace"}
-                    </p>
-                  </div>
-                </div>
-
-                <ul className="space-y-3 text-xs sm:text-[13px] text-ink-950">
-                  {activeTraits.beneficial_actions_and_remedies.map((remedy, idx) => (
-                    <li key={idx} className="flex items-start gap-2.5 font-medium">
-                      <span className="mt-1.5 size-2 shrink-0 rounded-full bg-emerald-600 shadow-xs" />
-                      <span className="leading-relaxed">{remedy}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            {/* 3. 5-Tab Navigation System */}
+            <div className="flex items-center justify-start sm:justify-center overflow-x-auto gap-2 p-1.5 rounded-2xl bg-surface-muted border border-border/80 shadow-inner scrollbar-none">
+              {[
+                { id: "core", labelBn: "অবকহড়া ও মূল চক্র", labelHi: "अवकहड़ा एवं मूल चक्र", labelEn: "Core & Avakahada", icon: Sparkles },
+                { id: "rules", labelBn: "১৫টি শাস্ত্রীয় নিয়ম (01.pdf)", labelHi: "१५ शास्त्रीय नियम", labelEn: "15 Classical Rules", icon: BookOpen },
+                { id: "kundali", labelBn: "চন্দ্র লগ্ন ও গ্রহ সম্বন্ধ", labelHi: "चंद्र लग्न एवं ग्रह संबंध", labelEn: "Chandra Lagna & Dignity", icon: Eye },
+                { id: "transit", labelBn: "লাইভ গোচর ও সাড়ে সাতি", labelHi: "लाइव गोचर एवं साढ़े साती", labelEn: "Transit & Sade Sati", icon: Activity },
+                { id: "predictions", labelBn: "সতর্কতা, প্রতিকার ও জীবন", labelHi: "सावधानियां एवं उपाय", labelEn: "Cautions & Remedies", icon: Shield },
+              ].map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`flex items-center gap-2 px-3.5 sm:px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                      isActive
+                        ? "bg-amber-500 text-amber-950 font-black shadow-md shadow-amber-500/20 scale-[1.02]"
+                        : "text-muted-foreground hover:text-foreground hover:bg-card/70"
+                    }`}
+                  >
+                    <Icon className={`size-4 ${isActive ? "text-amber-950" : "text-muted-foreground"}`} />
+                    <span>{language === "bn" ? tab.labelBn : language === "hi" ? tab.labelHi : tab.labelEn}</span>
+                  </button>
+                );
+              })}
             </div>
 
-            {/* 4. Lucky Attributes & Strengths */}
-            <div className="rounded-[26px] border border-amber-300/80 bg-card p-6 sm:p-7 shadow-2xs space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-3 border-b border-border/60">
-                <h3 className="font-display text-base sm:text-lg font-extrabold text-ink-950 flex items-center gap-2">
-                  <Star className="size-4 text-amber-500 fill-amber-500" />
-                  <span>
-                    {language === "bn"
-                      ? "শুভ বৈশিষ্ট্য ও রাশির কারকতা"
-                      : language === "hi"
-                      ? "शुभ गुण एवं राशि की विशेषताएं"
-                      : "Lucky Attributes & Key Strengths"}
-                  </span>
-                </h3>
-                <span className="text-xs text-muted-foreground">
-                  {language === "bn" ? "শারীরিক শাসন:" : language === "hi" ? "शारीरिक नियंत्रण:" : "Body Governance:"}{" "}
-                  <strong className="text-ink-950">{activeTraits.body_parts}</strong>
-                </span>
+            {/* =========================================================================
+                TAB 1: CORE RASHI & AVAKAHADA CHAKRA
+            ========================================================================= */}
+            {activeTab === "core" && (
+              <div className="space-y-6 animate-in fade-in-50 duration-300">
+                {/* Avakahada Chakra Grid */}
+                <div className="rounded-[28px] border border-amber-300/80 bg-card p-6 sm:p-8 shadow-2xs space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-border/60">
+                    <div>
+                      <h3 className="font-display text-lg font-bold text-ink-950 flex items-center gap-2">
+                        <Sparkles className="size-4 text-amber-600" />
+                        <span>
+                          {language === "bn"
+                            ? "মহাজাগতিক অবকহড়া চক্র (Avakahada Chakra)"
+                            : language === "hi"
+                            ? "वैदिक अवकहड़ा चक्र (Avakahada Chakra)"
+                            : "Vedic Avakahada Chakra Attributes"}
+                        </span>
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        {language === "bn"
+                          ? "ক্লায়েন্টের ম্যাচমেকিং ও কুণ্ডলী শাস্ত্রের মূল ৭টি বৈশিষ্ট্য এবং বৈদিক নামাক্ষর"
+                          : language === "hi"
+                          ? "क्लाइंट के कुंडली शास्त्र अनुसार प्रमुख ७ गुण एवं वैदिक नामाक्षर"
+                          : "Foundational 7 attributes transcribed from classical Vedic matchmaking documents"}
+                      </p>
+                    </div>
+
+                    {result.namakshar && (
+                      <div className="inline-flex items-center gap-2 rounded-xl bg-amber-500/10 border border-amber-300 px-3.5 py-1.5 text-xs font-black text-amber-950 shadow-2xs">
+                        <Star className="size-3.5 text-amber-600 fill-amber-500" />
+                        <span>
+                          {language === "bn" ? "শুভ নামাক্ষর:" : language === "hi" ? "शुभ नामाक्षर:" : "Auspicious Letter:"}{" "}
+                          <strong className="text-base text-amber-800 ml-1 font-mono">{result.namakshar}</strong>
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 6 Avakahada Pillars Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
+                    <div className="rounded-xl bg-surface-muted/60 p-3.5 border border-border/60">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        {language === "bn" ? "১. বর্ণ (Varna)" : language === "hi" ? "१. वर्ण (Varna)" : "1. Varna"}
+                      </p>
+                      <p className="mt-1 font-extrabold text-ink-950 text-sm">
+                        {result.avakahada_chakra?.varna || activeTraits.element}
+                      </p>
+                      <span className="text-[10px] text-muted-foreground">
+                        {language === "bn" ? "স্বভাবগত শ্রেণী" : "Temperament"}
+                      </span>
+                    </div>
+
+                    <div className="rounded-xl bg-surface-muted/60 p-3.5 border border-border/60">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        {language === "bn" ? "২. বশ্য (Vashya)" : language === "hi" ? "२. वश्य (Vashya)" : "2. Vashya"}
+                      </p>
+                      <p className="mt-1 font-extrabold text-ink-950 text-sm">
+                        {result.avakahada_chakra?.vashya || "—"}
+                      </p>
+                      <span className="text-[10px] text-muted-foreground">
+                        {language === "bn" ? "নিয়ন্ত্রণ ও আকর্ষণ" : "Influence"}
+                      </span>
+                    </div>
+
+                    <div className="rounded-xl bg-surface-muted/60 p-3.5 border border-border/60">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        {language === "bn" ? "৩. যোনি প্রাণী (Yoni)" : language === "hi" ? "३. योनि (Yoni)" : "3. Yoni Animal"}
+                      </p>
+                      <p className="mt-1 font-extrabold text-ink-950 text-sm">
+                        {result.avakahada_chakra?.yoni || "—"}
+                      </p>
+                      <span className="text-[10px] text-muted-foreground">
+                        {language === "bn" ? "জৈবিক প্রবৃত্তি" : "Instinct"}
+                      </span>
+                    </div>
+
+                    <div className="rounded-xl bg-surface-muted/60 p-3.5 border border-border/60">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        {language === "bn" ? "৪. গণ (Gana)" : language === "hi" ? "४. गण (Gana)" : "4. Gana"}
+                      </p>
+                      <p className="mt-1 font-extrabold text-ink-950 text-sm">
+                        {result.avakahada_chakra?.gana || "—"}
+                      </p>
+                      <span className="text-[10px] text-muted-foreground">
+                        {language === "bn" ? "মানসিক চরিত্র" : "Disposition"}
+                      </span>
+                    </div>
+
+                    <div className="rounded-xl bg-surface-muted/60 p-3.5 border border-border/60">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        {language === "bn" ? "৫. নাড়ী (Nadi)" : language === "hi" ? "५. नाड़ी (Nadi)" : "5. Nadi"}
+                      </p>
+                      <p className="mt-1 font-extrabold text-ink-950 text-sm">
+                        {result.avakahada_chakra?.nadi || "—"}
+                      </p>
+                      <span className="text-[10px] text-muted-foreground">
+                        {language === "bn" ? "শারীরিক ধারা" : "Physiology"}
+                      </span>
+                    </div>
+
+                    <div className="rounded-xl bg-surface-muted/60 p-3.5 border border-border/60">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        {language === "bn" ? "৬. তত্ত্ব (Tatva)" : language === "hi" ? "६. तत्व (Tatva)" : "6. Tatva"}
+                      </p>
+                      <p className="mt-1 font-extrabold text-ink-950 text-sm">
+                        {result.avakahada_chakra?.tatva || activeTraits.element}
+                      </p>
+                      <span className="text-[10px] text-muted-foreground">
+                        {language === "bn" ? "মহাজাগতিক মৌল" : "Cosmic Element"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Paya Analysis Banner */}
+                  {result.avakahada_chakra?.paya && (
+                    <div className="rounded-2xl border border-amber-300/80 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+                      <div className="size-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-700 shrink-0 shadow-xs">
+                        <Award className="size-6" />
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-display text-sm font-extrabold text-ink-950">
+                            {language === "bn" ? "জন্মকালীন পায়া (Paya of Birth):" : language === "hi" ? "जन्म कालीन पाया (Paya):" : "Birth Foot (Paya):"}
+                          </h4>
+                          <span className="rounded-md bg-amber-100 text-amber-950 border border-amber-300 px-2.5 py-0.5 text-xs font-black shadow-2xs">
+                            {result.avakahada_chakra.paya.split("-")[0].trim()}
+                          </span>
+                        </div>
+                        <p className="text-xs text-ink-800 leading-relaxed font-medium">
+                          {result.avakahada_chakra.paya}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Navamsha (D9) Moon Details */}
+                  <div className="pt-2 border-t border-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="size-2 rounded-full bg-indigo-600" />
+                      <span className="text-muted-foreground">
+                        {language === "bn" ? "নবাংশ রাশি (D9 Navamsha Moon):" : language === "hi" ? "नवांश राशि (D9 Navamsha):" : "Navamsha Moon Sign (D9):"}
+                      </span>
+                      <strong className="text-ink-950 font-extrabold">
+                        {language === "bn" ? result.navamsha_rashi_name_bn : language === "hi" ? result.navamsha_rashi_name_hi : result.navamsha_rashi_name_en}
+                      </strong>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground">
+                        {language === "bn" ? "বর্গোত্তম স্ট্যাটাস:" : "Vargottama Status:"}
+                      </span>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-black ${
+                        result.is_vargottama
+                          ? "bg-emerald-100 text-emerald-950 border border-emerald-300"
+                          : "bg-surface-muted text-muted-foreground border border-border"
+                      }`}>
+                        {result.is_vargottama
+                          ? (language === "bn" ? "বর্গোত্তম (অত্যন্ত বলবান)" : "Vargottama (Supreme Fortitude)")
+                          : (language === "bn" ? "সাধারণ নবাংশ" : "Standard Navamsha")}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 12 Zodiac Signs & 27 Nakshatras Interactive Wheel */}
+                <div className="rounded-[28px] border border-border/80 bg-card p-6 sm:p-8 shadow-2xs space-y-6">
+                  <div className="text-center space-y-1">
+                    <h3 className="font-display text-lg sm:text-xl font-bold text-foreground">
+                      {language === "bn"
+                        ? "১২ রাশি ও ২৭ নক্ষত্রের মহাজাগতিক চক্র (Zodiac Wheel)"
+                        : language === "hi"
+                        ? "१२ राशि एवं २७ नक्षत्रों का ब्रह्मांडीय चक्र"
+                        : "12 Zodiac Signs & 27 Nakshatras Interactive Wheel"}
+                    </h3>
+                    <p className="text-xs text-muted-foreground max-w-xl mx-auto">
+                      {language === "bn"
+                        ? "আপনার রাশি ও নক্ষত্রের তাৎক্ষণিক মহাজাগতিক অবস্থান নিচে আলোকিত করে নির্দেশ করা হয়েছে।"
+                        : language === "hi"
+                        ? "आपकी राशि एवं नक्षत्र की खगोलीय स्थिति नीचे चक्र में प्रदर्शित है।"
+                        : "Your calculated Moon Sign and Nakshatra are illuminated on the zodiac mandala below."}
+                    </p>
+                  </div>
+
+                  <div className="flex justify-center py-4">
+                    <MoonSignWheel
+                      activeRashiIndex={result.rashi_index}
+                      activeNakshatraIndex={result.nakshatra_index}
+                    />
+                  </div>
+                </div>
               </div>
-
-              {/* Attribute Cards Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
-                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
-                    <Gem className="size-3 text-amber-600 shrink-0" />{" "}
-                    <span>{language === "bn" ? "শুভ রত্ন" : language === "hi" ? "शुभ रत्न" : "Lucky Gem"}</span>
-                  </p>
-                  <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{activeTraits.lucky_gemstone}</p>
-                </div>
-
-                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
-                    <Palette className="size-3 text-indigo-600 shrink-0" />{" "}
-                    <span>{language === "bn" ? "শুভ বর্ণ" : language === "hi" ? "शुभ रंग" : "Lucky Colors"}</span>
-                  </p>
-                  <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{activeTraits.lucky_color}</p>
-                </div>
-
-                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase">
-                    {language === "bn" ? "শুভ সংখ্যা" : language === "hi" ? "शुभ अंक" : "Lucky Numbers"}
-                  </p>
-                  <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{result.traits.lucky_numbers.join(", ")}</p>
-                </div>
-
-                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase">
-                    {language === "bn" ? "শুভ বার" : language === "hi" ? "शुभ दिन" : "Lucky Day"}
-                  </p>
-                  <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{activeTraits.lucky_day}</p>
-                </div>
-
-                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase">
-                    {language === "bn" ? "উপাস্য দেবতা" : language === "hi" ? "पूज्य देवता" : "Ruling Deity"}
-                  </p>
-                  <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{activeTraits.ruling_deity}</p>
-                </div>
-
-                <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase">
-                    {language === "bn" ? "অনুকূল রাশি" : language === "hi" ? "अनुकूल राशियां" : "Compatible Signs"}
-                  </p>
-                  <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">
-                    {activeTraits.compatible_rashis?.join(", ") || result.traits.compatible_rashis.join(", ")}
-                  </p>
-                </div>
-              </div>
-
-              {/* Strengths Pills with Crisp High-Contrast Text */}
-              <div className="pt-2">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2.5">
-                  {language === "bn" ? "ব্যক্তিত্বের প্রধান শক্তিসমূহ" : language === "hi" ? "व्यक्तित्व की प्रमुख विशेषताएं" : "Personality Strengths"}
-                </p>
-                <div className="flex flex-wrap gap-2 text-xs">
-                  {activeTraits.strengths.map((str, idx) => (
-                    <span
-                      key={idx}
-                      className="rounded-xl bg-white text-ink-950 px-3.5 py-1.5 font-bold border border-amber-300/80 shadow-2xs hover:border-amber-400 transition-colors"
-                    >
-                      <span className="text-amber-600 mr-1.5 font-black">✦</span>
-                      <span>{str}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* 4b. Classical rules, every one traceable to a client document */}
-            {result.client_rules && (
-              <ClientRulesPanel
-                profile={result.client_rules}
-                ascendantProfile={result.ascendant_client_rules}
-                kpReference={result.kp_reference}
-                language={language}
-              />
             )}
 
-            {/* 5. Kundali Chart Visualization with Consistent Aesthetic */}
-            <div className="rounded-[28px] border border-amber-300/80 bg-card p-6 sm:p-8 shadow-2xs space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-border/60">
-                <div>
-                  <h3 className="font-display text-lg font-bold text-ink-950 flex items-center gap-2">
-                    <Eye className="size-4 text-amber-600" />
-                    <span>
-                      {language === "bn"
-                        ? "জন্ম কোষ্ঠী চক্র (Birth Kundali Chart)"
-                        : language === "hi"
-                        ? "जन्म कुंडली चक्र (Birth Kundali)"
-                        : "Birth Kundali Chart Visualization"}
+            {/* =========================================================================
+                TAB 2: 15 CLASSICAL CLASSIFICATIONS (01.PDF)
+            ========================================================================= */}
+            {activeTab === "rules" && (
+              <div className="space-y-6 animate-in fade-in-50 duration-300">
+                {result.client_rules ? (
+                  <ClientRulesPanel
+                    profile={result.client_rules}
+                    ascendantProfile={result.ascendant_client_rules}
+                    kpReference={result.kp_reference}
+                    language={language}
+                  />
+                ) : (
+                  <div className="rounded-2xl border border-border bg-card p-6 text-center text-muted-foreground text-xs">
+                    {language === "bn" ? "শাস্ত্রীয় নিয়মের তথ্য উপলব্ধ নয়।" : "Classical rules data not available."}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* =========================================================================
+                TAB 3: CHANDRA LAGNA KUNDLI & PLANETARY DIGNITY
+            ========================================================================= */}
+            {activeTab === "kundali" && (
+              <div className="space-y-6 animate-in fade-in-50 duration-300">
+                {/* Kundali Chart Visualizer with Chandra Lagna Toggle */}
+                <div className="rounded-[28px] border border-amber-300/80 bg-card p-6 sm:p-8 shadow-2xs space-y-6">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-border/60">
+                    <div>
+                      <h3 className="font-display text-lg font-bold text-ink-950 flex items-center gap-2">
+                        <Eye className="size-4 text-amber-600" />
+                        <span>
+                          {chartMode === "chandra"
+                            ? (language === "bn" ? "চন্দ্র লগ্ন কুষ্ঠী চক্র (Chandra Lagna Chart)" : "Chandra Lagna Kundali Chart")
+                            : (language === "bn" ? "জন্ম লগ্ন কুষ্ঠী চক্র (Janma Lagna D1 Chart)" : "Janma Lagna D1 Kundali Chart")}
+                        </span>
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {chartMode === "chandra"
+                          ? (language === "bn"
+                              ? "চন্দ্রকে ১ম ভাব (লগ্ন) ধরে মানসিক স্থিতি, দৃষ্টিভঙ্গি ও গোচর প্রভাব নির্ণয়ের প্রামাণ্য চার্ট"
+                              : "Moon placed in 1st House for psychological resilience and transit evaluation")
+                          : (language === "bn"
+                              ? `${result.ayanamsa_name} অয়নামশা অনুসারে জন্ম লগ্ন ও ৯টি গ্রহের মূল অবস্থান`
+                              : `Ascendant (Lagna) and 9 planets in natal birth horoscope with ${result.ayanamsa_name}`)}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* Dual Chart Toggle */}
+                      <div className="flex items-center gap-1 rounded-xl border border-amber-300 bg-amber-50/50 p-1 text-xs font-black shadow-2xs">
+                        <button
+                          type="button"
+                          onClick={() => setChartMode("chandra")}
+                          className={`rounded-lg px-3 py-1.5 transition-all cursor-pointer ${
+                            chartMode === "chandra"
+                              ? "bg-amber-500 text-amber-950 shadow-xs"
+                              : "text-amber-900/80 hover:text-amber-950 hover:bg-amber-100/50"
+                          }`}
+                        >
+                          {language === "bn" ? "চন্দ্র লগ্ন চক্র" : language === "hi" ? "चंद्र लग्न चक्र" : "Chandra Lagna"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setChartMode("lagna")}
+                          className={`rounded-lg px-3 py-1.5 transition-all cursor-pointer ${
+                            chartMode === "lagna"
+                              ? "bg-amber-500 text-amber-950 shadow-xs"
+                              : "text-amber-900/80 hover:text-amber-950 hover:bg-amber-100/50"
+                          }`}
+                        >
+                          {language === "bn" ? "লগ্ন চক্র (D1)" : language === "hi" ? "लग्न चक्र (D1)" : "Lagna D1"}
+                        </button>
+                      </div>
+
+                      {/* Style selector pills */}
+                      <div className="flex items-center gap-1 rounded-xl border border-border bg-surface-muted p-1 text-xs font-bold">
+                        {(["north_indian", "south_indian", "east_indian"] as ChartStyleType[]).map((style) => (
+                          <button
+                            key={style}
+                            type="button"
+                            onClick={() => setChartStyle(style)}
+                            className={`rounded-lg px-2.5 py-1.5 transition-all cursor-pointer ${
+                              chartStyle === style
+                                ? "bg-card text-foreground font-black shadow-2xs border border-border/60"
+                                : "text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            {style === "north_indian"
+                              ? "North"
+                              : style === "south_indian"
+                              ? "South"
+                              : "বাংলা"}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Chart Renderer */}
+                  <div className="py-2">
+                    <KundaliChart
+                      planets={chartMode === "chandra" && result.chandra_lagna_planets?.length ? result.chandra_lagna_planets : result.planets}
+                      ascendantRashiIndex={chartMode === "chandra" ? result.rashi_index : result.ascendant_rashi_index}
+                      chartStyle={chartStyle}
+                      language={language}
+                    />
+                  </div>
+                </div>
+
+                {/* Classical Planetary Dignity Matrix */}
+                {result.planetary_dignity && (
+                  <div className="rounded-[28px] border border-amber-300/80 bg-card p-6 sm:p-8 shadow-2xs space-y-5">
+                    <div className="pb-3 border-b border-border/60">
+                      <h3 className="font-display text-base sm:text-lg font-extrabold text-ink-950 flex items-center gap-2">
+                        <Award className="size-4 text-amber-600" />
+                        <span>
+                          {language === "bn"
+                            ? `এই রাশিতে গ্রহদের উচ্চ-নীচ ও নৈসর্গিক মৈত্রী সম্বন্ধ`
+                            : language === "hi"
+                            ? `इस राशि में ग्रहों का उच्च-नीच एवं नैसर्गिक मैत्री संबंध`
+                            : `Planetary Dignities & Natural Friendships for ${result.rashi_name_en}`}
+                        </span>
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {language === "bn"
+                          ? "সূত্র: ক্লায়েন্টের রিসোর্স নথি 'Basics of Kundali Reading Explained' (পৃষ্ঠা ১-৫)"
+                          : "Source: Client Resource Document 'Basics of Kundali Reading Explained' (pp. 1-5)"}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                      {/* Exalted & Debilitated */}
+                      <div className="rounded-2xl border border-border/80 bg-surface-muted/50 p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-emerald-800 flex items-center gap-1.5">
+                            <CheckCircle2 className="size-4 text-emerald-600" />
+                            <span>{language === "bn" ? "উচ্চ গ্রহ (Exalted Graha):" : "Exalted Planets:"}</span>
+                          </span>
+                          <span className="font-extrabold text-ink-950">
+                            {result.planetary_dignity.exalted_planets?.length
+                              ? result.planetary_dignity.exalted_planets.join(", ")
+                              : (language === "bn" ? "কোনো গ্রহ উচ্চ নয়" : "None")}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2 border-t border-border/60">
+                          <span className="font-bold text-rose-800 flex items-center gap-1.5">
+                            <AlertTriangle className="size-4 text-rose-600" />
+                            <span>{language === "bn" ? "নীচ গ্রহ (Debilitated Graha):" : "Debilitated Planets:"}</span>
+                          </span>
+                          <span className="font-extrabold text-ink-950">
+                            {result.planetary_dignity.debilitated_planets?.length
+                              ? result.planetary_dignity.debilitated_planets.join(", ")
+                              : (language === "bn" ? "কোনো গ্রহ নীচ নয়" : "None")}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2 border-t border-border/60">
+                          <span className="font-bold text-indigo-800 flex items-center gap-1.5">
+                            <Star className="size-4 text-indigo-600" />
+                            <span>{language === "bn" ? "মূলত্রিকোণ / স্বক্ষেত্র:" : "Moolatrikona / Own:"}</span>
+                          </span>
+                          <span className="font-extrabold text-ink-950">
+                            {result.planetary_dignity.moolatrikona || result.planetary_dignity.own_lord}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Natural Friendships of Ruling Lord */}
+                      <div className="rounded-2xl border border-border/80 bg-surface-muted/50 p-4 space-y-2.5">
+                        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                          {language === "bn"
+                            ? `${result.rashi_lord} গ্রহের নৈসর্গিক মৈত্রী (Friendship Table)`
+                            : `Natural Friendships of Lord ${result.rashi_lord}`}
+                        </p>
+
+                        <div className="flex items-start gap-2 pt-1">
+                          <span className="rounded-md bg-emerald-100 text-emerald-950 px-2 py-0.5 font-bold text-[10px] shrink-0">
+                            {language === "bn" ? "মিত্র (Friends)" : "Friends"}
+                          </span>
+                          <span className="text-ink-950 font-medium">
+                            {result.planetary_dignity.ruler_friends?.join(", ") || "—"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-start gap-2 pt-1 border-t border-border/40">
+                          <span className="rounded-md bg-rose-100 text-rose-950 px-2 py-0.5 font-bold text-[10px] shrink-0">
+                            {language === "bn" ? "শত্রু (Enemies)" : "Enemies"}
+                          </span>
+                          <span className="text-ink-950 font-medium">
+                            {result.planetary_dignity.ruler_enemies?.length
+                              ? result.planetary_dignity.ruler_enemies.join(", ")
+                              : (language === "bn" ? "কোনো শত্রু গ্রহ নেই (None)" : "No natural enemies")}
+                          </span>
+                        </div>
+
+                        <div className="flex items-start gap-2 pt-1 border-t border-border/40">
+                          <span className="rounded-md bg-amber-100 text-amber-950 px-2 py-0.5 font-bold text-[10px] shrink-0">
+                            {language === "bn" ? "সম (Neutrals)" : "Neutrals"}
+                          </span>
+                          <span className="text-ink-950 font-medium">
+                            {result.planetary_dignity.ruler_neutrals?.join(", ") || "—"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* =========================================================================
+                TAB 4: REAL-TIME TRANSIT, CHANDRA BALA & SADE SATI
+            ========================================================================= */}
+            {activeTab === "transit" && (
+              <div className="space-y-6 animate-in fade-in-50 duration-300">
+                {/* 1. Chandra Bala Meter */}
+                {result.chandra_bala && (
+                  <div className="rounded-[28px] border border-amber-300/80 bg-card p-6 sm:p-8 shadow-2xs space-y-5">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border/60">
+                      <div>
+                        <h3 className="font-display text-base sm:text-lg font-extrabold text-ink-950 flex items-center gap-2">
+                          <Activity className="size-4 text-amber-600" />
+                          <span>
+                            {language === "bn"
+                              ? "বর্তমান চন্দ্র বল গোচর (Real-Time Chandra Bala)"
+                              : language === "hi"
+                              ? "वर्तमान चंद्र बल गोचर"
+                              : "Current Chandra Bala (Lunar Transit Strength)"}
+                          </span>
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {language === "bn"
+                            ? "আজকের দিনে চন্দ্র আপনার জন্ম রাশি থেকে কোন রাশিতে ভ্রমণ করছে তার ভিত্তিতে শুভাশুভ বল"
+                            : "Daily transit evaluation of Moon relative to your Natal Moon Sign"}
+                        </p>
+                      </div>
+
+                      {/* Status Badge */}
+                      <span className={`px-3.5 py-1.5 rounded-xl font-black text-xs shadow-2xs border ${
+                        result.chandra_bala.house_from_natal_moon === 8
+                          ? "bg-rose-100 text-rose-950 border-rose-300 animate-pulse"
+                          : result.chandra_bala.is_auspicious
+                          ? "bg-emerald-100 text-emerald-950 border-emerald-300"
+                          : "bg-amber-100 text-amber-950 border-amber-300"
+                      }`}>
+                        {result.chandra_bala.status_label}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                      <div className="rounded-xl bg-surface-muted/60 p-3.5 border border-border/60">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                          {language === "bn" ? "চন্দ্রের বর্তমান রাশি" : "Transiting Moon Sign"}
+                        </p>
+                        <p className="mt-1 font-extrabold text-ink-950 text-base">
+                          {result.chandra_bala.current_moon_sign_name}
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl bg-surface-muted/60 p-3.5 border border-border/60">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                          {language === "bn" ? "জন্ম রাশি থেকে ভাব" : "House from Natal Moon"}
+                        </p>
+                        <p className="mt-1 font-extrabold text-amber-700 text-base">
+                          {result.chandra_bala.house_from_natal_moon}
+                          <span className="text-xs text-muted-foreground ml-1">
+                            {language === "bn" ? "ম ভাব" : "th House"}
+                          </span>
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl bg-surface-muted/60 p-3.5 border border-border/60">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                          {language === "bn" ? "ফল নির্ণয়" : "Result Category"}
+                        </p>
+                        <p className="mt-1 font-extrabold text-ink-950 text-sm">
+                          {result.chandra_bala.house_from_natal_moon === 8
+                            ? (language === "bn" ? "চন্দ্রাষ্টম (সতর্কতা)" : "Chandrashtama")
+                            : result.chandra_bala.is_auspicious
+                            ? (language === "bn" ? "পরম শুভ ও সহায়ক" : "Highly Auspicious")
+                            : (language === "bn" ? "সাধারণ / নিরপেক্ষ" : "Neutral / Moderate")}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Narrative Description & Advice */}
+                    <div className="rounded-2xl border border-border/80 bg-surface-muted/40 p-4 sm:p-5 space-y-2">
+                      <p className="text-xs sm:text-[13px] text-ink-950 leading-relaxed font-medium">
+                        {result.chandra_bala.description}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground italic pt-1 border-t border-border/40">
+                        {language === "bn"
+                          ? "শাস্ত্রীয় নিয়ম: জন্ম রাশি থেকে ১, ৩, ৬, ৭, ১০, ১১ ভাবে চন্দ্র শুভফলদায়ক; ২, ৫, ৯ মধ্যম; ৪, ৮, ১২ ভাবে সতর্কতা কাম্য।"
+                          : "Classical Muhurta rule: 1st, 3rd, 6th, 7th, 10th, 11th from Moon are auspicious; 4th, 8th, 12th demand mindfulness."}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. Saturn Sade Sati & Dhaiya Tracker */}
+                {result.sade_sati_status && (
+                  <div className="rounded-[28px] border border-amber-300/80 bg-card p-6 sm:p-8 shadow-2xs space-y-5">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border/60">
+                      <div>
+                        <h3 className="font-display text-base sm:text-lg font-extrabold text-ink-950 flex items-center gap-2">
+                          <Shield className="size-4 text-amber-600" />
+                          <span>
+                            {language === "bn"
+                              ? "শনির সাড়ে সাতি ও ধাইয়া ট্র্যাকার (Saturn Sade Sati Tracker)"
+                              : language === "hi"
+                              ? "शनि साढ़े साती एवं ढैया ट्रैकर"
+                              : "Saturn Sade Sati & Dhaiya Transit Tracker"}
+                          </span>
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {language === "bn"
+                            ? "জন্ম রাশি সাপেক্ষে শনির বর্তমান গোচর অবস্থান ও শাস্ত্রসম্মত উপশম"
+                            : "Real-time planetary analysis of Saturn's current transit relative to your Moon Sign"}
+                        </p>
+                      </div>
+
+                      <span className={`px-3.5 py-1.5 rounded-xl font-black text-xs shadow-2xs border ${
+                        result.sade_sati_status.is_active
+                          ? result.sade_sati_status.impact_level === "high"
+                            ? "bg-rose-100 text-rose-950 border-rose-300"
+                            : "bg-amber-100 text-amber-950 border-amber-300"
+                          : "bg-emerald-100 text-emerald-950 border-emerald-300"
+                      }`}>
+                        {result.sade_sati_status.is_active
+                          ? (language === "bn" ? "প্রভাব সক্রিয়" : "Active Transit")
+                          : (language === "bn" ? "অনুকূল অবস্থা" : "Favorable Transit")}
+                      </span>
+                    </div>
+
+                    {/* Phase Title Card */}
+                    <div className="rounded-2xl border border-amber-300/60 bg-gradient-to-r from-amber-500/10 via-card to-card p-4 sm:p-5">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                            {language === "bn" ? "শনির বর্তমান পর্যায়" : "Active Phase"}
+                          </p>
+                          <h4 className="font-display text-base sm:text-lg font-black text-ink-950 mt-0.5">
+                            {result.sade_sati_status.phase_title}
+                          </h4>
+                        </div>
+                        <span className="text-xs text-ink-800 font-bold">
+                          {language === "bn" ? "শনির রাশি:" : "Saturn Sign:"}{" "}
+                          <strong className="text-amber-800">{result.sade_sati_status.saturn_sign_name}</strong>{" "}
+                          ({result.sade_sati_status.saturn_house_from_moon}
+                          {language === "bn" ? "ম ভাব" : "th House"})
+                        </span>
+                      </div>
+
+                      <p className="mt-3 text-xs sm:text-[13px] text-ink-900 leading-relaxed font-medium">
+                        {result.sade_sati_status.description}
+                      </p>
+                    </div>
+
+                    {/* Authentic Remedy Banner */}
+                    <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.05] p-4 sm:p-5 space-y-1.5">
+                      <div className="flex items-center gap-2 text-emerald-800 font-black text-xs uppercase tracking-wider">
+                        <CheckCircle2 className="size-4" />
+                        <span>{language === "bn" ? "শাস্ত্রসম্মত শনি শান্তি প্রতিকার:" : "Prescribed Classical Remedy:"}</span>
+                      </div>
+                      <p className="text-xs sm:text-[13px] text-ink-950 font-medium leading-relaxed">
+                        {result.sade_sati_status.remedy_summary}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* =========================================================================
+                TAB 5: PREDICTIONS, CAUTIONS & BENEFICIAL REMEDIES
+            ========================================================================= */}
+            {activeTab === "predictions" && (
+              <div className="space-y-6 animate-in fade-in-50 duration-300">
+                {/* Warnings and Beneficial Actions Dual Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Warnings & Cautions */}
+                  <div className="rounded-[26px] border border-rose-500/30 bg-gradient-to-br from-rose-500/[0.05] via-card to-card p-6 sm:p-7 shadow-sm space-y-4">
+                    <div className="flex items-center gap-3 pb-3 border-b border-rose-500/20">
+                      <div className="flex size-10 items-center justify-center rounded-xl bg-rose-500/15 text-rose-700 shadow-xs">
+                        <AlertTriangle className="size-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-display text-base sm:text-lg font-extrabold text-ink-950">
+                          {language === "bn"
+                            ? "কী কী থেকে সাবধান থাকবেন (সতর্কতা)"
+                            : language === "hi"
+                            ? "किन-किन बातों से सावधान रहें (सावधानियां)"
+                            : "Cautions & Pitfalls (What to Avoid)"}
+                        </h3>
+                        <p className="text-[11px] font-semibold text-rose-700/90">
+                          {language === "bn"
+                            ? "আপনার রাশির স্বভাবজাত দুর্বলতা ও প্রতিকূল ক্ষেত্র"
+                            : language === "hi"
+                            ? "आपकी राशि की स्वाभाविक कमजोरियां और प्रतिकूल क्षेत्र"
+                            : "Innate vulnerabilities and traits to be mindful of"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <ul className="space-y-3 text-xs sm:text-[13px] text-ink-950">
+                      {activeTraits.cautions_and_pitfalls.map((caution, idx) => (
+                        <li key={idx} className="flex items-start gap-2.5 font-medium">
+                          <span className="mt-1.5 size-2 shrink-0 rounded-full bg-rose-600 shadow-xs" />
+                          <span className="leading-relaxed">{caution}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Beneficial Actions & Remedies */}
+                  <div className="rounded-[26px] border border-emerald-500/30 bg-gradient-to-br from-emerald-500/[0.05] via-card to-card p-6 sm:p-7 shadow-sm space-y-4">
+                    <div className="flex items-center gap-3 pb-3 border-b border-emerald-500/20">
+                      <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-700 shadow-xs">
+                        <CheckCircle2 className="size-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-display text-base sm:text-lg font-extrabold text-ink-950">
+                          {language === "bn"
+                            ? "কী করলে আপনার ভালো হবে (শুভ প্রতিকার)"
+                            : language === "hi"
+                            ? "क्या करने से आपका कल्याण होगा (शुभ उपाय)"
+                            : "Beneficial Actions & Remedies (What to Do)"}
+                        </h3>
+                        <p className="text-[11px] font-semibold text-emerald-700/90">
+                          {language === "bn"
+                            ? "সৌভাগ্য বৃদ্ধি, মানসিক শান্তি ও সাফল্যের বৈদিক উপায়"
+                            : language === "hi"
+                            ? "सौभाग्य, मानसिक शांति और सफलता के अचूक उपाय"
+                            : "Auspicious Vedic practices to enhance luck and peace"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <ul className="space-y-3 text-xs sm:text-[13px] text-ink-950">
+                      {activeTraits.beneficial_actions_and_remedies.map((remedy, idx) => (
+                        <li key={idx} className="flex items-start gap-2.5 font-medium">
+                          <span className="mt-1.5 size-2 shrink-0 rounded-full bg-emerald-600 shadow-xs" />
+                          <span className="leading-relaxed">{remedy}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Lucky Attributes & Strengths */}
+                <div className="rounded-[26px] border border-amber-300/80 bg-card p-6 sm:p-7 shadow-2xs space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-3 border-b border-border/60">
+                    <h3 className="font-display text-base sm:text-lg font-extrabold text-ink-950 flex items-center gap-2">
+                      <Star className="size-4 text-amber-500 fill-amber-500" />
+                      <span>
+                        {language === "bn"
+                          ? "শুভ বৈশিষ্ট্য ও রাশির কারকতা"
+                          : language === "hi"
+                          ? "शुभ गुण एवं राशि की विशेषताएं"
+                          : "Lucky Attributes & Key Strengths"}
+                      </span>
+                    </h3>
+                    <span className="text-xs text-muted-foreground">
+                      {language === "bn" ? "শারীরিক শাসন (কালপুরুষ):" : "Kalapurusha Governance:"}{" "}
+                      <strong className="text-ink-950">{activeTraits.body_parts}</strong>
                     </span>
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    {language === "bn"
-                      ? `${result.ayanamsa_name} অয়নামশা অনুযায়ী লগ্ন ও ৯টি গ্রহের সঠিক অবস্থান`
-                      : language === "hi"
-                      ? `${result.ayanamsa_name} अयनांश अनुसार लग्न और ९ ग्रहों की सही स्थिति`
-                      : `Ascendant (Lagna) and Moon placement calculated with ${result.ayanamsa_name}`}
-                  </p>
-                </div>
+                  </div>
 
-                {/* Style selector pills */}
-                <div className="flex items-center gap-1.5 rounded-xl border border-border bg-surface-muted p-1 text-xs font-bold">
-                  {(["north_indian", "south_indian", "east_indian"] as ChartStyleType[]).map((style) => (
-                    <button
-                      key={style}
-                      type="button"
-                      onClick={() => setChartStyle(style)}
-                      className={`rounded-lg px-2.5 py-1 transition-all ${
-                        chartStyle === style
-                          ? "bg-amber-500 text-amber-950 font-black shadow-2xs"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      {style === "north_indian"
-                        ? "North Indian"
-                        : style === "south_indian"
-                        ? "South Indian"
-                        : "East Indian (বাংলা)"}
-                    </button>
-                  ))}
+                  {/* Attribute Cards Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
+                    <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
+                        <Gem className="size-3 text-amber-600 shrink-0" />{" "}
+                        <span>{language === "bn" ? "শুভ রত্ন" : language === "hi" ? "शुभ रत्न" : "Lucky Gem"}</span>
+                      </p>
+                      <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{activeTraits.lucky_gemstone}</p>
+                    </div>
+
+                    <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
+                        <Palette className="size-3 text-indigo-600 shrink-0" />{" "}
+                        <span>{language === "bn" ? "শুভ বর্ণ" : language === "hi" ? "शुभ रंग" : "Lucky Colors"}</span>
+                      </p>
+                      <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{activeTraits.lucky_color}</p>
+                    </div>
+
+                    <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                        {language === "bn" ? "শুভ সংখ্যা" : language === "hi" ? "शुभ अंक" : "Lucky Numbers"}
+                      </p>
+                      <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{result.traits.lucky_numbers.join(", ")}</p>
+                    </div>
+
+                    <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                        {language === "bn" ? "শুভ বার" : language === "hi" ? "शुभ दिन" : "Lucky Day"}
+                      </p>
+                      <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{activeTraits.lucky_day}</p>
+                    </div>
+
+                    <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                        {language === "bn" ? "উপাস্য দেবতা" : language === "hi" ? "पूज्य देवता" : "Ruling Deity"}
+                      </p>
+                      <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{activeTraits.ruling_deity}</p>
+                    </div>
+
+                    <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                        {language === "bn" ? "অনুকূল রাশি" : language === "hi" ? "अनुकूल राशियां" : "Compatible Signs"}
+                      </p>
+                      <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">
+                        {activeTraits.compatible_rashis?.join(", ") || result.traits.compatible_rashis.join(", ")}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Strengths Pills */}
+                  <div className="pt-2">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2.5">
+                      {language === "bn" ? "ব্যক্তিত্বের প্রধান শক্তিসমূহ" : language === "hi" ? "व्यक्तित्व की प्रमुख विशेषताएं" : "Personality Strengths"}
+                    </p>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      {activeTraits.strengths.map((str, idx) => (
+                        <span
+                          key={idx}
+                          className="rounded-xl bg-white text-ink-950 px-3.5 py-1.5 font-bold border border-amber-300/80 shadow-2xs hover:border-amber-400 transition-colors"
+                        >
+                          <span className="text-amber-600 mr-1.5 font-black">✦</span>
+                          <span>{str}</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
+            )}
 
-              {/* Chart Renderer with Consistent Parchment/Cosmic Background */}
-              <div className="py-2">
-                <KundaliChart
-                  planets={result.planets}
-                  ascendantRashiIndex={result.ascendant_rashi_index}
-                  chartStyle={chartStyle}
-                  language={language}
-                />
-              </div>
+            {/* Bottom Actions: Recalculate & Consult CTA */}
+            <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setResult(null);
+                  window.scrollTo({ top: 150, behavior: "smooth" });
+                }}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                <RotateCcw className="size-3.5" />
+                <span>
+                  {language === "bn"
+                    ? "অন্য জন্ম বিবরণ দিয়ে পুনরায় গণনা করুন"
+                    : language === "hi"
+                    ? "अन्य जन्म विवरण से पुनः गणना करें"
+                    : "Recalculate with different details"}
+                </span>
+              </button>
 
-              {/* Re-calculate Callouts */}
-              <div className="pt-4 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setResult(null);
-                    window.scrollTo({ top: 150, behavior: "smooth" });
-                  }}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground"
-                >
-                  <RotateCcw className="size-3.5" />
-                  <span>
+              <div className="flex items-center gap-2">
+                <Link href="/appointments">
+                  <Button size="sm" className="bg-amber-500 text-amber-950 font-black hover:bg-amber-400">
                     {language === "bn"
-                      ? "অন্য জন্ম বিবরণ দিয়ে পুনরায় গণনা করুন"
+                      ? "অভিজ্ঞ জ্যোতিষীর সাথে বিস্তারিত পরামর্শ করুন"
                       : language === "hi"
-                      ? "अन्य जन्म विवरण से पुनः गणना करें"
-                      : "Recalculate with different details"}
-                  </span>
-                </button>
-
-                <div className="flex items-center gap-2">
-                  <Link href="/appointments">
-                    <Button size="sm" className="bg-amber-500 text-amber-950 font-black hover:bg-amber-400">
-                      {language === "bn"
-                        ? "অভিজ্ঞ জ্যোতিষীর সাথে বিস্তারিত পরামর্শ করুন"
-                        : language === "hi"
-                        ? "विस्तृत कुंडली विश्लेषण के लिए ज्योतिषी से परामर्श लें"
-                        : "Consult an Astrologer for Detailed Kundali"}
-                    </Button>
-                  </Link>
-                </div>
+                      ? "विस्तृत कुंडली विश्लेषण के लिए ज्योतिषी से परामर्श लें"
+                      : "Consult an Astrologer for Detailed Kundali"}
+                  </Button>
+                </Link>
               </div>
             </div>
 
-            {/* 6. Interactive Moon Sign Wheel Diagram */}
-            <div className="rounded-[28px] border border-border/80 bg-card p-6 sm:p-8 shadow-2xs space-y-6">
-              <div className="text-center space-y-1">
-                <h3 className="font-display text-lg sm:text-xl font-bold text-foreground">
-                  {language === "bn"
-                    ? "১২ রাশি ও ২৭ নক্ষত্রের মহাজাগতিক চক্র (Zodiac Wheel)"
-                    : language === "hi"
-                    ? "१२ राशि एवं २७ नक्षत्रों का ब्रह्मांडीय चक्र"
-                    : "12 Zodiac Signs & 27 Nakshatras Interactive Wheel"}
-                </h3>
-                <p className="text-xs text-muted-foreground max-w-xl mx-auto">
-                  {language === "bn"
-                    ? "আপনার রাশি ও নক্ষত্রের তাৎক্ষণিক মহাজাগতিক অবস্থান নিচে আলোকিত করে নির্দেশ করা হয়েছে।"
-                    : language === "hi"
-                    ? "आपकी राशि एवं नक्षत्र की खगोलीय स्थिति नीचे चक्र में प्रदर्शित है।"
-                    : "Your calculated Moon Sign and Nakshatra are illuminated on the zodiac mandala below."}
-                </p>
-              </div>
-
-              <div className="flex justify-center py-4">
-                <MoonSignWheel
-                  activeRashiIndex={result.rashi_index}
-                  activeNakshatraIndex={result.nakshatra_index}
-                />
-              </div>
-            </div>
-
-            {/* 7. How the chart was calculated - timezone, cusps and any caveat */}
             <CalculationDetails
               timezone={result.timezone_resolution}
               cusps={result.house_cusps}

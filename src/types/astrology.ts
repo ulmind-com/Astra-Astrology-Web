@@ -71,6 +71,37 @@ export interface RashiTraits {
   compatible_rashis: string[];
 }
 
+export interface RashiPlanetaryDignity {
+  exalted_planets: string[];
+  debilitated_planets: string[];
+  own_lord: string;
+  moolatrikona: string;
+  ruler_friends: string[];
+  ruler_enemies: string[];
+  ruler_neutrals: string[];
+}
+
+export interface ChandraBalaInfo {
+  current_moon_sign_index: number;
+  current_moon_sign_name: string;
+  house_from_natal_moon: number;
+  is_auspicious: boolean;
+  status_label: string;
+  description: string;
+}
+
+export interface SadeSatiStatus {
+  is_active: boolean;
+  phase_code: "rising" | "peak" | "setting" | "kantaka" | "ashtama" | "none" | string;
+  phase_title: string;
+  saturn_sign_index: number;
+  saturn_sign_name: string;
+  saturn_house_from_moon: number;
+  impact_level: "high" | "medium" | "favorable" | string;
+  description: string;
+  remedy_summary: string;
+}
+
 export interface RashiCalculateResult {
   name: string;
   gender: string;
@@ -116,6 +147,19 @@ export interface RashiCalculateResult {
   client_rules?: ClientSignProfile | null;
   ascendant_client_rules?: ClientSignProfile | null;
   kp_reference?: KpReference;
+
+  /** Extended Classical Precision Fields */
+  avakahada_chakra?: AvakahadaChakra | null;
+  namakshar?: string;
+  navamsha_rashi_index?: number;
+  navamsha_rashi_name_en?: string;
+  navamsha_rashi_name_bn?: string;
+  navamsha_rashi_name_hi?: string;
+  is_vargottama?: boolean;
+  planetary_dignity?: RashiPlanetaryDignity | null;
+  chandra_lagna_planets?: PlanetPosition[];
+  chandra_bala?: ChandraBalaInfo | null;
+  sade_sati_status?: SadeSatiStatus | null;
 
   /** How the UTC offset used for this chart was arrived at. */
   timezone_resolution?: TimezoneResolution | null;
