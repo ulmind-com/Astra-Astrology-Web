@@ -114,6 +114,50 @@ export interface KPUITranslations {
   gayatriMantra: string;
   viewInsightsBtn: string;
   hideInsightsBtn: string;
+
+  // 7 Tabs
+  tabOverview: string;
+  tabSignificators: string;
+  tabLifeEvents: string;
+  tabCuspsPlanets: string;
+  tabRulingHorary: string;
+  tabAspectsBadhaka: string;
+  tabRemedies: string;
+
+  // Horary Mode
+  horaryToggle: string;
+  horaryNumberLabel: string;
+  horaryHelp: string;
+
+  // Untenanted & Badges
+  untenantedBadge: string;
+  untenantedHint: string;
+
+  // Significators
+  levelATitle: string;
+  levelBTitle: string;
+  levelCTitle: string;
+  levelDTitle: string;
+  planetSignificatorsHeading: string;
+  houseSignificatorsHeading: string;
+
+  // Life events
+  lifeEventsHeading: string;
+  lifeEventsSubheading: string;
+  promiseScoreLabel: string;
+
+  // Badhaka & Maraka
+  badhakaTitle: string;
+  badhakaHouseLabel: string;
+  marakaHousesLabel: string;
+
+  // Aspects
+  aspectsTitle: string;
+  aspectsSubheading: string;
+
+  // Remedies
+  remediesDashboardTitle: string;
+  remediesDashboardSubheading: string;
 }
 
 export const KP_UI_TRANSLATIONS: Record<"en" | "bn" | "hi", KPUITranslations> = {
@@ -224,6 +268,42 @@ export const KP_UI_TRANSLATIONS: Record<"en" | "bn" | "hi", KPUITranslations> = 
     gayatriMantra: "Gayatri Mantra",
     viewInsightsBtn: "View Guidance & Remedies",
     hideInsightsBtn: "Hide Guidance",
+
+    tabOverview: "Overview & Charts",
+    tabSignificators: "4-Fold Significators",
+    tabLifeEvents: "CSL Life Events",
+    tabCuspsPlanets: "Cusps & Planets",
+    tabRulingHorary: "Ruling Planets & Horary",
+    tabAspectsBadhaka: "Aspects & Badhaka",
+    tabRemedies: "Dasha & Remedies",
+
+    horaryToggle: "KP Horary 1-249 (Prashna Mode)",
+    horaryNumberLabel: "Select Horary Number (1 to 249)",
+    horaryHelp: "In KP Prashna, a chosen seed number between 1 and 249 fixes the exact Cuspal Ascendant sub-arc.",
+
+    untenantedBadge: "Untenanted",
+    untenantedHint: "Supreme Fruitful Significator - No planet occupies its stars (Rahul Kaushik Ch. 1)",
+
+    levelATitle: "Grade A (In Star of Occupant)",
+    levelBTitle: "Grade B (Occupant of House)",
+    levelCTitle: "Grade C (In Star of House Lord)",
+    levelDTitle: "Grade D (House Lord)",
+    planetSignificatorsHeading: "Planetary Significators (Grades A, B, C, D)",
+    houseSignificatorsHeading: "House Significators (1 to 12 Bhavas)",
+
+    lifeEventsHeading: "Cuspal Sub Lord (CSL) Life Events Analyzer",
+    lifeEventsSubheading: "Event promise scores and verdicts based on Rahul Kaushik's classical house groups.",
+    promiseScoreLabel: "Promise Score",
+
+    badhakaTitle: "Badhaka & Maraka Sthana Analysis",
+    badhakaHouseLabel: "Badhaka House",
+    marakaHousesLabel: "Maraka Houses",
+
+    aspectsTitle: "KP Angular Planetary Aspects (With Orbs)",
+    aspectsSubheading: "Western aspects utilized in KP: Conjunction (0°), Sextile (60°), Square (90°), Trine (120°), Opposition (180°).",
+
+    remediesDashboardTitle: "Classical 43-Day Lal Kitab & Vedic Remedies",
+    remediesDashboardSubheading: "Specific prescribed upayas and mantras for afflicted planets occupying houses 6, 8, or 12.",
   },
   bn: {
     badge: "কেপি জ্যোতিষ পদ্ধতি (Krishnamurti Paddhati)",
@@ -331,6 +411,42 @@ export const KP_UI_TRANSLATIONS: Record<"en" | "bn" | "hi", KPUITranslations> = 
     gayatriMantra: "গায়ত্রী মন্ত্র",
     viewInsightsBtn: "পরামর্শ ও প্রতিকার দেখুন",
     hideInsightsBtn: "পরামর্শ বন্ধ করুন",
+
+    tabOverview: "ড্যাশবোর্ড ও কুষ্ঠি",
+    tabSignificators: "৪-স্তরের কারকত্ব",
+    tabLifeEvents: "কুসপ্যাল সাব লর্ড বিচার",
+    tabCuspsPlanets: "কুসপ ও গ্রহ সারণী",
+    tabRulingHorary: "রুলিং প্ল্যানেটস ও হোরারি",
+    tabAspectsBadhaka: "দৃষ্টি ও বাধক-মারক",
+    tabRemedies: "দশা ও প্রতিকার",
+
+    horaryToggle: "কেপি হোরারি ১–২৪৯ (প্রশ্ন পদ্ধতি)",
+    horaryNumberLabel: "হোরারি সংখ্যা বাছুন (১ থেকে ২৪৯)",
+    horaryHelp: "কেপি প্রশ্নপদ্ধতিতে ১ থেকে ২৪৯ এর যেকোনো সংখ্যা সঠিক কুসপ্যাল লগ্ন সাব-আর্ক নির্ধারণ করে।",
+
+    untenantedBadge: "আনটেন্যান্টেড",
+    untenantedHint: "সবচেয়ে শক্তিশালী ফলদাতা — এই গ্রহের নক্ষত্রে অন্য কোনো গ্রহ নেই (রাহুল কৌশিক চ্যাপ্টার ১)",
+
+    levelATitle: "গ্রেড A (ভাব স্থিত গ্রহের নক্ষত্রে)",
+    levelBTitle: "গ্রেড B (ভাব স্থিত গ্রহ)",
+    levelCTitle: "গ্রেড C (ভাবাধিপতির নক্ষত্রে)",
+    levelDTitle: "গ্রেড D (ভাবাধিপতি)",
+    planetSignificatorsHeading: "গ্রহ কারকত্ব সারণী (গ্রেড A, B, C, D)",
+    houseSignificatorsHeading: "১২টি ভাব কারকত্ব সারণী",
+
+    lifeEventsHeading: "কুসপ্যাল সাব লর্ড (CSL) ইভেন্ট প্রমিস বিচার",
+    lifeEventsSubheading: "রাহুল কৌশিকের ক্লায়েন্ট রিসোর্স অনুসারে চাকরি, ব্যবসা, বিবাহ, ধন ও স্বাস্থ্যের নির্ভুল ফলাফল।",
+    promiseScoreLabel: "প্রমিস স্কোর",
+
+    badhakaTitle: "বাধক ও মারক স্থান বিচার",
+    badhakaHouseLabel: "বাধক স্থান",
+    marakaHousesLabel: "মারক স্থানসমূহ",
+
+    aspectsTitle: "কেপি পাশ্চাত্য কোণীয় দৃষ্টি সারণী (With Orbs)",
+    aspectsSubheading: "কেপিতে ব্যবহৃত পাশ্চাত্য দৃষ্টি: যুযুতি (0°), সেক্সটাইল (60°), কেন্দ্র (90°), ত্রিকোণ (120°), সমসপ্তক (180°)।",
+
+    remediesDashboardTitle: "৪৩ দিনের লাল কিতাব ও শাস্ত্রীয় বৈদিক প্রতিকার",
+    remediesDashboardSubheading: "৬ষ্ঠ, ৮ম বা ১২শ ভাবে পীড়িত গ্রহদের কুফল প্রশমনের জন্য বিশেষ উপাচার ও দান।",
   },
   hi: {
     badge: "कृष्णमूर्ति पद्धति (KP System)",
@@ -438,6 +554,42 @@ export const KP_UI_TRANSLATIONS: Record<"en" | "bn" | "hi", KPUITranslations> = 
     gayatriMantra: "गायत्री मंत्र",
     viewInsightsBtn: "मार्गदर्शन एवं उपाय देखें",
     hideInsightsBtn: "मार्गदर्शन बंद करें",
+
+    tabOverview: "डैशबोर्ड एवं कुण्डली",
+    tabSignificators: "४-स्तरीय कारकत्व",
+    tabLifeEvents: "CSL जीवन घटनाक्रम",
+    tabCuspsPlanets: "भाव एवं ग्रह तालिका",
+    tabRulingHorary: "रूलिंग प्लैनेट्स एवं प्रश्न",
+    tabAspectsBadhaka: "दृष्टि एवं बाधक-मारक",
+    tabRemedies: "दशा एवं शास्त्रीय उपाय",
+
+    horaryToggle: "केपी प्रश्न कुंडली १–२४९ (Horary Mode)",
+    horaryNumberLabel: "प्रश्न संख्या चुनें (१ से २४९)",
+    horaryHelp: "केपी प्रश्न पद्धति में १ से २४९ तक की संख्या से सटीक भाव लग्न निर्धारित होता है।",
+
+    untenantedBadge: "अनटेनेंटेड",
+    untenantedHint: "अत्यधिक फलदायी — इसके नक्षत्र में कोई ग्रह नहीं है (राहुल कौशिक अध्याय १)",
+
+    levelATitle: "ग्रेड A (भाव स्थित ग्रह के नक्षत्र में)",
+    levelBTitle: "ग्रेड B (भाव में स्थित ग्रह)",
+    levelCTitle: "ग्रेड C (भावेश के नक्षत्र में)",
+    levelDTitle: "ग्रेड D (भावेश)",
+    planetSignificatorsHeading: "ग्रह कारकत्व तालिका (ग्रेड A, B, C, D)",
+    houseSignificatorsHeading: "१२ भाव कारकत्व तालिका",
+
+    lifeEventsHeading: "कस्पल सब लॉर्ड (CSL) जीवन घटना विश्लेषण",
+    lifeEventsSubheading: "राहुल कौशिक के प्रामाणिक नियमों के अनुसार नौकरी, व्यापार, विवाह, धन एवं स्वास्थ्य का फल।",
+    promiseScoreLabel: "प्रॉमिस स्कोर",
+
+    badhakaTitle: "बाधक एवं मारक भाव विश्लेषण",
+    badhakaHouseLabel: "बाधक भाव",
+    marakaHousesLabel: "मारक भाव",
+
+    aspectsTitle: "केपी कोणीय दृष्टि तालिका (Orbs सहित)",
+    aspectsSubheading: "केपी में प्रयुक्त पाश्चात्य दृष्टियां: युति (0°), लाभ (60°), केंद्र (90°), त्रिकोण (120°), प्रतियुति (180°)।",
+
+    remediesDashboardTitle: "४३ दिवसीय लाल किताब एवं वैदिक उपाय",
+    remediesDashboardSubheading: "६, ८ या १२वें भाव में पीड़ित ग्रहों की शांति हेतु अचूक उपाय एवं दान।",
   },
 };
 
