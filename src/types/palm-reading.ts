@@ -131,6 +131,12 @@ export interface PalmScanResponse {
     karmic_harmony: string;
   };
 
+  dermatoglyphic_loops?: DermatoglyphicLoop[];
+  marriage_patterns?: MarriagePattern[];
+  temperament_archetype?: TemperamentArchetype;
+  medical_constitution?: MedicalConstitution;
+  kundli_palm_sync?: KundliPalmSync;
+
   overlay_image: string | null;
   response_image: string | null;
   coins_charged: number;
@@ -138,6 +144,87 @@ export interface PalmScanResponse {
   processing_ms: number;
   warnings: string[];
   reading_id: string | null;
+}
+
+export interface DermatoglyphicLoop {
+  id: string;
+  name: string;
+  sanskrit_name: string;
+  category: string;
+  found: boolean;
+  confidence: number;
+  location: string;
+  meaning: string;
+  source: string;
+}
+
+export interface MarriagePattern {
+  card_id: number;
+  image_ref: string;
+  name: string;
+  vedic_title: string;
+  found: boolean;
+  category: string;
+  auspicious: boolean;
+  description: string;
+  remedy: string;
+}
+
+export interface TemperamentArchetype {
+  primary_archetype: string;
+  vedic_archetype_name: string;
+  elemental_signature: string;
+  affinity_score_pct: number;
+  description: string;
+  vedic_strengths: string[];
+  growth_counsel: string;
+  secondary_affinity?: {
+    title: string;
+    vedic_name: string;
+    affinity_pct: number;
+  };
+  source: string;
+}
+
+export interface MedicalConstitution {
+  pallor_diagnosis: {
+    state: string;
+    clinical_significance: string;
+    constitutional_risk: string;
+    ayurvedic_remedy: string;
+  };
+  neuro_serotonin_axis: {
+    status: string;
+    contributing_factors: string[];
+    explanation: string;
+    vedic_neuro_upaya: string;
+  };
+  organ_sensitivities: Array<{
+    organ: string;
+    marker: string;
+    status: string;
+    advice: string;
+  }>;
+  nail_mineral_diagnostics: Record<string, string>;
+  source: string;
+}
+
+export interface KundliPalmSync {
+  overall_alignment_pct: number;
+  karmic_harmony_verdict: string;
+  dominant_ruling_graha: string;
+  master_remedy: string;
+  planets: Array<{
+    graha: string;
+    english_name: string;
+    palm_mount: string;
+    elevation_mm: number;
+    manifestation_potency: string;
+    alignment_status: string;
+    alignment_pct: number;
+    gemstone_upaya: string;
+    vedic_mantra: string;
+  }>;
 }
 
 export interface PalmReadingRecord {
@@ -190,6 +277,12 @@ export interface PalmReadingRecord {
     counterpart_role: string;
     karmic_harmony: string;
   };
+
+  dermatoglyphic_loops?: DermatoglyphicLoop[];
+  marriage_patterns?: MarriagePattern[];
+  temperament_archetype?: TemperamentArchetype;
+  medical_constitution?: MedicalConstitution;
+  kundli_palm_sync?: KundliPalmSync;
 
   overlay_image: string | null;
   coins_charged: number;

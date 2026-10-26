@@ -350,13 +350,20 @@ export const palmReadingApi = {
   availability: () =>
     api.get<PalmReadingAvailability>(endpoints.palmReading.availability),
 
-  /** Scan a palm photo. Nothing is charged unless a reading is produced. */
-  scan: (image: File | Blob | string) => {
+  /** Scan a palm photo with optional Kundli chart synchronization. Nothing is charged unless a reading is produced. */
+  scan: (image: File | Blob | string, birth_details?: Record<string, any>) => {
     if (typeof image === "string") {
-      return api.post<PalmScanResponse>(endpoints.palmReading.scan, { image });
+      return api.post<PalmScanResponse>(endpoints.palmReading.scan, { image, birth_details });
     }
     const form = new FormData();
     form.append("file", image, image instanceof File ? image.name : "palm_capture.jpg");
+    if (birth_details) {
+      if (birth_details.birth_date) form.append("birth_date", birth_details.birth_date);
+      if (birth_details.birth_time) form.append("birth_time", birth_details.birth_time);
+      if (birth_details.latitude) form.append("latitude", String(birth_details.latitude));
+      if (birth_details.longitude) form.append("longitude", String(birth_details.longitude));
+      if (birth_details.timezone_offset) form.append("timezone_offset", String(birth_details.timezone_offset));
+    }
     return apiFetch<PalmScanResponse>(endpoints.palmReading.scan, {
       method: "POST",
       body: form,
