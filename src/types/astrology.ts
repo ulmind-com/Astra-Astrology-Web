@@ -352,6 +352,92 @@ export interface NakshatraTraits {
   beej_mantra: string;
 }
 
+export interface GandantaInfo {
+  is_gandanta: boolean;
+  gandanta_type: string | null;
+  junction_name_en: string | null;
+  junction_name_bn: string | null;
+  junction_name_hi: string | null;
+  severity: string | null;
+  description_en: string | null;
+  description_bn: string | null;
+  description_hi: string | null;
+  remedies_en: string[];
+  remedies_bn: string[];
+  remedies_hi: string[];
+}
+
+export interface PushkaraInfo {
+  is_pushkara_navamsha: boolean;
+  is_pushkara_bhaga: boolean;
+  navamsha_sign_en: string;
+  navamsha_sign_bn: string;
+  navamsha_sign_hi: string;
+  pada_number: number;
+  degree_in_sign: number;
+  degree_in_sign_formatted: string;
+  significance_en: string;
+  significance_bn: string;
+  significance_hi: string;
+}
+
+export interface DashaBalanceAtBirth {
+  dasha_lord_en: string;
+  dasha_lord_bn: string;
+  dasha_lord_hi: string;
+  total_cycle_years: number;
+  balance_years: number;
+  balance_months: number;
+  balance_days: number;
+  balance_formatted_en: string;
+  balance_formatted_bn: string;
+  balance_formatted_hi: string;
+  elapsed_percentage: number;
+  remaining_percentage: number;
+}
+
+export interface DailyTaraBalaInfo {
+  current_moon_nakshatra_index: number;
+  current_moon_nakshatra_name_en: string;
+  current_moon_nakshatra_name_bn: string;
+  current_moon_nakshatra_name_hi: string;
+  tara_step: number;
+  tara_name_en: string;
+  tara_name_bn: string;
+  tara_name_hi: string;
+  is_auspicious: boolean;
+  status_label_en: string;
+  status_label_bn: string;
+  status_label_hi: string;
+  guidance_en: string;
+  guidance_bn: string;
+  guidance_hi: string;
+}
+
+export interface NakshatraDispositionInfo {
+  disposition_en: string;
+  disposition_bn: string;
+  disposition_hi: string;
+  gunas_en: string;
+  gunas_bn: string;
+  gunas_hi: string;
+  caste_varna_en: string;
+  caste_varna_bn: string;
+  caste_varna_hi: string;
+  gender_en: string;
+  gender_bn: string;
+  gender_hi: string;
+  direction_en: string;
+  direction_bn: string;
+  direction_hi: string;
+  sacred_bird_en: string;
+  sacred_bird_bn: string;
+  sacred_bird_hi: string;
+  suitable_activities_en: string[];
+  suitable_activities_bn: string[];
+  suitable_activities_hi: string[];
+}
+
 export interface NakshatraCalculateResult {
   name: string;
   gender: string;
@@ -407,6 +493,13 @@ export interface NakshatraCalculateResult {
   client_rules?: ClientNakshatraRules | null;
   /** Classifications for the Moon's rashi, from the client's 01.pdf. */
   rashi_client_rules?: ClientSignProfile | null;
+
+  /** Classical Enhancements */
+  gandanta?: GandantaInfo;
+  pushkara?: PushkaraInfo;
+  dasha_balance?: DashaBalanceAtBirth;
+  daily_tara_bala?: DailyTaraBalaInfo;
+  disposition?: NakshatraDispositionInfo;
 
   timezone_resolution?: TimezoneResolution | null;
   calculation?: CalculationMeta | null;

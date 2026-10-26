@@ -31,6 +31,12 @@ import {
   Flame,
   Briefcase,
   Heart,
+  Shield,
+  Zap,
+  Activity,
+  Radio,
+  Layers,
+  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -46,6 +52,7 @@ import { NakshatraTechniquesPanel } from "@/components/astrology/nakshatra-techn
 import { ClientRulesPanel } from "@/components/astrology/client-rules-panel";
 import { CalculationDetails } from "@/components/astrology/calculation-details";
 import { NakshatraWheel } from "@/components/astrology/nakshatra-wheel";
+import { KundaliChart } from "@/components/astrology/kundali-chart";
 import { NAKSHATRA_UI_TEXTS } from "@/lib/nakshatra-translations";
 import { useAuth } from "@/providers/auth-provider";
 import { useProfile } from "@/hooks/use-profile";
@@ -58,6 +65,7 @@ import {
 import type {
   AstrologyLanguage,
   AyanamsaType,
+  ChartStyleType,
   NakshatraCalculatePayload,
   NakshatraCalculateResult,
   UserProfile,
@@ -71,6 +79,10 @@ export default function NakshatraCalculatorPage() {
   const nakshatraFeature = getFeature("nakshatra_calculator");
   const [coinModalOpen, setCoinModalOpen] = React.useState(false);
   const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
+
+  // Tab & Chart Style State
+  const [activeTab, setActiveTab] = React.useState<"core" | "panchang" | "gandanta_dasha" | "tarabala" | "traits">("core");
+  const [chartStyle, setChartStyle] = React.useState<ChartStyleType>("north_indian");
 
   // Language state: 'bn' (Bengali), 'en' (English), 'hi' (Hindi)
   const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
@@ -922,7 +934,7 @@ export default function NakshatraCalculatorPage() {
         </section>
 
         {/* =================================================================== */}
-        {/* Results Dashboard Section */}
+        {/* Results Dashboard Section (5-Tab Cosmic UI) */}
         {/* =================================================================== */}
         {result && (
           <section ref={resultsRef} className="max-w-5xl mx-auto px-4 mt-14 space-y-8 animate-fade-in">
@@ -965,6 +977,47 @@ export default function NakshatraCalculatorPage() {
                       </>
                     )}
                   </p>
+
+                  {/* Auspicious Badges Strip */}
+                  <div className="mt-4 flex flex-wrap items-center gap-2">
+                    {result.gandanta?.is_gandanta ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/20 border border-rose-400/50 px-3 py-1 text-xs font-bold text-rose-300 shadow-sm animate-pulse">
+                        <AlertTriangle className="size-3.5 text-rose-400" />
+                        <span>
+                          {language === "bn"
+                            ? `গণ্ডান্ত সন্ধি (${result.gandanta.junction_name_bn || result.gandanta.severity})`
+                            : language === "hi"
+                            ? `गंडान्त संधि (${result.gandanta.junction_name_hi || result.gandanta.severity})`
+                            : `Gandanta Sandhi (${result.gandanta.severity})`}
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 px-3 py-1 text-xs font-bold text-emerald-300 shadow-sm">
+                        <CheckCircle2 className="size-3.5 text-emerald-400" />
+                        <span>
+                          {language === "bn" ? "গণ্ডান্ত মুক্ত (Safe)" : language === "hi" ? "गंडान्त मुक्त (सुरक्षित)" : "Free of Gandanta"}
+                        </span>
+                      </span>
+                    )}
+
+                    {result.pushkara?.is_pushkara_navamsha && (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/20 border border-amber-300/50 px-3 py-1 text-xs font-bold text-amber-200 shadow-sm">
+                        <Award className="size-3.5 text-amber-300" />
+                        <span>
+                          {language === "bn" ? "পরম শুভ পুষ্কর নবাংশ" : language === "hi" ? "परम शुभ पुष्कर नवांश" : "Pushkara Navamsha"}
+                        </span>
+                      </span>
+                    )}
+
+                    {result.pushkara?.is_pushkara_bhaga && (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-500/20 border border-purple-400/50 px-3 py-1 text-xs font-bold text-purple-200 shadow-sm">
+                        <Sparkles className="size-3.5 text-purple-300" />
+                        <span>
+                          {language === "bn" ? "পুষ্কর ভাগ ডিগ্রি" : language === "hi" ? "पुष्कर भाग" : "Pushkara Bhaga"}
+                        </span>
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Circular / Pill Metrics */}
@@ -1013,409 +1066,877 @@ export default function NakshatraCalculatorPage() {
               </div>
             </div>
 
-            {/* Sacred Identity Cards Grid */}
-            <div>
-              <h3 className="font-display text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                <Sparkles className="size-5 text-amber-500" />
-                <span>{ui.sacredIdentityHeading}</span>
-              </h3>
+            {/* Tab Navigation Pill Bar */}
+            <div className="flex flex-wrap items-center justify-center gap-2 rounded-2xl border border-border/80 bg-card/90 p-2 shadow-sm backdrop-blur-md">
+              {[
+                { id: "core", labelBn: "মূল নক্ষত্র ও চক্র", labelHi: "मुख्य नक्षत्र व चक्र", labelEn: "Core Star & Wheel", icon: Star },
+                { id: "panchang", labelBn: "পঞ্চাঙ্গ ও অবকহড়া", labelHi: "पंचांग व अवकहड़ा", labelEn: "Panchang & Avakahada", icon: Compass },
+                { id: "gandanta_dasha", labelBn: "গণ্ডান্ত, পুষ্কর ও দশা ভোগ", labelHi: "गंडान्त, पुष्कर व दशा", labelEn: "Gandanta, Pushkara & Dasha", icon: Award },
+                { id: "tarabala", labelBn: "নবতারা ও আজকের লাইভ বল", labelHi: "नवपाय व लाइव तारा बल", labelEn: "Navatara & Today's Transit", icon: Radio },
+                { id: "traits", labelBn: "স্বভাব, কর্ম ও বৈদিক প্রতিকার", labelHi: "स्वभाव, कर्म व वैदिक उपाय", labelEn: "Traits, Career & Remedies", icon: BookOpen },
+              ].map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-bold transition-all ${
+                      isActive
+                        ? "bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-amber-950 shadow-md font-black scale-102"
+                        : "text-muted-foreground hover:text-foreground hover:bg-surface-muted/60"
+                    }`}
+                  >
+                    <Icon className={`size-4 ${isActive ? "text-amber-950 fill-amber-950/20" : "text-amber-600"}`} />
+                    <span>
+                      {language === "bn" ? tab.labelBn : language === "hi" ? tab.labelHi : tab.labelEn}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                <div className="rounded-2xl border border-border/80 bg-surface-elevated p-4 shadow-sm">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                    <Star className="size-3.5 text-amber-500" />
-                    <span>{ui.deityLabel}</span>
-                  </div>
-                  <div className="text-sm sm:text-base font-bold text-foreground break-words leading-snug">
-                    {result.traits.ruling_deity}
+            {/* =================================================================== */}
+            {/* TAB 1: CORE STAR & CONSTELLATIONS WHEEL */}
+            {/* =================================================================== */}
+            {activeTab === "core" && (
+              <div className="space-y-8 animate-fade-in">
+                {/* Sacred Identity Cards Grid */}
+                <div>
+                  <h3 className="font-display text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                    <Sparkles className="size-5 text-amber-500" />
+                    <span>{ui.sacredIdentityHeading}</span>
+                  </h3>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div className="rounded-2xl border border-border/80 bg-surface-elevated p-4 shadow-sm">
+                      <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                        <Star className="size-3.5 text-amber-500" />
+                        <span>{ui.deityLabel}</span>
+                      </div>
+                      <div className="text-sm sm:text-base font-bold text-foreground break-words leading-snug">
+                        {result.traits.ruling_deity}
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-border/80 bg-surface-elevated p-4 shadow-sm">
+                      <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                        <Scroll className="size-3.5 text-indigo-500" />
+                        <span>{ui.symbolLabel}</span>
+                      </div>
+                      <div className="text-sm sm:text-base font-bold text-foreground break-words leading-snug">
+                        {result.traits.symbol}
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-border/80 bg-surface-elevated p-4 shadow-sm">
+                      <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                        <Trees className="size-3.5 text-emerald-500" />
+                        <span>{ui.sacredTreeLabel}</span>
+                      </div>
+                      <div className="text-sm sm:text-base font-bold text-foreground break-words leading-snug">
+                        {result.traits.sacred_tree}
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-border/80 bg-surface-elevated p-4 shadow-sm">
+                      <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                        <Award className="size-3.5 text-amber-500" />
+                        <span>{ui.currentNamaksharLabel}</span>
+                      </div>
+                      <div className="text-lg sm:text-xl font-extrabold text-amber-600">
+                        &ldquo;{result.current_namakshar}&rdquo;
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-border/80 bg-surface-elevated p-4 shadow-sm">
+                      <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                        <Palette className="size-3.5 text-rose-500" />
+                        <span>{ui.luckyColorLabel}</span>
+                      </div>
+                      <div className="text-sm font-semibold text-foreground break-words leading-snug">
+                        {result.traits.lucky_color}
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-border/80 bg-surface-elevated p-4 shadow-sm">
+                      <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                        <Gem className="size-3.5 text-teal-500" />
+                        <span>{ui.luckyGemstoneLabel}</span>
+                      </div>
+                      <div className="text-sm font-semibold text-foreground break-words leading-snug">
+                        {result.traits.lucky_gemstone}
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-border/80 bg-surface-elevated p-4 shadow-sm col-span-2">
+                      <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                        <Flame className="size-3.5 text-amber-500" />
+                        <span>{ui.beejMantraLabel}</span>
+                      </div>
+                      <div className="text-sm font-bold text-amber-700 break-words leading-snug">
+                        {result.traits.beej_mantra}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-border/80 bg-surface-elevated p-4 shadow-sm">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                    <Scroll className="size-3.5 text-indigo-500" />
-                    <span>{ui.symbolLabel}</span>
-                  </div>
-                  <div className="text-sm sm:text-base font-bold text-foreground break-words leading-snug">
-                    {result.traits.symbol}
-                  </div>
+                {/* 27 Cosmic Constellations Wheel Section */}
+                <div className="rounded-3xl border border-border/80 bg-surface-elevated p-6 sm:p-10 shadow-sm text-center">
+                  <h3 className="font-display text-2xl font-extrabold text-foreground mb-2 flex items-center justify-center gap-2">
+                    <Globe className="size-6 text-amber-500" />
+                    <span>{ui.wheelHeading}</span>
+                  </h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto mb-8">
+                    {ui.wheelSubheading}
+                  </p>
+
+                  <NakshatraWheel
+                    activeNakshatraIndex={result.nakshatra_index}
+                    activePada={result.pada}
+                    language={language}
+                  />
                 </div>
 
-                <div className="rounded-2xl border border-border/80 bg-surface-elevated p-4 shadow-sm">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                    <Trees className="size-3.5 text-emerald-500" />
-                    <span>{ui.sacredTreeLabel}</span>
-                  </div>
-                  <div className="text-sm sm:text-base font-bold text-foreground break-words leading-snug">
-                    {result.traits.sacred_tree}
-                  </div>
-                </div>
+                {/* Auspicious Name Syllables Across 4 Padas */}
+                <div className="rounded-3xl border border-border/80 bg-surface-elevated p-6 sm:p-8 shadow-sm">
+                  <h3 className="font-display text-xl font-bold text-foreground flex items-center gap-2 mb-1">
+                    <BookOpen className="size-5 text-indigo-500" />
+                    <span>{ui.padasHeading}</span>
+                  </h3>
+                  <p className="text-xs text-muted-foreground mb-6">{ui.padasSubheading}</p>
 
-                <div className="rounded-2xl border border-border/80 bg-surface-elevated p-4 shadow-sm">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                    <Award className="size-3.5 text-amber-500" />
-                    <span>{ui.currentNamaksharLabel}</span>
-                  </div>
-                  <div className="text-lg sm:text-xl font-extrabold text-brand-600">
-                    &ldquo;{result.current_namakshar}&rdquo;
-                  </div>
-                </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {result.padas.map((p) => {
+                      const isNative = p.is_native_pada;
+                      return (
+                        <div
+                          key={p.pada}
+                          className={`relative rounded-2xl p-5 border transition-all duration-300 ${
+                            isNative
+                              ? "border-amber-500 bg-amber-500/10 shadow-md ring-2 ring-amber-500/30 scale-102"
+                              : "border-border/70 bg-surface-muted/30"
+                          }`}
+                        >
+                          {isNative && (
+                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 font-bold text-[10px] uppercase tracking-wider shadow-sm flex items-center gap-1">
+                              <Star className="size-2.5 fill-slate-950 text-slate-950" />
+                              <span>{ui.nativePadaBadge}</span>
+                            </div>
+                          )}
 
-                <div className="rounded-2xl border border-border/80 bg-surface-elevated p-4 shadow-sm">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                    <Palette className="size-3.5 text-rose-500" />
-                    <span>{ui.luckyColorLabel}</span>
-                  </div>
-                  <div className="text-sm font-semibold text-foreground break-words leading-snug">
-                    {result.traits.lucky_color}
-                  </div>
-                </div>
+                          <div className="text-center space-y-2">
+                            <div className="text-xs font-semibold text-muted-foreground uppercase">
+                              {ui.padaLabel} {p.pada}
+                            </div>
 
-                <div className="rounded-2xl border border-border/80 bg-surface-elevated p-4 shadow-sm">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                    <Gem className="size-3.5 text-teal-500" />
-                    <span>{ui.luckyGemstoneLabel}</span>
-                  </div>
-                  <div className="text-sm font-semibold text-foreground break-words leading-snug">
-                    {result.traits.lucky_gemstone}
-                  </div>
-                </div>
+                            <div className="text-3xl font-extrabold text-foreground tracking-tight">
+                              &ldquo;{p.namakshar}&rdquo;
+                            </div>
 
-                <div className="rounded-2xl border border-border/80 bg-surface-elevated p-4 shadow-sm col-span-2">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                    <Flame className="size-3.5 text-amber-500" />
-                    <span>{ui.beejMantraLabel}</span>
-                  </div>
-                  <div className="text-sm font-bold text-amber-700 break-words leading-snug">
-                    {result.traits.beej_mantra}
+                            <div className="text-[11px] text-muted-foreground space-y-0.5 pt-1">
+                              <div>
+                                {language === "bn" ? p.rashi_name_bn : language === "hi" ? p.rashi_name_hi : p.rashi_name_en}
+                              </div>
+                              <div className="font-semibold text-indigo-600">
+                                {ui.navamshaSignLabel}: {p.navamsha_sign}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Panchang - the elements the client's reference report lists */}
-            {result.panchang && (
-              <PanchangStrip
-                panchang={result.panchang}
-                nakshatraName={
-                  language === "bn"
-                    ? result.nakshatra_name_bn
-                    : language === "hi"
-                      ? result.nakshatra_name_hi
-                      : result.nakshatra_name_en
-                }
-                language={language}
-              />
             )}
 
-            {/* Avakahada Chakra Section */}
-            <div className="rounded-3xl border border-border/80 bg-surface-elevated p-6 sm:p-8 shadow-sm">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="font-display text-xl font-bold text-foreground flex items-center gap-2">
-                    <Compass className="size-5 text-brand-500" />
-                    <span>{ui.avakahadaHeading}</span>
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Vedic classifications for marriage compatibility (Ashtakoota) & core constitutional disposition
-                  </p>
+            {/* =================================================================== */}
+            {/* TAB 2: PANCHANG & AVAKAHADA CHAKRA */}
+            {/* =================================================================== */}
+            {activeTab === "panchang" && (
+              <div className="space-y-8 animate-fade-in">
+                {/* Panchang Strip */}
+                {result.panchang && (
+                  <PanchangStrip
+                    panchang={result.panchang}
+                    nakshatraName={activeStarName}
+                    language={language}
+                  />
+                )}
+
+                {/* Avakahada Chakra Section */}
+                <div className="rounded-3xl border border-border/80 bg-surface-elevated p-6 sm:p-8 shadow-sm">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="font-display text-xl font-bold text-foreground flex items-center gap-2">
+                        <Compass className="size-5 text-amber-500" />
+                        <span>{ui.avakahadaHeading}</span>
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {language === "bn"
+                          ? "বৈদিক বিবাহ মেলাকক (অষ্টকূট) ও জাতকের জন্মগত স্বভাবের মৌলিক চক্র"
+                          : language === "hi"
+                          ? "वैदिक विवाह मेलापक (अष्टकूट) एवं जातक के मूल स्वभाव का चक्र"
+                          : "Vedic classifications for marriage compatibility (Ashtakoota) & constitutional disposition"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
+                      <div className="text-xs font-medium text-muted-foreground uppercase mb-1">{ui.ganaLabel}</div>
+                      <div className="text-base font-bold text-foreground">{result.avakahada.gana}</div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
+                      <div className="text-xs font-medium text-muted-foreground uppercase mb-1">{ui.yoniLabel}</div>
+                      <div className="text-base font-bold text-foreground">{result.avakahada.yoni}</div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
+                      <div className="text-xs font-medium text-muted-foreground uppercase mb-1">{ui.nadiLabel}</div>
+                      <div className="text-base font-bold text-foreground">{result.avakahada.nadi}</div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
+                      <div className="text-xs font-medium text-muted-foreground uppercase mb-1">{ui.varnaLabel}</div>
+                      <div className="text-base font-bold text-foreground">{result.avakahada.varna}</div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
+                      <div className="text-xs font-medium text-muted-foreground uppercase mb-1">{ui.vashyaLabel}</div>
+                      <div className="text-base font-bold text-foreground">{result.avakahada.vashya}</div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
+                      <div className="text-xs font-medium text-muted-foreground uppercase mb-1">{ui.tatvaLabel}</div>
+                      <div className="text-base font-bold text-foreground">{result.avakahada.tatva}</div>
+                    </div>
+
+                    <div className="col-span-2 rounded-2xl border border-amber-300 bg-amber-50/60 p-4">
+                      <div className="mb-1 flex items-center justify-between">
+                        <span className="text-xs font-medium uppercase text-muted-foreground">{ui.payaLabel}</span>
+                        <span className="rounded-md bg-amber-200/80 px-2 py-0.5 text-[10px] font-bold text-amber-900">
+                          {language === "bn" ? "লগ্ন সাপেক্ষে" : language === "hi" ? "लग्न अनुसार" : "House from Lagna"}
+                        </span>
+                      </div>
+                      <div className="break-words text-sm font-bold leading-snug text-amber-900">
+                        {result.paya?.value ?? result.avakahada.paya}
+                      </div>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Birth Kundali Chart with Moon Placement */}
+                {result.planets && (
+                  <div className="rounded-3xl border border-border/80 bg-card p-6 sm:p-8 shadow-sm space-y-6">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <div>
+                        <h3 className="font-display text-xl font-bold text-foreground flex items-center gap-2">
+                          <Eye className="size-5 text-amber-500" />
+                          <span>
+                            {language === "bn"
+                              ? "জন্ম কুষ্ঠী চক্রে চন্দ্রের নক্ষত্র অবস্থান"
+                              : language === "hi"
+                              ? "जन्म कुंडली चक्र में चंद्र व नक्षत्र स्थिति"
+                              : "Birth Kundali Chart (Moon & Nakshatra Placement)"}
+                          </span>
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {language === "bn"
+                            ? `${result.ayanamsa_name} অয়নামশা অনুযায়ী লগ্ন ও ৯টি গ্রহের অবস্থান`
+                            : `${result.ayanamsa_name} ayanamsa sidereal planetary chart`}
+                        </p>
+                      </div>
+
+                      {/* Style Selector Pills */}
+                      <div className="flex items-center gap-1.5 rounded-xl border border-border bg-surface-muted p-1 text-xs font-bold">
+                        {(["north_indian", "south_indian", "east_indian"] as ChartStyleType[]).map((style) => (
+                          <button
+                            key={style}
+                            type="button"
+                            onClick={() => setChartStyle(style)}
+                            className={`rounded-lg px-2.5 py-1 transition-all ${
+                              chartStyle === style
+                                ? "bg-amber-500 text-amber-950 font-black shadow-2xs"
+                                : "text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            {style === "north_indian" ? "North" : style === "south_indian" ? "South" : "East (বাংলা)"}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="py-2 flex justify-center">
+                      <KundaliChart
+                        planets={result.planets}
+                        ascendantRashiIndex={result.rashi_index}
+                        chartStyle={chartStyle}
+                        language={language}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
+            )}
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
-                  <div className="text-xs font-medium text-muted-foreground uppercase mb-1">{ui.ganaLabel}</div>
-                  <div className="text-base font-bold text-foreground">{result.avakahada.gana}</div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
-                  <div className="text-xs font-medium text-muted-foreground uppercase mb-1">{ui.yoniLabel}</div>
-                  <div className="text-base font-bold text-foreground">{result.avakahada.yoni}</div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
-                  <div className="text-xs font-medium text-muted-foreground uppercase mb-1">{ui.nadiLabel}</div>
-                  <div className="text-base font-bold text-foreground">{result.avakahada.nadi}</div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
-                  <div className="text-xs font-medium text-muted-foreground uppercase mb-1">{ui.varnaLabel}</div>
-                  <div className="text-base font-bold text-foreground">{result.avakahada.varna}</div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
-                  <div className="text-xs font-medium text-muted-foreground uppercase mb-1">{ui.vashyaLabel}</div>
-                  <div className="text-base font-bold text-foreground">{result.avakahada.vashya}</div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
-                  <div className="text-xs font-medium text-muted-foreground uppercase mb-1">{ui.tatvaLabel}</div>
-                  <div className="text-base font-bold text-foreground">{result.avakahada.tatva}</div>
-                </div>
-
-                {/* Paya is the one Avakahada field that disagrees with the client's
-                    own reference report, and no supplied document defines the rule.
-                    It is still shown, but never as settled. */}
+            {/* =================================================================== */}
+            {/* TAB 3: GANDANTA, PUSHKARA & DASHA BALANCE */}
+            {/* =================================================================== */}
+            {activeTab === "gandanta_dasha" && (
+              <div className="space-y-8 animate-fade-in">
+                {/* 1. Gandanta Dosha Analysis */}
                 <div
-                  className={`col-span-2 rounded-2xl border p-4 ${
-                    result.paya?.is_disputed
-                      ? "border-amber-300 bg-amber-50"
-                      : "border-border/60 bg-surface-muted/40"
+                  className={`rounded-3xl border p-6 sm:p-8 shadow-sm transition-all ${
+                    result.gandanta?.is_gandanta
+                      ? "border-rose-400 bg-gradient-to-br from-rose-500/10 via-card to-rose-500/5"
+                      : "border-emerald-500/40 bg-gradient-to-br from-emerald-500/10 via-card to-emerald-500/5"
                   }`}
                 >
-                  <div className="mb-1 flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-medium uppercase text-muted-foreground">
-                      {ui.payaLabel}
-                    </span>
-                    {result.paya?.is_disputed && (
-                      <span className="rounded-md bg-amber-200/70 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-900">
-                        {language === "bn"
-                          ? "অনিশ্চিত"
-                          : language === "hi"
-                          ? "अपुष्ट"
-                          : "Unconfirmed"}
-                      </span>
-                    )}
-                  </div>
-                  <div className="break-words text-sm font-bold leading-snug text-amber-700">
-                    {result.paya?.value ?? result.avakahada.paya}
-                  </div>
-                  {result.paya?.is_disputed && result.paya.notice && (
-                    <details className="mt-2">
-                      <summary className="cursor-pointer text-[11px] font-semibold text-amber-900">
-                        {language === "bn"
-                          ? "কেন অনিশ্চিত"
-                          : language === "hi"
-                          ? "क्यों अपुष्ट"
-                          : "Why this is unconfirmed"}
-                      </summary>
-                      <p className="mt-1.5 text-[11px] leading-relaxed text-amber-900/90">
-                        {result.paya.notice}
-                      </p>
-                      {result.paya.evidence.length > 0 && (
-                        <ul className="mt-1.5 space-y-0.5 border-t border-amber-200 pt-1.5">
-                          {result.paya.evidence.map((item, index) => (
-                            <li key={index} className="text-[10px] leading-relaxed text-amber-900/80">
-                              • {item}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </details>
-                  )}
-                </div>
-              </div>
-            </div>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`size-11 rounded-2xl flex items-center justify-center ${
+                          result.gandanta?.is_gandanta ? "bg-rose-500 text-white" : "bg-emerald-500 text-white"
+                        }`}
+                      >
+                        {result.gandanta?.is_gandanta ? (
+                          <AlertTriangle className="size-6" />
+                        ) : (
+                          <CheckCircle2 className="size-6" />
+                        )}
+                      </div>
+                      <div>
+                        <h4 className="font-display text-lg sm:text-xl font-bold text-foreground">
+                          {language === "bn"
+                            ? "গণ্ডান্ত নক্ষত্র ও পদ দোষ বিচার (Gandanta Analysis)"
+                            : language === "hi"
+                            ? "गंडान्त नक्षत्र एवं पद दोष विचार"
+                            : "Gandanta Constellation & Sandhi Cusp Analysis"}
+                        </h4>
+                        <p className="text-xs text-muted-foreground">
+                          {language === "bn"
+                            ? "জল ও অগ্নি রাশির সূক্ষ্ম সংযোগস্থলের বৈদিক বিশ্লেষণ"
+                            : "Vedic analysis of the water-fire elemental junction"}
+                        </p>
+                      </div>
+                    </div>
 
-            {/* Auspicious Name Syllables Across 4 Padas */}
-            <div className="rounded-3xl border border-border/80 bg-surface-elevated p-6 sm:p-8 shadow-sm">
-              <h3 className="font-display text-xl font-bold text-foreground flex items-center gap-2 mb-1">
-                <BookOpen className="size-5 text-indigo-500" />
-                <span>{ui.padasHeading}</span>
-              </h3>
-              <p className="text-xs text-muted-foreground mb-6">{ui.padasSubheading}</p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {result.padas.map((p) => {
-                  const isNative = p.is_native_pada;
-                  return (
-                    <div
-                      key={p.pada}
-                      className={`relative rounded-2xl p-5 border transition-all duration-300 ${
-                        isNative
-                          ? "border-amber-500 bg-amber-500/10 shadow-md ring-2 ring-amber-500/30 scale-102"
-                          : "border-border/70 bg-surface-muted/30"
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+                        result.gandanta?.is_gandanta
+                          ? "bg-rose-500/20 text-rose-800 border border-rose-300"
+                          : "bg-emerald-500/20 text-emerald-800 border border-emerald-300"
                       }`}
                     >
-                      {isNative && (
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 font-bold text-[10px] uppercase tracking-wider shadow-sm flex items-center gap-1">
-                          <Star className="size-2.5 fill-slate-950 text-slate-950" />
-                          <span>{ui.nativePadaBadge}</span>
-                        </div>
-                      )}
+                      {result.gandanta?.severity ?? (result.gandanta?.is_gandanta ? "Active Gandanta" : "Safe")}
+                    </span>
+                  </div>
 
-                      <div className="text-center space-y-2">
-                        <div className="text-xs font-semibold text-muted-foreground uppercase">
-                          {ui.padaLabel} {p.pada}
-                        </div>
+                  <p className="text-sm text-foreground/90 leading-relaxed font-medium">
+                    {language === "bn"
+                      ? result.gandanta?.description_bn
+                      : language === "hi"
+                      ? result.gandanta?.description_hi
+                      : result.gandanta?.description_en}
+                  </p>
 
-                        <div className="text-3xl font-extrabold text-foreground tracking-tight">
-                          &ldquo;{p.namakshar}&rdquo;
-                        </div>
+                  {result.gandanta?.is_gandanta && (result.gandanta.remedies_bn.length > 0 || result.gandanta.remedies_en.length > 0) && (
+                    <div className="mt-5 pt-4 border-t border-rose-300/40 space-y-2.5">
+                      <h5 className="text-xs sm:text-sm font-bold text-rose-900 flex items-center gap-2">
+                        <Flame className="size-4 text-rose-600" />
+                        <span>
+                          {language === "bn"
+                            ? "শাস্ত্রীয় গণ্ডান্ত শান্তি ও বৈদিক প্রতিকার বিধান:"
+                            : language === "hi"
+                            ? "शास्त्रीय गंडान्त शांति व वैदिक उपाय:"
+                            : "Classical Gandanta Shanti & Vedic Remedies:"}
+                        </span>
+                      </h5>
+                      <ul className="space-y-1.5 text-xs sm:text-sm text-foreground/90">
+                        {(language === "bn"
+                          ? result.gandanta.remedies_bn
+                          : language === "hi"
+                          ? result.gandanta.remedies_hi
+                          : result.gandanta.remedies_en
+                        ).map((rem, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="size-1.5 rounded-full bg-rose-500 mt-1.5 shrink-0" />
+                            <span className="leading-snug">{rem}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
 
-                        <div className="text-[11px] text-muted-foreground space-y-0.5 pt-1">
-                          <div>
-                            {language === "bn" ? p.rashi_name_bn : language === "hi" ? p.rashi_name_hi : p.rashi_name_en}
+                {/* 2. Pushkara Navamsha & Pushkara Bhaga */}
+                <div className="rounded-3xl border border-amber-300 bg-gradient-to-br from-amber-500/10 via-card to-purple-500/5 p-6 sm:p-8 shadow-sm">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="size-11 rounded-2xl bg-amber-500 text-amber-950 flex items-center justify-center font-bold">
+                      <Award className="size-6" />
+                    </div>
+                    <div>
+                      <h4 className="font-display text-lg sm:text-xl font-bold text-foreground">
+                        {language === "bn"
+                          ? "পুষ্কর নবাংশ ও পুষ্কর ভাগ বিচার (Pushkara Navamsha)"
+                          : language === "hi"
+                          ? "पुष्कर नवांश एवं पुष्कर भाग विचार"
+                          : "Pushkara Navamsha & Pushkara Bhaga Auspiciousness"}
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        {language === "bn"
+                          ? "২৪টি পবিত্র পুষ্টিকর নবাংশ পদ ও পরম রাজযোগকারী ডিগ্রির বিচার"
+                          : "24 sacred nourishing navamsha padas and royal degree analysis"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4">
+                    <div className="p-4 rounded-2xl bg-surface-muted/50 border border-border/60">
+                      <div className="text-xs font-semibold text-muted-foreground uppercase mb-1">
+                        {language === "bn" ? "পুষ্কর নবাংশ স্থিতি" : "Pushkara Navamsha"}
+                      </div>
+                      <div className="text-base font-extrabold text-foreground flex items-center gap-2">
+                        {result.pushkara?.is_pushkara_navamsha ? (
+                          <span className="text-emerald-700 flex items-center gap-1.5">
+                            <CheckCircle2 className="size-4 text-emerald-600" />
+                            {language === "bn" ? "হ্যাঁ (উপস্থিত — পরম শুভ)" : "Present (Sacred Placement)"}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground font-medium">
+                            {language === "bn" ? "সাধারণ নবাংশ" : "Standard Navamsha"}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        নবাংশ রাশি: {result.pushkara?.navamsha_sign_bn || result.pushkara?.navamsha_sign_en} (পদ {result.pada})
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-surface-muted/50 border border-border/60">
+                      <div className="text-xs font-semibold text-muted-foreground uppercase mb-1">
+                        {language === "bn" ? "পুষ্কর ভাগ ডিগ্রি" : "Pushkara Bhaga Degree"}
+                      </div>
+                      <div className="text-base font-extrabold text-foreground flex items-center gap-2">
+                        {result.pushkara?.is_pushkara_bhaga ? (
+                          <span className="text-purple-700 flex items-center gap-1.5">
+                            <Sparkles className="size-4 text-purple-600" />
+                            {language === "bn" ? "হ্যাঁ (১° সীমার মধ্যে অবস্থিত)" : "Active Pushkara Bhaga"}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground font-medium">
+                            {result.pushkara?.degree_in_sign_formatted}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        রাশিতে ভোগাংশ: {result.pushkara?.degree_in_sign_formatted}
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed font-medium">
+                    {language === "bn"
+                      ? result.pushkara?.significance_bn
+                      : language === "hi"
+                      ? result.pushkara?.significance_hi
+                      : result.pushkara?.significance_en}
+                  </p>
+                </div>
+
+                {/* 3. Vimshottari Dasha Balance at Birth */}
+                {result.dasha_balance && (
+                  <div className="rounded-3xl border border-border/80 bg-card p-6 sm:p-8 shadow-sm space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="size-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold">
+                        <Clock className="size-6" />
+                      </div>
+                      <div>
+                        <h4 className="font-display text-lg sm:text-xl font-bold text-foreground">
+                          {language === "bn"
+                            ? "জন্মকালীন বিংশোত্তরী মহাদশা ভোগ ব্যালেন্স"
+                            : language === "hi"
+                            ? "जन्मकालीन विंशोत्तरी महादशा शेष"
+                            : "Vimshottari Mahadasha Balance at Birth"}
+                        </h4>
+                        <p className="text-xs text-muted-foreground">
+                          {language === "bn"
+                            ? "জন্ম নক্ষত্রের ভুঞ্জাংশ থেকে অবশিষ্ট মহাদশার নিখুঁত সময়কাল"
+                            : "Calculated from the remaining degree arc of the Janma Nakshatra"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="p-5 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-amber-500/10 border border-indigo-200">
+                      <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                        {language === "bn" ? "মহাদশা অধিপতি ও অবশিষ্ট কাল" : "Mahadasha Lord & Balance"}
+                      </div>
+                      <div className="text-xl sm:text-2xl font-black text-indigo-950">
+                        {language === "bn"
+                          ? result.dasha_balance.balance_formatted_bn
+                          : language === "hi"
+                          ? result.dasha_balance.balance_formatted_hi
+                          : result.dasha_balance.balance_formatted_en}
+                      </div>
+                      <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+                        <span>
+                          মোট চক্র: {result.dasha_balance.total_cycle_years} বছর ({result.dasha_balance.dasha_lord_bn})
+                        </span>
+                        <span className="font-bold text-indigo-700">
+                          অবশিষ্ট: {result.dasha_balance.remaining_percentage}%
+                        </span>
+                      </div>
+                      <div className="w-full h-2.5 rounded-full bg-slate-200 mt-1.5 overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-indigo-600 to-amber-500 rounded-full"
+                          style={{ width: `${result.dasha_balance.remaining_percentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* =================================================================== */}
+            {/* TAB 4: NAVATARA & TODAY'S LIVE TRANSIT TARA BALA */}
+            {/* =================================================================== */}
+            {activeTab === "tarabala" && (
+              <div className="space-y-8 animate-fade-in">
+                {/* 1. Real-Time Daily Tara Bala Live Card */}
+                {result.daily_tara_bala && (
+                  <div
+                    className={`rounded-3xl border p-6 sm:p-8 shadow-sm ${
+                      result.daily_tara_bala.is_auspicious
+                        ? "border-emerald-400 bg-gradient-to-br from-emerald-500/15 via-card to-emerald-500/5"
+                        : "border-rose-400 bg-gradient-to-br from-rose-500/15 via-card to-rose-500/5"
+                    }`}
+                  >
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`size-12 rounded-2xl flex items-center justify-center font-bold ${
+                            result.daily_tara_bala.is_auspicious ? "bg-emerald-500 text-white" : "bg-rose-500 text-white"
+                          }`}
+                        >
+                          <Radio className="size-6 animate-pulse" />
+                        </div>
+                        <div>
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-muted text-xs font-bold text-muted-foreground mb-1">
+                            <span className="size-2 rounded-full bg-emerald-500 animate-ping" />
+                            {language === "bn" ? "লাইভ মহাজাগতিক ট্রানজিট" : "Live Ephemeris Transit"}
                           </div>
-                          <div className="font-semibold text-indigo-600">
-                            {ui.navamshaSignLabel}: {p.navamsha_sign}
-                          </div>
+                          <h4 className="font-display text-xl sm:text-2xl font-black text-foreground">
+                            {language === "bn"
+                              ? `আজকের দিনে আপনার তারা: ${result.daily_tara_bala.tara_name_bn}`
+                              : language === "hi"
+                              ? `आज आपकी तारा: ${result.daily_tara_bala.tara_name_hi}`
+                              : `Today's Active Tara: ${result.daily_tara_bala.tara_name_en}`}
+                          </h4>
+                          <p className="text-xs text-muted-foreground">
+                            {language === "bn"
+                              ? `বর্তমান আকাশে চন্দ্র ${result.daily_tara_bala.current_moon_nakshatra_name_bn} নক্ষত্রে সঞ্চার করছে (তারা নং ${result.daily_tara_bala.tara_step})`
+                              : `Current Moon transiting in ${result.daily_tara_bala.current_moon_nakshatra_name_en} star (Tara Step ${result.daily_tara_bala.tara_step})`}
+                          </p>
+                        </div>
+                      </div>
+
+                      <span
+                        className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider ${
+                          result.daily_tara_bala.is_auspicious
+                            ? "bg-emerald-500 text-white shadow-sm"
+                            : "bg-rose-500 text-white shadow-sm"
+                        }`}
+                      >
+                        {language === "bn"
+                          ? result.daily_tara_bala.status_label_bn
+                          : language === "hi"
+                          ? result.daily_tara_bala.status_label_hi
+                          : result.daily_tara_bala.status_label_en}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 p-4 rounded-2xl bg-card/80 border border-border/80">
+                      <div className="text-xs font-bold text-muted-foreground uppercase mb-1">
+                        {language === "bn" ? "দৈনিক কর্মপরামর্শ ও সতর্কতা" : "Daily Guidance & Advisory"}
+                      </div>
+                      <p className="text-sm font-medium text-foreground leading-relaxed">
+                        {language === "bn"
+                          ? result.daily_tara_bala.guidance_bn
+                          : language === "hi"
+                          ? result.daily_tara_bala.guidance_hi
+                          : result.daily_tara_bala.guidance_en}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. Complete 9 Taras Grid (27 Constellations) */}
+                <div className="rounded-3xl border border-border/80 bg-surface-elevated p-6 sm:p-8 shadow-sm">
+                  <h3 className="font-display text-xl font-bold text-foreground flex items-center gap-2 mb-1">
+                    <Star className="size-5 text-amber-500" />
+                    <span>{ui.tarabalaHeading}</span>
+                  </h3>
+                  <p className="text-xs text-muted-foreground mb-6">{ui.tarabalaSubheading}</p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {result.tarabala.map((t) => (
+                      <div
+                        key={t.tara_index}
+                        className={`rounded-2xl p-4 border transition-all ${
+                          t.is_auspicious
+                            ? "border-emerald-500/30 bg-emerald-500/5"
+                            : "border-rose-500/30 bg-rose-500/5"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-bold text-sm text-foreground">
+                            {language === "bn" ? t.tara_name_bn : language === "hi" ? t.tara_name_hi : t.tara_name}
+                          </span>
+                          <span
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                              t.is_auspicious
+                                ? "bg-emerald-500/20 text-emerald-700 border border-emerald-500/30"
+                                : "bg-rose-500/20 text-rose-700 border border-rose-500/30"
+                            }`}
+                          >
+                            {t.is_auspicious ? ui.auspiciousBadge : ui.inauspiciousBadge}
+                          </span>
+                        </div>
+
+                        <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                          {t.significance}
+                        </p>
+
+                        <div className="pt-2 border-t border-border/40 text-[11px] font-semibold text-foreground/80">
+                          <span className="text-muted-foreground font-normal">Stars: </span>
+                          {t.nakshatras.join(", ")}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* =================================================================== */}
+            {/* TAB 5: TRAITS, CAREER & VEDIC REMEDIES */}
+            {/* =================================================================== */}
+            {activeTab === "traits" && (
+              <div className="space-y-8 animate-fade-in">
+                {/* 1. Nakshatra Disposition & Totem Matrix */}
+                {result.disposition && (
+                  <div className="rounded-3xl border border-border/80 bg-surface-elevated p-6 sm:p-8 shadow-sm">
+                    <h4 className="font-display text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                      <Award className="size-5 text-amber-500" />
+                      <span>
+                        {language === "bn"
+                          ? "নক্ষত্রের স্বভাব, গুণ ও টোটেম রূপরেখা"
+                          : language === "hi"
+                          ? "नक्षत्र स्वभाव, गुण एवं टोटेम स्वरूप"
+                          : "Nakshatra Disposition & Totem Matrix"}
+                      </span>
+                    </h4>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                      <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
+                        <div className="text-xs font-semibold text-muted-foreground uppercase mb-1">
+                          {language === "bn" ? "স্বভাব শ্রেণি" : "Disposition"}
+                        </div>
+                        <div className="text-sm font-bold text-foreground">
+                          {language === "bn" ? result.disposition.disposition_bn : result.disposition.disposition_en}
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
+                        <div className="text-xs font-semibold text-muted-foreground uppercase mb-1">
+                          {language === "bn" ? "গুণ বিভাজন" : "Gunas"}
+                        </div>
+                        <div className="text-sm font-bold text-foreground">
+                          {language === "bn" ? result.disposition.gunas_bn : result.disposition.gunas_en}
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
+                        <div className="text-xs font-semibold text-muted-foreground uppercase mb-1">
+                          {language === "bn" ? "পবিত্র পক্ষী" : "Sacred Bird"}
+                        </div>
+                        <div className="text-sm font-bold text-foreground">
+                          {language === "bn" ? result.disposition.sacred_bird_bn : result.disposition.sacred_bird_en}
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
+                        <div className="text-xs font-semibold text-muted-foreground uppercase mb-1">
+                          {language === "bn" ? "দিক ও বর্ণ" : "Direction & Varna"}
+                        </div>
+                        <div className="text-sm font-bold text-foreground">
+                          {language === "bn"
+                            ? `${result.disposition.direction_bn} • ${result.disposition.caste_varna_bn}`
+                            : `${result.disposition.direction_en} • ${result.disposition.caste_varna_en}`}
                         </div>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
 
-            {/* Personality Overview, Strengths, Cautions, Remedies */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Overview & Strengths */}
-              <div className="space-y-6">
-                <div className="rounded-3xl border border-border/80 bg-surface-elevated p-6 shadow-sm">
-                  <h4 className="font-display text-lg font-bold text-foreground mb-3 flex items-center gap-2">
-                    <Sparkles className="size-4 text-brand-500" />
-                    <span>{ui.overviewHeading}</span>
-                  </h4>
-                  <p className="text-sm text-foreground/90 leading-relaxed">{result.traits.overview}</p>
-                </div>
+                    {result.disposition.suitable_activities_bn.length > 0 && (
+                      <div className="pt-4 border-t border-border/60">
+                        <div className="text-xs font-bold text-muted-foreground uppercase mb-2">
+                          {language === "bn" ? "এই নক্ষত্রে কোন কোন কাজ পরম শুভ ও সফলদায়ক:" : "Classical Auspicious Activities:"}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {(language === "bn"
+                            ? result.disposition.suitable_activities_bn
+                            : language === "hi"
+                            ? result.disposition.suitable_activities_hi
+                            : result.disposition.suitable_activities_en
+                          ).map((act, idx) => (
+                            <span
+                              key={idx}
+                              className="px-3 py-1 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-900 border border-amber-300"
+                            >
+                              ✦ {act}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
-                <div className="rounded-3xl border border-emerald-500/30 bg-emerald-500/5 p-6 shadow-sm">
-                  <h4 className="font-display text-lg font-bold text-emerald-800 mb-3 flex items-center gap-2">
-                    <CheckCircle2 className="size-5 text-emerald-600" />
-                    <span>{ui.strengthsHeading}</span>
-                  </h4>
-                  <ul className="space-y-2.5 text-sm text-foreground/90">
-                    {result.traits.strengths.map((s, idx) => (
-                      <li key={idx} className="flex items-start gap-2.5">
-                        <span className="size-1.5 rounded-full bg-emerald-500 mt-2 shrink-0" />
-                        <span className="leading-snug">{s}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Cautions & Remedies */}
-              <div className="space-y-6">
-                <div className="rounded-3xl border border-rose-500/30 bg-rose-500/5 p-6 shadow-sm">
-                  <h4 className="font-display text-lg font-bold text-rose-800 mb-3 flex items-center gap-2">
-                    <AlertTriangle className="size-5 text-rose-600" />
-                    <span>{ui.cautionsHeading}</span>
-                  </h4>
-                  <ul className="space-y-2.5 text-sm text-foreground/90">
-                    {result.traits.cautions_and_pitfalls.map((c, idx) => (
-                      <li key={idx} className="flex items-start gap-2.5">
-                        <span className="size-1.5 rounded-full bg-rose-500 mt-2 shrink-0" />
-                        <span className="leading-snug">{c}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="rounded-3xl border border-amber-500/30 bg-amber-500/5 p-6 shadow-sm">
-                  <h4 className="font-display text-lg font-bold text-amber-800 mb-3 flex items-center gap-2">
-                    <Heart className="size-5 text-amber-600" />
-                    <span>{ui.remediesHeading}</span>
-                  </h4>
-                  <ul className="space-y-2.5 text-sm text-foreground/90">
-                    {result.traits.beneficial_actions_and_remedies.map((r, idx) => (
-                      <li key={idx} className="flex items-start gap-2.5">
-                        <span className="size-1.5 rounded-full bg-amber-500 mt-2 shrink-0" />
-                        <span className="leading-snug">{r}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* Suitable Careers */}
-            <div className="rounded-3xl border border-border/80 bg-surface-elevated p-6 sm:p-8 shadow-sm">
-              <h4 className="font-display text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                <Briefcase className="size-5 text-brand-500" />
-                <span>{ui.careerHeading}</span>
-              </h4>
-              <div className="flex flex-wrap gap-2.5">
-                {result.traits.career_fields.map((career, idx) => (
-                  <span
-                    key={idx}
-                    className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-brand-500/10 text-brand-900 border border-brand-500/20 shadow-2xs"
-                  >
-                    ✦ {career}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Tarabala Chakra (9 Taras) */}
-            <div className="rounded-3xl border border-border/80 bg-surface-elevated p-6 sm:p-8 shadow-sm">
-              <h3 className="font-display text-xl font-bold text-foreground flex items-center gap-2 mb-1">
-                <Star className="size-5 text-amber-500" />
-                <span>{ui.tarabalaHeading}</span>
-              </h3>
-              <p className="text-xs text-muted-foreground mb-6">{ui.tarabalaSubheading}</p>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {result.tarabala.map((t) => (
-                  <div
-                    key={t.tara_index}
-                    className={`rounded-2xl p-4 border transition-all ${
-                      t.is_auspicious
-                        ? "border-emerald-500/30 bg-emerald-500/5"
-                        : "border-rose-500/30 bg-rose-500/5"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-bold text-sm text-foreground">
-                        {language === "bn" ? t.tara_name_bn : language === "hi" ? t.tara_name_hi : t.tara_name}
-                      </span>
-                      <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          t.is_auspicious
-                            ? "bg-emerald-500/20 text-emerald-700 border border-emerald-500/30"
-                            : "bg-rose-500/20 text-rose-700 border border-rose-500/30"
-                        }`}
-                      >
-                        {t.is_auspicious ? ui.auspiciousBadge : ui.inauspiciousBadge}
-                      </span>
+                {/* 2. Overview, Strengths, Cautions & Remedies */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Overview & Strengths */}
+                  <div className="space-y-6">
+                    <div className="rounded-3xl border border-border/80 bg-surface-elevated p-6 shadow-sm">
+                      <h4 className="font-display text-lg font-bold text-foreground mb-3 flex items-center gap-2">
+                        <Sparkles className="size-4 text-amber-500" />
+                        <span>{ui.overviewHeading}</span>
+                      </h4>
+                      <p className="text-sm text-foreground/90 leading-relaxed">{result.traits.overview}</p>
                     </div>
 
-                    <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-                      {t.significance}
-                    </p>
-
-                    <div className="pt-2 border-t border-border/40 text-[11px] font-semibold text-foreground/80">
-                      <span className="text-muted-foreground font-normal">Stars: </span>
-                      {t.nakshatras.join(", ")}
+                    <div className="rounded-3xl border border-emerald-500/30 bg-emerald-500/5 p-6 shadow-sm">
+                      <h4 className="font-display text-lg font-bold text-emerald-800 mb-3 flex items-center gap-2">
+                        <CheckCircle2 className="size-5 text-emerald-600" />
+                        <span>{ui.strengthsHeading}</span>
+                      </h4>
+                      <ul className="space-y-2.5 text-sm text-foreground/90">
+                        {result.traits.strengths.map((s, idx) => (
+                          <li key={idx} className="flex items-start gap-2.5">
+                            <span className="size-1.5 rounded-full bg-emerald-500 mt-2 shrink-0" />
+                            <span className="leading-snug">{s}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   </div>
-                ))}
+
+                  {/* Cautions & Remedies */}
+                  <div className="space-y-6">
+                    <div className="rounded-3xl border border-rose-500/30 bg-rose-500/5 p-6 shadow-sm">
+                      <h4 className="font-display text-lg font-bold text-rose-800 mb-3 flex items-center gap-2">
+                        <AlertTriangle className="size-5 text-rose-600" />
+                        <span>{ui.cautionsHeading}</span>
+                      </h4>
+                      <ul className="space-y-2.5 text-sm text-foreground/90">
+                        {result.traits.cautions_and_pitfalls.map((c, idx) => (
+                          <li key={idx} className="flex items-start gap-2.5">
+                            <span className="size-1.5 rounded-full bg-rose-500 mt-2 shrink-0" />
+                            <span className="leading-snug">{c}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="rounded-3xl border border-amber-500/30 bg-amber-500/5 p-6 shadow-sm">
+                      <h4 className="font-display text-lg font-bold text-amber-800 mb-3 flex items-center gap-2">
+                        <Heart className="size-5 text-amber-600" />
+                        <span>{ui.remediesHeading}</span>
+                      </h4>
+                      <ul className="space-y-2.5 text-sm text-foreground/90">
+                        {result.traits.beneficial_actions_and_remedies.map((r, idx) => (
+                          <li key={idx} className="flex items-start gap-2.5">
+                            <span className="size-1.5 rounded-full bg-amber-500 mt-2 shrink-0" />
+                            <span className="leading-snug">{r}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Suitable Careers */}
+                <div className="rounded-3xl border border-border/80 bg-surface-elevated p-6 sm:p-8 shadow-sm">
+                  <h4 className="font-display text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                    <Briefcase className="size-5 text-amber-500" />
+                    <span>{ui.careerHeading}</span>
+                  </h4>
+                  <div className="flex flex-wrap gap-2.5">
+                    {result.traits.career_fields.map((career, idx) => (
+                      <span
+                        key={idx}
+                        className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-amber-500/10 text-amber-900 border border-amber-500/20 shadow-2xs"
+                      >
+                        ✦ {career}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 4. Saptarishis Predictive Techniques Panel */}
+                {result.client_rules && (
+                  <NakshatraTechniquesPanel rules={result.client_rules} language={language} />
+                )}
+
+                {/* 5. Moon Sign Rules from 01.pdf */}
+                {result.rashi_client_rules && (
+                  <ClientRulesPanel
+                    profile={result.rashi_client_rules}
+                    kpReference={undefined}
+                    language={language}
+                  />
+                )}
+              </div>
+            )}
+
+            {/* Recalculate CTA Bar */}
+            <div className="pt-4 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setResult(null);
+                  window.scrollTo({ top: 150, behavior: "smooth" });
+                }}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground"
+              >
+                <RotateCcw className="size-3.5" />
+                <span>
+                  {language === "bn"
+                    ? "অন্য জন্ম বিবরণ দিয়ে পুনরায় গণনা করুন"
+                    : language === "hi"
+                    ? "अन्य विवरण से पुनः गणना करें"
+                    : "Recalculate with different birth details"}
+                </span>
+              </button>
+
+              <div className="flex items-center gap-2">
+                <Link href="/appointments">
+                  <Button size="sm" className="bg-amber-500 text-amber-950 font-black hover:bg-amber-400">
+                    {language === "bn"
+                      ? "অভিজ্ঞ জ্যোতিষীর সাথে বিস্তারিত পরামর্শ করুন"
+                      : language === "hi"
+                      ? "विस्तृत परामर्श के लिए ज्योतिषी से संपर्क करें"
+                      : "Consult Astrologer for Detailed Nakshatra Kundali"}
+                  </Button>
+                </Link>
               </div>
             </div>
 
-            {/* The client's own nakshatra techniques, applied to this chart */}
-            {result.client_rules && (
-              <NakshatraTechniquesPanel rules={result.client_rules} language={language} />
-            )}
-
-            {/* Classifications for the Moon's rashi, from the client's 01.pdf */}
-            {result.rashi_client_rules && (
-              <ClientRulesPanel
-                profile={result.rashi_client_rules}
-                kpReference={undefined}
-                language={language}
-              />
-            )}
-
-            {/* 27 Cosmic Constellations Wheel Section */}
-            <div className="rounded-3xl border border-border/80 bg-surface-elevated p-6 sm:p-10 shadow-sm text-center">
-              <h3 className="font-display text-2xl font-extrabold text-foreground mb-2 flex items-center justify-center gap-2">
-                <Globe className="size-6 text-brand-500" />
-                <span>{ui.wheelHeading}</span>
-              </h3>
-              <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto mb-8">
-                {ui.wheelSubheading}
-              </p>
-
-              <NakshatraWheel
-                activeNakshatraIndex={result.nakshatra_index}
-                activePada={result.pada}
-                language={language}
-              />
-            </div>
-
-            {/* How the chart was calculated - timezone provenance and caveats */}
+            {/* Calculation Audit Details */}
             <CalculationDetails
               timezone={result.timezone_resolution}
               calculation={result.calculation}
