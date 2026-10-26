@@ -1431,6 +1431,98 @@ export interface DailyHoroscopePayload {
   birth_date?: string | null;
   birth_time?: string | null;
   birth_rashi_index?: number | null;
+  birth_lagna_index?: number | null;
+}
+
+export interface ChoghadiyaItem {
+  period_index: number;
+  is_day: boolean;
+  name: string;
+  name_bn: string;
+  name_hi: string;
+  ruler_planet: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+  guidance: string;
+  guidance_bn: string;
+  guidance_hi: string;
+}
+
+export interface PanchakStatus {
+  is_panchak: boolean;
+  panchak_type: string;
+  panchak_type_bn: string;
+  panchak_type_hi: string;
+  severity: string;
+  description: string;
+  description_bn: string;
+  description_hi: string;
+  prohibited_activities: string[];
+}
+
+export interface PlanetaryDrishtiItem {
+  aspecting_planet: string;
+  aspect_type: string;
+  yoga_name: string;
+  yoga_name_bn: string;
+  yoga_name_hi: string;
+  is_positive: boolean;
+  impact: string;
+  impact_bn: string;
+  impact_hi: string;
+  classical_remedy: string;
+  classical_remedy_bn: string;
+  classical_remedy_hi: string;
+}
+
+export interface AshtakavargaTransitPoints {
+  sign_index: number;
+  sarvashtakavarga_points: number;
+  moon_bhinnashtakavarga_points: number;
+  strength_grade: string;
+  strength_grade_bn: string;
+  strength_grade_hi: string;
+  score_multiplier: number;
+}
+
+export interface NumerologyDailySynergy {
+  mulank: number;
+  bhagyank: number;
+  ruling_planet: string;
+  day_relationship: string;
+  day_relationship_bn: string;
+  day_relationship_hi: string;
+  synergy_score_pct: number;
+  advice: string;
+  advice_bn: string;
+  advice_hi: string;
+}
+
+export interface BiorhythmHour {
+  hour: number;
+  time_label: string;
+  energy_score: number;
+  dominant_graha: string;
+  status: string;
+  status_bn: string;
+  status_hi: string;
+}
+
+export interface DualTransitInsight {
+  moon_transit_house: number;
+  lagna_transit_house: number;
+  lagna_sign_name: string;
+  emotional_outlook: string;
+  emotional_outlook_bn: string;
+  emotional_outlook_hi: string;
+  physical_event_outlook: string;
+  physical_event_outlook_bn: string;
+  physical_event_outlook_hi: string;
+  synthesis_verdict: string;
+  synthesis_verdict_bn: string;
+  synthesis_verdict_hi: string;
+  dual_harmony_score: number;
 }
 
 export interface HoraItem {
@@ -1516,6 +1608,10 @@ export interface DailySignHoroscope {
   beej_mantra?: string;
   charity_dana?: string;
   tara_bala?: TaraBalaSummary | null;
+  ashtakavarga?: AshtakavargaTransitPoints | null;
+  client_classifications?: Record<string, any>;
+  nakshatra_pada_shift?: Record<string, any>;
+  planetary_drishtis?: PlanetaryDrishtiItem[];
 }
 
 export interface DailyPanchangSummary {
@@ -1534,6 +1630,8 @@ export interface DailyPanchangSummary {
   disha_remedy?: string;
   favorable_chandra_rashis?: string[];
   horas?: HoraItem[];
+  choghadiya?: ChoghadiyaItem[];
+  panchak?: PanchakStatus | null;
 }
 
 export interface DailyHoroscopeResult {
@@ -1547,6 +1645,9 @@ export interface DailyHoroscopeResult {
   panchang: DailyPanchangSummary;
   signs: DailySignHoroscope[];
   personalized_profile?: PersonalizedNakshatraProfile | null;
+  numerology_synergy?: NumerologyDailySynergy | null;
+  biorhythm_timeline?: BiorhythmHour[];
+  dual_transit?: DualTransitInsight | null;
   calculation_meta: {
     engine: string;
     ayanamsha: string;
