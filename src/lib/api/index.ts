@@ -373,13 +373,16 @@ export const faceReadingApi = {
   availability: () =>
     api.get<FaceReadingAvailability>(endpoints.faceReading.availability),
 
-  /** Production 3D MediaPipe + OpenCV facial scanning pipeline */
-  scan: (image: File | Blob | string) => {
+  /** Production 3D MediaPipe + OpenCV facial scanning pipeline with optional Kundli Sync */
+  scan: (image: File | Blob | string, birth_details?: Record<string, any>) => {
     if (typeof image === "string") {
-      return api.post<FaceScanResponse>(endpoints.faceReading.scan, { image });
+      return api.post<FaceScanResponse>(endpoints.faceReading.scan, { image, birth_details });
     }
     const form = new FormData();
     form.append("file", image, image instanceof File ? image.name : "face_capture.jpg");
+    if (birth_details) {
+      form.append("birth_details", JSON.stringify(birth_details));
+    }
     return apiFetch<FaceScanResponse>(endpoints.faceReading.scan, {
       method: "POST",
       body: form,

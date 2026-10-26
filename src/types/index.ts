@@ -316,7 +316,27 @@ export const REVIEW_KIND_LABELS: Record<ReviewKind, string> = {
 };
 
 // ------------------------------------------------------------ face reading
-export type FaceReading = S["FaceReadingOut"];
+export type FaceReading = S["FaceReadingOut"] & {
+  tri_zone_analysis?: TriZoneAnalysis | null;
+  pancha_mahabhuta?: PanchaMahabhuta | null;
+  kundli_sync?: KundliFaceSync | null;
+  forehead_lines_count?: number;
+  forehead_lines_shastra?: {
+    title_bn?: string;
+    title_en?: string;
+    meaning_bn?: string;
+    meaning_en?: string;
+  } | null;
+  forehead_lines_data?: Array<{
+    y_center: number;
+    x_start: number;
+    x_end: number;
+    width_px: number;
+    prominence: number;
+    is_continuous: boolean;
+    planet_name: string;
+  }>;
+};
 export type FaceReadingSection = S["ReadingSectionOut"];
 export type FaceReadingAvailability = S["FaceReadingAvailability"];
 export type FaceRule = S["RuleOut"];
@@ -351,6 +371,99 @@ export type MeasurementDetail = {
   status: string;
 };
 
+export type TriZoneEraDetail = {
+  era_name: string;
+  era_name_bn?: string;
+  age_span: string;
+  score_pct: number;
+  rulers: string;
+  deity?: string;
+  forecast_en: string;
+  forecast_bn?: string;
+};
+
+export type TriZoneAnalysis = {
+  upper_pct: number;
+  middle_pct: number;
+  lower_pct: number;
+  ratio_str: string;
+  status: "balanced" | "upper_dominant" | "middle_dominant" | "lower_dominant";
+  title_en: string;
+  desc_en: string;
+  desc_bn?: string;
+  desc_hi?: string;
+  eras: TriZoneEraDetail[];
+};
+
+export type PanchaMahabhuta = {
+  dominant_element: string;
+  element_bn?: string;
+  element_hi?: string;
+  mahapurusha: string;
+  mahapurusha_bn?: string;
+  traits_en: string;
+  traits_bn?: string;
+  traits_hi?: string;
+  scores: Record<string, number>;
+};
+
+export type HouseZoneCorrelation = {
+  house: number;
+  house_name: string;
+  house_name_bn?: string;
+  house_name_hi?: string;
+  face_part: string;
+  face_part_bn?: string;
+  face_part_hi?: string;
+  planets_occupying?: string;
+  significance_en: string;
+  significance_bn?: string;
+  status_note_en?: string;
+  status_note_bn?: string;
+};
+
+export type KundliFaceSync = {
+  sync_available: boolean;
+  message?: string;
+  ascendant_sign: string;
+  ascendant_sign_bn?: string;
+  ascendant_sign_hi?: string;
+  ascendant_lord: string;
+  physiognomy_traits: Record<string, any>;
+  first_house_conjunction?: {
+    title_en: string;
+    title_bn?: string;
+    title_hi?: string;
+    meaning_en: string;
+    meaning_bn?: string;
+    meaning_hi?: string;
+  } | null;
+  house_correlations: HouseZoneCorrelation[];
+  kalpurush_highlight?: {
+    nakshatra: string;
+    lord: string;
+    body_part_en: string;
+    body_part_bn?: string;
+    explanation_en: string;
+    explanation_bn?: string;
+  } | null;
+  til_masaka: Array<{
+    planet: string;
+    type_en: string;
+    type_bn?: string;
+    zone_en: string;
+    zone_bn?: string;
+    body_correlation_en: string;
+    body_correlation_bn?: string;
+  }>;
+  remedies: Array<{
+    category: string;
+    upaya_en: string;
+    upaya_bn?: string;
+    gemstone?: string;
+  }>;
+};
+
 export type FaceScanResponse = {
   scan_id: string;
   status: "ACCEPTED" | "RETAKE_RECOMMENDED" | "REJECTED";
@@ -379,6 +492,9 @@ export type FaceScanResponse = {
     meaning_bn?: string;
     meaning_en?: string;
   };
+  tri_zone_analysis?: TriZoneAnalysis | null;
+  pancha_mahabhuta?: PanchaMahabhuta | null;
+  kundli_sync?: KundliFaceSync | null;
   landmark_mapping_version: string;
   model_version: string;
   processing_duration_ms: number;
