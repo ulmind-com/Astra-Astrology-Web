@@ -22,6 +22,12 @@ import {
   HeartHandshake,
   Layers,
   Flame,
+  Activity,
+  Zap,
+  TrendingUp,
+  AlertCircle,
+  Gem,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -29,10 +35,8 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { astrologyApi } from "@/lib/api";
 import { LocationPickerModal } from "@/components/astrology/location-picker-modal";
 import { KPChartViewer } from "@/components/astrology/kp-chart-viewer";
-import {
-  KP_PLANET_NAMES,
-  KP_LOCALIZED_DASHA_INSIGHTS,
-} from "@/lib/kp-translations";
+import { KP_PLANET_NAMES } from "@/lib/kp-translations";
+import { DASHA_I18N, type DashaTranslations } from "@/lib/dasha-translations";
 import { useAuth } from "@/providers/auth-provider";
 import { useProfile } from "@/hooks/use-profile";
 import { useFeaturePricing } from "@/hooks/use-feature-pricing";
@@ -47,11 +51,12 @@ import type {
   KPCalculatePayload,
   KPCalculateResult,
   KPDashaPeriod,
+  PersonalizedDashaPhalaItem,
+  YoginiPeriodItem,
   UserProfile,
   UserPublic,
 } from "@/types";
 
-// Planet abbreviations and icons matching AppliedJyotish screenshot
 const PLANET_PILLS: Array<{
   key: string;
   code: string;
@@ -61,45 +66,33 @@ const PLANET_PILLS: Array<{
   color: string;
   bgClass: string;
 }> = [
-  { key: "Asc", code: "Asc", nameEn: "Ascendant", nameBn: "লগ্ন", nameHi: "लग्न", color: "#eab308", bgClass: "bg-brand-100 border-brand-400 text-brand-900" },
   { key: "Sun", code: "Su", nameEn: "Sun", nameBn: "সূর্য", nameHi: "सूर्य", color: "#f97316", bgClass: "bg-orange-100 border-orange-400 text-orange-900" },
-  { key: "Moon", code: "Mo", nameEn: "Moon", nameBn: "চন্দ্র", nameHi: "चंद्र", color: "#64748b", bgClass: "bg-surface-muted border-border-strong text-ink-950" },
-  { key: "Mercury", code: "Me", nameEn: "Mercury", nameBn: "বুধ", nameHi: "बुध", color: "#10b981", bgClass: "bg-emerald-100 border-emerald-400 text-emerald-900" },
-  { key: "Venus", code: "Ve", nameEn: "Venus", nameBn: "শুক্র", nameHi: "शुक्र", color: "#eab308", bgClass: "bg-yellow-100 border-yellow-400 text-yellow-900" },
+  { key: "Moon", code: "Mo", nameEn: "Moon", nameBn: "চন্দ্র", nameHi: "चंद्र", color: "#64748b", bgClass: "bg-slate-100 border-slate-400 text-slate-900" },
   { key: "Mars", code: "Ma", nameEn: "Mars", nameBn: "মঙ্গল", nameHi: "मंगल", color: "#ef4444", bgClass: "bg-red-100 border-red-400 text-red-900" },
-  { key: "Jupiter", code: "Ju", nameEn: "Jupiter", nameBn: "বৃহস্পতি", nameHi: "बृहस्पति", color: "#f59e0b", bgClass: "bg-brand-100 border-brand-400 text-brand-900" },
-  { key: "Saturn", code: "Sa", nameEn: "Saturn", nameBn: "শনি", nameHi: "शनि", color: "#8b5cf6", bgClass: "bg-purple-100 border-purple-400 text-purple-900" },
   { key: "Rahu", code: "Ra", nameEn: "Rahu", nameBn: "রাহু", nameHi: "राहु", color: "#6366f1", bgClass: "bg-indigo-100 border-indigo-400 text-indigo-900" },
-  { key: "Ketu", code: "Ke", nameEn: "Ketu", nameBn: "কেতু", nameHi: "केतु", color: "#d97706", bgClass: "bg-surface-muted border-border-strong text-ink-950" },
+  { key: "Jupiter", code: "Ju", nameEn: "Jupiter", nameBn: "বৃহস্পতি", nameHi: "बृहस्पति", color: "#f59e0b", bgClass: "bg-amber-100 border-amber-400 text-amber-900" },
+  { key: "Saturn", code: "Sa", nameEn: "Saturn", nameBn: "শনি", nameHi: "शनि", color: "#8b5cf6", bgClass: "bg-purple-100 border-purple-400 text-purple-900" },
+  { key: "Mercury", code: "Me", nameEn: "Mercury", nameBn: "বুধ", nameHi: "बुध", color: "#10b981", bgClass: "bg-emerald-100 border-emerald-400 text-emerald-900" },
+  { key: "Ketu", code: "Ke", nameEn: "Ketu", nameBn: "কেতু", nameHi: "केतु", color: "#d97706", bgClass: "bg-amber-100 border-amber-600 text-amber-950" },
+  { key: "Venus", code: "Ve", nameEn: "Venus", nameBn: "শুক্র", nameHi: "शुक्र", color: "#ec4899", bgClass: "bg-pink-100 border-pink-400 text-pink-900" },
 ];
 
-// Helper to format date strings to DD-MM-YYYY
-function formatDateDisplay(dStr: string): string {
+function formatDateDisplay(dStr?: string): string {
   if (!dStr) return "—";
   if (dStr.includes("-")) {
     const parts = dStr.split("-");
-    if (parts[0].length === 4) {
-      // YYYY-MM-DD -> DD-MM-YYYY
-      return `${parts[2]}-${parts[1]}-${parts[0]}`;
-    }
+    if (parts[0].length === 4) return `${parts[2]}-${parts[1]}-${parts[0]}`;
     return dStr;
-  }
-  if (dStr.includes("/")) {
-    const parts = dStr.split("/");
-    if (parts[2]?.length === 4) {
-      return `${parts[0].padStart(2, "0")}-${parts[1].padStart(2, "0")}-${parts[2]}`;
-    }
   }
   return dStr;
 }
 
-// Decorative Gold Diamond Divider matching Screenshots
 function GoldDiamondDivider() {
   return (
-    <div className="relative flex items-center justify-center my-4">
-      <div className="h-[2px] w-48 sm:w-64 bg-gradient-to-r from-transparent via-brand-400 to-transparent relative flex items-center justify-between">
-        <span className="size-2 rotate-45 border-2 border-brand-500 bg-white" />
-        <span className="size-2 rotate-45 border-2 border-brand-500 bg-white" />
+    <div className="relative flex items-center justify-center my-3">
+      <div className="h-[2px] w-48 sm:w-64 bg-gradient-to-r from-transparent via-amber-400 to-transparent relative flex items-center justify-between">
+        <span className="size-2 rotate-45 border-2 border-amber-500 bg-white" />
+        <span className="size-2 rotate-45 border-2 border-amber-500 bg-white" />
       </div>
     </div>
   );
@@ -115,23 +108,23 @@ export default function DashaCalculatorPage() {
 
   // Language state
   const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
+  const ui = DASHA_I18N[language] || DASHA_I18N.en;
+
+  // Active Tab
+  const [activeTab, setActiveTab] = React.useState<
+    "radar" | "tree" | "yogini" | "phala" | "transit" | "timeline"
+  >("radar");
 
   // Form State
   const [name, setName] = React.useState("");
   const [gender, setGender] = React.useState<"male" | "female" | "other">("male");
-
-  // Mandatory DOB (DD-MM-YYYY)
   const [day, setDay] = React.useState("");
   const [month, setMonth] = React.useState("");
   const [year, setYear] = React.useState("");
-
-  // Optional Time (HH:MM:SS AM/PM)
   const [hour, setHour] = React.useState("");
   const [minute, setMinute] = React.useState("");
   const [second, setSecond] = React.useState("");
   const [period, setPeriod] = React.useState<"AM" | "PM">("PM");
-
-  // Place & Coordinates
   const [place, setPlace] = React.useState("");
   const [latitude, setLatitude] = React.useState<number | null>(null);
   const [longitude, setLongitude] = React.useState<number | null>(null);
@@ -144,18 +137,20 @@ export default function DashaCalculatorPage() {
   const [loading, setLoading] = React.useState(false);
   const [result, setResult] = React.useState<KPCalculateResult | null>(null);
 
-  // Stepper Drilldown States: 1 = Mahadasha, 2 = Antar Dasha, 3 = Pratyantar Dasha
-  const [activeStep, setActiveStep] = React.useState<1 | 2 | 3>(1);
+  // Stepper Drilldown States for Vimshottari Tree (1 = MD, 2 = AD, 3 = PD)
+  const [activeTreeStep, setActiveTreeStep] = React.useState<1 | 2 | 3>(1);
   const [selectedMD, setSelectedMD] = React.useState<KPDashaPeriod | null>(null);
   const [selectedAD, setSelectedAD] = React.useState<KPDashaPeriod | null>(null);
 
-  // Active Planet Insights Pill
-  const [selectedPlanetInsight, setSelectedPlanetInsight] = React.useState<string>("Venus");
+  // Yogini active selection
+  const [selectedYogini, setSelectedYogini] = React.useState<YoginiPeriodItem | null>(null);
+
+  // Active Planet Phala selection
+  const [selectedPhalaPlanet, setSelectedPhalaPlanet] = React.useState<string>("Jupiter");
 
   const resultsRef = React.useRef<HTMLDivElement>(null);
   const hasAutoFilled = React.useRef(false);
 
-  // Focus navigation refs
   const dayRef = React.useRef<HTMLInputElement>(null);
   const monthRef = React.useRef<HTMLInputElement>(null);
   const yearRef = React.useRef<HTMLInputElement>(null);
@@ -163,7 +158,7 @@ export default function DashaCalculatorPage() {
   const minuteRef = React.useRef<HTMLInputElement>(null);
   const secondRef = React.useRef<HTMLInputElement>(null);
 
-  // Helper: auto-fill from logged-in user profile
+  // Auto-fill from profile
   const populateFromProfileData = React.useCallback(
     (p: UserProfile, u?: UserPublic | null) => {
       const fullName =
@@ -227,17 +222,13 @@ export default function DashaCalculatorPage() {
           }
         }
 
-        const placeName = b.place || [b.city, b.state, b.country].filter(Boolean).join(", ");
-        if (placeName) {
-          setPlace(placeName);
-        }
+        const placeName = b.place || b.city || [b.city, b.state, b.country].filter(Boolean).join(", ");
+        if (placeName) setPlace(placeName);
         if (b.latitude != null && b.longitude != null) {
           setLatitude(Number(b.latitude));
           setLongitude(Number(b.longitude));
         }
-        if (b.timezone != null) {
-          setTimezone(String(b.timezone));
-        }
+        if (b.timezone != null) setTimezone(String(b.timezone));
       }
     },
     [],
@@ -250,7 +241,6 @@ export default function DashaCalculatorPage() {
     }
   }, [profile, user, populateFromProfileData]);
 
-  // Form Reset
   const handleReset = () => {
     setName("");
     setGender("male");
@@ -266,94 +256,13 @@ export default function DashaCalculatorPage() {
     setLongitude(null);
     setTimezone("5.5");
     setResult(null);
-    setActiveStep(1);
+    setActiveTreeStep(1);
     setSelectedMD(null);
     setSelectedAD(null);
-    toast.info(
-      language === "bn"
-        ? "ফর্ম খালি করা হয়েছে।"
-        : language === "hi"
-        ? "फ़ॉर्म साफ़ कर दिया गया है।"
-        : "Form cleared.",
-    );
+    setSelectedYogini(null);
+    toast.info(language === "bn" ? "ফর্ম রিসেট করা হয়েছে।" : "Form cleared.");
   };
 
-  // Re-sync with Profile
-  const handleReloadFromProfile = () => {
-    if (profile) {
-      populateFromProfileData(profile, user);
-      toast.success(
-        language === "bn"
-          ? "প্রোফাইল থেকে তথ্য পুনরায় লোড করা হয়েছে।"
-          : language === "hi"
-          ? "प्रोफ़ाइल से विवरण पुनः लोड किया गया।"
-          : "Loaded details from your profile.",
-      );
-    }
-  };
-
-  // Navigation keydowns
-  const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    prevRef?: React.RefObject<HTMLInputElement | null>,
-  ) => {
-    if (e.key === "Backspace" && (e.target as HTMLInputElement).value === "" && prevRef?.current) {
-      prevRef.current.focus();
-    }
-  };
-
-  const handleDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value.replace(/\D/g, "");
-    if (val.length > 2) val = val.slice(0, 2);
-    const num = parseInt(val, 10);
-    if (!isNaN(num) && num > 31) val = "31";
-    setDay(val);
-    if (val.length === 2 && monthRef.current) monthRef.current.focus();
-  };
-
-  const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value.replace(/\D/g, "");
-    if (val.length > 2) val = val.slice(0, 2);
-    const num = parseInt(val, 10);
-    if (!isNaN(num) && num > 12) val = "12";
-    setMonth(val);
-    if (val.length === 2 && yearRef.current) yearRef.current.focus();
-  };
-
-  const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value.replace(/\D/g, "");
-    if (val.length > 4) val = val.slice(0, 4);
-    setYear(val);
-    if (val.length === 4 && hourRef.current) hourRef.current.focus();
-  };
-
-  const handleHourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value.replace(/\D/g, "");
-    if (val.length > 2) val = val.slice(0, 2);
-    const num = parseInt(val, 10);
-    if (!isNaN(num) && num > 12) val = "12";
-    setHour(val);
-    if (val.length === 2 && minuteRef.current) minuteRef.current.focus();
-  };
-
-  const handleMinuteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value.replace(/\D/g, "");
-    if (val.length > 2) val = val.slice(0, 2);
-    const num = parseInt(val, 10);
-    if (!isNaN(num) && num > 59) val = "59";
-    setMinute(val);
-    if (val.length === 2 && secondRef.current) secondRef.current.focus();
-  };
-
-  const handleSecondChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value.replace(/\D/g, "");
-    if (val.length > 2) val = val.slice(0, 2);
-    const num = parseInt(val, 10);
-    if (!isNaN(num) && num > 59) val = "59";
-    setSecond(val);
-  };
-
-  // Submit & Calculate
   const handleCalculate = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -362,35 +271,17 @@ export default function DashaCalculatorPage() {
     const y = parseInt(year, 10);
 
     if (!day || isNaN(d) || d < 1 || d > 31) {
-      toast.error(
-        language === "bn"
-          ? "সঠিক জন্ম দিন (১-৩১) লিখুন।"
-          : language === "hi"
-          ? "मान्य जन्म दिन (1-31) दर्ज करें।"
-          : "Enter a valid birth day (1-31).",
-      );
+      toast.error(language === "bn" ? "সঠিক জন্ম দিন (১-৩১) লিখুন।" : "Enter a valid birth day (1-31).");
       dayRef.current?.focus();
       return;
     }
     if (!month || isNaN(m) || m < 1 || m > 12) {
-      toast.error(
-        language === "bn"
-          ? "সঠিক জন্ম মাস (১-১২) লিখুন।"
-          : language === "hi"
-          ? "मान्य जन्म माह (1-12) दर्ज करें।"
-          : "Enter a valid birth month (1-12).",
-      );
+      toast.error(language === "bn" ? "সঠিক জন্ম মাস (১-১২) লিখুন।" : "Enter a valid birth month (1-12).");
       monthRef.current?.focus();
       return;
     }
     if (!year || isNaN(y) || y < 1800 || y > 2100) {
-      toast.error(
-        language === "bn"
-          ? "সঠিক জন্ম বছর (১৮০০-২১০০) লিখুন।"
-          : language === "hi"
-          ? "मान्य जन्म वर्ष (1800-2100) दर्ज करें।"
-          : "Enter a valid 4-digit birth year (1800-2100).",
-      );
+      toast.error(language === "bn" ? "সঠিক জন্ম বছর লিখুন।" : "Enter a valid 4-digit birth year.");
       yearRef.current?.focus();
       return;
     }
@@ -450,34 +341,24 @@ export default function DashaCalculatorPage() {
       const resp = await astrologyApi.calculateDasha(payload);
       setResult(resp);
 
-      // Auto-set active Mahadasha & Antardasha
-      const currentMD = resp.dashas?.find((d: KPDashaPeriod) => d.is_current) || resp.dashas?.[0];
+      // Auto-set selections
+      const currentMD = resp.dashas?.find((d) => d.is_current) || resp.dashas?.[0];
       if (currentMD) {
         setSelectedMD(currentMD);
-        setSelectedPlanetInsight(currentMD.lord);
-        const currentAD = currentMD.sub_periods?.find((ad: KPDashaPeriod) => ad.is_current) || currentMD.sub_periods?.[0];
-        if (currentAD) {
-          setSelectedAD(currentAD);
-        }
+        setSelectedPhalaPlanet(currentMD.lord);
+        const currentAD = currentMD.sub_periods?.find((ad) => ad.is_current) || currentMD.sub_periods?.[0];
+        if (currentAD) setSelectedAD(currentAD);
       }
-      setActiveStep(1);
+      if (resp.yogini_dasha?.periods) {
+        const curY = resp.yogini_dasha.periods.find((y) => y.is_current) || resp.yogini_dasha.periods[0];
+        setSelectedYogini(curY);
+      }
 
-      if (access.requiredCoins > 0) {
-        toast.success(
-          language === "bn"
-            ? `বিংশোত্তরী দশা গণনা সম্পন্ন হয়েছে! (${access.requiredCoins} কয়েন খরচ হয়েছে)`
-            : `Dasha calculated! (${access.requiredCoins} coins used)`,
-        );
-        refreshWallet();
-      } else {
-        toast.success(
-          language === "bn"
-            ? "বিংশোত্তরী দশা নির্ভুল গণনা সম্পন্ন হয়েছে!"
-            : language === "hi"
-            ? "विंशोत्तरी दशा की सटीक गणना संपन्न!"
-            : "Vimshottari Dasha calculated successfully!",
-        );
-      }
+      toast.success(
+        language === "bn"
+          ? "বিংশোত্তরী ও যোগিনী দশা নির্ভুল গণনা সম্পন্ন হয়েছে!"
+          : "Dasha calculated with 100% precision!",
+      );
 
       setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -491,51 +372,34 @@ export default function DashaCalculatorPage() {
         setCoinModalReason("unauthorized");
         setCoinModalOpen(true);
       } else {
-        toast.error(
-          err?.message ||
-            (language === "bn"
-              ? "দশা নির্ণয়ে সমস্যা হয়েছে। আবার চেষ্টা করুন।"
-              : language === "hi"
-              ? "दशा गणना में त्रुटि हुई। कृपया पुनः प्रयास करें।"
-              : "Failed to calculate Dasha timeline."),
-        );
+        toast.error(err?.message || "Failed to calculate Dasha timeline.");
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // Find Current Mahadasha, Antardasha, and Pratyantardasha
-  const currentMahadasha = React.useMemo(() => {
-    return result?.dashas?.find((d) => d.is_current) || result?.dashas?.[0];
-  }, [result]);
+  const runningSnapshot = result?.current_running_dasha;
+  const sandhiInfo = result?.dasha_sandhi_chidra;
+  const transitSynergy = result?.dasha_transit_synergy;
+  const yoginiSys = result?.yogini_dasha;
+  const phalaList = result?.personalized_dasha_phala || [];
+  const timelineSegments = result?.dasha_life_timeline || [];
 
-  const currentAntardasha = React.useMemo(() => {
-    if (!currentMahadasha?.sub_periods) return null;
-    return currentMahadasha.sub_periods.find((ad) => ad.is_current) || currentMahadasha.sub_periods[0];
-  }, [currentMahadasha]);
-
-  const currentPratyantardasha = React.useMemo(() => {
-    if (!currentAntardasha?.sub_periods) return null;
-    return currentAntardasha.sub_periods.find((pad) => pad.is_current) || currentAntardasha.sub_periods[0];
-  }, [currentAntardasha]);
-
-  // Active insight for selected planet
-  const activeInsight = React.useMemo(() => {
-    const localized = KP_LOCALIZED_DASHA_INSIGHTS[selectedPlanetInsight] || KP_LOCALIZED_DASHA_INSIGHTS["Venus"];
-    return localized?.[language] || localized?.en;
-  }, [selectedPlanetInsight, language]);
+  const selectedPhalaItem = React.useMemo(() => {
+    return phalaList.find((p) => p.planet === selectedPhalaPlanet) || phalaList[0];
+  }, [phalaList, selectedPhalaPlanet]);
 
   return (
-    <div className="min-h-screen bg-background/60 text-foreground flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50/70 text-slate-900 flex flex-col font-sans">
       <SiteHeader />
 
       {/* Hero Header */}
-      <div className="relative border-b border-brand-200/50 bg-gradient-to-b from-brand-500/10 via-brand-50/30 to-background py-8 sm:py-12">
+      <div className="relative border-b border-amber-200/60 bg-gradient-to-b from-amber-500/10 via-amber-50/40 to-background py-8 sm:py-12">
         <div className="mx-auto max-w-6xl px-4 text-center">
           {/* Language Switcher Bar */}
-          <div className="flex items-center justify-center gap-1.5 mb-6">
-            <span className="text-xs font-semibold text-muted-foreground mr-1">
+          <div className="flex items-center justify-center gap-1.5 mb-5">
+            <span className="text-xs font-semibold text-slate-500 mr-1">
               {language === "bn" ? "ভাষা:" : language === "hi" ? "भाषा:" : "Language:"}
             </span>
             {(
@@ -551,8 +415,8 @@ export default function DashaCalculatorPage() {
                 onClick={() => setLanguage(lang.code)}
                 className={`rounded-full px-3 py-1 text-xs font-bold transition-all ${
                   language === lang.code
-                    ? "bg-brand-400 text-ink-950 shadow-xs"
-                    : "bg-surface border border-border/80 text-muted-foreground hover:text-foreground"
+                    ? "bg-amber-500 text-white shadow-xs"
+                    : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900"
                 }`}
               >
                 {lang.label}
@@ -560,325 +424,259 @@ export default function DashaCalculatorPage() {
             ))}
           </div>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-4 py-1.5 text-xs font-semibold text-brand-800">
-            <Sparkles className="size-3.5 text-brand-600" />
-            <span>Vimshottari Dasha System (120-Year Vedic Cycle)</span>
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-semibold text-amber-900">
+            <Sparkles className="size-3.5 text-amber-600" />
+            <span>{ui.badgeVimshottari}</span>
           </div>
 
-          <h1 className="mt-4 font-display text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-ink-950">
-            {language === "bn"
-              ? "দশা ক্যালকুলেটর - বিংশোত্তরী মহাদশা ও অন্তর্দশা ফলাফল"
-              : language === "hi"
-              ? "दशा कैलकुलेटर - विंशोत्तरी महादशा एवं अंतर्दशा परिणाम"
-              : "Dasha Calculator - Vimshottari Mahadasha and Antardasha Result"}
+          <h1 className="mt-3.5 font-display text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-950">
+            {ui.titleMain}
           </h1>
 
-          <p className="mx-auto mt-3 max-w-2xl text-sm sm:text-base text-muted-foreground leading-relaxed">
-            {language === "bn"
-              ? "কৃষ্ণমূর্তি ও লাহিড়ী অয়নাংশের সাথে আপনার জন্মকালীন সঠিক বিংশোত্তরী মহাদশা, অন্তর্দশা ও প্রত্যন্তর্দশা সময়রেখা ও প্রতিকার জানুন।"
-              : language === "hi"
-              ? "सटीक अयनांश गणना के साथ अपनी विंशोत्तरी महादशा, अंतर्दशा एवं प्रत्यंतर्दशा की समयसीमा और वैदिक उपाय जानें।"
-              : "Discover your exact active planetary periods (Mahadasha, Antardasha, Pratyantardasha) with 100% astronomical accuracy and authentic Vedic remedies."}
+          <p className="mx-auto mt-3 max-w-3xl text-sm sm:text-base text-slate-600 leading-relaxed">
+            {ui.subtitleMain}
           </p>
 
           <div className="pt-4 flex justify-center">
             <FeatureCoinBadge
               feature={dashaFeature}
-              walletBalance={walletBalance}
+              coins={dashaFeature?.coins ?? 15}
               language={language}
             />
           </div>
         </div>
       </div>
 
-      {/* Main Content Area */}
+      {/* Main Content */}
       <main className="mx-auto max-w-6xl px-4 py-8 flex-1 w-full space-y-10">
         {/* Birth Details Input Form */}
-        <div className="rounded-2xl border border-brand-300/80 bg-white p-5 sm:p-8 shadow-sm">
+        <div className="rounded-2xl border border-amber-300/80 bg-white p-5 sm:p-8 shadow-sm">
           {dashaFeature && !dashaFeature.enabled && (
             <div className="mb-6">
-              <FeatureDisabledAlert
-                featureName={language === "bn" ? "দশা ক্যালকুলেটর" : "Dasha Calculator"}
-                language={language}
-              />
+              <FeatureDisabledAlert featureName={dashaFeature?.name} language={language} />
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border/60">
-            <div>
-              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
-                <Calendar className="size-5 text-brand-600" />
-                {language === "bn"
-                  ? "জন্ম বিবরণ লিখুন"
-                  : language === "hi"
-                  ? "जन्म विवरण दर्ज करें"
-                  : "Enter Birth Details"}
-              </h2>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                {language === "bn"
-                  ? "জন্ম তারিখ বাধ্যতামূলক। জন্ম সময় জানা না থাকলে দুপুর ১২:০০ স্বয়ংক্রিয়ভাবে নেওয়া হবে।"
-                  : language === "hi"
-                  ? "जन्म तिथि अनिवार्य है। यदि समय ज्ञात न हो तो 12:00 PM लिया जाएगा।"
-                  : "Birth date is mandatory. Time is optional (defaults to 12:00 PM if omitted)."}
-              </p>
-            </div>
-
-            {isSignedIn && (
-              <button
-                type="button"
-                onClick={handleReloadFromProfile}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-700 hover:text-brand-800 bg-brand-50 border border-brand-300/60 rounded-xl px-3 py-2 transition-colors self-start sm:self-auto"
-              >
-                <RefreshCw className="size-3.5" />
-                {language === "bn" ? "প্রোফাইল থেকে লোড করুন" : language === "hi" ? "प्रोफ़ाइल से लोड करें" : "Sync Profile"}
-              </button>
-            )}
-          </div>
-
-          <form onSubmit={handleCalculate} className="mt-6 space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {/* Name */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground">
-                  {language === "bn" ? "নাম" : language === "hi" ? "पूरा नाम" : "Full Name"}
+          <form onSubmit={handleCalculate} className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                  {language === "bn" ? "পূর্ণ নাম" : "Full Name"}
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder={language === "bn" ? "আপনার নাম" : language === "hi" ? "अपना नाम" : "Your Name"}
-                    className="w-full rounded-xl border border-input bg-surface pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    placeholder={language === "bn" ? "আপনার নাম" : "Your Name"}
+                    className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm focus:border-amber-500 focus:outline-none"
                   />
                 </div>
               </div>
 
-              {/* Gender */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground">
-                  {language === "bn" ? "লিঙ্গ" : language === "hi" ? "लिंग" : "Gender"}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                  {language === "bn" ? "লিঙ্গ" : "Gender"}
                 </label>
-                <div className="grid grid-cols-3 gap-1 rounded-xl bg-surface-muted p-1 border border-input">
+                <div className="grid grid-cols-3 gap-2">
                   {(["male", "female", "other"] as const).map((g) => (
                     <button
                       key={g}
                       type="button"
                       onClick={() => setGender(g)}
-                      className={`rounded-lg py-1.5 text-xs font-bold capitalize transition-all ${
+                      className={`rounded-xl py-2.5 text-xs font-bold capitalize transition-all border ${
                         gender === g
-                          ? "bg-brand-400 text-ink-950 shadow-xs"
-                          : "text-muted-foreground hover:text-foreground"
+                          ? "bg-amber-500 text-white border-amber-500 shadow-xs"
+                          : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
                       }`}
                     >
                       {g === "male"
-                        ? language === "bn"
-                          ? "পুরুষ"
-                          : language === "hi"
-                          ? "पुरुष"
-                          : "Male"
+                        ? language === "bn" ? "পুরুষ" : "Male"
                         : g === "female"
-                        ? language === "bn"
-                          ? "মহিলা"
-                          : language === "hi"
-                          ? "महिला"
-                          : "Female"
-                        : language === "bn"
-                        ? "অন্যান্য"
-                        : language === "hi"
-                        ? "अन्य"
-                        : "Other"}
+                        ? language === "bn" ? "মহিলা" : "Female"
+                        : language === "bn" ? "অন্যান্য" : "Other"}
                     </button>
                   ))}
                 </div>
               </div>
+            </div>
 
-              {/* Date of Birth (DD-MM-YYYY) */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground flex items-center justify-between">
-                  <span>
-                    {language === "bn" ? "জন্ম তারিখ *" : language === "hi" ? "जन्म तिथि *" : "Date of Birth *"}
-                  </span>
-                  <span className="text-[11px] font-normal text-brand-700">
-                    DD - MM - YYYY
-                  </span>
+            {/* Birth Date & Time */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* DOB */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                  <Calendar className="inline-block size-3.5 mr-1 text-amber-600" />
+                  <span>{language === "bn" ? "জন্ম তারিখ (দিন - মাস - বছর) *" : "Date of Birth (DD - MM - YYYY) *"}</span>
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   <input
                     ref={dayRef}
                     type="text"
-                    inputMode="numeric"
-                    placeholder="DD"
                     value={day}
-                    onChange={handleDayChange}
-                    className="w-full rounded-xl border border-input bg-surface px-2 py-2 text-center text-sm font-semibold tracking-wider focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/\D/g, "").slice(0, 2);
+                      setDay(v);
+                      if (v.length === 2) monthRef.current?.focus();
+                    }}
+                    placeholder="DD"
+                    maxLength={2}
+                    className="w-full text-center rounded-xl border border-slate-200 py-2.5 text-sm font-semibold focus:border-amber-500 focus:outline-none"
                   />
                   <input
                     ref={monthRef}
                     type="text"
-                    inputMode="numeric"
-                    placeholder="MM"
                     value={month}
-                    onChange={handleMonthChange}
-                    onKeyDown={(e) => handleKeyDown(e, dayRef)}
-                    className="w-full rounded-xl border border-input bg-surface px-2 py-2 text-center text-sm font-semibold tracking-wider focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/\D/g, "").slice(0, 2);
+                      setMonth(v);
+                      if (v.length === 2) yearRef.current?.focus();
+                    }}
+                    placeholder="MM"
+                    maxLength={2}
+                    className="w-full text-center rounded-xl border border-slate-200 py-2.5 text-sm font-semibold focus:border-amber-500 focus:outline-none"
                   />
                   <input
                     ref={yearRef}
                     type="text"
-                    inputMode="numeric"
-                    placeholder="YYYY"
                     value={year}
-                    onChange={handleYearChange}
-                    onKeyDown={(e) => handleKeyDown(e, monthRef)}
-                    className="w-full rounded-xl border border-input bg-surface px-2 py-2 text-center text-sm font-semibold tracking-wider focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/\D/g, "").slice(0, 4);
+                      setYear(v);
+                      if (v.length === 4) hourRef.current?.focus();
+                    }}
+                    placeholder="YYYY"
+                    maxLength={4}
+                    className="w-full text-center rounded-xl border border-slate-200 py-2.5 text-sm font-semibold focus:border-amber-500 focus:outline-none"
                   />
                 </div>
               </div>
 
-              {/* Time of Birth */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground flex items-center justify-between">
-                  <span>
-                    {language === "bn" ? "জন্ম সময়" : language === "hi" ? "जन्म समय" : "Time of Birth"}
-                    <span className="text-[11px] font-semibold text-emerald-700 ml-1.5">
-                      ({language === "bn" ? "ঐচ্ছিক — না দিলে ১২:০০ PM" : language === "hi" ? "वैकल्पिक — 12:00 PM" : "Optional — 12:00 PM"})
-                    </span>
-                  </span>
-                  <span className="text-[11px] font-normal text-muted-foreground">
-                    HH : MM : SS
-                  </span>
+              {/* TOB */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                  <Clock className="inline-block size-3.5 mr-1 text-amber-600" />
+                  <span>{language === "bn" ? "জন্ম সময় (ঘণ্টা : মিনিট : সেকেন্ড)" : "Time of Birth (HH : MM : SS)"}</span>
                 </label>
-                <div className="grid grid-cols-4 gap-1.5">
+                <div className="grid grid-cols-4 gap-2">
                   <input
                     ref={hourRef}
                     type="text"
-                    inputMode="numeric"
-                    placeholder="12"
                     value={hour}
-                    onChange={handleHourChange}
-                    className="w-full rounded-xl border border-input bg-surface px-1 py-2 text-center text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/\D/g, "").slice(0, 2);
+                      setHour(v);
+                      if (v.length === 2) minuteRef.current?.focus();
+                    }}
+                    placeholder="HH"
+                    maxLength={2}
+                    className="w-full text-center rounded-xl border border-slate-200 py-2.5 text-sm font-semibold focus:border-amber-500 focus:outline-none"
                   />
                   <input
                     ref={minuteRef}
                     type="text"
-                    inputMode="numeric"
-                    placeholder="00"
                     value={minute}
-                    onChange={handleMinuteChange}
-                    onKeyDown={(e) => handleKeyDown(e, hourRef)}
-                    className="w-full rounded-xl border border-input bg-surface px-1 py-2 text-center text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/\D/g, "").slice(0, 2);
+                      setMinute(v);
+                      if (v.length === 2) secondRef.current?.focus();
+                    }}
+                    placeholder="MM"
+                    maxLength={2}
+                    className="w-full text-center rounded-xl border border-slate-200 py-2.5 text-sm font-semibold focus:border-amber-500 focus:outline-none"
                   />
                   <input
                     ref={secondRef}
                     type="text"
-                    inputMode="numeric"
-                    placeholder="00"
                     value={second}
-                    onChange={handleSecondChange}
-                    onKeyDown={(e) => handleKeyDown(e, minuteRef)}
-                    className="w-full rounded-xl border border-input bg-surface px-1 py-2 text-center text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    onChange={(e) => setSecond(e.target.value.replace(/\D/g, "").slice(0, 2))}
+                    placeholder="SS"
+                    maxLength={2}
+                    className="w-full text-center rounded-xl border border-slate-200 py-2.5 text-sm font-semibold focus:border-amber-500 focus:outline-none"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setPeriod((p) => (p === "AM" ? "PM" : "AM"))}
-                    className="w-full rounded-xl border border-input bg-brand-50 font-bold text-xs text-brand-900 hover:bg-brand-100 transition-colors"
-                  >
-                    {period}
-                  </button>
-                </div>
-              </div>
-
-              {/* Birth Place with Location Picker Modal */}
-              <div className="space-y-1.5 sm:col-span-2">
-                <label className="text-xs font-bold text-foreground flex items-center justify-between">
-                  <span>
-                    {language === "bn" ? "জন্মস্থান *" : language === "hi" ? "जन्म स्थान *" : "Birth Place *"}
-                  </span>
-                  {latitude !== null && longitude !== null && (
-                    <span className="text-[11px] font-medium text-emerald-600">
-                      ✓ {latitude.toFixed(2)}°, {longitude.toFixed(2)}°
-                    </span>
-                  )}
-                </label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                    <input
-                      type="text"
-                      value={place}
-                      onChange={(e) => setPlace(e.target.value)}
-                      placeholder={
-                        language === "bn"
-                          ? "শহরের নাম লিখুন (যেমন: Kolaghat, Kolkata, Delhi)"
-                          : language === "hi"
-                          ? "शहर का नाम (जैसे: Kolaghat, Kolkata, Delhi)"
-                          : "Search city or town (e.g. Kolaghat, Kolkata, Delhi)"
-                      }
-                      className="w-full rounded-xl border border-input bg-surface pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-                    />
+                  <div className="flex rounded-xl border border-slate-200 overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => setPeriod("AM")}
+                      className={`flex-1 text-xs font-bold py-2.5 ${
+                        period === "AM" ? "bg-amber-500 text-white" : "bg-white text-slate-600"
+                      }`}
+                    >
+                      AM
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPeriod("PM")}
+                      className={`flex-1 text-xs font-bold py-2.5 ${
+                        period === "PM" ? "bg-amber-500 text-white" : "bg-white text-slate-600"
+                      }`}
+                    >
+                      PM
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsMapModalOpen(true)}
-                    className="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-brand-400 bg-brand-50 px-3 py-2 text-xs font-bold text-brand-900 hover:bg-brand-100 transition-colors"
-                  >
-                    <Compass className="size-4 text-brand-600" />
-                    <span className="hidden sm:inline">
-                      {language === "bn" ? "ম্যাপ নির্বাচন" : language === "hi" ? "मानचित्र" : "Map Select"}
-                    </span>
-                  </button>
                 </div>
               </div>
             </div>
 
+            {/* Place */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                <MapPin className="inline-block size-3.5 mr-1 text-amber-600" />
+                <span>{language === "bn" ? "জন্মস্থান *" : "Birth Place *"}</span>
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={place}
+                  onChange={(e) => setPlace(e.target.value)}
+                  placeholder="Kolkata, West Bengal, India"
+                  className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-amber-500 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setIsMapModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-xs font-bold text-amber-800 hover:bg-amber-100 transition-colors"
+                >
+                  <Compass className="size-4" />
+                  <span>{language === "bn" ? "মানচিত্র" : "Map"}</span>
+                </button>
+              </div>
+            </div>
+
             {/* Advance Settings Toggle */}
-            <div className="pt-2">
+            <div className="pt-1">
               <button
                 type="button"
-                onClick={() => setShowAdvance((v) => !v)}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => setShowAdvance(!showAdvance)}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800"
               >
                 <Sliders className="size-3.5" />
-                <span>
-                  {showAdvance
-                    ? language === "bn"
-                      ? "উন্নত সেটিংস লুকান"
-                      : "Hide Advanced Settings"
-                    : language === "bn"
-                    ? "উন্নত সেটিংস (অয়নাংশ ও সময় অঞ্চল)"
-                    : "Advanced Settings (Ayanamsa & Timezone)"}
-                </span>
+                <span>{language === "bn" ? "উন্নত জ্যোতিষ সেটিংস (অয়নাংশ ও স্থানাঙ্ক)" : "Advanced Astro Settings"}</span>
               </button>
 
               {showAdvance && (
-                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-xl border border-border/80 bg-surface-muted/40 p-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-foreground">
-                      {language === "bn" ? "অয়নাংশ পদ্ধতি" : "Ayanamsa System"}
-                    </label>
+                <div className="mt-3 p-4 rounded-xl border border-slate-100 bg-slate-50/70 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Ayanamsa</label>
                     <select
                       value={ayanamsa}
                       onChange={(e) => setAyanamsa(e.target.value as AyanamsaType)}
-                      className="w-full rounded-xl border border-input bg-surface px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      className="w-full rounded-lg border border-slate-200 bg-white p-2 text-xs font-semibold"
                     >
-                      <option value="krishnamurti">Krishnamurti (KP Original)</option>
-                      <option value="lahiri">Lahiri (Chitra Paksha / AppliedJyotish)</option>
-                      <option value="bv_raman">B.V. Raman</option>
-                      <option value="kp_new">KP New Ayanamsa</option>
-                      <option value="yukteshwar">Sri Yukteshwar</option>
+                      <option value="krishnamurti">KP (Krishnamurti Standard)</option>
+                      <option value="lahiri">Lahiri (Chitra Paksha)</option>
+                      <option value="raman">BV Raman</option>
                     </select>
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-foreground">
-                      {language === "bn" ? "সময় অঞ্চল (Timezone Offset)" : "Timezone Offset (Hours)"}
-                    </label>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Timezone</label>
                     <input
                       type="text"
                       value={timezone}
                       onChange={(e) => setTimezone(e.target.value)}
-                      placeholder="+5.5 for IST"
-                      className="w-full rounded-xl border border-input bg-surface px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      placeholder="+5.5"
+                      className="w-full rounded-lg border border-slate-200 bg-white p-2 text-xs"
                     />
                   </div>
                 </div>
@@ -886,52 +684,41 @@ export default function DashaCalculatorPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3">
-              <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={handleReset}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 py-2.5 px-4 rounded-xl hover:bg-slate-100 transition-colors order-2 sm:order-1"
+              >
+                <RotateCcw className="size-3.5" />
+                <span>{ui.resetBtn}</span>
+              </button>
+
+              <div className="flex items-center gap-3 w-full sm:w-auto justify-end order-1 sm:order-2">
+                <FeatureCoinBadge
+                  feature={dashaFeature}
+                  coins={dashaFeature?.coins ?? 15}
+                  language={language}
+                />
+
                 <button
                   type="submit"
                   disabled={loading || (dashaFeature ? !dashaFeature.enabled : false)}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-brand-300 px-8 py-3 text-sm font-bold text-ink-950 shadow-glow hover:bg-brand-400 active:scale-98 transition-all disabled:opacity-50"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   {loading ? (
                     <>
                       <RefreshCw className="size-4 animate-spin" />
-                      <span>{language === "bn" ? "দশা গণনা চলছে..." : "Calculating Dasha..."}</span>
+                      <span>{ui.calculating}</span>
                     </>
                   ) : (
                     <>
                       <Sparkles className="size-4" />
-                      <span>
-                        {dashaFeature && !dashaFeature.enabled
-                          ? language === "bn"
-                            ? "ফিচারটি বন্ধ রয়েছে"
-                            : "Feature Unavailable"
-                          : language === "bn"
-                          ? "বিংশোত্তরী দশা গণনা করুন"
-                          : language === "hi"
-                          ? "विंशोत्तरी दशा की गणना करें"
-                          : "Calculate Vimshottari Dasha"}
-                      </span>
+                      <span>{ui.calculateBtn}</span>
                     </>
                   )}
                 </button>
-
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-input bg-surface px-5 py-3 text-sm font-semibold text-muted-foreground hover:bg-surface-muted hover:text-foreground transition-colors"
-                >
-                  <RotateCcw className="size-4" />
-                  <span>{language === "bn" ? "রিসেট" : "Reset"}</span>
-                </button>
               </div>
-
-              <FeatureCoinBadge
-                feature={dashaFeature}
-                walletBalance={walletBalance}
-                language={language}
-                showWallet={false}
-              />
             </div>
           </form>
         </div>
@@ -946,11 +733,6 @@ export default function DashaCalculatorPage() {
             setLongitude(loc.longitude);
             if (loc.timezone != null) setTimezone(String(loc.timezone));
             setIsMapModalOpen(false);
-            toast.success(
-              language === "bn"
-                ? `স্থান নিশ্চিত করা হয়েছে: ${loc.place}`
-                : `Location set: ${loc.place}`,
-            );
           }}
           currentPlace={place}
           currentLat={latitude}
@@ -959,490 +741,993 @@ export default function DashaCalculatorPage() {
 
         {/* Results Section */}
         {result && (
-          <div ref={resultsRef} className="space-y-12 pt-6">
-            {/* ─────────────────────────────────────────────────────────
-                SECTION 1: Your Details Card (Matching Screenshot 1)
-            ───────────────────────────────────────────────────────── */}
-            <div className="max-w-xl mx-auto rounded-2xl border-2 border-brand-400/90 bg-white p-6 shadow-sm">
-              <h2 className="text-center font-display text-2xl font-bold tracking-tight text-foreground">
-                {language === "bn" ? "আপনার বিবরণ" : language === "hi" ? "आपका विवरण" : "Your Details"}
-              </h2>
-
-              <GoldDiamondDivider />
-
-              <div className="mt-4 space-y-3 px-2 sm:px-6">
-                <div className="flex items-center justify-between text-sm sm:text-base">
-                  <div className="flex items-center gap-2 font-bold text-foreground">
-                    <span className="flex size-4 items-center justify-center rounded-full bg-brand-300 text-ink-950 text-[10px]">
-                      ➔
-                    </span>
-                    <span>{language === "bn" ? "নাম:" : "Name:"}</span>
-                  </div>
-                  <span className="font-semibold text-muted-foreground">
-                    {result.name || name || "Native"}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between text-sm sm:text-base">
-                  <div className="flex items-center gap-2 font-bold text-foreground">
-                    <span className="flex size-4 items-center justify-center rounded-full bg-brand-300 text-ink-950 text-[10px]">
-                      ➔
-                    </span>
-                    <span>{language === "bn" ? "লিঙ্গ:" : "Gender:"}</span>
-                  </div>
-                  <span className="font-semibold text-muted-foreground capitalize">
-                    {result.gender || gender}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between text-sm sm:text-base">
-                  <div className="flex items-center gap-2 font-bold text-foreground">
-                    <span className="flex size-4 items-center justify-center rounded-full bg-brand-300 text-ink-950 text-[10px]">
-                      ➔
-                    </span>
-                    <span>{language === "bn" ? "জন্ম তারিখ:" : "Date of Birth:"}</span>
-                  </div>
-                  <span className="font-semibold text-muted-foreground tabular-nums">
-                    {result.birth_date_formatted || `${day.padStart(2, "0")}/${month.padStart(2, "0")}/${year}`}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between text-sm sm:text-base">
-                  <div className="flex items-center gap-2 font-bold text-foreground">
-                    <span className="flex size-4 items-center justify-center rounded-full bg-brand-300 text-ink-950 text-[10px]">
-                      ➔
-                    </span>
-                    <span>{language === "bn" ? "জন্ম সময়:" : "Time of Birth:"}</span>
-                  </div>
-                  <span className="font-semibold text-muted-foreground tabular-nums">
-                    {result.birth_time_formatted || `${hour.padStart(2, "0")}h:${minute.padStart(2, "0")}m:${second.padStart(2, "0")}s`}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* ─────────────────────────────────────────────────────────
-                SECTION 2: Current Dasha 3 Cards (Matching Screenshot 1)
-            ───────────────────────────────────────────────────────── */}
-            <div className="rounded-2xl border-2 border-brand-300/80 bg-white p-6 sm:p-8 shadow-sm">
-              <div className="text-center">
-                <h3 className="font-display text-2xl font-bold tracking-tight text-brand-900 flex items-center justify-center gap-2">
-                  <Calendar className="size-6 text-brand-700" />
-                  <span>{language === "bn" ? "বর্তমান দশা" : language === "hi" ? "वर्तमान दशा" : "Current Dasha"}</span>
+          <div ref={resultsRef} className="space-y-8 pt-4">
+            {/* User Profile Header Card */}
+            <div className="rounded-2xl border-2 border-amber-300 bg-white p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700">
+                  {language === "bn" ? "বিশ্লেষিত জন্ম বিবরণ" : "Analyzed Birth Details"}
+                </span>
+                <h3 className="font-display text-2xl font-bold text-slate-900">
+                  {result.name || name || "Native"} ({result.gender})
                 </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  📅 {result.birth_date_formatted} · ⏰ {result.birth_time_formatted} · 📍 {result.birth_place}
+                </p>
               </div>
 
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-5">
-                {/* 1. Mahadasha Card (Blue Border) */}
-                <div className="rounded-xl border-2 border-blue-400 bg-blue-50/20 p-5 shadow-xs flex flex-col justify-between">
-                  <div>
-                    <h4 className="font-display text-base font-bold text-blue-600">
-                      {language === "bn" ? "মহাদশা (Mahadasha)" : "Mahadasha"}
-                    </h4>
-                    <div className="h-px bg-blue-200 my-2.5" />
-                    <div className="flex items-center gap-3 mt-3">
-                      <div className="size-10 rounded-full bg-orange-100 border border-orange-300 flex items-center justify-center text-lg">
-                        🪐
-                      </div>
-                      <div>
-                        <p className="font-display text-lg font-bold text-foreground">
-                          {currentMahadasha?.lord
-                            ? KP_PLANET_NAMES[currentMahadasha.lord]?.[language] || currentMahadasha.lord
-                            : "Venus"}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {language === "bn" ? "প্রধান সময়চক্র" : "Major planetary period"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-blue-100 text-xs text-muted-foreground space-y-1 tabular-nums font-medium">
-                    <p>
-                      <span className="font-semibold text-foreground">Start:</span>{" "}
-                      {formatDateDisplay(currentMahadasha?.start_date || "2025-06-27")}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-foreground">End:</span>{" "}
-                      {formatDateDisplay(currentMahadasha?.end_date || "2045-06-26")}
-                    </p>
-                  </div>
-                </div>
-
-                {/* 2. Antar Dasha Card (Green Border) */}
-                <div className="rounded-xl border-2 border-emerald-500 bg-emerald-50/20 p-5 shadow-xs flex flex-col justify-between">
-                  <div>
-                    <h4 className="font-display text-base font-bold text-emerald-600">
-                      {language === "bn" ? "অন্তর্দশা (Antar Dasha)" : "Antar Dasha"}
-                    </h4>
-                    <div className="h-px bg-emerald-200 my-2.5" />
-                    <div className="flex items-center gap-3 mt-3">
-                      <div className="size-10 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center text-lg">
-                        ✨
-                      </div>
-                      <div>
-                        <p className="font-display text-lg font-bold text-foreground">
-                          {currentAntardasha?.lord
-                            ? KP_PLANET_NAMES[currentAntardasha.lord]?.[language] || currentAntardasha.lord
-                            : "Venus"}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {language === "bn" ? "উপ-পর্যায়" : "Sub-period inside Mahadasha"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-emerald-100 text-xs text-muted-foreground space-y-1 tabular-nums font-medium">
-                    <p>
-                      <span className="font-semibold text-foreground">Start:</span>{" "}
-                      {formatDateDisplay(currentAntardasha?.start_date || "2025-06-27")}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-foreground">End:</span>{" "}
-                      {formatDateDisplay(currentAntardasha?.end_date || "2028-11-01")}
-                    </p>
-                  </div>
-                </div>
-
-                {/* 3. Pratyantar Dasha Card (Gold Border) */}
-                <div className="rounded-xl border-2 border-brand-400 bg-brand-50/20 p-5 shadow-xs flex flex-col justify-between">
-                  <div>
-                    <h4 className="font-display text-base font-bold text-brand-700">
-                      {language === "bn" ? "প্রত্যন্তর্দশা (Pratyantar Dasha)" : "Pratyantar Dasha"}
-                    </h4>
-                    <div className="h-px bg-brand-200 my-2.5" />
-                    <div className="flex items-center gap-3 mt-3">
-                      <div className="size-10 rounded-full bg-indigo-100 border border-indigo-300 flex items-center justify-center text-lg">
-                        🔮
-                      </div>
-                      <div>
-                        <p className="font-display text-lg font-bold text-foreground">
-                          {currentPratyantardasha?.lord
-                            ? KP_PLANET_NAMES[currentPratyantardasha.lord]?.[language] || currentPratyantardasha.lord
-                            : "Rahu"}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {language === "bn" ? "সূক্ষ্ম দশা" : "Current sub-sub period"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-brand-100 text-xs text-muted-foreground space-y-1 tabular-nums font-medium">
-                    <p>
-                      <span className="font-semibold text-foreground">Start:</span>{" "}
-                      {formatDateDisplay(currentPratyantardasha?.start_date || "2026-08-31")}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-foreground">End:</span>{" "}
-                      {formatDateDisplay(currentPratyantardasha?.end_date || "2027-03-02")}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ─────────────────────────────────────────────────────────
-                SECTION 3: Vimshottari Dasha 3-Level Stepper & Interactive Table
-                (Matching Screenshot 2)
-            ───────────────────────────────────────────────────────── */}
-            <div className="rounded-2xl border border-brand-200/80 bg-white p-5 sm:p-8 shadow-sm">
-              <div className="text-center">
-                <h3 className="font-display text-2xl font-bold tracking-tight text-foreground">
-                  {language === "bn" ? "বিংশোত্তরী দশা" : language === "hi" ? "विंशोत्तरी दशा" : "Vimshottari Dasha"}
-                </h3>
-                <GoldDiamondDivider />
-
-                {/* 3-Level Stepper */}
-                <div className="mt-6 flex items-center justify-center gap-2 sm:gap-4">
-                  {/* Step 1: Mahadasha */}
-                  <button
-                    type="button"
-                    onClick={() => setActiveStep(1)}
-                    className="inline-flex items-center gap-2 cursor-pointer group"
-                  >
-                    <span
-                      className={`flex size-7 items-center justify-center rounded-full text-xs font-bold transition-all ${
-                        activeStep === 1
-                          ? "bg-brand-300 text-ink-950 shadow-xs"
-                          : "border border-border bg-white text-muted-foreground hover:border-brand-400"
-                      }`}
-                    >
-                      1
-                    </span>
-                    <span
-                      className={`text-xs sm:text-sm font-bold ${
-                        activeStep === 1 ? "text-brand-950" : "text-muted-foreground group-hover:text-foreground"
-                      }`}
-                    >
-                      {language === "bn" ? "মহাদশা" : "Mahadasha"}
-                    </span>
-                  </button>
-
-                  <div className="h-0.5 w-6 sm:w-12 bg-border-strong" />
-
-                  {/* Step 2: Antar Dasha */}
-                  <button
-                    type="button"
-                    onClick={() => selectedMD && setActiveStep(2)}
-                    disabled={!selectedMD}
-                    className="inline-flex items-center gap-2 cursor-pointer group disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <span
-                      className={`flex size-7 items-center justify-center rounded-full text-xs font-bold transition-all ${
-                        activeStep === 2
-                          ? "bg-brand-300 text-ink-950 shadow-xs"
-                          : "border border-border bg-white text-muted-foreground hover:border-brand-400"
-                      }`}
-                    >
-                      2
-                    </span>
-                    <span
-                      className={`text-xs sm:text-sm font-bold ${
-                        activeStep === 2 ? "text-brand-950" : "text-muted-foreground group-hover:text-foreground"
-                      }`}
-                    >
-                      {language === "bn" ? "অন্তর্দশা" : "Antar Dasha"}
-                    </span>
-                  </button>
-
-                  <div className="h-0.5 w-6 sm:w-12 bg-border-strong" />
-
-                  {/* Step 3: Pratyantar Dasha */}
-                  <button
-                    type="button"
-                    onClick={() => selectedAD && setActiveStep(3)}
-                    disabled={!selectedAD}
-                    className="inline-flex items-center gap-2 cursor-pointer group disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <span
-                      className={`flex size-7 items-center justify-center rounded-full text-xs font-bold transition-all ${
-                        activeStep === 3
-                          ? "bg-brand-300 text-ink-950 shadow-xs"
-                          : "border border-border bg-white text-muted-foreground hover:border-brand-400"
-                      }`}
-                    >
-                      3
-                    </span>
-                    <span
-                      className={`text-xs sm:text-sm font-bold ${
-                        activeStep === 3 ? "text-brand-950" : "text-muted-foreground group-hover:text-foreground"
-                      }`}
-                    >
-                      {language === "bn" ? "প্রত্যন্তর্দশা" : "Pratyantar Dasha"}
-                    </span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Breadcrumb Context indicator */}
-              <div className="mt-6 flex items-center justify-between px-2 text-xs font-semibold text-muted-foreground">
-                <div className="flex items-center gap-1.5">
-                  <span
-                    onClick={() => setActiveStep(1)}
-                    className="hover:underline cursor-pointer text-brand-800"
-                  >
-                    Mahadashas
-                  </span>
-                  {selectedMD && activeStep >= 2 && (
-                    <>
-                      <span>➔</span>
-                      <span
-                        onClick={() => setActiveStep(2)}
-                        className="hover:underline cursor-pointer text-brand-800"
-                      >
-                        {selectedMD.lord}
-                      </span>
-                    </>
-                  )}
-                  {selectedAD && activeStep === 3 && (
-                    <>
-                      <span>➔</span>
-                      <span className="text-foreground">{selectedAD.lord}</span>
-                    </>
-                  )}
-                </div>
-                <span className="text-[11px] text-muted-foreground">
-                  {language === "bn" ? "যেকোনো সারিতে ক্লিক করে বিস্তারিত দেখুন" : "Click any row to drill down"}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-lg bg-amber-100 border border-amber-300 px-3 py-1 text-xs font-bold text-amber-900">
+                  Lagna: {result.panchang.ascendant_sign}
+                </span>
+                <span className="rounded-lg bg-slate-100 border border-slate-300 px-3 py-1 text-xs font-bold text-slate-800">
+                  Moon: {result.panchang.moon_rashi} ({result.panchang.moon_nakshatra})
                 </span>
               </div>
-
-              {/* Interactive Table with Olive Green Header matching Screenshot */}
-              <div className="mt-3 overflow-x-auto rounded-xl border border-border">
-                <table className="w-full border-collapse text-left text-sm">
-                  <thead>
-                    <tr className="bg-border-strong text-ink-950 font-bold border-b border-border">
-                      <th className="py-3 px-4 font-bold">
-                        {activeStep === 1
-                          ? language === "bn" ? "মহাদশা" : "Mahadasha"
-                          : activeStep === 2
-                          ? language === "bn" ? "অন্তর্দশা" : "Antar Dasha"
-                          : language === "bn" ? "প্রত্যন্তর্দশা" : "Pratyantar Dasha"}
-                      </th>
-                      <th className="py-3 px-4 font-bold text-center">
-                        {language === "bn" ? "শুরুর তারিখ" : "Start Date"}
-                      </th>
-                      <th className="py-3 px-4 font-bold text-center">
-                        {language === "bn" ? "শেষের তারিখ" : "End Date"}
-                      </th>
-                      <th className="py-3 px-4 font-bold text-center">
-                        {language === "bn" ? "স্থায়িত্ব" : "Duration"}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border bg-white">
-                    {/* Render Level 1: 9 Mahadashas */}
-                    {activeStep === 1 &&
-                      result.dashas?.map((md, idx) => {
-                        const isCurrent = md.is_current;
-                        const isSelected = selectedMD?.lord === md.lord;
-                        return (
-                          <tr
-                            key={`md-${md.lord}-${idx}`}
-                            onClick={() => {
-                              setSelectedMD(md);
-                              setActiveStep(2);
-                              setSelectedPlanetInsight(md.lord);
-                            }}
-                            className={`group cursor-pointer transition-colors ${
-                              isCurrent
-                                ? "bg-brand-50/70 font-semibold"
-                                : "hover:bg-brand-50/40"
-                            }`}
-                          >
-                            <td className="py-3.5 px-4">
-                              <div className="flex items-center gap-2.5">
-                                <span className="flex size-4 items-center justify-center rounded-full bg-brand-300 text-ink-950 text-[9px] group-hover:scale-110 transition-transform">
-                                  ➔
-                                </span>
-                                <span className="font-bold text-foreground">
-                                  {KP_PLANET_NAMES[md.lord]?.[language] || md.lord}
-                                </span>
-                                {isCurrent && (
-                                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-300">
-                                    {language === "bn" ? "বর্তমান" : "Current"}
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                            <td className="py-3.5 px-4 text-center tabular-nums text-muted-foreground">
-                              {formatDateDisplay(md.start_date)}
-                            </td>
-                            <td className="py-3.5 px-4 text-center tabular-nums text-muted-foreground">
-                              {formatDateDisplay(md.end_date)}
-                            </td>
-                            <td className="py-3.5 px-4 text-center font-medium text-foreground">
-                              {md.duration}
-                            </td>
-                          </tr>
-                        );
-                      })}
-
-                    {/* Render Level 2: 9 Antardashas for selected Mahadasha */}
-                    {activeStep === 2 &&
-                      selectedMD?.sub_periods?.map((ad, idx) => {
-                        const isCurrent = ad.is_current;
-                        return (
-                          <tr
-                            key={`ad-${ad.lord}-${idx}`}
-                            onClick={() => {
-                              setSelectedAD(ad);
-                              setActiveStep(3);
-                              setSelectedPlanetInsight(ad.lord);
-                            }}
-                            className={`group cursor-pointer transition-colors ${
-                              isCurrent
-                                ? "bg-emerald-50/70 font-semibold"
-                                : "hover:bg-brand-50/40"
-                            }`}
-                          >
-                            <td className="py-3.5 px-4">
-                              <div className="flex items-center gap-2.5">
-                                <span className="flex size-4 items-center justify-center rounded-full bg-emerald-600 text-white text-[9px] group-hover:scale-110 transition-transform">
-                                  ➔
-                                </span>
-                                <span className="font-bold text-foreground">
-                                  {KP_PLANET_NAMES[ad.lord]?.[language] || ad.lord}
-                                </span>
-                                {isCurrent && (
-                                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-300">
-                                    {language === "bn" ? "বর্তমান" : "Current"}
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                            <td className="py-3.5 px-4 text-center tabular-nums text-muted-foreground">
-                              {formatDateDisplay(ad.start_date)}
-                            </td>
-                            <td className="py-3.5 px-4 text-center tabular-nums text-muted-foreground">
-                              {formatDateDisplay(ad.end_date)}
-                            </td>
-                            <td className="py-3.5 px-4 text-center font-medium text-foreground">
-                              {ad.duration}
-                            </td>
-                          </tr>
-                        );
-                      })}
-
-                    {/* Render Level 3: 9 Pratyantardashas for selected Antardasha */}
-                    {activeStep === 3 &&
-                      selectedAD?.sub_periods?.map((pad, idx) => {
-                        const isCurrent = pad.is_current;
-                        return (
-                          <tr
-                            key={`pad-${pad.lord}-${idx}`}
-                            onClick={() => setSelectedPlanetInsight(pad.lord)}
-                            className={`group cursor-pointer transition-colors ${
-                              isCurrent
-                                ? "bg-brand-50/70 font-semibold"
-                                : "hover:bg-brand-50/40"
-                            }`}
-                          >
-                            <td className="py-3.5 px-4">
-                              <div className="flex items-center gap-2.5">
-                                <span className="flex size-4 items-center justify-center rounded-full bg-brand-300 text-ink-950 text-[9px]">
-                                  ➔
-                                </span>
-                                <span className="font-bold text-foreground">
-                                  {KP_PLANET_NAMES[pad.lord]?.[language] || pad.lord}
-                                </span>
-                                {isCurrent && (
-                                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-300">
-                                    {language === "bn" ? "বর্তমান" : "Current"}
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                            <td className="py-3.5 px-4 text-center tabular-nums text-muted-foreground">
-                              {formatDateDisplay(pad.start_date)}
-                            </td>
-                            <td className="py-3.5 px-4 text-center tabular-nums text-muted-foreground">
-                              {formatDateDisplay(pad.end_date)}
-                            </td>
-                            <td className="py-3.5 px-4 text-center font-medium text-foreground">
-                              {pad.duration}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                  </tbody>
-                </table>
-              </div>
             </div>
 
-            {/* ─────────────────────────────────────────────────────────
-                SECTION 4: Choose Rashi Kundli Chart Style (Matching Screenshots 3 & 4)
-            ───────────────────────────────────────────────────────── */}
-            <div className="space-y-4">
-              <div className="text-center">
-                <h3 className="font-display text-2xl font-bold tracking-tight text-foreground">
-                  {language === "bn"
-                    ? "রাশি কুন্ডলী চার্ট শৈলী নির্বাচন করুন"
-                    : language === "hi"
-                    ? "राशि कुंडली चार्ट शैली चुनें"
-                    : "Choose Rashi Kundli Chart Style"}
-                </h3>
-                <GoldDiamondDivider />
-              </div>
+            {/* 6-Tab Navigation Bar */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200">
+              {[
+                { id: "radar", label: ui.tabActiveRadar, icon: Activity },
+                { id: "tree", label: ui.tabVimshottari, icon: Layers },
+                { id: "yogini", label: ui.tabYogini, icon: Zap },
+                { id: "phala", label: ui.tabPhala, icon: TrendingUp },
+                { id: "transit", label: ui.tabTransitSandhi, icon: Compass },
+                { id: "timeline", label: ui.tabTimelineRemedies, icon: Flame },
+              ].map((t) => {
+                const Icon = t.icon;
+                const isActive = activeTab === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setActiveTab(t.id as any)}
+                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
+                      isActive
+                        ? "bg-amber-500 text-white shadow-md shadow-amber-500/20"
+                        : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    }`}
+                  >
+                    <Icon className="size-4" />
+                    <span>{t.label}</span>
+                  </button>
+                );
+              })}
+            </div>
 
+            {/* ════════════════════════════════════════════════════════════
+                TAB 1: LIVE ACTIVE RADAR SNAPSHOT (5-Tier Running Dasha)
+            ════════════════════════════════════════════════════════════ */}
+            {activeTab === "radar" && runningSnapshot && (
+              <div className="space-y-6">
+                <div className="rounded-2xl border-2 border-amber-300 bg-white p-6 shadow-sm space-y-6">
+                  <div className="text-center space-y-1">
+                    <h3 className="font-display text-2xl font-bold text-slate-900 flex items-center justify-center gap-2">
+                      <Activity className="size-6 text-amber-600" />
+                      <span>{ui.activeRadarTitle}</span>
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-500 max-w-2xl mx-auto">
+                      {ui.activeRadarSubtitle}
+                    </p>
+                    <GoldDiamondDivider />
+                  </div>
+
+                  {/* Active Breadcrumb Path */}
+                  <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-4 text-center">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800">
+                      {ui.activePathTitle}
+                    </span>
+                    <p className="font-display text-lg sm:text-2xl font-extrabold text-amber-950 mt-1">
+                      {runningSnapshot.active_path}
+                    </p>
+                  </div>
+
+                  {/* 5 Cards Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                    {/* 1. Mahadasha */}
+                    <div className="rounded-xl border-2 border-blue-400 bg-blue-50/30 p-4 flex flex-col justify-between">
+                      <div>
+                        <span className="text-[10px] font-extrabold uppercase text-blue-700">
+                          {ui.levelMahadasha}
+                        </span>
+                        <h4 className="font-display text-xl font-bold text-slate-900 mt-1">
+                          {KP_PLANET_NAMES[runningSnapshot.mahadasha]?.[language] || runningSnapshot.mahadasha}
+                        </h4>
+                      </div>
+                      <div className="mt-3 pt-2 border-t border-blue-200/60 text-[11px] text-slate-600 space-y-0.5">
+                        <p><span className="font-semibold">{ui.startDate}:</span> {formatDateDisplay(runningSnapshot.md_start)}</p>
+                        <p><span className="font-semibold">{ui.endDate}:</span> {formatDateDisplay(runningSnapshot.md_end)}</p>
+                        <p className="text-blue-700 font-bold">{runningSnapshot.remaining_days_md} {ui.remainingDays}</p>
+                      </div>
+                    </div>
+
+                    {/* 2. Antardasha */}
+                    <div className="rounded-xl border-2 border-emerald-500 bg-emerald-50/30 p-4 flex flex-col justify-between">
+                      <div>
+                        <span className="text-[10px] font-extrabold uppercase text-emerald-700">
+                          {ui.levelAntardasha}
+                        </span>
+                        <h4 className="font-display text-xl font-bold text-slate-900 mt-1">
+                          {KP_PLANET_NAMES[runningSnapshot.antardasha]?.[language] || runningSnapshot.antardasha}
+                        </h4>
+                      </div>
+                      <div className="mt-3 pt-2 border-t border-emerald-200/60 text-[11px] text-slate-600 space-y-0.5">
+                        <p><span className="font-semibold">{ui.startDate}:</span> {formatDateDisplay(runningSnapshot.ad_start)}</p>
+                        <p><span className="font-semibold">{ui.endDate}:</span> {formatDateDisplay(runningSnapshot.ad_end)}</p>
+                        <p className="text-emerald-700 font-bold">{runningSnapshot.remaining_days_ad} {ui.remainingDays}</p>
+                      </div>
+                    </div>
+
+                    {/* 3. Pratyantardasha */}
+                    <div className="rounded-xl border-2 border-amber-400 bg-amber-50/30 p-4 flex flex-col justify-between">
+                      <div>
+                        <span className="text-[10px] font-extrabold uppercase text-amber-800">
+                          {ui.levelPratyantardasha}
+                        </span>
+                        <h4 className="font-display text-xl font-bold text-slate-900 mt-1">
+                          {KP_PLANET_NAMES[runningSnapshot.pratyantardasha]?.[language] || runningSnapshot.pratyantardasha}
+                        </h4>
+                      </div>
+                      <div className="mt-3 pt-2 border-t border-amber-200/60 text-[11px] text-slate-600 space-y-0.5">
+                        <p><span className="font-semibold">{ui.startDate}:</span> {formatDateDisplay(runningSnapshot.pd_start)}</p>
+                        <p><span className="font-semibold">{ui.endDate}:</span> {formatDateDisplay(runningSnapshot.pd_end)}</p>
+                      </div>
+                    </div>
+
+                    {/* 4. Sookshma Dasha */}
+                    <div className="rounded-xl border-2 border-purple-400 bg-purple-50/30 p-4 flex flex-col justify-between">
+                      <div>
+                        <span className="text-[10px] font-extrabold uppercase text-purple-700">
+                          {ui.levelSookshma}
+                        </span>
+                        <h4 className="font-display text-xl font-bold text-slate-900 mt-1">
+                          {KP_PLANET_NAMES[runningSnapshot.sookshma_dasha || "Sun"]?.[language] || runningSnapshot.sookshma_dasha}
+                        </h4>
+                      </div>
+                      <div className="mt-3 pt-2 border-t border-purple-200/60 text-[11px] text-slate-600 space-y-0.5">
+                        <p><span className="font-semibold">{ui.startDate}:</span> {formatDateDisplay(runningSnapshot.sd_start)}</p>
+                        <p><span className="font-semibold">{ui.endDate}:</span> {formatDateDisplay(runningSnapshot.sd_end)}</p>
+                      </div>
+                    </div>
+
+                    {/* 5. Pran Dasha */}
+                    <div className="rounded-xl border-2 border-rose-400 bg-rose-50/30 p-4 flex flex-col justify-between">
+                      <div>
+                        <span className="text-[10px] font-extrabold uppercase text-rose-700">
+                          {ui.levelPran}
+                        </span>
+                        <h4 className="font-display text-xl font-bold text-slate-900 mt-1">
+                          {KP_PLANET_NAMES[runningSnapshot.pran_dasha || "Sun"]?.[language] || runningSnapshot.pran_dasha}
+                        </h4>
+                      </div>
+                      <div className="mt-3 pt-2 border-t border-rose-200/60 text-[11px] text-slate-600 space-y-0.5">
+                        <p><span className="font-semibold">{ui.startDate}:</span> {formatDateDisplay(runningSnapshot.pran_start)}</p>
+                        <p><span className="font-semibold">{ui.endDate}:</span> {formatDateDisplay(runningSnapshot.pran_end)}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Progress Meters */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
+                      <div className="flex justify-between text-xs font-bold mb-1.5">
+                        <span>Antardasha Progress ({runningSnapshot.antardasha})</span>
+                        <span className="text-emerald-700">{runningSnapshot.percentage_completed_ad}%</span>
+                      </div>
+                      <div className="h-2.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-emerald-500 rounded-full transition-all"
+                          style={{ width: `${runningSnapshot.percentage_completed_ad}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
+                      <div className="flex justify-between text-xs font-bold mb-1.5">
+                        <span>Mahadasha Progress ({runningSnapshot.mahadasha})</span>
+                        <span className="text-blue-700">{runningSnapshot.percentage_completed_md}%</span>
+                      </div>
+                      <div className="h-2.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-blue-500 rounded-full transition-all"
+                          style={{ width: `${runningSnapshot.percentage_completed_md}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sookshma & Pran Dasha Micro Tables */}
+                {runningSnapshot.sookshma_periods && runningSnapshot.sookshma_periods.length > 0 && (
+                  <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-display text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <Sparkles className="size-4 text-purple-600" />
+                        <span>Sookshma Dashas (Level 4 Micro Periods)</span>
+                      </h4>
+                      <span className="text-xs text-slate-500 font-semibold">
+                        Under {runningSnapshot.pratyantardasha} Pratyantardasha
+                      </span>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs text-left">
+                        <thead>
+                          <tr className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                            <th className="py-2.5 px-3">Lord</th>
+                            <th className="py-2.5 px-3 text-center">Start</th>
+                            <th className="py-2.5 px-3 text-center">End</th>
+                            <th className="py-2.5 px-3 text-center">Duration</th>
+                            <th className="py-2.5 px-3 text-center">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {runningSnapshot.sookshma_periods.map((sd, i) => (
+                            <tr
+                              key={i}
+                              className={sd.is_current ? "bg-purple-50 font-bold" : "hover:bg-slate-50"}
+                            >
+                              <td className="py-2.5 px-3">
+                                {KP_PLANET_NAMES[sd.lord]?.[language] || sd.lord}
+                              </td>
+                              <td className="py-2.5 px-3 text-center text-slate-600">
+                                {sd.start_date} {sd.start_time}
+                              </td>
+                              <td className="py-2.5 px-3 text-center text-slate-600">
+                                {sd.end_date} {sd.end_time}
+                              </td>
+                              <td className="py-2.5 px-3 text-center text-slate-600">{sd.duration}</td>
+                              <td className="py-2.5 px-3 text-center">
+                                {sd.is_current ? (
+                                  <span className="rounded-full bg-purple-100 text-purple-800 px-2 py-0.5 text-[10px] font-bold border border-purple-300">
+                                    Active Now
+                                  </span>
+                                ) : (
+                                  "—"
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ════════════════════════════════════════════════════════════
+                TAB 2: VIMSHOTTARI TREE (5-Tier Full Interactive Drilldown)
+            ════════════════════════════════════════════════════════════ */}
+            {activeTab === "tree" && (
+              <div className="rounded-2xl border border-amber-200/90 bg-white p-5 sm:p-8 shadow-sm space-y-6">
+                <div className="text-center space-y-1">
+                  <h3 className="font-display text-2xl font-bold text-slate-900">
+                    {ui.vimshottariTreeTitle}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-500">
+                    {ui.drilldownHint}
+                  </p>
+                  <GoldDiamondDivider />
+
+                  {/* 3-Step Stepper */}
+                  <div className="mt-4 flex items-center justify-center gap-2 sm:gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTreeStep(1)}
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${
+                        activeTreeStep === 1
+                          ? "bg-amber-500 text-white border-amber-500 shadow-xs"
+                          : "bg-white border-slate-200 text-slate-600 hover:border-amber-400"
+                      }`}
+                    >
+                      <span>1. Mahadasha</span>
+                    </button>
+
+                    <div className="h-0.5 w-6 sm:w-10 bg-slate-200" />
+
+                    <button
+                      type="button"
+                      onClick={() => selectedMD && setActiveTreeStep(2)}
+                      disabled={!selectedMD}
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                        activeTreeStep === 2
+                          ? "bg-amber-500 text-white border-amber-500 shadow-xs"
+                          : "bg-white border-slate-200 text-slate-600 hover:border-amber-400"
+                      }`}
+                    >
+                      <span>2. Antardasha</span>
+                    </button>
+
+                    <div className="h-0.5 w-6 sm:w-10 bg-slate-200" />
+
+                    <button
+                      type="button"
+                      onClick={() => selectedAD && setActiveTreeStep(3)}
+                      disabled={!selectedAD}
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                        activeTreeStep === 3
+                          ? "bg-amber-500 text-white border-amber-500 shadow-xs"
+                          : "bg-white border-slate-200 text-slate-600 hover:border-amber-400"
+                      }`}
+                    >
+                      <span>3. Pratyantardasha</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Breadcrumbs */}
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-500 pt-2 border-t border-slate-100">
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      onClick={() => setActiveTreeStep(1)}
+                      className="cursor-pointer hover:underline text-amber-800"
+                    >
+                      All Mahadashas
+                    </span>
+                    {selectedMD && activeTreeStep >= 2 && (
+                      <>
+                        <span>➔</span>
+                        <span
+                          onClick={() => setActiveTreeStep(2)}
+                          className="cursor-pointer hover:underline text-amber-800"
+                        >
+                          {selectedMD.lord}
+                        </span>
+                      </>
+                    )}
+                    {selectedAD && activeTreeStep === 3 && (
+                      <>
+                        <span>➔</span>
+                        <span className="text-slate-900">{selectedAD.lord}</span>
+                      </>
+                    )}
+                  </div>
+                  <span className="text-[11px] text-slate-400">{ui.drilldownHint}</span>
+                </div>
+
+                {/* Table */}
+                <div className="overflow-x-auto rounded-xl border border-slate-200">
+                  <table className="w-full text-sm text-left">
+                    <thead>
+                      <tr className="bg-slate-100 text-slate-900 font-bold border-b border-slate-200">
+                        <th className="py-3 px-4">Lord</th>
+                        <th className="py-3 px-4 text-center">{ui.startDate}</th>
+                        <th className="py-3 px-4 text-center">{ui.endDate}</th>
+                        <th className="py-3 px-4 text-center">{ui.duration}</th>
+                        <th className="py-3 px-4 text-center">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 bg-white">
+                      {activeTreeStep === 1 &&
+                        result.dashas?.map((md, idx) => (
+                          <tr
+                            key={`md-${idx}`}
+                            onClick={() => {
+                              setSelectedMD(md);
+                              setActiveTreeStep(2);
+                            }}
+                            className={`cursor-pointer transition-colors ${
+                              md.is_current ? "bg-amber-50/70 font-semibold" : "hover:bg-slate-50"
+                            }`}
+                          >
+                            <td className="py-3.5 px-4 font-bold text-slate-900 flex items-center gap-2">
+                              <span>➔</span>
+                              <span>{KP_PLANET_NAMES[md.lord]?.[language] || md.lord}</span>
+                            </td>
+                            <td className="py-3.5 px-4 text-center text-slate-600 tabular-nums">
+                              {formatDateDisplay(md.start_date)}
+                            </td>
+                            <td className="py-3.5 px-4 text-center text-slate-600 tabular-nums">
+                              {formatDateDisplay(md.end_date)}
+                            </td>
+                            <td className="py-3.5 px-4 text-center text-slate-600">{md.duration}</td>
+                            <td className="py-3.5 px-4 text-center">
+                              {md.is_current ? (
+                                <span className="rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-xs font-bold border border-emerald-300">
+                                  {ui.currentTag}
+                                </span>
+                              ) : (
+                                "—"
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+
+                      {activeTreeStep === 2 &&
+                        selectedMD?.sub_periods?.map((ad, idx) => (
+                          <tr
+                            key={`ad-${idx}`}
+                            onClick={() => {
+                              setSelectedAD(ad);
+                              setActiveTreeStep(3);
+                            }}
+                            className={`cursor-pointer transition-colors ${
+                              ad.is_current ? "bg-emerald-50/70 font-semibold" : "hover:bg-slate-50"
+                            }`}
+                          >
+                            <td className="py-3.5 px-4 font-bold text-slate-900 flex items-center gap-2">
+                              <span>➔</span>
+                              <span>{KP_PLANET_NAMES[ad.lord]?.[language] || ad.lord}</span>
+                            </td>
+                            <td className="py-3.5 px-4 text-center text-slate-600 tabular-nums">
+                              {formatDateDisplay(ad.start_date)}
+                            </td>
+                            <td className="py-3.5 px-4 text-center text-slate-600 tabular-nums">
+                              {formatDateDisplay(ad.end_date)}
+                            </td>
+                            <td className="py-3.5 px-4 text-center text-slate-600">{ad.duration}</td>
+                            <td className="py-3.5 px-4 text-center">
+                              {ad.is_current ? (
+                                <span className="rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-xs font-bold border border-emerald-300">
+                                  {ui.currentTag}
+                                </span>
+                              ) : (
+                                "—"
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+
+                      {activeTreeStep === 3 &&
+                        selectedAD?.sub_periods?.map((pad, idx) => (
+                          <tr
+                            key={`pad-${idx}`}
+                            className={pad.is_current ? "bg-amber-50/70 font-semibold" : "hover:bg-slate-50"}
+                          >
+                            <td className="py-3.5 px-4 font-bold text-slate-900 flex items-center gap-2">
+                              <span>•</span>
+                              <span>{KP_PLANET_NAMES[pad.lord]?.[language] || pad.lord}</span>
+                            </td>
+                            <td className="py-3.5 px-4 text-center text-slate-600 tabular-nums">
+                              {formatDateDisplay(pad.start_date)}
+                            </td>
+                            <td className="py-3.5 px-4 text-center text-slate-600 tabular-nums">
+                              {formatDateDisplay(pad.end_date)}
+                            </td>
+                            <td className="py-3.5 px-4 text-center text-slate-600">{pad.duration}</td>
+                            <td className="py-3.5 px-4 text-center">
+                              {pad.is_current ? (
+                                <span className="rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-xs font-bold border border-emerald-300">
+                                  {ui.currentTag}
+                                </span>
+                              ) : (
+                                "—"
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* ════════════════════════════════════════════════════════════
+                TAB 3: YOGINI DASHA (36-Year Classical Cycle)
+            ════════════════════════════════════════════════════════════ */}
+            {activeTab === "yogini" && yoginiSys && (
+              <div className="space-y-6">
+                <div className="rounded-2xl border-2 border-amber-300 bg-white p-6 shadow-sm space-y-4">
+                  <div className="text-center space-y-1">
+                    <h3 className="font-display text-2xl font-bold text-slate-900 flex items-center justify-center gap-2">
+                      <Zap className="size-6 text-amber-600" />
+                      <span>{ui.yoginiTitle}</span>
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-500 max-w-2xl mx-auto">
+                      {ui.yoginiSubtitle}
+                    </p>
+                    <GoldDiamondDivider />
+                  </div>
+
+                  {/* Summary Box */}
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 p-4 rounded-xl border border-amber-200 bg-amber-50/50 text-xs">
+                    <div>
+                      <span className="font-semibold text-slate-500">{ui.startingYogini}:</span>
+                      <p className="font-bold text-slate-900 text-sm mt-0.5">{yoginiSys.starting_yogini}</p>
+                    </div>
+                    <div>
+                      <span className="font-semibold text-slate-500">{ui.balanceAtBirth}:</span>
+                      <p className="font-bold text-slate-900 text-sm mt-0.5">{yoginiSys.balance_str}</p>
+                    </div>
+                    <div>
+                      <span className="font-semibold text-slate-500">{ui.currentRunningYogini}:</span>
+                      <p className="font-bold text-amber-800 text-sm mt-0.5">{yoginiSys.current_yogini} ({yoginiSys.current_sub_yogini})</p>
+                    </div>
+                    <div>
+                      <span className="font-semibold text-slate-500">{ui.cycleNumber}:</span>
+                      <p className="font-bold text-slate-900 text-sm mt-0.5">Cycle {yoginiSys.current_cycle_number}</p>
+                    </div>
+                  </div>
+
+                  {/* Verdict */}
+                  <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700">
+                    💡 {yoginiSys.verdict}
+                  </div>
+
+                  {/* Yoginis Table */}
+                  <div className="overflow-x-auto rounded-xl border border-slate-200 mt-4">
+                    <table className="w-full text-xs text-left">
+                      <thead>
+                        <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
+                          <th className="py-3 px-3">Yogini</th>
+                          <th className="py-3 px-3">Ruler</th>
+                          <th className="py-3 px-3 text-center">Years</th>
+                          <th className="py-3 px-3 text-center">Nature</th>
+                          <th className="py-3 px-3 text-center">Start</th>
+                          <th className="py-3 px-3 text-center">End</th>
+                          <th className="py-3 px-3 text-center">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {yoginiSys.periods.slice(0, 16).map((yp, i) => (
+                          <tr
+                            key={i}
+                            onClick={() => setSelectedYogini(yp)}
+                            className={`cursor-pointer transition-colors ${
+                              yp.is_current ? "bg-amber-50/80 font-bold" : "hover:bg-slate-50"
+                            }`}
+                          >
+                            <td className="py-3 px-3 font-bold text-slate-900 flex items-center gap-1.5">
+                              <span>➔</span>
+                              <span>{yp.name}</span>
+                            </td>
+                            <td className="py-3 px-3 text-slate-700">{yp.ruler_planet}</td>
+                            <td className="py-3 px-3 text-center text-slate-600">{yp.duration_years} Y</td>
+                            <td className="py-3 px-3 text-center">
+                              <span
+                                className={`rounded-full px-2 py-0.5 text-[10px] font-bold border ${
+                                  yp.nature === "Benefic"
+                                    ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                                    : yp.nature === "Challenging"
+                                    ? "bg-red-100 text-red-800 border-red-300"
+                                    : "bg-slate-100 text-slate-700 border-slate-300"
+                                }`}
+                              >
+                                {yp.nature}
+                              </span>
+                            </td>
+                            <td className="py-3 px-3 text-center text-slate-600 tabular-nums">{yp.start_date}</td>
+                            <td className="py-3 px-3 text-center text-slate-600 tabular-nums">{yp.end_date}</td>
+                            <td className="py-3 px-3 text-center">
+                              {yp.is_current ? (
+                                <span className="rounded-full bg-amber-500 text-white px-2 py-0.5 text-[10px] font-bold">
+                                  Running
+                                </span>
+                              ) : (
+                                "—"
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Sub-Yoginis for Selected Yogini */}
+                  {selectedYogini?.sub_periods && selectedYogini.sub_periods.length > 0 && (
+                    <div className="mt-6 pt-4 border-t border-slate-200 space-y-3">
+                      <h4 className="font-display text-sm font-bold text-slate-900">
+                        Antar-Yoginis (Sub-Periods) under {selectedYogini.name}
+                      </h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        {selectedYogini.sub_periods.map((sub, sidx) => (
+                          <div
+                            key={sidx}
+                            className={`p-3 rounded-xl border text-xs ${
+                              sub.is_current
+                                ? "bg-amber-100 border-amber-400 font-bold shadow-xs"
+                                : "bg-slate-50 border-slate-200"
+                            }`}
+                          >
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="font-bold text-slate-900">{sub.name}</span>
+                              <span className="text-[10px] text-slate-500">({sub.ruler_planet})</span>
+                            </div>
+                            <p className="text-[11px] text-slate-600">{sub.start_date} to {sub.end_date}</p>
+                            {sub.is_current && (
+                              <span className="inline-block mt-1 text-[9px] font-bold bg-amber-600 text-white px-1.5 py-0.2 rounded">
+                                Active
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ════════════════════════════════════════════════════════════
+                TAB 4: PERSONALIZED KUNDLI PHALA (Lagna-Specific)
+            ════════════════════════════════════════════════════════════ */}
+            {activeTab === "phala" && (
+              <div className="space-y-6">
+                <div className="rounded-2xl border-2 border-amber-300 bg-white p-6 shadow-sm space-y-6">
+                  <div className="text-center space-y-1">
+                    <h3 className="font-display text-2xl font-bold text-slate-900 flex items-center justify-center gap-2">
+                      <TrendingUp className="size-6 text-amber-600" />
+                      <span>{ui.phalaTitle}</span>
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-500 max-w-2xl mx-auto">
+                      {ui.phalaSubtitle}
+                    </p>
+                    <GoldDiamondDivider />
+                  </div>
+
+                  {/* Planet Pill Selectors */}
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    {PLANET_PILLS.map((pill) => {
+                      const isSelected = selectedPhalaPlanet === pill.key;
+                      return (
+                        <button
+                          key={pill.key}
+                          type="button"
+                          onClick={() => setSelectedPhalaPlanet(pill.key)}
+                          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold border transition-all ${
+                            isSelected
+                              ? "ring-2 ring-amber-500 scale-105 shadow-xs " + pill.bgClass
+                              : "border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900"
+                          }`}
+                        >
+                          <span className="size-2 rounded-full" style={{ backgroundColor: pill.color }} />
+                          <span>{pill.nameEn}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Selected Planet Phala Card */}
+                  {selectedPhalaItem && (
+                    <div className="rounded-xl border border-amber-200 bg-amber-50/20 p-5 sm:p-7 space-y-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-amber-200/60">
+                        <div>
+                          <span className="text-xs font-bold uppercase tracking-widest text-amber-700">
+                            {selectedPhalaItem.lagna} Lagna Analysis
+                          </span>
+                          <h4 className="font-display text-2xl font-bold text-slate-900 mt-0.5">
+                            {KP_PLANET_NAMES[selectedPhalaItem.planet]?.[language] || selectedPhalaItem.planet} –{" "}
+                            {selectedPhalaItem.functional_nature}
+                          </h4>
+                          <p className="text-xs text-slate-500 mt-1">
+                            Placed in House {selectedPhalaItem.house_placed} ({selectedPhalaItem.sign_placed}) · Dignity: {selectedPhalaItem.dignity}
+                          </p>
+                        </div>
+
+                        {/* Favorability Score Meter */}
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            <span className="text-[11px] font-bold text-slate-500">{ui.favorabilityScore}</span>
+                            <p className="text-2xl font-black text-amber-900">{selectedPhalaItem.favorability_score}%</p>
+                          </div>
+                          <div className="size-14 rounded-full border-4 border-amber-500 flex items-center justify-center bg-white font-extrabold text-sm">
+                            {selectedPhalaItem.favorability_score >= 60 ? "🌟" : "⚖️"}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 4 Life Domains Grid */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-1">
+                          <h5 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                            <span>💼</span>
+                            <span>{ui.careerImpact}</span>
+                          </h5>
+                          <p className="text-xs text-slate-600 leading-relaxed">
+                            {selectedPhalaItem.career_impact}
+                          </p>
+                        </div>
+
+                        <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-1">
+                          <h5 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                            <span>💰</span>
+                            <span>{ui.wealthImpact}</span>
+                          </h5>
+                          <p className="text-xs text-slate-600 leading-relaxed">
+                            {selectedPhalaItem.wealth_impact}
+                          </p>
+                        </div>
+
+                        <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-1">
+                          <h5 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                            <span>❤️</span>
+                            <span>{ui.relationshipImpact}</span>
+                          </h5>
+                          <p className="text-xs text-slate-600 leading-relaxed">
+                            {selectedPhalaItem.relationship_impact}
+                          </p>
+                        </div>
+
+                        <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-1">
+                          <h5 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                            <span>🌿</span>
+                            <span>{ui.healthImpact}</span>
+                          </h5>
+                          <p className="text-xs text-slate-600 leading-relaxed">
+                            {selectedPhalaItem.health_impact}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Gemstone Warning & Remedies */}
+                      <div className="space-y-3">
+                        {selectedPhalaItem.gemstone_warning && (
+                          <div className="p-3.5 rounded-xl border border-amber-300 bg-amber-50 text-xs text-amber-900 flex items-start gap-2.5">
+                            <Gem className="size-4 text-amber-700 shrink-0 mt-0.5" />
+                            <span>{selectedPhalaItem.gemstone_warning}</span>
+                          </div>
+                        )}
+
+                        <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-700 flex items-start gap-2.5">
+                          <Flame className="size-4 text-amber-600 shrink-0 mt-0.5" />
+                          <div>
+                            <span className="font-bold">{ui.remedyAction}:</span>{" "}
+                            <span>{selectedPhalaItem.recommended_remedy}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ════════════════════════════════════════════════════════════
+                TAB 5: TRANSIT & SANDHI (Live Synergy & Alerts)
+            ════════════════════════════════════════════════════════════ */}
+            {activeTab === "transit" && (
+              <div className="space-y-6">
+                <div className="rounded-2xl border-2 border-amber-300 bg-white p-6 shadow-sm space-y-6">
+                  <div className="text-center space-y-1">
+                    <h3 className="font-display text-2xl font-bold text-slate-900 flex items-center justify-center gap-2">
+                      <Compass className="size-6 text-amber-600" />
+                      <span>{ui.transitSandhiTitle}</span>
+                    </h3>
+                    <GoldDiamondDivider />
+                  </div>
+
+                  {/* Sandhi & Chidra Banners */}
+                  {sandhiInfo && (
+                    <div className="space-y-3">
+                      {sandhiInfo.is_in_chidra_dasha && (
+                        <div className="p-4 rounded-xl border-2 border-red-400 bg-red-50 text-xs text-red-950 space-y-2">
+                          <div className="flex items-center gap-2 font-bold text-sm text-red-800">
+                            <AlertTriangle className="size-4 text-red-600" />
+                            <span>{ui.chidraAlertTitle}</span>
+                          </div>
+                          <p>{sandhiInfo.chidra_message}</p>
+                          {sandhiInfo.precautions.length > 0 && (
+                            <ul className="list-disc list-inside space-y-1 text-[11px] text-red-900 pt-1">
+                              {sandhiInfo.precautions.map((p, idx) => (
+                                <li key={idx}>{p}</li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      )}
+
+                      {sandhiInfo.is_in_dasha_sandhi && (
+                        <div className="p-4 rounded-xl border-2 border-amber-400 bg-amber-50 text-xs text-amber-950 space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-sm text-amber-900 flex items-center gap-2">
+                              <Clock className="size-4 text-amber-700" />
+                              <span>{ui.sandhiAlertTitle}</span>
+                            </span>
+                            <span className="rounded-full bg-amber-200 px-2 py-0.5 text-[10px] font-bold text-amber-950">
+                              {sandhiInfo.days_to_transition} Days Left
+                            </span>
+                          </div>
+                          <p>{sandhiInfo.sandhi_message}</p>
+                        </div>
+                      )}
+
+                      {!sandhiInfo.is_in_chidra_dasha && !sandhiInfo.is_in_dasha_sandhi && (
+                        <div className="p-3.5 rounded-xl border border-emerald-300 bg-emerald-50 text-xs text-emerald-900 flex items-center gap-2">
+                          <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+                          <span>
+                            Dasha Transition Stability: You are currently safely inside your stable mid-period of {sandhiInfo.current_md_lord} Mahadasha.
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Real-time Transit Synergy Box */}
+                  {transitSynergy && (
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+                        <h4 className="font-display text-base font-bold text-slate-900 flex items-center gap-2">
+                          <Activity className="size-4 text-amber-600" />
+                          <span>{ui.transitPositionTitle}</span>
+                        </h4>
+                        <span className="text-xs font-bold text-amber-800">
+                          {ui.synergyScore}: {transitSynergy.synergy_score}%
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                        <div className="p-3.5 rounded-lg bg-white border border-slate-200">
+                          <span className="font-bold text-slate-800">
+                            Mahadasha Lord ({transitSynergy.md_lord}):
+                          </span>
+                          <p className="text-slate-600 mt-1">
+                            Transiting in {transitSynergy.md_transit_sign} ({transitSynergy.md_transit_house_from_moon}th from Moon - {transitSynergy.md_transit_nature})
+                          </p>
+                        </div>
+
+                        <div className="p-3.5 rounded-lg bg-white border border-slate-200">
+                          <span className="font-bold text-slate-800">
+                            Antardasha Lord ({transitSynergy.ad_lord}):
+                          </span>
+                          <p className="text-slate-600 mt-1">
+                            Transiting in {transitSynergy.ad_transit_sign} ({transitSynergy.ad_transit_house_from_moon}th from Moon - {transitSynergy.ad_transit_nature})
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Sade Sati Card */}
+                      <div className="p-3.5 rounded-lg bg-white border border-slate-200 text-xs space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-slate-800">{ui.sadeSatiTitle}:</span>
+                          <span
+                            className={`rounded px-2 py-0.5 text-[10px] font-bold ${
+                              transitSynergy.sade_sati_active
+                                ? "bg-amber-100 text-amber-900 border border-amber-300"
+                                : "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                            }`}
+                          >
+                            {transitSynergy.sade_sati_phase}
+                          </span>
+                        </div>
+                        <p className="text-slate-600 text-[11px]">{transitSynergy.sade_sati_description}</p>
+                      </div>
+
+                      <div className="text-xs font-medium text-slate-700 bg-amber-50/70 p-3 rounded-lg border border-amber-200">
+                        🌟 <strong>Verdict:</strong> {transitSynergy.synergy_verdict}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ════════════════════════════════════════════════════════════
+                TAB 6: LIFE TIMELINE & REMEDIES
+            ════════════════════════════════════════════════════════════ */}
+            {activeTab === "timeline" && (
+              <div className="space-y-6">
+                <div className="rounded-2xl border-2 border-amber-300 bg-white p-6 shadow-sm space-y-6">
+                  <div className="text-center space-y-1">
+                    <h3 className="font-display text-2xl font-bold text-slate-900 flex items-center justify-center gap-2">
+                      <Flame className="size-6 text-amber-600" />
+                      <span>{ui.timelineTitle}</span>
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-500 max-w-2xl mx-auto">
+                      {ui.timelineSubtitle}
+                    </p>
+                    <GoldDiamondDivider />
+                  </div>
+
+                  {/* Visual Life Journey Bar */}
+                  <div className="space-y-3">
+                    <div className="h-5 w-full bg-slate-100 rounded-xl overflow-hidden flex shadow-inner">
+                      {timelineSegments.map((seg, sidx) => {
+                        const bg =
+                          seg.nature === "favorable"
+                            ? "bg-emerald-500"
+                            : seg.nature === "challenging"
+                            ? "bg-red-500"
+                            : "bg-amber-400";
+                        return (
+                          <div
+                            key={sidx}
+                            title={`${seg.lord} (${seg.age_start}-${seg.age_end} yrs)`}
+                            className={`h-full ${bg} border-r border-white/50 transition-all hover:opacity-80`}
+                            style={{ flex: seg.duration_years }}
+                          />
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex items-center justify-center gap-4 text-xs font-bold">
+                      <span className="flex items-center gap-1.5 text-emerald-700">
+                        <span className="size-2.5 rounded-full bg-emerald-500" />
+                        <span>{ui.favorablePhase}</span>
+                      </span>
+                      <span className="flex items-center gap-1.5 text-amber-700">
+                        <span className="size-2.5 rounded-full bg-amber-400" />
+                        <span>{ui.neutralPhase}</span>
+                      </span>
+                      <span className="flex items-center gap-1.5 text-red-700">
+                        <span className="size-2.5 rounded-full bg-red-500" />
+                        <span>{ui.challengingPhase}</span>
+                      </span>
+                    </div>
+
+                    {/* Timeline Segments Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3">
+                      {timelineSegments.map((seg, sidx) => (
+                        <div
+                          key={sidx}
+                          className={`p-3.5 rounded-xl border text-xs space-y-1 ${
+                            seg.is_current
+                              ? "border-amber-500 bg-amber-50/80 shadow-xs ring-1 ring-amber-400"
+                              : "border-slate-200 bg-slate-50"
+                          }`}
+                        >
+                          <div className="flex justify-between items-center">
+                            <span className="font-bold text-sm text-slate-900">
+                              {KP_PLANET_NAMES[seg.lord]?.[language] || seg.lord} Mahadasha
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-500">
+                              Age {seg.age_start}–{seg.age_end}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500">{seg.start_date} to {seg.end_date}</p>
+                          <p className="text-slate-700 text-xs pt-1">{seg.theme}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Authentic Vedic & Lal Kitab Remedies Dashboard */}
+                  <div className="mt-8 pt-6 border-t border-slate-200 space-y-4">
+                    <h4 className="font-display text-xl font-bold text-slate-900 flex items-center gap-2">
+                      <Sparkles className="size-5 text-amber-600" />
+                      <span>{ui.authenticRemediesTitle}</span>
+                    </h4>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                      <div className="p-4 rounded-xl border border-amber-300 bg-amber-50/60 space-y-2">
+                        <span className="font-bold text-amber-900 uppercase tracking-wider text-[11px]">
+                          {ui.beejMantra} (Daily Japa)
+                        </span>
+                        <p className="font-serif text-sm font-extrabold text-slate-900">
+                          ॐ ग्रां ग्रीं ग्रौं सः गुरवे नमः / ॐ शुं शुक्राय नमः
+                        </p>
+                        <p className="text-slate-600 text-[11px]">
+                          Chant 108 times daily facing East using a Rudraksha or Tulsi mala to dissolve obstacles.
+                        </p>
+                      </div>
+
+                      <div className="p-4 rounded-xl border border-emerald-300 bg-emerald-50/60 space-y-2">
+                        <span className="font-bold text-emerald-900 uppercase tracking-wider text-[11px]">
+                          {ui.gayatriMantra}
+                        </span>
+                        <p className="font-serif text-xs font-bold text-slate-900">
+                          ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं भर्गो देवस्य धीमहि धियो यो नः प्रचोदयात्॥
+                        </p>
+                        <p className="text-slate-600 text-[11px]">
+                          Reciting Gayatri Mantra at sunrise neutralizes malefic transit friction during major Dasha transitions.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Consultation CTA */}
+                    <div className="rounded-xl border border-amber-300 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-amber-500/10 p-5 text-center space-y-3">
+                      <p className="text-sm font-semibold text-slate-800">
+                        {ui.consultationCta}
+                      </p>
+                      <Link
+                        href="/astrologers"
+                        className="inline-flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold px-6 py-2.5 text-xs shadow-md transition-all"
+                      >
+                        <span>{ui.bookAstrologer}</span>
+                        <ArrowRight className="size-4" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Rashi Kundli Chart Viewer */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+              <h3 className="font-display text-xl font-bold text-slate-900 text-center">
+                {language === "bn" ? "রাশি কুন্ডলী ও ভাব চক্র" : "Rashi Kundli & Bhava Chart"}
+              </h3>
               <KPChartViewer
                 planets={result.planets}
                 cusps={result.cusps}
@@ -1456,256 +1741,6 @@ export default function DashaCalculatorPage() {
                 nakshatraName={result.panchang.moon_nakshatra}
                 language={language}
               />
-            </div>
-
-            {/* ─────────────────────────────────────────────────────────
-                SECTION 5: "Is Your Life Suddenly Changing? It Could Be Your Mahadasha."
-                (Matching Screenshot 5)
-            ───────────────────────────────────────────────────────── */}
-            <div className="rounded-2xl border-2 border-brand-300/80 bg-white p-6 sm:p-10 shadow-sm space-y-8">
-              {/* Top Planet Pill Selectors matching Screenshot 5 */}
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                {PLANET_PILLS.map((pill) => {
-                  const isSelected = selectedPlanetInsight === pill.key;
-                  return (
-                    <button
-                      key={pill.key}
-                      type="button"
-                      onClick={() => setSelectedPlanetInsight(pill.key)}
-                      className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold border transition-all ${
-                        isSelected
-                          ? "ring-2 ring-brand-500 scale-105 shadow-xs " + pill.bgClass
-                          : "border-border bg-surface-muted text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      <span
-                        className="size-2 rounded-full"
-                        style={{ backgroundColor: pill.color }}
-                      />
-                      <span>{pill.code}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Title Header */}
-              <div className="text-center space-y-2">
-                <h3 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center justify-center gap-2">
-                  <Clock className="size-7 text-brand-600 inline-block" />
-                  <span>
-                    {language === "bn"
-                      ? "আপনার জীবন কি হঠাৎ বদলে যাচ্ছে? এটি হতে পারে আপনার মহাদশা।"
-                      : language === "hi"
-                      ? "क्या आपका जीवन अचानक बदल रहा है? यह आपकी महादशा हो सकती है।"
-                      : "Is Your Life Suddenly Changing? It Could Be Your Mahadasha."}
-                  </span>
-                </h3>
-                <GoldDiamondDivider />
-              </div>
-
-              {/* Astrological Description & Life Impact */}
-              <div className="max-w-3xl mx-auto text-center space-y-4 text-sm sm:text-base text-muted-foreground leading-relaxed">
-                <p>
-                  {language === "bn" ? (
-                    <>
-                      বৈদিক জ্যোতিষশাস্ত্র অনুসারে আপনার জীবনের প্রতিটি গুরুত্বপূর্ণ অধ্যায়{" "}
-                      <strong className="text-foreground">বিংশোত্তরী দশা পদ্ধতি</strong> দ্বারা নিয়ন্ত্রিত হয়,
-                      যা দুটি প্রধান ভাগে বিভক্ত:
-                    </>
-                  ) : language === "hi" ? (
-                    <>
-                      वैदिक ज्योतिष के अनुसार आपके जीवन की महत्वपूर्ण घटनाएं{" "}
-                      <strong className="text-foreground">विंशोत्तरी दशा प्रणाली</strong> द्वारा संचालित होती हैं:
-                    </>
-                  ) : (
-                    <>
-                      In Vedic astrology, your life events are governed by the{" "}
-                      <strong className="text-foreground">Vimshottari Dasha system</strong>, which is divided into:
-                    </>
-                  )}
-                </p>
-
-                <p className="font-semibold text-foreground">
-                  <span className="text-brand-800">
-                    {language === "bn" ? "মহাদশা (Mahadasha)" : "Mahadasha"}
-                  </span>{" "}
-                  – {language === "bn" ? "প্রধান জীবনচক্র" : "the major planetary period"}{" "}
-                  |{" "}
-                  <span className="text-emerald-700">
-                    {language === "bn" ? "অন্তর্দশা (Antardasha)" : "Antardasha"}
-                  </span>{" "}
-                  – {language === "bn" ? "মহাদশার অন্তর্গত উপ-পর্যায়" : "the sub-period within Mahadasha"}
-                </p>
-
-                <p>
-                  {language === "bn"
-                    ? "প্রতিটি গ্রহের সময়কাল আপনার জীবনের বিভিন্ন ক্ষেত্রে প্রত্যক্ষ প্রভাব ফেলে: ক্যারিয়ারের উত্থান বা কর্মক্ষেত্রে পরিবর্তন, সম্পর্কের শুভফল বা মনোমালিন্য, স্বাস্থ্যের উন্নতি বা সংবেদনশীলতা, এবং অপ্রত্যাশিত আর্থিক লাভ।"
-                    : "Each planetary period affects different areas of your life like: Career growth or career transitions, Relationship harmony or conflicts, Health vitality, and Sudden financial gains or unexpected changes."}
-                </p>
-
-                <p className="font-bold text-foreground">
-                  🧠{" "}
-                  {language === "bn"
-                    ? "বিভ্রান্তিতে থাকবেন না। জানুন আপনি কোন গ্রহের প্রভাবে আছেন এবং সঠিক সিদ্ধান্তের মাধ্যমে জীবনকে সফল করুন।"
-                    : "Don't live in confusion. Understand what phase you're in and how to navigate it wisely."}
-                </p>
-              </div>
-
-              {/* Consultation Booking CTA Card */}
-              <div className="max-w-2xl mx-auto rounded-2xl bg-gradient-to-r from-brand-500/10 via-brand-500/5 to-brand-500/10 border-2 border-brand-400/80 p-6 text-center space-y-4">
-                <p className="text-sm sm:text-base font-semibold text-foreground">
-                  🎯{" "}
-                  {language === "bn"
-                    ? "আমাদের অভিজ্ঞ বৈদিক জ্যোতিষীদের সাথে সরাসরি কথা বলুন — মহাদশা, অন্তর্দশার নির্ভুল বিশ্লেষণ, সঠিক সময়জ্ঞান এবং প্রামাণ্য বৈদিক প্রতিকার।"
-                    : "Consult with our Verified Vedic Astrology Experts, specialized in Mahadasha & Antardasha reading, planetary remedies, and timing of life events."}
-                </p>
-
-                <div className="pt-1">
-                  <p className="text-xs font-bold uppercase tracking-wider text-brand-800 mb-2">
-                    🔗 {language === "bn" ? "আপনার দশা কনসাল্টেশন বুক করুন:" : "Book Your Dasha Consultation Now:"}
-                  </p>
-                  <Link
-                    href="/astrologers"
-                    className="inline-flex items-center gap-2 rounded-xl bg-brand-300 px-6 py-2.5 text-sm font-bold text-ink-950 shadow-glow hover:bg-brand-400 active:scale-98 transition-all"
-                  >
-                    <span>👉 {language === "bn" ? "জ্যোতিষী নির্বাচন করুন" : "Find an Astrologer"}</span>
-                    <ArrowRight className="size-4" />
-                  </Link>
-                </div>
-
-                <p className="text-xs font-bold text-brand-900">
-                  🛡️{" "}
-                  {language === "bn"
-                    ? "জানুন কোন গ্রহ আপনার জীবন নিয়ন্ত্রণ করছে — এবং প্রতিকারের মাধ্যমে পরিস্থিতিকে নিজের অনুকূলে আনুন।"
-                    : "Know which planet is ruling your life — and how to turn the tide in your favor."}
-                </p>
-              </div>
-
-              {/* Selected Planet Insights Card */}
-              {activeInsight && (
-                <div className="mt-8 rounded-2xl border border-brand-200/90 bg-brand-50/20 p-6 sm:p-8 space-y-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-200/60">
-                    <div>
-                      <span className="text-xs font-bold uppercase tracking-widest text-brand-700">
-                        {language === "bn" ? "নির্বাচিত গ্রহের গভীর অন্তর্দৃষ্টি" : "Dasha Insights & Authentic Remedies"}
-                      </span>
-                      <h4 className="font-display text-2xl font-bold text-foreground mt-0.5">
-                        {KP_PLANET_NAMES[selectedPlanetInsight]?.[language] || selectedPlanetInsight} –{" "}
-                        {language === "bn" ? "প্রভাব ও ফলাফল" : "Predictions & Remedies"}
-                      </h4>
-                    </div>
-
-                    <div className="flex items-center gap-3 text-xs">
-                      <span className="rounded-lg bg-brand-100 border border-brand-300 px-3 py-1 font-bold text-brand-900">
-                        {language === "bn" ? "শুভ বার: " : "Lucky Day: "}
-                        {activeInsight.lucky_day}
-                      </span>
-                      <span className="rounded-lg bg-surface border border-border px-3 py-1 font-bold text-foreground">
-                        {language === "bn" ? "শুভ রং: " : "Color: "}
-                        {activeInsight.lucky_color}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Overview */}
-                  <div className="space-y-1.5">
-                    <h5 className="text-sm font-bold text-foreground flex items-center gap-2">
-                      <Sparkles className="size-4 text-brand-600" />
-                      <span>{language === "bn" ? "সাধারণ প্রভাব ও মনস্তত্ত্ব" : "General Overview & Mindset"}</span>
-                    </h5>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {activeInsight.overview}
-                    </p>
-                  </div>
-
-                  {/* Career & Wealth */}
-                  <div className="space-y-1.5">
-                    <h5 className="text-sm font-bold text-foreground flex items-center gap-2">
-                      <Layers className="size-4 text-brand-600" />
-                      <span>{language === "bn" ? "কর্মজীবন ও আর্থিক স্থিতি" : "Career & Wealth Guidance"}</span>
-                    </h5>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {activeInsight.career_and_wealth}
-                    </p>
-                  </div>
-
-                  {/* Do's and Don'ts */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
-                    {/* Favorable actions */}
-                    <div className="rounded-xl border border-emerald-300/80 bg-emerald-50/40 p-4 space-y-2.5">
-                      <h5 className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
-                        <CheckCircle2 className="size-4 text-emerald-600" />
-                        <span>{language === "bn" ? "কী কী করা উচিত (Do's)" : "Favorable Actions (Do's)"}</span>
-                      </h5>
-                      <ul className="space-y-1.5 text-xs text-muted-foreground">
-                        {activeInsight.favorable_actions?.map((item, idx) => (
-                          <li key={idx} className="flex items-start gap-2">
-                            <span className="text-emerald-600 font-bold">✓</span>
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Cautions */}
-                    <div className="rounded-xl border border-red-300/80 bg-red-50/40 p-4 space-y-2.5">
-                      <h5 className="text-xs font-bold uppercase tracking-wider text-red-800 flex items-center gap-1.5">
-                        <AlertTriangle className="size-4 text-red-600" />
-                        <span>{language === "bn" ? "কী কী বর্জনীয় (Don'ts)" : "Cautions & Pitfalls (Don'ts)"}</span>
-                      </h5>
-                      <ul className="space-y-1.5 text-xs text-muted-foreground">
-                        {activeInsight.cautions_and_pitfalls?.map((item, idx) => (
-                          <li key={idx} className="flex items-start gap-2">
-                            <span className="text-red-600 font-bold">✕</span>
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  {/* Authentic Vedic & KP Remedies from Chapter 9 */}
-                  <div className="rounded-xl border border-brand-300 bg-brand-50/60 p-5 space-y-3">
-                    <h5 className="text-sm font-bold text-brand-900 flex items-center gap-2">
-                      <Flame className="size-4 text-brand-600" />
-                      <span>
-                        {language === "bn"
-                          ? "প্রামাণ্য কেপি ও বৈদিক প্রতিকার (Client's Vedic Remedies)"
-                          : "Authentic KP & Vedic Remedies"}
-                      </span>
-                    </h5>
-                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-foreground">
-                      {activeInsight.remedies?.map((rem, idx) => (
-                        <li key={idx} className="flex items-start gap-2 bg-white/80 p-2.5 rounded-lg border border-brand-200/80">
-                          <span className="text-brand-600 font-bold">❖</span>
-                          <span>{rem}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Mantras */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                    <div className="rounded-xl border border-border bg-surface p-4 space-y-1.5">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                        {language === "bn" ? "বীজ মন্ত্র" : "Beej Mantra"}
-                      </span>
-                      <p className="font-serif text-sm font-bold text-brand-900">
-                        {activeInsight.beej_mantra}
-                      </p>
-                    </div>
-
-                    <div className="rounded-xl border border-border bg-surface p-4 space-y-1.5">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                        {language === "bn" ? "গায়ত্রী মন্ত্র" : "Gayatri Mantra"}
-                      </span>
-                      <p className="font-serif text-xs font-semibold text-foreground leading-relaxed">
-                        {activeInsight.gayatri_mantra}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         )}

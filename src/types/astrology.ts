@@ -630,8 +630,120 @@ export interface KPDashaPeriod {
   end_date: string;
   duration: string;
   is_current: boolean;
+  start_time?: string;
+  end_time?: string;
   insight?: KPDashaInsight;
   sub_periods?: KPDashaPeriod[];
+}
+
+export interface CurrentRunningDashaInfo {
+  mahadasha: string;
+  antardasha: string;
+  pratyantardasha: string;
+  sookshma_dasha?: string;
+  pran_dasha?: string;
+  active_path?: string;
+  md_start?: string;
+  md_end?: string;
+  ad_start?: string;
+  ad_end?: string;
+  pd_start?: string;
+  pd_end?: string;
+  sd_start?: string;
+  sd_end?: string;
+  pran_start?: string;
+  pran_end?: string;
+  remaining_days_ad?: number;
+  remaining_days_md?: number;
+  percentage_completed_ad?: number;
+  percentage_completed_md?: number;
+  sookshma_periods?: KPDashaPeriod[];
+  pran_periods?: KPDashaPeriod[];
+}
+
+export interface DashaSandhiChidraInfo {
+  is_in_chidra_dasha: boolean;
+  is_in_dasha_sandhi: boolean;
+  chidra_message: string;
+  sandhi_message: string;
+  current_md_lord: string;
+  next_md_lord: string;
+  transition_date: string;
+  days_to_transition: number;
+  alert_severity: "none" | "warning" | "critical";
+  precautions: string[];
+  remedial_measures: string[];
+}
+
+export interface PersonalizedDashaPhalaItem {
+  planet: string;
+  lagna: string;
+  functional_nature: string;
+  houses_owned: number[];
+  house_placed: number;
+  sign_placed: string;
+  dignity: string;
+  is_retrograde: boolean;
+  favorability_score: number;
+  overall_impact: string;
+  career_impact: string;
+  wealth_impact: string;
+  relationship_impact: string;
+  health_impact: string;
+  gemstone_warning: string;
+  recommended_remedy: string;
+}
+
+export interface YoginiPeriodItem {
+  name: string;
+  ruler_planet: string;
+  duration_years: number;
+  start_date: string;
+  end_date: string;
+  is_current: boolean;
+  nature: string;
+  significance: string;
+  sub_periods?: YoginiPeriodItem[];
+}
+
+export interface YoginiDashaSystem {
+  birth_nakshatra: string;
+  starting_yogini: string;
+  balance_str: string;
+  current_yogini: string;
+  current_sub_yogini: string;
+  current_cycle_number: number;
+  periods: YoginiPeriodItem[];
+  verdict: string;
+}
+
+export interface DashaTransitSynergy {
+  md_lord: string;
+  md_transit_sign: string;
+  md_transit_house_from_moon: number;
+  md_transit_nature: string;
+  ad_lord: string;
+  ad_transit_sign: string;
+  ad_transit_house_from_moon: number;
+  ad_transit_nature: string;
+  sade_sati_active: boolean;
+  sade_sati_phase: string;
+  sade_sati_description: string;
+  synergy_verdict: string;
+  synergy_score: number;
+}
+
+export interface DashaTimelineSegment {
+  lord: string;
+  start_date: string;
+  end_date: string;
+  age_start: number;
+  age_end: number;
+  duration_years: number;
+  nature: "favorable" | "neutral" | "challenging";
+  favorability_score: number;
+  theme: string;
+  is_current: boolean;
 }
 
 export interface KPCalculateResult {
@@ -659,6 +771,14 @@ export interface KPCalculateResult {
   badhaka_maraka?: KPBadhakaMarakaInfo;
   horary_details?: KPHoraryInfo;
   remedies?: KPRemedyItem[];
+
+  // Advanced Dasha Capabilities
+  current_running_dasha?: CurrentRunningDashaInfo;
+  dasha_sandhi_chidra?: DashaSandhiChidraInfo;
+  personalized_dasha_phala?: PersonalizedDashaPhalaItem[];
+  yogini_dasha?: YoginiDashaSystem;
+  dasha_transit_synergy?: DashaTransitSynergy;
+  dasha_life_timeline?: DashaTimelineSegment[];
 
   selected_language: AstrologyLanguage;
   translations: Record<string, any>;
