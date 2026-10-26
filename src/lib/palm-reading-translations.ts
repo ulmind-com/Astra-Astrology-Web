@@ -53,6 +53,11 @@ export interface PalmTranslations {
     overview: string;
     timeline: string;
     sacred_marks: string;
+    archetype: string;
+    marriage: string;
+    loops: string;
+    medical: string;
+    kundli_sync: string;
     lines: string;
     forecasts: string;
     details: string;
@@ -130,6 +135,11 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
       overview: "সামগ্রিক বিবরণ",
       timeline: "আয়ু ও কালক্রম",
       sacred_marks: "পবিত্র চিহ্ন ও যোগ",
+      archetype: "স্বভাব ও প্রকৃতি",
+      marriage: "বিবাহ ও দাম্পত্য",
+      loops: "চর্মরেখা লুপ",
+      medical: "স্বাস্থ্য ও আয়ুর্বেদ",
+      kundli_sync: "কুণ্ডলী ও গ্রহ যোগ",
       lines: "রেখাসমূহ",
       forecasts: "ভবিষ্যদ্বাণী",
       details: "জ্যামিতিক পরিমাপ",
@@ -289,6 +299,11 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
       overview: "समग्र विवरण",
       timeline: "आयु एवं कालक्रम",
       sacred_marks: "पवित्र चिह्न एवं योग",
+      archetype: "प्रकृति और स्वभाव",
+      marriage: "विवाह एवं संबंध",
+      loops: "त्वचा-रेखा लूप",
+      medical: "स्वास्थ्य एवं आयुर्वेद",
+      kundli_sync: "कुंडली एवं ग्रह संरेखण",
       lines: "हस्तरेखाएं",
       forecasts: "भविष्यवाणी",
       details: "माप और अनुपात",
@@ -448,6 +463,11 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
       overview: "Overview",
       timeline: "Age Timeline",
       sacred_marks: "Sacred Marks",
+      archetype: "Vedic Archetype",
+      marriage: "Marriage Cards",
+      loops: "Dermatoglyphic Loops",
+      medical: "Medical Chirology",
+      kundli_sync: "Kundli-Palm Sync",
       lines: "Palm Creases",
       forecasts: "Life Forecasts",
       details: "Measurements",

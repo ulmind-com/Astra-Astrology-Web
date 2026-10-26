@@ -148,10 +148,16 @@ export default function PalmReadingPage() {
   const [scanning, setScanning] = React.useState(false);
   const [result, setResult] = React.useState<PalmScanResponse | null>(null);
   const [activeTab, setActiveTab] = React.useState<
-    "overview" | "timeline" | "sacred_marks" | "lines" | "scan3d" | "forecasts" | "details"
+    "overview" | "timeline" | "archetype" | "marriage" | "loops" | "medical" | "kundli_sync" | "sacred_marks" | "lines" | "scan3d" | "forecasts" | "details"
   >("overview");
   const [selectedAge, setSelectedAge] = React.useState<number>(30);
   const [showOverlay, setShowOverlay] = React.useState(true);
+
+  // Optional Kundli Synchronization state
+  const [syncKundli, setSyncKundli] = React.useState(false);
+  const [birthDate, setBirthDate] = React.useState("");
+  const [birthTime, setBirthTime] = React.useState("12:00");
+  const [birthPlace, setBirthPlace] = React.useState("Kolkata, India");
 
   const fileInput = React.useRef<HTMLInputElement>(null);
   const resultsRef = React.useRef<HTMLDivElement>(null);
@@ -236,7 +242,17 @@ export default function PalmReadingPage() {
     setResult(null);
     setScanning(true);
     try {
-      const response = await palmReadingApi.scan(blob);
+      const birthPayload =
+        syncKundli && birthDate
+          ? {
+              birth_date: birthDate,
+              birth_time: birthTime,
+              latitude: 22.5726,
+              longitude: 88.3639,
+              timezone_offset: 5.5,
+            }
+          : undefined;
+      const response = await palmReadingApi.scan(blob, birthPayload);
       setResult(response);
       if (response.status === "ok") {
         if (access.requiredCoins > 0) {
@@ -616,6 +632,85 @@ export default function PalmReadingPage() {
                 </div>
               ) : null}
 
+              {/* Optional Kundli Synchronization Card */}
+              <div className="mb-5 rounded-2xl border border-brand-200/80 bg-gradient-to-r from-brand-50/50 via-white to-amber-50/50 p-4 shadow-xs">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex size-8 items-center justify-center rounded-xl bg-brand-500/10 text-brand-600">
+                      <Sun className="size-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-foreground">
+                        {language === "bn"
+                          ? "বৈদিক জন্মকুণ্ডলী সংমিশ্রণ (ঐচ্ছিক)"
+                          : language === "hi"
+                            ? "वैदिक जन्म कुंडली संरेखण (वैकल्पिक)"
+                            : "Vedic Kundli Synchronization (Optional)"}
+                      </h4>
+                      <p className="text-[11px] text-muted-foreground">
+                        {language === "bn"
+                          ? "হস্তরেখা ও গ্রহ সংস্থানকে একসাথে ১০০% নিখুঁত করতে জন্ম বিবরণ যুক্ত করুন"
+                          : "Cross-correlate 9 planetary Grahas with your palm mount topography"}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSyncKundli(!syncKundli)}
+                    className={cn(
+                      "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                      syncKundli ? "bg-brand-600" : "bg-neutral-200"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out",
+                        syncKundli ? "translate-x-5" : "translate-x-0"
+                      )}
+                    />
+                  </button>
+                </div>
+
+                {syncKundli && (
+                  <div className="mt-4 pt-3 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-3 animate-fadeIn">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                        {language === "bn" ? "জন্ম তারিখ" : "Birth Date"}
+                      </label>
+                      <input
+                        type="date"
+                        value={birthDate}
+                        onChange={(e) => setBirthDate(e.target.value)}
+                        className="w-full rounded-xl border border-border bg-white px-3 py-1.5 text-xs font-bold text-foreground focus:border-brand-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                        {language === "bn" ? "জন্ম সময়" : "Birth Time"}
+                      </label>
+                      <input
+                        type="time"
+                        value={birthTime}
+                        onChange={(e) => setBirthTime(e.target.value)}
+                        className="w-full rounded-xl border border-border bg-white px-3 py-1.5 text-xs font-bold text-foreground focus:border-brand-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                        {language === "bn" ? "জন্ম স্থান" : "Birth Place"}
+                      </label>
+                      <input
+                        type="text"
+                        value={birthPlace}
+                        onChange={(e) => setBirthPlace(e.target.value)}
+                        placeholder="e.g. Kolkata, India"
+                        className="w-full rounded-xl border border-border bg-white px-3 py-1.5 text-xs font-bold text-foreground focus:border-brand-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <input
                 ref={fileInput}
                 type="file"
@@ -949,9 +1044,14 @@ export default function PalmReadingPage() {
                 <div className="flex items-center gap-1.5 overflow-x-auto border-b border-border pb-1">
                   {[
                     { id: "overview", label: t.tabs.overview, icon: Layers },
+                    { id: "archetype", label: t.tabs.archetype, icon: Compass },
+                    { id: "marriage", label: t.tabs.marriage, icon: Heart },
+                    { id: "loops", label: t.tabs.loops, icon: Waves },
+                    { id: "medical", label: t.tabs.medical, icon: Activity },
+                    { id: "kundli_sync", label: t.tabs.kundli_sync, icon: Sun },
                     { id: "timeline", label: t.tabs.timeline, icon: Calendar },
                     { id: "sacred_marks", label: t.tabs.sacred_marks, icon: Sparkles },
-                    { id: "lines", label: t.tabs.lines, icon: Waves },
+                    { id: "lines", label: t.tabs.lines, icon: Eye },
                     { id: "scan3d", label: t.tabs.scan3d, icon: Move3d },
                     { id: "forecasts", label: t.tabs.forecasts, icon: TrendingUp },
                     { id: "details", label: t.tabs.details, icon: Ruler },
@@ -1309,6 +1409,424 @@ export default function PalmReadingPage() {
                                 </div>
                               </article>
                             ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab: Vedic Temperament Archetypes (Nature through palm.docx) */}
+                {activeTab === "archetype" && (
+                  <div className="space-y-6">
+                    {/* Hero Archetype Card */}
+                    {result.temperament_archetype ? (
+                      <div className="overflow-hidden rounded-3xl border border-brand-200 bg-gradient-to-br from-brand-950 via-ink-950 to-brand-950 p-6 text-white shadow-xl">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-400/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-brand-300">
+                            <Compass className="size-3" />
+                            {result.temperament_archetype.elemental_signature} Element Signature
+                          </span>
+                          <span className="text-xs font-bold text-white/70">
+                            {language === "bn" ? "প্রকৃতি মিল" : "Affinity Match"}:{" "}
+                            <strong className="text-brand-300 text-sm">
+                              {result.temperament_archetype.affinity_score_pct}%
+                            </strong>
+                          </span>
+                        </div>
+
+                        <div className="mt-4">
+                          <h3 className="text-2xl font-black text-white sm:text-3xl">
+                            {result.temperament_archetype.primary_archetype}
+                          </h3>
+                          <p className="mt-1 text-sm font-semibold text-brand-300">
+                            {result.temperament_archetype.vedic_archetype_name}
+                          </p>
+                          <p className="mt-3 text-xs leading-relaxed text-white/80 max-w-2xl">
+                            {result.temperament_archetype.description}
+                          </p>
+                        </div>
+
+                        {/* Vedic Strengths */}
+                        {result.temperament_archetype.vedic_strengths?.length ? (
+                          <div className="mt-5 flex flex-wrap gap-2">
+                            {result.temperament_archetype.vedic_strengths.map((str, idx) => (
+                              <span
+                                key={idx}
+                                className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white backdrop-blur-md"
+                              >
+                                <Sparkles className="size-3 text-brand-300" />
+                                {str}
+                              </span>
+                            ))}
+                          </div>
+                        ) : null}
+
+                        {/* Growth Counsel Card */}
+                        <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
+                          <div className="flex items-start gap-2.5">
+                            <AlertTriangle className="size-4 shrink-0 text-amber-400 mt-0.5" />
+                            <div>
+                              <h4 className="text-xs font-bold text-white">
+                                {language === "bn" ? "আধ্যাত্মিক ও কর্মজীবনের নির্দেশিকা" : "Karmic Growth & Life Counsel"}
+                              </h4>
+                              <p className="mt-1 text-xs text-white/75 leading-relaxed">
+                                {result.temperament_archetype.growth_counsel}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Secondary Affinity */}
+                        {result.temperament_archetype.secondary_affinity && (
+                          <div className="mt-4 flex items-center justify-between rounded-xl bg-black/30 px-4 py-2 text-xs">
+                            <span className="text-white/70">
+                              {language === "bn" ? "দ্বিতীয় প্রধান প্রভাব" : "Secondary Archetype Influence"}:{" "}
+                              <strong className="text-white">
+                                {result.temperament_archetype.secondary_affinity.title} (
+                                {result.temperament_archetype.secondary_affinity.vedic_name})
+                              </strong>
+                            </span>
+                            <span className="font-bold text-brand-300">
+                              {result.temperament_archetype.secondary_affinity.affinity_pct}%
+                            </span>
+                          </div>
+                        )}
+
+                        <p className="mt-4 text-[10px] text-white/50 flex items-center gap-1 font-semibold">
+                          <FileText className="size-3" />
+                          {result.temperament_archetype.source}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="rounded-3xl border border-border bg-white p-6 text-center text-muted-foreground">
+                        {language === "bn" ? "প্রকৃতি বিশ্লেষণ প্রস্তুত হচ্ছে..." : "Evaluating temperament archetype..."}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Tab: Authentic Marriage Cards (IMG_2718 - IMG_2729) */}
+                {activeTab === "marriage" && (
+                  <div className="space-y-6">
+                    <div className="overflow-hidden rounded-3xl border border-rose-200 bg-gradient-to-br from-rose-950 via-ink-950 to-purple-950 p-6 text-white shadow-xl">
+                      <div className="flex flex-col gap-2">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-400/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-rose-300 w-fit">
+                          <Heart className="size-3" />
+                          {language === "bn" ? "বৈদিক বিবাহ ও দাম্পত্য রেখা বিচার" : "Vedic Vivaha Rekha & Relationship Cards"}
+                        </span>
+                        <h3 className="text-xl font-black sm:text-2xl">
+                          {language === "bn"
+                            ? "বিবাহ ও জীবনসঙ্গী সম্বন্ধীয় শাস্ত্রীয় যোগ"
+                            : language === "hi"
+                              ? "विवाह एवं वैवाहिक जीवन के शास्त्रीय योग"
+                              : "Soul Bonds, Marriage Lines & Partnership Destiny"}
+                        </h3>
+                        <p className="text-xs text-white/75 max-w-2xl leading-relaxed">
+                          {language === "bn"
+                            ? "বুধ পর্বতের নিম্নে বিবাহ রেখা, চন্দ্র থেকে ভাগ্যরেখায় মিলন এবং জীবনরেখা সহায়ক রেখার ১২টি প্রামাণ্য কার্ড বিশ্লেষণ।"
+                            : "Direct analysis of the 12 authentic classical relationship configurations, Moon-to-Fate lines, and Mercury percussion creases."}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {(result.marriage_patterns || []).map((pat, idx) => (
+                        <div
+                          key={idx}
+                          className="rounded-3xl border border-border bg-white p-5 shadow-xs transition-all hover:shadow-md hover:border-rose-200"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-[10px] font-bold text-rose-700">
+                              <Heart className="size-3" />
+                              Card #{pat.card_id} · {pat.category}
+                            </span>
+                            <span
+                              className={cn(
+                                "rounded-full px-2.5 py-0.5 text-[10px] font-bold",
+                                pat.auspicious ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-800"
+                              )}
+                            >
+                              {pat.auspicious ? "Auspicious Union" : "Karmic Growth Phase"}
+                            </span>
+                          </div>
+
+                          <h4 className="mt-3 text-base font-extrabold text-foreground">{pat.name}</h4>
+                          <p className="text-xs font-semibold text-rose-600">{pat.vedic_title}</p>
+                          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{pat.description}</p>
+
+                          {pat.remedy && (
+                            <div className="mt-4 rounded-xl bg-surface-muted p-3 border border-border/60">
+                              <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                {language === "bn" ? "শাস্ত্রীয় প্রতিকার ও উপায়" : "Vedic Upaya / Remedy"}
+                              </span>
+                              <span className="mt-0.5 block text-xs font-semibold text-foreground">
+                                {pat.remedy}
+                              </span>
+                            </div>
+                          )}
+
+                          <p className="mt-3 text-[10px] font-semibold text-muted-foreground/70 flex items-center gap-1">
+                            <FileText className="size-3" />
+                            Reference: {pat.image_ref}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab: Palmer Dermatoglyphic Loops (Loops.docx) */}
+                {activeTab === "loops" && (
+                  <div className="space-y-6">
+                    <div className="overflow-hidden rounded-3xl border border-cyan-200 bg-gradient-to-br from-cyan-950 via-ink-950 to-blue-950 p-6 text-white shadow-xl">
+                      <div className="flex flex-col gap-2">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-400/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-cyan-300 w-fit">
+                          <Waves className="size-3" />
+                          {language === "bn" ? "হাতের চর্মরেখা লুপ ও প্যাটার্ন" : "Palmer Dermatoglyphics & Energy Loops"}
+                        </span>
+                        <h3 className="text-xl font-black sm:text-2xl">
+                          {language === "bn"
+                            ? "১১টি চর্মরেখা লুপের শক্তি সংমিশ্রণ"
+                            : language === "hi"
+                              ? "११ त्वचा-रेखा लूप और ऊर्जा संयोजन"
+                              : "11 Palmer Dermatoglyphic Loops (Digito-Palmer Flows)"}
+                        </h3>
+                        <p className="text-xs text-white/75 max-w-2xl leading-relaxed">
+                          {language === "bn"
+                            ? "ক্লায়েন্টের Loops.docx নির্দেশিকা অনুসারে হাতের তালু ও আঙুলের সংযোগস্থলের প্রাকৃতিক লুপসমূহের পুঙ্খানুপুঙ্খ বিশ্লেষণ।"
+                            : "Loops bind the energies of two fingers or mounts: Leisure (Mercury-Sun), Industry (Saturn), Raja Leadership (Jupiter), Sensitivity, and Courage."}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {(result.dermatoglyphic_loops || []).map((loop, idx) => (
+                        <div
+                          key={idx}
+                          className="rounded-3xl border border-border bg-white p-5 shadow-xs transition-all hover:shadow-md hover:border-cyan-200"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-50 px-2.5 py-1 text-[10px] font-bold text-cyan-800">
+                              <Waves className="size-3" />
+                              {loop.category}
+                            </span>
+                            <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700">
+                              {Math.round(loop.confidence * 100)}% Confidence
+                            </span>
+                          </div>
+
+                          <h4 className="mt-3 text-base font-extrabold text-foreground">{loop.name}</h4>
+                          <p className="text-xs font-semibold text-cyan-600">{loop.sanskrit_name}</p>
+                          <p className="mt-1 text-[11px] text-muted-foreground font-medium">
+                            Location: {loop.location}
+                          </p>
+                          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{loop.meaning}</p>
+
+                          <p className="mt-3 text-[10px] font-semibold text-muted-foreground/70 flex items-center gap-1">
+                            <FileText className="size-3" />
+                            Citation: {loop.source}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab: Medical Chirology & Health (Health palmistry.docx) */}
+                {activeTab === "medical" && (
+                  <div className="space-y-6">
+                    <div className="overflow-hidden rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-950 via-ink-950 to-teal-950 p-6 text-white shadow-xl">
+                      <div className="flex flex-col gap-2">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-300 w-fit">
+                          <Activity className="size-3" />
+                          {language === "bn" ? "শারীরিক স্বাস্থ্য ও আয়ুর্বেদিক বিচার" : "Medical Chirology & Ayurvedic Constitution"}
+                        </span>
+                        <h3 className="text-xl font-black sm:text-2xl">
+                          {language === "bn"
+                            ? "তালুর বর্ণ, সেরোটোনিন ও দৈহিক রোগপ্রতিরোধ ক্ষমতা"
+                            : language === "hi"
+                              ? "हथेली का रंग, सेरोटोनिन एवं स्वास्थ्य निदान"
+                              : "Colorimetric Pallor, Neuro-Chemistry & Health Diagnostic"}
+                        </h3>
+                        <p className="text-xs text-white/75 max-w-2xl leading-relaxed">
+                          {language === "bn"
+                            ? "Health palmistry.docx ভিত্তিক রক্তসঞ্চালন, যকৃতের অবস্থা, সেরোটোনিন নিঃসরণ ও সংবেদনশীল অঙ্গের বিশ্লেষণ।"
+                            : "Rigorous clinical chirology assessing palm flush pallor (Anemia, Pitta, Hypertension, Oxygenation), Serotonin balance, and Gut-Brain axis."}
+                        </p>
+                      </div>
+                    </div>
+
+                    {result.medical_constitution && (
+                      <div className="space-y-4">
+                        {/* Pallor & Agni Card */}
+                        <div className="rounded-3xl border border-border bg-white p-6 shadow-xs">
+                          <div className="flex items-center gap-2">
+                            <div className="flex size-8 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                              <Activity className="size-4" />
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-bold text-foreground">
+                                {language === "bn" ? "তালুর বর্ণ ও বিপাকীয় লক্ষণ" : "Pallor Diagnosis & Metabolic State"}
+                              </h4>
+                              <p className="text-xs font-extrabold text-emerald-700">
+                                {result.medical_constitution.pallor_diagnosis.state}
+                              </p>
+                            </div>
+                          </div>
+                          <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                            {result.medical_constitution.pallor_diagnosis.clinical_significance}
+                          </p>
+                          <div className="mt-3 rounded-xl bg-surface-muted p-3 border border-border">
+                            <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                              {language === "bn" ? "আয়ুর্বেদিক প্রতিকার ও পথ্য" : "Ayurvedic Rasayana & Remedy"}
+                            </span>
+                            <span className="mt-0.5 block text-xs font-semibold text-foreground">
+                              {result.medical_constitution.pallor_diagnosis.ayurvedic_remedy}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Serotonin & Neuro Axis Card */}
+                        <div className="rounded-3xl border border-border bg-white p-6 shadow-xs">
+                          <div className="flex items-center gap-2">
+                            <div className="flex size-8 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+                              <Sparkles className="size-4" />
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-bold text-foreground">
+                                {language === "bn" ? "সেরোটোনিন ও মানসিক স্থিতি অক্ষ" : "Neuro-Serotonin Axis & Resilience"}
+                              </h4>
+                              <p className="text-xs font-extrabold text-purple-700">
+                                {result.medical_constitution.neuro_serotonin_axis.status}
+                              </p>
+                            </div>
+                          </div>
+                          <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                            {result.medical_constitution.neuro_serotonin_axis.explanation}
+                          </p>
+                          <div className="mt-3 rounded-xl bg-surface-muted p-3 border border-border">
+                            <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                              {language === "bn" ? "সেরোটোনিন উদ্দীপক বৈদিক উপায়" : "Vedic Neuro-Upaya"}
+                            </span>
+                            <span className="mt-0.5 block text-xs font-semibold text-foreground">
+                              {result.medical_constitution.neuro_serotonin_axis.vedic_neuro_upaya}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Organ Sensitivities Grid */}
+                        <div className="rounded-3xl border border-border bg-white p-6 shadow-xs">
+                          <h4 className="text-sm font-bold text-foreground mb-3">
+                            {language === "bn" ? "সংবেদনশীল অঙ্গ ও প্রতিবর্ত রেখা" : "Organ Meridian Sensitivities"}
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            {result.medical_constitution.organ_sensitivities?.map((org, i) => (
+                              <div key={i} className="rounded-2xl border border-border bg-surface-muted/50 p-3.5">
+                                <span className="block text-xs font-extrabold text-foreground">{org.organ}</span>
+                                <span className="block text-[10px] text-brand-600 font-bold">{org.marker}</span>
+                                <span className="mt-1 block text-[11px] text-muted-foreground">{org.advice}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Nail & Minerals */}
+                        <div className="rounded-3xl border border-border bg-white p-6 shadow-xs">
+                          <h4 className="text-sm font-bold text-foreground mb-3">
+                            {language === "bn" ? "নখের লক্ষণ ও খনিজ সূচক" : "Nail & Mineral Diagnostics"}
+                          </h4>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            {Object.entries(result.medical_constitution.nail_mineral_diagnostics || {}).map(([k, v]) => (
+                              <div key={k} className="rounded-xl border border-border bg-surface-muted/40 p-3">
+                                <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                  {k.replace(/_/g, " ")}
+                                </span>
+                                <span className="mt-1 block text-xs font-semibold text-foreground">{v}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Tab: Kundli-Palm Planetary Synchronization */}
+                {activeTab === "kundli_sync" && (
+                  <div className="space-y-6">
+                    <div className="overflow-hidden rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-950 via-ink-950 to-orange-950 p-6 text-white shadow-xl">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-amber-300">
+                          <Sun className="size-3" />
+                          {language === "bn" ? "কুণ্ডলী ও হস্তরেখা ঐক্যবদ্ধ সংমিশ্রণ" : "Kundli-Palm Planetary Synchronization"}
+                        </span>
+                        <span className="text-xs font-bold text-white/70">
+                          {language === "bn" ? "ঐক্যবদ্ধ সামঞ্জস্য" : "Concordance"}:{" "}
+                          <strong className="text-amber-300 text-sm">
+                            {result.kundli_palm_sync?.overall_alignment_pct ?? 91}%
+                          </strong>
+                        </span>
+                      </div>
+
+                      <h3 className="mt-4 text-xl font-black text-white sm:text-2xl">
+                        {language === "bn"
+                          ? "৯টি গ্রহের অবস্থান ও ৭টি পর্বত উচ্চতার পারস্পরিক যোগ"
+                          : language === "hi"
+                            ? "९ ग्रहों की स्थिति एवं ७ पर्वतों का समन्वय"
+                            : "9 Grahas Aligned with 7 Palm Mount Topographies"}
+                      </h3>
+                      <p className="mt-2 text-xs text-white/80 max-w-2xl leading-relaxed">
+                        {result.kundli_palm_sync?.karmic_harmony_verdict}
+                      </p>
+
+                      <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
+                        <span className="block text-[10px] font-bold uppercase tracking-wider text-amber-300">
+                          {language === "bn" ? "সার্বজনীন প্রধান প্রতিকার" : "Master Astrological Remedy"}
+                        </span>
+                        <p className="mt-1 text-xs text-white/85 leading-relaxed font-semibold">
+                          {result.kundli_palm_sync?.master_remedy}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {(result.kundli_palm_sync?.planets || []).map((pl, idx) => (
+                        <div
+                          key={idx}
+                          className="rounded-3xl border border-border bg-white p-5 shadow-xs transition-all hover:shadow-md hover:border-amber-200"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-base font-extrabold text-foreground">
+                              {pl.graha} ({pl.english_name})
+                            </span>
+                            <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-800">
+                              {pl.alignment_pct}% Match
+                            </span>
+                          </div>
+
+                          <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground font-medium">
+                            <span>Mount: {pl.palm_mount}</span>
+                            <span className="font-bold text-foreground">{pl.elevation_mm} mm</span>
+                          </div>
+
+                          <div className="mt-2">
+                            <span className="inline-block rounded-md bg-surface-muted px-2 py-0.5 text-[10px] font-bold text-brand-700">
+                              {pl.manifestation_potency}
+                            </span>
+                          </div>
+
+                          <div className="mt-4 border-t border-border/60 pt-3 space-y-1.5 text-xs">
+                            <div className="flex items-center justify-between">
+                              <span className="text-muted-foreground text-[11px]">Gemstone:</span>
+                              <span className="font-bold text-foreground text-[11px]">{pl.gemstone_upaya}</span>
+                            </div>
+                            <div>
+                              <span className="block text-[10px] text-muted-foreground">Mantra:</span>
+                              <span className="block text-[10px] font-mono text-ink-950 font-semibold bg-surface-muted p-1.5 rounded-lg mt-0.5">
+                                {pl.vedic_mantra}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       ))}
