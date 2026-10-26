@@ -39,9 +39,14 @@ export interface KundliMatchingTranslations {
 
   tabs: {
     dosha: string;
+    dashakoot: string;
+    cancellations: string;
+    papasamya: string;
+    avakahada: string;
     forecast: string;
     planetDetails: string;
     lagnaCharts: string;
+    personality: string;
   };
 
   metricCards: {
@@ -157,10 +162,15 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
     isNotManglik: "মাঙ্গলিক নন",
 
     tabs: {
-      dosha: "দোষ ও অষ্টকূট",
-      forecast: "দাম্পত্য ভবিষ্যৎ ও শুভ সময়",
+      dosha: "অষ্টকূট (৩৬ গুণ)",
+      dashakoot: "দশকূট (১০ পরুথাম)",
+      cancellations: "দোষভঙ্গ ও মহাদোষ",
+      papasamya: "পাপসাম্য সামঞ্জস্য",
+      avakahada: "অবকহড়া ও পঞ্চাঙ্গ",
+      forecast: "দাম্পত্য ভবিষ্যৎ",
       planetDetails: "গ্রহের অবস্থান",
-      lagnaCharts: "লগ্ন কুন্ডলী",
+      lagnaCharts: "কুন্ডলী চক্র (D1/D9)",
+      personality: "স্বভাব ও ব্যক্তিত্ব",
     },
 
     metricCards: {
@@ -357,10 +367,15 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
     isNotManglik: "मांगलिक नहीं है",
 
     tabs: {
-      dosha: "दोष व अष्टकूट",
-      forecast: "दांपत्य भविष्य एवं शुभ समय",
+      dosha: "अष्टकूट (36 गुण)",
+      dashakoot: "दशकूट (10 पोरुथम)",
+      cancellations: "दोषभंग व महादोष",
+      papasamya: "पापसाम्य संतुलन",
+      avakahada: "अवकहड़ा व पंचांग",
+      forecast: "दांपत्य भविष्य",
       planetDetails: "ग्रह स्थिति",
-      lagnaCharts: "लग्न कुंडली",
+      lagnaCharts: "कुंडली चक्र (D1/D9)",
+      personality: "स्वभाव व व्यक्तित्व",
     },
 
     metricCards: {
@@ -557,10 +572,15 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
     isNotManglik: "Not a Manglik",
 
     tabs: {
-      dosha: "Dosha",
-      forecast: "Marriage Forecast & Timing",
+      dosha: "Ashtakoot (36 Gunas)",
+      dashakoot: "Dashakoot (10 Poruthams)",
+      cancellations: "Dosha Cancellations",
+      papasamya: "Papasamya Balance",
+      avakahada: "Avakahada Matrix",
+      forecast: "Life Forecast",
       planetDetails: "Planet Details",
-      lagnaCharts: "Lagna Charts",
+      lagnaCharts: "Kundli Charts (D1/D9)",
+      personality: "Personality & Traits",
     },
 
     metricCards: {
