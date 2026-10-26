@@ -33,6 +33,15 @@ import {
   Droplets,
   Wind,
   Mountain,
+  Zap,
+  Target,
+  Layers,
+  Eye,
+  BookOpen,
+  Award,
+  Scale,
+  Star,
+  ShieldAlert,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -51,6 +60,13 @@ import type {
   DailySignHoroscope,
   HoraItem,
   PersonalizedNakshatraProfile,
+  ChoghadiyaItem,
+  PanchakStatus,
+  PlanetaryDrishtiItem,
+  AshtakavargaTransitPoints,
+  NumerologyDailySynergy,
+  BiorhythmHour,
+  DualTransitInsight,
 } from "@/types";
 
 // 12 Zodiac signs metadata
@@ -149,6 +165,11 @@ function HoroscopeContent() {
   // 24 Horas Timeline state
   const [showHoras, setShowHoras] = React.useState<boolean>(false);
   const [horaViewPeriod, setHoraViewPeriod] = React.useState<"day" | "night">("day");
+  const [showChoghadiya, setShowChoghadiya] = React.useState<boolean>(false);
+  const [choghadiyaViewPeriod, setChoghadiyaViewPeriod] = React.useState<"day" | "night">("day");
+  const [showBiorhythm, setShowBiorhythm] = React.useState<boolean>(false);
+  const [selectedLagna, setSelectedLagna] = React.useState<number | null>(null);
+  const [showClientRules, setShowClientRules] = React.useState<boolean>(false);
 
   // Copied mantra toast state
   const [copiedMantra, setCopiedMantra] = React.useState<boolean>(false);
@@ -172,7 +193,15 @@ function HoroscopeContent() {
 
   // Fetch daily horoscope
   const fetchHoroscope = React.useCallback(
-    async (date: string, lang: AstrologyLanguage, nakIdx: number | null, bDate?: string, bTime?: string) => {
+    async (
+      date: string,
+      lang: AstrologyLanguage,
+      nakIdx: number | null,
+      bDate?: string,
+      bTime?: string,
+      bLagna?: number | null,
+      activeSign?: number
+    ) => {
       if (horoscopeFeature && !horoscopeFeature.enabled) {
         setLoading(false);
         setError(
@@ -200,6 +229,12 @@ function HoroscopeContent() {
           payload.birth_date = bDate;
           if (bTime) payload.birth_time = bTime;
         }
+        if (bLagna !== null && bLagna !== undefined) {
+          payload.birth_lagna_index = bLagna;
+        }
+        if (activeSign !== undefined && activeSign !== null) {
+          payload.birth_rashi_index = activeSign;
+        }
 
         const data = await astrologyApi.dailyHoroscope(payload);
         setHoroscopeData(data);
@@ -222,8 +257,25 @@ function HoroscopeContent() {
   );
 
   React.useEffect(() => {
-    fetchHoroscope(selectedDate, language, selectedNakshatra, birthDateInput, birthTimeInput);
-  }, [fetchHoroscope, selectedDate, language, selectedNakshatra, birthDateInput, birthTimeInput]);
+    fetchHoroscope(
+      selectedDate,
+      language,
+      selectedNakshatra,
+      birthDateInput,
+      birthTimeInput,
+      selectedLagna,
+      activeSignIndex
+    );
+  }, [
+    fetchHoroscope,
+    selectedDate,
+    language,
+    selectedNakshatra,
+    birthDateInput,
+    birthTimeInput,
+    selectedLagna,
+    activeSignIndex,
+  ]);
 
   // Sync active sign from query param if changed
   React.useEffect(() => {
@@ -305,6 +357,21 @@ function HoroscopeContent() {
       taraBalaBadge: "নবতারা বল",
       sadeSatiLabel: "শনি গোচর / সাড়ে সাতি",
       guruLabel: "বৃহস্পতি গোচর",
+      choghadiyaBtn: "১৬ বৈদিক চৌঘড়িয়া",
+      choghadiyaTitle: "১৬ বৈদিক চৌঘড়িয়া মুহূর্ত (অমৃত, শুভ, লাভ, চল, রোগ, কাল, উদ্বেগ)",
+      choghadiyaDesc: "সূর্যোদয় ও সূর্যাস্তের নিখুঁত জ্যোতির্বৈজ্ঞানিক বিভাজন অনুসারে দিন ও রাতের ১৬টি মুহূর্ত।",
+      dayChoghadiya: "দিবা চৌঘড়িয়া (দিনের ৮ মুহূর্ত)",
+      nightChoghadiya: "রাত্রি চৌঘড়িয়া (রাতের ৮ মুহূর্ত)",
+      biorhythmBtn: "২৪-ঘণ্টা কসমিক বায়োরিদম",
+      biorhythmTitle: "২৪-ঘণ্টার মহাজাগতিক শক্তি বায়োরিদম তরঙ্গ",
+      biorhythmDesc: "হোরা, চৌঘড়িয়া ও অষ্টকবর্গের সম্মিলিত সূচকে আপনার দৈনিক শারীরিক ও মানসিক শক্তির পরিবর্তন।",
+      panchakTitle: "বৈদিক পঞ্চক স্থিতি (Dhanishta to Revati)",
+      ashtakavargaTitle: "পরাশর অষ্টকবর্গ গোচর বল",
+      numerologySynergyTitle: "দৈনিক সংখ্যাতত্ত্ব ও বার অধিপতি সুরসংগতি (Client §3.5)",
+      dualTransitTitle: "দ্বৈত গোচর বিচার (চন্দ্র মনস্তত্ত্ব + লগ্ন জাগতিক সাফল্য)",
+      clientRulesTitle: "ক্লায়েন্ট রাশি শাস্ত্রীয় গুণাবলী ও শ্রেণিবিভাগ (01.pdf)",
+      drishtiTitle: "চন্দ্র গোচরে গ্রহের দৃষ্টি ও বিশেষ শুভাশুভ যোগ",
+      selectLagna: "জন্ম লগ্ন নির্বাচন করুন",
     },
     hi: {
       title: "दैनिक राशिफल",
@@ -429,6 +496,21 @@ function HoroscopeContent() {
       taraBalaBadge: "Navatara Bala",
       sadeSatiLabel: "Saturn Transit / Sade Sati",
       guruLabel: "Jupiter Transit",
+      choghadiyaBtn: "16 Vedic Choghadiyas",
+      choghadiyaTitle: "16 Vedic Choghadiya Muhurats (Amrit, Shubh, Labh, Char, Rog, Kaal, Udveg)",
+      choghadiyaDesc: "Exact division of daylight and nighttime into 16 auspicious & challenging periods.",
+      dayChoghadiya: "Daytime Choghadiyas (8 Periods)",
+      nightChoghadiya: "Nighttime Choghadiyas (8 Periods)",
+      biorhythmBtn: "24h Cosmic Biorhythm",
+      biorhythmTitle: "24-Hour Cosmic Biorhythm Energy Timeline",
+      biorhythmDesc: "Hour-by-hour vital cosmic energy index synthesized from Hora, Choghadiya & Ashtakavarga.",
+      panchakTitle: "Vedic Panchak Status (Dhanishta to Revati)",
+      ashtakavargaTitle: "Parashara Ashtakavarga Transit Strength",
+      numerologySynergyTitle: "Daily Numerology & Day Lord Synergy (Client §3.5)",
+      dualTransitTitle: "Dual Transit Analysis (Moon Mind + Lagna Manifestation)",
+      clientRulesTitle: "Client Classical Sign Classifications (01.pdf)",
+      drishtiTitle: "Planetary Aspects & Yogas on Transit Moon",
+      selectLagna: "Select Birth Lagna (Ascendant)",
     },
   }[language];
 
@@ -661,10 +743,10 @@ function HoroscopeContent() {
                   </select>
                 </div>
 
-                {/* Method 2: Birth Date & Time to Auto-detect */}
+                {/* Method 2: Birth Date & Time */}
                 <div>
                   <label className="block text-xs font-bold text-[#4D4664] mb-1">
-                    {language === "bn" ? "২. অথবা জন্ম তারিখ ও সময় দিয়ে গণনা করুন:" : "2. Or Auto-Detect from Birth Date & Time:"}
+                    {language === "bn" ? "২. জন্ম তারিখ ও সময় (সংখ্যাতত্ত্ব ও কুষ্ঠির জন্য):" : "2. Birth Date & Time (Numerology & Chart):"}
                   </label>
                   <div className="flex items-center gap-2">
                     <input
@@ -682,6 +764,28 @@ function HoroscopeContent() {
                       className="w-1/2 rounded-xl border border-[#e2d0bf] bg-[#fffaf5] px-2.5 py-1.5 text-xs text-[#4D4664] focus:outline-none focus:ring-1 focus:ring-[#b06d4e]"
                     />
                   </div>
+                </div>
+
+                {/* Method 3: Birth Lagna Selector for Dual Transit */}
+                <div className="md:col-span-2 pt-2 border-t border-[#ebd7c8]/60">
+                  <label className="block text-xs font-bold text-[#4D4664] mb-1">
+                    {language === "bn" ? "৩. জন্ম লগ্ন (দ্বৈত গোচর বিশ্লেষণের জন্য):" : "3. Birth Lagna (For Dual Transit Analysis):"}
+                  </label>
+                  <select
+                    value={selectedLagna !== null ? selectedLagna : ""}
+                    onChange={(e) => {
+                      const val = e.target.value === "" ? null : Number(e.target.value);
+                      setSelectedLagna(val);
+                    }}
+                    className="w-full sm:w-1/2 rounded-xl border border-[#e2d0bf] bg-[#fffaf5] px-3 py-2 text-xs text-[#4D4664] focus:outline-none focus:ring-1 focus:ring-[#b06d4e]"
+                  >
+                    <option value="">-- {t.selectLagna} --</option>
+                    {ZODIAC_LIST.map((z) => (
+                      <option key={z.index} value={z.index}>
+                        {z.symbol} {language === "bn" ? z.bn : language === "hi" ? z.hi : z.en} ({z.sa} • {z.ruler})
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
               </div>
@@ -783,15 +887,94 @@ function HoroscopeContent() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setShowHoras(!showHoras)}
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#b06d4e]/10 text-[#8c5035] border border-[#b06d4e]/30 hover:bg-[#b06d4e]/20 transition-colors font-medium shadow-2xs"
+                    onClick={() => {
+                      setShowHoras(!showHoras);
+                      if (!showHoras) {
+                        setShowChoghadiya(false);
+                        setShowBiorhythm(false);
+                      }
+                    }}
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full border transition-colors font-medium shadow-2xs ${
+                      showHoras ? "bg-[#b06d4e] text-white border-[#b06d4e]" : "bg-[#b06d4e]/10 text-[#8c5035] border-[#b06d4e]/30 hover:bg-[#b06d4e]/20"
+                    }`}
                   >
-                    <Clock className="size-3.5 text-[#b06d4e]" />
+                    <Clock className="size-3.5" />
                     <span>{t.horaBtn}</span>
                     {showHoras ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowChoghadiya(!showChoghadiya);
+                      if (!showChoghadiya) {
+                        setShowHoras(false);
+                        setShowBiorhythm(false);
+                      }
+                    }}
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full border transition-colors font-medium shadow-2xs ${
+                      showChoghadiya ? "bg-[#4D4664] text-white border-[#4D4664]" : "bg-[#4D4664]/10 text-[#4D4664] border-[#4D4664]/30 hover:bg-[#4D4664]/20"
+                    }`}
+                  >
+                    <Sparkles className="size-3.5" />
+                    <span>{t.choghadiyaBtn}</span>
+                    {showChoghadiya ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowBiorhythm(!showBiorhythm);
+                      if (!showBiorhythm) {
+                        setShowHoras(false);
+                        setShowChoghadiya(false);
+                      }
+                    }}
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full border transition-colors font-medium shadow-2xs ${
+                      showBiorhythm ? "bg-emerald-700 text-white border-emerald-700" : "bg-emerald-600/10 text-emerald-800 border-emerald-600/30 hover:bg-emerald-600/20"
+                    }`}
+                  >
+                    <Activity className="size-3.5" />
+                    <span>{t.biorhythmBtn}</span>
+                    {showBiorhythm ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
+                  </button>
                 </div>
               </div>
+
+              {/* Vedic Panchak Status Banner (If Active) */}
+              {horoscopeData.panchang.panchak?.is_panchak && (
+                <div className={`mt-3.5 rounded-xl border p-3 text-xs shadow-2xs ${
+                  horoscopeData.panchang.panchak.severity === "high"
+                    ? "bg-rose-50/80 border-rose-300 text-rose-950"
+                    : horoscopeData.panchang.panchak.severity === "medium"
+                    ? "bg-amber-50/80 border-amber-300 text-amber-950"
+                    : "bg-emerald-50/80 border-emerald-300 text-emerald-950"
+                }`}>
+                  <div className="flex items-start gap-2.5">
+                    <AlertTriangle className={`size-4 shrink-0 mt-0.5 ${
+                      horoscopeData.panchang.panchak.severity === "high" ? "text-rose-600" : "text-amber-600"
+                    }`} />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <strong className="font-bold">
+                          {t.panchakTitle}: {language === "bn" ? horoscopeData.panchang.panchak.panchak_type_bn : horoscopeData.panchang.panchak.panchak_type}
+                        </strong>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.2 rounded-full ${
+                          horoscopeData.panchang.panchak.severity === "high" ? "bg-rose-200 text-rose-900" : "bg-amber-200 text-amber-900"
+                        }`}>
+                          {horoscopeData.panchang.panchak.severity} severity
+                        </span>
+                      </div>
+                      <p className="mt-1 leading-relaxed">
+                        {language === "bn" ? horoscopeData.panchang.panchak.description_bn : horoscopeData.panchang.panchak.description}
+                      </p>
+                      {horoscopeData.panchang.panchak.prohibited_activities?.length > 0 && (
+                        <p className="mt-1.5 font-semibold text-rose-800">
+                          {language === "bn" ? "বর্জনীয় কাজ" : "Caution"}: {horoscopeData.panchang.panchak.prohibited_activities.join(" • ")}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Panchang 5 Limbs Grid */}
               <div className="mt-3.5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
@@ -1164,6 +1347,185 @@ function HoroscopeContent() {
 
                 </div>
               </div>
+
+              {/* Dual Transit Analysis (Moon Mind + Lagna Manifestation) */}
+              {horoscopeData?.dual_transit && (
+                <div className="rounded-2xl border border-[#c4a482] bg-gradient-to-br from-[#fbf4eb] via-[#f7e9dc] to-[#fbf4eb] p-5 sm:p-6 shadow-xs">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2.5 text-[#8c5035]">
+                      <Scale className="size-5 text-[#b06d4e]" />
+                      <h3 className="font-cinzel text-base font-bold text-[#4D4664]">{t.dualTransitTitle}</h3>
+                    </div>
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      {horoscopeData.dual_transit.dual_harmony_score}% Harmony
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div className="rounded-xl bg-[#fffcf9] border border-[#f0dfd2] p-3.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#b06d4e]">
+                        {language === "bn" ? "চন্দ্র গোচর (মানসিক দিক)" : "Moon Transit (Mind & Emotion)"}
+                      </span>
+                      <p className="text-sm font-bold text-[#4D4664] mt-0.5">
+                        {language === "bn" ? `${horoscopeData.dual_transit.moon_transit_house}ম ভাব গোচর` : `House ${horoscopeData.dual_transit.moon_transit_house}`}
+                      </p>
+                      <p className="mt-1 text-[#6e5f7a]">{horoscopeData.dual_transit.emotional_outlook}</p>
+                    </div>
+                    <div className="rounded-xl bg-[#fffcf9] border border-[#f0dfd2] p-3.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#b06d4e]">
+                        {language === "bn" ? "লগ্ন গোচর (বাস্তব ঘটনা ও শারীরিক ফল)" : "Lagna Transit (Physical Events)"}
+                      </span>
+                      <p className="text-sm font-bold text-[#4D4664] mt-0.5">
+                        {language === "bn" ? `${horoscopeData.dual_transit.lagna_transit_house}ম ভাব গোচর` : `House ${horoscopeData.dual_transit.lagna_transit_house}`}
+                      </p>
+                      <p className="mt-1 text-[#6e5f7a]">{horoscopeData.dual_transit.physical_event_outlook}</p>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-xs leading-relaxed text-[#594f63] font-medium border-t border-[#ebd0be] pt-2.5">
+                    {language === "bn" ? horoscopeData.dual_transit.synthesis_verdict_bn : horoscopeData.dual_transit.synthesis_verdict}
+                  </p>
+                </div>
+              )}
+
+              {/* Numerology Synergy Card (Client §3.5 NEW NUMRO) */}
+              {horoscopeData?.numerology_synergy && (
+                <div className="rounded-2xl border border-[#ebd7c8] bg-gradient-to-r from-[#fefbf7] via-[#fbf2e7] to-[#fefbf7] p-5 sm:p-6 shadow-2xs">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2 text-[#b06d4e]">
+                      <Coins className="size-4" />
+                      <h3 className="font-cinzel text-base font-bold text-[#4D4664]">{t.numerologySynergyTitle}</h3>
+                    </div>
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      {horoscopeData.numerology_synergy.synergy_score_pct}% Match
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs mb-3">
+                    <div className="rounded-xl bg-[#fff] border border-[#f0dfd2] p-2.5 text-center">
+                      <span className="text-[#8c7e97] block">{language === "bn" ? "আপনার মূলাঙ্ক" : "Mulank"}</span>
+                      <strong className="text-lg text-[#b06d4e]">{horoscopeData.numerology_synergy.mulank}</strong>
+                    </div>
+                    <div className="rounded-xl bg-[#fff] border border-[#f0dfd2] p-2.5 text-center">
+                      <span className="text-[#8c7e97] block">{language === "bn" ? "ভাগ্যাঙ্ক" : "Bhagyank"}</span>
+                      <strong className="text-lg text-[#4D4664]">{horoscopeData.numerology_synergy.bhagyank}</strong>
+                    </div>
+                    <div className="rounded-xl bg-[#fff] border border-[#f0dfd2] p-2.5 text-center">
+                      <span className="text-[#8c7e97] block">{language === "bn" ? "অধিপতি গ্রহ" : "Ruler"}</span>
+                      <strong className="text-sm text-[#4D4664]">{horoscopeData.numerology_synergy.ruling_planet}</strong>
+                    </div>
+                    <div className="rounded-xl bg-[#fff] border border-[#f0dfd2] p-2.5 text-center">
+                      <span className="text-[#8c7e97] block">{language === "bn" ? "দিনের সম্পর্ক" : "Day Harmony"}</span>
+                      <strong className="text-sm text-[#b06d4e]">
+                        {language === "bn" ? horoscopeData.numerology_synergy.day_relationship_bn : horoscopeData.numerology_synergy.day_relationship}
+                      </strong>
+                    </div>
+                  </div>
+                  <p className="text-xs text-[#594f63] leading-relaxed">
+                    {language === "bn" ? horoscopeData.numerology_synergy.advice_bn : horoscopeData.numerology_synergy.advice}
+                  </p>
+                </div>
+              )}
+
+              {/* Ashtakavarga & KP Nakshatra Sub-Lord Transit Card */}
+              {activeSignData.ashtakavarga && (
+                <div className="rounded-2xl border border-[#ebd7c8] bg-[#fbf5ee] p-5 sm:p-6 shadow-2xs">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2 text-[#8c5035]">
+                      <Award className="size-5 text-[#b06d4e]" />
+                      <h3 className="font-cinzel text-base font-bold text-[#4D4664]">{t.ashtakavargaTitle}</h3>
+                    </div>
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      {language === "bn" ? activeSignData.ashtakavarga.strength_grade_bn : activeSignData.ashtakavarga.strength_grade}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                    <div className="rounded-xl bg-[#fffaf5] border border-[#edd7c4] p-3 text-center">
+                      <span className="text-[#8c7e97] block">{language === "bn" ? "সর্বাষ্টকবর্গ (SAV)" : "Sarvashtakavarga (SAV)"}</span>
+                      <strong className="text-xl text-[#b06d4e]">{activeSignData.ashtakavarga.sarvashtakavarga_points} / 56</strong>
+                      <span className="text-[10px] text-[#7d7388] block">{language === "bn" ? "২৮+ বিন্দু অত্যন্ত শুভ" : "28+ points is favorable"}</span>
+                    </div>
+                    <div className="rounded-xl bg-[#fffaf5] border border-[#edd7c4] p-3 text-center">
+                      <span className="text-[#8c7e97] block">{language === "bn" ? "চন্দ্র ভিন্নাষ্টকবর্গ (BAV)" : "Moon Bhinnashtakavarga"}</span>
+                      <strong className="text-xl text-[#4D4664]">{activeSignData.ashtakavarga.moon_bhinnashtakavarga_points} / 8</strong>
+                      <span className="text-[10px] text-[#7d7388] block">{language === "bn" ? "৪+ বিন্দু মানসিক বল" : "4+ bindus is protective"}</span>
+                    </div>
+                    <div className="rounded-xl bg-[#fffaf5] border border-[#edd7c4] p-3 text-center">
+                      <span className="text-[#8c7e97] block">{language === "bn" ? "কেপি সাব-লর্ড (KP Sub-Lord)" : "KP Nakshatra Sub-Lord"}</span>
+                      <strong className="text-sm text-[#4D4664] block mt-1">
+                        {activeSignData.nakshatra_pada_shift?.kp_sub_lord || "Active"}
+                      </strong>
+                      <span className="text-[10px] text-[#7d7388] block">
+                        Lord: {activeSignData.nakshatra_pada_shift?.nakshatra_lord || "Active"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Real-time Planetary Aspects & Yogas on Moon */}
+              {activeSignData.planetary_drishtis && activeSignData.planetary_drishtis.length > 0 && (
+                <div className="rounded-2xl border border-[#ebd7c8] bg-[#fbf5ee] p-5 sm:p-6 shadow-2xs">
+                  <div className="flex items-center gap-2 text-[#8c5035] mb-3">
+                    <Eye className="size-5 text-[#b06d4e]" />
+                    <h3 className="font-cinzel text-base font-bold text-[#4D4664]">{t.drishtiTitle}</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {activeSignData.planetary_drishtis.map((d, idx) => (
+                      <div key={idx} className="rounded-xl bg-[#fffaf5] border border-[#eedecf] p-3 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-[#4D4664]">
+                            {language === "bn" ? d.yoga_name_bn : d.yoga_name} ({d.aspecting_planet})
+                          </span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            d.is_positive ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800"
+                          }`}>
+                            {d.aspect_type}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-[#594f63] leading-relaxed">
+                          {language === "bn" ? d.impact_bn : d.impact}
+                        </p>
+                        {d.classical_remedy && (
+                          <p className="mt-1.5 text-[11px] font-semibold text-[#8c5035]">
+                            <strong>{language === "bn" ? "প্রতিকার" : "Remedy"}:</strong> {language === "bn" ? d.classical_remedy_bn : d.classical_remedy}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Client's 15 Classifications (01.pdf) Grid */}
+              {activeSignData.client_classifications?.classifications && (
+                <div className="rounded-2xl border border-[#ebd7c8] bg-[#fbf3e9] p-5 sm:p-6 shadow-2xs">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2 text-[#8c5035]">
+                      <BookOpen className="size-5 text-[#b06d4e]" />
+                      <h3 className="font-cinzel text-base font-bold text-[#4D4664]">{t.clientRulesTitle}</h3>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowClientRules(!showClientRules)}
+                      className="text-xs font-semibold text-[#b06d4e] hover:underline flex items-center gap-1"
+                    >
+                      <span>{showClientRules ? (language === "bn" ? "সংক্ষেপ করুন" : "Collapse") : (language === "bn" ? "সবগুলো ১৫টি দেখুন" : "View All 15")}</span>
+                      {showClientRules ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs">
+                    {activeSignData.client_classifications.classifications
+                      .slice(0, showClientRules ? 15 : 6)
+                      .map((cl: any, idx: number) => (
+                        <div key={idx} className="rounded-xl bg-[#fff] border border-[#eedecf] p-2.5">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#8c7e97] block">
+                            {cl.label}
+                          </span>
+                          <strong className="text-xs text-[#4D4664] block mt-0.5">{cl.value}</strong>
+                          <p className="text-[11px] text-[#6e5f7a] mt-1 line-clamp-2">{cl.definition}</p>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
 
               {/* Detailed Predictions Grid (5 Detailed Sections) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
