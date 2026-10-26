@@ -29,6 +29,9 @@ import {
   Activity,
   TrendingUp,
   ShieldAlert,
+  Scale,
+  BookOpen,
+  Printer,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -187,7 +190,10 @@ export default function KundliMatchingPage() {
   // Results & Tabs State
   const [isLoading, setIsLoading] = React.useState(false);
   const [result, setResult] = React.useState<KundliMatchingResult | null>(null);
-  const [activeTab, setActiveTab] = React.useState<"dosha" | "forecast" | "planets" | "charts">("dosha");
+  const [activeTab, setActiveTab] = React.useState<
+    "dosha" | "dashakoot" | "cancellations" | "papasamya" | "charts" | "avakahada" | "forecast" | "personality" | "planets"
+  >("dosha");
+  const [selectedChartType, setSelectedChartType] = React.useState<"d1" | "d9" | "chalit" | "moon">("d1");
   const [chartStyle, setChartStyle] = React.useState<ChartStyleType>("north");
 
   // Validate Person
@@ -1221,17 +1227,17 @@ export default function KundliMatchingPage() {
               </div>
             </div>
 
-            {/* 4. THREE INTERACTIVE TABS (Dosha, Planet Details, Lagna Charts) */}
+            {/* 4. MULTI-LAYERED INTERACTIVE TABS */}
             <div className="space-y-6">
-              {/* Tab Navigation Pill Bar matching screenshot */}
-              <div className="flex border-b border-amber-200 overflow-x-auto scrollbar-none">
+              {/* Tab Navigation Pill Bar */}
+              <div className="flex border-b border-amber-200 overflow-x-auto scrollbar-none gap-1 py-1">
                 <button
                   type="button"
                   onClick={() => setActiveTab("dosha")}
-                  className={`py-3 px-5 sm:px-6 text-sm font-bold border-b-2 transition-all flex items-center gap-2 shrink-0 ${
+                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     activeTab === "dosha"
-                      ? "border-amber-500 text-amber-900 bg-amber-50/40"
-                      : "border-transparent text-slate-500 hover:text-slate-800"
+                      ? "bg-amber-500 text-white shadow-xs font-extrabold"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/60"
                   }`}
                 >
                   <ShieldCheck className="size-4" />
@@ -1239,11 +1245,71 @@ export default function KundliMatchingPage() {
                 </button>
                 <button
                   type="button"
+                  onClick={() => setActiveTab("dashakoot")}
+                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                    activeTab === "dashakoot"
+                      ? "bg-amber-500 text-white shadow-xs font-extrabold"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/60"
+                  }`}
+                >
+                  <Sparkles className="size-4" />
+                  <span>{t.tabs.dashakoot}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("cancellations")}
+                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                    activeTab === "cancellations"
+                      ? "bg-amber-500 text-white shadow-xs font-extrabold"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/60"
+                  }`}
+                >
+                  <ShieldAlert className="size-4 text-emerald-600" />
+                  <span>{t.tabs.cancellations}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("papasamya")}
+                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                    activeTab === "papasamya"
+                      ? "bg-amber-500 text-white shadow-xs font-extrabold"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/60"
+                  }`}
+                >
+                  <Scale className="size-4 text-indigo-500" />
+                  <span>{t.tabs.papasamya}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("charts")}
+                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                    activeTab === "charts"
+                      ? "bg-amber-500 text-white shadow-xs font-extrabold"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/60"
+                  }`}
+                >
+                  <RotateCcw className="size-4" />
+                  <span>{t.tabs.lagnaCharts}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("avakahada")}
+                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                    activeTab === "avakahada"
+                      ? "bg-amber-500 text-white shadow-xs font-extrabold"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/60"
+                  }`}
+                >
+                  <BookOpen className="size-4 text-purple-600" />
+                  <span>{t.tabs.avakahada}</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => setActiveTab("forecast")}
-                  className={`py-3 px-5 sm:px-6 text-sm font-bold border-b-2 transition-all flex items-center gap-2 shrink-0 ${
+                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     activeTab === "forecast"
-                      ? "border-amber-500 text-amber-900 bg-amber-50/40"
-                      : "border-transparent text-slate-500 hover:text-slate-800"
+                      ? "bg-amber-500 text-white shadow-xs font-extrabold"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/60"
                   }`}
                 >
                   <Heart className="size-4 text-rose-500" />
@@ -1251,27 +1317,27 @@ export default function KundliMatchingPage() {
                 </button>
                 <button
                   type="button"
+                  onClick={() => setActiveTab("personality")}
+                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                    activeTab === "personality"
+                      ? "bg-amber-500 text-white shadow-xs font-extrabold"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/60"
+                  }`}
+                >
+                  <User className="size-4 text-teal-600" />
+                  <span>{t.tabs.personality}</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => setActiveTab("planets")}
-                  className={`py-3 px-5 sm:px-6 text-sm font-bold border-b-2 transition-all flex items-center gap-2 shrink-0 ${
+                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     activeTab === "planets"
-                      ? "border-amber-500 text-amber-900 bg-amber-50/40"
-                      : "border-transparent text-slate-500 hover:text-slate-800"
+                      ? "bg-amber-500 text-white shadow-xs font-extrabold"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/60"
                   }`}
                 >
                   <Sparkles className="size-4" />
                   <span>{t.tabs.planetDetails}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("charts")}
-                  className={`py-3 px-5 sm:px-6 text-sm font-bold border-b-2 transition-all flex items-center gap-2 shrink-0 ${
-                    activeTab === "charts"
-                      ? "border-amber-500 text-amber-900 bg-amber-50/40"
-                      : "border-transparent text-slate-500 hover:text-slate-800"
-                  }`}
-                >
-                  <RotateCcw className="size-4" />
-                  <span>{t.tabs.lagnaCharts}</span>
                 </button>
               </div>
 
@@ -1534,6 +1600,532 @@ export default function KundliMatchingPage() {
               )}
 
               {/* =================================================================
+                  TAB: DASHAKOOT (10 PORUTHAMS - SOUTH INDIAN METHOD)
+                 ================================================================= */}
+              {activeTab === "dashakoot" && result.dashakoot && (
+                <div className="space-y-6 animate-fadeIn">
+                  {/* Summary Card */}
+                  <div className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 via-amber-100/40 to-orange-50/50 p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-3.5">
+                      <div className="size-12 rounded-full bg-amber-500 text-white flex items-center justify-center font-serif text-lg font-bold shadow-xs">
+                        {toLocalizedDigits(result.dashakoot.total_received, language)}
+                      </div>
+                      <div>
+                        <h4 className="font-serif font-bold text-amber-950 text-base">
+                          {language === "bn"
+                            ? "দক্ষিণ ভারতীয় দশকূট মিলন (১০ পরুথাম)"
+                            : language === "hi"
+                            ? "दक्षिण भारतीय दशकूट मिलान (10 पोरुथम)"
+                            : "South Indian Dashakoota (10 Poruthams)"}
+                        </h4>
+                        <p className="text-xs text-amber-900/80 mt-0.5">
+                          {language === "bn"
+                            ? `মোট প্রাপ্ত স্কোর: ${toLocalizedDigits(result.dashakoot.total_received, language)} / ৩৬ • অনুকূল পরুথাম: ${toLocalizedDigits(result.dashakoot.porutham_count, language)} / ১০`
+                            : `Total Score: ${result.dashakoot.total_received} / 36 • Favorable Poruthams: ${result.dashakoot.porutham_count} / 10`}
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        result.dashakoot.is_favorable
+                          ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                          : "bg-amber-100 text-amber-800 border border-amber-300"
+                      }`}
+                    >
+                      {result.dashakoot.is_favorable
+                        ? language === "bn"
+                          ? "অনুকূল দশকূট মিলন"
+                          : "Favorable Dashakoot"
+                        : language === "bn"
+                        ? "মধ্যম দশকূট মিলন"
+                        : "Moderate Dashakoot"}
+                    </span>
+                  </div>
+
+                  {/* 10 Poruthams Table matching Client Report page 15 */}
+                  <div className="bg-white rounded-2xl border border-amber-200/80 shadow-xs overflow-hidden">
+                    <div className="bg-amber-500/10 px-5 py-4 border-b border-amber-200/70">
+                      <h3 className="font-serif font-bold text-amber-950 text-base sm:text-lg">
+                        {language === "bn"
+                          ? "দশ পরুথাম বিস্তারিত ফলাফল সারণী"
+                          : language === "hi"
+                          ? "दस पोरुथम विस्तृत परिणाम तालिका"
+                          : "10 Porutham Detailed Agreement Table"}
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        {language === "bn"
+                          ? "দিন, গণ, যোনি, রাশি, রাশ্যাধিপতি, রজ্জু, বেধ, বশ্য, মহেন্দ্র ও স্ত্রী দীর্ঘ বিচার"
+                          : "Dina, Gana, Yoni, Rasi, Rasyadhipati, Rajju, Vedha, Vashya, Mahendra, Stree Deergha"}
+                      </p>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                          <tr className="bg-amber-50/70 border-b border-amber-200/70 text-slate-700 font-bold">
+                            <th className="py-3 px-4">{language === "bn" ? "পরুথাম (Koota)" : "Porutham"}</th>
+                            <th className="py-3 px-4">{t.pointsTable.colMale}</th>
+                            <th className="py-3 px-4">{t.pointsTable.colFemale}</th>
+                            <th className="py-3 px-4 text-center">{t.pointsTable.colOutOf}</th>
+                            <th className="py-3 px-4 text-center">{t.pointsTable.colReceived}</th>
+                            <th className="py-3 px-4">{language === "bn" ? "তাৎপর্য ও ব্যাখ্যা" : "Significance"}</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {result.dashakoot.items.map((item, idx) => (
+                            <tr
+                              key={item.attribute}
+                              className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/30"}
+                            >
+                              <td className="py-3 px-4 font-bold text-slate-900">{item.attribute}</td>
+                              <td className="py-3 px-4 text-slate-700">{item.male}</td>
+                              <td className="py-3 px-4 text-slate-700">{item.female}</td>
+                              <td className="py-3 px-4 text-center font-bold text-slate-600">
+                                {toLocalizedDigits(item.out_of, language)}
+                              </td>
+                              <td className="py-3 px-4 text-center">
+                                <span
+                                  className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                                    item.received === item.out_of
+                                      ? "bg-emerald-100 text-emerald-800"
+                                      : item.received > 0
+                                      ? "bg-amber-100 text-amber-800"
+                                      : "bg-rose-100 text-rose-800"
+                                  }`}
+                                >
+                                  {toLocalizedDigits(item.received, language)}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 text-slate-600 text-xs">{item.description}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot>
+                          <tr className="bg-amber-100/60 font-bold border-t-2 border-amber-300 text-slate-900">
+                            <td className="py-3.5 px-4 text-base font-serif">{t.pointsTable.totalLabel}</td>
+                            <td className="py-3.5 px-4">-</td>
+                            <td className="py-3.5 px-4">-</td>
+                            <td className="py-3.5 px-4 text-center text-base">{toLocalizedDigits(36, language)}</td>
+                            <td className="py-3.5 px-4 text-center text-base font-extrabold text-amber-900">
+                              {toLocalizedDigits(result.dashakoot.total_received, language)}
+                            </td>
+                            <td className="py-3.5 px-4 text-xs font-medium text-amber-950">{result.dashakoot.verdict}</td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* =================================================================
+                  TAB: DOSHA CANCELLATIONS & BHANGA ENGINE
+                 ================================================================= */}
+              {activeTab === "cancellations" && (
+                <div className="space-y-6 animate-fadeIn">
+                  {/* Headline */}
+                  <div className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50/60 p-5 shadow-xs">
+                    <h3 className="font-serif font-bold text-slate-900 text-base sm:text-lg flex items-center gap-2">
+                      <ShieldCheck className="size-5 text-emerald-600" />
+                      <span>
+                        {language === "bn"
+                          ? "মহাদোষ ও শাস্ত্রীয় দোষভঙ্গ (Dosha Cancellation) বিশ্লেষণ"
+                          : language === "hi"
+                          ? "महादोष एवं शास्त्रीय दोषभंग विश्लेषण"
+                          : "Maha Dosha & Classical Cancellation Analysis"}
+                      </span>
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
+                      {language === "bn"
+                        ? "শাস্ত্রীয় জ্যোতিষ (মুহূর্ত চিন্তামণি ও পরাশর শাস্ত্র) অনুসারে সাধারণ গণনায় দোষ দেখা গেলেও বিশেষ রাশিনাথ মিত্রতা, চরণভেদ ও নক্ষত্রভেদে অনেক দোষ স্বয়ং বিনষ্ট হয় (দোষভঙ্গ)। নিচে বিস্তারিত পরীক্ষা দেওয়া হলো:"
+                        : "According to Brihat Parashara Hora Shastra & Muhurta Chintamani, apparent doshas are often cancelled by planetary friendship and constellation variations."}
+                    </p>
+                  </div>
+
+                  {/* Cancellations Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {result.cancellations?.map((c) => (
+                      <div
+                        key={c.dosha_name}
+                        className="bg-white rounded-2xl border border-amber-200/80 p-5 shadow-xs space-y-3"
+                      >
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-serif font-bold text-slate-900 text-base">{c.dosha_name}</h4>
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                              !c.is_present
+                                ? "bg-emerald-100 text-emerald-800"
+                                : c.is_cancelled
+                                ? "bg-teal-100 text-teal-800 border border-teal-300"
+                                : "bg-rose-100 text-rose-800"
+                            }`}
+                          >
+                            {!c.is_present
+                              ? language === "bn"
+                                ? "দোষ মুক্ত"
+                                : "Dosha Free"
+                              : c.is_cancelled
+                              ? language === "bn"
+                                ? "দোষভঙ্গ (বাতিল)"
+                                : "Cancelled (Bhanga)"
+                              : language === "bn"
+                              ? "দোষ বিদ্যমান"
+                              : "Dosha Present"}
+                          </span>
+                        </div>
+
+                        <p className="text-xs sm:text-sm text-slate-700 leading-relaxed bg-amber-50/50 p-3 rounded-xl border border-amber-100">
+                          {c.cancellation_reason}
+                        </p>
+
+                        <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
+                          <span>
+                            <strong>{language === "bn" ? "শাস্ত্র সূত্র:" : "Reference:"}</strong> {c.shastra_citation}
+                          </span>
+                          <span>
+                            <strong>{language === "bn" ? "তীব্রতা:" : "Severity:"}</strong> {c.severity}
+                          </span>
+                        </div>
+
+                        {c.remedy && c.remedy !== "No remedy required." && (
+                          <div className="text-xs text-amber-900 bg-amber-100/40 p-2.5 rounded-lg border border-amber-200 flex items-start gap-2">
+                            <Sparkles className="size-3.5 text-amber-700 shrink-0 mt-0.5" />
+                            <span>
+                              <strong>{language === "bn" ? "শাস্ত্রসম্মত প্রতিকার:" : "Remedy:"}</strong> {c.remedy}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Manglik Detailed Factors Side-by-Side (Matching Client Report Page 9-10) */}
+                  {result.manglik_detail && (
+                    <div className="bg-white rounded-2xl border border-amber-200/80 p-5 shadow-xs space-y-4">
+                      <h4 className="font-serif font-bold text-amber-950 text-base flex items-center gap-2">
+                        <Flame className="size-4 text-orange-500" />
+                        <span>
+                          {language === "bn"
+                            ? "মাঙ্গলিক কারণ ও দৃষ্টি বিশদ বিবরণী (Based On House & Aspects)"
+                            : "Manglik Breakdown: Based On House & Aspects"}
+                        </span>
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                          <div className="flex justify-between items-center font-bold text-slate-900 text-xs sm:text-sm pb-1 border-b border-slate-200">
+                            <span>{result.groom.name} ({language === "bn" ? "বর" : "Groom"})</span>
+                            <span className="text-amber-800 font-serif">
+                              {result.manglik_detail.groom_percentage}% ({result.manglik_detail.groom_severity})
+                            </span>
+                          </div>
+                          <ul className="text-xs text-slate-700 space-y-1">
+                            {(result.manglik_detail.groom_factors || []).map((f: string, i: number) => (
+                              <li key={i} className="flex items-start gap-1.5">
+                                <span className="text-amber-500 font-bold">•</span>
+                                <span>{f}</span>
+                              </li>
+                            ))}
+                          </ul>
+                          {result.manglik_detail.groom_cancellations?.length > 0 && (
+                            <div className="mt-2 text-xs text-emerald-800 bg-emerald-50 p-2 rounded-lg border border-emerald-200">
+                              <strong>{language === "bn" ? "উপশম / নিবৃত্তি:" : "Relief:"}</strong>{" "}
+                              {result.manglik_detail.groom_cancellations.join("; ")}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                          <div className="flex justify-between items-center font-bold text-slate-900 text-xs sm:text-sm pb-1 border-b border-slate-200">
+                            <span>{result.bride.name} ({language === "bn" ? "কনে" : "Bride"})</span>
+                            <span className="text-amber-800 font-serif">
+                              {result.manglik_detail.bride_percentage}% ({result.manglik_detail.bride_severity})
+                            </span>
+                          </div>
+                          <ul className="text-xs text-slate-700 space-y-1">
+                            {(result.manglik_detail.bride_factors || []).map((f: string, i: number) => (
+                              <li key={i} className="flex items-start gap-1.5">
+                                <span className="text-amber-500 font-bold">•</span>
+                                <span>{f}</span>
+                              </li>
+                            ))}
+                          </ul>
+                          {result.manglik_detail.bride_cancellations?.length > 0 && (
+                            <div className="mt-2 text-xs text-emerald-800 bg-emerald-50 p-2 rounded-lg border border-emerald-200">
+                              <strong>{language === "bn" ? "উপশম / নিবৃত্তি:" : "Relief:"}</strong>{" "}
+                              {result.manglik_detail.bride_cancellations.join("; ")}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* =================================================================
+                  TAB: PAPASAMYA (MALEFIC BALANCING SCALE)
+                 ================================================================= */}
+              {activeTab === "papasamya" && result.papasamya && (
+                <div className="space-y-6 animate-fadeIn">
+                  {/* Papasamya Meter Banner */}
+                  <div className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50/60 p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-3.5">
+                      <div className="size-12 rounded-full bg-indigo-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                        <Scale className="size-6" />
+                      </div>
+                      <div>
+                        <h4 className="font-serif font-bold text-slate-900 text-base">
+                          {language === "bn"
+                            ? "পাপসাম্য সামঞ্জস্য সূচক (Papasamya Balance)"
+                            : language === "hi"
+                            ? "पापसाम्य संतुलन सूचकांक"
+                            : "Papasamya Malefic Balance"}
+                        </h4>
+                        <p className="text-xs text-slate-600 mt-0.5">
+                          {language === "bn"
+                            ? `বরের পাপ পয়েন্ট: ${toLocalizedDigits(result.papasamya.groom_score.total_points, language)} | কনের পাপ পয়েন্ট: ${toLocalizedDigits(result.papasamya.bride_score.total_points, language)} (ব্যবধান: ${toLocalizedDigits(result.papasamya.difference, language)})`
+                            : `Groom Points: ${result.papasamya.groom_score.total_points} | Bride Points: ${result.papasamya.bride_score.total_points} (Diff: ${result.papasamya.difference})`}
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        result.papasamya.is_balanced
+                          ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                          : "bg-amber-100 text-amber-800 border border-amber-300"
+                      }`}
+                    >
+                      {result.papasamya.verdict}
+                    </span>
+                  </div>
+
+                  {/* Description */}
+                  <div className="bg-white rounded-2xl border border-amber-200/80 p-5 shadow-xs space-y-4">
+                    <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                      {result.papasamya.description}
+                    </p>
+
+                    {/* Side by side breakdowns */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+                        <div className="font-bold text-slate-900 text-sm flex justify-between border-b border-slate-200 pb-1">
+                          <span>{result.groom.name} ({language === "bn" ? "বর" : "Groom"})</span>
+                          <span className="text-indigo-700 font-serif text-base">
+                            {result.papasamya.groom_score.total_points} pts
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 text-center py-2">
+                          <div className="bg-white p-2 rounded border border-slate-200">
+                            <span className="text-slate-500 text-[10px] block">
+                              {language === "bn" ? "লগ্ন থেকে" : "From Lagna"}
+                            </span>
+                            <strong className="text-slate-800">{result.papasamya.groom_score.lagna_points}</strong>
+                          </div>
+                          <div className="bg-white p-2 rounded border border-slate-200">
+                            <span className="text-slate-500 text-[10px] block">
+                              {language === "bn" ? "চন্দ্র থেকে" : "From Moon"}
+                            </span>
+                            <strong className="text-slate-800">{result.papasamya.groom_score.moon_points}</strong>
+                          </div>
+                          <div className="bg-white p-2 rounded border border-slate-200">
+                            <span className="text-slate-500 text-[10px] block">
+                              {language === "bn" ? "শুক্র থেকে" : "From Venus"}
+                            </span>
+                            <strong className="text-slate-800">{result.papasamya.groom_score.venus_points}</strong>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+                        <div className="font-bold text-slate-900 text-sm flex justify-between border-b border-slate-200 pb-1">
+                          <span>{result.bride.name} ({language === "bn" ? "কনে" : "Bride"})</span>
+                          <span className="text-indigo-700 font-serif text-base">
+                            {result.papasamya.bride_score.total_points} pts
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 text-center py-2">
+                          <div className="bg-white p-2 rounded border border-slate-200">
+                            <span className="text-slate-500 text-[10px] block">
+                              {language === "bn" ? "লগ্ন থেকে" : "From Lagna"}
+                            </span>
+                            <strong className="text-slate-800">{result.papasamya.bride_score.lagna_points}</strong>
+                          </div>
+                          <div className="bg-white p-2 rounded border border-slate-200">
+                            <span className="text-slate-500 text-[10px] block">
+                              {language === "bn" ? "চন্দ্র থেকে" : "From Moon"}
+                            </span>
+                            <strong className="text-slate-800">{result.papasamya.bride_score.moon_points}</strong>
+                          </div>
+                          <div className="bg-white p-2 rounded border border-slate-200">
+                            <span className="text-slate-500 text-[10px] block">
+                              {language === "bn" ? "শুক্র থেকে" : "From Venus"}
+                            </span>
+                            <strong className="text-slate-800">{result.papasamya.bride_score.venus_points}</strong>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* =================================================================
+                  TAB: AVAKAHADA & PANCHANG MATRIX (Matching Client Report Page 2)
+                 ================================================================= */}
+              {activeTab === "avakahada" && result.avakahada_comparison && (
+                <div className="space-y-6 animate-fadeIn">
+                  <div className="bg-white rounded-2xl border border-amber-200/80 shadow-xs overflow-hidden">
+                    <div className="bg-amber-500/10 px-5 py-4 border-b border-amber-200/70">
+                      <h3 className="font-serif font-bold text-amber-950 text-base sm:text-lg">
+                        {language === "bn"
+                          ? "অবকহড়া চক্র ও পঞ্চাঙ্গ তুলনামূলক সারণী"
+                          : language === "hi"
+                          ? "अवकहड़ा चक्र एवं पंचांग तुलनात्मक विवरण"
+                          : "Side-by-Side Avakahada Chakra & Panchang Matrix"}
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        {language === "bn"
+                          ? "ক্লায়েন্ট রেফারেন্স রিপোর্ট (পৃষ্ঠা ২) অনুযায়ী উভয় জাতক-জাতিকার ১৬টি মৌলিক সূচকের তুলনা"
+                          : "16 Astrological attributes side-by-side conforming strictly to client reference specification"}
+                      </p>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                          <tr className="bg-amber-50/70 border-b border-amber-200/70 text-slate-700 font-bold">
+                            <th className="py-3 px-4">{language === "bn" ? "বৈশিষ্ট্য (Attribute)" : "Attribute"}</th>
+                            <th className="py-3 px-4 text-center font-bold text-amber-900">
+                              {result.groom.name} ({language === "bn" ? "বর" : "Groom"})
+                            </th>
+                            <th className="py-3 px-4 text-center font-bold text-amber-900">
+                              {result.bride.name} ({language === "bn" ? "কনে" : "Bride"})
+                            </th>
+                            <th className="py-3 px-4">{language === "bn" ? "তাৎপর্য" : "Significance"}</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {result.avakahada_comparison.map((item, idx) => (
+                            <tr
+                              key={item.attribute}
+                              className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/30"}
+                            >
+                              <td className="py-2.5 px-4 font-bold text-slate-900">{item.attribute}</td>
+                              <td className="py-2.5 px-4 text-center text-slate-800 font-medium">{item.male}</td>
+                              <td className="py-2.5 px-4 text-center text-slate-800 font-medium">{item.female}</td>
+                              <td className="py-2.5 px-4 text-slate-500 text-xs">{item.description}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* =================================================================
+                  TAB: PERSONALITY & TRAITS (Matching Client Report Page 21-22)
+                 ================================================================= */}
+              {activeTab === "personality" && result.personality && (
+                <div className="space-y-6 animate-fadeIn">
+                  {/* Summary */}
+                  <div className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50/60 p-5 shadow-xs">
+                    <h4 className="font-serif font-bold text-slate-900 text-base">
+                      {language === "bn"
+                        ? "মনস্তাত্ত্বিক ও চারিত্রিক বৈশিষ্ট্য বিশ্লেষণ"
+                        : language === "hi"
+                        ? "मनोवैज्ञानिक एवं चारित्रिक विशेषता विश्लेषण"
+                        : "Psychological & Trait Compatibility"}
+                    </h4>
+                    <p className="text-xs sm:text-sm text-slate-700 mt-1 leading-relaxed">
+                      {result.personality.compatibility_summary}
+                    </p>
+                  </div>
+
+                  {/* Traits cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Groom */}
+                    <div className="bg-white rounded-2xl border border-amber-200/80 p-5 shadow-xs space-y-4">
+                      <h4 className="font-serif font-bold text-amber-950 text-base border-b border-amber-100 pb-2">
+                        {result.groom.name} ({language === "bn" ? "বর" : "Groom"}) — {result.groom.janam_rasi}
+                      </h4>
+                      <p className="text-xs text-slate-600 italic">{result.personality.groom_summary}</p>
+
+                      <div>
+                        <span className="text-xs font-bold text-emerald-800 uppercase tracking-wide block mb-2">
+                          {language === "bn" ? "ইতিবাচক গুণাবলী (Positive Traits)" : "Positive Traits"}
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {result.personality.groom_positive_traits.map((tr) => (
+                            <span
+                              key={tr}
+                              className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 text-xs font-semibold border border-emerald-200"
+                            >
+                              {tr}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <span className="text-xs font-bold text-rose-800 uppercase tracking-wide block mb-2">
+                          {language === "bn" ? "সতর্কতার ক্ষেত্র (Areas for Patience)" : "Sensitive Traits"}
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {result.personality.groom_negative_traits.map((tr) => (
+                            <span
+                              key={tr}
+                              className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-800 text-xs font-semibold border border-rose-200"
+                            >
+                              {tr}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bride */}
+                    <div className="bg-white rounded-2xl border border-amber-200/80 p-5 shadow-xs space-y-4">
+                      <h4 className="font-serif font-bold text-amber-950 text-base border-b border-amber-100 pb-2">
+                        {result.bride.name} ({language === "bn" ? "কনে" : "Bride"}) — {result.bride.janam_rasi}
+                      </h4>
+                      <p className="text-xs text-slate-600 italic">{result.personality.bride_summary}</p>
+
+                      <div>
+                        <span className="text-xs font-bold text-emerald-800 uppercase tracking-wide block mb-2">
+                          {language === "bn" ? "ইতিবাচক গুণাবলী (Positive Traits)" : "Positive Traits"}
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {result.personality.bride_positive_traits.map((tr) => (
+                            <span
+                              key={tr}
+                              className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 text-xs font-semibold border border-emerald-200"
+                            >
+                              {tr}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <span className="text-xs font-bold text-rose-800 uppercase tracking-wide block mb-2">
+                          {language === "bn" ? "সতর্কতার ক্ষেত্র (Areas for Patience)" : "Sensitive Traits"}
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {result.personality.bride_negative_traits.map((tr) => (
+                            <span
+                              key={tr}
+                              className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-800 text-xs font-semibold border border-rose-200"
+                            >
+                              {tr}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* =================================================================
                   TAB: MARRIAGE LIFE FORECAST & TIMING (7 Core Insights)
                  ================================================================= */}
               {activeTab === "forecast" && result.forecast && (
@@ -1704,7 +2296,132 @@ export default function KundliMatchingPage() {
                     </p>
                   </div>
 
-                  {/* 6. Classical Vedic Remedies */}
+                  {/* 6. Vimshottari Dasha & Dasha Sandhi Comparison */}
+                  {result.dasha_comparison && (
+                    <div className="rounded-2xl border border-indigo-200 bg-white p-5 sm:p-6 shadow-xs space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-indigo-100">
+                        <div className="flex items-center gap-2.5 text-indigo-900">
+                          <Clock className="size-5 text-indigo-600" />
+                          <div>
+                            <h4 className="font-serif font-bold text-base sm:text-lg">
+                              {language === "bn"
+                                ? "বিংশোত্তরী দশা ও দশা সন্ধি বিচার"
+                                : language === "hi"
+                                ? "विंशोत्तरी दशा एवं दशा संधि विचार"
+                                : "Vimshottari Dasha & Dasha Sandhi Match"}
+                            </h4>
+                            <p className="text-xs text-slate-500">
+                              {language === "bn"
+                                ? "উভয়ের বর্তমান মহাদশা ও অন্তর্দশার সামঞ্জস্যপূর্ণ বিশ্লেষণ"
+                                : "Analysis of running Mahadashas and critical transit juncture"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                              result.dasha_comparison.dasha_sandhi_present
+                                ? "bg-amber-100 text-amber-800 border-amber-300"
+                                : "bg-emerald-100 text-emerald-800 border-emerald-300"
+                            }`}
+                          >
+                            {result.dasha_comparison.dasha_sandhi_present
+                              ? language === "bn"
+                                ? "দশা সন্ধি বিদ্যমান"
+                                : "Dasha Sandhi Alert"
+                              : language === "bn"
+                              ? "দশা সন্ধি মুক্ত"
+                              : "No Dasha Sandhi"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Current Dasha Comparison Columns */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Groom Dasha */}
+                        <div className="p-4 rounded-xl bg-indigo-50/40 border border-indigo-100 space-y-2">
+                          <span className="text-xs font-bold text-indigo-900 uppercase tracking-wider block">
+                            {result.groom.name} — {language === "bn" ? "বর্তমান দশা" : "Current Dasha"}
+                          </span>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-sm font-semibold text-slate-600">
+                              {language === "bn" ? "মহাদশা:" : "Mahadasha:"}
+                            </span>
+                            <span className="text-base font-bold text-slate-900">
+                              {result.dasha_comparison.groom_dasha.current_mahadasha}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-xs font-semibold text-slate-600">
+                              {language === "bn" ? "অন্তর্দশা:" : "Antardasha:"}
+                            </span>
+                            <span className="text-xs font-bold text-slate-800">
+                              {result.dasha_comparison.groom_dasha.current_antardasha}
+                            </span>
+                          </div>
+                          {result.dasha_comparison.groom_dasha.dasha_sequence && (
+                            <div className="pt-2 flex flex-wrap gap-1.5">
+                              {result.dasha_comparison.groom_dasha.dasha_sequence.slice(0, 3).map((p, idx) => (
+                                <span
+                                  key={idx}
+                                  className="text-[11px] px-2 py-0.5 rounded-md font-medium border bg-white text-slate-600 border-slate-200"
+                                >
+                                  {p.planet}: {p.start_date.split("-")[0]} - {p.end_date.split("-")[0]}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Bride Dasha */}
+                        <div className="p-4 rounded-xl bg-pink-50/40 border border-pink-100 space-y-2">
+                          <span className="text-xs font-bold text-pink-900 uppercase tracking-wider block">
+                            {result.bride.name} — {language === "bn" ? "বর্তমান দশা" : "Current Dasha"}
+                          </span>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-sm font-semibold text-slate-600">
+                              {language === "bn" ? "মহাদশা:" : "Mahadasha:"}
+                            </span>
+                            <span className="text-base font-bold text-slate-900">
+                              {result.dasha_comparison.bride_dasha.current_mahadasha}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-xs font-semibold text-slate-600">
+                              {language === "bn" ? "অন্তর্দশা:" : "Antardasha:"}
+                            </span>
+                            <span className="text-xs font-bold text-slate-800">
+                              {result.dasha_comparison.bride_dasha.current_antardasha}
+                            </span>
+                          </div>
+                          {result.dasha_comparison.bride_dasha.dasha_sequence && (
+                            <div className="pt-2 flex flex-wrap gap-1.5">
+                              {result.dasha_comparison.bride_dasha.dasha_sequence.slice(0, 3).map((p, idx) => (
+                                <span
+                                  key={idx}
+                                  className="text-[11px] px-2 py-0.5 rounded-md font-medium border bg-white text-slate-600 border-slate-200"
+                                >
+                                  {p.planet}: {p.start_date.split("-")[0]} - {p.end_date.split("-")[0]}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Notes / Explanation */}
+                      <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1">
+                        <p className="font-semibold text-slate-900">
+                          {result.dasha_comparison.dasha_compatibility_verdict}
+                        </p>
+                        <p className="text-slate-600 leading-relaxed">
+                          {result.dasha_comparison.dasha_compatibility_description}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 7. Classical Vedic Remedies */}
                   <div className="rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50/80 via-white to-amber-50/80 p-5 sm:p-6 shadow-xs">
                     <div className="flex items-center gap-2.5 text-amber-900 mb-3">
                       <ShieldCheck className="size-5 text-amber-600" />
@@ -1837,77 +2554,227 @@ export default function KundliMatchingPage() {
                  ================================================================= */}
               {activeTab === "charts" && (
                 <div className="space-y-6 animate-fadeIn">
-                  {/* Chart Style Switcher */}
-                  <div className="flex justify-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setChartStyle("north")}
-                      className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all ${
-                        chartStyle === "north"
-                          ? "bg-amber-500 text-white border-amber-600 shadow-xs"
-                          : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
-                      }`}
-                    >
-                      {t.charts.chartStyleNorth}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setChartStyle("east")}
-                      className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all ${
-                        chartStyle === "east"
-                          ? "bg-amber-500 text-white border-amber-600 shadow-xs"
-                          : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
-                      }`}
-                    >
-                      {t.charts.chartStyleEast}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setChartStyle("south")}
-                      className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all ${
-                        chartStyle === "south"
-                          ? "bg-amber-500 text-white border-amber-600 shadow-xs"
-                          : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
-                      }`}
-                    >
-                      {t.charts.chartStyleSouth}
-                    </button>
-                  </div>
-
-                  {/* Side-by-Side D1 Charts */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Groom Lagna Chart */}
-                    <div className="bg-white rounded-2xl border border-amber-200/80 p-5 shadow-xs text-center space-y-4">
-                      <h4 className="font-serif font-bold text-slate-900 text-base">
-                        {t.charts.groomChartTitle}
-                      </h4>
-                      <div className="flex justify-center">
-                        <KundliDiamondChart
-                          title={result.groom.name}
-                          planets={result.groom.d1_planets}
-                          ascSignNum={result.groom.d1_asc_sign}
-                          chartStyle={chartStyle}
-                          className="max-w-[340px] sm:max-w-[380px]"
-                        />
-                      </div>
+                  {/* Chart Selection Controls: Type & Style */}
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white/80 rounded-2xl border border-amber-200/80 p-4 shadow-xs">
+                    {/* Chart Type Selector */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mr-1">
+                        {language === "bn" ? "ছক নির্বাচন:" : language === "hi" ? "कुंडली प्रकार:" : "Chart Type:"}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedChartType("d1")}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                          selectedChartType === "d1"
+                            ? "bg-amber-500 text-white border-amber-600 shadow-xs"
+                            : "bg-white text-slate-700 border-slate-200 hover:bg-amber-50"
+                        }`}
+                      >
+                        {language === "bn" ? "D1 লগ্ন ছক" : language === "hi" ? "D1 लग्न कुंडली" : "D1 Lagna"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedChartType("d9")}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                          selectedChartType === "d9"
+                            ? "bg-amber-500 text-white border-amber-600 shadow-xs"
+                            : "bg-white text-slate-700 border-slate-200 hover:bg-amber-50"
+                        }`}
+                      >
+                        {language === "bn" ? "D9 নবাংশ ছক (দাম্পত্য)" : language === "hi" ? "D9 नवांश (दांपत्य)" : "D9 Navamsha"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedChartType("chalit")}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                          selectedChartType === "chalit"
+                            ? "bg-amber-500 text-white border-amber-600 shadow-xs"
+                            : "bg-white text-slate-700 border-slate-200 hover:bg-amber-50"
+                        }`}
+                      >
+                        {language === "bn" ? "ভাব চলিত ছক" : language === "hi" ? "भाव चलित" : "Bhava Chalit"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedChartType("moon")}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                          selectedChartType === "moon"
+                            ? "bg-amber-500 text-white border-amber-600 shadow-xs"
+                            : "bg-white text-slate-700 border-slate-200 hover:bg-amber-50"
+                        }`}
+                      >
+                        {language === "bn" ? "চন্দ্র কুন্ডলী" : language === "hi" ? "चंद्र कुंडली" : "Chandra Kundli"}
+                      </button>
                     </div>
 
-                    {/* Bride Lagna Chart */}
-                    <div className="bg-white rounded-2xl border border-amber-200/80 p-5 shadow-xs text-center space-y-4">
-                      <h4 className="font-serif font-bold text-slate-900 text-base">
-                        {t.charts.brideChartTitle}
-                      </h4>
-                      <div className="flex justify-center">
-                        <KundliDiamondChart
-                          title={result.bride.name}
-                          planets={result.bride.d1_planets}
-                          ascSignNum={result.bride.d1_asc_sign}
-                          chartStyle={chartStyle}
-                          className="max-w-[340px] sm:max-w-[380px]"
-                        />
-                      </div>
+                    {/* Chart Style Switcher (North, East, South) */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mr-1">
+                        {language === "bn" ? "শৈলী:" : language === "hi" ? "शैली:" : "Style:"}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setChartStyle("north")}
+                        className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all ${
+                          chartStyle === "north"
+                            ? "bg-slate-800 text-white border-slate-900 shadow-xs"
+                            : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+                        }`}
+                      >
+                        {t.charts.chartStyleNorth}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setChartStyle("east")}
+                        className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all ${
+                          chartStyle === "east"
+                            ? "bg-slate-800 text-white border-slate-900 shadow-xs"
+                            : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+                        }`}
+                      >
+                        {t.charts.chartStyleEast}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setChartStyle("south")}
+                        className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all ${
+                          chartStyle === "south"
+                            ? "bg-slate-800 text-white border-slate-900 shadow-xs"
+                            : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+                        }`}
+                      >
+                        {t.charts.chartStyleSouth}
+                      </button>
                     </div>
                   </div>
+
+                  {/* Informational Banner for the selected chart */}
+                  <div className="rounded-xl bg-amber-50 border border-amber-200/80 px-4 py-3 flex items-center justify-between text-xs text-amber-900">
+                    <p className="font-medium">
+                      {selectedChartType === "d1"
+                        ? language === "bn"
+                          ? "D1 জন্ম লগ্ন কুন্ডলী: ব্যক্তিত্ব, দেহগঠন ও সামগ্রিক জীবনের মূল ভিত্তি প্রকাশ করে।"
+                          : language === "hi"
+                          ? "D1 जन्म लग्न कुंडली: समग्र व्यक्तित्व एवं जीवन आधार का मुख्य विश्लेषण।"
+                          : "D1 Birth Chart: Core representation of physical constitution and life foundation."
+                        : selectedChartType === "d9"
+                        ? language === "bn"
+                          ? "D9 নবাংশ কুন্ডলী (Navamsha): বৈদিক জ্যোতিষে বিবাহ, জীবনসঙ্গীর স্বভাব, দাম্পত্য সুখ ও অন্তিম সৌভাগ্যের সুনির্দিষ্ট দিক নির্দেশ করে।"
+                          : language === "hi"
+                          ? "D9 नवांश कुंडली: विवाह, जीवनसाथी के स्वभाव एवं दांपत्य सुख का अंतिम शास्त्रीय प्रमाण।"
+                          : "D9 Navamsha Chart: The paramount divisional chart for marriage, spouse disposition, and marital harmony."
+                        : selectedChartType === "chalit"
+                        ? language === "bn"
+                          ? "ভাব চলিত কুন্ডলী: শ্রীপতি ভাবারম্ভ পদ্ধতি অনুসারে গ্রহদের প্রকৃত ভাব অবস্থানের দিক নির্দেশ করে।"
+                          : language === "hi"
+                          ? "भाव चलित कुंडली: श्रीपति भाव पद्धति अनुसार ग्रहों की वास्तविक भाव स्थिति।"
+                          : "Bhava Chalit Chart: Actual house placements according to classical house cusps."
+                        : language === "bn"
+                        ? "চন্দ্র কুন্ডলী: মানসিক সংযোগ, সংবেদনশীলতা ও উভয় মনের অভ্যন্তরীণ রসায়ন বোঝার মাপকাঠি।"
+                        : language === "hi"
+                        ? "चंद्र कुंडली: मानसिक सामंजस्य एवं भावनात्मक तालमेल का विश्लेषण।"
+                        : "Chandra Kundli: Mental disposition, emotional compatibility, and subconscious harmony."}
+                    </p>
+                  </div>
+
+                  {/* Side-by-Side Comparative Charts */}
+                  {(() => {
+                    const groomPlanets =
+                      selectedChartType === "d9"
+                        ? result.groom_charts?.d9_planets || result.groom.d1_planets
+                        : selectedChartType === "chalit"
+                        ? result.groom_charts?.chalit_planets || result.groom.d1_planets
+                        : selectedChartType === "moon"
+                        ? result.groom_charts?.moon_chart_planets || result.groom.d1_planets
+                        : result.groom_charts?.d1_planets || result.groom.d1_planets;
+
+                    const groomAscSign =
+                      selectedChartType === "d9"
+                        ? result.groom_charts?.d9_asc_sign || result.groom.d1_asc_sign
+                        : selectedChartType === "chalit"
+                        ? result.groom_charts?.chalit_asc_sign || result.groom.d1_asc_sign
+                        : selectedChartType === "moon"
+                        ? result.groom_charts?.moon_chart_asc_sign || result.groom.d1_asc_sign
+                        : result.groom_charts?.d1_asc_sign || result.groom.d1_asc_sign;
+
+                    const bridePlanets =
+                      selectedChartType === "d9"
+                        ? result.bride_charts?.d9_planets || result.bride.d1_planets
+                        : selectedChartType === "chalit"
+                        ? result.bride_charts?.chalit_planets || result.bride.d1_planets
+                        : selectedChartType === "moon"
+                        ? result.bride_charts?.moon_chart_planets || result.bride.d1_planets
+                        : result.bride_charts?.d1_planets || result.bride.d1_planets;
+
+                    const brideAscSign =
+                      selectedChartType === "d9"
+                        ? result.bride_charts?.d9_asc_sign || result.bride.d1_asc_sign
+                        : selectedChartType === "chalit"
+                        ? result.bride_charts?.chalit_asc_sign || result.bride.d1_asc_sign
+                        : selectedChartType === "moon"
+                        ? result.bride_charts?.moon_chart_asc_sign || result.bride.d1_asc_sign
+                        : result.bride_charts?.d1_asc_sign || result.bride.d1_asc_sign;
+
+                    return (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Groom Chart */}
+                        <div className="bg-white rounded-2xl border border-amber-200/80 p-5 shadow-xs text-center space-y-4">
+                          <div>
+                            <span className="text-xs font-bold text-amber-700 uppercase tracking-wider block mb-0.5">
+                              {language === "bn" ? "বরের কুন্ডলী" : language === "hi" ? "वर की कुंडली" : "Groom's Chart"}
+                            </span>
+                            <h4 className="font-serif font-bold text-slate-900 text-base">
+                              {result.groom.name} —{" "}
+                              {selectedChartType === "d1"
+                                ? "D1 Lagna"
+                                : selectedChartType === "d9"
+                                ? "D9 Navamsha"
+                                : selectedChartType === "chalit"
+                                ? "Bhava Chalit"
+                                : "Chandra Kundli"}
+                            </h4>
+                          </div>
+                          <div className="flex justify-center">
+                            <KundliDiamondChart
+                              title={result.groom.name}
+                              planets={groomPlanets}
+                              ascSignNum={groomAscSign}
+                              chartStyle={chartStyle}
+                              className="max-w-[340px] sm:max-w-[380px]"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Bride Chart */}
+                        <div className="bg-white rounded-2xl border border-amber-200/80 p-5 shadow-xs text-center space-y-4">
+                          <div>
+                            <span className="text-xs font-bold text-rose-700 uppercase tracking-wider block mb-0.5">
+                              {language === "bn" ? "কনের কুন্ডলী" : language === "hi" ? "वधू की कुंडली" : "Bride's Chart"}
+                            </span>
+                            <h4 className="font-serif font-bold text-slate-900 text-base">
+                              {result.bride.name} —{" "}
+                              {selectedChartType === "d1"
+                                ? "D1 Lagna"
+                                : selectedChartType === "d9"
+                                ? "D9 Navamsha"
+                                : selectedChartType === "chalit"
+                                ? "Bhava Chalit"
+                                : "Chandra Kundli"}
+                            </h4>
+                          </div>
+                          <div className="flex justify-center">
+                            <KundliDiamondChart
+                              title={result.bride.name}
+                              planets={bridePlanets}
+                              ascSignNum={brideAscSign}
+                              chartStyle={chartStyle}
+                              className="max-w-[340px] sm:max-w-[380px]"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
             </div>

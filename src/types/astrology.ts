@@ -929,6 +929,120 @@ export interface MarriageLifeForecast {
   remedies_guidance: string[];
 }
 
+export interface AvakahadaAttributeItem {
+  attribute: string;
+  male: string;
+  female: string;
+  description?: string;
+}
+
+export interface DashakootItem {
+  attribute: string;
+  male: string;
+  female: string;
+  out_of: number;
+  received: number;
+  description?: string;
+  status?: string;
+}
+
+export interface DashakootResult {
+  items: DashakootItem[];
+  total_received: number;
+  total_out_of: number;
+  porutham_count: number;
+  is_favorable: boolean;
+  verdict: string;
+}
+
+export interface DoshaCancellationInfo {
+  dosha_name: string;
+  is_present: boolean;
+  is_cancelled: boolean;
+  cancellation_reason: string;
+  shastra_citation: string;
+  severity: string;
+  remedy: string;
+}
+
+export interface RajjuDoshaDetail {
+  is_present: boolean;
+  rajju_type: string;
+  body_part: string;
+  classical_impact: string;
+  male_rajju: string;
+  female_rajju: string;
+  remedy: string;
+}
+
+export interface PapasamyaPlanetDetail {
+  planet: string;
+  house_from_lagna?: number | null;
+  house_from_moon?: number | null;
+  house_from_venus?: number | null;
+  points: number;
+}
+
+export interface PapasamyaPersonScore {
+  total_points: number;
+  lagna_points: number;
+  moon_points: number;
+  venus_points: number;
+  details: PapasamyaPlanetDetail[];
+}
+
+export interface PapasamyaResult {
+  groom_score: PapasamyaPersonScore;
+  bride_score: PapasamyaPersonScore;
+  difference: number;
+  is_balanced: boolean;
+  verdict: string;
+  description: string;
+}
+
+export interface PersonalityTraitReport {
+  groom_positive_traits: string[];
+  groom_negative_traits: string[];
+  groom_summary: string;
+  bride_positive_traits: string[];
+  bride_negative_traits: string[];
+  bride_summary: string;
+  compatibility_summary: string;
+}
+
+export interface DashaPeriodItem {
+  level: string;
+  planet: string;
+  start_date: string;
+  end_date: string;
+}
+
+export interface PersonDashaOverview {
+  current_mahadasha: string;
+  current_antardasha: string;
+  current_pratyantardasha: string;
+  dasha_sequence: DashaPeriodItem[];
+}
+
+export interface DashaComparisonResult {
+  groom_dasha: PersonDashaOverview;
+  bride_dasha: PersonDashaOverview;
+  dasha_sandhi_present: boolean;
+  dasha_compatibility_verdict: string;
+  dasha_compatibility_description: string;
+}
+
+export interface ChartPlanetSet {
+  d1_planets: KundliChartPlanet[];
+  d9_planets: KundliChartPlanet[];
+  chalit_planets: KundliChartPlanet[];
+  moon_chart_planets: KundliChartPlanet[];
+  d1_asc_sign: number;
+  d9_asc_sign: number;
+  chalit_asc_sign: number;
+  moon_chart_asc_sign: number;
+}
+
 export interface KundliMatchingResult {
   groom: KundliMatchingPersonProfile;
   bride: KundliMatchingPersonProfile;
@@ -941,6 +1055,17 @@ export interface KundliMatchingResult {
   selected_language: AstrologyLanguage;
   translations?: Record<string, any>;
   forecast?: MarriageLifeForecast | null;
+  dashakoot?: DashakootResult | null;
+  avakahada_comparison?: AvakahadaAttributeItem[];
+  cancellations?: DoshaCancellationInfo[];
+  rajju_detail?: RajjuDoshaDetail | null;
+  papasamya?: PapasamyaResult | null;
+  personality?: PersonalityTraitReport | null;
+  dasha_comparison?: DashaComparisonResult | null;
+  groom_charts?: ChartPlanetSet | null;
+  bride_charts?: ChartPlanetSet | null;
+  manglik_detail?: Record<string, any>;
+  classical_recommendation?: string;
 }
 
 
