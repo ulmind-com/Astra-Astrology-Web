@@ -24,6 +24,21 @@ import {
   User,
   Star,
   CheckCircle2,
+  Layers,
+  Activity,
+  Award,
+  Zap,
+  AlertTriangle,
+  Briefcase,
+  DollarSign,
+  Heart,
+  Home,
+  Plane,
+  Flame,
+  Check,
+  X,
+  Info,
+  Target,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -55,6 +70,15 @@ import type {
   UserPublic,
 } from "@/types";
 
+type KPTab =
+  | "overview"
+  | "significators"
+  | "life_events"
+  | "cusps_planets"
+  | "ruling_horary"
+  | "aspects_badhaka"
+  | "remedies";
+
 export default function KPCalculatorPage() {
   const { user, isSignedIn } = useAuth();
   const { data: profile } = useProfile({ enabled: isSignedIn });
@@ -66,6 +90,9 @@ export default function KPCalculatorPage() {
   // Language state: 'bn' (Bengali), 'en' (English), 'hi' (Hindi)
   const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
   const ui = KP_UI_TRANSLATIONS[language];
+
+  // Tab State
+  const [activeTab, setActiveTab] = React.useState<KPTab>("overview");
 
   // Form State
   const [name, setName] = React.useState("");
@@ -90,6 +117,10 @@ export default function KPCalculatorPage() {
   const [ayanamsa, setAyanamsa] = React.useState<AyanamsaType>("krishnamurti");
   const [isMapModalOpen, setIsMapModalOpen] = React.useState(false);
   const [showAdvance, setShowAdvance] = React.useState(false);
+
+  // KP Horary Mode (1 to 249)
+  const [isHoraryMode, setIsHoraryMode] = React.useState(false);
+  const [horaryNumber, setHoraryNumber] = React.useState("1");
 
   // Loading & Result
   const [loading, setLoading] = React.useState(false);
@@ -149,43 +180,37 @@ export default function KPCalculatorPage() {
         if (b.time_of_birth) {
           const timeMatch = b.time_of_birth.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?/i);
           if (timeMatch) {
-            const rawHour = parseInt(timeMatch[1], 10);
-            const rawMin = timeMatch[2];
-            const rawSec = timeMatch[3] || "00";
-            const periodStr = timeMatch[4]?.toUpperCase() as "AM" | "PM" | undefined;
+            let h = parseInt(timeMatch[1], 10);
+            const m = timeMatch[2];
+            const s = timeMatch[3] || "00";
+            const ampm = timeMatch[4]?.toUpperCase();
 
-            if (periodStr) {
-              setHour(String(rawHour).padStart(2, "0"));
-              setMinute(rawMin);
-              setSecond(rawSec);
-              setPeriod(periodStr);
+            if (ampm) {
+              setPeriod(ampm as "AM" | "PM");
+              setHour(String(h).padStart(2, "0"));
             } else {
-              if (rawHour >= 12) {
+              if (h >= 12) {
                 setPeriod("PM");
-                const h12 = rawHour > 12 ? rawHour - 12 : 12;
-                setHour(String(h12).padStart(2, "0"));
+                if (h > 12) h -= 12;
               } else {
                 setPeriod("AM");
-                const h12 = rawHour === 0 ? 12 : rawHour;
-                setHour(String(h12).padStart(2, "0"));
+                if (h === 0) h = 12;
               }
-              setMinute(rawMin);
-              setSecond(rawSec);
+              setHour(String(h).padStart(2, "0"));
             }
+            setMinute(m);
+            setSecond(s);
           }
         }
 
-        const placeName = b.place || [b.city, b.state, b.country].filter(Boolean).join(", ");
-        if (placeName) {
-          setPlace(placeName);
+        if (b.place) {
+          setPlace(b.place);
+        } else if (b.city) {
+          setPlace(b.city);
         }
-        if (b.latitude != null && b.longitude != null) {
-          setLatitude(Number(b.latitude));
-          setLongitude(Number(b.longitude));
-        }
-        if (b.timezone != null) {
-          setTimezone(String(b.timezone));
-        }
+        if (typeof b.latitude === "number") setLatitude(b.latitude);
+        if (typeof b.longitude === "number") setLongitude(b.longitude);
+        if (typeof b.timezone === "number") setTimezone(String(b.timezone));
       }
     },
     [],
@@ -198,7 +223,19 @@ export default function KPCalculatorPage() {
     }
   }, [profile, user, populateFromProfileData]);
 
-  // Form Reset
+  const handleReloadFromProfile = () => {
+    if (profile) {
+      populateFromProfileData(profile, user);
+      toast.success(
+        language === "bn"
+          ? "আপনার প্রোফাইল থেকে তথ্য লোড করা হয়েছে।"
+          : language === "hi"
+          ? "आपकी प्रोफाइल से विवरण लोड कर दिया गया है।"
+          : "Details synced from your profile.",
+      );
+    }
+  };
+
   const handleReset = () => {
     setName("");
     setGender("male");
@@ -213,36 +250,19 @@ export default function KPCalculatorPage() {
     setLatitude(null);
     setLongitude(null);
     setTimezone("5.5");
+    setAyanamsa("krishnamurti");
+    setIsHoraryMode(false);
+    setHoraryNumber("1");
     setResult(null);
-    toast.info(
-      language === "bn"
-        ? "ফর্ম খালি করা হয়েছে।"
-        : language === "hi"
-        ? "फ़ॉर्म साफ़ कर दिया गया है।"
-        : "Form cleared.",
-    );
+    setActiveTab("overview");
   };
 
-  // Re-sync with Profile
-  const handleReloadFromProfile = () => {
-    if (profile) {
-      populateFromProfileData(profile, user);
-      toast.success(
-        language === "bn"
-          ? "প্রোফাইল থেকে তথ্য পুনরায় লোড করা হয়েছে।"
-          : language === "hi"
-          ? "प्रोफ़ाइल से विवरण पुनः लोड किया गया।"
-          : "Loaded details from your profile.",
-      );
-    }
-  };
-
-  // Input formatting & navigation
+  // Keyboard navigation for inputs
   const handleKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
     prevRef?: React.RefObject<HTMLInputElement | null>,
   ) => {
-    if (e.key === "Backspace" && (e.target as HTMLInputElement).value === "" && prevRef?.current) {
+    if (e.key === "Backspace" && e.currentTarget.value === "" && prevRef?.current) {
       prevRef.current.focus();
     }
   };
@@ -376,6 +396,7 @@ export default function KPCalculatorPage() {
       timezone: tz,
       ayanamsa,
       language,
+      horary_number: isHoraryMode ? Math.max(1, Math.min(249, parseInt(horaryNumber, 10) || 1)) : undefined,
     };
 
     const access = checkAccess("kp_calculator");
@@ -451,7 +472,6 @@ export default function KPCalculatorPage() {
     }
   };
 
-  // Helper for localized sign & planet names
   const getLocalizedSign = (sign: string) => {
     return KP_SIGN_NAMES[sign]?.[language] || sign;
   };
@@ -463,8 +483,9 @@ export default function KPCalculatorPage() {
   // Ascendant sign index
   const ascendantSignIndex = React.useMemo(() => {
     if (!result) return 0;
-    const ascPlanet = result.planets.find((p) => p.name === "Ascendant" || p.code === "Asc");
-    return ascPlanet ? ascPlanet.sign_index : 0;
+    const ascPlanet = result.planets?.find((p) => p.name === "Ascendant" || p.code === "Asc");
+    if (ascPlanet) return ascPlanet.sign_index;
+    return result.cusps?.[0]?.sign_index ?? 0;
   }, [result]);
 
   return (
@@ -479,23 +500,15 @@ export default function KPCalculatorPage() {
               <Sparkles className="w-3.5 h-3.5 text-amber-600" />
               <span>{ui.badge}</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
               {ui.title}
             </h1>
-            <p className="mt-1 text-sm sm:text-base text-slate-600 max-w-2xl">
+            <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-3xl leading-relaxed">
               {ui.subtitle}
             </p>
-            <div className="pt-2">
-              <FeatureCoinBadge
-                feature={kpFeature}
-                walletBalance={walletBalance}
-                language={language}
-              />
-            </div>
           </div>
 
-          {/* Language Switcher */}
-          <div className="inline-flex items-center rounded-xl bg-white border border-slate-200 p-1 shadow-xs self-start md:self-auto">
+          <div className="inline-flex items-center bg-white rounded-xl p-1 border border-slate-200 shadow-xs self-start md:self-center">
             {(["bn", "en", "hi"] as const).map((lang) => (
               <button
                 key={lang}
@@ -716,6 +729,61 @@ export default function KPCalculatorPage() {
               </div>
             </div>
 
+            {/* KP Horary 1 to 249 Mode Card */}
+            <div className="p-4 sm:p-5 rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50/90 via-orange-50/40 to-amber-50/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span className="text-xs sm:text-sm font-extrabold text-amber-950">
+                    {ui.horaryToggle}
+                  </span>
+                  {isHoraryMode && (
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs animate-pulse">
+                      ACTIVE
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-amber-800/80 leading-relaxed max-w-2xl">
+                  {ui.horaryHelp}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                {isHoraryMode && (
+                  <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-amber-300 shadow-2xs">
+                    <label className="text-xs font-bold text-amber-900 whitespace-nowrap">
+                      {ui.horaryNumberLabel}:
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={249}
+                      value={horaryNumber}
+                      onChange={(e) => setHoraryNumber(e.target.value)}
+                      className="w-16 py-1 px-1 bg-amber-50 border border-amber-200 rounded-lg text-sm font-black text-amber-900 text-center focus:ring-2 focus:ring-amber-500 outline-none"
+                    />
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsHoraryMode(!isHoraryMode)}
+                  className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all border ${
+                    isHoraryMode
+                      ? "bg-amber-600 text-white border-amber-700 shadow-xs"
+                      : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+                  }`}
+                >
+                  {isHoraryMode
+                    ? language === "bn"
+                      ? "হোরারি সক্রিয় ✓"
+                      : "Horary Active ✓"
+                    : language === "bn"
+                    ? "হোরারি চালু করুন"
+                    : "Enable Horary"}
+                </button>
+              </div>
+            </div>
+
             {/* Advance Settings Toggle */}
             <div>
               <button
@@ -798,15 +866,14 @@ export default function KPCalculatorPage() {
               <div className="flex items-center gap-3 w-full sm:w-auto justify-end order-1 sm:order-2">
                 <FeatureCoinBadge
                   feature={kpFeature}
-                  walletBalance={walletBalance}
+                  coins={kpFeature?.coins ?? 20}
                   language={language}
-                  showWallet={false}
                 />
 
                 <button
                   type="submit"
                   disabled={loading || (kpFeature ? !kpFeature.enabled : false)}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-extrabold text-sm shadow-md hover:shadow-lg transition-all disabled:opacity-50"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   {loading ? (
                     <>
@@ -816,13 +883,8 @@ export default function KPCalculatorPage() {
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4" />
-                      <span>
-                        {kpFeature && !kpFeature.enabled
-                          ? language === "bn"
-                            ? "ফিচারটি বন্ধ রয়েছে"
-                            : "Feature Unavailable"
-                          : ui.calculateBtn}
-                      </span>
+                      <span>{ui.calculateBtn}</span>
+                      <ArrowRight className="w-4 h-4" />
                     </>
                   )}
                 </button>
@@ -831,7 +893,6 @@ export default function KPCalculatorPage() {
           </form>
         </div>
 
-        {/* Location Picker Modal */}
         <LocationPickerModal
           open={isMapModalOpen}
           onClose={() => setIsMapModalOpen(false)}
@@ -846,619 +907,1141 @@ export default function KPCalculatorPage() {
 
         {/* Calculation Results Dashboard */}
         {result && (
-          <div ref={resultsRef} className="space-y-10 animate-in fade-in duration-300">
-            {/* 1. KP Astrological Key Metrics (4-Column Card Grid matching user screenshot) */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <ShieldCheck className="w-5 h-5 text-amber-500" />
-                <h2 className="text-xl font-extrabold text-slate-900">{ui.detailsHeading}</h2>
+          <div ref={resultsRef} className="space-y-8 animate-in fade-in duration-300">
+            {/* Header Result Card */}
+            <div className="bg-white rounded-2xl border border-amber-200/90 p-5 sm:p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-extrabold text-amber-700 uppercase tracking-wider">
+                    KP Astrology Analysis
+                  </span>
+                  {result.horary_details && (
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-2xs">
+                      Horary #{result.horary_details.horary_number}
+                    </span>
+                  )}
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                  {result.name}
+                </h2>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600 mt-1">
+                  <span>📅 {result.birth_date_formatted}</span>
+                  <span>⏰ {result.birth_time_formatted}</span>
+                  <span>📍 {result.birth_place}</span>
+                  <span>🧭 {result.panchang.ascendant_sign} Ascendant</span>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Column 1: Ayanamsa & Casting Time */}
-                <div className="bg-white rounded-2xl border border-amber-200/90 p-5 shadow-xs">
-                  <div className="text-xs font-bold text-amber-700 uppercase tracking-wider mb-2">
-                    {ui.ayanamsaTitle}
-                  </div>
-                  <div className="text-xl font-black text-slate-800 tracking-tight">
-                    {result.panchang.ayanamsa_name} ({result.panchang.ayanamsa_degrees.toFixed(2)}°)
-                  </div>
-                  <div className="mt-3 pt-3 border-t border-slate-100 text-xs space-y-1 text-slate-600">
-                    <div>
-                      <span className="font-semibold">{ui.castingTimeTitle}:</span>{" "}
-                      <span className="font-mono text-slate-800">
-                        {result.ruling_planets_casting.time_formatted || result.birth_time_formatted}
+              {/* Untenanted summary chips */}
+              {result.untenanted_planets && result.untenanted_planets.length > 0 && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex flex-col gap-1 max-w-sm">
+                  <span className="text-[11px] font-black text-amber-900 flex items-center gap-1.5">
+                    <Star className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
+                    Untenanted Planets (Supreme Fruitful)
+                  </span>
+                  <div className="flex flex-wrap gap-1.5 mt-0.5">
+                    {result.untenanted_planets.map((p) => (
+                      <span
+                        key={`untenanted-badge-${p}`}
+                        className="px-2.5 py-0.5 rounded-md text-[11px] font-extrabold bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-2xs"
+                      >
+                        {p} ★
                       </span>
-                    </div>
-                    <div>
-                      <span className="font-semibold">{ui.julianDayTitle}:</span>{" "}
-                      <span className="font-mono text-slate-800">{result.panchang.julian_day}</span>
-                    </div>
+                    ))}
                   </div>
                 </div>
+              )}
+            </div>
 
-                {/* Column 2: Vedic Panchang */}
-                <div className="bg-white rounded-2xl border border-amber-200/90 p-5 shadow-xs">
-                  <div className="text-xs font-bold text-amber-700 uppercase tracking-wider mb-2">
-                    {ui.panchangHeading}
-                  </div>
-                  <div className="space-y-1.5 text-xs text-slate-700">
-                    <div className="flex justify-between">
-                      <span className="font-medium text-slate-500">{ui.tithiLabel}:</span>
-                      <span className="font-bold text-slate-800">{result.panchang.tithi}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium text-slate-500">{ui.karanaLabel}:</span>
-                      <span className="font-bold text-slate-800">{result.panchang.karana}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium text-slate-500">{ui.yogaLabel}:</span>
-                      <span className="font-bold text-slate-800">{result.panchang.yoga}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium text-slate-500">{ui.dayLabel}:</span>
-                      <span className="font-bold text-slate-800">
-                        {result.panchang.vedic_day_name || result.panchang.day_name}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+            {/* 7 Modern Tabs Navigation Bar */}
+            <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 rounded-2xl overflow-x-auto no-scrollbar border border-slate-200">
+              {[
+                { id: "overview", label: ui.tabOverview, icon: Compass },
+                { id: "significators", label: ui.tabSignificators, icon: Layers },
+                { id: "life_events", label: ui.tabLifeEvents, icon: Target },
+                { id: "cusps_planets", label: ui.tabCuspsPlanets, icon: Activity },
+                { id: "ruling_horary", label: ui.tabRulingHorary, icon: Sparkles },
+                { id: "aspects_badhaka", label: ui.tabAspectsBadhaka, icon: ShieldCheck },
+                { id: "remedies", label: ui.tabRemedies, icon: Flame },
+              ].map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id as KPTab)}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
+                      isActive
+                        ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-sm"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-white/80"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
 
-                {/* Column 3: Solar Timings */}
-                <div className="bg-white rounded-2xl border border-amber-200/90 p-5 shadow-xs">
-                  <div className="text-xs font-bold text-amber-700 uppercase tracking-wider mb-2">
-                    {ui.sunTimesHeading}
-                  </div>
-                  <div className="space-y-3 pt-1">
-                    <div className="flex items-center gap-2.5">
-                      <Sunrise className="w-5 h-5 text-amber-500" />
+            {/* TAB 1: OVERVIEW & CHARTS */}
+            {activeTab === "overview" && (
+              <div className="space-y-8 animate-fadeIn">
+                {/* 4-Column Key Metrics */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Column 1: Ayanamsa & Casting Time */}
+                  <div className="bg-white rounded-2xl border border-amber-200/90 p-5 shadow-xs">
+                    <div className="text-xs font-bold text-amber-700 uppercase tracking-wider mb-2">
+                      {ui.ayanamsaTitle}
+                    </div>
+                    <div className="text-lg font-black text-slate-800 tracking-tight">
+                      {result.panchang.ayanamsa_name} ({result.panchang.ayanamsa_degrees.toFixed(2)}°)
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-slate-100 text-xs space-y-1 text-slate-600">
                       <div>
-                        <div className="text-[10px] font-bold text-slate-500 uppercase">
-                          {ui.sunriseLabel}
+                        <span className="font-semibold">{ui.castingTimeTitle}:</span>{" "}
+                        <span className="font-mono text-slate-800">
+                          {result.ruling_planets_casting.time_formatted || result.birth_time_formatted}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-semibold">{ui.julianDayTitle}:</span>{" "}
+                        <span className="font-mono text-slate-800">{result.panchang.julian_day}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Column 2: Vedic Panchang */}
+                  <div className="bg-white rounded-2xl border border-amber-200/90 p-5 shadow-xs">
+                    <div className="text-xs font-bold text-amber-700 uppercase tracking-wider mb-2">
+                      {ui.panchangHeading}
+                    </div>
+                    <div className="space-y-1.5 text-xs text-slate-700">
+                      <div className="flex justify-between">
+                        <span className="font-medium text-slate-500">{ui.tithiLabel}:</span>
+                        <span className="font-bold text-slate-800">{result.panchang.tithi}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium text-slate-500">{ui.karanaLabel}:</span>
+                        <span className="font-bold text-slate-800">{result.panchang.karana}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium text-slate-500">{ui.yogaLabel}:</span>
+                        <span className="font-bold text-slate-800">{result.panchang.yoga}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium text-slate-500">{ui.dayLabel}:</span>
+                        <span className="font-bold text-slate-800">
+                          {result.panchang.vedic_day_name || result.panchang.day_name}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Column 3: Solar Timings */}
+                  <div className="bg-white rounded-2xl border border-amber-200/90 p-5 shadow-xs">
+                    <div className="text-xs font-bold text-amber-700 uppercase tracking-wider mb-2">
+                      {ui.sunTimesHeading}
+                    </div>
+                    <div className="space-y-3 pt-1">
+                      <div className="flex items-center gap-2.5">
+                        <Sunrise className="w-5 h-5 text-amber-500" />
+                        <div>
+                          <div className="text-[10px] font-bold text-slate-500 uppercase">
+                            {ui.sunriseLabel}
+                          </div>
+                          <div className="text-sm font-extrabold text-slate-800 font-mono">
+                            {result.panchang.sunrise}
+                          </div>
                         </div>
-                        <div className="text-sm font-extrabold text-slate-800 font-mono">
-                          {result.panchang.sunrise}
+                      </div>
+                      <div className="flex items-center gap-2.5">
+                        <Sunset className="w-5 h-5 text-orange-500" />
+                        <div>
+                          <div className="text-[10px] font-bold text-slate-500 uppercase">
+                            {ui.sunsetLabel}
+                          </div>
+                          <div className="text-sm font-extrabold text-slate-800 font-mono">
+                            {result.panchang.sunset}
+                          </div>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2.5">
-                      <Sunset className="w-5 h-5 text-orange-500" />
-                      <div>
-                        <div className="text-[10px] font-bold text-slate-500 uppercase">
-                          {ui.sunsetLabel}
+                  </div>
+
+                  {/* Column 4: Dasha Balance at Birth */}
+                  <div className="bg-white rounded-2xl border border-amber-200/90 p-5 shadow-xs">
+                    <div className="text-xs font-bold text-amber-700 uppercase tracking-wider mb-2">
+                      {ui.dashaBalanceHeading}
+                    </div>
+                    <div className="text-base font-extrabold text-slate-900">
+                      {result.panchang.balance_dasha}
+                    </div>
+                    <div className="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+                      {result.panchang.moon_rashi} • {result.panchang.moon_nakshatra}
+                    </div>
+                  </div>
+                </div>
+
+                {/* If Horary was used */}
+                {result.horary_details && (
+                  <div className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 p-5 sm:p-6 shadow-xs">
+                    <div className="flex items-center gap-2 text-amber-900 font-extrabold text-base mb-2">
+                      <Sparkles className="w-5 h-5 text-amber-600" />
+                      <span>KP Horary Prashna Details (Seed #{result.horary_details.horary_number})</span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs mt-3">
+                      <div className="bg-white p-3 rounded-xl border border-amber-200">
+                        <span className="text-slate-500 font-medium">Ascendant Sign:</span>
+                        <div className="text-sm font-extrabold text-slate-800">
+                          {result.horary_details.sign} ({result.horary_details.sign_lord})
                         </div>
-                        <div className="text-sm font-extrabold text-slate-800 font-mono">
-                          {result.panchang.sunset}
+                      </div>
+                      <div className="bg-white p-3 rounded-xl border border-amber-200">
+                        <span className="text-slate-500 font-medium">Star Lord (Nakshatra):</span>
+                        <div className="text-sm font-extrabold text-amber-800">
+                          {result.horary_details.star_lord}
+                        </div>
+                      </div>
+                      <div className="bg-white p-3 rounded-xl border border-amber-200">
+                        <span className="text-slate-500 font-medium">Sub Lord:</span>
+                        <div className="text-sm font-extrabold text-amber-900">
+                          {result.horary_details.sub_lord}
+                        </div>
+                      </div>
+                      <div className="bg-white p-3 rounded-xl border border-amber-200">
+                        <span className="text-slate-500 font-medium">Sub-Sub Lord:</span>
+                        <div className="text-sm font-extrabold text-slate-900">
+                          {result.horary_details.sub_sub_lord}
                         </div>
                       </div>
                     </div>
+                    <div className="mt-3 text-xs text-amber-900/80">
+                      <strong>Sub-Arc Range:</strong> {result.horary_details.sub_span_formatted} (Zodiac Longitude: {result.horary_details.sub_start_degree}° to {result.horary_details.sub_end_degree}°)
+                    </div>
                   </div>
+                )}
+
+                {/* Nirayana Bhava Chalit Chart Viewer */}
+                <div>
+                  <div className="mb-4">
+                    <h2 className="text-xl font-extrabold text-slate-900">{ui.chartHeading}</h2>
+                    <p className="text-xs text-slate-600 mt-0.5">{ui.chartSubheading}</p>
+                  </div>
+
+                  <KPChartViewer
+                    planets={result.planets}
+                    cusps={result.cusps}
+                    ascendantSignIndex={ascendantSignIndex}
+                    userName={result.name}
+                    birthDate={result.birth_date_formatted}
+                    birthTime={result.birth_time_formatted}
+                    moonSignName={result.panchang.moon_rashi}
+                    nakshatraName={result.panchang.moon_nakshatra}
+                    language={language}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: 4-FOLD SIGNIFICATORS */}
+            {activeTab === "significators" && (
+              <div className="space-y-8 animate-fadeIn">
+                <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-l-4 border-amber-500 p-4 rounded-r-xl text-xs text-slate-700 leading-relaxed space-y-1">
+                  <div className="font-extrabold text-slate-900 text-sm">
+                    {language === "bn"
+                      ? "কেপি ৪-স্তরের কারকত্ব তত্ত্ব (Prof. K.S. Krishnamurti 4-Step Significators)"
+                      : "KP 4-Fold Significators Theory (Prof. K.S. Krishnamurti)"}
+                  </div>
+                  <p>
+                    {language === "bn"
+                      ? "গ্রেড A (লেভেল A): ভাবাধিপতি/ভাবস্থ গ্রহের নক্ষত্রে অবস্থানকারী গ্রহ (সবচেয়ে শক্তিশালী)। গ্রেড B (লেভেল B): ভাবস্থ গ্রহ। গ্রেড C (লেভেল C): ভাবাধিপতির নক্ষত্রে অবস্থানকারী গ্রহ। গ্রেড D (লেভেল D): ভাবাধিপতি গ্রহ।"
+                      : "Level A: Houses occupied by star lord (Strongest). Level B: House occupied by planet itself. Level C: Houses owned by star lord. Level D: Houses owned by planet itself."}
+                  </p>
                 </div>
 
-                {/* Column 4: Dasha Balance at Birth */}
-                <div className="bg-white rounded-2xl border border-amber-200/90 p-5 shadow-xs">
-                  <div className="text-xs font-bold text-amber-700 uppercase tracking-wider mb-2">
-                    {ui.dashaBalanceHeading}
-                  </div>
-                  <div className="text-base font-extrabold text-slate-900">
-                    {result.panchang.balance_dasha}
-                  </div>
-                  <div className="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500">
-                    {result.panchang.moon_rashi} • {result.panchang.moon_nakshatra}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 2. Nirayana Bhava Chalit Chart Viewer */}
-            <div>
-              <div className="mb-4">
-                <h2 className="text-xl font-extrabold text-slate-900">{ui.chartHeading}</h2>
-                <p className="text-xs text-slate-600 mt-0.5">{ui.chartSubheading}</p>
-              </div>
-
-              <KPChartViewer
-                planets={result.planets}
-                cusps={result.cusps}
-                ascendantSignIndex={ascendantSignIndex}
-                userName={result.name}
-                birthDate={result.birth_date_formatted}
-                birthTime={result.birth_time_formatted}
-                moonSignName={result.panchang.moon_rashi}
-                nakshatraName={result.panchang.moon_nakshatra}
-                language={language}
-              />
-            </div>
-
-            {/* 3. KP Ruling Planets (RP) Dual Side-by-Side Tables */}
-            <div>
-              <div className="mb-4">
-                <h2 className="text-xl font-extrabold text-slate-900">{ui.rpHeading}</h2>
-                <p className="text-xs text-slate-600 mt-0.5">{ui.rpSubheading}</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Table 1: Ruling Planets at Birth (DOB) */}
+                {/* Table 1: Planetary Significators */}
                 <div className="bg-white rounded-2xl border border-amber-200/90 shadow-xs overflow-hidden">
-                  <div className="bg-gradient-to-r from-amber-500 to-amber-600 px-5 py-3 text-white">
-                    <h3 className="text-sm font-extrabold tracking-wide">{ui.rpDobTitle}</h3>
+                  <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                    <h3 className="text-base font-extrabold text-slate-900">{ui.planetSignificatorsHeading}</h3>
+                    <span className="text-xs font-semibold text-amber-700">Level A → B → C → D</span>
                   </div>
-                  <div className="p-4 divide-y divide-slate-100 text-xs">
-                    <div className="py-2.5 flex justify-between items-center">
-                      <span className="font-semibold text-slate-600">{ui.lagnaSignLord}</span>
-                      <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
-                        {result.ruling_planets_dob.lagna_rashi_lord}
-                      </span>
-                    </div>
-                    <div className="py-2.5 flex justify-between items-center">
-                      <span className="font-semibold text-slate-600">{ui.lagnaStarLord}</span>
-                      <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
-                        {result.ruling_planets_dob.lagna_nakshatra_lord}
-                      </span>
-                    </div>
-                    <div className="py-2.5 flex justify-between items-center">
-                      <span className="font-semibold text-slate-600">{ui.lagnaSubLord}</span>
-                      <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
-                        {result.ruling_planets_dob.lagna_sub_lord}
-                      </span>
-                    </div>
-                    <div className="py-2.5 flex justify-between items-center">
-                      <span className="font-semibold text-slate-600">{ui.moonSignLord}</span>
-                      <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
-                        {result.ruling_planets_dob.moon_rashi_lord}
-                      </span>
-                    </div>
-                    <div className="py-2.5 flex justify-between items-center">
-                      <span className="font-semibold text-slate-600">{ui.moonStarLord}</span>
-                      <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
-                        {result.ruling_planets_dob.moon_nakshatra_lord}
-                      </span>
-                    </div>
-                    <div className="py-2.5 flex justify-between items-center">
-                      <span className="font-semibold text-slate-600">{ui.moonSubLord}</span>
-                      <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
-                        {result.ruling_planets_dob.moon_sub_lord}
-                      </span>
-                    </div>
-                    <div className="py-2.5 flex justify-between items-center">
-                      <span className="font-semibold text-slate-600">{ui.dayLordLabel}</span>
-                      <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
-                        {result.ruling_planets_dob.day_lord}
-                      </span>
-                    </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-100/75 text-slate-700 font-bold uppercase tracking-wider border-b border-slate-200">
+                        <tr>
+                          <th className="py-3 px-4">{ui.planetCol}</th>
+                          <th className="py-3 px-4">{ui.levelATitle}</th>
+                          <th className="py-3 px-4">{ui.levelBTitle}</th>
+                          <th className="py-3 px-4">{ui.levelCTitle}</th>
+                          <th className="py-3 px-4">{ui.levelDTitle}</th>
+                          <th className="py-3 px-4">All Houses Signified</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {result.planet_significators?.map((ps) => (
+                          <tr key={`planet-sig-${ps.planet}`} className="hover:bg-amber-50/50 transition-colors">
+                            <td className="py-3 px-4 font-extrabold text-slate-900">
+                              {ps.planet}
+                            </td>
+                            <td className="py-3 px-4 font-mono font-bold text-amber-800">
+                              {ps.level_a.length > 0 ? ps.level_a.join(", ") : "-"}
+                            </td>
+                            <td className="py-3 px-4 font-mono font-bold text-slate-700">
+                              {ps.level_b.length > 0 ? ps.level_b.join(", ") : "-"}
+                            </td>
+                            <td className="py-3 px-4 font-mono font-bold text-slate-600">
+                              {ps.level_c.length > 0 ? ps.level_c.join(", ") : "-"}
+                            </td>
+                            <td className="py-3 px-4 font-mono font-bold text-slate-500">
+                              {ps.level_d.length > 0 ? ps.level_d.join(", ") : "-"}
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="flex flex-wrap gap-1">
+                                {ps.all_signified_houses.map((h) => (
+                                  <span
+                                    key={`sig-h-${ps.planet}-${h}`}
+                                    className="px-2 py-0.5 rounded text-[11px] font-black bg-amber-100 text-amber-900 border border-amber-200"
+                                  >
+                                    H{h}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
 
-                {/* Table 2: Ruling Planets at Casting Time */}
+                {/* Table 2: House Significators */}
                 <div className="bg-white rounded-2xl border border-amber-200/90 shadow-xs overflow-hidden">
-                  <div className="bg-gradient-to-r from-slate-700 to-slate-800 px-5 py-3 text-white">
-                    <h3 className="text-sm font-extrabold tracking-wide">{ui.rpCastingTitle}</h3>
+                  <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                    <h3 className="text-base font-extrabold text-slate-900">{ui.houseSignificatorsHeading}</h3>
+                    <span className="text-xs font-semibold text-slate-500">Houses 1 to 12</span>
                   </div>
-                  <div className="p-4 divide-y divide-slate-100 text-xs">
-                    <div className="py-2.5 flex justify-between items-center">
-                      <span className="font-semibold text-slate-600">{ui.lagnaSignLord}</span>
-                      <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                        {result.ruling_planets_casting.lagna_rashi_lord}
-                      </span>
-                    </div>
-                    <div className="py-2.5 flex justify-between items-center">
-                      <span className="font-semibold text-slate-600">{ui.lagnaStarLord}</span>
-                      <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                        {result.ruling_planets_casting.lagna_nakshatra_lord}
-                      </span>
-                    </div>
-                    <div className="py-2.5 flex justify-between items-center">
-                      <span className="font-semibold text-slate-600">{ui.lagnaSubLord}</span>
-                      <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                        {result.ruling_planets_casting.lagna_sub_lord}
-                      </span>
-                    </div>
-                    <div className="py-2.5 flex justify-between items-center">
-                      <span className="font-semibold text-slate-600">{ui.moonSignLord}</span>
-                      <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                        {result.ruling_planets_casting.moon_rashi_lord}
-                      </span>
-                    </div>
-                    <div className="py-2.5 flex justify-between items-center">
-                      <span className="font-semibold text-slate-600">{ui.moonStarLord}</span>
-                      <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                        {result.ruling_planets_casting.moon_nakshatra_lord}
-                      </span>
-                    </div>
-                    <div className="py-2.5 flex justify-between items-center">
-                      <span className="font-semibold text-slate-600">{ui.moonSubLord}</span>
-                      <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                        {result.ruling_planets_casting.moon_sub_lord}
-                      </span>
-                    </div>
-                    <div className="py-2.5 flex justify-between items-center">
-                      <span className="font-semibold text-slate-600">{ui.dayLordLabel}</span>
-                      <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                        {result.ruling_planets_casting.day_lord}
-                      </span>
-                    </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-100/75 text-slate-700 font-bold uppercase tracking-wider border-b border-slate-200">
+                        <tr>
+                          <th className="py-3 px-4">{ui.cuspCol}</th>
+                          <th className="py-3 px-4">{ui.levelATitle}</th>
+                          <th className="py-3 px-4">{ui.levelBTitle}</th>
+                          <th className="py-3 px-4">{ui.levelCTitle}</th>
+                          <th className="py-3 px-4">{ui.levelDTitle}</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {result.house_significators?.map((hs) => (
+                          <tr key={`house-sig-${hs.house}`} className="hover:bg-amber-50/50 transition-colors">
+                            <td className="py-3 px-4 font-extrabold text-slate-900">
+                              House {hs.house}
+                            </td>
+                            <td className="py-3 px-4 font-bold text-amber-800">
+                              {hs.level_a.length > 0 ? hs.level_a.join(", ") : "-"}
+                            </td>
+                            <td className="py-3 px-4 font-bold text-slate-700">
+                              {hs.level_b.length > 0 ? hs.level_b.join(", ") : "-"}
+                            </td>
+                            <td className="py-3 px-4 font-bold text-slate-600">
+                              {hs.level_c.length > 0 ? hs.level_c.join(", ") : "-"}
+                            </td>
+                            <td className="py-3 px-4 font-bold text-slate-500">
+                              {hs.level_d.length > 0 ? hs.level_d.join(", ") : "-"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* 4. Placidus 12 House Cusps Table */}
-            <div className="bg-white rounded-2xl border border-amber-200/90 shadow-xs overflow-hidden">
-              <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-                <h3 className="text-base font-extrabold text-slate-900">{ui.cuspsHeading}</h3>
-                <span className="text-xs font-semibold text-amber-700">Placidus Unequal Division</span>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-100/75 text-slate-700 font-bold uppercase tracking-wider border-b border-slate-200">
-                    <tr>
-                      <th className="py-3 px-4">{ui.cuspCol}</th>
-                      <th className="py-3 px-4">{ui.degreeCol}</th>
-                      <th className="py-3 px-4">{ui.signCol}</th>
-                      <th className="py-3 px-4">{ui.signLordCol}</th>
-                      <th className="py-3 px-4">{ui.starLordCol}</th>
-                      <th className="py-3 px-4">{ui.subLordCol}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {result.cusps.map((c) => (
-                      <tr key={`cusp-${c.cusp}`} className="hover:bg-amber-50/50 transition-colors">
-                        <td className="py-3 px-4 font-bold text-slate-800">
-                          {c.cusp === 1 ? `I (${c.cusp}) [Lagna]` : `${c.cusp}`}
-                        </td>
-                        <td className="py-3 px-4 font-mono font-medium text-slate-700">
-                          {c.degree_formatted}
-                        </td>
-                        <td className="py-3 px-4 font-semibold text-slate-800">
-                          {getLocalizedSign(c.sign)}
-                        </td>
-                        <td className="py-3 px-4 font-bold text-slate-700">{c.sign_lord}</td>
-                        <td className="py-3 px-4 font-bold text-amber-700">{c.star_lord}</td>
-                        <td className="py-3 px-4 font-extrabold text-amber-900 bg-amber-50/80">
-                          {c.sub_lord}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            {/* TAB 3: CSL LIFE EVENTS */}
+            {activeTab === "life_events" && (
+              <div className="space-y-6 animate-fadeIn">
+                <div>
+                  <h2 className="text-xl font-extrabold text-slate-900">{ui.lifeEventsHeading}</h2>
+                  <p className="text-xs text-slate-600 mt-0.5">{ui.lifeEventsSubheading}</p>
+                </div>
 
-            {/* 5. Planetary Positions & Bhava Table */}
-            <div className="bg-white rounded-2xl border border-amber-200/90 shadow-xs overflow-hidden">
-              <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-                <h3 className="text-base font-extrabold text-slate-900">{ui.planetsHeading}</h3>
-                <span className="text-xs font-semibold text-slate-500">9 Grahas + Ascendant</span>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-100/75 text-slate-700 font-bold uppercase tracking-wider border-b border-slate-200">
-                    <tr>
-                      <th className="py-3 px-4">{ui.planetCol}</th>
-                      <th className="py-3 px-4">{ui.motionCol}</th>
-                      <th className="py-3 px-4">{ui.degreeCol}</th>
-                      <th className="py-3 px-4">{ui.signCol}</th>
-                      <th className="py-3 px-4">{ui.signLordCol}</th>
-                      <th className="py-3 px-4">{ui.starLordCol}</th>
-                      <th className="py-3 px-4">{ui.subLordCol}</th>
-                      <th className="py-3 px-4">{ui.houseCol}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {result.planets.map((p) => (
-                      <tr key={`planet-pos-${p.name}`} className="hover:bg-amber-50/50 transition-colors">
-                        <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-1.5">
-                          <span>{p.name}</span>
-                          <span className="text-[10px] text-slate-400">({p.code})</span>
-                        </td>
-                        <td className="py-3 px-4">
-                          {p.is_retrograde ? (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-red-100 text-red-800">
-                              {ui.retrogradeText}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {result.life_events?.map((ev) => {
+                    const isHigh = ev.promise_score >= 70;
+                    const isMed = ev.promise_score >= 45 && ev.promise_score < 70;
+
+                    let CategoryIcon = Briefcase;
+                    if (ev.category === "business") CategoryIcon = Award;
+                    else if (ev.category === "marriage") CategoryIcon = Heart;
+                    else if (ev.category === "love_marriage") CategoryIcon = Sparkles;
+                    else if (ev.category === "wealth") CategoryIcon = DollarSign;
+                    else if (ev.category === "property") CategoryIcon = Home;
+                    else if (ev.category === "health") CategoryIcon = Activity;
+                    else if (ev.category === "foreign") CategoryIcon = Plane;
+
+                    return (
+                      <div
+                        key={`life-ev-${ev.category}`}
+                        className="bg-white rounded-2xl border border-slate-200 hover:border-amber-300 p-5 shadow-xs transition-all flex flex-col justify-between space-y-4"
+                      >
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 shrink-0">
+                                <CategoryIcon className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <h3 className="text-sm font-extrabold text-slate-900">{ev.title}</h3>
+                                <div className="text-[11px] text-slate-500">
+                                  Primary: Cusp {ev.primary_cusp} • CSL: <strong className="text-slate-800">{ev.cuspal_sub_lord}</strong> (Star: {ev.csl_star_lord || "-"})
+                                </div>
+                              </div>
+                            </div>
+
+                            <span
+                              className={`px-3 py-1 rounded-full text-[10px] font-extrabold border shrink-0 ${
+                                isHigh
+                                  ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+                                  : isMed
+                                  ? "bg-amber-50 text-amber-800 border-amber-300"
+                                  : "bg-rose-50 text-rose-800 border-rose-300"
+                              }`}
+                            >
+                              {ev.verdict}
                             </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700">
-                              {ui.directText}
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-3 px-4 font-mono font-medium text-slate-700">
-                          {p.degree_formatted}
-                        </td>
-                        <td className="py-3 px-4 font-semibold text-slate-800">
-                          {getLocalizedSign(p.sign)}
-                        </td>
-                        <td className="py-3 px-4 font-bold text-slate-700">{p.sign_lord}</td>
-                        <td className="py-3 px-4 font-bold text-amber-700">{p.star_lord}</td>
-                        <td className="py-3 px-4 font-extrabold text-amber-900 bg-amber-50/80">
-                          {p.sub_lord}
-                        </td>
-                        <td className="py-3 px-4 font-black text-amber-800 text-sm">
-                          {p.bhav_house}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                          </div>
+
+                          {/* Promise Score Progress Bar */}
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-xs">
+                              <span className="font-semibold text-slate-600">{ui.promiseScoreLabel}:</span>
+                              <span className="font-extrabold text-slate-900">{ev.promise_score}%</span>
+                            </div>
+                            <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                              <div
+                                className={`h-full rounded-full transition-all duration-500 ${
+                                  isHigh
+                                    ? "bg-gradient-to-r from-emerald-500 to-teal-500"
+                                    : isMed
+                                    ? "bg-gradient-to-r from-amber-500 to-orange-500"
+                                    : "bg-gradient-to-r from-rose-500 to-red-500"
+                                }`}
+                                style={{ width: `${ev.promise_score}%` }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Houses Signified vs Favorable */}
+                          <div className="pt-2 border-t border-slate-100 grid grid-cols-2 gap-2 text-[11px]">
+                            <div>
+                              <span className="text-slate-500 block">Favorable Houses:</span>
+                              <div className="flex flex-wrap gap-1 mt-0.5">
+                                {ev.favorable_houses.map((h) => (
+                                  <span key={`fav-h-${ev.category}-${h}`} className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold">
+                                    H{h}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block">Houses Signified by CSL:</span>
+                              <div className="flex flex-wrap gap-1 mt-0.5">
+                                {ev.signified_houses.map((h) => (
+                                  <span key={`signified-h-${ev.category}-${h}`} className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 font-bold">
+                                    H{h}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Rule Description */}
+                          <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                            {ev.description}
+                          </p>
+                        </div>
+
+                        {/* Timing hint */}
+                        {ev.timing_hint && (
+                          <div className="text-[11px] text-amber-800 bg-amber-50/70 p-2 rounded-lg border border-amber-200/70">
+                            <strong>Timing Hint:</strong> {ev.timing_hint}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* 6. Vimshottari Dasha 3-Tier Drilldown Timeline */}
-            <div className="bg-white rounded-2xl border border-amber-200/90 shadow-xs overflow-hidden">
-              <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
-                <h3 className="text-base font-extrabold text-slate-900">{ui.dashaHeading}</h3>
-                <p className="text-xs text-slate-600 mt-0.5">{ui.dashaSubheading}</p>
-              </div>
+            {/* TAB 4: CUSPS & PLANETS */}
+            {activeTab === "cusps_planets" && (
+              <div className="space-y-8 animate-fadeIn">
+                {/* 1. Placidus 12 House Cusps Table */}
+                <div className="bg-white rounded-2xl border border-amber-200/90 shadow-xs overflow-hidden">
+                  <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-base font-extrabold text-slate-900">{ui.cuspsHeading}</h3>
+                      <p className="text-xs text-slate-500 mt-0.5">Placidus Unequal Division • Sign, Star, Sub & Sub-Sub Lord (SSL)</p>
+                    </div>
+                    <span className="text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
+                      12 Cusps
+                    </span>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-100/75 text-slate-700 font-bold uppercase tracking-wider border-b border-slate-200">
+                        <tr>
+                          <th className="py-3 px-4">{ui.cuspCol}</th>
+                          <th className="py-3 px-4">{ui.degreeCol}</th>
+                          <th className="py-3 px-4">{ui.signCol}</th>
+                          <th className="py-3 px-4">{ui.signLordCol}</th>
+                          <th className="py-3 px-4">{ui.starLordCol}</th>
+                          <th className="py-3 px-4">{ui.subLordCol}</th>
+                          <th className="py-3 px-4 font-black text-amber-900">{ui.subSubLordCol} (SSL)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {result.cusps.map((c) => (
+                          <tr key={`cusp-${c.cusp}`} className="hover:bg-amber-50/50 transition-colors">
+                            <td className="py-3 px-4 font-bold text-slate-800">
+                              {c.cusp === 1 ? `I (${c.cusp}) [Lagna]` : `${c.cusp}`}
+                            </td>
+                            <td className="py-3 px-4 font-mono font-medium text-slate-700">
+                              {c.degree_formatted}
+                            </td>
+                            <td className="py-3 px-4 font-semibold text-slate-800">
+                              {getLocalizedSign(c.sign)}
+                            </td>
+                            <td className="py-3 px-4 font-bold text-slate-700">{c.sign_lord}</td>
+                            <td className="py-3 px-4 font-bold text-amber-700">{c.star_lord}</td>
+                            <td className="py-3 px-4 font-extrabold text-amber-900 bg-amber-50/80">
+                              {c.sub_lord}
+                            </td>
+                            <td className="py-3 px-4 font-extrabold text-indigo-900 bg-indigo-50/50">
+                              {c.sub_sub_lord || "-"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
 
-              <div className="p-4 sm:p-6 space-y-4">
-                {result.dashas?.map((md: KPDashaPeriod) => {
-                  const isMDExpanded = expandedMD === md.lord;
-                  const isInsightExpanded = expandedInsightMD === md.lord;
-                  const insight =
-                    KP_LOCALIZED_DASHA_INSIGHTS[md.lord]?.[language] ||
-                    md.insight ||
-                    KP_LOCALIZED_DASHA_INSIGHTS[md.lord]?.["en"];
-
-                  return (
-                    <div
-                      key={`md-${md.lord}`}
-                      className={`rounded-2xl border transition-all overflow-hidden ${
-                        md.is_current
-                          ? "border-amber-400 bg-amber-50/30 shadow-md ring-1 ring-amber-400/50"
-                          : "border-slate-200 bg-white shadow-xs"
-                      }`}
-                    >
-                      {/* Mahadasha Header */}
-                      <div className="p-3.5 sm:p-4 flex flex-wrap items-center justify-between gap-3 bg-white">
-                        <button
-                          type="button"
-                          onClick={() => setExpandedMD(isMDExpanded ? null : md.lord)}
-                          className="flex items-center gap-2.5 text-left hover:opacity-80 transition-opacity"
-                        >
-                          {isMDExpanded ? (
-                            <ChevronDown className="w-4 h-4 text-amber-600 shrink-0" />
-                          ) : (
-                            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
-                          )}
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm sm:text-base font-extrabold text-slate-900">
-                                {md.lord} {ui.mahadashaTitle}
-                              </span>
-                              <span className="text-xs font-semibold text-slate-500">
-                                ({md.duration})
-                              </span>
-                              {md.is_current && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs animate-pulse">
-                                  <Sparkles className="w-2.5 h-2.5" />
-                                  <span>{ui.activeStatus}</span>
+                {/* 2. Planetary Positions & Bhava Table */}
+                <div className="bg-white rounded-2xl border border-amber-200/90 shadow-xs overflow-hidden">
+                  <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-base font-extrabold text-slate-900">{ui.planetsHeading}</h3>
+                      <p className="text-xs text-slate-500 mt-0.5">9 Grahas + Untenanted Status & Sub-Sub Lord</p>
+                    </div>
+                    <span className="text-xs font-semibold text-slate-500">Nirayana Placements</span>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-100/75 text-slate-700 font-bold uppercase tracking-wider border-b border-slate-200">
+                        <tr>
+                          <th className="py-3 px-4">{ui.planetCol}</th>
+                          <th className="py-3 px-4">{ui.motionCol}</th>
+                          <th className="py-3 px-4">{ui.degreeCol}</th>
+                          <th className="py-3 px-4">{ui.signCol}</th>
+                          <th className="py-3 px-4">{ui.signLordCol}</th>
+                          <th className="py-3 px-4">{ui.starLordCol}</th>
+                          <th className="py-3 px-4">{ui.subLordCol}</th>
+                          <th className="py-3 px-4 font-black text-indigo-900">{ui.subSubLordCol} (SSL)</th>
+                          <th className="py-3 px-4">Untenanted?</th>
+                          <th className="py-3 px-4">{ui.houseCol}</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {result.planets.map((p) => (
+                          <tr key={`planet-pos-${p.name}`} className="hover:bg-amber-50/50 transition-colors">
+                            <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-1.5">
+                              <span>{p.name}</span>
+                              <span className="text-[10px] text-slate-400">({p.code})</span>
+                            </td>
+                            <td className="py-3 px-4">
+                              {p.is_retrograde ? (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-red-100 text-red-800">
+                                  {ui.retrogradeText}
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700">
+                                  {ui.directText}
                                 </span>
                               )}
-                            </div>
-                            <div className="text-[11px] font-mono text-slate-500 mt-0.5">
-                              {md.start_date} → {md.end_date}
-                            </div>
-                          </div>
-                        </button>
+                            </td>
+                            <td className="py-3 px-4 font-mono font-medium text-slate-700">
+                              {p.degree_formatted}
+                            </td>
+                            <td className="py-3 px-4 font-semibold text-slate-800">
+                              {getLocalizedSign(p.sign)}
+                            </td>
+                            <td className="py-3 px-4 font-bold text-slate-700">{p.sign_lord}</td>
+                            <td className="py-3 px-4 font-bold text-amber-700">{p.star_lord}</td>
+                            <td className="py-3 px-4 font-extrabold text-amber-900 bg-amber-50/80">
+                              {p.sub_lord}
+                            </td>
+                            <td className="py-3 px-4 font-extrabold text-indigo-900 bg-indigo-50/50">
+                              {p.sub_sub_lord || "-"}
+                            </td>
+                            <td className="py-3 px-4">
+                              {p.is_untenanted ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 shadow-2xs">
+                                  <Star className="w-2.5 h-2.5 fill-amber-950" />
+                                  Untenanted
+                                </span>
+                              ) : (
+                                <span className="text-slate-400 text-[11px]">-</span>
+                              )}
+                            </td>
+                            <td className="py-3 px-4 font-black text-amber-800 text-sm">
+                              {p.bhav_house}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
 
-                        {/* Action Buttons: Insights toggle */}
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setExpandedInsightMD(isInsightExpanded ? null : md.lord)
-                            }
-                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
-                              isInsightExpanded
-                                ? "bg-amber-600 text-white border-amber-700 shadow-xs"
-                                : md.is_current
-                                ? "bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300"
-                                : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
-                            }`}
-                          >
-                            <Sparkles className="w-3.5 h-3.5" />
-                            <span>
-                              {isInsightExpanded ? ui.hideInsightsBtn : ui.viewInsightsBtn}
-                            </span>
-                          </button>
+            {/* TAB 5: RULING PLANETS & HORARY */}
+            {activeTab === "ruling_horary" && (
+              <div className="space-y-8 animate-fadeIn">
+                {/* Retrograde Filter Engine Card */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 shadow-xs space-y-2">
+                    <div className="flex items-center gap-2 text-emerald-900 font-extrabold text-sm">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <span>Fruitful Ruling Planets (Event Fructification)</span>
+                    </div>
+                    <p className="text-xs text-emerald-800/80 leading-relaxed">
+                      Ruling planets whose star lords are direct in transit. These act as powerful, unobstructed triggers for timing key events.
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 pt-2">
+                      {result.ruling_planets_dob.fruitful_planets?.map((fp) => (
+                        <span key={`fp-${fp}`} className="px-3 py-1 rounded-lg text-xs font-black bg-emerald-600 text-white shadow-2xs">
+                          {fp} ✓
+                        </span>
+                      ))}
+                      {(!result.ruling_planets_dob.fruitful_planets || result.ruling_planets_dob.fruitful_planets.length === 0) && (
+                        <span className="text-xs text-slate-500">None</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="bg-rose-50 border border-rose-200 rounded-2xl p-5 shadow-xs space-y-2">
+                    <div className="flex items-center gap-2 text-rose-900 font-extrabold text-sm">
+                      <AlertTriangle className="w-4 h-4 text-rose-600" />
+                      <span>Discarded Ruling Planets (Retrograde Star Filter)</span>
+                    </div>
+                    <p className="text-xs text-rose-800/80 leading-relaxed">
+                      Per Rahul Kaushik Rule 6 (Page 56): Any ruling planet in the star of a retrograde planet cannot deliver favorable results and is discarded.
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 pt-2">
+                      {result.ruling_planets_dob.discarded_planets?.map((dp) => (
+                        <span key={`dp-${dp}`} className="px-3 py-1 rounded-lg text-xs font-black bg-rose-600 text-white shadow-2xs">
+                          {dp} ✕
+                        </span>
+                      ))}
+                      {(!result.ruling_planets_dob.discarded_planets || result.ruling_planets_dob.discarded_planets.length === 0) && (
+                        <span className="text-xs text-emerald-700 font-semibold">No planets discarded — all star lords direct.</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dual Side-by-Side RP Tables */}
+                <div>
+                  <div className="mb-4">
+                    <h2 className="text-xl font-extrabold text-slate-900">{ui.rpHeading}</h2>
+                    <p className="text-xs text-slate-600 mt-0.5">{ui.rpSubheading}</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Table 1: Ruling Planets at Birth (DOB) */}
+                    <div className="bg-white rounded-2xl border border-amber-200/90 shadow-xs overflow-hidden">
+                      <div className="bg-gradient-to-r from-amber-500 to-amber-600 px-5 py-3 text-white">
+                        <h3 className="text-sm font-extrabold tracking-wide">{ui.rpDobTitle}</h3>
+                      </div>
+                      <div className="p-4 divide-y divide-slate-100 text-xs">
+                        <div className="py-2.5 flex justify-between items-center">
+                          <span className="font-semibold text-slate-600">{ui.lagnaSignLord}</span>
+                          <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
+                            {result.ruling_planets_dob.lagna_rashi_lord}
+                          </span>
+                        </div>
+                        <div className="py-2.5 flex justify-between items-center">
+                          <span className="font-semibold text-slate-600">{ui.lagnaStarLord}</span>
+                          <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
+                            {result.ruling_planets_dob.lagna_nakshatra_lord}
+                          </span>
+                        </div>
+                        <div className="py-2.5 flex justify-between items-center">
+                          <span className="font-semibold text-slate-600">{ui.lagnaSubLord}</span>
+                          <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
+                            {result.ruling_planets_dob.lagna_sub_lord}
+                          </span>
+                        </div>
+                        <div className="py-2.5 flex justify-between items-center">
+                          <span className="font-semibold text-slate-600">{ui.moonSignLord}</span>
+                          <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
+                            {result.ruling_planets_dob.moon_rashi_lord}
+                          </span>
+                        </div>
+                        <div className="py-2.5 flex justify-between items-center">
+                          <span className="font-semibold text-slate-600">{ui.moonStarLord}</span>
+                          <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
+                            {result.ruling_planets_dob.moon_nakshatra_lord}
+                          </span>
+                        </div>
+                        <div className="py-2.5 flex justify-between items-center">
+                          <span className="font-semibold text-slate-600">{ui.moonSubLord}</span>
+                          <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
+                            {result.ruling_planets_dob.moon_sub_lord}
+                          </span>
+                        </div>
+                        <div className="py-2.5 flex justify-between items-center">
+                          <span className="font-semibold text-slate-600">{ui.dayLordLabel}</span>
+                          <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
+                            {result.ruling_planets_dob.day_lord}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Table 2: Ruling Planets at Casting Time */}
+                    <div className="bg-white rounded-2xl border border-amber-200/90 shadow-xs overflow-hidden">
+                      <div className="bg-gradient-to-r from-slate-700 to-slate-800 px-5 py-3 text-white">
+                        <h3 className="text-sm font-extrabold tracking-wide">{ui.rpCastingTitle}</h3>
+                      </div>
+                      <div className="p-4 divide-y divide-slate-100 text-xs">
+                        <div className="py-2.5 flex justify-between items-center">
+                          <span className="font-semibold text-slate-600">{ui.lagnaSignLord}</span>
+                          <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+                            {result.ruling_planets_casting.lagna_rashi_lord}
+                          </span>
+                        </div>
+                        <div className="py-2.5 flex justify-between items-center">
+                          <span className="font-semibold text-slate-600">{ui.lagnaStarLord}</span>
+                          <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+                            {result.ruling_planets_casting.lagna_nakshatra_lord}
+                          </span>
+                        </div>
+                        <div className="py-2.5 flex justify-between items-center">
+                          <span className="font-semibold text-slate-600">{ui.lagnaSubLord}</span>
+                          <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+                            {result.ruling_planets_casting.lagna_sub_lord}
+                          </span>
+                        </div>
+                        <div className="py-2.5 flex justify-between items-center">
+                          <span className="font-semibold text-slate-600">{ui.moonSignLord}</span>
+                          <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+                            {result.ruling_planets_casting.moon_rashi_lord}
+                          </span>
+                        </div>
+                        <div className="py-2.5 flex justify-between items-center">
+                          <span className="font-semibold text-slate-600">{ui.moonStarLord}</span>
+                          <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+                            {result.ruling_planets_casting.moon_nakshatra_lord}
+                          </span>
+                        </div>
+                        <div className="py-2.5 flex justify-between items-center">
+                          <span className="font-semibold text-slate-600">{ui.moonSubLord}</span>
+                          <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+                            {result.ruling_planets_casting.moon_sub_lord}
+                          </span>
+                        </div>
+                        <div className="py-2.5 flex justify-between items-center">
+                          <span className="font-semibold text-slate-600">{ui.dayLordLabel}</span>
+                          <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+                            {result.ruling_planets_casting.day_lord}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 6: ASPECTS & BADHAKA */}
+            {activeTab === "aspects_badhaka" && (
+              <div className="space-y-8 animate-fadeIn">
+                {/* Badhaka & Maraka Card */}
+                {result.badhaka_maraka && (
+                  <div className="bg-white rounded-2xl border border-amber-200/90 p-5 sm:p-6 shadow-xs space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck className="w-5 h-5 text-amber-600" />
+                        <h3 className="text-base font-extrabold text-slate-900">{ui.badhakaTitle}</h3>
+                      </div>
+                      <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-900 border border-amber-300">
+                        Ascendant: {result.badhaka_maraka.ascendant_type}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Badhaka details */}
+                      <div className="bg-amber-50/50 p-4 rounded-xl border border-amber-200 space-y-2">
+                        <div className="text-xs font-bold text-amber-900 uppercase">
+                          {ui.badhakaHouseLabel}: House {result.badhaka_maraka.badhaka_house} ({result.badhaka_maraka.badhaka_sign})
+                        </div>
+                        <div className="text-xs text-slate-700">
+                          <strong>Badhaka Lord:</strong> {result.badhaka_maraka.badhaka_lord}
+                        </div>
+                        <div className="text-xs text-slate-700">
+                          <strong>Badhaka Connected Planets:</strong>{" "}
+                          {result.badhaka_maraka.badhaka_planets.length > 0
+                            ? result.badhaka_maraka.badhaka_planets.join(", ")
+                            : "None"}
                         </div>
                       </div>
 
-                      {/* Detailed Insights & Guidance Card */}
-                      {isInsightExpanded && insight && (
-                        <div className="p-4 sm:p-6 bg-gradient-to-b from-amber-50/60 to-white border-t border-amber-200/80 space-y-4 animate-in fade-in duration-200">
-                          {/* Meta tags bar */}
-                          <div className="flex flex-wrap items-center gap-2 pb-3 border-b border-amber-200/50 text-xs">
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-100/80 text-amber-900 font-semibold border border-amber-300">
-                              <span>📿 {ui.luckyDeity}:</span>
-                              <strong className="font-extrabold">{insight.deity}</strong>
-                            </span>
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-900 font-semibold border border-blue-200">
-                              <span>🗓️ {ui.luckyDay}:</span>
-                              <strong className="font-extrabold">{insight.lucky_day}</strong>
-                            </span>
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-50 text-purple-900 font-semibold border border-purple-200">
-                              <span>🎨 {ui.luckyColor}:</span>
-                              <strong className="font-extrabold">{insight.lucky_color}</strong>
-                            </span>
-                          </div>
-
-                          {/* Overview / What to Expect */}
-                          <div className="bg-white/80 rounded-xl p-4 border border-amber-200/80 shadow-xs">
-                            <h4 className="text-xs font-extrabold text-amber-900 uppercase tracking-wider flex items-center gap-2 mb-1.5">
-                              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                              <span>{ui.overviewTitle}</span>
-                            </h4>
-                            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
-                              {insight.overview}
-                            </p>
-                          </div>
-
-                          {/* Career & Wealth */}
-                          <div className="bg-white/80 rounded-xl p-4 border border-amber-200/80 shadow-xs">
-                            <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-2 mb-1.5">
-                              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                              <span>{ui.careerWealthTitle}</span>
-                            </h4>
-                            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
-                              {insight.career_and_wealth}
-                            </p>
-                          </div>
-
-                          {/* 2-Column Grid: Do's & Don'ts */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* Do's (Favorable Actions) */}
-                            <div className="bg-emerald-50/50 rounded-xl p-4 border border-emerald-200 shadow-xs">
-                              <h4 className="text-xs font-extrabold text-emerald-900 uppercase tracking-wider flex items-center gap-2 mb-3">
-                                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                                <span>{ui.favorableTitle}</span>
-                              </h4>
-                              <ul className="space-y-2 text-xs text-slate-700">
-                                {insight.favorable_actions.map((act, idx) => (
-                                  <li key={`fav-${idx}`} className="flex items-start gap-2">
-                                    <span className="text-emerald-600 font-bold shrink-0 mt-0.5">✦</span>
-                                    <span className="font-medium leading-relaxed">{act}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-
-                            {/* Don'ts (Cautions & Pitfalls) */}
-                            <div className="bg-rose-50/50 rounded-xl p-4 border border-rose-200 shadow-xs">
-                              <h4 className="text-xs font-extrabold text-rose-900 uppercase tracking-wider flex items-center gap-2 mb-3">
-                                <ShieldCheck className="w-4 h-4 text-rose-600 shrink-0" />
-                                <span>{ui.cautionsTitle}</span>
-                              </h4>
-                              <ul className="space-y-2 text-xs text-slate-700">
-                                {insight.cautions_and_pitfalls.map((pit, idx) => (
-                                  <li key={`pit-${idx}`} className="flex items-start gap-2">
-                                    <span className="text-rose-600 font-bold shrink-0 mt-0.5">⚠</span>
-                                    <span className="font-medium leading-relaxed">{pit}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
-
-                          {/* Remedies & Upayas */}
-                          <div className="bg-amber-100/40 rounded-xl p-4 sm:p-5 border border-amber-300/80 shadow-xs">
-                            <h4 className="text-xs font-extrabold text-amber-950 uppercase tracking-wider flex items-center gap-2 mb-3">
-                              <BookOpen className="w-4 h-4 text-amber-700 shrink-0" />
-                              <span>{ui.remediesTitle}</span>
-                            </h4>
-                            <ul className="space-y-2 text-xs text-slate-800">
-                              {insight.remedies.map((rem, idx) => (
-                                <li key={`rem-${idx}`} className="flex items-start gap-2.5">
-                                  <span className="text-amber-700 font-extrabold shrink-0 mt-0.5">🪔</span>
-                                  <span className="font-semibold leading-relaxed">{rem}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-
-                          {/* Sacred Mantras */}
-                          <div className="bg-gradient-to-r from-amber-500/10 via-amber-600/10 to-amber-500/10 rounded-xl p-4 border border-amber-400/60 shadow-xs space-y-2">
-                            <div className="text-xs font-bold text-amber-900">
-                              <span className="text-slate-500">{ui.beejMantra}:</span>{" "}
-                              <span className="font-extrabold font-serif text-amber-950">
-                                {insight.beej_mantra}
-                              </span>
-                            </div>
-                            <div className="text-xs font-bold text-amber-900 pt-1 border-t border-amber-200/50">
-                              <span className="text-slate-500">{ui.gayatriMantra}:</span>{" "}
-                              <span className="font-extrabold font-serif text-amber-950 italic">
-                                {insight.gayatri_mantra}
-                              </span>
-                            </div>
-                          </div>
+                      {/* Maraka details */}
+                      <div className="bg-rose-50/50 p-4 rounded-xl border border-rose-200 space-y-2">
+                        <div className="text-xs font-bold text-rose-900 uppercase">
+                          {ui.marakaHousesLabel}: Houses 2 & 7
                         </div>
-                      )}
+                        <div className="text-xs text-slate-700">
+                          <strong>Maraka Lords:</strong> {result.badhaka_maraka.maraka_lords.join(", ")}
+                        </div>
+                        <div className="text-xs text-slate-700">
+                          <strong>Maraka Connected Planets:</strong>{" "}
+                          {result.badhaka_maraka.maraka_planets.length > 0
+                            ? result.badhaka_maraka.maraka_planets.join(", ")
+                            : "None"}
+                        </div>
+                      </div>
+                    </div>
 
-                      {/* Level 2: Antardashas */}
-                      {isMDExpanded && md.sub_periods && (
-                        <div className="px-4 pb-4 pt-1 space-y-2 border-t border-amber-200/60 ml-6">
-                          {md.sub_periods.map((ad: KPDashaPeriod) => {
-                            const isADExpanded = expandedAD === `${md.lord}-${ad.lord}`;
-                            return (
-                              <div
-                                key={`ad-${md.lord}-${ad.lord}`}
-                                className={`rounded-lg border text-xs ${
-                                  ad.is_current
-                                    ? "border-amber-400 bg-amber-100/40"
-                                    : "border-slate-200 bg-slate-50/50"
+                    <p className="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed">
+                      💡 {result.badhaka_maraka.notes}
+                    </p>
+                  </div>
+                )}
+
+                {/* KP Western Angular Aspects Table */}
+                <div className="bg-white rounded-2xl border border-amber-200/90 shadow-xs overflow-hidden">
+                  <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-base font-extrabold text-slate-900">{ui.aspectsTitle}</h3>
+                      <p className="text-xs text-slate-500 mt-0.5">{ui.aspectsSubheading}</p>
+                    </div>
+                    <span className="text-xs font-semibold text-slate-600">
+                      {result.aspects?.length || 0} Aspects Detected
+                    </span>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-100/75 text-slate-700 font-bold uppercase tracking-wider border-b border-slate-200">
+                        <tr>
+                          <th className="py-3 px-4">Planets Involved</th>
+                          <th className="py-3 px-4">Aspect</th>
+                          <th className="py-3 px-4">Angle</th>
+                          <th className="py-3 px-4">Orb</th>
+                          <th className="py-3 px-4">Nature</th>
+                          <th className="py-3 px-4">Significance</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {result.aspects?.map((asp, idx) => (
+                          <tr key={`aspect-${asp.planet_1}-${asp.planet_2}-${idx}`} className="hover:bg-amber-50/50 transition-colors">
+                            <td className="py-3 px-4 font-extrabold text-slate-900 whitespace-nowrap">
+                              {asp.planet_1} ↔ {asp.planet_2}
+                            </td>
+                            <td className="py-3 px-4 font-bold text-amber-800 whitespace-nowrap">
+                              <span className="mr-1 text-sm font-black">{asp.aspect_symbol}</span>
+                              <span>{asp.aspect_name}</span>
+                            </td>
+                            <td className="py-3 px-4 font-mono font-medium text-slate-700 whitespace-nowrap">
+                              {asp.angle_degrees.toFixed(2)}°
+                            </td>
+                            <td className="py-3 px-4 font-mono text-slate-500 whitespace-nowrap">
+                              ±{asp.orb_degrees.toFixed(2)}°
+                            </td>
+                            <td className="py-3 px-4 whitespace-nowrap">
+                              <span
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                  asp.nature === "Harmonious"
+                                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                                    : "bg-rose-50 text-rose-800 border border-rose-200"
                                 }`}
                               >
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setExpandedAD(
-                                      isADExpanded ? null : `${md.lord}-${ad.lord}`,
-                                    )
-                                  }
-                                  className="w-full px-3 py-2 flex items-center justify-between text-left hover:bg-amber-100/30 rounded-lg transition-colors"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    {isADExpanded ? (
-                                      <ChevronDown className="w-3.5 h-3.5 text-amber-600" />
-                                    ) : (
-                                      <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                                    )}
-                                    <span className="font-bold text-slate-800">
-                                      {md.lord} / {ad.lord} ({ui.antardashaTitle})
-                                    </span>
-                                    {ad.is_current && (
-                                      <span className="px-2 py-0.5 rounded text-[9px] font-black bg-amber-600 text-white">
-                                        ACTIVE
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="font-mono text-[11px] text-slate-600">
-                                    {ad.start_date} → {ad.end_date}
-                                  </div>
-                                </button>
-
-                                {/* Level 3: Pratyantardashas */}
-                                {isADExpanded && ad.sub_periods && (
-                                  <div className="px-4 py-2 border-t border-slate-200 ml-4 space-y-1 bg-white rounded-b-lg">
-                                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                                      {ui.pratyantardashaTitle}
-                                    </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                                      {ad.sub_periods.map((pd: KPDashaPeriod) => (
-                                        <div
-                                          key={`pd-${pd.lord}`}
-                                          className={`p-2 rounded border text-[11px] flex items-center justify-between ${
-                                            pd.is_current
-                                              ? "border-amber-500 bg-amber-50 font-bold text-amber-900"
-                                              : "border-slate-100 bg-slate-50/50 text-slate-700"
-                                          }`}
-                                        >
-                                          <span>
-                                            {pd.lord}{" "}
-                                            {pd.is_current && (
-                                              <span className="text-[9px] text-amber-600 font-extrabold">
-                                                ● Active
-                                              </span>
-                                            )}
-                                          </span>
-                                          <span className="font-mono text-[10px] text-slate-500">
-                                            {pd.start_date}
-                                          </span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                                {asp.nature}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-slate-600 leading-relaxed min-w-[280px]">
+                              {asp.significance}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* TAB 7: DASHA & REMEDIES */}
+            {activeTab === "remedies" && (
+              <div className="space-y-8 animate-fadeIn">
+                {/* 43-Day Lal Kitab & Vedic Remedies Dashboard */}
+                <div>
+                  <div className="mb-4">
+                    <h2 className="text-xl font-extrabold text-slate-900">{ui.remediesDashboardTitle}</h2>
+                    <p className="text-xs text-slate-600 mt-0.5">{ui.remediesDashboardSubheading}</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {result.remedies?.map((rem) => (
+                      <div
+                        key={`rem-${rem.planet}-${rem.house_involved}`}
+                        className="bg-white rounded-2xl border border-amber-200/90 p-5 shadow-xs space-y-3"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Flame className="w-5 h-5 text-amber-500" />
+                            <h3 className="text-sm font-black text-slate-900">{rem.planet} Remedy</h3>
+                          </div>
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300">
+                            Afflicted House {rem.house_involved}
+                          </span>
+                        </div>
+
+                        <div className="text-xs text-slate-600">
+                          <strong>Problem / Symptom:</strong> {rem.problem}
+                        </div>
+
+                        <div className="bg-amber-50/70 p-3 rounded-xl border border-amber-200/80 text-xs text-amber-950 space-y-1">
+                          <strong className="block text-amber-900 font-extrabold">🏺 43-Day Lal Kitab Upaya:</strong>
+                          <p className="leading-relaxed">{rem.lal_kitab_upaya}</p>
+                        </div>
+
+                        <div className="bg-indigo-50/50 p-3 rounded-xl border border-indigo-200/60 text-xs text-indigo-950 space-y-1">
+                          <strong className="block text-indigo-900 font-extrabold">🕉️ Vedic Mantra:</strong>
+                          <p className="font-serif italic leading-relaxed">{rem.vedic_mantra}</p>
+                        </div>
+
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs text-slate-700">
+                          <strong>🤝 Recommended Charity:</strong> {rem.charity_recommendation}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Vimshottari Dasha 3-Tier Drilldown Timeline */}
+                <div className="bg-white rounded-2xl border border-amber-200/90 shadow-xs overflow-hidden">
+                  <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
+                    <h3 className="text-base font-extrabold text-slate-900">{ui.dashaHeading}</h3>
+                    <p className="text-xs text-slate-600 mt-0.5">{ui.dashaSubheading}</p>
+                  </div>
+
+                  <div className="p-4 sm:p-6 space-y-4">
+                    {result.dashas?.map((md: KPDashaPeriod) => {
+                      const isMDExpanded = expandedMD === md.lord;
+                      const isInsightExpanded = expandedInsightMD === md.lord;
+                      const insight =
+                        KP_LOCALIZED_DASHA_INSIGHTS[md.lord]?.[language] ||
+                        md.insight ||
+                        KP_LOCALIZED_DASHA_INSIGHTS[md.lord]?.["en"];
+
+                      return (
+                        <div
+                          key={`md-${md.lord}`}
+                          className={`rounded-2xl border transition-all overflow-hidden ${
+                            md.is_current
+                              ? "border-amber-400 bg-amber-50/30 shadow-md ring-1 ring-amber-400/50"
+                              : "border-slate-200 bg-white shadow-xs"
+                          }`}
+                        >
+                          {/* Mahadasha Header */}
+                          <div className="p-3.5 sm:p-4 flex flex-wrap items-center justify-between gap-3 bg-white">
+                            <button
+                              type="button"
+                              onClick={() => setExpandedMD(isMDExpanded ? null : md.lord)}
+                              className="flex items-center gap-2.5 text-left hover:opacity-80 transition-opacity"
+                            >
+                              {isMDExpanded ? (
+                                <ChevronDown className="w-4 h-4 text-amber-600 shrink-0" />
+                              ) : (
+                                <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+                              )}
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm sm:text-base font-extrabold text-slate-900">
+                                    {md.lord} {ui.mahadashaTitle}
+                                  </span>
+                                  <span className="text-xs font-semibold text-slate-500">
+                                    ({md.duration})
+                                  </span>
+                                  {md.is_current && (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs animate-pulse">
+                                      <Sparkles className="w-2.5 h-2.5" />
+                                      <span>{ui.activeStatus}</span>
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-[11px] font-mono text-slate-500 mt-0.5">
+                                  {md.start_date} → {md.end_date}
+                                </div>
+                              </div>
+                            </button>
+
+                            {/* Action Buttons: Insights toggle */}
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setExpandedInsightMD(isInsightExpanded ? null : md.lord)
+                                }
+                                className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-all ${
+                                  isInsightExpanded
+                                    ? "bg-amber-100 text-amber-900 border-amber-300"
+                                    : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                                }`}
+                              >
+                                {isInsightExpanded ? ui.hideInsightsBtn : ui.viewInsightsBtn}
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Expandable Dasha Insights Card */}
+                          {isInsightExpanded && insight && (
+                            <div className="p-4 sm:p-5 bg-gradient-to-br from-amber-50/60 to-orange-50/40 border-t border-amber-200/80 space-y-4 text-xs">
+                              <div className="space-y-1">
+                                <span className="font-bold text-amber-900 uppercase tracking-wide text-[11px]">
+                                  {ui.overviewTitle}
+                                </span>
+                                <p className="text-slate-700 leading-relaxed">{insight.overview}</p>
+                              </div>
+
+                              <div className="space-y-1">
+                                <span className="font-bold text-amber-900 uppercase tracking-wide text-[11px]">
+                                  {ui.careerWealthTitle}
+                                </span>
+                                <p className="text-slate-700 leading-relaxed">
+                                  {insight.career_and_wealth}
+                                </p>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                                <div className="bg-white/80 p-3 rounded-xl border border-emerald-200">
+                                  <span className="font-bold text-emerald-800 flex items-center gap-1.5 mb-1.5">
+                                    <Check className="w-3.5 h-3.5" />
+                                    {ui.favorableTitle}
+                                  </span>
+                                  <ul className="space-y-1 text-slate-600 list-disc list-inside">
+                                    {insight.favorable_actions?.map((item: string, idx: number) => (
+                                      <li key={idx} className="leading-tight">
+                                        {item}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+
+                                <div className="bg-white/80 p-3 rounded-xl border border-rose-200">
+                                  <span className="font-bold text-rose-800 flex items-center gap-1.5 mb-1.5">
+                                    <X className="w-3.5 h-3.5" />
+                                    {ui.cautionsTitle}
+                                  </span>
+                                  <ul className="space-y-1 text-slate-600 list-disc list-inside">
+                                    {insight.cautions_and_pitfalls?.map((item: string, idx: number) => (
+                                      <li key={idx} className="leading-tight">
+                                        {item}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Antardasha (AD) List */}
+                          {isMDExpanded && md.sub_periods && (
+                            <div className="border-t border-slate-200 p-3 sm:p-4 bg-slate-50/60 space-y-2">
+                              {md.sub_periods.map((ad: KPDashaPeriod) => {
+                                const isADExpanded = expandedAD === ad.lord;
+                                return (
+                                  <div
+                                    key={`ad-${md.lord}-${ad.lord}`}
+                                    className={`rounded-xl border transition-all ${
+                                      ad.is_current
+                                        ? "border-amber-400 bg-amber-50/60 shadow-xs"
+                                        : "border-slate-200 bg-white"
+                                    }`}
+                                  >
+                                    <button
+                                      type="button"
+                                      onClick={() => setExpandedAD(isADExpanded ? null : ad.lord)}
+                                      className="w-full p-2.5 sm:p-3 flex items-center justify-between text-left text-xs"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        {isADExpanded ? (
+                                          <ChevronDown className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                        ) : (
+                                          <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                        )}
+                                        <span className="font-bold text-slate-800">
+                                          {ad.lord} {ui.antardashaTitle}
+                                        </span>
+                                        {ad.is_current && (
+                                          <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-500 text-white">
+                                            ACTIVE
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div className="font-mono text-[11px] text-slate-500">
+                                        {ad.start_date} → {ad.end_date} ({ad.duration})
+                                      </div>
+                                    </button>
+
+                                    {/* Pratyantardasha (PD) List */}
+                                    {isADExpanded && ad.sub_periods && (
+                                      <div className="border-t border-slate-100 p-2 sm:p-3 bg-slate-50/80">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                                          {ad.sub_periods.map((pd: KPDashaPeriod) => (
+                                            <div
+                                              key={`pd-${md.lord}-${ad.lord}-${pd.lord}`}
+                                              className={`p-2 rounded-lg border text-xs flex justify-between items-center ${
+                                                pd.is_current
+                                                  ? "bg-amber-100/80 border-amber-400 font-bold"
+                                                  : "bg-white border-slate-200"
+                                              }`}
+                                            >
+                                              <span className="flex items-center gap-1 font-semibold text-slate-800">
+                                                <span>{pd.lord}</span>
+                                                {pd.is_current && (
+                                                  <span className="text-[9px] font-black text-amber-700">
+                                                    ● Active
+                                                  </span>
+                                                )}
+                                              </span>
+                                              <span className="font-mono text-[10px] text-slate-500">
+                                                {pd.start_date}
+                                              </span>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>

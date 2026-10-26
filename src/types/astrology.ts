@@ -457,6 +457,7 @@ export interface KPCalculatePayload {
   ayanamsa?: AyanamsaType;
   house_system?: HouseSystemType;
   language?: AstrologyLanguage;
+  horary_number?: number;
 }
 
 export interface KPPanchang {
@@ -493,6 +494,10 @@ export interface KPRulingPlanets {
   day_lord: string;
   date_formatted: string;
   time_formatted: string;
+  is_lagna_star_retrograde?: boolean;
+  is_moon_star_retrograde?: boolean;
+  discarded_planets?: string[];
+  fruitful_planets?: string[];
 }
 
 export interface KPCuspDetail {
@@ -504,6 +509,7 @@ export interface KPCuspDetail {
   sign_lord: string;
   star_lord: string;
   sub_lord: string;
+  sub_sub_lord?: string;
 }
 
 export interface KPPlanetDetail {
@@ -520,9 +526,88 @@ export interface KPPlanetDetail {
   sign_lord: string;
   star_lord: string;
   sub_lord: string;
+  sub_sub_lord?: string;
   rashi_house: number;
   bhav_house: number;
   is_retrograde: boolean;
+  is_untenanted?: boolean;
+}
+
+export interface KPPlanetSignificator {
+  planet: string;
+  level_a: number[];
+  level_b: number[];
+  level_c: number[];
+  level_d: number[];
+  all_signified_houses: number[];
+}
+
+export interface KPHouseSignificator {
+  house: number;
+  level_a: string[];
+  level_b: string[];
+  level_c: string[];
+  level_d: string[];
+}
+
+export interface KPEventAnalysisItem {
+  category: string;
+  title: string;
+  primary_cusp: number;
+  cuspal_sub_lord: string;
+  csl_star_lord: string;
+  csl_sub_lord: string;
+  favorable_houses: number[];
+  unfavorable_houses: number[];
+  signified_houses: number[];
+  promise_score: number;
+  verdict: string;
+  description: string;
+  timing_hint: string;
+}
+
+export interface KPAspectItem {
+  planet_1: string;
+  planet_2: string;
+  aspect_name: string;
+  aspect_symbol: string;
+  angle_degrees: number;
+  orb_degrees: number;
+  nature: string;
+  significance: string;
+}
+
+export interface KPBadhakaMarakaInfo {
+  ascendant_type: string;
+  badhaka_house: number;
+  badhaka_sign: string;
+  badhaka_lord: string;
+  maraka_houses: number[];
+  maraka_lords: string[];
+  badhaka_planets: string[];
+  maraka_planets: string[];
+  notes: string;
+}
+
+export interface KPHoraryInfo {
+  horary_number: number;
+  sub_start_degree: number;
+  sub_end_degree: number;
+  sub_span_formatted: string;
+  sign: string;
+  sign_lord: string;
+  star_lord: string;
+  sub_lord: string;
+  sub_sub_lord: string;
+}
+
+export interface KPRemedyItem {
+  planet: string;
+  house_involved: number;
+  problem: string;
+  lal_kitab_upaya: string;
+  vedic_mantra: string;
+  charity_recommendation: string;
 }
 
 export interface KPDashaInsight {
@@ -565,6 +650,15 @@ export interface KPCalculateResult {
   cusps: KPCuspDetail[];
   planets: KPPlanetDetail[];
   dashas: KPDashaPeriod[];
+
+  untenanted_planets?: string[];
+  planet_significators?: KPPlanetSignificator[];
+  house_significators?: KPHouseSignificator[];
+  life_events?: KPEventAnalysisItem[];
+  aspects?: KPAspectItem[];
+  badhaka_maraka?: KPBadhakaMarakaInfo;
+  horary_details?: KPHoraryInfo;
+  remedies?: KPRemedyItem[];
 
   selected_language: AstrologyLanguage;
   translations: Record<string, any>;
