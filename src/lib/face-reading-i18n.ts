@@ -63,6 +63,15 @@ export const I18N_UI: Record<FaceReadingLanguage, Record<string, string>> = {
     perfectKeepStill: "Perfect! Hold still",
     alignedReady: "Face aligned! Click button below to scan",
     centerFace: "Position face inside oval",
+    tabFeatures: "Samudrika Lakshana",
+    tabTriZone: "Tri-Zone Timeline",
+    tabMahabhuta: "5 Elements & Mahapurusha",
+    tabKundliSync: "Kundli-Face Alignment",
+    tabForehead: "Planetary Forehead Lines",
+    tabRemedies: "Vedic Remedies",
+    kundliSyncBadge: "100% Vedic Accuracy Enabled",
+    kundliSyncPrompt: "Connect your Kundli for 100% Vedic Astrological Alignment",
+    enterBirthDetails: "Enter Birth Details (Optional)",
   },
   bn: {
     title: "সামুদ্রিক শাস্ত্র মুখাবয়ব বিশ্লেষণ",
@@ -114,6 +123,15 @@ export const I18N_UI: Record<FaceReadingLanguage, Record<string, string>> = {
     perfectKeepStill: "নিখুঁত! স্থির থাকুন",
     alignedReady: "মুখের অবস্থান সঠিক! নিচের বাটনে ক্লিক করুন",
     centerFace: "ওভালের ভেতরে মুখ রাখুন",
+    tabFeatures: "সামুদ্রিক লক্ষণ",
+    tabTriZone: "ত্রিকাল ও আয়ু মণ্ডল",
+    tabMahabhuta: "পঞ্চ মহাভূত ও মহাপুরুষ",
+    tabKundliSync: "কুণ্ডলী-মুখ সামঞ্জস্য",
+    tabForehead: "সপ্তগ্রহ কপাল রেখা",
+    tabRemedies: "বৈদিক প্রতিকার ও রত্ন",
+    kundliSyncBadge: "১০০% বৈদিক নির্ভুলতা সক্রিয়",
+    kundliSyncPrompt: "১০০% নির্ভুল জ্যোতিষীয় সামঞ্জস্যের জন্য আপনার কুণ্ডলী সংযুক্ত করুন",
+    enterBirthDetails: "জন্ম বিবরণ দিন (ঐচ্ছিক)",
   },
   hi: {
     title: "सामुद्रिक शास्त्र मुखाकृति विश्लेषण",
@@ -165,6 +183,15 @@ export const I18N_UI: Record<FaceReadingLanguage, Record<string, string>> = {
     perfectKeepStill: "बिल्कुल सही! स्थिर रहें",
     alignedReady: "चेहरा सही स्थिति में है! नीचे बटन दबाएं",
     centerFace: "अंडाकार घेरे में चेहरा रखें",
+    tabFeatures: "सामुद्रिक लक्षण",
+    tabTriZone: "त्रिकाल व आयु मंडल",
+    tabMahabhuta: "पंच महाभूत व महापुरुष",
+    tabKundliSync: "कुंडली-मुखाकृति संरेखण",
+    tabForehead: "सप्तग्रह ललाट रेखाएं",
+    tabRemedies: "वैदिक उपाय व रत्न",
+    kundliSyncBadge: "100% वैदिक सटीकता सक्रिय",
+    kundliSyncPrompt: "100% सटीक ज्योतिषीय फलादेश के लिए अपनी जन्मकुंडली जोड़ें",
+    enterBirthDetails: "जन्म विवरण दर्ज करें (वैकल्पिक)",
   },
 };
 
@@ -178,6 +205,7 @@ export const FEATURE_NAMES: Record<string, Record<FaceReadingLanguage, string>> 
   lips: { en: "Lips & smile", bn: "ঠোঁট ও হাসি", hi: "होंठ व मुस्कान" },
   chin: { en: "Chin & jaw", bn: "চিবুক ও চোয়াল", hi: "ठोड़ी व जबड़ा" },
   cheeks: { en: "Cheeks", bn: "গাল", hi: "गाल" },
+  ears: { en: "Ears", bn: "কান (কর্ণ লক্ষণ)", hi: "कान (कर्ण लक्षण)" },
 };
 
 export const AREA_NAMES: Record<string, Record<FaceReadingLanguage, string>> = {
