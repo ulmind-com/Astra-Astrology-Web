@@ -166,3 +166,98 @@ export interface NumerologyCalculateResponse {
   name_analysis: NameAnalysisResponse;
   mobile_analysis: MobileAnalysisResponse | null;
 }
+
+export interface NameCorrectionRequest {
+  name: string;
+  mulank?: number;
+  bhagyank?: number;
+  target_compound?: number;
+}
+
+export interface NameCorrectionSuggestion {
+  suggested_spelling: string;
+  added_letters: string[];
+  new_compound: number;
+  new_single_digit: number;
+  compound_title: string;
+  compound_quality: string;
+  sound_harmony: string;
+  why_auspicious: string;
+}
+
+export interface NameCorrectionResponse {
+  original_name: string;
+  original_compound: number;
+  original_quality: string;
+  negative_syllables: string[];
+  suggestions: NameCorrectionSuggestion[];
+  general_guidance: string;
+}
+
+export interface MobileCompareRequest {
+  numbers: string[];
+  mulank?: number;
+  bhagyank?: number;
+  profession?: string;
+  birth_date?: string;
+}
+
+export interface MobileComparisonItem {
+  mobile_number: string;
+  single_digit: number;
+  compound_number: number;
+  compound_quality: string;
+  compatibility_score: number;
+  grade: string;
+  positive_pairs: string[];
+  negative_pairs: string[];
+  profession_match: boolean;
+  verdict_bn: string;
+}
+
+export interface MobileCompareResponse {
+  best_number: string;
+  items: MobileComparisonItem[];
+  recommendations_bn: string[];
+}
+
+export interface BusinessNumerologyRequest {
+  brand_name: string;
+  industry: string;
+  owner_mulank?: number;
+  owner_bhagyank?: number;
+}
+
+export interface BusinessNumerologyResponse {
+  brand_name: string;
+  industry: string;
+  chaldean_compound: number;
+  single_digit: number;
+  compound_meaning: string;
+  industry_suitability: string;
+  industry_fit_score: number;
+  owner_harmony_score: number;
+  favorable_business_numbers: number[];
+  actionable_recommendations: string[];
+}
+
+export interface VehicleBankAuditRequest {
+  audit_type?: "vehicle" | "bank";
+  input_string: string;
+  mulank?: number;
+  bhagyank?: number;
+}
+
+export interface VehicleBankAuditResponse {
+  input_string: string;
+  audit_type: "vehicle" | "bank";
+  extracted_digits: string;
+  total_sum: number;
+  single_digit: number;
+  compound_number: number;
+  compound_quality: string;
+  safety_rating: string;
+  risk_alert: string | null;
+  remedy_bn: string;
+}
+

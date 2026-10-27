@@ -21,6 +21,11 @@ import {
   Info,
   ChevronDown,
   ChevronUp,
+  Wand2,
+  Building2,
+  Car,
+  Landmark,
+  Trophy,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -29,6 +34,10 @@ import { Button } from "@/components/ui";
 import { numerologyApi } from "@/lib/api";
 import { useAuth } from "@/providers/auth-provider";
 import { useProfile } from "@/hooks/use-profile";
+import { NameCorrectionSection } from "@/components/numerology/name-correction";
+import { MobileComparisonSection } from "@/components/numerology/mobile-comparison";
+import { BusinessNumerologySection } from "@/components/numerology/business-numerology";
+import { VehicleBankAuditSection } from "@/components/numerology/vehicle-bank-audit";
 import type { NumerologyCalculateResponse } from "@/types/numerology";
 import type { AstrologyLanguage } from "@/types";
 
@@ -45,7 +54,18 @@ export default function NumerologyPage() {
 
   const [loading, setLoading] = React.useState(false);
   const [data, setData] = React.useState<NumerologyCalculateResponse | null>(null);
-  const [activeTab, setActiveTab] = React.useState<"loshu" | "dasha" | "name" | "mobile" | "remedies" | "profile">("loshu");
+  const [activeTab, setActiveTab] = React.useState<
+    | "loshu"
+    | "dasha"
+    | "name"
+    | "name_correct"
+    | "mobile"
+    | "mobile_compare"
+    | "business"
+    | "vehicle_bank"
+    | "remedies"
+    | "profile"
+  >("loshu");
   const hasAutoFilled = React.useRef(false);
 
   // Auto-populate from user profile if signed in
@@ -283,7 +303,11 @@ export default function NumerologyPage() {
                 { id: "loshu", label: language === "bn" ? "বৈদিক লো-শু গ্রিড ও যোগ" : "Lo Shu Grid & Yogas", icon: Layers },
                 { id: "dasha", label: language === "bn" ? "সংখ্যা দশা টাইমলাইন" : "Dasha Timeline", icon: Compass },
                 { id: "name", label: language === "bn" ? "চ্যালডিয়ান নাম বিশ্লেষণ" : "Name Analysis", icon: UserCheck },
-                { id: "mobile", label: language === "bn" ? "মোবাইল কনজাংশন অডিট" : "Mobile Audit", icon: Phone },
+                { id: "name_correct", label: language === "bn" ? "নাম সংশোধন ও শুভ বানান" : "Name Correction", icon: Wand2 },
+                { id: "mobile", label: language === "bn" ? "মোবাইল অডিট" : "Mobile Audit", icon: Phone },
+                { id: "mobile_compare", label: language === "bn" ? "সিম তুলনা স্যুট" : "SIM Compare", icon: Trophy },
+                { id: "business", label: language === "bn" ? "ব্যবসা ও ব্র্যান্ড অডিট" : "Business & Brand", icon: Building2 },
+                { id: "vehicle_bank", label: language === "bn" ? "গাড়ি ও ব্যাংক অ্যাকাউন্ট" : "Vehicle & Bank", icon: Car },
                 { id: "remedies", label: language === "bn" ? "অনুপস্থিত সংখ্যা প্রতিকার" : "Missing Remedies", icon: BookOpen },
                 { id: "profile", label: language === "bn" ? "মূলাঙ্ক ২০-ক্ষেত্র বিবরণ" : "20-Field Profile", icon: Award },
               ].map((tab) => {
@@ -705,6 +729,44 @@ export default function NumerologyPage() {
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* Tab 7: Name Correction & Spelling Harmonizer */}
+            {activeTab === "name_correct" && (
+              <NameCorrectionSection
+                initialName={fullName}
+                mulank={data.mulank.number}
+                bhagyank={data.bhagyank.number}
+                language={language}
+              />
+            )}
+
+            {/* Tab 8: Mobile Sim Comparison Suite */}
+            {activeTab === "mobile_compare" && (
+              <MobileComparisonSection
+                mulank={data.mulank.number}
+                bhagyank={data.bhagyank.number}
+                birthDate={birthDate}
+                language={language}
+              />
+            )}
+
+            {/* Tab 9: Business & Brand Numerology Evaluator */}
+            {activeTab === "business" && (
+              <BusinessNumerologySection
+                ownerMulank={data.mulank.number}
+                ownerBhagyank={data.bhagyank.number}
+                language={language}
+              />
+            )}
+
+            {/* Tab 10: Vehicle Plate & Bank Account Numerology Audit */}
+            {activeTab === "vehicle_bank" && (
+              <VehicleBankAuditSection
+                mulank={data.mulank.number}
+                bhagyank={data.bhagyank.number}
+                language={language}
+              />
             )}
           </div>
         )}

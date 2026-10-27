@@ -1,0 +1,228 @@
+"use client";
+
+import * as React from "react";
+import { Car, Landmark, ShieldAlert, CheckCircle2, Sparkles, AlertTriangle, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui";
+import { numerologyApi } from "@/lib/api";
+import type { VehicleBankAuditResponse } from "@/types/numerology";
+import type { AstrologyLanguage } from "@/types";
+
+interface VehicleBankAuditProps {
+  mulank?: number;
+  bhagyank?: number;
+  language?: AstrologyLanguage;
+}
+
+export function VehicleBankAuditSection({
+  mulank = 1,
+  bhagyank = 1,
+  language = "bn",
+}: VehicleBankAuditProps) {
+  const [auditType, setAuditType] = React.useState<"vehicle" | "bank">("vehicle");
+  const [inputString, setInputString] = React.useState("WB 02 AK 1234");
+  const [loading, setLoading] = React.useState(false);
+  const [result, setResult] = React.useState<VehicleBankAuditResponse | null>(null);
+
+  const handleAudit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputString.trim()) {
+      toast.error(
+        language === "bn"
+          ? "অনুগ্রহ করে গাড়ির নম্বর অথবা ব্যাংক অ্যাকাউন্ট নম্বর দিন"
+          : "Please enter a vehicle plate or bank account number"
+      );
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await numerologyApi.auditVehicleBank({
+        input_string: inputString.trim(),
+        audit_type: auditType,
+        mulank,
+        bhagyank,
+      });
+      if (res) {
+        setResult(res);
+        toast.success(
+          language === "bn"
+            ? `${auditType === "vehicle" ? "গাড়ির নম্বর" : "ব্যাংক অ্যাকাউন্ট"} অডিট সফলভাবে সম্পন্ন হয়েছে!`
+            : "Audit completed successfully!"
+        );
+      }
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to audit vehicle/bank number.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Search & Audit Form Card */}
+      <div className="rounded-2xl border border-border/80 bg-surface p-5 sm:p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/70 pb-4">
+          <div>
+            <h3 className="text-base sm:text-lg font-display font-bold text-foreground flex items-center gap-2">
+              {auditType === "vehicle" ? (
+                <Car className="size-5 text-brand-600 dark:text-brand-400" />
+              ) : (
+                <Landmark className="size-5 text-brand-600 dark:text-brand-400" />
+              )}
+              {language === "bn"
+                ? "গাড়ির নম্বর প্লেট ও ব্যাংক অ্যাকাউন্ট নিউমারোলজি অডিট"
+                : "Vehicle Number Plate & Bank Account Numerology Audit"}
+            </h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {language === "bn"
+                ? "গাড়ির ক্ষেত্রে পথদুর্ঘটনা ও জরিমানা ঝুঁকি এবং ব্যাংকের ক্ষেত্রে অর্থ ধরে রাখার ক্ষমতা পরীক্ষা ও প্রতিকার"
+                : "Check vehicle accident vulnerability and bank account wealth retention with precise remedies."}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-mono bg-surface-muted/60 px-3 py-1.5 rounded-lg border border-border/60">
+            <span className="text-muted-foreground">মূলাঙ্ক:</span>
+            <span className="font-bold text-brand-600">{mulank}</span>
+            <span className="text-muted-foreground ml-2">ভাগ্যাঙ্ক:</span>
+            <span className="font-bold text-brand-600">{bhagyank}</span>
+          </div>
+        </div>
+
+        {/* Audit Type Toggle */}
+        <div className="flex p-1 bg-surface-muted/60 rounded-xl border border-border/70 max-w-sm">
+          <button
+            type="button"
+            onClick={() => {
+              setAuditType("vehicle");
+              setInputString("WB 02 AK 1234");
+              setResult(null);
+            }}
+            className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              auditType === "vehicle"
+                ? "bg-surface text-brand-600 shadow-2xs"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Car className="size-3.5" />
+            {language === "bn" ? "গাড়ির নম্বর (Vehicle)" : "Vehicle Plate"}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setAuditType("bank");
+              setInputString("123456789012");
+              setResult(null);
+            }}
+            className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              auditType === "bank"
+                ? "bg-surface text-brand-600 shadow-2xs"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Landmark className="size-3.5" />
+            {language === "bn" ? "ব্যাংক অ্যাকাউন্ট (Bank)" : "Bank Account"}
+          </button>
+        </div>
+
+        <form onSubmit={handleAudit} className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 items-end">
+          <div className="sm:col-span-9 space-y-1.5">
+            <label className="text-xs font-semibold text-foreground">
+              {auditType === "vehicle"
+                ? language === "bn"
+                  ? "গাড়ির সম্পূর্ণ নম্বর প্লেট (অক্ষর ও সংখ্যা সহ)"
+                  : "Complete Vehicle Plate (Letters & Digits)"
+                : language === "bn"
+                ? "সম্পূর্ণ ব্যাংক অ্যাকাউন্ট নম্বর"
+                : "Complete Bank Account Number"}
+            </label>
+            <input
+              type="text"
+              value={inputString}
+              onChange={(e) => setInputString(e.target.value)}
+              placeholder={auditType === "vehicle" ? "e.g. DL 01 AB 1234 or WB 02 AK 9999" : "e.g. 123456789012"}
+              className="w-full h-10 px-3.5 rounded-xl border border-border/80 bg-surface-muted/30 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+            />
+          </div>
+
+          <div className="sm:col-span-3">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-10 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs shadow-xs"
+            >
+              <Sparkles className="size-4 mr-1.5" />
+              {loading
+                ? language === "bn" ? "অডিট হচ্ছে..." : "Auditing..."
+                : language === "bn" ? "অডিট সম্পন্ন করুন" : "Run Audit"}
+            </Button>
+          </div>
+        </form>
+      </div>
+
+      {/* Results View */}
+      {result && (
+        <div className="space-y-6">
+          {/* Top Score Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="rounded-2xl border border-border/80 bg-surface p-5 shadow-xs space-y-2">
+              <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                নিষ্কাশিত মান ও টোটাল
+              </span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-serif font-black text-brand-600 dark:text-brand-400">
+                  {result.single_digit}
+                </span>
+                <span className="text-xs font-mono font-bold text-muted-foreground">
+                  (কম্পাউন্ড: {result.compound_number})
+                </span>
+              </div>
+              <p className="text-[11px] font-mono text-muted-foreground truncate">
+                {result.extracted_digits}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-border/80 bg-surface p-5 shadow-xs space-y-2 md:col-span-2">
+              <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                {result.audit_type === "vehicle" ? "নিরাপত্তা ও দুর্ঘটনা রেটিং" : "আর্থিক প্রবাহ ও সঞ্চয় রেটিং"}
+              </span>
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="size-5 text-brand-600" />
+                <span className="text-base sm:text-lg font-bold text-foreground">
+                  {result.safety_rating}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                কম্পাউন্ড গুণমান: {result.compound_quality}
+              </p>
+            </div>
+          </div>
+
+          {/* Risk Alert Warning if present */}
+          {result.risk_alert && (
+            <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-950 dark:text-rose-200 text-xs flex items-start gap-2.5">
+              <ShieldAlert className="size-4 shrink-0 text-rose-600 mt-0.5" />
+              <div>
+                <span className="font-bold">সতর্কতামূলক বার্তা: </span>
+                {result.risk_alert}
+              </div>
+            </div>
+          )}
+
+          {/* Remedial Guidance Card */}
+          <div className="rounded-2xl border border-emerald-500/30 bg-surface p-5 sm:p-6 shadow-xs space-y-3">
+            <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-sm">
+              <CheckCircle2 className="size-4 text-emerald-600" />
+              {language === "bn"
+                ? "বৈদিক বাস্তু ও নিউমারোলজি নিশ্চিত প্রতিষেধক (Auspicious Remedy)"
+                : "Vedic Numerology & Vastu Verified Remedy"}
+            </div>
+            <p className="text-xs text-foreground leading-relaxed">
+              {result.remedy_bn}
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
