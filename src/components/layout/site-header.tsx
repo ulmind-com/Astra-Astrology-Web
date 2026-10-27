@@ -72,7 +72,7 @@ export function SiteHeader() {
               <Sparkles className="size-[15px]" />
             </span>
             <span className="font-display text-[14px] font-bold tracking-wide text-foreground">
-              Astra Astrology
+              DivinLink
             </span>
           </Link>
 

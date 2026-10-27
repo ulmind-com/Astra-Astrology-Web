@@ -45,7 +45,7 @@ export function SiteFooter() {
               <span className="medallion flex size-9 items-center justify-center rounded-xl text-ink-900">
                 <Sparkles className="size-4" />
               </span>
-              <span className="font-display tracking-wide">Astra Astrology</span>
+              <span className="font-display tracking-wide">DivinLink</span>
             </div>
             <p className="mt-3 max-w-sm text-sm text-muted-foreground">
               Guidance from verified astrologers — kundli, matchmaking, numerology and
@@ -77,7 +77,7 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-6 flex flex-col gap-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>© <Year /> Astra Astrology. All rights reserved.</p>
+          <p>© <Year /> DivinLink. All rights reserved.</p>
           <p className="max-w-md sm:text-right">
             Astrological guidance is offered for personal reflection and is not a
             substitute for professional medical, legal or financial advice.

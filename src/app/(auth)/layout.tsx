@@ -22,7 +22,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <span className="medallion flex size-9 items-center justify-center rounded-xl">
             <Sparkles className="size-4" />
           </span>
-          <span className="font-display tracking-wide">Astra Astrology</span>
+          <span className="font-display tracking-wide">DivinLink</span>
         </Link>
 
         <div className="relative">
@@ -42,7 +42,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="relative space-y-4">
           <UlmindCredit />
           <p className="text-xs text-ink-500">
-            © <Year /> Astra Astrology
+            © <Year /> DivinLink
           </p>
         </div>
       </aside>
@@ -56,7 +56,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <span className="medallion flex size-9 items-center justify-center rounded-xl text-ink-900">
               <Sparkles className="size-4" />
             </span>
-            <span className="font-display tracking-wide">Astra Astrology</span>
+            <span className="font-display tracking-wide">DivinLink</span>
           </Link>
           {children}
 

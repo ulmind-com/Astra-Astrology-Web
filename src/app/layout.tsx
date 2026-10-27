@@ -36,13 +36,13 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "Astra Astrology — Talk to verified astrologers",
-    template: "%s · Astra Astrology",
+    default: "DivinLink — Talk to verified astrologers",
+    template: "%s · DivinLink",
   },
   description:
     "Consult verified astrologers for kundli, matchmaking, numerology and vastu guidance. Chat or call, whenever you need clarity.",
   openGraph: {
-    title: "Astra Astrology",
+    title: "DivinLink",
     description: "Consult verified astrologers for kundli, numerology and vastu guidance.",
     type: "website",
   },

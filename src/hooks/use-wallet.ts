@@ -118,7 +118,7 @@ export function useRecharge() {
         order_id: order.razorpay_order_id,
         amount: order.amount_paise,
         currency: order.currency,
-        name: "Astra Astrology",
+        name: "DivinLink",
         description: "Wallet recharge",
         prefill: { name: profile.name, email: profile.email, contact: profile.contact ?? "" },
         theme: { color: "#7c3aed" },
