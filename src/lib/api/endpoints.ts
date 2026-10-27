@@ -142,4 +142,19 @@ export const endpoints = {
     session: (id: string) => `/ai-astrologer/session/${id}`,
     feedback: "/ai-astrologer/feedback",
   },
+
+  numerology: {
+    calculate: "/numerology/calculate",
+    name: "/numerology/name",
+    mobile: "/numerology/mobile",
+    profile: (num: number) => `/numerology/profile/${num}`,
+  },
+
+  vastu: {
+    audit: "/vastu/audit",
+    compassResolve: "/vastu/compass/resolve",
+    compassPadas: "/vastu/compass/padas",
+    zones: "/vastu/zones",
+    remedies: "/vastu/remedies",
+  },
 } as const;

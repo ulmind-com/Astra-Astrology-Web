@@ -5,6 +5,16 @@ import { UlmindCredit } from "@/components/ulmind-credit";
 
 const COLUMNS = [
   {
+    title: "Vedic Tools",
+    links: [
+      { href: "/numerology", label: "Numerology & Lo Shu" },
+      { href: "/vastu", label: "Vastu 16-Zone Compass" },
+      { href: "/kundli", label: "Kundli Calculator" },
+      { href: "/kundli-matching", label: "Kundli Matching" },
+      { href: "/daily-horoscope", label: "Daily Horoscope" },
+    ],
+  },
+  {
     title: "Consult",
     links: [
       { href: "/astrologers", label: "All astrologers" },

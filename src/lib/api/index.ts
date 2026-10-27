@@ -530,4 +530,52 @@ export const aiAstrologerApi = {
   }) => api.post<{ status: string }>(endpoints.aiAstrologer.feedback, body),
 };
 
+// ------------------------------------------------------------------- Numerology & Vastu
+import type {
+  NumerologyCalculateRequest,
+  NumerologyCalculateResponse,
+  NameAnalysisResponse,
+  MobileAnalysisResponse,
+  MulankProfile,
+} from "@/types/numerology";
+
+import type {
+  VastuAuditRequest,
+  VastuAuditResponse,
+  PadaInfo,
+  VastuZoneInfo,
+  VastuRemedyItem,
+} from "@/types/vastu";
+
+export const numerologyApi = {
+  calculate: (body: NumerologyCalculateRequest) =>
+    api.post<NumerologyCalculateResponse>(endpoints.numerology.calculate, body),
+
+  analyzeName: (body: { name: string; mulank?: number; bhagyank?: number }) =>
+    api.post<NameAnalysisResponse>(endpoints.numerology.name, body),
+
+  analyzeMobile: (body: { mobile_number: string; mulank?: number; bhagyank?: number; birth_date?: string }) =>
+    api.post<MobileAnalysisResponse>(endpoints.numerology.mobile, body),
+
+  getProfile: (number: number) =>
+    api.get<MulankProfile>(endpoints.numerology.profile(number)),
+};
+
+export const vastuApi = {
+  audit: (body: VastuAuditRequest) =>
+    api.post<VastuAuditResponse>(endpoints.vastu.audit, body),
+
+  resolveDegree: (degree: number) =>
+    api.get<PadaInfo>(endpoints.vastu.compassResolve, { query: { degree } }),
+
+  getPadas: () =>
+    api.get<PadaInfo[]>(endpoints.vastu.compassPadas),
+
+  getZones: () =>
+    api.get<VastuZoneInfo[]>(endpoints.vastu.zones),
+
+  getRemedies: (category?: string) =>
+    api.get<VastuRemedyItem[]>(endpoints.vastu.remedies, { query: category ? { category } : undefined }),
+};
+
 
