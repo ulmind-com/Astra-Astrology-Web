@@ -545,6 +545,10 @@ import type {
   PadaInfo,
   VastuZoneInfo,
   VastuRemedyItem,
+  AyadiCalculationRequest,
+  AyadiCalculationResponse,
+  MedicalVastuItem,
+  AstroVastuRule,
 } from "@/types/vastu";
 
 export const numerologyApi = {
@@ -576,6 +580,15 @@ export const vastuApi = {
 
   getRemedies: (category?: string) =>
     api.get<VastuRemedyItem[]>(endpoints.vastu.remedies, { query: category ? { category } : undefined }),
+
+  calculateAyadi: (body: AyadiCalculationRequest) =>
+    api.post<AyadiCalculationResponse>(endpoints.vastu.ayadi, body),
+
+  getMedicalCatalog: () =>
+    api.get<MedicalVastuItem[]>(endpoints.vastu.medical),
+
+  getAstroVastuRules: (planet_id?: string) =>
+    api.get<AstroVastuRule[]>(endpoints.vastu.astrovastu, { query: planet_id ? { planet_id } : undefined }),
 };
 
 

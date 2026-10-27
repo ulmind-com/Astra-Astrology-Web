@@ -67,3 +67,51 @@ export interface VastuAuditResponse {
   key_remedies: VastuRemedyItem[];
   warnings_critical: string[];
 }
+
+export interface AyadiCalculationRequest {
+  length: number;
+  width: number;
+  unit?: "feet" | "meter";
+}
+
+export interface AyadiCalculationResponse {
+  length: number;
+  width: number;
+  area_sqft: number;
+  aaya_number: number;
+  aaya_name: string;
+  aaya_name_bn: string;
+  is_auspicious: boolean;
+  aaya_significance_bn: string;
+  dhana_score: number;
+  rina_score: number;
+  is_dhana_dominant: boolean;
+  structure_longevity_years: number;
+  building_nakshatra_number: number;
+  building_nakshatra_name: string;
+  best_facing_directions_bn: string[];
+}
+
+export interface MedicalVastuItem {
+  ailment_id: string;
+  name_bn: string;
+  name_en: string;
+  affected_zone: string;
+  affected_element: string;
+  body_organ_bn: string;
+  dosha: string;
+  root_cause_bn: string;
+  remedy_bn: string;
+}
+
+export interface AstroVastuRule {
+  planet_id: string;
+  planet_name_bn: string;
+  governing_direction: string;
+  element: string;
+  importance_during_dasha_bn: string;
+  critical_dos_bn: string[];
+  critical_donts_bn: string[];
+  talismanic_remedy_bn: string;
+}
+
