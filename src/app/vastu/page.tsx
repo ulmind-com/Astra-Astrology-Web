@@ -26,6 +26,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Button } from "@/components/ui";
 import { vastuApi } from "@/lib/api";
+import { VastuCompass } from "@/components/vastu/vastu-compass";
 import type { PadaInfo, VastuAuditResponse, VastuZoneInfo, VastuRemedyItem } from "@/types/vastu";
 import type { AstrologyLanguage } from "@/types";
 
@@ -34,7 +35,7 @@ export default function VastuPage() {
   const [entranceDegree, setEntranceDegree] = React.useState<number>(335.0);
   const [currentPada, setCurrentPada] = React.useState<PadaInfo | null>(null);
   const [propertyType, setPropertyType] = React.useState<"residential" | "commercial" | "industrial">("residential");
-  const [activeTab, setActiveTab] = React.useState<"audit" | "compass" | "zones" | "remedies">("audit");
+  const [activeTab, setActiveTab] = React.useState<"compass" | "audit" | "zones" | "remedies">("compass");
 
   // Placement selections
   const [placements, setPlacements] = React.useState<Record<string, string>>({
@@ -190,6 +191,16 @@ export default function VastuPage() {
         <div className="flex flex-wrap justify-center gap-2 border-b border-border/60 pb-3">
           {[
             {
+              id: "compass",
+              label:
+                language === "bn"
+                  ? "স্মার্ট ডিভাইস কম্পাস (Live Compass)"
+                  : language === "hi"
+                  ? "स्मार्ट कम्पास (Live)"
+                  : "Live Device Compass",
+              icon: Compass,
+            },
+            {
               id: "audit",
               label:
                 language === "bn"
@@ -198,16 +209,6 @@ export default function VastuPage() {
                   ? "360° प्रॉपर्टी ऑडिट"
                   : "360° Property Audit",
               icon: Home,
-            },
-            {
-              id: "compass",
-              label:
-                language === "bn"
-                  ? "৩২-পদ কম্পাস হুইল"
-                  : language === "hi"
-                  ? "32-पद कम्पास चक्र"
-                  : "32-Pada Compass",
-              icon: Compass,
             },
             {
               id: "zones",
@@ -628,86 +629,47 @@ export default function VastuPage() {
             TAB 2: 32 PADAS COMPASS WHEEL
         ========================================================================= */}
         {activeTab === "compass" && (
-          <div className="card-surface rounded-2xl border border-border/80 p-6 sm:p-8 space-y-6 shadow-xs">
-            <div className="text-center max-w-xl mx-auto space-y-2">
-              <h3 className="text-xl font-serif font-bold text-foreground flex items-center justify-center gap-2">
-                <Compass className="size-5 text-amber-500" />
-                {language === "bn"
-                  ? "৩২-পদ বৈদিক প্রবেশদ্বার কম্পাস (32 Pada Chakra)"
-                  : language === "hi"
-                  ? "32-पद वैदिक प्रवेश द्वार कम्पास (32 Pada Chakra)"
-                  : "32-Pada Vedic Entrance Compass Chakra"}
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                {language === "bn"
-                  ? "বৃত্তাকার ৩৬০° পরিসীমা প্রতিটি ১১.২৫° কোণের ৩২টি পদে বিভক্ত। যার মধ্যে ৮টি পদ স্বর্ণদ্বার (Golden Doors)।"
-                  : language === "hi"
-                  ? "360° की परिधि 11.25° के 32 पदों में विभाजित है, जिनमें से 8 स्वर्णिम द्वार (शुभ) हैं।"
-                  : "The 360° compass circle is divided into 32 padas (11.25° each), featuring 8 Golden Doors for immense wealth."}
-              </p>
-            </div>
+          <div className="space-y-6">
+            <VastuCompass
+              language={language}
+              onAngleSelect={(deg) => {
+                setEntranceDegree(deg);
+                vastuApi.resolveDegree(deg).then((res) => {
+                  if (res) setCurrentPada(res);
+                }).catch(() => {});
+              }}
+            />
 
-            {/* Quick Degree Input */}
-            <div className="max-w-md mx-auto p-4 bg-surface rounded-xl border border-border/80 space-y-3">
-              <div className="flex justify-between items-center text-xs">
-                <span className="font-semibold text-foreground">
-                  {language === "bn" ? "ডিগ্রি পরিবর্তন করুন:" : "Adjust Degree Angle:"}
-                </span>
-                <span className="font-mono font-bold text-amber-600 dark:text-amber-400 text-sm">
-                  {entranceDegree.toFixed(1)}°
-                </span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="359.9"
-                step="0.5"
-                value={entranceDegree}
-                onChange={(e) => handleDegreeChange(parseFloat(e.target.value))}
-                className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-brand-500"
-              />
-            </div>
-
-            {currentPada && (
-              <div className="max-w-xl mx-auto p-6 bg-surface border border-border/80 rounded-2xl text-center space-y-3 shadow-sm">
-                <span
-                  className={`inline-block px-3 py-1 rounded-full text-xs font-bold border ${
-                    currentPada.is_auspicious
-                      ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30"
-                      : "bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/30"
-                  }`}
-                >
-                  {currentPada.is_auspicious
-                    ? language === "bn"
-                      ? "শুভ প্রবেশদ্বার (Golden Door)"
+            {/* Quick CTA to Full Audit */}
+            <div className="card-surface p-4 sm:p-5 rounded-2xl border border-border/80 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
+              <div className="space-y-1 text-center sm:text-left">
+                <div className="text-xs font-bold text-foreground flex items-center justify-center sm:justify-start gap-1.5">
+                  <Sparkles className="size-3.5 text-amber-500" />
+                  <span>
+                    {language === "bn"
+                      ? "এই কম্পাস কোণটি দিয়ে সম্পূর্ণ ভবনের অডিট করতে চান?"
                       : language === "hi"
-                      ? "स्वर्णिम द्वार (अति शुभ)"
-                      : "Auspicious Golden Door"
-                    : language === "bn"
-                    ? "প্রতিকূল প্রবেশদ্বার (Challenge Door)"
-                    : language === "hi"
-                    ? "चुनौतीपूर्ण द्वार"
-                    : "Challenging Door"}
-                </span>
-
-                <h4 className="text-2xl font-serif font-black text-foreground">
-                  {language === "bn"
-                    ? `পদ ${currentPada.pada_id} — ${currentPada.deity}`
-                    : `Pada ${currentPada.pada_id} — ${currentPada.deity}`}
-                </h4>
-
-                <div className="text-xs font-mono text-muted-foreground">
-                  {language === "bn"
-                    ? `কোণ ব্যাপ্তি: ${currentPada.start_degree}° থেকে ${currentPada.end_degree}° (কেন্দ্র: ${currentPada.center_degree}°)`
-                    : `Degree Range: ${currentPada.start_degree}° to ${currentPada.end_degree}° (Center: ${currentPada.center_degree}°)`}
+                      ? "क्या आप इस कोण से संपूर्ण भवन का ऑडिट करना चाहते हैं?"
+                      : "Audit entire property with this compass orientation?"}
+                  </span>
                 </div>
-
-                <p className="text-xs text-foreground/80 leading-relaxed">{currentPada.life_effects}</p>
-                <div className="text-xs text-amber-600 dark:text-amber-400 font-semibold">
-                  {language === "bn" ? "চ্যালেঞ্জ:" : "Challenge:"} {currentPada.challenge}
+                <div className="text-xs text-muted-foreground">
+                  {language === "bn"
+                    ? `বর্তমান প্রবেশদ্বার কোণ: ${entranceDegree.toFixed(1)}° — রান্নাঘর, মাস্টার বেডরুম, টয়লেট সহ সব কক্ষের পূর্ণাঙ্গ অডিট ও স্কোরকার্ড দেখুন।`
+                    : `Current entrance angle: ${entranceDegree.toFixed(1)}° — Evaluate all rooms at once.`}
                 </div>
               </div>
-            )}
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                onClick={() => setActiveTab("audit")}
+                className="shrink-0 text-xs font-bold cursor-pointer bg-brand-500 hover:bg-brand-600 text-brand-foreground shadow-sm flex items-center gap-1.5"
+              >
+                <Home className="size-3.5" />
+                {language === "bn" ? "৩৬০° প্রপার্টি অডিট খুলুন" : "Open 360° Audit"}
+              </Button>
+            </div>
           </div>
         )}
 
