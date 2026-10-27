@@ -48,6 +48,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Button } from "@/components/ui";
 import { astrologyApi } from "@/lib/api";
+import { useLanguage } from "@/providers/language-provider";
 import { useFeaturePricing } from "@/hooks/use-feature-pricing";
 import {
   FeatureCoinBadge,
@@ -146,8 +147,8 @@ function HoroscopeContent() {
   const [coinModalOpen, setCoinModalOpen] = React.useState(false);
   const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
 
-  // State
-  const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
+  // Centralized State
+  const { language, setLanguage } = useLanguage();
   const [selectedDate, setSelectedDate] = React.useState<string>(() => formatDateToYMD(new Date()));
   const [activeSignIndex, setActiveSignIndex] = React.useState<number>(() => {
     const found = ZODIAC_LIST.findIndex(

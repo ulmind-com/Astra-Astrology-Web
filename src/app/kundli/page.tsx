@@ -43,6 +43,7 @@ import {
 } from "@/components/astrology/birth-place-field";
 import { KundliDiamondChart } from "@/components/astrology/kundli-diamond-chart";
 import { useAuth } from "@/providers/auth-provider";
+import { useLanguage } from "@/providers/language-provider";
 import { useProfile } from "@/hooks/use-profile";
 import { useFeaturePricing } from "@/hooks/use-feature-pricing";
 import {
@@ -114,8 +115,8 @@ export default function KundliPage() {
   const [coinModalOpen, setCoinModalOpen] = React.useState(false);
   const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
 
-  // Language state
-  const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
+  // Centralized Language state
+  const { language, setLanguage } = useLanguage();
   const t = KUNDLI_UI_STRINGS[language] || KUNDLI_UI_STRINGS.bn;
 
   // Form State

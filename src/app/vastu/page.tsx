@@ -29,6 +29,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Button } from "@/components/ui";
 import { vastuApi } from "@/lib/api";
+import { useLanguage } from "@/providers/language-provider";
 import { useFeaturePricing } from "@/hooks/use-feature-pricing";
 import {
   FeatureCoinBadge,
@@ -48,7 +49,7 @@ export default function VastuPage() {
   const [coinModalOpen, setCoinModalOpen] = React.useState(false);
   const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
 
-  const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
+  const { language, setLanguage } = useLanguage();
   const [entranceDegree, setEntranceDegree] = React.useState<number>(335.0);
   const [currentPada, setCurrentPada] = React.useState<PadaInfo | null>(null);
   const [propertyType, setPropertyType] = React.useState<"residential" | "commercial" | "industrial">("residential");

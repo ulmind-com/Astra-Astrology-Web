@@ -53,6 +53,7 @@ import {
   KP_LOCALIZED_DASHA_INSIGHTS,
 } from "@/lib/kp-translations";
 import { useAuth } from "@/providers/auth-provider";
+import { useLanguage } from "@/providers/language-provider";
 import { useProfile } from "@/hooks/use-profile";
 import { useFeaturePricing } from "@/hooks/use-feature-pricing";
 import {
@@ -87,8 +88,8 @@ export default function KPCalculatorPage() {
   const [coinModalOpen, setCoinModalOpen] = React.useState(false);
   const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
 
-  // Language state: 'bn' (Bengali), 'en' (English), 'hi' (Hindi)
-  const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
+  // Centralized Language state: 'bn' (Bengali), 'en' (English), 'hi' (Hindi)
+  const { language, setLanguage } = useLanguage();
   const ui = KP_UI_TRANSLATIONS[language];
 
   // Tab State

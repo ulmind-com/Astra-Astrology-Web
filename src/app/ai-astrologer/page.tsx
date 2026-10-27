@@ -38,6 +38,7 @@ import { toast } from "sonner";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Button } from "@/components/ui";
+import { useLanguage } from "@/providers/language-provider";
 import { useFeaturePricing } from "@/hooks/use-feature-pricing";
 import {
   aiAstrologerApi,
@@ -45,59 +46,178 @@ import {
   type AIChatResponse,
 } from "@/lib/api";
 
-const SUGGESTED_PROMPTS = [
-  {
-    title: "বর্তমান মহাদশা ও ফলাফল",
-    query: "আমার বর্তমান বিংশোত্তরী মহাদশা ও অন্তর্দশা বিচার করে কর্ম ও আর্থিক ভাগ্য বলুন।",
-    category: "dasha",
+const SUGGESTED_PROMPTS: Record<
+  "bn" | "en" | "hi",
+  Array<{ title: string; query: string; category: string }>
+> = {
+  bn: [
+    {
+      title: "বর্তমান মহাদশা ও ফলাফল",
+      query: "আমার বর্তমান বিংশোত্তরী মহাদশা ও অন্তর্দশা বিচার করে কর্ম ও আর্থিক ভাগ্য বলুন।",
+      category: "dasha",
+    },
+    {
+      title: "মাঙ্গলিক ও কালসর্প দোষ",
+      query: "আমার জন্মকুন্ডলীতে কি মাঙ্গলিক দোষ বা কালসর্প দোষ আছে? প্রতিকার কী?",
+      category: "kundli",
+    },
+    {
+      title: "শনির সাড়ে সাতি ও ঢাইয়া",
+      query: "আমার রাশিতে কি শনির সাড়ে সাতি বা কন্টক ঢাইয়া চলছে? শাস্ত্রীয় উপায় কী?",
+      category: "saturn",
+    },
+    {
+      title: "আজকের গ্রহ হোরা ও শুভ সময়",
+      query: "আজকের দিনের অনুকূল গ্রহ হোরা ও নক্ষত্র তারা বল বিচার করে শুভ সময় নির্দেশ করুন।",
+      category: "horoscope",
+    },
+    {
+      title: "বিবাহ ও প্রেম জীবন",
+      query: "কুন্ডলীর সপ্তম ভাব ও বৃহস্পতির দৃষ্টি অনুসারে আমার দাম্পত্য ও বিবাহযোগ কেমন?",
+      category: "marriage",
+    },
+    {
+      title: "বাস্তু ও উত্তর-পূর্ব কোণ",
+      query: "বাড়ির উত্তর-পূর্ব (ঈশান কোণ) বাস্তু দোষ মুক্ত রাখার সর্বোত্তম শাস্ত্রীয় নিয়ম কী?",
+      category: "vastu",
+    },
+  ],
+  en: [
+    {
+      title: "Current Mahadasha & Forecast",
+      query: "Analyze my current Vimshottari Mahadasha and Antardasha for career and financial prospects.",
+      category: "dasha",
+    },
+    {
+      title: "Manglik & Kaal Sarp Dosha",
+      query: "Does my birth chart have Manglik Dosha or Kaal Sarp Dosha? What are the Vedic remedies?",
+      category: "kundli",
+    },
+    {
+      title: "Saturn Sade Sati & Dhaiya",
+      query: "Am I going through Saturn Sade Sati or Kantaka Shani? What remedies are recommended?",
+      category: "saturn",
+    },
+    {
+      title: "Today's Planetary Hora & Muhurat",
+      query: "Guide me on auspicious Hora timings and favorable planetary positions for today.",
+      category: "horoscope",
+    },
+    {
+      title: "Marriage & Relationship Timing",
+      query: "Based on the 7th house and Jupiter's transit/aspect, what is my marriage outlook?",
+      category: "marriage",
+    },
+    {
+      title: "Vastu & Northeast Zone",
+      query: "What are the authentic Vedic rules to rectify Vastu defects in the Northeast (Ishanya) corner?",
+      category: "vastu",
+    },
+  ],
+  hi: [
+    {
+      title: "वर्तमान महादशा और फल",
+      query: "मेरी वर्तमान विंशोत्तरी महादशा और अंतर्दशा का विश्लेषण कर करियर और आर्थिक स्थिति बताएं।",
+      category: "dasha",
+    },
+    {
+      title: "मांगलिक एवं कालसर्प दोष",
+      query: "क्या मेरी कुंडली में मांगलिक दोष या कालसर्प दोष है? इसके वैदिक उपाय क्या हैं?",
+      category: "kundli",
+    },
+    {
+      title: "शनि की साढ़े साती और ढैया",
+      query: "क्या मेरी राशि पर शनि की साढ़े साती या ढैया चल रही है? कृपया शास्त्रीय उपाय बताएं।",
+      category: "saturn",
+    },
+    {
+      title: "आज का ग्रह होरा एवं शुभ मुहूर्त",
+      query: "आज के अनुकूल ग्रह होरा और नक्षत्र ताराबल के अनुसार शुभ मुहूर्त बताएं।",
+      category: "horoscope",
+    },
+    {
+      title: "विवाह एवं वैवाहिक जीवन",
+      query: "कुंडली के सप्तम भाव और गुरु की दृष्टि अनुसार विवाह और दांपत्य जीवन कैसा रहेगा?",
+      category: "marriage",
+    },
+    {
+      title: "वास्तु एवं ईशान कोण",
+      query: "घर के ईशान कोण (उत्तर-पूर्व) को वास्तु दोष से मुक्त रखने के शास्त्रीय नियम क्या हैं?",
+      category: "vastu",
+    },
+  ],
+};
+
+const WELCOME_MESSAGES: Record<
+  "bn" | "en" | "hi",
+  { content: string; suggested_followups: string[] }
+> = {
+  bn: {
+    content:
+      "নমস্কার! আমি **ডিভাইনলিঙ্ক এআই বৈদিক জ্যোতিষী**। মহর্ষি পরাশর ও জৈমিনী শাস্ত্রের প্রাচীন সূত্র এবং সুইস এফিমেরিসের নিখুঁত গণনার ভিত্তিতে আপনার জীবনের প্রতিটি প্রশ্নের শাস্ত্রীয় ও নির্ভুল উত্তর দিতে আমি সদা প্রস্তুত।\n\nআপনি আপনার জন্ম তারিখ, সময় ও স্থান যুক্ত করে ব্যক্তিগত কুন্ডলীর ভিত্তিতে অথবা সাধারণ জ্যোতিষ ও বাস্তু বিষয়ে যেকোনো প্রশ্ন করতে পারেন।",
+    suggested_followups: [
+      "আমার বর্তমান মহাদশা ও অন্তর্দশা কেমন?",
+      "আমার কুন্ডলীতে মাঙ্গলিক দোষ আছে কি?",
+      "আজকের দিনে কোন হোরায় শুভ কাজ শুরু করব?",
+    ],
   },
-  {
-    title: "মাঙ্গলিক ও কালসর্প দোষ",
-    query: "আমার জন্মকুন্ডলীতে কি মাঙ্গলিক দোষ বা কালসর্প দোষ আছে? প্রতিকার কী?",
-    category: "kundli",
+  en: {
+    content:
+      "Greetings! I am **DivinLink AI Vedic Astrologer**. Built on authentic Vedic scriptures (Brihat Parashara Hora Shastra, Jaimini Upadesha Sutras) and Swiss Ephemeris precision, I am here to provide authentic Vedic guidance for all your life questions.\n\nYou can link your birth details (date, time, location) for personalized Kundli readings or ask any questions regarding Vedic astrology, Vastu, and remedies.",
+    suggested_followups: [
+      "How is my current Mahadasha & Antardasha?",
+      "Do I have Manglik Dosha in my Kundli?",
+      "What is the most auspicious Hora today for important work?",
+    ],
   },
-  {
-    title: "শনির সাড়ে সাতি ও ঢাইয়া",
-    query: "আমার রাশিতে কি শনির সাড়ে সাতি বা কন্টক ঢাইয়া চলছে? শাস্ত্রীয় উপায় কী?",
-    category: "saturn",
+  hi: {
+    content:
+      "नमस्ते! मैं **डिवाइनलिंक एआई वैदिक ज्योतिषी** हूँ। महर्षि पराशर एवं जैमिनी शास्त्र के प्रामाणिक सूत्रों तथा स्विस एफेमेरिस की सटीक गणनाओं के आधार पर आपके सभी प्रश्नों का शास्त्रीय समाधान देने के लिए तत्पर हूँ।\n\nआप अपनी जन्म तिथि, समय व स्थान जोड़कर व्यक्तिगत जन्मकुंडली आधारित प्रश्न पूछ सकते हैं अथवा सामान्य ज्योतिष व वास्तु संबंधी मार्गदर्शन प्राप्त कर सकते हैं।",
+    suggested_followups: [
+      "मेरी वर्तमान महादशा और अंतर्दशा कैसी है?",
+      "क्या मेरी कुंडली में मांगलिक दोष है?",
+      "आज के दिन किस होरा में शुभ कार्य आरंभ करूँ?",
+    ],
   },
-  {
-    title: "আজকের গ্রহ হোরা ও শুভ সময়",
-    query: "আজকের দিনের অনুকূল গ্রহ হোরা ও নক্ষত্র তারা বল বিচার করে শুভ সময় নির্দেশ করুন।",
-    category: "horoscope",
-  },
-  {
-    title: "বিবাহ ও প্রেম জীবন",
-    query: "কুন্ডলীর সপ্তম ভাব ও বৃহস্পতির দৃষ্টি অনুসারে আমার দাম্পত্য ও বিবাহযোগ কেমন?",
-    category: "marriage",
-  },
-  {
-    title: "বাস্তু ও উত্তর-পূর্ব কোণ",
-    query: "বাড়ির উত্তর-পূর্ব (ঈশান কোণ) বাস্তু দোষ মুক্ত রাখার সর্বোত্তম শাস্ত্রীয় নিয়ম কী?",
-    category: "vastu",
-  },
-];
+};
 
 export default function AIAstrologerPage() {
   const { pricing } = useFeaturePricing();
-  const [messages, setMessages] = React.useState<AIChatMessage[]>([
-    {
-      role: "assistant",
-      content:
-        "নমস্কার! আমি **অ্যাস্ট্রা এআই বৈদিক জ্যোতিষী**। মহর্ষি পরাশর ও জৈমিনী শাস্ত্রের প্রাচীন সূত্র এবং সুইস এফিমেরিসের নিখুঁত গণনার ভিত্তিতে আপনার জীবনের প্রতিটি প্রশ্নের শাস্ত্রীয় ও নির্ভুল উত্তর দিতে আমি সদা প্রস্তুত।\n\nআপনি আপনার জন্ম তারিখ, সময় ও স্থান যুক্ত করে ব্যক্তিগত কুন্ডলীর ভিত্তিতে অথবা সাধারণ জ্যোতিষ ও বাস্তু বিষয়ে যেকোনো প্রশ্ন করতে পারেন।",
-      timestamp: new Date().toISOString(),
-      suggested_followups: [
-        "আমার বর্তমান মহাদশা ও অন্তর্দশা কেমন?",
-        "আমার কুন্ডলীতে মাঙ্গলিক দোষ আছে কি?",
-        "আজকের দিনে কোন হোরায় শুভ কাজ শুরু করব?",
-      ],
-    },
-  ]);
+  const { language, setLanguage } = useLanguage();
+
+  const [messages, setMessages] = React.useState<AIChatMessage[]>(() => {
+    const welcome = WELCOME_MESSAGES[language] || WELCOME_MESSAGES.bn;
+    return [
+      {
+        role: "assistant",
+        content: welcome.content,
+        timestamp: new Date().toISOString(),
+        suggested_followups: welcome.suggested_followups,
+      },
+    ];
+  });
 
   const [inputQuery, setInputQuery] = React.useState("");
   const [sessionId, setSessionId] = React.useState<string>("");
   const [loading, setLoading] = React.useState(false);
-  const [language, setLanguage] = React.useState<"bn" | "en" | "hi">("bn");
+
+  // When language switches and only the initial greeting is present, update the welcome greeting
+  React.useEffect(() => {
+    setMessages((prev) => {
+      if (prev.length <= 1) {
+        const welcome = WELCOME_MESSAGES[language] || WELCOME_MESSAGES.bn;
+        return [
+          {
+            role: "assistant",
+            content: welcome.content,
+            timestamp: new Date().toISOString(),
+            suggested_followups: welcome.suggested_followups,
+          },
+        ];
+      }
+      return prev;
+    });
+  }, [language]);
 
   // Birth details state for personalization
   const [showBirthDrawer, setShowBirthDrawer] = React.useState(false);
@@ -309,17 +429,54 @@ export default function AIAstrologerPage() {
             <div className="space-y-1.5">
               <div className="inline-flex items-center gap-2 rounded-full bg-[#b06d4e]/10 px-3 py-1 text-xs font-semibold text-[#b06d4e]">
                 <Sparkles className="size-3.5" />
-                <span>শাস্ত্রীয় RAG এনজিন • সুইস এফিমেরিস ২.১০ নির্ভুল গণনা</span>
+                <span>
+                  {language === "bn"
+                    ? "শাস্ত্রীয় RAG এনজিন • সুইস এফিমেরিস ২.১০ নির্ভুল গণনা"
+                    : language === "hi"
+                    ? "शास्त्रीय RAG इंजन • स्विस एफेमेरिस २.१० सटीक गणना"
+                    : "Authentic Vedic RAG Engine • Swiss Ephemeris 2.10 Precision"}
+                </span>
               </div>
               <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#4D4664] tracking-tight">
-                অ্যাস্ট্রা এআই বৈদিক জ্যোতিষী
+                {language === "bn"
+                  ? "ডিভাইনলিঙ্ক এআই বৈদিক জ্যোতিষী"
+                  : language === "hi"
+                  ? "डिवाइनलिंक एआई वैदिक ज्योतिषी"
+                  : "DivinLink AI Vedic Astrologer"}
               </h1>
               <p className="text-xs sm:text-sm text-[#4D4664]/80 max-w-2xl leading-relaxed">
-                বৃহৎ পরাশর শাস্ত্র, জৈমিনী সূত্র এবং ক্লায়েন্টের খাঁটি বৈদিক নথির ভিত্তিতে ২৪ ঘণ্টা সরাসরি নির্ভুল জ্যোতিষীয় সমাধান ও ব্যক্তিগত পরামর্শ।
+                {language === "bn"
+                  ? "বৃহৎ পরাশর শাস্ত্র, জৈমিনী সূত্র এবং ক্লায়েন্টের খাঁটি বৈদিক নথির ভিত্তিতে ২৪ ঘণ্টা সরাসরি নির্ভুল জ্যোতিষীয় সমাধান ও ব্যক্তিগত পরামর্শ।"
+                  : language === "hi"
+                  ? "बृहत् पराशर शास्त्र, जैमिनी सूत्र एवं प्रामाणिक वैदिक ग्रंथों के आधार पर २४ घंटे सीधा सटीक ज्योतिषीय समाधान व व्यक्तिगत परामर्श।"
+                  : "24/7 authentic Vedic astrology guidance, horoscope analysis, and remedies based on Brihat Parashara Hora Shastra, Jaimini Sutras, and Swiss Ephemeris."}
               </p>
             </div>
 
-            <div className="flex items-center gap-2 self-start md:self-auto">
+            <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
+              <div className="inline-flex items-center rounded-xl border border-[#b06d4e]/30 bg-white/80 p-1 text-xs shadow-2xs">
+                {(
+                  [
+                    { code: "bn", label: "বাংলা" },
+                    { code: "hi", label: "हिन्दी" },
+                    { code: "en", label: "English" },
+                  ] as const
+                ).map((l) => (
+                  <button
+                    key={l.code}
+                    type="button"
+                    onClick={() => void setLanguage(l.code)}
+                    className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+                      language === l.code
+                        ? "bg-[#b06d4e] text-white shadow-xs"
+                        : "text-[#4D4664]/70 hover:text-[#4D4664] hover:bg-[#b06d4e]/10"
+                    }`}
+                  >
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+
               <Button
                 variant="outline"
                 size="sm"
@@ -329,14 +486,24 @@ export default function AIAstrologerPage() {
                 }`}
               >
                 <User className="mr-1.5 size-3.5" />
-                {birthDate ? "কুন্ডলী সংযুক্ত ✓" : "জন্ম বিবরণ যুক্ত করুন"}
+                {birthDate
+                  ? language === "bn"
+                    ? "কুন্ডলী সংযুক্ত ✓"
+                    : language === "hi"
+                    ? "कुंडली जुड़ी हुई ✓"
+                    : "Kundli Linked ✓"
+                  : language === "bn"
+                  ? "জন্ম বিবরণ যুক্ত করুন"
+                  : language === "hi"
+                  ? "जन्म विवरण जोड़ें"
+                  : "Link Birth Chart"}
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={clearChat}
                 className="text-[#4D4664]/70 hover:text-red-600"
-                title="নতুন সেশন"
+                title={language === "bn" ? "নতুন সেশন" : language === "hi" ? "नया सत्र" : "New Chat"}
               >
                 <Trash2 className="size-4" />
               </Button>
@@ -420,10 +587,14 @@ export default function AIAstrologerPage() {
         <div className="mt-4">
           <p className="text-xs font-semibold text-[#4D4664]/70 mb-2 flex items-center gap-1.5">
             <Wand2 className="size-3.5 text-[#b06d4e]" />
-            দ্রুত শাস্ত্রীয় পরামর্শের জন্য প্রশ্ন নির্বাচন করুন:
+            {language === "bn"
+              ? "দ্রুত শাস্ত্রীয় পরামর্শের জন্য প্রশ্ন নির্বাচন করুন:"
+              : language === "hi"
+              ? "त्वरित शास्त्रीय परामर्श के लिए प्रश्न चुनें:"
+              : "Select a topic for instant Vedic consultation:"}
           </p>
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
-            {SUGGESTED_PROMPTS.map((p, idx) => (
+            {(SUGGESTED_PROMPTS[language] || SUGGESTED_PROMPTS.bn).map((p, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSendMessage(p.query)}
@@ -644,7 +815,13 @@ export default function AIAstrologerPage() {
           >
             <input
               type="text"
-              placeholder="আপনার প্রশ্ন এখানে লিখুন (যেমন: শনির সাড়ে সাতি প্রতিকার, ক্যারিয়ার বা মাঙ্গলিক বিচার)..."
+              placeholder={
+                language === "bn"
+                  ? "আপনার প্রশ্ন এখানে লিখুন (যেমন: শনির সাড়ে সাতি প্রতিকার, ক্যারিয়ার বা মাঙ্গলিক বিচার)..."
+                  : language === "hi"
+                  ? "अपना प्रश्न यहाँ लिखें (जैसे: शनि साढ़े साती उपाय, करियर या मांगलिक विचार)..."
+                  : "Type your Vedic question here (e.g. Sade Sati remedies, career timing, Manglik Dosha)..."
+              }
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
               disabled={loading}
@@ -657,12 +834,18 @@ export default function AIAstrologerPage() {
               className="rounded-2xl bg-[#b06d4e] hover:bg-[#975c40] text-white px-4 py-2.5 shrink-0 shadow-xs transition-all"
             >
               <Send className="size-4 mr-1 sm:mr-1.5" />
-              <span className="hidden sm:inline text-xs font-semibold">জিজ্ঞাসা করুন</span>
+              <span className="hidden sm:inline text-xs font-semibold">
+                {language === "bn" ? "জিজ্ঞাসা করুন" : language === "hi" ? "पूछें" : "Ask AI"}
+              </span>
             </Button>
           </form>
 
           <p className="text-[11px] text-center text-[#4D4664]/60 mt-2">
-            অ্যাস্ট্রা এআই বৈদিক শাস্ত্র ও এফিমেরিস নির্ভুল সূত্র প্রয়োগ করে। জটিল প্রতিকারের ক্ষেত্রে আমাদের অভিজ্ঞ জ্যোতিষীদের সাথেও সরাসরি পরামর্শ করতে পারেন।
+            {language === "bn"
+              ? "ডিভাইনলিঙ্ক এআই বৈদিক শাস্ত্র ও এফিমেরিস নির্ভুল সূত্র প্রয়োগ করে। জটিল প্রতিকারের ক্ষেত্রে আমাদের অভিজ্ঞ জ্যোতিষীদের সাথেও সরাসরি পরামর্শ করতে পারেন।"
+              : language === "hi"
+              ? "डिवाइनलिंक एआई वैदिक शास्त्र एवं एफेमेरिस के सटीक सूत्र लागू करता है। विशेष मार्गदर्शन के लिए हमारे अनुभवी ज्योतिषियों से भी परामर्श कर सकते हैं।"
+              : "DivinLink AI applies authentic Vedic scriptures and high-precision ephemeris algorithms. For complex remedies, you can also consult our verified astrologers."}
           </p>
         </div>
 
