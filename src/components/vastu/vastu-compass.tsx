@@ -11,13 +11,24 @@ import {
   Smartphone,
   Layers,
   Shield,
+  HelpCircle,
+  Sliders,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Maximize2,
+  FlipHorizontal,
+  Flame,
+  Droplets,
+  Wind,
+  Mountain,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui";
 import type { AstrologyLanguage } from "@/types";
 
 // ---------------------------------------------------------------------------
-// 32 Padas Mathematical Definitions (11.25° each, N5 center at 0° True North)
+// 32 Padas Mathematical Definitions (11.25° each, N5 centered at 0.0° True North)
 // N5 spans from 348.75° to 360.0°/0.0°, N6 spans from 0.0° to 11.25°
 // ---------------------------------------------------------------------------
 export interface CompassPada {
@@ -42,7 +53,7 @@ export const COMPASS_PADAS: CompassPada[] = [
   {
     id: "N6", name: "N6", deity_bn: "ভুজঙ্গ (Bhujanga)", deity_en: "Bhujanga",
     quadrant: "North", startDeg: 0.0, centerDeg: 5.625, endDeg: 11.25, isGoldenDoor: false,
-    effects_bn: "পুত্রসন্তানের সাথে অহংকারের সংঘাত ও আত্মীয়দের বৈরিতা।",
+    effects_bn: "পুত্রসন্তানের সাথে অহংকারের সংঘাত ও আত্মীয়দের বৈরিতা বৃদ্ধি।",
     effects_en: "Ego clash with sons, hostility with close relatives.",
     effects_hi: "पुत्र के साथ वैचारिक मतभेद एवं परिजनों से दूरी।",
     challenge_bn: "পারিবারিক একাকীত্ব",
@@ -394,7 +405,7 @@ export const COMPASS_ZONES: CompassZone[] = [
     remedyMetal: "রূপা / অ্যালুমিনিয়াম স্ট্রিপ (বা পিরামিড)",
   },
   {
-    code: "ENE", name_bn: "ENE (পূর্ব-উত্তর-পূর্ব)", name_en: "ENE (Joy & Recreation)", name_hi: "पूर्व-उत्तर-पूर्व (आनंद)",
+    code: "ENE", name_bn: "ENE (পূর্ব-উত্তর-পূর্ব)", name_en: "ENE (Joy & Recreation)", name_hi: "पूर्व-उत्तर-পূর্ব (आनंद)",
     centerDeg: 67.5, element: "Air", element_bn: "বায়ু / কাঠ তত্ত্ব (Air/Wood)", element_en: "Air / Wood",
     colorHex: "#10B981",
     lifeAspect_bn: "আনন্দ, চিত্তবিনোদন, পারিবারিক প্রশান্তি ও প্রফুল্লতা",
@@ -550,7 +561,7 @@ export interface InspectItem {
 
 export const INSPECT_ITEMS: InspectItem[] = [
   { id: "entrance", icon: "🚪", title_bn: "মূল প্রবেশদ্বার (Main Entrance)", title_en: "Main Entrance", title_hi: "मुख्य द्वार", category: "entrance" },
-  { id: "toilet", icon: "🚽", title_bn: "টয়লেট / কমোড (Toilet)", title_en: "Toilet / Commode", title_hi: "शौचालय", category: "toilet" },
+  { id: "toilet", icon: "🚽", title_bn: "টয়লেট / বাথরুম (Toilet)", title_en: "Toilet / Commode", title_hi: "शौचालय", category: "toilet" },
   { id: "kitchen", icon: "🍳", title_bn: "রান্নাঘর / গ্যাসের চুলা (Kitchen)", title_en: "Kitchen / Stove", title_hi: "रसोई घर", category: "kitchen" },
   { id: "master_bed", icon: "🛏️", title_bn: "মাস্টার বেডরুম (Master Bed)", title_en: "Master Bedroom", title_hi: "मास्टर बेडरूम", category: "master_bed" },
   { id: "puja_room", icon: "🪔", title_bn: "পূজা ঘর / মন্দির (Puja Room)", title_en: "Puja Room / Temple", title_hi: "पूजा घर / मंदिर", category: "puja_room" },
@@ -574,15 +585,24 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
   const [selectedItemId, setSelectedItemId] = React.useState<string>("entrance");
   const [isSensorActive, setIsSensorActive] = React.useState<boolean>(false);
   const [rotateMode, setRotateMode] = React.useState<"dial" | "needle">("dial");
+  const [isFlipped180, setIsFlipped180] = React.useState<boolean>(false);
+  const [manualOffset, setManualOffset] = React.useState<number>(0);
+  const [holdMode, setHoldMode] = React.useState<"flat" | "upright">("upright");
 
   const compassRef = React.useRef<SVGSVGElement | null>(null);
   const isDragging = React.useRef<boolean>(false);
   const targetHeadingRef = React.useRef<number>(0.0);
   const animFrameRef = React.useRef<number | null>(null);
 
-  // Find current Pada based on heading
+  // Effective Heading after applying 180° flip and manual calibration offset
+  const effectiveHeading = React.useMemo(() => {
+    let h = heading + (isFlipped180 ? 180 : 0) + manualOffset;
+    return ((h % 360) + 360) % 360;
+  }, [heading, isFlipped180, manualOffset]);
+
+  // Find current Pada based on effective heading
   const currentPada = React.useMemo<CompassPada>(() => {
-    const deg = (heading % 360 + 360) % 360;
+    const deg = (effectiveHeading % 360 + 360) % 360;
     for (const p of COMPASS_PADAS) {
       if (p.startDeg > p.endDeg) {
         if (deg >= p.startDeg || deg < p.endDeg) return p;
@@ -591,11 +611,11 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
       }
     }
     return COMPASS_PADAS[0];
-  }, [heading]);
+  }, [effectiveHeading]);
 
-  // Find current 16-Zone based on heading
+  // Find current 16-Zone based on effective heading
   const currentZone = React.useMemo<CompassZone>(() => {
-    const deg = (heading % 360 + 360) % 360;
+    const deg = (effectiveHeading % 360 + 360) % 360;
     for (const z of COMPASS_ZONES) {
       const start = (z.centerDeg - 11.25 + 360) % 360;
       const end = (z.centerDeg + 11.25) % 360;
@@ -606,9 +626,9 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
       }
     }
     return COMPASS_ZONES[0];
-  }, [heading]);
+  }, [effectiveHeading]);
 
-  // Dynamic evaluation of selected item at current heading
+  // Dynamic evaluation of selected item at effective heading
   const itemEvaluation = React.useMemo(() => {
     const sel = INSPECT_ITEMS.find((i) => i.id === selectedItemId) || INSPECT_ITEMS[0];
     const cat = sel.category;
@@ -914,14 +934,14 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
     let current = heading;
     const animate = () => {
       let diff = targetHeadingRef.current - current;
-      // Shortest path around circle
+      // Shortest angular path around circle
       while (diff < -180) diff += 360;
       while (diff > 180) diff -= 360;
 
       if (Math.abs(diff) > 0.05) {
-        current = (current + diff * 0.25 + 360) % 360;
+        current = (current + diff * 0.2 + 360) % 360;
         setHeading(current);
-        if (onAngleSelect) onAngleSelect(current);
+        if (onAngleSelect) onAngleSelect(effectiveHeading);
       }
       animFrameRef.current = requestAnimationFrame(animate);
     };
@@ -930,12 +950,48 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [onAngleSelect, heading]);
+  }, [onAngleSelect, heading, effectiveHeading]);
 
   // Set target heading smoothly
   const setTargetDegree = (deg: number) => {
     const normalized = (deg % 360 + 360) % 360;
     targetHeadingRef.current = normalized;
+  };
+
+  // Robust Sensor Heading Calculation (Handles 3D tilt, pitch beta, roll gamma)
+  const handleDeviceOrientation = (event: DeviceOrientationEvent) => {
+    let rawHeading: number | null = null;
+
+    // 1. iOS Safari native webkitCompassHeading (hardware tilt-compensated)
+    if (typeof (event as any).webkitCompassHeading !== "undefined") {
+      rawHeading = (event as any).webkitCompassHeading;
+    } 
+    // 2. Android Chrome / W3C orientation
+    else if (event.alpha !== null) {
+      const alpha = event.alpha;
+      const beta = event.beta ?? 0;
+      const gamma = event.gamma ?? 0;
+
+      // When phone is held flat in hand
+      if (holdMode === "flat" || (Math.abs(beta) < 25 && Math.abs(gamma) < 25)) {
+        rawHeading = (360 - alpha) % 360;
+      } else {
+        // Phone held upright aiming at door/wall: 3D vector projection
+        const radA = alpha * (Math.PI / 180);
+        const radB = beta * (Math.PI / 180);
+        const radG = gamma * (Math.PI / 180);
+
+        const _x = -Math.cos(radA) * Math.sin(radG) - Math.sin(radA) * Math.sin(radB) * Math.cos(radG);
+        const _y = -Math.sin(radA) * Math.sin(radG) + Math.cos(radA) * Math.sin(radB) * Math.cos(radG);
+
+        let comp = Math.atan2(_y, _x) * (180 / Math.PI);
+        rawHeading = (comp + 360) % 360;
+      }
+    }
+
+    if (rawHeading !== null && !isNaN(rawHeading)) {
+      setTargetDegree(rawHeading);
+    }
   };
 
   // Sensor Permission & Orientation Listener
@@ -954,14 +1010,14 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
           setIsSensorActive(true);
           toast.success(
             language === "bn"
-              ? "ডিভাইস কম্পাস সেন্সর সফলভাবে সক্রিয় হয়েছে!"
-              : "Device compass sensor activated successfully!"
+              ? "কম্পাস সেন্সর চালু হয়েছে! ফোনটি দরজার দিকে তাক করুন।"
+              : "Compass sensor activated! Aim phone towards target."
           );
         } else {
           toast.error(
             language === "bn"
               ? "সেন্সর পারমিশন অস্বীকৃত হয়েছে। ম্যানুয়াল ডায়াল ব্যবহার করুন।"
-              : "Compass permission denied. You can rotate manually."
+              : "Compass permission denied."
           );
         }
       } else if ("ondeviceorientationabsolute" in win) {
@@ -988,22 +1044,6 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
       toast.error(
         language === "bn" ? "সেন্সর চালু করা যায়নি। ম্যানুয়াল মোড সক্রিয়।" : "Failed to activate sensor."
       );
-    }
-  };
-
-  const handleDeviceOrientation = (event: DeviceOrientationEvent) => {
-    let compassDeg: number | null = null;
-
-    // iOS Safari webkitCompassHeading
-    if (typeof (event as any).webkitCompassHeading !== "undefined") {
-      compassDeg = (event as any).webkitCompassHeading;
-    } else if (event.alpha !== null) {
-      // Android Chrome: alpha 0 is North if absolute
-      compassDeg = (360 - event.alpha) % 360;
-    }
-
-    if (compassDeg !== null && !isNaN(compassDeg)) {
-      setTargetDegree(compassDeg);
     }
   };
 
@@ -1045,57 +1085,90 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
   return (
     <div className="space-y-6">
       {/* =====================================================================
-          CONTROL BAR: Sensor Toggle & Dial/Needle Mode
+          CONTROL BAR: Sensor Toggle, 180° Flip, Hold Mode & Reset
       ===================================================================== */}
-      <div className="card-surface p-4 sm:p-5 rounded-2xl border border-border/80 flex flex-col md:flex-row items-center justify-between gap-4 shadow-2xs">
+      <div className="card-surface p-4 sm:p-5 rounded-2xl border border-border/80 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+        {/* Left: Sensor status & Title */}
         <div className="flex items-center gap-3 w-full md:w-auto">
           <div
-            className={`size-10 rounded-xl flex items-center justify-center shrink-0 border transition-all ${
+            className={`size-11 rounded-2xl flex items-center justify-center shrink-0 border transition-all ${
               isSensorActive
-                ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 animate-pulse"
+                ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-600 dark:text-emerald-400 animate-pulse shadow-md shadow-emerald-500/20"
                 : "bg-surface-muted border-border text-muted-foreground"
             }`}
           >
-            <Smartphone className="size-5" />
+            <Compass className="size-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-sm text-foreground">
+              <span className="font-bold text-sm sm:text-base text-foreground">
                 {language === "bn"
-                  ? "স্মার্ট ডিভাইস কম্পাস সেন্সর"
+                  ? "স্মার্ট ডিভাইস বাস্তু কম্পাস"
                   : language === "hi"
-                  ? "डिवाइस कम्पास सेंसर"
-                  : "Live Device Compass Sensor"}
+                  ? "स्मार्ट वास्तु कम्पास"
+                  : "Smart Vastu Sensor Compass"}
               </span>
               <span
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                className={`text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border ${
                   isSensorActive
-                    ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30"
+                    ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/40"
                     : "bg-muted text-muted-foreground border-border"
                 }`}
               >
                 {isSensorActive
                   ? language === "bn"
-                    ? "🟢 সেন্সর সক্রিয়"
-                    : "🟢 Sensor Live"
+                    ? "🟢 লাইভ সেন্সর চালু"
+                    : "🟢 Live Sensor Active"
                   : language === "bn"
                   ? "ম্যানুয়াল মোড"
                   : "Manual Mode"}
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground mt-0.5">
               {isSensorActive
                 ? language === "bn"
-                  ? "ফোনটিকে অনুভূমিকভাবে রেখে লক্ষ্যবস্তুর দিকে তাক করুন।"
-                  : "Hold phone flat and point towards the door/room."
+                  ? "ফোনটিকে দরজার দিকে তাক করুন। উল্টো দেখালে ১৮০° ফ্লিপ চাপুন।"
+                  : "Aim phone at door/room. Use 180° Flip if direction is reversed."
                 : language === "bn"
-                ? "সেন্সর চালু করুন অথবা নিচে ডায়ালটি ঘুরিয়ে কোণ পরিবর্তন করুন।"
-                : "Enable sensor or drag the dial to rotate."}
+                ? "মোবাইলের ম্যাগনেটিক সেন্সর চালু করুন অথবা নিচে ডায়ালটি ঘুরিয়ে দেখুন।"
+                : "Enable device magnetic sensor or rotate dial manually."}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+        {/* Right: Quick Action Controls */}
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-start md:justify-end">
+          {/* 180 Degree Flip Button (Fixes North/South Inversion Immediately!) */}
+          <button
+            type="button"
+            onClick={() => {
+              setIsFlipped180(!isFlipped180);
+              toast.success(
+                !isFlipped180
+                  ? (language === "bn" ? "কম্পাস ১৮০° উল্টানো হয়েছে (উত্তর-দক্ষিণ ঠিক করা হয়েছে)" : "Compass inverted 180°")
+                  : (language === "bn" ? "কম্পাস স্বাভাবিক অবস্থায় ফেরত আনা হয়েছে" : "Compass orientation restored")
+              );
+            }}
+            className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs ${
+              isFlipped180
+                ? "bg-amber-500 text-amber-950 border-amber-600 font-extrabold shadow-sm"
+                : "bg-surface border-border text-foreground hover:bg-surface-muted"
+            }`}
+            title="ফোন যদি উত্তরমুখী থাকাকালীন দক্ষিণ দেখায়, তবে এটি চাপুন"
+          >
+            <FlipHorizontal className="size-3.5" />
+            <span>
+              {language === "bn"
+                ? isFlipped180
+                  ? "১৮০° ফ্লিপ অন"
+                  : "🔄 ১৮০° ফ্লিপ (উল্টো হলে ঠিক করুন)"
+                : isFlipped180
+                ? "180° Flipped"
+                : "🔄 Flip 180°"}
+            </span>
+          </button>
+
+          {/* Sensor Activate / Stop Button */}
           {isSensorActive ? (
             <Button
               type="button"
@@ -1113,31 +1186,34 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
               variant="primary"
               size="sm"
               onClick={requestSensorPermission}
-              className="text-xs font-bold cursor-pointer bg-brand-500 hover:bg-brand-600 text-brand-foreground shadow-sm flex items-center gap-1.5"
+              className="text-xs font-extrabold cursor-pointer bg-brand-500 hover:bg-brand-600 text-brand-foreground shadow-sm flex items-center gap-1.5"
             >
-              <Compass className="size-3.5" />
-              {language === "bn" ? "কম্পাস সেন্সর চালু করুন" : "Enable Sensor"}
+              <Smartphone className="size-3.5" />
+              {language === "bn" ? "লাইভ সেন্সর চালু করুন" : "Enable Compass"}
             </Button>
           )}
 
-          <div className="hidden sm:flex items-center p-1 rounded-xl bg-surface border border-border/80 text-xs font-semibold">
+          {/* Hold Mode (Flat vs Upright) */}
+          <div className="flex items-center p-0.5 rounded-xl bg-surface border border-border text-xs font-semibold">
             <button
               type="button"
-              onClick={() => setRotateMode("dial")}
-              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                rotateMode === "dial" ? "bg-brand-500 text-brand-foreground shadow-2xs" : "text-muted-foreground"
+              onClick={() => setHoldMode("upright")}
+              className={`px-2 py-1 rounded-lg transition-all cursor-pointer ${
+                holdMode === "upright" ? "bg-brand-500 text-brand-foreground shadow-2xs" : "text-muted-foreground"
               }`}
+              title="ফোন সোজা ধরে দরজার দিকে তাক করা"
             >
-              {language === "bn" ? "ডায়াল মোড" : "Dial"}
+              {language === "bn" ? "উল্লম্ব / সোজা" : "Upright"}
             </button>
             <button
               type="button"
-              onClick={() => setRotateMode("needle")}
-              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                rotateMode === "needle" ? "bg-brand-500 text-brand-foreground shadow-2xs" : "text-muted-foreground"
+              onClick={() => setHoldMode("flat")}
+              className={`px-2 py-1 rounded-lg transition-all cursor-pointer ${
+                holdMode === "flat" ? "bg-brand-500 text-brand-foreground shadow-2xs" : "text-muted-foreground"
               }`}
+              title="ফোন সমতল টেবিলে বা হাতের তালুতে রাখা"
             >
-              {language === "bn" ? "সূঁচ মোড" : "Needle"}
+              {language === "bn" ? "সমতল / ফ্ল্যাট" : "Flat"}
             </button>
           </div>
         </div>
@@ -1148,18 +1224,20 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
       ===================================================================== */}
       <div className="card-surface p-4 sm:p-5 rounded-2xl border border-border/80 space-y-3 shadow-2xs">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <Sparkles className="size-3.5 text-amber-500" />
-            {language === "bn"
-              ? "কী পরীক্ষা করছেন নির্বাচন করুন (Select Room / Feature)"
-              : language === "hi"
-              ? "किसकी जांच कर रहे हैं? (कक्षा चुनें)"
-              : "What are you inspecting?"}
+          <label className="text-xs font-extrabold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <Sparkles className="size-4 text-amber-500" />
+            <span>
+              {language === "bn"
+                ? "কী পরীক্ষা করছেন? নির্বাচন করুন:"
+                : language === "hi"
+                ? "किसकी जांच कर रहे हैं? चुनें:"
+                : "Select Feature to Inspect:"}
+            </span>
           </label>
-          <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+          <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400">
             {language === "bn"
-              ? "রিয়েল-টাইমে বাস্তু ফল দেখুন"
-              : "Instant Real-Time Verdict"}
+              ? "রিয়েল-টাইমে বাস্তু ফল ও প্রতিকার"
+              : "Real-Time Vastu Remedy & Score"}
           </span>
         </div>
 
@@ -1172,13 +1250,13 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
                 key={item.id}
                 type="button"
                 onClick={() => setSelectedItemId(item.id)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold shrink-0 transition-all cursor-pointer border ${
+                className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer border ${
                   isSelected
-                    ? "bg-brand-500 text-brand-foreground border-brand-500 shadow-sm shadow-brand-500/20 font-bold"
+                    ? "bg-brand-500 text-brand-foreground border-brand-500 shadow-sm shadow-brand-500/20"
                     : "bg-surface border-border/80 text-muted-foreground hover:text-foreground hover:bg-surface-muted"
                 }`}
               >
-                <span className="text-sm">{item.icon}</span>
+                <span className="text-base">{item.icon}</span>
                 <span>{language === "bn" ? item.title_bn.split(" ")[0] : item.title_en}</span>
               </button>
             );
@@ -1191,45 +1269,55 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
       ===================================================================== */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left: The Circular Vastu Chakra Compass (7 Cols) */}
-        <div className="lg:col-span-7 card-surface rounded-2xl border border-border/80 p-4 sm:p-6 shadow-xs flex flex-col items-center justify-center space-y-4 relative overflow-hidden">
-          {/* Top Sighting Reticle / Aiming Mark */}
-          <div className="flex flex-col items-center space-y-1 z-10">
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-extrabold tracking-wider shadow-2xs">
-              <Compass className="size-3.5 text-amber-500" />
-              <span>
-                {language === "bn" ? "মুখোমুখি দিক:" : "Aiming Direction:"}{" "}
-                <strong className="font-mono text-sm text-foreground">{heading.toFixed(1)}°</strong>{" "}
-                <span className="text-amber-600 dark:text-amber-400">({currentZone.code})</span>
-              </span>
+        <div className="lg:col-span-7 card-surface rounded-3xl border border-border/80 p-5 sm:p-7 shadow-sm flex flex-col items-center justify-center space-y-5 relative overflow-hidden bg-gradient-to-b from-surface via-surface to-surface-muted/20">
+          
+          {/* Digital HUD Readout Bar */}
+          <div className="flex flex-col items-center space-y-1.5 z-10 w-full max-w-sm">
+            <div className="flex items-center justify-between w-full px-4 py-2 rounded-2xl bg-amber-500/10 border border-amber-500/30 shadow-2xs">
+              <div className="flex items-center gap-2">
+                <Compass className="size-4 text-amber-500 animate-spin-slow" />
+                <span className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+                  {language === "bn" ? "মুখোমুখি দিক:" : "Aiming:"}
+                </span>
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="font-mono text-xl sm:text-2xl font-black text-foreground">
+                  {effectiveHeading.toFixed(1)}°
+                </span>
+                <span className="text-sm font-extrabold text-amber-600 dark:text-amber-400">
+                  {currentZone.code}
+                </span>
+              </div>
             </div>
-            {/* Red Sighting Arrow pointing down into wheel */}
-            <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[10px] border-t-amber-500 filter drop-shadow(0 2px 4px rgba(229,169,60,0.4))" />
+
+            {/* Red/Gold Sighting Arrow pointing down into wheel */}
+            <div className="w-0 h-0 border-l-[7px] border-l-transparent border-r-[7px] border-r-transparent border-t-[12px] border-t-amber-500 filter drop-shadow(0 2px 6px rgba(229,169,60,0.5))" />
           </div>
 
           {/* SVG VASTU CHAKRA WHEEL */}
           <div
-            className="relative w-full max-w-[380px] sm:max-w-[440px] aspect-square flex items-center justify-center select-none touch-none cursor-grab active:cursor-grabbing"
+            className="relative w-full max-w-[400px] sm:max-w-[460px] aspect-square flex items-center justify-center select-none touch-none cursor-grab active:cursor-grabbing"
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
           >
             {/* Background Outer Glow */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-500/10 via-brand-500/5 to-transparent blur-xl pointer-events-none" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-500/15 via-brand-500/10 to-transparent blur-2xl pointer-events-none" />
 
             <svg
               ref={compassRef}
               viewBox="0 0 500 500"
               className="w-full h-full transform transition-transform duration-75"
               style={{
-                transform: rotateMode === "dial" ? `rotate(${-heading}deg)` : "rotate(0deg)",
+                transform: rotateMode === "dial" ? `rotate(${-effectiveHeading}deg)` : "rotate(0deg)",
               }}
             >
               <defs>
                 {/* Central Vastu Purusha Glow & Gradient */}
                 <radialGradient id="centerGradient" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#E5A93C" stopOpacity="0.25" />
-                  <stop offset="70%" stopColor="#1E293B" stopOpacity="0.8" />
-                  <stop offset="100%" stopColor="#0B0F17" stopOpacity="0.95" />
+                  <stop offset="0%" stopColor="#E5A93C" stopOpacity="0.3" />
+                  <stop offset="65%" stopColor="#1E293B" stopOpacity="0.85" />
+                  <stop offset="100%" stopColor="#0B0F17" stopOpacity="0.98" />
                 </radialGradient>
 
                 <linearGradient id="goldNeedleTop" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -1243,24 +1331,25 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
                 </linearGradient>
               </defs>
 
-              {/* Outer Rim Ring */}
-              <circle cx="250" cy="250" r="244" fill="#0B0F17" stroke="#334155" strokeWidth="2.5" />
-              <circle cx="250" cy="250" r="236" fill="none" stroke="#E5A93C" strokeWidth="1" strokeOpacity="0.4" />
+              {/* Outer Metallic Bezel */}
+              <circle cx="250" cy="250" r="246" fill="#0B0F17" stroke="#475569" strokeWidth="3" />
+              <circle cx="250" cy="250" r="238" fill="none" stroke="#E5A93C" strokeWidth="1.5" strokeOpacity="0.5" />
 
               {/* 360-degree ticks (Every 10 degrees labeled, every 2.5 degrees ticked) */}
               {Array.from({ length: 72 }).map((_, i) => {
                 const deg = i * 5;
                 const isMajor = deg % 10 === 0;
-                const tickLen = isMajor ? 10 : 5;
+                const isCardinal = deg === 0 || deg === 90 || deg === 180 || deg === 270;
+                const tickLen = isCardinal ? 12 : isMajor ? 9 : 5;
                 const rad = ((deg - 90) * Math.PI) / 180;
-                const x1 = 250 + 242 * Math.cos(rad);
-                const y1 = 250 + 242 * Math.sin(rad);
-                const x2 = 250 + (242 - tickLen) * Math.cos(rad);
-                const y2 = 250 + (242 - tickLen) * Math.sin(rad);
+                const x1 = 250 + 244 * Math.cos(rad);
+                const y1 = 250 + 244 * Math.sin(rad);
+                const x2 = 250 + (244 - tickLen) * Math.cos(rad);
+                const y2 = 250 + (244 - tickLen) * Math.sin(rad);
 
                 // Degree text at major ticks
-                const tx = 250 + 224 * Math.cos(rad);
-                const ty = 250 + 224 * Math.sin(rad);
+                const tx = 250 + 225 * Math.cos(rad);
+                const ty = 250 + 225 * Math.sin(rad);
 
                 return (
                   <g key={`tick-${deg}`}>
@@ -1269,17 +1358,17 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
                       y1={y1}
                       x2={x2}
                       y2={y2}
-                      stroke={isMajor ? "#E5A93C" : "#64748B"}
-                      strokeWidth={isMajor ? "1.5" : "1"}
+                      stroke={isCardinal ? "#F59E0B" : isMajor ? "#E5A93C" : "#64748B"}
+                      strokeWidth={isCardinal ? "2" : isMajor ? "1.5" : "1"}
                     />
                     {isMajor && (
                       <text
                         x={tx}
                         y={ty + 3}
-                        fontSize="7"
+                        fontSize={isCardinal ? "8" : "7"}
                         fontFamily="monospace"
-                        fontWeight="bold"
-                        fill="#94A3B8"
+                        fontWeight={isCardinal ? "900" : "bold"}
+                        fill={isCardinal ? "#F59E0B" : "#CBD5E1"}
                         textAnchor="middle"
                         transform={`rotate(${deg}, ${tx}, ${ty})`}
                       >
@@ -1290,13 +1379,13 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
                 );
               })}
 
-              {/* 32 PADAS RING (Radius 214 to 172, 11.25° each) */}
+              {/* 32 PADAS RING (Radius 215 to 175, 11.25° each) */}
               {COMPASS_PADAS.map((pada) => {
                 const c = pada.centerDeg;
                 const startAngle = pada.startDeg - 90;
                 const endAngle = pada.endDeg - 90;
-                const rOuter = 214;
-                const rInner = 176;
+                const rOuter = 215;
+                const rInner = 175;
 
                 const radStart = (startAngle * Math.PI) / 180;
                 const radEnd = (endAngle * Math.PI) / 180;
@@ -1331,16 +1420,16 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
                           ? "#B91C1C"
                           : "#475569"
                       }
-                      fillOpacity={pada.isGoldenDoor ? "0.35" : "0.15"}
-                      stroke={pada.isGoldenDoor ? "#E5A93C" : "#334155"}
-                      strokeWidth={pada.isGoldenDoor ? "1.5" : "0.75"}
+                      fillOpacity={pada.isGoldenDoor ? "0.45" : "0.2"}
+                      stroke={pada.isGoldenDoor ? "#FDE047" : "#334155"}
+                      strokeWidth={pada.isGoldenDoor ? "1.8" : "0.75"}
                     />
                     <text
                       x={textX}
                       y={textY + 2.5}
                       fontSize="7"
                       fontWeight="bold"
-                      fill={pada.isGoldenDoor ? "#FDE047" : "#CBD5E1"}
+                      fill={pada.isGoldenDoor ? "#FEF08A" : "#E2E8F0"}
                       textAnchor="middle"
                       transform={`rotate(${c}, ${textX}, ${textY})`}
                     >
@@ -1350,13 +1439,13 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
                 );
               })}
 
-              {/* 16 ZONES RING (Radius 176 to 134, 22.5° each) with Panchabhuta colors */}
+              {/* 16 ZONES RING (Radius 175 to 132, 22.5° each) with Panchabhuta colors */}
               {COMPASS_ZONES.map((zone) => {
                 const c = zone.centerDeg;
                 const startAngle = c - 11.25 - 90;
                 const endAngle = c + 11.25 - 90;
-                const rOuter = 176;
-                const rInner = 134;
+                const rOuter = 175;
+                const rInner = 132;
 
                 const radStart = (startAngle * Math.PI) / 180;
                 const radEnd = (endAngle * Math.PI) / 180;
@@ -1373,24 +1462,24 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
                 const pathData = `M ${x1} ${y1} A ${rOuter} ${rOuter} 0 0 1 ${x2} ${y2} L ${x3} ${y3} A ${rInner} ${rInner} 0 0 0 ${x4} ${y4} Z`;
 
                 const textRad = ((c - 90) * Math.PI) / 180;
-                const textX = 250 + 155 * Math.cos(textRad);
-                const textY = 250 + 155 * Math.sin(textRad);
+                const textX = 250 + 153 * Math.cos(textRad);
+                const textY = 250 + 153 * Math.sin(textRad);
 
                 return (
                   <g key={`zone-${zone.code}`}>
                     <path
                       d={pathData}
                       fill={zone.colorHex}
-                      fillOpacity="0.25"
+                      fillOpacity="0.3"
                       stroke={zone.colorHex}
-                      strokeWidth="1"
+                      strokeWidth="1.2"
                     />
                     <text
                       x={textX}
-                      y={textY + 3}
-                      fontSize="9"
+                      y={textY + 3.5}
+                      fontSize="9.5"
                       fontFamily="serif"
-                      fontWeight="black"
+                      fontWeight="900"
                       fill="#FFFFFF"
                       textAnchor="middle"
                       transform={`rotate(${c}, ${textX}, ${textY})`}
@@ -1401,12 +1490,12 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
                 );
               })}
 
-              {/* LIFE ASPECT RING (Radius 134 to 98) */}
+              {/* LIFE ASPECT RING (Radius 132 to 96) */}
               {COMPASS_ZONES.map((zone) => {
                 const c = zone.centerDeg;
                 const textRad = ((c - 90) * Math.PI) / 180;
-                const textX = 250 + 116 * Math.cos(textRad);
-                const textY = 250 + 116 * Math.sin(textRad);
+                const textX = 250 + 114 * Math.cos(textRad);
+                const textY = 250 + 114 * Math.sin(textRad);
 
                 return (
                   <text
@@ -1414,7 +1503,7 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
                     x={textX}
                     y={textY + 2}
                     fontSize="6"
-                    fontWeight="semibold"
+                    fontWeight="bold"
                     fill="#94A3B8"
                     textAnchor="middle"
                     transform={`rotate(${c}, ${textX}, ${textY})`}
@@ -1424,74 +1513,74 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
                 );
               })}
 
-              {/* CENTER CIRCLE: Vastu Purusha Mandala & Cardinal Lines */}
-              <circle cx="250" cy="250" r="98" fill="url(#centerGradient)" stroke="#E5A93C" strokeWidth="1.5" />
-              <circle cx="250" cy="250" r="90" fill="none" stroke="#64748B" strokeWidth="0.75" strokeDasharray="3 3" />
+              {/* CENTER CIRCLE: Sacred Vastu Purusha Mandala & Cardinal Lines */}
+              <circle cx="250" cy="250" r="96" fill="url(#centerGradient)" stroke="#E5A93C" strokeWidth="1.5" />
+              <circle cx="250" cy="250" r="88" fill="none" stroke="#64748B" strokeWidth="0.75" strokeDasharray="3 3" />
 
               {/* Cardinal Crosshair Axis (Jaivik / Pranik Source) */}
-              <line x1="250" y1="152" x2="250" y2="348" stroke="#E5A93C" strokeWidth="1" strokeOpacity="0.5" />
-              <line x1="152" y1="250" x2="348" y2="250" stroke="#E5A93C" strokeWidth="1" strokeOpacity="0.5" />
+              <line x1="250" y1="154" x2="250" y2="346" stroke="#E5A93C" strokeWidth="1.2" strokeOpacity="0.6" />
+              <line x1="154" y1="250" x2="346" y2="250" stroke="#E5A93C" strokeWidth="1.2" strokeOpacity="0.6" />
 
               {/* Diagonal Lines (NE-SW and NW-SE) */}
-              <line x1="181" y1="181" x2="319" y2="319" stroke="#38BDF8" strokeWidth="0.75" strokeOpacity="0.3" strokeDasharray="2 2" />
-              <line x1="319" y1="181" x2="181" y2="319" stroke="#F87171" strokeWidth="0.75" strokeOpacity="0.3" strokeDasharray="2 2" />
+              <line x1="182" y1="182" x2="318" y2="318" stroke="#38BDF8" strokeWidth="0.75" strokeOpacity="0.35" strokeDasharray="2 2" />
+              <line x1="318" y1="182" x2="182" y2="318" stroke="#F87171" strokeWidth="0.75" strokeOpacity="0.35" strokeDasharray="2 2" />
 
               {/* Vastu Purusha Silhouette Line Art (Head in NE, Feet in SW) */}
               <path
-                d="M 250 250 Q 265 235 275 225 Q 260 215 250 220 Q 240 215 225 225 Q 235 235 250 250 Z"
+                d="M 250 250 Q 268 232 278 222 Q 262 212 250 218 Q 238 212 222 222 Q 232 232 250 250 Z"
                 fill="none"
                 stroke="#E5A93C"
-                strokeWidth="1.2"
-                strokeOpacity="0.6"
+                strokeWidth="1.5"
+                strokeOpacity="0.7"
               />
-              <circle cx="250" cy="250" r="16" fill="#0B0F17" stroke="#E5A93C" strokeWidth="1.5" />
-              <text x="250" y="247" fontSize="5" fontWeight="bold" fill="#E5A93C" textAnchor="middle">
+              <circle cx="250" cy="250" r="17" fill="#0B0F17" stroke="#E5A93C" strokeWidth="1.5" />
+              <text x="250" y="247" fontSize="5.5" fontWeight="bold" fill="#E5A93C" textAnchor="middle">
                 VASTU
               </text>
-              <text x="250" y="254" fontSize="5" fontWeight="bold" fill="#E5A93C" textAnchor="middle">
+              <text x="250" y="255" fontSize="5.5" fontWeight="bold" fill="#E5A93C" textAnchor="middle">
                 CHAKRA
               </text>
 
               {/* COMPASS NEEDLE (Used when in needle rotate mode) */}
               {rotateMode === "needle" && (
-                <g transform={`rotate(${heading}, 250, 250)`}>
+                <g transform={`rotate(${effectiveHeading}, 250, 250)`}>
                   {/* North Pointing Arrow (Gold) */}
-                  <polygon points="250,70 257,250 250,235" fill="url(#goldNeedleTop)" />
-                  <polygon points="250,70 243,250 250,235" fill="#D97706" />
+                  <polygon points="250,65 258,250 250,232" fill="url(#goldNeedleTop)" />
+                  <polygon points="250,65 242,250 250,232" fill="#D97706" />
 
                   {/* South Pointing Arrow (Silver) */}
-                  <polygon points="250,430 257,250 250,265" fill="url(#silverNeedleBottom)" />
-                  <polygon points="250,430 243,250 250,265" fill="#334155" />
+                  <polygon points="250,435 258,250 250,268" fill="url(#silverNeedleBottom)" />
+                  <polygon points="250,435 242,250 250,268" fill="#334155" />
 
                   {/* Center Brass Cap */}
-                  <circle cx="250" cy="250" r="9" fill="#F59E0B" stroke="#78350F" strokeWidth="1.5" />
-                  <circle cx="250" cy="250" r="4" fill="#0284C7" />
+                  <circle cx="250" cy="250" r="10" fill="#F59E0B" stroke="#78350F" strokeWidth="1.5" />
+                  <circle cx="250" cy="250" r="4.5" fill="#0284C7" />
                 </g>
               )}
             </svg>
           </div>
 
-          {/* Quick Direction Presets & Fine Slider */}
+          {/* Quick Direction Presets & Fine Calibration Slider */}
           <div className="w-full space-y-3 pt-2">
             <div className="flex justify-between items-center text-xs">
               <span className="font-semibold text-muted-foreground">
-                {language === "bn" ? "ম্যানুয়াল কোণ নিয়ন্ত্রণ:" : "Angle Adjustment:"}
+                {language === "bn" ? "ম্যানুয়াল কোণ নিয়ন্ত্রণ / ফাইন টিউনিং:" : "Manual Angle Adjustment:"}
               </span>
               <div className="flex items-center gap-1 font-mono">
                 <button
                   type="button"
-                  onClick={() => setTargetDegree(heading - 1)}
-                  className="px-2 py-0.5 rounded bg-surface border border-border text-foreground hover:bg-surface-muted cursor-pointer"
+                  onClick={() => setTargetDegree(effectiveHeading - 1)}
+                  className="px-2 py-0.5 rounded-lg bg-surface border border-border text-foreground hover:bg-surface-muted cursor-pointer font-bold"
                 >
                   -1°
                 </button>
-                <span className="font-bold text-amber-600 dark:text-amber-400 px-2">
-                  {heading.toFixed(1)}°
+                <span className="font-bold text-amber-600 dark:text-amber-400 px-2 text-sm">
+                  {effectiveHeading.toFixed(1)}°
                 </span>
                 <button
                   type="button"
-                  onClick={() => setTargetDegree(heading + 1)}
-                  className="px-2 py-0.5 rounded bg-surface border border-border text-foreground hover:bg-surface-muted cursor-pointer"
+                  onClick={() => setTargetDegree(effectiveHeading + 1)}
+                  className="px-2 py-0.5 rounded-lg bg-surface border border-border text-foreground hover:bg-surface-muted cursor-pointer font-bold"
                 >
                   +1°
                 </button>
@@ -1503,13 +1592,13 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
               min="0"
               max="359.9"
               step="0.5"
-              value={heading}
+              value={effectiveHeading}
               onChange={(e) => setTargetDegree(parseFloat(e.target.value))}
               className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-brand-500"
             />
 
             {/* 8 Cardinal / Inter-cardinal Quick Buttons */}
-            <div className="grid grid-cols-4 sm:grid-cols-8 gap-1 pt-1">
+            <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5 pt-1">
               {[
                 { label: "N (0°)", deg: 0 },
                 { label: "NE (45°)", deg: 45 },
@@ -1524,7 +1613,7 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
                   key={btn.label}
                   type="button"
                   onClick={() => setTargetDegree(btn.deg)}
-                  className="py-1 px-1 text-[11px] font-semibold rounded-lg bg-surface border border-border/80 text-muted-foreground hover:text-foreground hover:bg-surface-muted transition-all cursor-pointer text-center"
+                  className="py-1.5 px-1 text-[11px] font-bold rounded-xl bg-surface border border-border/80 text-muted-foreground hover:text-foreground hover:bg-surface-muted transition-all cursor-pointer text-center shadow-2xs"
                 >
                   {btn.label}
                 </button>
@@ -1536,20 +1625,20 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
         {/* Right: Real-time Live Diagnostic & Remedial Card (5 Cols) */}
         <div className="lg:col-span-5 space-y-4">
           {/* Main Status Badge Card */}
-          <div className="card-surface p-5 sm:p-6 rounded-2xl border border-border/80 shadow-xs space-y-4">
+          <div className="card-surface p-5 sm:p-6 rounded-3xl border border-border/80 shadow-xs space-y-4 bg-gradient-to-b from-surface via-surface to-surface-muted/30">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                {language === "bn" ? "রিয়েল-টাইম বাস্তু মূল্যায়ন" : "Live Vastu Analysis"}
+              <span className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+                {language === "bn" ? "রিয়েল-টাইম বাস্তু ফলাফল" : "Live Vastu Analysis"}
               </span>
               <div
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${itemEvaluation.colorClass}`}
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black border ${itemEvaluation.colorClass}`}
               >
                 {itemEvaluation.iconType === "check" ? (
-                  <CheckCircle2 className="size-3.5" />
+                  <CheckCircle2 className="size-4" />
                 ) : itemEvaluation.iconType === "alert" ? (
-                  <ShieldAlert className="size-3.5" />
+                  <ShieldAlert className="size-4 text-red-500" />
                 ) : (
-                  <AlertTriangle className="size-3.5" />
+                  <AlertTriangle className="size-4 text-amber-500" />
                 )}
                 <span>{itemEvaluation.score}% স্কোর</span>
               </div>
@@ -1557,39 +1646,39 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
 
             {/* Title & Status */}
             <div>
-              <h3 className="text-lg font-serif font-bold text-foreground">
+              <h3 className="text-lg sm:text-xl font-serif font-black text-foreground">
                 {itemEvaluation.badge_bn}
               </h3>
-              <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold mt-0.5">
+              <p className="text-xs sm:text-sm text-amber-600 dark:text-amber-400 font-bold mt-1">
                 {itemEvaluation.title_bn}
               </p>
             </div>
 
             {/* Detailed Impact */}
-            <div className="p-3.5 rounded-xl bg-surface border border-border/80 text-xs text-foreground/80 leading-relaxed">
-              <span className="font-bold text-foreground block mb-1">
-                {language === "bn" ? "জীবনের ওপর প্রভাব:" : "Impact on Native & Household:"}
+            <div className="p-4 rounded-2xl bg-surface border border-border/80 text-xs text-foreground/90 leading-relaxed shadow-2xs">
+              <span className="font-bold text-foreground block mb-1 text-xs">
+                {language === "bn" ? "জীবন ও পরিবারের ওপর প্রভাব:" : "Impact on Native & Household:"}
               </span>
               {itemEvaluation.desc_bn}
             </div>
 
             {/* Non-Demolition Remedy Box */}
-            <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 space-y-2">
-              <div className="text-xs font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
-                <Sparkles className="size-3.5 text-amber-500" />
+            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+              <div className="text-xs font-bold text-amber-800 dark:text-amber-200 flex items-center gap-1.5">
+                <Sparkles className="size-4 text-amber-500" />
                 <span>
                   {language === "bn"
                     ? "ভাঙচুরবিহীন প্রতিকার (Non-Demolition Remedy)"
                     : "Non-Demolition Remedy"}
                 </span>
               </div>
-              <p className="text-xs text-foreground/90 leading-relaxed">
+              <p className="text-xs text-foreground leading-relaxed">
                 {itemEvaluation.remedy_bn}
               </p>
 
               {itemEvaluation.metalStrip && (
-                <div className="pt-2 border-t border-amber-500/20 flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                  <Shield className="size-3.5" />
+                <div className="pt-2 border-t border-amber-500/20 flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                  <Shield className="size-4 text-emerald-500" />
                   <span>
                     {language === "bn"
                       ? `মেটাল স্ট্রিপ ব্লক: ${itemEvaluation.metalStrip}`
@@ -1601,33 +1690,33 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
           </div>
 
           {/* Current Zone & Pada Profile Card */}
-          <div className="card-surface p-5 rounded-2xl border border-border/80 shadow-2xs space-y-3">
-            <h4 className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+          <div className="card-surface p-5 rounded-3xl border border-border/80 shadow-2xs space-y-3">
+            <h4 className="text-xs font-extrabold text-foreground uppercase tracking-wider flex items-center gap-1.5">
               <Layers className="size-3.5 text-amber-500" />
               {language === "bn" ? "বর্তমান কোণ ও জোনের তাৎপর্য" : "Zone & Pada Bio-Energy"}
             </h4>
 
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="p-2.5 rounded-xl bg-surface border border-border/80">
-                <span className="text-muted-foreground block text-[10px]">সক্রিয় পদ (Pada):</span>
-                <span className="font-bold text-foreground">
+              <div className="p-3 rounded-2xl bg-surface border border-border/80">
+                <span className="text-muted-foreground block text-[10px] font-semibold">সক্রিয় পদ (Pada):</span>
+                <span className="font-bold text-foreground text-sm">
                   {currentPada.id} — {currentPada.deity_bn.split(" ")[0]}
                 </span>
-                <span className="text-[10px] text-muted-foreground block">
+                <span className="text-[10px] text-muted-foreground block font-mono mt-0.5">
                   {currentPada.startDeg}° - {currentPada.endDeg}°
                 </span>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-surface border border-border/80">
-                <span className="text-muted-foreground block text-[10px]">তত্ত্ব (Element):</span>
-                <span className="font-bold text-foreground">{currentZone.element_bn}</span>
-                <span className="text-[10px] text-muted-foreground block">
+              <div className="p-3 rounded-2xl bg-surface border border-border/80">
+                <span className="text-muted-foreground block text-[10px] font-semibold">তত্ত্ব (Element):</span>
+                <span className="font-bold text-foreground text-sm">{currentZone.element_bn.split(" ")[0]}</span>
+                <span className="text-[10px] text-muted-foreground block font-medium mt-0.5">
                   {currentZone.name_bn.split(" ")[0]} জোন
                 </span>
               </div>
             </div>
 
-            <div className="p-2.5 rounded-xl bg-surface border border-border/80 text-xs space-y-1">
+            <div className="p-3 rounded-2xl bg-surface border border-border/80 text-xs space-y-1.5">
               <div className="text-muted-foreground text-[11px]">
                 <strong className="text-foreground">শারীরিক অঙ্গ:</strong> {currentZone.organs_bn}
               </div>
