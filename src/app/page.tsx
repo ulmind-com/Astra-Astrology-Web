@@ -32,24 +32,28 @@ const SERVICES = [
     title: "Kundli & Birth Chart",
     body: "Your planetary positions, dasha periods and what they point to — read by seasoned practitioners.",
     accent: "brand",
+    href: "/kundli",
   },
   {
     icon: Heart,
     title: "Matchmaking",
     body: "Guna milan across all eight kootas, with the doshas read properly and explained clearly.",
     accent: "gold",
+    href: "/kundli-matching",
   },
   {
     icon: Hash,
     title: "Numerology",
     body: "Mulank, bhagyank, lucky numbers, and what your name adds up to in your life path.",
     accent: "brand",
+    href: "/numerology",
   },
   {
     icon: Sparkles,
     title: "Vastu Shastra",
     body: "Room by room, on the sixteen-direction compass — bringing alignment to your spaces.",
     accent: "gold",
+    href: "/vastu",
   },
 ];
 
@@ -421,9 +425,10 @@ export default function HomePage() {
 
           <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {SERVICES.map((service, i) => (
-              <div
+              <Link
                 key={service.title}
-                className="card-surface group relative flex flex-col items-center p-6 sm:p-7 text-center hover:card-glow hover:-translate-y-1.5 transition-all duration-300"
+                href={service.href}
+                className="card-surface group relative flex flex-col items-center p-6 sm:p-7 text-center hover:card-glow hover:-translate-y-1.5 transition-all duration-300 block cursor-pointer"
                 style={{ animationDelay: `${i * 80}ms` }}
               >
                 {/* Soft background glow on hover */}
@@ -436,13 +441,16 @@ export default function HomePage() {
                 >
                   <service.icon className="size-6 sm:size-7 text-ink-900" />
                 </span>
-                <h3 className="mt-4 sm:mt-5 font-display text-base font-semibold tracking-tight text-foreground">
+                <h3 className="mt-4 sm:mt-5 font-display text-base font-semibold tracking-tight text-foreground group-hover:text-brand-600 transition-colors">
                   {service.title}
                 </h3>
                 <p className="mt-2 text-xs sm:text-sm leading-relaxed text-muted-foreground">
                   {service.body}
                 </p>
-              </div>
+                <span className="mt-3 text-[11px] font-bold text-brand-600 group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1">
+                  Explore Feature ➔
+                </span>
+              </Link>
             ))}
           </div>
         </section>
