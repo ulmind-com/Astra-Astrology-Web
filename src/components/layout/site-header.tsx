@@ -13,7 +13,7 @@
  * wired into each page separately.
  */
 
-import { Coins, LogOut, Menu, Sparkles, User, Wallet, X } from "lucide-react";
+import { Coins, Globe, LogOut, Menu, Sparkles, User, Wallet, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
@@ -21,6 +21,7 @@ import * as React from "react";
 import { Avatar, Button } from "@/components/ui";
 import { RAIL_LINKS, SiteRail } from "@/components/layout/site-rail";
 import { useAuth } from "@/providers/auth-provider";
+import { useLanguage } from "@/providers/language-provider";
 import { useWallet } from "@/hooks/use-wallet";
 import { cn } from "@/lib/utils";
 import { formatCoins } from "@/types";
@@ -28,6 +29,7 @@ import { formatCoins } from "@/types";
 export function SiteHeader() {
   const pathname = usePathname();
   const { user, isSignedIn, signOut } = useAuth();
+  const { language, setLanguage } = useLanguage();
   const { data: walletData } = useWallet(Boolean(isSignedIn));
   const coinsBalance = walletData?.wallet?.balance_coins;
   const [open, setOpen] = React.useState(false);
@@ -196,6 +198,36 @@ export function SiteHeader() {
             );
           })}
         </nav>
+
+        {/* Quick Language Switcher */}
+        <div className="mt-3 flex items-center justify-between rounded-2xl border border-border/70 bg-surface-muted/50 p-2.5">
+          <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+            <Globe className="size-4 text-brand-700" />
+            <span>Language / ভাষা</span>
+          </div>
+          <div className="inline-flex items-center gap-1 rounded-xl bg-background/80 p-0.5 border border-border/60">
+            {(
+              [
+                { code: "bn", label: "বাংলা" },
+                { code: "hi", label: "हिन्दी" },
+                { code: "en", label: "English" },
+              ] as const
+            ).map((l) => (
+              <button
+                key={l.code}
+                type="button"
+                onClick={() => void setLanguage(l.code)}
+                className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+                  language === l.code
+                    ? "bg-brand-500 text-white shadow-2xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <div className="mt-4 border-t border-border/60 pt-4">
           {isSignedIn ? (

@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { ReviewPrompt } from "@/components/reviews/review-prompt";
 import { AuthProvider } from "@/providers/auth-provider";
+import { LanguageProvider } from "@/providers/language-provider";
 import { QueryProvider } from "@/providers/query-provider";
 import { RealtimeProvider } from "@/providers/realtime-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
@@ -60,16 +61,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <QueryProvider>
             <RealtimeProvider>
               <AuthProvider signInPath="/login">
-                {children}
-                <ReviewPrompt />
-                <MobileBottomNav />
-                <Toaster
-                  theme="light"
-                  position="top-center"
-                  richColors
-                  closeButton
-                  toastOptions={{ className: "font-sans" }}
-                />
+                <LanguageProvider>
+                  {children}
+                  <ReviewPrompt />
+                  <MobileBottomNav />
+                  <Toaster
+                    theme="light"
+                    position="top-center"
+                    richColors
+                    closeButton
+                    toastOptions={{ className: "font-sans" }}
+                  />
+                </LanguageProvider>
               </AuthProvider>
             </RealtimeProvider>
           </QueryProvider>

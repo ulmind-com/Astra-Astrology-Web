@@ -39,6 +39,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { astrologyApi } from "@/lib/api";
 import { parseProfileBirthDetails } from "@/lib/birth-details";
 import { useAuth } from "@/providers/auth-provider";
+import { useLanguage } from "@/providers/language-provider";
 import { useProfile } from "@/hooks/use-profile";
 import { useFeaturePricing } from "@/hooks/use-feature-pricing";
 import {
@@ -139,8 +140,8 @@ const defaultPersonState: PersonFormState = {
 };
 
 export default function KundliMatchingPage() {
-  // Language State
-  const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
+  // Centralized Language State
+  const { language, setLanguage } = useLanguage();
   const t: KundliMatchingTranslations =
     KUNDLI_MATCHING_STRINGS[language] || KUNDLI_MATCHING_STRINGS.bn;
 

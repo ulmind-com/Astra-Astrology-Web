@@ -38,6 +38,7 @@ import { KPChartViewer } from "@/components/astrology/kp-chart-viewer";
 import { KP_PLANET_NAMES } from "@/lib/kp-translations";
 import { DASHA_I18N, type DashaTranslations } from "@/lib/dasha-translations";
 import { useAuth } from "@/providers/auth-provider";
+import { useLanguage } from "@/providers/language-provider";
 import { useProfile } from "@/hooks/use-profile";
 import { useFeaturePricing } from "@/hooks/use-feature-pricing";
 import {
@@ -106,8 +107,8 @@ export default function DashaCalculatorPage() {
   const [coinModalOpen, setCoinModalOpen] = React.useState(false);
   const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
 
-  // Language state
-  const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
+  // Centralized Language state
+  const { language, setLanguage } = useLanguage();
   const ui = DASHA_I18N[language] || DASHA_I18N.en;
 
   // Active Tab

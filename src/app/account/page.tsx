@@ -1,8 +1,9 @@
 "use client";
 
-import { Camera, Trash2 } from "lucide-react";
+import { Camera, Check, Globe, Languages, Sparkles, Trash2 } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
+import { useLanguage, AVAILABLE_LANGUAGES, type LanguageOption } from "@/providers/language-provider";
 
 import {
   Alert,
@@ -29,7 +30,7 @@ export default function ProfilePage() {
   const { data: profile, isLoading, error } = useProfile();
   const queryClient = useQueryClient();
   const update = useUpdateProfile({ successMessage: "Profile updated." });
-
+  const { language, setLanguage } = useLanguage();
   const [form, setForm] = React.useState({
     first_name: "",
     middle_name: "",
@@ -38,6 +39,7 @@ export default function ProfilePage() {
     gender: "undisclosed" as Gender,
     marital_status: "undisclosed" as MaritalStatus,
     occupation: "",
+    language: "bn",
   });
   const [uploading, setUploading] = React.useState(false);
   const fileRef = React.useRef<HTMLInputElement>(null);
@@ -53,8 +55,9 @@ export default function ProfilePage() {
       gender: profile.gender,
       marital_status: profile.marital_status,
       occupation: profile.occupation ?? "",
+      language: profile.language || language || "bn",
     });
-  }, [profile]);
+  }, [profile, language]);
 
   function onSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -67,7 +70,11 @@ export default function ProfilePage() {
       gender: form.gender,
       marital_status: form.marital_status,
       occupation: form.occupation.trim() || null,
+      language: form.language,
     });
+    if (form.language !== language && (form.language === "bn" || form.language === "en" || form.language === "hi")) {
+      void setLanguage(form.language as any, { silent: true });
+    }
   }
 
   async function onPickAvatar(event: React.ChangeEvent<HTMLInputElement>) {
@@ -261,6 +268,24 @@ export default function ProfilePage() {
               />
             </Field>
 
+            <Field label="Preferred Language" htmlFor="language" className="sm:col-span-2" hint="Central language for Kundli, Numerology, Vastu, Palm, AI readings & horoscopes.">
+              <Select
+                id="language"
+                value={form.language}
+                onChange={(e) => {
+                  const val = e.target.value as "bn" | "en" | "hi";
+                  setForm({ ...form, language: val });
+                  void setLanguage(val);
+                }}
+              >
+                {AVAILABLE_LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.flagSymbol} {l.nameNative} ({l.nameEn})
+                  </option>
+                ))}
+              </Select>
+            </Field>
+
             <div className="sm:col-span-2">
               <Field label="Email" hint="Your sign-in address — it cannot be changed here.">
                 <Input value={profile.email} disabled readOnly />
@@ -275,6 +300,9 @@ export default function ProfilePage() {
           </CardFooter>
         </Card>
       </form>
+
+      {/* --------------------------------------------------- language preference */}
+      <LanguagePreferenceCard />
 
       {/* --------------------------------------------------- notifications */}
       <NotificationCard />
@@ -327,6 +355,83 @@ function NotificationCard() {
             />
           </div>
         ))}
+      </CardBody>
+    </Card>
+  );
+}
+
+function LanguagePreferenceCard() {
+  const { language, setLanguage } = useLanguage();
+
+  return (
+    <Card className="border-primary/20 shadow-sm overflow-hidden">
+      <CardHeader className="pb-3 border-b border-border/40 bg-muted/20">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div className="flex items-center gap-3">
+            <div className="size-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <Languages className="size-5" />
+            </div>
+            <div>
+              <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                Preferred Language
+                <span className="text-xs font-normal text-muted-foreground hidden sm:inline">
+                  (পছন্দের ভাষা / पसंदीदा भाषा)
+                </span>
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                All 12 astrology tools, readings, charts, and reports will automatically load in this language.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/15 text-primary tracking-wide">
+              {AVAILABLE_LANGUAGES.find((l) => l.code === language)?.nameNative || language}
+            </span>
+          </div>
+        </div>
+      </CardHeader>
+      <CardBody className="pt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {AVAILABLE_LANGUAGES.map((item) => {
+            const isSelected = language === item.code;
+            return (
+              <button
+                key={item.code}
+                type="button"
+                onClick={() => void setLanguage(item.code)}
+                className={`relative flex flex-col items-start p-4 rounded-xl border text-left transition-all duration-200 cursor-pointer ${
+                  isSelected
+                    ? "border-primary bg-primary/5 ring-2 ring-primary/25 shadow-sm"
+                    : "border-border/60 hover:border-primary/40 hover:bg-muted/30"
+                }`}
+              >
+                <div className="flex items-center justify-between w-full mb-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl" role="img" aria-label={item.nameEn}>
+                      {item.flagSymbol}
+                    </span>
+                    <span className="font-semibold text-foreground text-sm">
+                      {item.nameNative}
+                    </span>
+                  </div>
+                  {isSelected ? (
+                    <span className="size-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
+                      <Check className="size-3 stroke-[3]" />
+                    </span>
+                  ) : (
+                    <span className="size-5 rounded-full border border-border/80 shrink-0" />
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground font-medium">
+                  {item.nameEn} • {item.taglineNative}
+                </p>
+                <span className="mt-2 text-[11px] text-muted-foreground/85 line-clamp-1">
+                  {item.taglineEn}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </CardBody>
     </Card>
   );

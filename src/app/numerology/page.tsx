@@ -33,6 +33,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { Button } from "@/components/ui";
 import { numerologyApi } from "@/lib/api";
 import { useAuth } from "@/providers/auth-provider";
+import { useLanguage } from "@/providers/language-provider";
 import { useProfile } from "@/hooks/use-profile";
 import { useFeaturePricing } from "@/hooks/use-feature-pricing";
 import {
@@ -55,7 +56,7 @@ export default function NumerologyPage() {
   const [coinModalOpen, setCoinModalOpen] = React.useState(false);
   const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
 
-  const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
+  const { language, setLanguage } = useLanguage();
   const [fullName, setFullName] = React.useState("Samiran Sasmal");
   const [birthDate, setBirthDate] = React.useState("1995-10-25");
   const [gender, setGender] = React.useState<"male" | "female" | "other">("male");

@@ -49,6 +49,7 @@ import { MoonSignWheel } from "@/components/astrology/moon-sign-wheel";
 import { KundaliChart } from "@/components/astrology/kundali-chart";
 import { getClientRashiTraits } from "@/lib/astrology-translations";
 import { useAuth } from "@/providers/auth-provider";
+import { useLanguage } from "@/providers/language-provider";
 import { useProfile } from "@/hooks/use-profile";
 import { useFeaturePricing } from "@/hooks/use-feature-pricing";
 import {
@@ -76,8 +77,8 @@ export default function RashiCalculatorPage() {
   const [coinModalOpen, setCoinModalOpen] = React.useState(false);
   const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
 
-  // Global Language Selection for Output & UI (English, বাংলা, हिन्दी)
-  const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
+  // Centralized Global Language Selection for Output & UI (English, বাংলা, हिन्दी)
+  const { language, setLanguage } = useLanguage();
 
   // Form State - initialized empty, dynamically populated from logged-in profile
   const [name, setName] = React.useState("");

@@ -55,6 +55,7 @@ import { NakshatraWheel } from "@/components/astrology/nakshatra-wheel";
 import { KundaliChart } from "@/components/astrology/kundali-chart";
 import { NAKSHATRA_UI_TEXTS } from "@/lib/nakshatra-translations";
 import { useAuth } from "@/providers/auth-provider";
+import { useLanguage } from "@/providers/language-provider";
 import { useProfile } from "@/hooks/use-profile";
 import { useFeaturePricing } from "@/hooks/use-feature-pricing";
 import {
@@ -84,8 +85,8 @@ export default function NakshatraCalculatorPage() {
   const [activeTab, setActiveTab] = React.useState<"core" | "panchang" | "gandanta_dasha" | "tarabala" | "traits">("core");
   const [chartStyle, setChartStyle] = React.useState<ChartStyleType>("north_indian");
 
-  // Language state: 'bn' (Bengali), 'en' (English), 'hi' (Hindi)
-  const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
+  // Centralized Language state: 'bn' (Bengali), 'en' (English), 'hi' (Hindi)
+  const { language, setLanguage } = useLanguage();
   const ui = NAKSHATRA_UI_TEXTS[language];
 
   // Form State

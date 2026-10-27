@@ -22,6 +22,7 @@ import {
   CalendarDays,
   Coins,
   Compass,
+  Globe,
   HeartHandshake,
   Hand,
   Hash,
@@ -46,6 +47,7 @@ import { Avatar } from "@/components/ui";
 import { useWallet } from "@/hooks/use-wallet";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
+import { useLanguage } from "@/providers/language-provider";
 import { formatCoins } from "@/types";
 
 export const RAIL_LINKS = [
@@ -82,6 +84,7 @@ function isLinkActive(pathname: string, href: string) {
 export function SiteRail() {
   const pathname = usePathname();
   const { user, isSignedIn, signOut } = useAuth();
+  const { language } = useLanguage();
   const { data: walletData } = useWallet(Boolean(isSignedIn));
   const coinsBalance = walletData?.wallet?.balance_coins;
 
@@ -222,6 +225,29 @@ export function SiteRail() {
                 <span className="text-[13px] font-medium text-muted-foreground">Wallet</span>
                 <span className="rounded-full bg-brand-200/80 px-2 py-0.5 text-[11px] font-bold tabular-nums text-brand-950">
                   {coinsBalance !== undefined ? formatCoins(coinsBalance) : "—"}
+                </span>
+              </span>
+            </Link>
+
+            <Link
+              href="/account"
+              title={expanded ? undefined : `Language: ${language.toUpperCase()}`}
+              className="group flex h-10 items-center gap-3 rounded-2xl px-2.5 outline-none transition-colors hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-brand-600"
+            >
+              <span className="flex size-[22px] shrink-0 items-center justify-center">
+                <Globe className="size-[19px] text-muted-foreground group-hover:text-brand-600 transition-colors" />
+              </span>
+              <span
+                className={cn(
+                  "flex min-w-0 flex-1 items-center justify-between gap-2 whitespace-nowrap transition-all duration-300",
+                  expanded
+                    ? "translate-x-0 opacity-100"
+                    : "pointer-events-none -translate-x-2 opacity-0",
+                )}
+              >
+                <span className="text-[13px] font-medium text-muted-foreground">Language</span>
+                <span className="rounded-full bg-surface-muted border border-border/80 px-2 py-0.5 text-[10px] font-bold uppercase text-foreground">
+                  {language}
                 </span>
               </span>
             </Link>

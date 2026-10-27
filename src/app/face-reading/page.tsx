@@ -57,6 +57,7 @@ import {
 } from "@/lib/face-reading-i18n";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
+import { useLanguage } from "@/providers/language-provider";
 import type { FaceReading, FaceScanResponse } from "@/types";
 
 type Stage = "intro" | "measuring" | "reading" | "rejected";
@@ -73,7 +74,7 @@ export default function FaceReadingPage() {
   const [scanResult, setScanResult] = React.useState<FaceScanResponse | null>(null);
   const [reading, setReading] = React.useState<FaceReading | null>(null);
   const [rejectedInfo, setRejectedInfo] = React.useState<{ issues: string[]; message?: string | null } | null>(null);
-  const [language, setLanguage] = React.useState<FaceReadingLanguage>("bn");
+  const { language, setLanguage } = useLanguage();
 
   // Optional Kundli-Face Synchronization State
   const [birthDetails, setBirthDetails] = React.useState({

@@ -67,6 +67,7 @@ import {
 } from "@/lib/palm-reading-translations";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
+import { useLanguage } from "@/providers/language-provider";
 import { useFeaturePricing } from "@/hooks/use-feature-pricing";
 import {
   FeatureCoinBadge,
@@ -140,7 +141,7 @@ export default function PalmReadingPage() {
   const [coinModalOpen, setCoinModalOpen] = React.useState(false);
   const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
 
-  const [language, setLanguage] = React.useState<PalmLanguage>("bn");
+  const { language, setLanguage } = useLanguage();
   const t = PALM_TRANSLATIONS[language];
 
   const [availability, setAvailability] = React.useState<PalmReadingAvailability | null>(null);
