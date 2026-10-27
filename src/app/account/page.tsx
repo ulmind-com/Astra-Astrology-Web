@@ -112,7 +112,7 @@ export default function ProfilePage() {
       <header>
         <h1 className="text-2xl font-bold tracking-tight">Profile</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          How you appear across Astra Astrology.
+          How you appear across DivinLink.
         </p>
       </header>
 
