@@ -20,6 +20,9 @@ import {
   Sliders,
   Check,
   Award,
+  Activity,
+  Calculator,
+  Sun,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -27,6 +30,9 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { Button } from "@/components/ui";
 import { vastuApi } from "@/lib/api";
 import { VastuCompass } from "@/components/vastu/vastu-compass";
+import { MedicalVastu } from "@/components/vastu/medical-vastu";
+import { AstroVastu } from "@/components/vastu/astro-vastu";
+import { AyadiShadvarga } from "@/components/vastu/ayadi-shadvarga";
 import type { PadaInfo, VastuAuditResponse, VastuZoneInfo, VastuRemedyItem } from "@/types/vastu";
 import type { AstrologyLanguage } from "@/types";
 
@@ -35,7 +41,8 @@ export default function VastuPage() {
   const [entranceDegree, setEntranceDegree] = React.useState<number>(335.0);
   const [currentPada, setCurrentPada] = React.useState<PadaInfo | null>(null);
   const [propertyType, setPropertyType] = React.useState<"residential" | "commercial" | "industrial">("residential");
-  const [activeTab, setActiveTab] = React.useState<"compass" | "audit" | "zones" | "remedies">("compass");
+  const [activeTab, setActiveTab] = React.useState<"compass" | "medical" | "astrovastu" | "ayadi" | "audit" | "zones" | "remedies">("compass");
+
 
   // Placement selections
   const [placements, setPlacements] = React.useState<Record<string, string>>({
@@ -194,11 +201,41 @@ export default function VastuPage() {
               id: "compass",
               label:
                 language === "bn"
-                  ? "স্মার্ট ডিভাইস কম্পাস (Live Compass)"
+                  ? "স্মার্ট কম্পাস ও এআর (Live & AR)"
                   : language === "hi"
-                  ? "स्मार्ट कम्पास (Live)"
-                  : "Live Device Compass",
+                  ? "स्मार्ट कम्पास एवं एआर"
+                  : "Smart Compass & AR",
               icon: Compass,
+            },
+            {
+              id: "medical",
+              label:
+                language === "bn"
+                  ? "মেডিকেল বাস্তু (Medical Vastu)"
+                  : language === "hi"
+                  ? "मेडिकल वास्तु निदान"
+                  : "Medical Vastu",
+              icon: Activity,
+            },
+            {
+              id: "astrovastu",
+              label:
+                language === "bn"
+                  ? "অ্যাস্ট্রো-বাস্তু কুণ্ডলী (Astro-Vastu)"
+                  : language === "hi"
+                  ? "एस्ट्रो-वास्तु कुण्डली"
+                  : "Astro-Vastu Synergy",
+              icon: Sun,
+            },
+            {
+              id: "ayadi",
+              label:
+                language === "bn"
+                  ? "আয়াদি ষড়বর্গ (Ayadi Vedic)"
+                  : language === "hi"
+                  ? "आयादि षड्वर्ग गणक"
+                  : "Ayadi Shadvarga",
+              icon: Calculator,
             },
             {
               id: "audit",
@@ -231,6 +268,7 @@ export default function VastuPage() {
               icon: Flame,
             },
           ].map((tab) => {
+
             const Icon = tab.icon;
             return (
               <button
@@ -674,8 +712,30 @@ export default function VastuPage() {
         )}
 
         {/* =========================================================================
+            TAB: MEDICAL & PATHOLOGY VASTU
+        ========================================================================= */}
+        {activeTab === "medical" && (
+          <MedicalVastu language={language} />
+        )}
+
+        {/* =========================================================================
+            TAB: ASTRO-VASTU SYNERGY
+        ========================================================================= */}
+        {activeTab === "astrovastu" && (
+          <AstroVastu language={language} />
+        )}
+
+        {/* =========================================================================
+            TAB: AYADI SHADVARGA VEDIC ENGINE
+        ========================================================================= */}
+        {activeTab === "ayadi" && (
+          <AyadiShadvarga language={language} />
+        )}
+
+        {/* =========================================================================
             TAB 3: 16 DIRECTIONAL ZONES
         ========================================================================= */}
+
         {activeTab === "zones" && (
           <div className="space-y-4">
             <div className="text-center max-w-xl mx-auto space-y-1 mb-2">

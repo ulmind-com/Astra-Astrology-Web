@@ -156,5 +156,9 @@ export const endpoints = {
     compassPadas: "/vastu/compass/padas",
     zones: "/vastu/zones",
     remedies: "/vastu/remedies",
+    ayadi: "/vastu/ayadi",
+    medical: "/vastu/medical",
+    astrovastu: "/vastu/astrovastu",
   },
 } as const;
+

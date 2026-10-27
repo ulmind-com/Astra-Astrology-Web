@@ -14,15 +14,19 @@ import {
   HelpCircle,
   Sliders,
   Check,
-  ChevronDown,
-  ChevronUp,
-  Maximize2,
   FlipHorizontal,
   Flame,
   Droplets,
   Wind,
   Mountain,
+  Camera,
+  Crosshair,
+  MapPin,
+  Video,
+  Eye,
 } from "lucide-react";
+
+
 import { toast } from "sonner";
 import { Button } from "@/components/ui";
 import type { AstrologyLanguage } from "@/types";
@@ -588,17 +592,99 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
   const [isFlipped180, setIsFlipped180] = React.useState<boolean>(false);
   const [manualOffset, setManualOffset] = React.useState<number>(0);
   const [holdMode, setHoldMode] = React.useState<"flat" | "upright">("upright");
+  const [viewMode, setViewMode] = React.useState<"chakra" | "ar">("chakra");
+  const [isCameraActive, setIsCameraActive] = React.useState<boolean>(false);
+  const [cameraError, setCameraError] = React.useState<string | null>(null);
+  const [declinationOffset, setDeclinationOffset] = React.useState<number>(0);
+  const [isGpsCalibrated, setIsGpsCalibrated] = React.useState<boolean>(false);
 
   const compassRef = React.useRef<SVGSVGElement | null>(null);
+  const videoRef = React.useRef<HTMLVideoElement | null>(null);
   const isDragging = React.useRef<boolean>(false);
   const targetHeadingRef = React.useRef<number>(0.0);
   const animFrameRef = React.useRef<number | null>(null);
 
-  // Effective Heading after applying 180° flip and manual calibration offset
+  // Stop camera tracks on unmount
+  React.useEffect(() => {
+    return () => {
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, []);
+
+  const startCamera = async () => {
+    try {
+      setCameraError(null);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+        audio: false,
+      });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play().catch(() => {});
+      }
+      setIsCameraActive(true);
+      setViewMode("ar");
+      if (!isSensorActive) {
+        requestSensorPermission();
+      }
+      toast.success(
+        language === "bn"
+          ? "📷 লাইভ ক্যামেরা এআর (AR) ভিউ সক্রিয় হয়েছে!"
+          : "Live Camera AR view activated!"
+      );
+    } catch (err) {
+      console.error("Camera access error:", err);
+      setCameraError(
+        language === "bn"
+          ? "ক্যামেরা অ্যাক্সেস পাওয়া যায়নি। ব্রাউজারের অনুমতি নিশ্চিত করুন।"
+          : "Camera access unavailable or denied."
+      );
+      toast.error(language === "bn" ? "ক্যামেরা চালু করা যায়নি।" : "Failed to open camera.");
+    }
+  };
+
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach((track) => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    setIsCameraActive(false);
+    setViewMode("chakra");
+  };
+
+  const calibrateGpsDeclination = () => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      toast.error(language === "bn" ? "ডিভাইসে জিপিএস নেই।" : "GPS not supported.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        const offset = Math.round((-0.03 * latitude + 0.015 * (longitude - 75) - 0.7) * 10) / 10;
+        setDeclinationOffset(offset);
+        setIsGpsCalibrated(true);
+        toast.success(
+          language === "bn"
+            ? `ট্রু নর্থ জিপিএস ক্যালিব্রেটেড! অফসেট: ${offset}°`
+            : `True North calibrated! Offset: ${offset}°`
+        );
+      },
+      () => {
+        toast.error(language === "bn" ? "জিপিএস লোকেশন পাওয়া যায়নি।" : "GPS unavailable.");
+      }
+    );
+  };
+
+  // Effective Heading after applying 180° flip, manual calibration offset, and GPS True North declination
   const effectiveHeading = React.useMemo(() => {
-    let h = heading + (isFlipped180 ? 180 : 0) + manualOffset;
+    let h = heading + (isFlipped180 ? 180 : 0) + manualOffset + declinationOffset;
     return ((h % 360) + 360) % 360;
-  }, [heading, isFlipped180, manualOffset]);
+  }, [heading, isFlipped180, manualOffset, declinationOffset]);
+
 
   // Find current Pada based on effective heading
   const currentPada = React.useMemo<CompassPada>(() => {
@@ -1168,6 +1254,53 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
             </span>
           </button>
 
+          {/* Camera AR Toggle Button */}
+          {viewMode === "ar" ? (
+            <button
+              type="button"
+              onClick={stopCamera}
+              className="px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/40 hover:bg-rose-500/20 shadow-2xs"
+              title="ক্যামেরা বন্ধ করে ২ডি চক্র ভিউতে যান"
+            >
+              <Eye className="size-3.5" />
+              <span>{language === "bn" ? "🔄 চক্র ভিউ" : "2D Chakra"}</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={startCamera}
+              className="px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 bg-brand-500/15 text-brand-700 dark:text-brand-300 border-brand-500/40 hover:bg-brand-500/25 shadow-2xs"
+              title="ক্যামেরা অন করে দেওয়ালে সরাসরি বাস্তু পদ দেখুন"
+            >
+              <Camera className="size-3.5" />
+              <span>{language === "bn" ? "📷 ক্যামেরা এআর (AR)" : "📷 Camera AR"}</span>
+            </button>
+          )}
+
+          {/* GPS True North Calibration */}
+          <button
+            type="button"
+            onClick={calibrateGpsDeclination}
+            className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs ${
+              isGpsCalibrated
+                ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/40"
+                : "bg-surface border-border text-foreground hover:bg-surface-muted"
+            }`}
+            title="জিপিএস দিয়ে ট্রু নর্থ ক্যালিব্রেশন"
+          >
+            <MapPin className="size-3.5" />
+            <span>
+              {isGpsCalibrated
+                ? language === "bn"
+                  ? `🧭 ট্রু নর্থ (${declinationOffset > 0 ? "+" : ""}${declinationOffset}°)`
+                  : `True North (${declinationOffset > 0 ? "+" : ""}${declinationOffset}°)`
+                : language === "bn"
+                ? "🧭 জিপিএস ট্রু নর্থ"
+                : "🧭 GPS True North"}
+            </span>
+          </button>
+
+
           {/* Sensor Activate / Stop Button */}
           {isSensorActive ? (
             <Button
@@ -1268,39 +1401,148 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
           MAIN INTERACTIVE COMPASS CHAKRA + REAL-TIME VERDICT CARD
       ===================================================================== */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left: The Circular Vastu Chakra Compass (7 Cols) */}
+        {/* Left: The Circular Vastu Chakra Compass OR Camera AR View (7 Cols) */}
         <div className="lg:col-span-7 card-surface rounded-3xl border border-border/80 p-5 sm:p-7 shadow-sm flex flex-col items-center justify-center space-y-5 relative overflow-hidden bg-gradient-to-b from-surface via-surface to-surface-muted/20">
           
-          {/* Digital HUD Readout Bar */}
-          <div className="flex flex-col items-center space-y-1.5 z-10 w-full max-w-sm">
-            <div className="flex items-center justify-between w-full px-4 py-2 rounded-2xl bg-amber-500/10 border border-amber-500/30 shadow-2xs">
-              <div className="flex items-center gap-2">
-                <Compass className="size-4 text-amber-500 animate-spin-slow" />
-                <span className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
-                  {language === "bn" ? "মুখোমুখি দিক:" : "Aiming:"}
-                </span>
+          {viewMode === "ar" ? (
+            /* =================================================================
+               LIVE CAMERA AUGMENTED REALITY (AR) HUD VIEW
+            ================================================================= */
+            <div className="relative w-full h-[520px] sm:h-[580px] rounded-3xl overflow-hidden bg-black border-2 border-brand-500/40 shadow-2xl flex flex-col justify-between p-4 sm:p-5 select-none">
+              <video
+                ref={videoRef}
+                playsInline
+                autoPlay
+                muted
+                className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-transparent to-black/85 pointer-events-none" />
+
+              {/* Top AR HUD Ribbon */}
+              <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 p-3 rounded-2xl bg-black/65 backdrop-blur-md border border-white/20 text-white shadow-lg">
+                <div className="flex items-center gap-2">
+                  <Crosshair className="size-4 text-amber-400 animate-spin-slow" />
+                  <span className="font-mono text-base font-extrabold tracking-wider">
+                    {effectiveHeading.toFixed(1)}° {currentZone.code}
+                  </span>
+                  <span className="text-xs text-white/70 font-semibold hidden sm:inline">
+                    ({currentZone.name_bn.split(" ")[0]})
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`px-2.5 py-1 rounded-xl text-xs font-black border ${
+                      currentPada.isGoldenDoor
+                        ? "bg-amber-500 text-amber-950 border-amber-400 shadow-md shadow-amber-500/30"
+                        : "bg-white/15 text-white border-white/30"
+                    }`}
+                  >
+                    {currentPada.id} — {currentPada.deity_bn.split(" ")[0]}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={stopCamera}
+                    className="p-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white transition-all cursor-pointer"
+                    title="চক্র ভিউতে ফিরে যান"
+                  >
+                    <Eye className="size-4" />
+                  </button>
+                </div>
               </div>
-              <div className="flex items-baseline gap-1.5">
-                <span className="font-mono text-xl sm:text-2xl font-black text-foreground">
-                  {effectiveHeading.toFixed(1)}°
-                </span>
-                <span className="text-sm font-extrabold text-amber-600 dark:text-amber-400">
-                  {currentZone.code}
-                </span>
+
+              {/* Center Dynamic AR Reticle & Crosshair */}
+              <div className="relative z-10 self-center flex flex-col items-center justify-center my-auto">
+                <div
+                  className={`size-44 sm:size-52 rounded-full border-2 border-dashed flex items-center justify-center relative transition-all duration-200 animate-pulse ${
+                    currentPada.isGoldenDoor
+                      ? "border-amber-400 shadow-[0_0_40px_rgba(245,158,11,0.7)]"
+                      : itemEvaluation.rating === "Critical"
+                      ? "border-rose-500 shadow-[0_0_40px_rgba(239,68,68,0.7)]"
+                      : "border-emerald-400 shadow-[0_0_40px_rgba(52,211,153,0.6)]"
+                  }`}
+                >
+                  <div className="absolute inset-2 rounded-full border border-white/20 pointer-events-none" />
+                  <div className="size-20 rounded-full border border-white/40 flex items-center justify-center bg-black/40 backdrop-blur-md shadow-inner">
+                    <Crosshair className="size-8 text-white/90" />
+                  </div>
+                </div>
+
+                <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/25 text-white text-xs font-extrabold shadow-lg">
+                  {currentPada.isGoldenDoor ? (
+                    <>
+                      <Sparkles className="size-3.5 text-amber-400" />
+                      <span className="text-amber-300">🌟 ১০০% শুভ স্বর্ণদ্বার সনাক্ত</span>
+                    </>
+                  ) : itemEvaluation.rating === "Critical" ? (
+                    <>
+                      <AlertTriangle className="size-3.5 text-rose-400" />
+                      <span className="text-rose-300">🚨 বাস্তু সংঘাত লক্ষ্যবিন্দু</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="size-3.5 text-emerald-400" />
+                      <span className="text-emerald-300">বাস্তু পরিমাপ কেন্দ্রবিন্দু</span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Bottom AR Real-Time Card */}
+              <div className="relative z-10 w-full p-4 rounded-2xl bg-black/80 backdrop-blur-lg border border-white/20 text-white space-y-2 shadow-xl">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                    <Sparkles className="size-3.5" />
+                    {itemEvaluation.title_bn}
+                  </span>
+                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-white/20">
+                    {currentZone.element_bn.split(" ")[0]}
+                  </span>
+                </div>
+                <p className="text-xs text-white/90 leading-relaxed font-medium line-clamp-2">
+                  {itemEvaluation.desc_bn}
+                </p>
+                {itemEvaluation.metalStrip && (
+                  <div className="pt-1.5 border-t border-white/15 flex items-center gap-1.5 text-xs text-amber-200 font-bold">
+                    <span>🛠️ বিনা ভাঙচুরে সমাধান:</span>
+                    <span>{itemEvaluation.metalStrip}</span>
+                  </div>
+                )}
               </div>
             </div>
+          ) : (
+            <>
+              {/* Digital HUD Readout Bar */}
+              <div className="flex flex-col items-center space-y-1.5 z-10 w-full max-w-sm">
+                <div className="flex items-center justify-between w-full px-4 py-2 rounded-2xl bg-amber-500/10 border border-amber-500/30 shadow-2xs">
+                  <div className="flex items-center gap-2">
+                    <Compass className="size-4 text-amber-500 animate-spin-slow" />
+                    <span className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+                      {language === "bn" ? "মুখোমুখি দিক:" : "Aiming:"}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="font-mono text-xl sm:text-2xl font-black text-foreground">
+                      {effectiveHeading.toFixed(1)}°
+                    </span>
+                    <span className="text-sm font-extrabold text-amber-600 dark:text-amber-400">
+                      {currentZone.code}
+                    </span>
+                  </div>
+                </div>
 
-            {/* Red/Gold Sighting Arrow pointing down into wheel */}
-            <div className="w-0 h-0 border-l-[7px] border-l-transparent border-r-[7px] border-r-transparent border-t-[12px] border-t-amber-500 filter drop-shadow(0 2px 6px rgba(229,169,60,0.5))" />
-          </div>
+                {/* Red/Gold Sighting Arrow pointing down into wheel */}
+                <div className="w-0 h-0 border-l-[7px] border-l-transparent border-r-[7px] border-r-transparent border-t-[12px] border-t-amber-500 filter drop-shadow(0 2px 6px rgba(229,169,60,0.5))" />
+              </div>
 
-          {/* SVG VASTU CHAKRA WHEEL */}
-          <div
-            className="relative w-full max-w-[400px] sm:max-w-[460px] aspect-square flex items-center justify-center select-none touch-none cursor-grab active:cursor-grabbing"
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-          >
+              {/* SVG VASTU CHAKRA WHEEL */}
+              <div
+                className="relative w-full max-w-[400px] sm:max-w-[460px] aspect-square flex items-center justify-center select-none touch-none cursor-grab active:cursor-grabbing"
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+              >
+
             {/* Background Outer Glow */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-500/15 via-brand-500/10 to-transparent blur-2xl pointer-events-none" />
 
@@ -1620,7 +1862,10 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
               ))}
             </div>
           </div>
+            </>
+          )}
         </div>
+
 
         {/* Right: Real-time Live Diagnostic & Remedial Card (5 Cols) */}
         <div className="lg:col-span-5 space-y-4">
