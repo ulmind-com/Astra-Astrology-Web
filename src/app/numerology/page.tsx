@@ -1,211 +1,304 @@
 "use client";
 
-import { useState } from "react";
+import * as React from "react";
+import Link from "next/link";
+import {
+  Sparkles,
+  Hash,
+  Compass,
+  Layers,
+  Award,
+  BookOpen,
+  Phone,
+  UserCheck,
+  Flame,
+  ShieldAlert,
+  CheckCircle2,
+  Calendar,
+  Languages,
+  Clock,
+  RotateCcw,
+  Info,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+import { toast } from "sonner";
+import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { Button } from "@/components/ui";
 import { numerologyApi } from "@/lib/api";
+import { useAuth } from "@/providers/auth-provider";
+import { useProfile } from "@/hooks/use-profile";
 import type { NumerologyCalculateResponse } from "@/types/numerology";
-import { Sparkles, Hash, ShieldAlert, Award, Compass, Phone, UserCheck, Flame, BookOpen, Layers } from "lucide-react";
+import type { AstrologyLanguage } from "@/types";
 
 export default function NumerologyPage() {
-  const [fullName, setFullName] = useState("Samiran Sasmal");
-  const [birthDate, setBirthDate] = useState("1995-10-25");
-  const [gender, setGender] = useState<"male" | "female" | "other">("male");
-  const [mobileNumber, setMobileNumber] = useState("9876543210");
-  const [predictionYear, setPredictionYear] = useState<number>(new Date().getFullYear());
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<NumerologyCalculateResponse | null>(null);
-  const [activeTab, setActiveTab] = useState<"loshu" | "dasha" | "name" | "mobile" | "remedies">("loshu");
+  const { user, isSignedIn } = useAuth();
+  const { data: profile } = useProfile({ enabled: isSignedIn });
+
+  const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
+  const [fullName, setFullName] = React.useState("Samiran Sasmal");
+  const [birthDate, setBirthDate] = React.useState("1995-10-25");
+  const [gender, setGender] = React.useState<"male" | "female" | "other">("male");
+  const [mobileNumber, setMobileNumber] = React.useState("9876543210");
+  const [predictionYear, setPredictionYear] = React.useState<number>(new Date().getFullYear());
+
+  const [loading, setLoading] = React.useState(false);
+  const [data, setData] = React.useState<NumerologyCalculateResponse | null>(null);
+  const [activeTab, setActiveTab] = React.useState<"loshu" | "dasha" | "name" | "mobile" | "remedies" | "profile">("loshu");
+  const hasAutoFilled = React.useRef(false);
+
+  // Auto-populate from user profile if signed in
+  React.useEffect(() => {
+    if (profile && !hasAutoFilled.current) {
+      if (profile.full_name) setFullName(profile.full_name);
+      if (profile.birth?.date_of_birth) setBirthDate(profile.birth.date_of_birth);
+      if (profile.gender === "male" || profile.gender === "female") setGender(profile.gender);
+      hasAutoFilled.current = true;
+    }
+  }, [profile]);
 
   const handleCalculate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!fullName.trim() || !birthDate) {
+      toast.error(language === "bn" ? "অনুগ্রহ করে পূর্ণ নাম ও জন্মতারিখ প্রদান করুন" : "Please provide full name and birth date");
+      return;
+    }
     setLoading(true);
-    setError(null);
     try {
       const res = await numerologyApi.calculate({
-        full_name: fullName,
+        full_name: fullName.trim(),
         birth_date: birthDate,
         gender,
-        mobile_number: mobileNumber.trim() ? mobileNumber : undefined,
+        mobile_number: mobileNumber.trim() ? mobileNumber.trim() : undefined,
         prediction_year: predictionYear || undefined,
       });
       if (res) {
         setData(res);
-      } else {
-        setError("নিউমারোলজি গণনা সম্পন্ন করা যায়নি। অনুগ্রহ করে তথ্য পুনরায় পরীক্ষা করুন।");
+        toast.success(
+          language === "bn"
+            ? "বৈদিক ও চ্যালডিয়ান নিউমারোলজি গণনা সফলভাবে সম্পন্ন হয়েছে!"
+            : "Vedic Numerology calculated successfully!"
+        );
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "সার্ভার সংযোগে সমস্যা হয়েছে।");
+      toast.error(err instanceof Error ? err.message : "Failed to calculate Numerology.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#07090E] text-[#EDEDED] py-12 px-4 sm:px-6 lg:px-8">
-      {/* Background Glows */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-[#E5A93C]/10 via-[#F59E0B]/5 to-transparent blur-[120px] rounded-full" />
-      </div>
+    <div className="min-h-screen bg-surface-muted/30 text-foreground flex flex-col font-sans pb-24">
+      <SiteHeader />
 
-      <div className="relative max-w-6xl mx-auto space-y-10">
-        {/* Page Header */}
-        <div className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E5A93C]/10 border border-[#E5A93C]/20 text-[#E5A93C] text-xs font-medium tracking-wide">
-            <Sparkles className="w-3.5 h-3.5" />
-            বৈদিক ও চ্যালডিয়ান নিউমারোলজি ইঞ্জিন
+      <main className="mx-auto max-w-6xl px-3 sm:px-4 py-8 flex-1 w-full space-y-8">
+        {/* =========================================================================
+            HEADER & HERO BANNER (Matching Kundli & Daily Horoscope)
+        ========================================================================= */}
+        <div className="mx-auto max-w-4xl text-center space-y-3">
+          <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/10 text-amber-900 dark:text-amber-300 border border-amber-400/30 font-bold px-4 py-1.5 text-xs shadow-2xs">
+            <Sparkles className="size-3.5 text-amber-600 dark:text-amber-400" />
+            <span>
+              {language === "bn"
+                ? "বৈদিক ও চ্যালডিয়ান নিউমারোলজি ইঞ্জিন (লো-শু গ্রিড ও সংখ্যা দশা)"
+                : language === "hi"
+                ? "वैदिक एवं कैल्डियन अंकशास्त्र इंजन (लो-शु ग्रिड एवं दशा)"
+                : "Vedic & Chaldean Numerology Engine (Lo Shu Grid & Dasha)"}
+            </span>
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-white tracking-tight">
-            Vedic Lo Shu & Name Numerology
+
+          <h1 className="font-display text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            {language === "bn"
+              ? "বৈদিক লো-শু গ্রিড, নাম স্পন্দন ও মোবাইল নিউমারোলজি"
+              : language === "hi"
+              ? "वैदिक लो-शु ग्रिड, नाम कम्पन एवं मोबाइल अंक ज्योतिष"
+              : "Vedic Lo Shu Grid, Name Vibrations & Mobile Numerology"}
           </h1>
-          <p className="max-w-2xl mx-auto text-sm sm:text-base text-zinc-400">
-            ১০০% অথরিটেটিভ ক্লায়েন্ট রিসোর্স দ্বারা পরিচালিত বৈদিক ৩×৩ লো-শু গ্রিড, রাজযোগ, সংখ্যা দশা, চ্যালডিয়ান নামের স্পন্দন এবং মোবাইল কনজাংশন অডিট।
+
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto">
+            {language === "bn"
+              ? "ক্লায়েন্টের অথরিটেটিভ রিসোর্স অনুসারে মূলাঙ্ক, ভাগ্যাঙ্ক, চ্যালডিয়ান ১-১০০ নাম কম্পাউন্ড, সংখ্যা দশা (/৪৫ সূত্র) এবং মোবাইল কনজাংশন পেয়ার বিশ্লেষণ।"
+              : language === "hi"
+              ? "मूलांक, भाग्यांक, कैल्डियन १-१०० नाम कम्पन, वैदिक दशा चक्र एवं मोबाइल युति विश्लेषण।"
+              : "Accurate Driver, Destiny, Chaldean 1-100 Compound Names, Numerology Dasha (/45 law) and Mobile Conjunction Pairs."}
           </p>
+
+          {/* Language Switcher Bar */}
+          <div className="flex items-center justify-center gap-2 pt-1">
+            {(["bn", "en", "hi"] as AstrologyLanguage[]).map((lang) => (
+              <button
+                key={lang}
+                onClick={() => setLanguage(lang)}
+                className={`px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                  language === lang
+                    ? "bg-brand-500 text-ink-950 font-bold shadow-xs"
+                    : "bg-surface border border-border/80 text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {lang === "bn" ? "বাংলা" : lang === "hi" ? "हिन्दी" : "English"}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Input Form */}
-        <div className="bg-zinc-900/60 backdrop-blur-xl border border-zinc-800/80 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#E5A93C]/5 rounded-bl-full pointer-events-none" />
-          <form onSubmit={handleCalculate} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
-            <div>
-              <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-2">
-                পূর্ণ নাম (Full Name)
-              </label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-                className="w-full bg-zinc-950/80 border border-zinc-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#E5A93C] transition-colors"
-                placeholder="যেমন: Samiran Sasmal"
-              />
-            </div>
+        {/* =========================================================================
+            FORM CARD (Matching Astra Glassmorphic Theme)
+        ========================================================================= */}
+        <div className="rounded-2xl border border-border/80 bg-surface/90 shadow-sm p-4 sm:p-6 backdrop-blur-md">
+          <form onSubmit={handleCalculate} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+              <div>
+                <label className="block text-xs font-semibold text-foreground-muted mb-1.5">
+                  {language === "bn" ? "পূর্ণ নাম (Full Name)" : "Full Name"}
+                </label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                  className="w-full bg-surface border border-border/80 rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                  placeholder="e.g. Samiran Sasmal"
+                />
+              </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-2">
-                জন্মতারিখ (Birth Date)
-              </label>
-              <input
-                type="date"
-                value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
-                required
-                className="w-full bg-zinc-950/80 border border-zinc-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#E5A93C] transition-colors"
-              />
-            </div>
+              <div>
+                <label className="block text-xs font-semibold text-foreground-muted mb-1.5">
+                  {language === "bn" ? "জন্মতারিখ (Birth Date)" : "Birth Date"}
+                </label>
+                <input
+                  type="date"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                  required
+                  className="w-full bg-surface border border-border/80 rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                />
+              </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-2">
-                লিঙ্গ (Gender)
-              </label>
-              <select
-                value={gender}
-                onChange={(e) => setGender(e.target.value as "male" | "female" | "other")}
-                className="w-full bg-zinc-950/80 border border-zinc-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#E5A93C] transition-colors"
-              >
-                <option value="male">পুরুষ (Male)</option>
-                <option value="female">মহিলা (Female)</option>
-                <option value="other">অন্যান্য (Other)</option>
-              </select>
-            </div>
+              <div>
+                <label className="block text-xs font-semibold text-foreground-muted mb-1.5">
+                  {language === "bn" ? "লিঙ্গ (Gender)" : "Gender"}
+                </label>
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value as "male" | "female" | "other")}
+                  className="w-full bg-surface border border-border/80 rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                >
+                  <option value="male">{language === "bn" ? "পুরুষ (Male)" : "Male"}</option>
+                  <option value="female">{language === "bn" ? "মহিলা (Female)" : "Female"}</option>
+                  <option value="other">{language === "bn" ? "অন্যান্য (Other)" : "Other"}</option>
+                </select>
+              </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-2">
-                মোবাইল নম্বর (ঐচ্ছিক)
-              </label>
-              <input
-                type="tel"
-                value={mobileNumber}
-                onChange={(e) => setMobileNumber(e.target.value)}
-                className="w-full bg-zinc-950/80 border border-zinc-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#E5A93C] transition-colors"
-                placeholder="১০ ডিজিট নম্বর"
-              />
-            </div>
+              <div>
+                <label className="block text-xs font-semibold text-foreground-muted mb-1.5">
+                  {language === "bn" ? "মোবাইল নম্বর (ঐচ্ছিক)" : "Mobile Number (Optional)"}
+                </label>
+                <input
+                  type="tel"
+                  value={mobileNumber}
+                  onChange={(e) => setMobileNumber(e.target.value)}
+                  className="w-full bg-surface border border-border/80 rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                  placeholder="১০ ডিজিট নম্বর"
+                />
+              </div>
 
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full h-[42px] bg-gradient-to-r from-[#E5A93C] to-[#F59E0B] text-zinc-950 font-bold rounded-xl text-sm shadow-lg shadow-[#E5A93C]/20 hover:brightness-110 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                {loading ? (
-                  <span className="inline-block w-4 h-4 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4" />
-                    গণনা করুন
-                  </>
-                )}
-              </button>
+              <div className="flex items-end">
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  variant="primary"
+                  size="lg"
+                  className="w-full h-[40px] font-bold text-ink-950 flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:brightness-105"
+                >
+                  {loading ? (
+                    <span className="inline-block w-4 h-4 border-2 border-ink-950 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      {language === "bn" ? "গণনা করুন" : "Calculate"}
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </form>
-
-          {error && (
-            <div className="mt-4 p-3 bg-red-950/50 border border-red-800/60 rounded-xl text-red-200 text-xs flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 text-red-400 shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
         </div>
 
-        {/* Results Section */}
+        {/* =========================================================================
+            RESULTS SECTION
+        ========================================================================= */}
         {data && (
-          <div className="space-y-8 animate-in fade-in duration-500">
-            {/* Top Stat Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-4 sm:p-5 relative overflow-hidden group hover:border-[#E5A93C]/40 transition-colors">
-                <div className="text-xs text-zinc-400 uppercase font-semibold tracking-wider">মূলাঙ্ক (Driver)</div>
-                <div className="text-3xl sm:text-4xl font-serif font-bold text-[#E5A93C] mt-2">
+          <div className="space-y-8 animate-in fade-in duration-300">
+            {/* Top 4 Quick Stat Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 sm:gap-4">
+              <div className="rounded-2xl border border-border/80 bg-surface p-4 sm:p-5 shadow-xs relative overflow-hidden">
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {language === "bn" ? "মূলাঙ্ক (Driver)" : "Driver (Mulank)"}
+                </div>
+                <div className="text-3xl sm:text-4xl font-serif font-black text-brand-600 mt-1.5">
                   {data.mulank.number}
                 </div>
-                <div className="text-xs text-zinc-300 mt-1 font-medium">{data.mulank.planet}</div>
+                <div className="text-xs font-medium text-foreground mt-1">{data.mulank.planet}</div>
               </div>
 
-              <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-4 sm:p-5 relative overflow-hidden group hover:border-[#E5A93C]/40 transition-colors">
-                <div className="text-xs text-zinc-400 uppercase font-semibold tracking-wider">ভাগ্যাঙ্ক (Destiny)</div>
-                <div className="text-3xl sm:text-4xl font-serif font-bold text-amber-300 mt-2">
+              <div className="rounded-2xl border border-border/80 bg-surface p-4 sm:p-5 shadow-xs relative overflow-hidden">
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {language === "bn" ? "ভাগ্যাঙ্ক (Destiny)" : "Destiny (Bhagyank)"}
+                </div>
+                <div className="text-3xl sm:text-4xl font-serif font-black text-amber-500 mt-1.5">
                   {data.bhagyank.number}
                 </div>
-                <div className="text-xs text-zinc-300 mt-1 font-medium">{data.bhagyank.planet}</div>
+                <div className="text-xs font-medium text-foreground mt-1">{data.bhagyank.planet}</div>
               </div>
 
-              <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-4 sm:p-5 relative overflow-hidden group hover:border-[#E5A93C]/40 transition-colors">
-                <div className="text-xs text-zinc-400 uppercase font-semibold tracking-wider">কুয়া সংখ্যা (Kua)</div>
-                <div className="text-3xl sm:text-4xl font-serif font-bold text-sky-400 mt-2">
+              <div className="rounded-2xl border border-border/80 bg-surface p-4 sm:p-5 shadow-xs relative overflow-hidden">
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {language === "bn" ? "কুয়া সংখ্যা (Kua)" : "Kua Number"}
+                </div>
+                <div className="text-3xl sm:text-4xl font-serif font-black text-sky-500 mt-1.5">
                   {data.kua_number}
                 </div>
-                <div className="text-xs text-zinc-300 mt-1 font-medium">ব্যক্তিগত শক্তি কম্পন</div>
+                <div className="text-xs font-medium text-foreground mt-1">
+                  {language === "bn" ? "ব্যক্তিগত শুভ কম্পন" : "Personal Vibration"}
+                </div>
               </div>
 
-              <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-4 sm:p-5 relative overflow-hidden group hover:border-[#E5A93C]/40 transition-colors">
-                <div className="text-xs text-zinc-400 uppercase font-semibold tracking-wider">ব্যক্তিগত বছর (Year)</div>
-                <div className="text-3xl sm:text-4xl font-serif font-bold text-emerald-400 mt-2">
+              <div className="rounded-2xl border border-border/80 bg-surface p-4 sm:p-5 shadow-xs relative overflow-hidden">
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {language === "bn" ? "ব্যক্তিগত বছর (Personal Year)" : "Personal Year"}
+                </div>
+                <div className="text-3xl sm:text-4xl font-serif font-black text-emerald-500 mt-1.5">
                   {data.year_prediction_number}
                 </div>
-                <div className="text-xs text-zinc-300 mt-1 font-medium">{data.year_prediction_summary.slice(0, 20)}...</div>
+                <div className="text-xs font-medium text-foreground mt-1 truncate">
+                  {data.year_prediction_summary.slice(0, 24)}...
+                </div>
               </div>
             </div>
 
-            {/* Navigation Tabs */}
-            <div className="flex flex-wrap gap-2 border-b border-zinc-800/80 pb-3">
+            {/* Pill Navigation Tabs (Matching Daily Horoscope Drawer Tabs) */}
+            <div className="flex flex-wrap gap-2 border-b border-border/80 pb-3">
               {[
-                { id: "loshu", label: "বৈদিক লো-শু গ্রিড ও যোগ", icon: Layers },
-                { id: "dasha", label: "সংখ্যা দশা টাইমলাইন", icon: Compass },
-                { id: "name", label: "চ্যালডিয়ান নাম বিশ্লেষণ", icon: UserCheck },
-                { id: "mobile", label: "মোবাইল কনজাংশন অডিট", icon: Phone },
-                { id: "remedies", label: "অনুপস্থিত সংখ্যা ও প্রতিকার", icon: BookOpen },
+                { id: "loshu", label: language === "bn" ? "বৈদিক লো-শু গ্রিড ও যোগ" : "Lo Shu Grid & Yogas", icon: Layers },
+                { id: "dasha", label: language === "bn" ? "সংখ্যা দশা টাইমলাইন" : "Dasha Timeline", icon: Compass },
+                { id: "name", label: language === "bn" ? "চ্যালডিয়ান নাম বিশ্লেষণ" : "Name Analysis", icon: UserCheck },
+                { id: "mobile", label: language === "bn" ? "মোবাইল কনজাংশন অডিট" : "Mobile Audit", icon: Phone },
+                { id: "remedies", label: language === "bn" ? "অনুপস্থিত সংখ্যা প্রতিকার" : "Missing Remedies", icon: BookOpen },
+                { id: "profile", label: language === "bn" ? "মূলাঙ্ক ২০-ক্ষেত্র বিবরণ" : "20-Field Profile", icon: Award },
               ].map((tab) => {
                 const Icon = tab.icon;
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                       activeTab === tab.id
-                        ? "bg-[#E5A93C] text-zinc-950 shadow-md shadow-[#E5A93C]/20"
-                        : "bg-zinc-900/60 text-zinc-400 hover:text-white hover:bg-zinc-800/60"
+                        ? "bg-brand-500 text-ink-950 font-bold shadow-xs"
+                        : "bg-surface border border-border/80 text-muted-foreground hover:text-foreground hover:bg-surface-muted"
                     }`}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="size-4" />
                     {tab.label}
                   </button>
                 );
@@ -214,38 +307,38 @@ export default function NumerologyPage() {
 
             {/* Tab 1: Lo Shu Grid & Planes */}
             {activeTab === "loshu" && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
                 {/* 3x3 Lo Shu Grid */}
-                <div className="lg:col-span-6 bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-base font-serif font-bold text-white flex items-center gap-2">
-                      <Hash className="w-4 h-4 text-[#E5A93C]" />
-                      বৈদিক ৩×৩ লো-শু গ্রিড (Vedic Sepharial Grid)
+                <div className="lg:col-span-6 rounded-2xl border border-border/80 bg-surface p-5 sm:p-6 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between border-b border-border/70 pb-3">
+                    <h3 className="text-base font-display font-bold text-foreground flex items-center gap-2">
+                      <Hash className="size-4 text-brand-600" />
+                      {language === "bn" ? "বৈদিক ৩×৩ লো-শু গ্রিড" : "Vedic 3x3 Lo Shu Grid"}
                     </h3>
-                    <span className="text-xs text-zinc-400">৩-১-৯ / ৬-৭-৫ / ২-৮-৪</span>
+                    <span className="text-xs font-mono text-muted-foreground">৩-১-৯ / ৬-৭-৫ / ২-৮-৪</span>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-3 p-2 bg-zinc-950/60 rounded-xl border border-zinc-800">
+                  <div className="grid grid-cols-3 gap-3 p-3 bg-surface-muted/50 rounded-2xl border border-border/70">
                     {data.lo_shu_grid.map((cell) => (
                       <div
                         key={cell.digit}
                         className={`aspect-square rounded-xl p-3 flex flex-col justify-between border transition-all ${
                           cell.count > 0
-                            ? "bg-[#E5A93C]/10 border-[#E5A93C]/40 shadow-inner shadow-[#E5A93C]/10"
-                            : "bg-zinc-900/30 border-zinc-800/40 opacity-40"
+                            ? "bg-brand-500/15 border-brand-500/40 shadow-xs"
+                            : "bg-surface/50 border-border/50 opacity-40"
                         }`}
                       >
                         <div className="flex justify-between items-start">
-                          <span className="text-xl sm:text-2xl font-serif font-black text-white">
+                          <span className="text-2xl sm:text-3xl font-serif font-black text-foreground">
                             {cell.digit}
                           </span>
                           {cell.count > 0 && (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#E5A93C] text-zinc-950">
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-brand-500 text-ink-950">
                               {cell.count}x
                             </span>
                           )}
                         </div>
-                        <div className="text-[10px] text-zinc-400 truncate">
+                        <div className="text-[10px] text-muted-foreground truncate font-medium">
                           {cell.element} • {cell.direction}
                         </div>
                       </div>
@@ -253,24 +346,26 @@ export default function NumerologyPage() {
                   </div>
 
                   {/* Raj Yogas */}
-                  <div className="space-y-3 pt-4 border-t border-zinc-800/80">
-                    <h4 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-                      <Award className="w-4 h-4 text-[#E5A93C]" />
-                      সক্রিয় রাজযোগ (Special Raj Yogas)
+                  <div className="space-y-3 pt-3">
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                      <Award className="size-4 text-brand-600" />
+                      {language === "bn" ? "সক্রিয় রাজযোগ (Special Raj Yogas)" : "Active Raj Yogas"}
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {data.raj_yogas.map((yoga) => (
                         <div
                           key={yoga.name}
-                          className={`p-3.5 rounded-xl border text-xs space-y-1 ${
+                          className={`p-3.5 rounded-xl border text-xs space-y-1.5 ${
                             yoga.is_active
-                              ? "bg-amber-950/20 border-amber-500/40 text-amber-200"
-                              : "bg-zinc-950/40 border-zinc-800/40 text-zinc-500"
+                              ? "bg-amber-500/10 border-amber-500/40 text-amber-950 dark:text-amber-200"
+                              : "bg-surface-muted/40 border-border/60 text-muted-foreground"
                           }`}
                         >
                           <div className="font-bold flex items-center justify-between">
-                            <span>{yoga.name}</span>
-                            <span className={`px-2 py-0.5 rounded text-[10px] ${yoga.is_active ? "bg-amber-400 text-zinc-950 font-bold" : "bg-zinc-800 text-zinc-400"}`}>
+                            <span className="truncate">{yoga.name}</span>
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold shrink-0 ${
+                              yoga.is_active ? "bg-amber-400 text-amber-950" : "bg-surface text-muted-foreground border border-border/80"
+                            }`}>
                               {yoga.is_active ? "সক্রিয় (Active)" : "অনুপস্থিত"}
                             </span>
                           </div>
@@ -282,40 +377,42 @@ export default function NumerologyPage() {
                 </div>
 
                 {/* Planes Progress */}
-                <div className="lg:col-span-6 bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-6 space-y-5">
-                  <h3 className="text-base font-serif font-bold text-white flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-[#E5A93C]" />
-                    লো-শু সমতল ও স্তম্ভ (Planes of Will & Action)
-                  </h3>
+                <div className="lg:col-span-6 rounded-2xl border border-border/80 bg-surface p-5 sm:p-6 shadow-xs space-y-4">
+                  <div className="border-b border-border/70 pb-3">
+                    <h3 className="text-base font-display font-bold text-foreground flex items-center gap-2">
+                      <Layers className="size-4 text-brand-600" />
+                      {language === "bn" ? "লো-শু সমতল ও স্তম্ভ (Planes of Will & Action)" : "Lo Shu Planes & Columns"}
+                    </h3>
+                  </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3.5">
                     {data.planes.map((plane) => (
-                      <div key={plane.name} className="p-3 bg-zinc-950/50 rounded-xl border border-zinc-800/60 space-y-2">
+                      <div key={plane.name} className="p-3 bg-surface-muted/40 rounded-xl border border-border/70 space-y-2">
                         <div className="flex justify-between items-center text-xs">
-                          <span className="font-semibold text-zinc-200">{plane.name}</span>
+                          <span className="font-semibold text-foreground">{plane.name}</span>
                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                             plane.status === "Complete"
-                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                              ? "bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30"
                               : plane.status === "Partial"
-                              ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                              : "bg-zinc-800 text-zinc-400"
+                              ? "bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30"
+                              : "bg-surface text-muted-foreground border border-border/80"
                           }`}>
                             {plane.status} ({plane.percentage}%)
                           </span>
                         </div>
-                        <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+                        <div className="w-full bg-border/60 h-1.5 rounded-full overflow-hidden">
                           <div
                             className={`h-full transition-all duration-500 ${
                               plane.percentage === 100
-                                ? "bg-emerald-400"
+                                ? "bg-emerald-500"
                                 : plane.percentage >= 50
-                                ? "bg-[#E5A93C]"
-                                : "bg-zinc-600"
+                                ? "bg-brand-500"
+                                : "bg-muted-foreground/40"
                             }`}
                             style={{ width: `${plane.percentage}%` }}
                           />
                         </div>
-                        <p className="text-[11px] text-zinc-400">{plane.significance}</p>
+                        <p className="text-[11px] text-muted-foreground">{plane.significance}</p>
                       </div>
                     ))}
                   </div>
@@ -325,51 +422,49 @@ export default function NumerologyPage() {
 
             {/* Tab 2: Dasha Timeline */}
             {activeTab === "dasha" && (
-              <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-6 sm:p-8 space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-serif font-bold text-white flex items-center gap-2">
-                      <Compass className="w-5 h-5 text-[#E5A93C]" />
-                      বৈদিক সংখ্যা দশা সময়কাল (Vedic Numerology Dasha Hierarchy)
-                    </h3>
-                    <p className="text-xs text-zinc-400 mt-1">
-                      ক্লায়েন্টের /৪৫ সূত্র অনুযায়ী মহাদশা (MD), অন্তর্দশা (AD) এবং প্রত্যন্তর্দশা (PD)-র নিখুঁত গণনা।
-                    </p>
-                  </div>
+              <div className="rounded-2xl border border-border/80 bg-surface p-5 sm:p-7 shadow-xs space-y-5">
+                <div className="border-b border-border/70 pb-3">
+                  <h3 className="text-lg font-display font-bold text-foreground flex items-center gap-2">
+                    <Compass className="size-5 text-brand-600" />
+                    {language === "bn" ? "বৈদিক সংখ্যা দশা সময়কাল (Vedic Dasha Hierarchy)" : "Vedic Numerology Dasha"}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    ক্লায়েন্টের অথরিটেটিভ /৪৫ সূত্র ($AD = \frac{"{MD \\times AD}"}{"{45}"}$) এবং ১৮ অক্টোবরের ফ্রেন্ডশিপ ম্যাট্রিক্স অনুযায়ী মহাদশা, অন্তর্দশা ও প্রত্যন্তর্দশা।
+                  </p>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-3.5">
                   {data.dasha_timeline.map((period, idx) => (
                     <div
                       key={idx}
-                      className="p-4 sm:p-5 bg-zinc-950/70 border border-zinc-800/80 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                      className="p-4 rounded-xl border border-border/70 bg-surface-muted/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5"
                     >
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="px-2.5 py-0.5 bg-[#E5A93C]/20 border border-[#E5A93C]/40 text-[#E5A93C] text-xs font-bold rounded-md">
+                          <span className="px-2.5 py-0.5 bg-brand-500/20 text-brand-800 dark:text-brand-300 font-bold text-xs rounded-md">
                             {period.level}
                           </span>
-                          <h4 className="text-sm sm:text-base font-bold text-white">
-                            {period.planet} (সংখ্যা {period.number})
+                          <h4 className="text-sm sm:text-base font-bold text-foreground">
+                            {period.planet} ({language === "bn" ? `সংখ্যা ${period.number}` : `Number ${period.number}`})
                           </h4>
                           <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${
                             period.friendship_score === "Favorable"
-                              ? "bg-emerald-500/20 text-emerald-300"
+                              ? "bg-emerald-500/20 text-emerald-800 dark:text-emerald-300"
                               : period.friendship_score === "Unfavorable"
-                              ? "bg-red-500/20 text-red-300"
-                              : "bg-zinc-800 text-zinc-300"
+                              ? "bg-red-500/20 text-red-800 dark:text-red-300"
+                              : "bg-surface border border-border/80 text-muted-foreground"
                           }`}>
                             {period.friendship_score}
                           </span>
                         </div>
-                        <p className="text-xs text-zinc-400">{period.guidance}</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{period.guidance}</p>
                       </div>
 
                       <div className="text-left sm:text-right shrink-0">
-                        <div className="text-xs font-mono text-zinc-300 font-semibold">
-                          {period.start_date} <span className="text-zinc-600">থেকে</span> {period.end_date}
+                        <div className="text-xs font-mono font-bold text-foreground">
+                          {period.start_date} <span className="text-muted-foreground">➔</span> {period.end_date}
                         </div>
-                        <div className="text-[11px] text-zinc-500 mt-0.5">
+                        <div className="text-[11px] text-muted-foreground mt-0.5">
                           স্থায়িত্ব: {period.duration_days} দিন
                         </div>
                       </div>
@@ -379,101 +474,102 @@ export default function NumerologyPage() {
               </div>
             )}
 
-            {/* Tab 3: Name Numerology */}
+            {/* Tab 3: Name Analysis */}
             {activeTab === "name" && (
-              <div className="space-y-6">
-                <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-6 sm:p-8 space-y-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-5">
+              <div className="rounded-2xl border border-border/80 bg-surface p-5 sm:p-7 shadow-xs space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/70 pb-4">
+                  <div>
+                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      {language === "bn" ? "চ্যালডিয়ান নাম বিশ্লেষণ" : "Chaldean Compound Name Analysis"}
+                    </div>
+                    <h3 className="text-2xl font-serif font-black text-foreground mt-1">
+                      {data.name_analysis.full_name}
+                    </h3>
+                    <p className="text-xs font-semibold text-brand-700 dark:text-brand-400 mt-1">
+                      কম্পাউন্ড সংখ্যা: {data.name_analysis.compound_number} (একক সংখ্যা: {data.name_analysis.single_number}) — {data.name_analysis.compound_name}
+                    </p>
+                  </div>
+
+                  <div className="px-4 py-2 bg-surface-muted/60 border border-border/80 rounded-xl text-left sm:text-right">
+                    <div className="text-[11px] text-muted-foreground">সামগ্রিক রায়</div>
+                    <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                      {data.name_analysis.overall_name_verdict}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-surface-muted/40 border border-border/70 text-xs sm:text-sm leading-relaxed text-foreground">
+                  {data.name_analysis.compound_description}
+                </div>
+
+                {/* Syllable Alert */}
+                {data.name_analysis.negative_syllables_found.length > 0 && (
+                  <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-900 dark:text-red-200 flex items-start gap-2.5">
+                    <ShieldAlert className="size-5 text-red-600 shrink-0 mt-0.5" />
                     <div>
-                      <div className="text-xs uppercase font-semibold text-zinc-400 tracking-wider">
-                        চ্যালডিয়ান নাম বিশ্লেষণ (Chaldean Compound Name)
-                      </div>
-                      <h3 className="text-2xl font-serif font-bold text-white mt-1">
-                        {data.name_analysis.full_name}
-                      </h3>
-                      <p className="text-xs text-amber-300 font-medium mt-1">
-                        কম্পাউন্ড সংখ্যা: {data.name_analysis.compound_number} (একক সংখ্যা: {data.name_analysis.single_number}) — {data.name_analysis.compound_name}
+                      <div className="font-bold">সতর্কতা: ক্ষতিকর সিলেবল চিহ্নিত হয়েছে!</div>
+                      <p className="mt-1">
+                        নামের মধ্যে ক্ষতিকর ধ্বনি ({data.name_analysis.negative_syllables_found.join(", ")}) রয়েছে, যা ক্লায়েন্ট ডকুমেন্ট (`Name Numerology/01.pdf`) অনুযায়ী শুভ কম্পাউন্ডকেও ক্ষতিগ্রস্ত করে।
                       </p>
                     </div>
-
-                    <div className="px-4 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-right">
-                      <div className="text-xs text-zinc-400">সামগ্রিক রায়</div>
-                      <div className="text-sm font-bold text-emerald-400">{data.name_analysis.overall_name_verdict}</div>
-                    </div>
                   </div>
+                )}
 
-                  <p className="text-sm text-zinc-300 leading-relaxed bg-zinc-950/40 p-4 rounded-xl border border-zinc-800/60">
-                    {data.name_analysis.compound_description}
-                  </p>
-
-                  {/* Syllable Alert */}
-                  {data.name_analysis.negative_syllables_found.length > 0 && (
-                    <div className="p-4 bg-red-950/30 border border-red-800/50 rounded-xl text-xs text-red-200 flex items-start gap-2.5">
-                      <ShieldAlert className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-                      <div>
-                        <div className="font-bold text-red-300">সতর্কতা: ক্ষতিকর সিলেবল চিহ্নিত হয়েছে!</div>
-                        <p className="mt-1">
-                          নামের মধ্যে ক্ষতিকর ধ্বনি ({data.name_analysis.negative_syllables_found.join(", ")}) রয়েছে, যা ক্লায়েন্ট ডকুমেন্ট অনুযায়ী শুভ কম্পাউন্ডকেও ক্ষতিগ্রস্ত করে।
-                        </p>
+                {/* Letters Sound Vibrations */}
+                <div>
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                    বর্ণভিত্তিক চ্যালডিয়ান স্পন্দন (Letter Sound Profiles)
+                  </h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2.5">
+                    {data.name_analysis.letters.map((ltr, idx) => (
+                      <div key={idx} className="p-3 bg-surface-muted/40 border border-border/70 rounded-xl text-center space-y-1">
+                        <div className="text-xl font-serif font-black text-brand-600">{ltr.letter}</div>
+                        <div className="text-xs font-semibold text-foreground">মান: {ltr.value}</div>
+                        <div className="text-[10px] text-muted-foreground truncate">{ltr.sound_element}</div>
                       </div>
-                    </div>
-                  )}
-
-                  {/* Letter Vibrations */}
-                  <div>
-                    <h4 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-3">
-                      বর্ণভিত্তিক চ্যালডিয়ান স্পন্দন (Letter Sound Vibrations)
-                    </h4>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2.5">
-                      {data.name_analysis.letters.map((ltr, idx) => (
-                        <div key={idx} className="p-3 bg-zinc-950/60 border border-zinc-800/70 rounded-xl text-center space-y-1">
-                          <div className="text-lg font-serif font-black text-[#E5A93C]">{ltr.letter}</div>
-                          <div className="text-xs font-semibold text-zinc-200">মান: {ltr.value}</div>
-                          <div className="text-[10px] text-zinc-400 truncate">{ltr.sound_element}</div>
-                        </div>
-                      ))}
-                    </div>
+                    ))}
                   </div>
+                </div>
 
-                  {/* Recommendation */}
-                  <div className="p-4 bg-amber-950/20 border border-amber-500/30 rounded-xl text-xs text-amber-200">
-                    <span className="font-bold">পরামর্শ: </span>
-                    {data.name_analysis.recommendation}
-                  </div>
+                <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-950 dark:text-amber-200">
+                  <span className="font-bold">পরামর্শ: </span>
+                  {data.name_analysis.recommendation}
                 </div>
               </div>
             )}
 
             {/* Tab 4: Mobile Numerology */}
             {activeTab === "mobile" && data.mobile_analysis && (
-              <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-6 sm:p-8 space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-5">
+              <div className="rounded-2xl border border-border/80 bg-surface p-5 sm:p-7 shadow-xs space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/70 pb-4">
                   <div>
-                    <div className="text-xs uppercase font-semibold text-zinc-400 tracking-wider">
+                    <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       মোবাইল নম্বর অডিট (Mobile Number Numerology)
                     </div>
-                    <h3 className="text-2xl font-serif font-bold text-white mt-1">
+                    <h3 className="text-2xl font-serif font-black text-foreground mt-1">
                       {data.mobile_analysis.mobile_number}
                     </h3>
-                    <p className="text-xs text-amber-300 mt-1">
+                    <p className="text-xs font-semibold text-brand-700 dark:text-brand-400 mt-1">
                       যোগফল: {data.mobile_analysis.total_sum} (একক সংখ্যা: {data.mobile_analysis.single_digit}) • {data.mobile_analysis.compound_quality}
                     </p>
                   </div>
 
-                  <div className="px-4 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-right">
-                    <div className="text-xs text-zinc-400">অডিট রায়</div>
-                    <div className="text-sm font-bold text-emerald-400">{data.mobile_analysis.overall_verdict}</div>
+                  <div className="px-4 py-2 bg-surface-muted/60 border border-border/80 rounded-xl text-left sm:text-right">
+                    <div className="text-[11px] text-muted-foreground">অডিট রায়</div>
+                    <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                      {data.mobile_analysis.overall_verdict}
+                    </div>
                   </div>
                 </div>
 
                 {/* Consecutive Conjunction Pairs */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-                      <Sparkles className="w-4 h-4 text-[#E5A93C]" />
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                      <Sparkles className="size-4 text-brand-600" />
                       ক্রমান্বয়ে ২-সংখ্যার জোড়া (৬০% / ৪০% আধিপত্য সূত্র)
                     </h4>
-                    <span className="text-[11px] text-zinc-400">১ম ডিজিট ৬০% • ২য় ডিজিট ৪০%</span>
+                    <span className="text-[11px] text-muted-foreground">১ম ডিজিট ৬০% • ২য় ডিজিট ৪০%</span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -482,16 +578,20 @@ export default function NumerologyPage() {
                         key={idx}
                         className={`p-3.5 rounded-xl border text-xs space-y-1.5 ${
                           p.category === "Good"
-                            ? "bg-emerald-950/20 border-emerald-500/40 text-emerald-200"
+                            ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-950 dark:text-emerald-200"
                             : p.category === "Malefic"
-                            ? "bg-red-950/20 border-red-500/40 text-red-200"
-                            : "bg-zinc-950/40 border-zinc-800/60 text-zinc-300"
+                            ? "bg-red-500/10 border-red-500/40 text-red-950 dark:text-red-200"
+                            : "bg-surface-muted/40 border-border/70 text-foreground"
                         }`}
                       >
                         <div className="flex items-center justify-between font-bold">
                           <span className="text-sm font-serif">{p.pair} জোড়া</span>
                           <span className={`px-2 py-0.5 rounded text-[10px] ${
-                            p.category === "Good" ? "bg-emerald-500 text-zinc-950" : p.category === "Malefic" ? "bg-red-500 text-white" : "bg-zinc-800 text-zinc-300"
+                            p.category === "Good"
+                              ? "bg-emerald-500 text-white"
+                              : p.category === "Malefic"
+                              ? "bg-red-500 text-white"
+                              : "bg-surface border border-border/80 text-muted-foreground"
                           }`}>
                             {p.category}
                           </span>
@@ -505,14 +605,14 @@ export default function NumerologyPage() {
                 {/* Sepharial L-Shapes */}
                 {data.mobile_analysis.l_shapes_formed.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-3">
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                       মোবাইল গ্রিডের এল-শেপ (Sepharial 3x3 L-Shapes)
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {data.mobile_analysis.l_shapes_formed.map((l, idx) => (
-                        <div key={idx} className="p-3 bg-zinc-950/60 border border-zinc-800 rounded-xl text-xs space-y-1">
-                          <div className="font-bold text-amber-300">L-Shape: {l.shape_code}</div>
-                          <p className="text-[11px] text-zinc-400">{l.meaning}</p>
+                        <div key={idx} className="p-3 bg-surface-muted/40 border border-border/70 rounded-xl text-xs space-y-1">
+                          <div className="font-bold text-brand-700 dark:text-brand-400">L-Shape: {l.shape_code}</div>
+                          <p className="text-[11px] text-muted-foreground">{l.meaning}</p>
                         </div>
                       ))}
                     </div>
@@ -523,32 +623,94 @@ export default function NumerologyPage() {
 
             {/* Tab 5: Missing Numbers & Remedies */}
             {activeTab === "remedies" && (
-              <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-6 sm:p-8 space-y-6">
-                <h3 className="text-lg font-serif font-bold text-white flex items-center gap-2">
-                  <Flame className="w-5 h-5 text-[#E5A93C]" />
-                  অনুপস্থিত সংখ্যার প্রতিকার (Missing Numbers & Vedic Remedies)
-                </h3>
+              <div className="rounded-2xl border border-border/80 bg-surface p-5 sm:p-7 shadow-xs space-y-5">
+                <div className="border-b border-border/70 pb-3">
+                  <h3 className="text-lg font-display font-bold text-foreground flex items-center gap-2">
+                    <Flame className="size-5 text-brand-600" />
+                    অনুপস্থিত সংখ্যার প্রতিকার (Missing Numbers & Vedic Remedies)
+                  </h3>
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {data.missing_numbers_remedies.map((rem) => (
-                    <div key={rem.digit} className="p-4 bg-zinc-950/70 border border-zinc-800/80 rounded-xl space-y-3">
+                    <div key={rem.digit} className="p-4 rounded-xl border border-border/80 bg-surface-muted/30 space-y-2.5">
                       <div className="flex items-center justify-between">
-                        <span className="text-xl font-serif font-black text-red-400">অনুপস্থিত {rem.digit}</span>
-                        <span className="text-xs text-zinc-400">{rem.element}</span>
+                        <span className="text-xl font-serif font-black text-red-500">অনুপস্থিত {rem.digit}</span>
+                        <span className="text-xs text-muted-foreground">{rem.element}</span>
                       </div>
-                      <p className="text-xs text-zinc-300 font-medium">প্রভাব: {rem.impact}</p>
-                      <div className="p-2.5 bg-zinc-900/60 rounded-lg text-xs text-amber-200 border border-zinc-800 space-y-1">
-                        <div><span className="font-bold">উপায়:</span> {rem.remedy}</div>
-                        <div className="text-[11px] text-zinc-400">রুদ্রাক্ষ: {rem.rudraksha} • ক্রিস্টাল: {rem.crystal}</div>
+                      <p className="text-xs text-foreground font-medium">প্রভাব: {rem.impact}</p>
+                      <div className="p-2.5 bg-surface rounded-lg text-xs border border-border/70 space-y-1">
+                        <div><span className="font-bold text-brand-700 dark:text-brand-400">উপায়:</span> {rem.remedy}</div>
+                        <div className="text-[11px] text-muted-foreground">রুদ্রাক্ষ: {rem.rudraksha} • ক্রিস্টাল: {rem.crystal}</div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
             )}
+
+            {/* Tab 6: 20-Field Profile from `NEW NUMRO.docx` */}
+            {activeTab === "profile" && (
+              <div className="rounded-2xl border border-border/80 bg-surface p-5 sm:p-7 shadow-xs space-y-6">
+                <div className="border-b border-border/70 pb-3">
+                  <h3 className="text-lg font-display font-bold text-foreground flex items-center gap-2">
+                    <Award className="size-5 text-brand-600" />
+                    মূলাঙ্ক {data.mulank.number}-এর পূর্ণাঙ্গ ২০-ক্ষেত্র শাস্ত্রীয় বিবরণ (NEW NUMRO)
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    ক্লায়েন্ট কর্তৃক প্রদত্ত অথরিটেটিভ হস্তলিখিত নিয়মাবলীর পূর্ণাঙ্গ রূপান্তর।
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+                  <div className="p-3.5 bg-surface-muted/40 rounded-xl border border-border/70 space-y-1">
+                    <span className="text-muted-foreground font-semibold">অধিপতি গ্রহ ও ইষ্টদেবতা:</span>
+                    <p className="font-bold text-foreground text-sm">{data.mulank.planet} • {data.mulank.deity}</p>
+                  </div>
+                  <div className="p-3.5 bg-surface-muted/40 rounded-xl border border-border/70 space-y-1">
+                    <span className="text-muted-foreground font-semibold">ধাতু ও রত্ন:</span>
+                    <p className="font-bold text-foreground">{data.mulank.metal} • {data.mulank.gemstone}</p>
+                  </div>
+                  <div className="p-3.5 bg-surface-muted/40 rounded-xl border border-border/70 space-y-1">
+                    <span className="text-muted-foreground font-semibold">শুভ দিক:</span>
+                    <p className="font-bold text-foreground">{data.mulank.direction}</p>
+                  </div>
+                  <div className="p-3.5 bg-surface-muted/40 rounded-xl border border-border/70 space-y-1">
+                    <span className="text-muted-foreground font-semibold">শুভ রঙ:</span>
+                    <p className="font-bold text-emerald-600 dark:text-emerald-400">{data.mulank.colors.join(", ")}</p>
+                  </div>
+                  <div className="p-3.5 bg-surface-muted/40 rounded-xl border border-border/70 space-y-1">
+                    <span className="text-muted-foreground font-semibold">বর্জনীয় রঙ:</span>
+                    <p className="font-bold text-red-500">{data.mulank.unlucky_colors.join(", ")}</p>
+                  </div>
+                  <div className="p-3.5 bg-surface-muted/40 rounded-xl border border-border/70 space-y-1">
+                    <span className="text-muted-foreground font-semibold">শুভ বার ও মাস:</span>
+                    <p className="font-bold text-foreground">{data.mulank.lucky_days.join(", ")}</p>
+                  </div>
+                  <div className="sm:col-span-2 lg:col-span-3 p-4 bg-brand-500/10 border border-brand-500/30 rounded-xl space-y-1.5">
+                    <span className="text-brand-800 dark:text-brand-300 font-bold">মূল বৈদিক বীজ মন্ত্র ও জপ সংখ্যা:</span>
+                    <p className="font-mono font-bold text-foreground text-sm">{data.mulank.beej_mantra} ({data.mulank.jap_count.toLocaleString()} বার জপ)</p>
+                  </div>
+                  <div className="sm:col-span-2 lg:col-span-3 p-4 bg-surface-muted/50 border border-border/80 rounded-xl space-y-1">
+                    <span className="text-muted-foreground font-semibold">দান সামগ্রী (Grains Daan):</span>
+                    <p className="text-foreground">{data.mulank.grains_daan}</p>
+                  </div>
+                  <div className="sm:col-span-2 lg:col-span-3 p-4 bg-surface-muted/50 border border-border/80 rounded-xl space-y-1">
+                    <span className="text-muted-foreground font-semibold">স্বাস্থ্য সতর্কতা ও রোগ প্রবণতা:</span>
+                    <p className="text-foreground">{data.mulank.health_traits}</p>
+                  </div>
+                  <div className="sm:col-span-2 lg:col-span-3 p-4 bg-surface-muted/50 border border-border/80 rounded-xl space-y-1">
+                    <span className="text-muted-foreground font-semibold">উপযুক্ত পেশা ও জীবিকা ক্ষেত্র:</span>
+                    <p className="text-foreground">{data.mulank.profession}</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
-      </div>
+      </main>
+
+      <SiteFooter />
     </div>
   );
 }
