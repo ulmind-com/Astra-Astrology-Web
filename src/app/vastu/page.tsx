@@ -29,6 +29,12 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Button } from "@/components/ui";
 import { vastuApi } from "@/lib/api";
+import { useFeaturePricing } from "@/hooks/use-feature-pricing";
+import {
+  FeatureCoinBadge,
+  FeatureDisabledAlert,
+  FeatureCoinModal,
+} from "@/components/astrology/feature-pricing-banner";
 import { VastuCompass } from "@/components/vastu/vastu-compass";
 import { MedicalVastu } from "@/components/vastu/medical-vastu";
 import { AstroVastu } from "@/components/vastu/astro-vastu";
@@ -37,6 +43,11 @@ import type { PadaInfo, VastuAuditResponse, VastuZoneInfo, VastuRemedyItem } fro
 import type { AstrologyLanguage } from "@/types";
 
 export default function VastuPage() {
+  const { getFeature, checkAccess, walletBalance, refresh: refreshWallet } = useFeaturePricing();
+  const vastuFeature = getFeature("vastu");
+  const [coinModalOpen, setCoinModalOpen] = React.useState(false);
+  const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
+
   const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
   const [entranceDegree, setEntranceDegree] = React.useState<number>(335.0);
   const [currentPada, setCurrentPada] = React.useState<PadaInfo | null>(null);
@@ -85,6 +96,22 @@ export default function VastuPage() {
 
   const handleAudit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const access = checkAccess("vastu");
+    if (!access.allowed) {
+      if (access.reason === "disabled") {
+        toast.error(
+          language === "bn"
+            ? "বাস্তু শাস্ত্র ফিচারটি বর্তমানে অ্যাডমিন দ্বারা বন্ধ রয়েছে।"
+            : "Vastu Shastra feature is temporarily unavailable."
+        );
+        return;
+      }
+      setCoinModalReason(access.reason || "insufficient_coins");
+      setCoinModalOpen(true);
+      return;
+    }
+
     setAuditLoading(true);
     try {
       const res = await vastuApi.audit({
@@ -94,6 +121,14 @@ export default function VastuPage() {
       });
       if (res) {
         setAuditResult(res);
+        if (vastuFeature && vastuFeature.coins > 0) {
+          refreshWallet();
+          toast.success(
+            language === "bn"
+              ? `${vastuFeature.coins} কয়েন ব্যালেন্স থেকে কাটা হয়েছে`
+              : `${vastuFeature.coins} coins deducted from wallet`
+          );
+        }
         toast.success(
           language === "bn"
             ? "৩৬০° বাস্তু অডিট রিপোর্ট সফলভাবে তৈরি হয়েছে!"
@@ -102,8 +137,16 @@ export default function VastuPage() {
             : "360° Vastu audit report generated successfully!"
         );
       }
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Failed to generate Vastu audit.");
+    } catch (err: any) {
+      if (err?.code === "insufficient_coins") {
+        setCoinModalReason("insufficient_coins");
+        setCoinModalOpen(true);
+      } else if (err?.code === "authentication_required" || err?.status === 401) {
+        setCoinModalReason("unauthorized");
+        setCoinModalOpen(true);
+      } else {
+        toast.error(err?.message || (err instanceof Error ? err.message : "Failed to generate Vastu audit."));
+      }
     } finally {
       setAuditLoading(false);
     }
@@ -190,7 +233,21 @@ export default function VastuPage() {
               ))}
             </div>
           </div>
+
+          <div className="pt-2 flex justify-center">
+            <FeatureCoinBadge
+              feature={vastuFeature}
+              coins={vastuFeature?.coins ?? 25}
+              language={language}
+            />
+          </div>
         </div>
+
+        {vastuFeature && !vastuFeature.enabled && (
+          <div className="max-w-4xl mx-auto">
+            <FeatureDisabledAlert featureName={vastuFeature?.name} language={language} />
+          </div>
+        )}
 
         {/* =========================================================================
             NAVIGATION TABS
@@ -848,6 +905,16 @@ export default function VastuPage() {
           </div>
         )}
       </main>
+
+      <FeatureCoinModal
+        open={coinModalOpen}
+        onClose={() => setCoinModalOpen(false)}
+        featureName={vastuFeature?.name || (language === "bn" ? "বাস্তু শাস্ত্র" : "Vastu Shastra")}
+        requiredCoins={vastuFeature?.coins ?? 25}
+        walletBalance={walletBalance}
+        reason={coinModalReason}
+        language={language}
+      />
 
       <SiteFooter />
     </div>
