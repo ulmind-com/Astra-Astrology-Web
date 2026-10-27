@@ -34,6 +34,12 @@ import { Button } from "@/components/ui";
 import { numerologyApi } from "@/lib/api";
 import { useAuth } from "@/providers/auth-provider";
 import { useProfile } from "@/hooks/use-profile";
+import { useFeaturePricing } from "@/hooks/use-feature-pricing";
+import {
+  FeatureCoinBadge,
+  FeatureDisabledAlert,
+  FeatureCoinModal,
+} from "@/components/astrology/feature-pricing-banner";
 import { NameCorrectionSection } from "@/components/numerology/name-correction";
 import { MobileComparisonSection } from "@/components/numerology/mobile-comparison";
 import { BusinessNumerologySection } from "@/components/numerology/business-numerology";
@@ -44,6 +50,10 @@ import type { AstrologyLanguage } from "@/types";
 export default function NumerologyPage() {
   const { user, isSignedIn } = useAuth();
   const { data: profile } = useProfile({ enabled: isSignedIn });
+  const { getFeature, checkAccess, walletBalance, refresh: refreshWallet } = useFeaturePricing();
+  const numerologyFeature = getFeature("numerology");
+  const [coinModalOpen, setCoinModalOpen] = React.useState(false);
+  const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
 
   const [language, setLanguage] = React.useState<AstrologyLanguage>("bn");
   const [fullName, setFullName] = React.useState("Samiran Sasmal");
@@ -84,6 +94,22 @@ export default function NumerologyPage() {
       toast.error(language === "bn" ? "অনুগ্রহ করে পূর্ণ নাম ও জন্মতারিখ প্রদান করুন" : "Please provide full name and birth date");
       return;
     }
+
+    const access = checkAccess("numerology");
+    if (!access.allowed) {
+      if (access.reason === "disabled") {
+        toast.error(
+          language === "bn"
+            ? "নিউমারোলজি ফিচারটি বর্তমানে অ্যাডমিন দ্বারা বন্ধ রয়েছে।"
+            : "Numerology feature is temporarily unavailable."
+        );
+        return;
+      }
+      setCoinModalReason(access.reason || "insufficient_coins");
+      setCoinModalOpen(true);
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await numerologyApi.calculate({
@@ -95,14 +121,30 @@ export default function NumerologyPage() {
       });
       if (res) {
         setData(res);
+        if (numerologyFeature && numerologyFeature.coins > 0) {
+          refreshWallet();
+          toast.success(
+            language === "bn"
+              ? `${numerologyFeature.coins} কয়েন ব্যালেন্স থেকে কাটা হয়েছে`
+              : `${numerologyFeature.coins} coins deducted from wallet`
+          );
+        }
         toast.success(
           language === "bn"
             ? "বৈদিক ও চ্যালডিয়ান নিউমারোলজি গণনা সফলভাবে সম্পন্ন হয়েছে!"
             : "Vedic Numerology calculated successfully!"
         );
       }
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Failed to calculate Numerology.");
+    } catch (err: any) {
+      if (err?.code === "insufficient_coins") {
+        setCoinModalReason("insufficient_coins");
+        setCoinModalOpen(true);
+      } else if (err?.code === "authentication_required" || err?.status === 401) {
+        setCoinModalReason("unauthorized");
+        setCoinModalOpen(true);
+      } else {
+        toast.error(err?.message || "Failed to calculate Numerology.");
+      }
     } finally {
       setLoading(false);
     }
@@ -144,8 +186,8 @@ export default function NumerologyPage() {
               : "Accurate Driver, Destiny, Chaldean 1-100 Compound Names, Numerology Dasha (/45 law) and Mobile Conjunction Pairs."}
           </p>
 
-          {/* Language Switcher Bar */}
-          <div className="flex items-center justify-center gap-2 pt-1">
+          {/* Language Switcher Bar & Pricing Badge */}
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
             {(["bn", "en", "hi"] as AstrologyLanguage[]).map((lang) => (
               <button
                 key={lang}
@@ -160,12 +202,25 @@ export default function NumerologyPage() {
               </button>
             ))}
           </div>
+
+          <div className="pt-2 flex justify-center">
+            <FeatureCoinBadge
+              feature={numerologyFeature}
+              coins={numerologyFeature?.coins ?? 20}
+              language={language}
+            />
+          </div>
         </div>
 
         {/* =========================================================================
             FORM CARD (Matching Astra Glassmorphic Theme)
         ========================================================================= */}
         <div className="rounded-2xl border border-border/80 bg-surface/90 shadow-sm p-4 sm:p-6 backdrop-blur-md">
+          {numerologyFeature && !numerologyFeature.enabled && (
+            <div className="mb-4">
+              <FeatureDisabledAlert featureName={numerologyFeature?.name} language={language} />
+            </div>
+          )}
           <form onSubmit={handleCalculate} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
               <div>
@@ -771,6 +826,16 @@ export default function NumerologyPage() {
           </div>
         )}
       </main>
+
+      <FeatureCoinModal
+        open={coinModalOpen}
+        onClose={() => setCoinModalOpen(false)}
+        featureName={numerologyFeature?.name || (language === "bn" ? "সংখ্যা জ্যোতিষ (নিউমারোলজি)" : "Numerology")}
+        requiredCoins={numerologyFeature?.coins ?? 20}
+        walletBalance={walletBalance}
+        reason={coinModalReason}
+        language={language}
+      />
 
       <SiteFooter />
     </div>
