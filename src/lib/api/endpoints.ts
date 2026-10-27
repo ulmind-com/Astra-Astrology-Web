@@ -146,7 +146,11 @@ export const endpoints = {
   numerology: {
     calculate: "/numerology/calculate",
     name: "/numerology/name",
+    nameCorrect: "/numerology/name/correct",
     mobile: "/numerology/mobile",
+    mobileCompare: "/numerology/mobile/compare",
+    business: "/numerology/business",
+    vehicleBank: "/numerology/vehicle-bank",
     profile: (num: number) => `/numerology/profile/${num}`,
   },
 

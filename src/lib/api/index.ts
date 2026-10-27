@@ -537,6 +537,14 @@ import type {
   NameAnalysisResponse,
   MobileAnalysisResponse,
   MulankProfile,
+  NameCorrectionRequest,
+  NameCorrectionResponse,
+  MobileCompareRequest,
+  MobileCompareResponse,
+  BusinessNumerologyRequest,
+  BusinessNumerologyResponse,
+  VehicleBankAuditRequest,
+  VehicleBankAuditResponse,
 } from "@/types/numerology";
 
 import type {
@@ -558,8 +566,20 @@ export const numerologyApi = {
   analyzeName: (body: { name: string; mulank?: number; bhagyank?: number }) =>
     api.post<NameAnalysisResponse>(endpoints.numerology.name, body),
 
+  correctName: (body: NameCorrectionRequest) =>
+    api.post<NameCorrectionResponse>(endpoints.numerology.nameCorrect, body),
+
   analyzeMobile: (body: { mobile_number: string; mulank?: number; bhagyank?: number; birth_date?: string }) =>
     api.post<MobileAnalysisResponse>(endpoints.numerology.mobile, body),
+
+  compareMobile: (body: MobileCompareRequest) =>
+    api.post<MobileCompareResponse>(endpoints.numerology.mobileCompare, body),
+
+  evaluateBusiness: (body: BusinessNumerologyRequest) =>
+    api.post<BusinessNumerologyResponse>(endpoints.numerology.business, body),
+
+  auditVehicleBank: (body: VehicleBankAuditRequest) =>
+    api.post<VehicleBankAuditResponse>(endpoints.numerology.vehicleBank, body),
 
   getProfile: (number: number) =>
     api.get<MulankProfile>(endpoints.numerology.profile(number)),
