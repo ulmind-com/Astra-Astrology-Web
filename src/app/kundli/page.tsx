@@ -235,23 +235,35 @@ export default function KundliPage() {
         const placeName = b.place || [b.city, b.state, b.country].filter(Boolean).join(", ");
         if (placeName) {
           setPlace(placeName);
-          const lat = b.latitude != null ? Number(b.latitude) : 22.5726;
-          const lon = b.longitude != null ? Number(b.longitude) : 88.3639;
+          const lat = b.latitude != null && !isNaN(Number(b.latitude)) ? Number(b.latitude) : 22.5726;
+          const lon = b.longitude != null && !isNaN(Number(b.longitude)) ? Number(b.longitude) : 88.3639;
           setLatitude(lat);
           setLongitude(lon);
+
+          let tzOffset = 5.5;
+          let tzName: string | null = null;
+          if (b.timezone_offset != null && !isNaN(Number(b.timezone_offset))) {
+            tzOffset = Number(b.timezone_offset);
+          } else if (b.timezone != null && !isNaN(Number(b.timezone))) {
+            tzOffset = Number(b.timezone);
+          }
+          if (typeof b.timezone === "string" && isNaN(Number(b.timezone))) {
+            tzName = b.timezone;
+          }
+
           setSelectedPlace({
             place: placeName,
             displayName: placeName,
             latitude: lat,
             longitude: lon,
-            timezoneName: null,
-            timezoneOffset: b.timezone != null ? Number(b.timezone) : 5.5,
-            timezoneLabel: null,
+            timezoneName: tzName,
+            timezoneOffset: tzOffset,
+            timezoneLabel: tzName || `UTC+${tzOffset}`,
             timezoneAbbreviation: null,
             isDst: false,
           });
+          setTimezone(String(tzOffset));
         }
-        if (b.timezone != null) setTimezone(String(b.timezone));
       }
     },
     [],
@@ -413,10 +425,33 @@ export default function KundliPage() {
       effectivePeriod = period;
     }
 
-    const effectiveLat = selectedPlace?.latitude ?? latitude ?? 22.5726;
-    const effectiveLon = selectedPlace?.longitude ?? longitude ?? 88.3639;
-    const effectiveTz = selectedPlace?.timezoneOffset ?? parseFloat(timezone) ?? 5.5;
+    const effectiveLat =
+      selectedPlace?.latitude != null && !isNaN(selectedPlace.latitude)
+        ? selectedPlace.latitude
+        : latitude != null && !isNaN(latitude)
+        ? latitude
+        : 22.5726;
+
+    const effectiveLon =
+      selectedPlace?.longitude != null && !isNaN(selectedPlace.longitude)
+        ? selectedPlace.longitude
+        : longitude != null && !isNaN(longitude)
+        ? longitude
+        : 88.3639;
+
+    const rawTz =
+      selectedPlace?.timezoneOffset != null && !isNaN(selectedPlace.timezoneOffset)
+        ? selectedPlace.timezoneOffset
+        : parseFloat(timezone);
+    const effectiveTz = typeof rawTz === "number" && !isNaN(rawTz) ? rawTz : 5.5;
+
     const effectivePlace = selectedPlace?.place ?? (place.trim() || "Kolkata, West Bengal, India");
+
+    const effectiveTzName =
+      selectedPlace?.timezoneName ||
+      (typeof profile?.birth?.timezone === "string" && isNaN(Number(profile.birth.timezone))
+        ? profile.birth.timezone
+        : null);
 
     const payload: KundliCalculatePayload = {
       name: name.trim(),
@@ -432,6 +467,7 @@ export default function KundliPage() {
       latitude: effectiveLat,
       longitude: effectiveLon,
       timezone: effectiveTz,
+      timezone_name: effectiveTzName,
       ayanamsa,
       house_system: houseSystem,
       chart_style:
@@ -490,7 +526,13 @@ export default function KundliPage() {
         setCoinModalReason("unauthorized");
         setCoinModalOpen(true);
       } else {
-        toast.error(err?.message || "Failed to calculate Kundli.");
+        const detailedMsg =
+          err?.fieldErrors && Object.keys(err.fieldErrors).length > 0
+            ? Object.entries(err.fieldErrors)
+                .map(([f, m]) => `${f}: ${m}`)
+                .join(", ")
+            : err?.message || "Failed to calculate Kundli.";
+        toast.error(detailedMsg);
       }
     } finally {
       setLoading(false);

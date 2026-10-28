@@ -939,6 +939,7 @@ export interface KundliCalculatePayload {
   latitude?: number | null;
   longitude?: number | null;
   timezone: number;
+  timezone_name?: string | null;
   ayanamsa?: AyanamsaType;
   house_system?: HouseSystemType;
   chart_style?: ChartStyleType;
