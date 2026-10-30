@@ -1037,6 +1037,7 @@ export interface PlanetaryDignityItem {
   planet_hi: string;
   sign: string;
   sign_bn: string;
+  sign_hi?: string;
   house: number;
   degree: number;
   degree_formatted: string;
@@ -1059,11 +1060,14 @@ export interface HousePredictionItem {
   house_name_hi: string;
   sign: string;
   sign_bn: string;
+  sign_hi?: string;
   sign_lord: string;
   sign_lord_bn: string;
+  sign_lord_hi?: string;
   lord_placement_house: number;
   occupants: string[];
   occupants_bn: string[];
+  occupants_hi?: string[];
   overview: string;
   overview_bn: string;
   overview_hi: string;
@@ -1081,6 +1085,7 @@ export interface ExtendedYogaItem {
   name_hi: string;
   category: string;
   category_bn: string;
+  category_hi?: string;
   is_present: boolean;
   description: string;
   description_bn: string;
@@ -1097,10 +1102,13 @@ export interface DoshaAnalysisItem {
   is_present: boolean;
   severity: string;
   severity_bn: string;
+  severity_hi?: string;
   specific_type?: string | null;
   specific_type_bn?: string | null;
+  specific_type_hi?: string | null;
   cancellation_reason?: string | null;
   cancellation_reason_bn?: string | null;
+  cancellation_reason_hi?: string | null;
   remedy: string;
   remedy_bn: string;
   remedy_hi: string;
@@ -1109,21 +1117,27 @@ export interface DoshaAnalysisItem {
 export interface GemstoneItem {
   category: string;
   category_bn: string;
+  category_hi?: string;
   stone_name: string;
   stone_name_bn: string;
   stone_name_hi: string;
   sanskrit_name: string;
   ruling_planet: string;
   ruling_planet_bn: string;
+  ruling_planet_hi?: string;
   metal: string;
   metal_bn: string;
+  metal_hi?: string;
   finger: string;
   finger_bn: string;
+  finger_hi?: string;
   wearing_day: string;
   wearing_day_bn: string;
+  wearing_day_hi?: string;
   beej_mantra: string;
   benefit: string;
   benefit_bn: string;
+  benefit_hi?: string;
 }
 
 export interface PersonalRemedies {
@@ -1138,16 +1152,20 @@ export interface PersonalRemedies {
   ishta_devata_hi: string;
   lucky_colors: string[];
   lucky_colors_bn: string[];
+  lucky_colors_hi?: string[];
   lucky_numbers: number[];
   favorable_direction: string;
   favorable_direction_bn: string;
+  favorable_direction_hi?: string;
 }
 
 export interface CurrentDashaInfo {
   mahadasha_lord: string;
   mahadasha_lord_bn: string;
+  mahadasha_lord_hi?: string;
   antardasha_lord: string;
   antardasha_lord_bn: string;
+  antardasha_lord_hi?: string;
   start_date: string;
   end_date: string;
   verdict: string;

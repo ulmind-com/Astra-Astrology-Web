@@ -68,6 +68,9 @@ import {
   translateBalDasa,
   translateYogaName,
   translateYogaDetails,
+  translateMetal,
+  translateFinger,
+  translateWearingDay,
   toLocalizedDigits,
 } from "@/lib/kundli-translations";
 import type {
@@ -351,11 +354,7 @@ export default function KundliPage() {
   const handleReloadFromProfile = () => {
     if (profile) {
       populateFromProfileData(profile, user);
-      toast.success(
-        language === "bn"
-          ? "প্রোফাইল থেকে তথ্য লোড করা হয়েছে"
-          : "Details reloaded from your profile",
-      );
+      toast.success(t.toastProfileLoaded);
     }
   };
 
@@ -363,13 +362,7 @@ export default function KundliPage() {
     e.preventDefault();
 
     if (!name.trim()) {
-      toast.error(
-        language === "bn"
-          ? "অনুগ্রহ করে আপনার নাম লিখুন"
-          : language === "hi"
-          ? "कृपया अपना नाम दर्ज करें"
-          : "Please enter your name",
-      );
+      toast.error(t.toastEnterName);
       return;
     }
 
@@ -391,25 +384,13 @@ export default function KundliPage() {
       y < 1800 ||
       y > 2100
     ) {
-      toast.error(
-        language === "bn"
-          ? "সঠিক জন্মতারিখ (দিন, মাস ও সাল) প্রদান করুন"
-          : language === "hi"
-          ? "कृपया मान्य जन्म तिथि दर्ज करें"
-          : "Please enter a valid birth date (DD, MM, YYYY)",
-      );
+      toast.error(t.toastEnterDob);
       return;
     }
 
     if (!selectedPlace && !place.trim()) {
       setPlaceTouched(true);
-      toast.error(
-        language === "bn"
-          ? "অনুগ্রহ করে তালিকা থেকে আপনার জন্মস্থান নির্বাচন করুন"
-          : language === "hi"
-          ? "कृपया सूची से अपना जन्म स्थान चुनें"
-          : "Please choose your birth place from the list",
-      );
+      toast.error(t.toastChoosePlace);
       return;
     }
 
@@ -484,11 +465,7 @@ export default function KundliPage() {
     const access = checkAccess("kundli");
     if (!access.allowed) {
       if (access.reason === "disabled") {
-        toast.error(
-          language === "bn"
-            ? "কুন্ডলী ফিচারটি বর্তমানে অ্যাডমিন দ্বারা বন্ধ রাখা হয়েছে।"
-            : "Kundli feature is temporarily unavailable.",
-        );
+        toast.error(t.toastDisabled);
         return;
       }
       setCoinModalReason(access.reason || "insufficient_coins");
@@ -501,18 +478,10 @@ export default function KundliPage() {
       const resp = await astrologyApi.calculateKundli(payload);
       setResult(resp);
       if (access.requiredCoins > 0) {
-        toast.success(
-          language === "bn"
-            ? `কুন্ডলী গণনা সম্পন্ন হয়েছে! (${access.requiredCoins} কয়েন খরচ হয়েছে)`
-            : `Kundli calculated! (${access.requiredCoins} coins used)`,
-        );
+        toast.success(t.toastSuccessCoins(access.requiredCoins));
         refreshWallet();
       } else {
-        toast.success(
-          language === "bn"
-            ? "কুন্ডলী ও গ্রহের অবস্থান সফলভাবে গণনা সম্পন্ন হয়েছে!"
-            : "Kundli & Planetary Position calculated successfully!",
-        );
+        toast.success(t.toastSuccess);
       }
       setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -558,29 +527,15 @@ export default function KundliPage() {
         <div className="mx-auto max-w-4xl text-center space-y-3">
           <div className="inline-flex items-center gap-2 rounded-full bg-amber-100/90 text-amber-950 border border-amber-300 font-bold px-4 py-1.5 text-xs shadow-2xs">
             <Sparkles className="size-3.5 text-amber-600" />
-            <span>
-              {language === "bn"
-                ? "বৈদিক জ্যোতিষশাস্ত্র ভিত্তিক নির্ভুল কুন্ডলী ক্যালকুলেটর"
-                : language === "hi"
-                ? "वैदिक ज्योतिष सम्मत सटीक जन्म कुंडली कैलकुलेटर"
-                : "Vedic Sidereal Accurate Birth Kundli Calculator"}
-            </span>
+            <span>{t.badge}</span>
           </div>
 
           <h1 className="font-display text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
-            {language === "bn"
-              ? "জন্মতারিখ দিয়ে কুন্ডলী ও গ্রহের অবস্থান — সম্পূর্ণ ফ্রি"
-              : language === "hi"
-              ? "जन्मतिथि से जानें जन्म कुंडली एवं ग्रह स्थिति — पूर्णतः निःशुल्क"
-              : "Find Your Kundli by Date of Birth - Complete Vedic Chart"}
+            {t.title}
           </h1>
 
           <p className="text-xs sm:text-sm text-foreground-muted max-w-2xl mx-auto">
-            {language === "bn"
-              ? "সঠিক লগ্ন, ১২টি ভাব, নবাংশ (D9) চার্ট, বিংশোত্তরী দশা ও বৈদিক যোগের পূর্ণাঙ্গ বিশ্লেষণ।"
-              : language === "hi"
-              ? "सटीक लग्न, १२ भाव, नवमांश (D9) चार्ट, विंशोत्तरी दशा एवं वैदिक योगों का संपूर्ण विश्लेषण।"
-              : "Accurate Ascendant, 12 Placidus House Cusps, Navamsha D9 Chart, Vimshottari Dashas and Classical Vedic Yogas."}
+            {t.subtitle}
           </p>
 
           {/* Feature Coin Badge */}
@@ -595,7 +550,7 @@ export default function KundliPage() {
           {/* Language Switcher Bar matching Image 2 */}
           <div className="flex items-center justify-center gap-2 pt-2">
             <span className="text-xs font-semibold text-foreground-muted">
-              {language === "bn" ? "ভাষা / Language:" : language === "hi" ? "भाषा / Language:" : "Language:"}
+              {t.languageLabel}
             </span>
             <div className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-white p-1 text-xs font-semibold shadow-2xs">
               {(
@@ -628,11 +583,7 @@ export default function KundliPage() {
         <div ref={formRef} className="mx-auto max-w-3xl w-full">
           <div className="rounded-[28px] border border-amber-300/70 bg-card p-6 sm:p-9 shadow-[0_12px_40px_-15px_rgba(26,18,8,0.08)] backdrop-blur-md">
             <h2 className="text-center font-display text-xl sm:text-2xl font-bold text-foreground mb-4">
-              {language === "bn"
-                ? "আপনার জন্ম বিবরণ প্রবেশ করান"
-                : language === "hi"
-                ? "अपना जन्म विवरण दर्ज करें"
-                : "Enter Your Birth Details"}
+              {t.formTitle}
             </h2>
 
             {/* Dynamic Profile Sync Status Banner */}
@@ -652,11 +603,7 @@ export default function KundliPage() {
                     </span>
                     <span className="text-muted-foreground ml-1.5 block sm:inline">
                       {profile?.birth?.date_of_birth
-                        ? language === "bn"
-                          ? "আপনার প্রোফাইল থেকে সংরক্ষিত জন্ম বিবরণ স্বয়ংক্রিয়ভাবে লোড করা হয়েছে।"
-                          : language === "hi"
-                          ? "आपकी प्रोफ़ाइल से सहेजा गया जन्म विवरण स्वतः भर दिया गया है।"
-                          : "Saved birth details loaded from your profile."
+                        ? t.profileSyncSub
                         : language === "bn"
                         ? "আপনার প্রোফাইলের নাম লোড করা হয়েছে।"
                         : language === "hi"
@@ -674,7 +621,7 @@ export default function KundliPage() {
                       className="inline-flex items-center gap-1 rounded-xl bg-white/90 hover:bg-white px-2.5 py-1 text-[11px] font-bold text-amber-900 border border-amber-300 shadow-2xs transition-colors cursor-pointer"
                     >
                       <RefreshCw className="size-3 text-amber-700" />
-                      <span>{language === "bn" ? "রিলোড" : language === "hi" ? "रीलोड" : "Reload"}</span>
+                      <span>{t.reloadBtn}</span>
                     </button>
                   )}
                   <button
@@ -683,7 +630,7 @@ export default function KundliPage() {
                     className="inline-flex items-center gap-1 rounded-xl bg-white/90 hover:bg-white px-2.5 py-1 text-[11px] font-bold text-rose-800 border border-rose-300 shadow-2xs transition-colors cursor-pointer"
                   >
                     <RotateCcw className="size-3 text-rose-600" />
-                    <span>{language === "bn" ? "খালি করুন" : language === "hi" ? "साफ़ करें" : "Clear"}</span>
+                    <span>{t.clearBtn}</span>
                   </button>
                 </div>
               </div>
@@ -693,19 +640,13 @@ export default function KundliPage() {
               <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-surface-muted/50 border border-border/80 px-4 py-3 text-xs text-muted-foreground shadow-2xs">
                 <div className="flex items-center gap-2">
                   <User className="size-4 text-amber-600 shrink-0" />
-                  <span>
-                    {language === "bn"
-                      ? "লগ-ইন করলে আপনার প্রোফাইলের সেভ করা জন্ম বিবরণ সরাসরি এখানে পূরণ হয়ে যাবে।"
-                      : language === "hi"
-                      ? "लॉग-इन करने पर आपकी प्रोफ़ाइल का विवरण स्वतः यहाँ भर जाएगा।"
-                      : "Sign in to automatically load your saved profile and birth details."}
-                  </span>
+                  <span>{t.signInPrompt}</span>
                 </div>
                 <Link
                   href="/login"
                   className="rounded-xl bg-amber-500 text-amber-950 px-3 py-1 text-[11px] font-bold shadow-2xs hover:bg-amber-400 transition-colors ml-auto"
                 >
-                  {language === "bn" ? "লগ-ইন করুন" : language === "hi" ? "लॉग-इन करें" : "Sign In"}
+                  {t.signInBtn}
                 </Link>
               </div>
             )}
@@ -715,20 +656,14 @@ export default function KundliPage() {
               <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                 <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
                   <User className="size-4 text-amber-600" />
-                  <span>{language === "bn" ? "নাম" : language === "hi" ? "नाम" : "Name"}</span>
+                  <span>{t.nameLabel}</span>
                 </label>
                 <div className="sm:col-span-9">
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder={
-                      language === "bn"
-                        ? "আপনার নাম লিখুন..."
-                        : language === "hi"
-                        ? "अपना नाम लिखें..."
-                        : "Enter your name..."
-                    }
+                    placeholder={t.namePlaceholder}
                     className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs font-medium"
                   />
                 </div>
@@ -738,7 +673,7 @@ export default function KundliPage() {
               <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                 <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
                   <HeartHandshake className="size-4 text-indigo-500" />
-                  <span>{language === "bn" ? "লিঙ্গ" : language === "hi" ? "लिंग" : "Gender"}</span>
+                  <span>{t.genderLabel}</span>
                 </label>
                 <div className="sm:col-span-9">
                   <select
@@ -746,15 +681,9 @@ export default function KundliPage() {
                     onChange={(e) => setGender(e.target.value as any)}
                     className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs cursor-pointer font-medium"
                   >
-                    <option value="male">
-                      {language === "bn" ? "পুরুষ (Male)" : language === "hi" ? "पुरुष (Male)" : "Male"}
-                    </option>
-                    <option value="female">
-                      {language === "bn" ? "মহিলা (Female)" : language === "hi" ? "महिला (Female)" : "Female"}
-                    </option>
-                    <option value="other">
-                      {language === "bn" ? "অন্যান্য (Other)" : language === "hi" ? "अन्य (Other)" : "Other"}
-                    </option>
+                    <option value="male">{t.genderMale}</option>
+                    <option value="female">{t.genderFemale}</option>
+                    <option value="other">{t.genderOther}</option>
                   </select>
                 </div>
               </div>
@@ -764,7 +693,7 @@ export default function KundliPage() {
                 <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
                   <Calendar className="size-4 text-amber-600" />
                   <span>
-                    {language === "bn" ? "জন্মতারিখ" : language === "hi" ? "जन्म तिथि" : "Birth Day"}
+                    {t.dobLabel}
                     <span className="text-[11px] font-bold text-rose-600 ml-1.5">*</span>
                   </span>
                 </label>
@@ -807,9 +736,9 @@ export default function KundliPage() {
                 <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
                   <Clock className="size-4 text-emerald-600" />
                   <span>
-                    {language === "bn" ? "জন্মসময়" : language === "hi" ? "जन्म समय" : "Birth Time"}
+                    {t.tobLabel}
                     <span className="text-[11px] font-semibold text-emerald-700 ml-1.5">
-                      ({language === "bn" ? "ঐচ্ছিক — না দিলে ১২:০০ PM" : language === "hi" ? "वैकल्पिक — 12:00 PM" : "Optional — 12:00 PM"})
+                      ({t.tobOptional})
                     </span>
                   </span>
                 </label>
@@ -860,7 +789,7 @@ export default function KundliPage() {
                 <label className="sm:col-span-3 flex items-start gap-2 pt-3 font-bold text-foreground">
                   <MapPin className="mt-0.5 size-4 shrink-0 text-rose-500" />
                   <span>
-                    {language === "bn" ? "জন্মস্থান" : "Birth Place"}
+                    {t.placeLabel}
                     <span className="ml-1 text-rose-500">*</span>
                   </span>
                 </label>
@@ -895,11 +824,7 @@ export default function KundliPage() {
                   className="flex items-center gap-1.5 text-xs font-bold text-amber-800 hover:text-amber-950 transition-colors cursor-pointer"
                 >
                   <Sliders className="size-3.5" />
-                  <span>
-                    {language === "bn"
-                      ? "উন্নত সেটিংস (অয়নাংশ ও ভাব পদ্ধতি)"
-                      : "Advanced Settings (Ayanamsa & House System)"}
-                  </span>
+                  <span>{t.advancedSettings}</span>
                   {showAdvance ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
                 </button>
 
@@ -939,7 +864,7 @@ export default function KundliPage() {
               {kundliFeature && !kundliFeature.enabled && (
                 <div className="pt-2">
                   <FeatureDisabledAlert
-                    featureName={language === "bn" ? "কুন্ডলী গণনা" : "Kundli Calculation"}
+                    featureName={kundliFeature?.name || t.calculateBtn}
                     language={language}
                   />
                 </div>
@@ -949,7 +874,7 @@ export default function KundliPage() {
               <div className="pt-3 space-y-2">
                 <div className="flex items-center justify-between px-1">
                   <span className="text-[11px] font-medium text-foreground-muted">
-                    {language === "bn" ? "গণনা খরচ" : "Calculation Fee"}:
+                    {t.calculationFee}:
                   </span>
                   <FeatureCoinBadge
                     feature={kundliFeature}
@@ -967,16 +892,10 @@ export default function KundliPage() {
                   <Sparkles className="size-4" />
                   <span>
                     {loading
-                      ? language === "bn"
-                        ? "কুন্ডলী গণনা করা হচ্ছে..."
-                        : "Calculating Kundli..."
+                      ? t.calculating
                       : kundliFeature && !kundliFeature.enabled
-                      ? language === "bn"
-                        ? "ফিচারটি বন্ধ রয়েছে"
-                        : "Feature Unavailable"
-                      : language === "bn"
-                      ? "কুন্ডলী গণনা করুন"
-                      : "Calculate Kundli"}
+                      ? t.toastDisabled
+                      : t.calculateBtn}
                   </span>
                 </button>
               </div>
@@ -1025,15 +944,7 @@ export default function KundliPage() {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    toast.success(
-                      language === "bn"
-                        ? "কুন্ডলী আপনার প্রোফাইলে সংরক্ষিত হয়েছে!"
-                        : language === "hi"
-                        ? "कुण्डली आपके प्रोफ़ाइल में सुरक्षित हो गई है!"
-                        : "Kundli saved to your profile!"
-                    )
-                  }
+                  onClick={() => toast.success(t.toastSaved)}
                   className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50/80 hover:bg-amber-100 px-4 py-2 text-xs font-bold text-amber-950 transition-colors shadow-2xs cursor-pointer"
                 >
                   <Lock className="size-4 text-amber-600" />
@@ -1063,15 +974,13 @@ export default function KundliPage() {
                     </div>
                     <div>
                       <div className="text-[11px] font-bold text-amber-800 uppercase tracking-widest">
-                        {language === "bn"
-                          ? "চলমান বিংশোত্তরী দশা মার্গদর্শন"
-                          : language === "hi"
-                          ? "वर्तमान विंशोत्तरी दशा मार्गदर्शन"
-                          : "Current Vimshottari Dasha Insight"}
+                        {t.currentRunningDasha}
                       </div>
                       <h3 className="font-display text-lg sm:text-xl font-extrabold text-foreground">
                         {language === "bn" && result.current_dasha.verdict_bn
                           ? result.current_dasha.verdict_bn
+                          : language === "hi" && result.current_dasha.verdict_hi
+                          ? result.current_dasha.verdict_hi
                           : result.current_dasha.verdict}
                       </h3>
                     </div>
@@ -1079,7 +988,7 @@ export default function KundliPage() {
                   <div className="inline-flex items-center gap-2 rounded-xl bg-amber-100/90 border border-amber-300 px-3.5 py-1.5 text-xs font-bold text-amber-950 self-start sm:self-auto">
                     <Clock className="size-3.5 text-amber-700" />
                     <span>
-                      {language === "bn" ? "সমাপ্তি:" : "Ends:"} {toLocalizedDigits(result.current_dasha.end_date, language)}
+                      {t.dashaEndsLabel} {toLocalizedDigits(result.current_dasha.end_date, language)}
                     </span>
                   </div>
                 </div>
@@ -1087,6 +996,8 @@ export default function KundliPage() {
                   <p className="font-medium text-foreground">
                     {language === "bn" && result.current_dasha.guidance_bn
                       ? result.current_dasha.guidance_bn
+                      : language === "hi" && result.current_dasha.guidance_hi
+                      ? result.current_dasha.guidance_hi
                       : result.current_dasha.guidance}
                   </p>
                 </div>
@@ -1337,10 +1248,10 @@ export default function KundliPage() {
               <div className="inline-flex rounded-xl bg-amber-50 p-1 border border-amber-300">
                 {(
                   [
-                    { key: "north", label: language === "bn" ? "উত্তর ভারত" : language === "hi" ? "उत्तर भारत" : "North" },
-                    { key: "east", label: language === "bn" ? "পূর্ব ভারত" : language === "hi" ? "पूर्व भारत" : "East" },
-                    { key: "south", label: language === "bn" ? "দক্ষিণ ভারত" : language === "hi" ? "दक्षिण भारत" : "South" },
-                    { key: "wheel", label: language === "bn" ? "ডায়মন্ড চার্ট" : language === "hi" ? "डायमंड चक्र" : "AppliedJyotish" },
+                    { key: "north", label: t.styleNorth },
+                    { key: "east", label: t.styleEast },
+                    { key: "south", label: t.styleSouth },
+                    { key: "wheel", label: t.styleDiamond },
                   ] as const
                 ).map((s) => (
                   <button
@@ -1506,16 +1417,10 @@ export default function KundliPage() {
               <div className="rounded-3xl border border-amber-200/80 bg-white p-5 sm:p-6 shadow-soft space-y-4">
                 <div className="text-center space-y-1">
                   <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">
-                    {language === "bn"
-                      ? "গ্রহের বলবত্তা, দগ্ধাবস্থা ও পঞ্চাবস্থা বিচার"
-                      : language === "hi"
-                      ? "ग्रहों का बलाबल, दग्धावस्था एवं पंचावस्था"
-                      : "Planetary Dignities, Combustion & Avasthas"}
+                    {t.dignitiesTableTitle}
                   </h3>
                   <p className="text-xs text-foreground-muted">
-                    {language === "bn"
-                      ? "পরাশর হোরা শাস্ত্র অনুসারে প্রতিটি গ্রহের উচ্চ/নীচ বলবত্তা, সূর্যের সান্নিধ্যে দগ্ধাবস্থা এবং জাগ্রত শক্তির মাত্রা।"
-                      : "Classical Brihat Parashara analysis of planetary dignity, combustion and operational vitality."}
+                    {t.dignitiesTableSub}
                   </p>
                   <GoldDiamondDivider />
                 </div>
@@ -1524,13 +1429,13 @@ export default function KundliPage() {
                   <table className="w-full border-collapse text-left text-xs sm:text-sm">
                     <thead>
                       <tr className="bg-amber-100/90 text-amber-950 font-bold border-b border-amber-300">
-                        <th className="py-3 px-4 font-bold text-center">{language === "bn" ? "গ্রহ" : "Planet"}</th>
-                        <th className="py-3 px-4 font-bold text-center">{language === "bn" ? "রাশি ও ডিগ্রি" : "Sign & Deg"}</th>
-                        <th className="py-3 px-4 font-bold text-center">{language === "bn" ? "অবস্থান ভাব" : "House"}</th>
-                        <th className="py-3 px-4 font-bold text-center">{language === "bn" ? "বলবত্তা (Dignity)" : "Dignity"}</th>
-                        <th className="py-3 px-4 font-bold text-center">{language === "bn" ? "পঞ্চাবস্থা" : "Avastha"}</th>
-                        <th className="py-3 px-4 font-bold text-center">{language === "bn" ? "দগ্ধাবস্থা" : "Combustion"}</th>
-                        <th className="py-3 px-4 font-bold text-center">{language === "bn" ? "বিশেষ মর্যাদা" : "Special Yoga"}</th>
+                        <th className="py-3 px-4 font-bold text-center">{t.thPlanet}</th>
+                        <th className="py-3 px-4 font-bold text-center">{t.thLongitude}</th>
+                        <th className="py-3 px-4 font-bold text-center">{t.thHouse}</th>
+                        <th className="py-3 px-4 font-bold text-center">{t.thDignity}</th>
+                        <th className="py-3 px-4 font-bold text-center">{t.thAvastha}</th>
+                        <th className="py-3 px-4 font-bold text-center">{t.thCombustion}</th>
+                        <th className="py-3 px-4 font-bold text-center">{t.thSpecialYoga}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-amber-100/80 bg-white">
@@ -1540,7 +1445,7 @@ export default function KundliPage() {
                             {translatePlanetName(item.planet, language)}
                             {item.is_retrograde && (
                               <span className="ml-1 text-[11px] text-amber-700 font-bold">
-                                ({language === "bn" ? "বক্রী" : "R"})
+                                ({t.retroTag})
                               </span>
                             )}
                           </td>
@@ -1555,7 +1460,7 @@ export default function KundliPage() {
                           <td className="py-3 px-4 text-center font-bold text-amber-900 tabular-nums">
                             {toLocalizedDigits(item.house, language)}
                             <span className="text-[10px] text-foreground-muted ml-0.5">
-                              {language === "bn" ? "ম ভাব" : "th"}
+                              {t.houseSuffix}
                             </span>
                           </td>
                           <td className="py-3 px-4 text-center">
@@ -1584,11 +1489,11 @@ export default function KundliPage() {
                             {item.is_combust ? (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-900 border border-orange-300">
                                 <Flame className="size-3 text-orange-600" />
-                                {language === "bn" ? "সূর্যদগ্ধ" : "Combust"}
+                                {t.combustTag}
                               </span>
                             ) : (
                               <span className="text-emerald-700 font-medium text-xs">
-                                {language === "bn" ? "অক্ষত" : "Normal"}
+                                {t.normalTag}
                               </span>
                             )}
                           </td>
@@ -1599,7 +1504,7 @@ export default function KundliPage() {
                                 className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-amber-500 text-white shadow-2xs"
                               >
                                 <Award className="size-3" />
-                                {language === "bn" ? "নীচভঙ্গ রাজযোগ" : "Neechabhanga"}
+                                {t.neechabhangaTag}
                               </span>
                             ) : (
                               <span className="text-foreground-muted">-</span>
@@ -1620,16 +1525,10 @@ export default function KundliPage() {
               <div className="rounded-3xl border border-amber-200/80 bg-white p-6 sm:p-8 shadow-soft space-y-6">
                 <div className="text-center space-y-1">
                   <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">
-                    {language === "bn"
-                      ? "দ্বাদশ ভাব ও জীবনের ১২টি ক্ষেত্রের ফলাফল"
-                      : language === "hi"
-                      ? "द्वादश भाव एवं जीवन के १२ क्षेत्र"
-                      : "12 Houses Deep Astrological Synthesis"}
+                    {t.housesSynthesisTitle}
                   </h3>
                   <p className="text-xs text-foreground-muted">
-                    {language === "bn"
-                      ? "আপনার কুন্ডলীর প্রতিটি ভাবের রাশিপতি, অবস্থানরত গ্রহ এবং ক্যারিয়ার, অর্থ ও সম্পর্কের ওপর প্রভাব।"
-                      : "Comprehensive house-by-house analysis of career, wealth, health and relationships."}
+                    {t.housesSynthesisSub}
                   </p>
                   <GoldDiamondDivider />
                 </div>
@@ -1638,6 +1537,12 @@ export default function KundliPage() {
                 <div className="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-12 gap-1.5">
                   {result.house_predictions.map((h) => {
                     const isSelected = activeHouseTab === h.house_number;
+                    const hNameDisplay =
+                      language === "bn"
+                        ? h.house_name_bn.split(" ")[0]
+                        : language === "hi"
+                        ? (h.house_name_hi || h.house_name).split(" ")[0]
+                        : h.house_name.split(" ")[0];
                     return (
                       <button
                         key={`h-tab-${h.house_number}`}
@@ -1653,7 +1558,7 @@ export default function KundliPage() {
                           {toLocalizedDigits(h.house_number, language)}
                         </div>
                         <div className="text-[10px] font-bold truncate">
-                          {language === "bn" ? h.house_name_bn.split(" ")[0] : h.house_name.split(" ")[0]}
+                          {hNameDisplay}
                         </div>
                       </button>
                     );
@@ -1667,31 +1572,34 @@ export default function KundliPage() {
                     result.house_predictions[0];
                   if (!sel) return null;
 
+                  const selHouseName =
+                    language === "bn"
+                      ? sel.house_name_bn
+                      : language === "hi"
+                      ? (sel.house_name_hi || sel.house_name)
+                      : sel.house_name;
+
                   return (
                     <div className="rounded-2xl border-2 border-amber-200 bg-gradient-to-br from-amber-50/40 via-white to-amber-50/20 p-5 sm:p-6 space-y-4">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-amber-200">
                         <div>
                           <div className="text-[11px] font-bold text-amber-800 uppercase tracking-widest">
-                            {language === "bn" ? "ভাব পরিচয়" : "House Overview"}
+                            {t.houseOverviewLabel}
                           </div>
                           <h4 className="font-display text-xl font-extrabold text-foreground flex items-center gap-2">
                             <span>
                               {toLocalizedDigits(sel.house_number, language)}
-                              {language === "bn" ? "ম ভাব: " : "th House: "}
-                              {language === "bn" ? sel.house_name_bn : sel.house_name}
+                              {t.houseTitleSuffix} {selHouseName}
                             </span>
                           </h4>
                         </div>
                         <div className="flex flex-wrap items-center gap-2 text-xs">
                           <span className="px-3 py-1 rounded-xl bg-amber-100 border border-amber-300 font-bold text-amber-950">
-                            {language === "bn" ? "রাশি: " : "Sign: "}
-                            {translateRashiName(sel.sign, language)}
+                            {t.signLabel} {translateRashiName(sel.sign, language)}
                           </span>
                           <span className="px-3 py-1 rounded-xl bg-amber-100 border border-amber-300 font-bold text-amber-950">
-                            {language === "bn" ? "ভাবাধিপতি: " : "Lord: "}
-                            {translatePlanetName(sel.sign_lord, language)} (
-                            {toLocalizedDigits(sel.lord_placement_house, language)}
-                            {language === "bn" ? "মে অবস্থান" : "th house"})
+                            {t.lordLabel} {translatePlanetName(sel.sign_lord, language)} (
+                            {toLocalizedDigits(sel.lord_placement_house, language)} {t.placementSuffix})
                           </span>
                         </div>
                       </div>
@@ -1699,7 +1607,7 @@ export default function KundliPage() {
                       {/* Occupants badge */}
                       <div className="flex items-center gap-2 text-xs">
                         <span className="font-bold text-foreground-muted">
-                          {language === "bn" ? "অবস্থানরত গ্রহ:" : "Occupants:"}
+                          {t.occupantsLabel}
                         </span>
                         {sel.occupants.length > 0 ? (
                           <div className="flex flex-wrap gap-1.5">
@@ -1714,7 +1622,7 @@ export default function KundliPage() {
                           </div>
                         ) : (
                           <span className="text-foreground-muted italic">
-                            {language === "bn" ? "কোন গ্রহ নেই (দৃষ্টির প্রভাব প্রযোজ্য)" : "Empty house"}
+                            {t.emptyHouseNote}
                           </span>
                         )}
                       </div>
@@ -1724,30 +1632,42 @@ export default function KundliPage() {
                         <div className="rounded-xl border border-amber-200 bg-white p-4 space-y-1.5 shadow-2xs">
                           <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
                             <BookOpen className="size-3.5 text-amber-600" />
-                            <span>{language === "bn" ? "মূল তাৎপর্য" : "Significance"}</span>
+                            <span>{t.significanceLabel}</span>
                           </div>
                           <p className="text-xs text-foreground-muted leading-relaxed">
-                            {language === "bn" ? sel.overview_bn : sel.overview}
+                            {language === "bn"
+                              ? sel.overview_bn
+                              : language === "hi"
+                              ? (sel.overview_hi || sel.overview)
+                              : sel.overview}
                           </p>
                         </div>
 
                         <div className="rounded-xl border border-amber-200 bg-white p-4 space-y-1.5 shadow-2xs">
                           <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-900">
                             <Award className="size-3.5 text-emerald-600" />
-                            <span>{language === "bn" ? "কর্ম ও অর্থভাগ্য" : "Career & Wealth"}</span>
+                            <span>{t.careerWealthLabel}</span>
                           </div>
                           <p className="text-xs text-foreground-muted leading-relaxed">
-                            {language === "bn" ? sel.career_wealth_effect_bn : sel.career_wealth_effect}
+                            {language === "bn"
+                              ? sel.career_wealth_effect_bn
+                              : language === "hi"
+                              ? (sel.career_wealth_effect_hi || sel.career_wealth_effect)
+                              : sel.career_wealth_effect}
                           </p>
                         </div>
 
                         <div className="rounded-xl border border-amber-200 bg-white p-4 space-y-1.5 shadow-2xs">
                           <div className="flex items-center gap-1.5 text-xs font-bold text-purple-900">
                             <Heart className="size-3.5 text-purple-600" />
-                            <span>{language === "bn" ? "সম্পর্ক ও পারিবারিক সুখ" : "Family & Relationships"}</span>
+                            <span>{t.familyRelationshipsLabel}</span>
                           </div>
                           <p className="text-xs text-foreground-muted leading-relaxed">
-                            {language === "bn" ? sel.relationship_family_effect_bn : sel.relationship_family_effect}
+                            {language === "bn"
+                              ? sel.relationship_family_effect_bn
+                              : language === "hi"
+                              ? (sel.relationship_family_effect_hi || sel.relationship_family_effect)
+                              : sel.relationship_family_effect}
                           </p>
                         </div>
                       </div>
@@ -1828,22 +1748,10 @@ export default function KundliPage() {
                 {/* Divisional Chart Switcher Tabs */}
                 <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
                   {[
-                    {
-                      id: "d1",
-                      name: language === "bn" ? "D1: লগ্ন ছক (সাধারণ জীবন)" : language === "hi" ? "D1: लग्न कुंडली (जीवन)" : "D1: Rasi (Foundation)",
-                    },
-                    {
-                      id: "d9",
-                      name: language === "bn" ? "D9: নবাংশ ছক (দাম্পত্য ও ভাগ্য)" : language === "hi" ? "D9: नवांश कुंडली (भाग्य/दांपत्य)" : "D9: Navamsha (Destiny)",
-                    },
-                    {
-                      id: "d10",
-                      name: language === "bn" ? "D10: দশমাংশ ছক (ক্যারিয়ার ও পদমর্যাদা)" : language === "hi" ? "D10: दशमांश कुंडली (करियर)" : "D10: Dasamsha (Career)",
-                    },
-                    {
-                      id: "d7",
-                      name: language === "bn" ? "D7: সপ্তাংশ ছক (সন্তান ও সৃজনশীলতা)" : language === "hi" ? "D7: सप्तांश कुंडली (संतान)" : "D7: Saptamsha (Children)",
-                    },
+                    { id: "d1", name: t.d1Tab },
+                    { id: "d9", name: t.d9Tab },
+                    { id: "d10", name: t.d10Tab },
+                    { id: "d7", name: t.d7Tab },
                   ].map((tab) => (
                     <button
                       key={tab.id}
@@ -1864,9 +1772,9 @@ export default function KundliPage() {
                 <div className="inline-flex rounded-xl bg-amber-50 p-1 border border-amber-300 mt-2">
                   {(
                     [
-                      { key: "north", label: language === "bn" ? "উত্তর ভারত" : language === "hi" ? "उत्तर भारत" : "North" },
-                      { key: "east", label: language === "bn" ? "পূর্ব ভারত" : language === "hi" ? "पूर्व भारत" : "East" },
-                      { key: "south", label: language === "bn" ? "দক্ষিণ ভারত" : language === "hi" ? "दक्षिण भारत" : "South" },
+                      { key: "north", label: t.styleNorth },
+                      { key: "east", label: t.styleEast },
+                      { key: "south", label: t.styleSouth },
                     ] as const
                   ).map((s) => (
                     <button
@@ -1890,9 +1798,7 @@ export default function KundliPage() {
                 {activeChartTab === "d1" && (
                   <>
                     <p className="text-xs text-foreground-muted text-center max-w-md">
-                      {language === "bn"
-                        ? "लग्न কুন্ডলী (D1) সমগ্র মানবজীবনের শারীরিক গঠন, স্বাস্থ্য, প্রবৃত্তি এবং ভাগ্যের মূল স্তম্ভ নির্দেশ করে।"
-                        : "Lagna Chart (D1) represents the foundational core, physical life, vitality and basic destiny."}
+                      {t.d1Desc}
                     </p>
                     <KundliDiamondChart
                       title={t.rasiChartTitle}
@@ -1908,12 +1814,10 @@ export default function KundliPage() {
                 {activeChartTab === "d9" && (
                   <>
                     <p className="text-xs text-foreground-muted text-center max-w-md">
-                      {language === "bn"
-                        ? "নবাংশ কুন্ডলী (D9) আত্মার অন্তর্নিহিত শক্তি, আধ্যাত্মিক সাধনা এবং দাম্পত্য জীবনের পূর্ণতা নির্দেশ করে।"
-                        : "Navamsha Chart (D9) reveals soul destiny, spiritual evolution and marriage longevity."}
+                      {t.d9Desc}
                     </p>
                     <KundliDiamondChart
-                      title={language === "bn" ? "নবাংশ চক্র (D9) — দাম্পত্য ও ভাগ্য" : language === "hi" ? "नवांश चक्र (D9)" : "Navamsha Chart (D9)"}
+                      title={t.navamsaChartTitle}
                       planets={result.d9_planets}
                       ascSignNum={result.d9_asc_sign}
                       isNavamsa={true}
@@ -1926,12 +1830,10 @@ export default function KundliPage() {
                 {activeChartTab === "d10" && (
                   <>
                     <p className="text-xs text-foreground-muted text-center max-w-md">
-                      {language === "bn"
-                        ? "দশমাংশ কুন্ডলী (D10) কর্মজীবন, পেশাগত সাফল্য, পদমর্যাদা, খ্যাতি এবং সমাজে অর্জিত প্রতিষ্ঠা নির্দেশ করে।"
-                        : "Dasamsha Chart (D10) governs profession, authority, achievements and social stature."}
+                      {t.d10Desc}
                     </p>
                     <KundliDiamondChart
-                      title={language === "bn" ? "দশমাংশ চক্র (D10) — কর্ম ও রাজসম্মান" : language === "hi" ? "दशमांश चक्र (D10)" : "Dasamsha Chart (D10)"}
+                      title={t.d10Title}
                       planets={result.d10_planets || result.d1_planets}
                       ascSignNum={result.d10_asc_sign || result.d1_asc_sign}
                       isNavamsa={false}
@@ -1944,12 +1846,10 @@ export default function KundliPage() {
                 {activeChartTab === "d7" && (
                   <>
                     <p className="text-xs text-foreground-muted text-center max-w-md">
-                      {language === "bn"
-                        ? "সপ্তাংশ কুন্ডলী (D7) সন্তানসুখ, বংশধর, উদ্ভাবনী ক্ষমতা এবং সৃষ্টিশীল মেধা নির্দেশ করে।"
-                        : "Saptamsha Chart (D7) governs children, progeny, lineage and creative intellect."}
+                      {t.d7Desc}
                     </p>
                     <KundliDiamondChart
-                      title={language === "bn" ? "সপ্তাংশ চক্র (D7) — সন্তান ও সৃজনশীলতা" : language === "hi" ? "सप्तांश चक्र (D7)" : "Saptamsha Chart (D7)"}
+                      title={t.d7Title}
                       planets={result.d7_planets || result.d1_planets}
                       ascSignNum={result.d7_asc_sign || result.d1_asc_sign}
                       isNavamsa={false}
@@ -2037,52 +1937,53 @@ export default function KundliPage() {
               <div className="rounded-3xl border border-amber-200/80 bg-white p-6 sm:p-8 shadow-soft space-y-6">
                 <div className="text-center space-y-1">
                   <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">
-                    {language === "bn"
-                      ? "পঞ্চ মহাপুরুষ, রাজযোগ ও ধনযোগ বিশ্লেষণ"
-                      : language === "hi"
-                      ? "पंच महापुरुष, राजयोग एवं धनयोग विश्लेषण"
-                      : "Pancha Mahapurusha, Raj Yogas & Dhana Yogas"}
+                    {t.extendedYogasTitle}
                   </h3>
                   <p className="text-xs text-foreground-muted">
-                    {language === "bn"
-                      ? "পরাশর হোরা শাস্ত্র ও জাতক পারিজাত অনুসারে গঠিত বিশেষ গ্রহ সংস্থান ও জীবনের শুভ ফলাফল।"
-                      : "Classical Vedic planetary configurations conferring wealth, authority, wisdom and fortune."}
+                    {t.extendedYogasSub}
                   </p>
                   <GoldDiamondDivider />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {result.extended_yogas.map((ey, eIdx) => (
-                    <div
-                      key={`ext-yoga-${eIdx}`}
-                      className="rounded-2xl border-2 border-amber-200/90 bg-gradient-to-br from-amber-50/40 via-white to-amber-50/20 p-5 space-y-2.5 shadow-2xs"
-                    >
-                      <div className="flex items-center justify-between pb-2 border-b border-amber-200">
-                        <div className="flex items-center gap-2">
-                          <span className="p-1 rounded-lg bg-amber-500 text-white">
-                            <Star className="size-4" />
+                  {result.extended_yogas.map((ey, eIdx) => {
+                    const eyName = language === "bn" ? ey.name_bn || ey.name : language === "hi" ? ey.name_hi || ey.name : ey.name;
+                    const eyCategory = language === "bn" ? ey.category_bn || ey.category : language === "hi" ? ey.category_hi || ey.category : ey.category;
+                    const eyDescription = language === "bn" ? ey.description_bn || ey.description : language === "hi" ? ey.description_hi || ey.description : ey.description;
+                    const eyEffects = language === "bn" ? ey.effects_bn || ey.effects : language === "hi" ? ey.effects_hi || ey.effects : ey.effects;
+
+                    return (
+                      <div
+                        key={`ext-yoga-${eIdx}`}
+                        className="rounded-2xl border-2 border-amber-200/90 bg-gradient-to-br from-amber-50/40 via-white to-amber-50/20 p-5 space-y-2.5 shadow-2xs"
+                      >
+                        <div className="flex items-center justify-between pb-2 border-b border-amber-200">
+                          <div className="flex items-center gap-2">
+                            <span className="p-1 rounded-lg bg-amber-500 text-white">
+                              <Star className="size-4" />
+                            </span>
+                            <h4 className="font-display text-base font-extrabold text-amber-950">
+                              {eyName}
+                            </h4>
+                          </div>
+                          <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                            {eyCategory}
                           </span>
-                          <h4 className="font-display text-base font-extrabold text-amber-950">
-                            {language === "bn" ? ey.name_bn : ey.name}
-                          </h4>
                         </div>
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
-                          {language === "bn" ? ey.category_bn : ey.category}
-                        </span>
-                      </div>
 
-                      <p className="text-xs text-foreground-muted leading-relaxed font-serif italic">
-                        {language === "bn" ? ey.description_bn : ey.description}
-                      </p>
+                        <p className="text-xs text-foreground-muted leading-relaxed font-serif italic">
+                          {eyDescription}
+                        </p>
 
-                      <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-xs text-foreground leading-relaxed">
-                        <span className="font-bold text-amber-950 mr-1">
-                          {language === "bn" ? "প্রভাব:" : "Effects:"}
-                        </span>
-                        {language === "bn" ? ey.effects_bn : ey.effects}
+                        <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-xs text-foreground leading-relaxed">
+                          <span className="font-bold text-amber-950 mr-1">
+                            {t.effectsLabel}:
+                          </span>
+                          {eyEffects}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -2094,78 +1995,76 @@ export default function KundliPage() {
               <div className="rounded-3xl border border-amber-200/80 bg-white p-6 sm:p-8 shadow-soft space-y-6">
                 <div className="text-center space-y-1">
                   <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">
-                    {language === "bn"
-                      ? "প্রধান বৈদিক দোষ বিশ্লেষণ ও প্রতিকার"
-                      : language === "hi"
-                      ? "प्रमुख वैदिक दोष विश्लेषण एवं उपाय"
-                      : "Classical Vedic Dosha Analysis & Remedies"}
+                    {t.doshasAnalysisTitle}
                   </h3>
                   <p className="text-xs text-foreground-muted">
-                    {language === "bn"
-                      ? "মাঙ্গলিক, কালসর্প, পিতৃ ও গুরু চণ্ডাল দোষের গভীর বিচার, ভঙ্গ নির্ণয় এবং নিশ্চিত বৈদিক প্রতিকার।"
-                      : "Authentic Parashari checks for Manglik, Kaal Sarp, Pitra and Guru Chandal doshas."}
+                    {t.doshasAnalysisSub}
                   </p>
                   <GoldDiamondDivider />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  {result.doshas_analysis.map((d, dIdx) => (
-                    <div
-                      key={`dosha-${dIdx}`}
-                      className="rounded-2xl border-2 border-amber-200 bg-amber-50/20 p-5 space-y-3 shadow-2xs"
-                    >
-                      <div className="flex items-center justify-between pb-2 border-b border-amber-200">
-                        <div className="flex items-center gap-2">
-                          <span className="size-7 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-sm">
-                            {d.is_present ? "⚠️" : "✨"}
+                  {result.doshas_analysis.map((d, dIdx) => {
+                    const doshaName = language === "bn" ? d.dosha_name_bn || d.dosha_name : language === "hi" ? d.dosha_name_hi || d.dosha_name : d.dosha_name;
+                    const severity = language === "bn" ? d.severity_bn || d.severity : language === "hi" ? d.severity_hi || d.severity : d.severity;
+                    const specificType = language === "bn" ? d.specific_type_bn : language === "hi" ? d.specific_type_hi || d.specific_type_bn : d.specific_type;
+                    const cancellationReason = language === "bn" ? d.cancellation_reason_bn : language === "hi" ? d.cancellation_reason_hi || d.cancellation_reason_bn : d.cancellation_reason;
+                    const remedy = language === "bn" ? d.remedy_bn || d.remedy : language === "hi" ? d.remedy_hi || d.remedy : d.remedy;
+
+                    return (
+                      <div
+                        key={`dosha-${dIdx}`}
+                        className="rounded-2xl border-2 border-amber-200 bg-amber-50/20 p-5 space-y-3 shadow-2xs"
+                      >
+                        <div className="flex items-center justify-between pb-2 border-b border-amber-200">
+                          <div className="flex items-center gap-2">
+                            <span className="size-7 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-sm">
+                              {d.is_present ? "⚠️" : "✨"}
+                            </span>
+                            <h4 className="font-display text-base font-extrabold text-foreground">
+                              {doshaName}
+                            </h4>
+                          </div>
+                          <span
+                            className={`px-3 py-1 rounded-xl text-xs font-bold border ${
+                              d.is_present
+                                ? "bg-rose-100 text-rose-900 border-rose-300"
+                                : "bg-emerald-100 text-emerald-900 border-emerald-300"
+                            }`}
+                          >
+                            {d.is_present
+                              ? `${t.doshaActive} (${severity})`
+                              : t.doshaClean}
                           </span>
-                          <h4 className="font-display text-base font-extrabold text-foreground">
-                            {language === "bn" ? d.dosha_name_bn : d.dosha_name}
-                          </h4>
                         </div>
-                        <span
-                          className={`px-3 py-1 rounded-xl text-xs font-bold border ${
-                            d.is_present
-                              ? "bg-rose-100 text-rose-900 border-rose-300"
-                              : "bg-emerald-100 text-emerald-900 border-emerald-300"
-                          }`}
-                        >
-                          {d.is_present
-                            ? language === "bn"
-                              ? `সক্রিয় (${d.severity_bn})`
-                              : `Active (${d.severity})`
-                            : language === "bn"
-                            ? "দোষমুক্ত / প্রশমিত"
-                            : "Clean / Cancelled"}
-                        </span>
+
+                        {specificType && (
+                          <div className="text-xs font-bold text-amber-900">
+                            {t.doshaTypeLabel}: {specificType}
+                          </div>
+                        )}
+
+                        {cancellationReason && (
+                          <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-950">
+                            <span className="font-bold">
+                              {t.cancellationLabel}:{" "}
+                            </span>
+                            {cancellationReason}
+                          </div>
+                        )}
+
+                        <div className="p-3.5 rounded-xl bg-white border border-amber-200 space-y-1">
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
+                            <ShieldCheck className="size-3.5 text-amber-600" />
+                            <span>{t.remedyLabel}:</span>
+                          </div>
+                          <p className="text-xs text-foreground-muted leading-relaxed">
+                            {remedy}
+                          </p>
+                        </div>
                       </div>
-
-                      {d.specific_type_bn && (
-                        <div className="text-xs font-bold text-amber-900">
-                          {language === "bn" ? "প্রকৃতি:" : "Type:"} {d.specific_type_bn}
-                        </div>
-                      )}
-
-                      {d.cancellation_reason_bn && (
-                        <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-950">
-                          <span className="font-bold">
-                            {language === "bn" ? "দোষভঙ্গ যোগ: " : "Cancellation: "}
-                          </span>
-                          {d.cancellation_reason_bn}
-                        </div>
-                      )}
-
-                      <div className="p-3.5 rounded-xl bg-white border border-amber-200 space-y-1">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
-                          <ShieldCheck className="size-3.5 text-amber-600" />
-                          <span>{language === "bn" ? "প্রস্তাবিত বৈদিক প্রতিকার:" : "Recommended Remedy:"}</span>
-                        </div>
-                        <p className="text-xs text-foreground-muted leading-relaxed">
-                          {language === "bn" ? d.remedy_bn : d.remedy}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -2177,16 +2076,10 @@ export default function KundliPage() {
               <div className="rounded-3xl border border-amber-200/80 bg-white p-6 sm:p-8 shadow-soft space-y-6">
                 <div className="text-center space-y-1">
                   <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">
-                    {language === "bn"
-                      ? "ব্যক্তিগত রত্ন, রুদ্রাক্ষ ও ইষ্টদেবতা নির্দেশিকা"
-                      : language === "hi"
-                      ? "व्यक्तिगत रत्न, रुद्राक्ष एवं इष्टदेवता मार्गदर्शन"
-                      : "Personalized Gemstones, Rudraksha & Ishta Devata Guide"}
+                    {t.remediesTitle}
                   </h3>
                   <p className="text-xs text-foreground-muted">
-                    {language === "bn"
-                      ? "বৃহৎ সংহিতা ও জাতক পারিজাত মতে আপনার কুণ্ডলীর ত্রিকোণাধিপতি অনুযায়ী প্রাণ রত্ন, ভাগ্য রত্ন ও রুদ্রাক্ষ বিধান।"
-                      : "Classical Brihat Samhita prescriptions for Life Stone, Lucky Stone, Rudraksha and Ishta Devata."}
+                    {t.remediesSub}
                   </p>
                   <GoldDiamondDivider />
                 </div>
@@ -2194,64 +2087,73 @@ export default function KundliPage() {
                 {/* 3 Gemstone Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   {[
-                    { data: result.remedies.life_stone, title: language === "bn" ? "প্রাণ রত্ন (লগ্ন রত্ন)" : "Life Stone", badge: language === "bn" ? "১ম ভাবাধিপতি" : "1st Lord" },
-                    { data: result.remedies.lucky_stone, title: language === "bn" ? "ভাগ্য রত্ন (ত্রিকোণ রত্ন)" : "Lucky Stone", badge: language === "bn" ? "৯ম ভাবাধিপতি" : "9th Lord" },
-                    { data: result.remedies.career_stone, title: language === "bn" ? "কর্ম রত্ন (পেশাগত রত্ন)" : "Career Stone", badge: language === "bn" ? "১০ম ভাবাধিপতি" : "10th Lord" },
-                  ].map((card, cIdx) => (
-                    <div
-                      key={`gem-${cIdx}`}
-                      className="rounded-2xl border-2 border-amber-200 bg-gradient-to-br from-amber-50/50 to-white p-5 space-y-3.5 shadow-2xs flex flex-col justify-between"
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-bold text-amber-800 uppercase tracking-widest">
-                            {card.badge}
-                          </span>
-                          <span className="p-1 rounded-lg bg-amber-100 text-amber-900">
-                            <Gem className="size-4" />
-                          </span>
-                        </div>
+                    { data: result.remedies.life_stone, title: t.lifeStoneTitle, badge: t.lifeStoneBadge },
+                    { data: result.remedies.lucky_stone, title: t.luckyStoneTitle, badge: t.luckyStoneBadge },
+                    { data: result.remedies.career_stone, title: t.careerStoneTitle, badge: t.careerStoneBadge },
+                  ].map((card, cIdx) => {
+                    const stoneName = language === "bn" ? card.data.stone_name_bn || card.data.stone_name : language === "hi" ? card.data.stone_name_hi || card.data.stone_name : card.data.stone_name;
+                    const planetName = language === "bn" ? card.data.ruling_planet_bn || card.data.ruling_planet : language === "hi" ? card.data.ruling_planet_hi || card.data.ruling_planet : card.data.ruling_planet;
+                    const metal = language === "bn" ? card.data.metal_bn : language === "hi" ? card.data.metal_hi || translateMetal(card.data.metal, language) : card.data.metal;
+                    const finger = language === "bn" ? card.data.finger_bn : language === "hi" ? card.data.finger_hi || translateFinger(card.data.finger, language) : card.data.finger;
+                    const wearingDay = language === "bn" ? card.data.wearing_day_bn : language === "hi" ? card.data.wearing_day_hi || translateWearingDay(card.data.wearing_day, language) : card.data.wearing_day;
+                    const benefit = language === "bn" ? card.data.benefit_bn || card.data.benefit : language === "hi" ? card.data.benefit_hi || card.data.benefit : card.data.benefit;
 
-                        <div>
-                          <h4 className="font-display text-lg font-extrabold text-foreground">
-                            {language === "bn" ? card.data.stone_name_bn : card.data.stone_name}
-                          </h4>
-                          <div className="text-xs font-semibold text-amber-900">
-                            {card.data.sanskrit_name} ({card.data.ruling_planet})
-                          </div>
-                        </div>
-
-                        <div className="space-y-1.5 text-xs">
-                          <div className="flex items-center justify-between border-b border-amber-100 pb-1">
-                            <span className="text-foreground-muted">{language === "bn" ? "ধাতু:" : "Metal:"}</span>
-                            <span className="font-bold text-foreground">
-                              {language === "bn" ? card.data.metal_bn : card.data.metal}
+                    return (
+                      <div
+                        key={`gem-${cIdx}`}
+                        className="rounded-2xl border-2 border-amber-200 bg-gradient-to-br from-amber-50/50 to-white p-5 space-y-3.5 shadow-2xs flex flex-col justify-between"
+                      >
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-bold text-amber-800 uppercase tracking-widest">
+                              {card.badge}
+                            </span>
+                            <span className="p-1 rounded-lg bg-amber-100 text-amber-900">
+                              <Gem className="size-4" />
                             </span>
                           </div>
-                          <div className="flex items-center justify-between border-b border-amber-100 pb-1">
-                            <span className="text-foreground-muted">{language === "bn" ? "আঙুল:" : "Finger:"}</span>
-                            <span className="font-bold text-foreground">
-                              {language === "bn" ? card.data.finger_bn : card.data.finger}
-                            </span>
+
+                          <div>
+                            <h4 className="font-display text-lg font-extrabold text-foreground">
+                              {stoneName}
+                            </h4>
+                            <div className="text-xs font-semibold text-amber-900">
+                              {card.data.sanskrit_name} ({planetName})
+                            </div>
                           </div>
-                          <div className="flex items-center justify-between border-b border-amber-100 pb-1">
-                            <span className="text-foreground-muted">{language === "bn" ? "ধারণের বার:" : "Day:"}</span>
-                            <span className="font-bold text-foreground">
-                              {language === "bn" ? card.data.wearing_day_bn : card.data.wearing_day}
-                            </span>
+
+                          <div className="space-y-1.5 text-xs">
+                            <div className="flex items-center justify-between border-b border-amber-100 pb-1">
+                              <span className="text-foreground-muted">{t.metalLabel}:</span>
+                              <span className="font-bold text-foreground">
+                                {metal}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between border-b border-amber-100 pb-1">
+                              <span className="text-foreground-muted">{t.fingerLabel}:</span>
+                              <span className="font-bold text-foreground">
+                                {finger}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between border-b border-amber-100 pb-1">
+                              <span className="text-foreground-muted">{t.wearingDayLabel}:</span>
+                              <span className="font-bold text-foreground">
+                                {wearingDay}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="p-2.5 rounded-xl bg-amber-100/70 border border-amber-200 text-center text-xs font-bold text-amber-950 font-serif">
+                            {card.data.beej_mantra}
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-xl bg-amber-100/70 border border-amber-200 text-center text-xs font-bold text-amber-950 font-serif">
-                          {card.data.beej_mantra}
-                        </div>
+                        <p className="text-xs text-foreground-muted leading-relaxed pt-2 border-t border-amber-100">
+                          {benefit}
+                        </p>
                       </div>
-
-                      <p className="text-xs text-foreground-muted leading-relaxed pt-2 border-t border-amber-100">
-                        {language === "bn" ? card.data.benefit_bn : card.data.benefit}
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Rudraksha, Ishta Devata & Favorable Elements Grid */}
@@ -2260,12 +2162,14 @@ export default function KundliPage() {
                     <div className="flex items-center gap-2">
                       <span className="text-lg">📿</span>
                       <h4 className="font-display text-base font-bold text-amber-950">
-                        {language === "bn" ? "অনুকূল রুদ্রাক্ষ" : "Auspicious Rudraksha"}
+                        {t.rudrakshaTitle}
                       </h4>
                     </div>
                     <p className="text-xs text-foreground-muted leading-relaxed">
                       {language === "bn"
                         ? result.remedies.rudraksha_recommendation_bn
+                        : language === "hi"
+                        ? result.remedies.rudraksha_recommendation_hi || result.remedies.rudraksha_recommendation
                         : result.remedies.rudraksha_recommendation}
                     </p>
                   </div>
@@ -2274,12 +2178,14 @@ export default function KundliPage() {
                     <div className="flex items-center gap-2">
                       <span className="text-lg">🕉️</span>
                       <h4 className="font-display text-base font-bold text-amber-950">
-                        {language === "bn" ? "ইষ্টদেবতা ও সাধনা" : "Ishta Devata"}
+                        {t.ishtaDevataTitle}
                       </h4>
                     </div>
                     <p className="text-xs text-foreground-muted leading-relaxed">
                       {language === "bn"
                         ? result.remedies.ishta_devata_bn
+                        : language === "hi"
+                        ? result.remedies.ishta_devata_hi || result.remedies.ishta_devata
                         : result.remedies.ishta_devata}
                     </p>
                   </div>
@@ -2288,28 +2194,32 @@ export default function KundliPage() {
                     <div className="flex items-center gap-2">
                       <Compass className="size-4 text-amber-700" />
                       <h4 className="font-display text-base font-bold text-amber-950">
-                        {language === "bn" ? "অনুকূল দিক, বর্ণ ও সংখ্যা" : "Favorable Elements"}
+                        {t.favorableElementsTitle}
                       </h4>
                     </div>
                     <div className="space-y-1.5 text-xs">
                       <div className="flex items-center justify-between border-b border-amber-100 pb-1">
-                        <span className="text-foreground-muted">{language === "bn" ? "শুভ দিক:" : "Direction:"}</span>
+                        <span className="text-foreground-muted">{t.favorableDirectionLabel}:</span>
                         <span className="font-bold text-foreground">
                           {language === "bn"
                             ? result.remedies.favorable_direction_bn
+                            : language === "hi"
+                            ? result.remedies.favorable_direction_hi || result.remedies.favorable_direction
                             : result.remedies.favorable_direction}
                         </span>
                       </div>
                       <div className="flex items-center justify-between border-b border-amber-100 pb-1">
-                        <span className="text-foreground-muted">{language === "bn" ? "শুভ বর্ণ:" : "Colors:"}</span>
+                        <span className="text-foreground-muted">{t.favorableColorsLabel}:</span>
                         <span className="font-bold text-foreground">
                           {language === "bn"
                             ? result.remedies.lucky_colors_bn.join(", ")
+                            : language === "hi"
+                            ? (result.remedies.lucky_colors_hi || result.remedies.lucky_colors).join(", ")
                             : result.remedies.lucky_colors.join(", ")}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-foreground-muted">{language === "bn" ? "শুভ সংখ্যা:" : "Numbers:"}</span>
+                        <span className="text-foreground-muted">{t.favorableNumbersLabel}:</span>
                         <span className="font-bold text-foreground tabular-nums">
                           {result.remedies.lucky_numbers.map((n) => toLocalizedDigits(n, language)).join(", ")}
                         </span>
@@ -2329,15 +2239,7 @@ export default function KundliPage() {
           <div className="rounded-2xl bg-white/95 border-2 border-amber-300 shadow-xl p-2 flex items-center justify-between gap-2 backdrop-blur-md">
             <button
               type="button"
-              onClick={() =>
-                toast.success(
-                  language === "bn"
-                    ? "কুন্ডলী আপনার অ্যাকাউন্টে সংরক্ষিত হয়েছে!"
-                    : language === "hi"
-                    ? "कुण्डली आपके खाते में सुरक्षित हो गई है!"
-                    : "Kundli saved to your account!"
-                )
-              }
+              onClick={() => toast.success(t.toastSaved)}
               className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 py-2.5 px-3 text-xs font-bold text-amber-950 transition-colors shadow-2xs cursor-pointer"
             >
               <Lock className="size-3.5 text-amber-600" />
@@ -2367,7 +2269,7 @@ export default function KundliPage() {
       <FeatureCoinModal
         open={coinModalOpen}
         onClose={() => setCoinModalOpen(false)}
-        featureName={kundliFeature?.name || (language === "bn" ? "কুন্ডলী (জন্ম ছক)" : "Kundli Chart")}
+        featureName={kundliFeature?.name || t.title}
         requiredCoins={kundliFeature?.coins ?? 20}
         walletBalance={walletBalance}
         reason={coinModalReason}

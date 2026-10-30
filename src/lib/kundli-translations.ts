@@ -516,7 +516,51 @@ export function translateYogaDetails(
   return { name, description: desc, effects };
 }
 
-// 13. UI Elements Dictionary
+// 13. Metals, Fingers and Wearing Days Localization
+export const KUNDLI_METALS: Record<string, Record<KundliLanguage, string>> = {
+  "Gold / Copper": { en: "Gold / Copper", bn: "স্বর্ণ বা তামা", hi: "स्वर्ण या तांबा" },
+  "Silver": { en: "Silver", bn: "রূপা", hi: "चांदी" },
+  "Copper / Gold": { en: "Copper / Gold", bn: "তামা বা অষ্টধাতু", hi: "तांबा या अष्टधातु" },
+  "Gold / Bronze": { en: "Gold / Bronze", bn: "স্বর্ণ বা ব্রোঞ্জ", hi: "स्वर्ण या कांस्य" },
+  "Gold": { en: "Gold", bn: "স্বর্ণ বা পিতল", hi: "स्वर्ण या पीतल" },
+  "Silver / Platinum": { en: "Silver / Platinum", bn: "রূপা বা প্লাটিনাম", hi: "चांदी या प्लैटिनम" },
+  "Silver / Iron": { en: "Silver / Iron", bn: "পঞ্চধাতু বা রূপা", hi: "पंचधातु या चांदी" },
+};
+
+export const KUNDLI_FINGERS: Record<string, Record<KundliLanguage, string>> = {
+  "Ring finger": { en: "Ring finger", bn: "অনামিকা অঙ্গুলি", hi: "अनामिका अंगुली" },
+  "Little finger": { en: "Little finger", bn: "কনিষ্ঠা অঙ্গুলি", hi: "कनिष्ठिका अंगुली" },
+  "Index finger": { en: "Index finger", bn: "তর্জনী অঙ্গুলি", hi: "तर्जनी अंगुली" },
+  "Middle finger": { en: "Middle finger", bn: "মধ্যমা অঙ্গুলি", hi: "मध्यमा अंगुली" },
+  "Middle or Little finger": { en: "Middle or Little finger", bn: "মধ্যমা বা কনিষ্ঠা অঙ্গুলি", hi: "मध्यमा या कनिष्ठिका" },
+};
+
+export const KUNDLI_WEARING_DAYS: Record<string, Record<KundliLanguage, string>> = {
+  "Sunday morning": { en: "Sunday morning", bn: "রবিবার প্রাতঃকালে", hi: "रविवार प्रातःकाल" },
+  "Monday morning": { en: "Monday morning", bn: "সোমবার প্রাতঃকালে", hi: "सोमवार प्रातःकाल" },
+  "Tuesday morning": { en: "Tuesday morning", bn: "মঙ্গলবার প্রাতঃকালে", hi: "मंगलवार प्रातःकाल" },
+  "Wednesday morning": { en: "Wednesday morning", bn: "বুধবার প্রাতঃকালে", hi: "बुधवार प्रातःकाल" },
+  "Thursday morning": { en: "Thursday morning", bn: "বৃহস্পতিবার প্রাতঃকালে", hi: "गुरुवार प्रातःकाल" },
+  "Friday morning": { en: "Friday morning", bn: "শুক্রবার প্রাতঃকালে", hi: "शुक्रवार प्रातःकाल" },
+  "Saturday evening": { en: "Saturday evening", bn: "শনিবার গোধূলি লগ্নে", hi: "शनिवार सायंकाल" },
+};
+
+export function translateMetal(metal: string, lang: KundliLanguage): string {
+  if (!metal) return "";
+  return KUNDLI_METALS[metal.trim()]?.[lang] || metal;
+}
+
+export function translateFinger(finger: string, lang: KundliLanguage): string {
+  if (!finger) return "";
+  return KUNDLI_FINGERS[finger.trim()]?.[lang] || finger;
+}
+
+export function translateWearingDay(day: string, lang: KundliLanguage): string {
+  if (!day) return "";
+  return KUNDLI_WEARING_DAYS[day.trim()]?.[lang] || day;
+}
+
+// 14. UI Elements Dictionary
 export interface KundliUiStrings {
   badge: string;
   title: string;
@@ -585,6 +629,119 @@ export interface KundliUiStrings {
   lblLongitude: string;
   lblDay: string;
   lblVedicDay: string;
+
+  // Toast & Validation
+  toastEnterName: string;
+  toastEnterDob: string;
+  toastChoosePlace: string;
+  toastProfileLoaded: string;
+  toastDisabled: string;
+  toastSuccess: string;
+  toastSuccessCoins: (coins: number) => string;
+  toastSaved: string;
+
+  // Header & Profile Banner
+  languageLabel: string;
+  profileSynced: string;
+  profileSyncSub: string;
+  reloadBtn: string;
+  clearBtn: string;
+  signInPrompt: string;
+  signInBtn: string;
+
+  // Form Fields
+  genderMale: string;
+  genderFemale: string;
+  genderOther: string;
+  dobDay: string;
+  dobMonth: string;
+  dobYear: string;
+  tobOptional: string;
+  calculationFee: string;
+  freeBadge: string;
+  coinsBadge: string;
+
+  // Dasha Banner
+  currentRunningDasha: string;
+  dashaEndsLabel: string;
+
+  // Chart Styles
+  styleNorth: string;
+  styleEast: string;
+  styleSouth: string;
+  styleDiamond: string;
+
+  // Tables
+  dignitiesTableTitle: string;
+  dignitiesTableSub: string;
+  thDignity: string;
+  thAvastha: string;
+  thCombustion: string;
+  thSpecialYoga: string;
+  retroTag: string;
+  houseSuffix: string;
+  combustTag: string;
+  normalTag: string;
+  neechabhangaTag: string;
+
+  // 12 Houses
+  housesSynthesisTitle: string;
+  housesSynthesisSub: string;
+  houseOverviewLabel: string;
+  houseTitleSuffix: string;
+  signLabel: string;
+  lordLabel: string;
+  placementSuffix: string;
+  occupantsLabel: string;
+  emptyHouseNote: string;
+  significanceLabel: string;
+  careerWealthLabel: string;
+  familyRelationshipsLabel: string;
+
+  // Divisional Charts
+  d10Title: string;
+  d10Sub: string;
+  d7Title: string;
+  d7Sub: string;
+  d1Desc: string;
+  d9Desc: string;
+  d10Desc: string;
+  d7Desc: string;
+  d1Tab: string;
+  d9Tab: string;
+  d10Tab: string;
+  d7Tab: string;
+
+  // Yogas & Doshas
+  extendedYogasTitle: string;
+  extendedYogasSub: string;
+  effectsLabel: string;
+  doshasAnalysisTitle: string;
+  doshasAnalysisSub: string;
+  doshaActive: string;
+  doshaClean: string;
+  doshaTypeLabel: string;
+  cancellationLabel: string;
+  remedyLabel: string;
+
+  // Remedies & Gemstones
+  remediesTitle: string;
+  remediesSub: string;
+  lifeStoneTitle: string;
+  lifeStoneBadge: string;
+  luckyStoneTitle: string;
+  luckyStoneBadge: string;
+  careerStoneTitle: string;
+  careerStoneBadge: string;
+  metalLabel: string;
+  fingerLabel: string;
+  wearingDayLabel: string;
+  rudrakshaTitle: string;
+  ishtaDevataTitle: string;
+  favorableElementsTitle: string;
+  favorableDirectionLabel: string;
+  favorableColorsLabel: string;
+  favorableNumbersLabel: string;
 }
 
 export const KUNDLI_UI_STRINGS: Record<KundliLanguage, KundliUiStrings> = {
@@ -657,6 +814,119 @@ export const KUNDLI_UI_STRINGS: Record<KundliLanguage, KundliUiStrings> = {
     lblLongitude: "দ্রাঘিমাংশ",
     lblDay: "বার (দিন)",
     lblVedicDay: "বৈদিক বার",
+
+    // Toast & Validation
+    toastEnterName: "অনুগ্রহ করে আপনার নাম লিখুন",
+    toastEnterDob: "সঠিক জন্মতারিখ (দিন, মাস ও সাল) প্রদান করুন",
+    toastChoosePlace: "অনুগ্রহ করে তালিকা থেকে আপনার জন্মস্থান নির্বাচন করুন",
+    toastProfileLoaded: "প্রোফাইল থেকে তথ্য লোড করা হয়েছে",
+    toastDisabled: "কুন্ডলী ফিচারটি বর্তমানে অ্যাডমিন দ্বারা বন্ধ রাখা হয়েছে।",
+    toastSuccess: "কুন্ডলী ও গ্রহের অবস্থান সফলভাবে গণনা সম্পন্ন হয়েছে!",
+    toastSuccessCoins: (coins: number) => `কুন্ডলী গণনা সম্পন্ন হয়েছে! (${coins} কয়েন খরচ হয়েছে)`,
+    toastSaved: "কুন্ডলী আপনার অ্যাকাউন্টে সংরক্ষিত হয়েছে!",
+
+    // Header & Profile Banner
+    languageLabel: "ভাষা / Language:",
+    profileSynced: "প্রোফাইল তথ্য লোড করা হয়েছে",
+    profileSyncSub: "আপনার সংরক্ষিত জন্ম বিবরণ স্বয়ংক্রিয়ভাবে যুক্ত হয়েছে",
+    reloadBtn: "রিলোড",
+    clearBtn: "খালি করুন",
+    signInPrompt: "আপনার সংরক্ষিত বিবরণ স্বয়ংক্রিয়ভাবে পূরণ করতে লগ-ইন করুন",
+    signInBtn: "লগ-ইন করুন",
+
+    // Form Fields
+    genderMale: "পুরুষ (Male)",
+    genderFemale: "মহিলা (Female)",
+    genderOther: "অন্যান্য (Other)",
+    dobDay: "দিন (DD)",
+    dobMonth: "মাস (MM)",
+    dobYear: "সাল (YYYY)",
+    tobOptional: "ঐচ্ছিক — না দিলে ১২:০০ PM",
+    calculationFee: "গণনা খরচ",
+    freeBadge: "সম্পূর্ণ ফ্রি",
+    coinsBadge: "কয়েন",
+
+    // Dasha Banner
+    currentRunningDasha: "চলমান বিংশোত্তরী দশা মার্গদর্শন",
+    dashaEndsLabel: "সমাপ্তি:",
+
+    // Chart Styles
+    styleNorth: "উত্তর ভারত",
+    styleEast: "পূর্ব ভারত",
+    styleSouth: "দক্ষিণ ভারত",
+    styleDiamond: "ডায়মন্ড চার্ট",
+
+    // Tables
+    dignitiesTableTitle: "গ্রহের বলবত্তা, দগ্ধাবস্থা ও পঞ্চাবস্থা বিচার",
+    dignitiesTableSub: "পরাশর হোরা শাস্ত্র অনুসারে প্রতিটি গ্রহের উচ্চ/নীচ বলবত্তা, সূর্যের সান্নিধ্যে দগ্ধাবস্থা এবং জাগ্রত শক্তির মাত্রা।",
+    thDignity: "বলবত্তা (Dignity)",
+    thAvastha: "পঞ্চাবস্থা",
+    thCombustion: "দগ্ধাবস্থা",
+    thSpecialYoga: "বিশেষ মর্যাদা",
+    retroTag: "বক্রী",
+    houseSuffix: "ম ভাব",
+    combustTag: "সূর্যদগ্ধ",
+    normalTag: "অক্ষত",
+    neechabhangaTag: "নীচভঙ্গ রাজযোগ",
+
+    // 12 Houses
+    housesSynthesisTitle: "দ্বাদশ ভাব ও জীবনের ১২টি ক্ষেত্রের ফলাফল",
+    housesSynthesisSub: "আপনার কুন্ডলীর প্রতিটি ভাবের রাশিপতি, অবস্থানরত গ্রহ এবং ক্যারিয়ার, অর্থ ও সম্পর্কের ওপর প্রভাব।",
+    houseOverviewLabel: "ভাব পরিচয়",
+    houseTitleSuffix: "ম ভাব:",
+    signLabel: "রাশি:",
+    lordLabel: "ভাবাধিপতি:",
+    placementSuffix: "মে অবস্থান",
+    occupantsLabel: "অবস্থানরত গ্রহ:",
+    emptyHouseNote: "কোন প্রত্যক্ষ গ্রহ নেই (দৃষ্টির প্রভাব প্রযোজ্য)",
+    significanceLabel: "মূল তাৎপর্য",
+    careerWealthLabel: "কর্ম ও অর্থভাগ্য",
+    familyRelationshipsLabel: "সম্পর্ক ও পারিবারিক সুখ",
+
+    // Divisional Charts
+    d10Title: "দশমাংশ চক্র (D10) — কর্ম ও রাজসম্মান",
+    d10Sub: "দশমাংশ কুন্ডলী (D10) কর্মজীবন, পেশাগত সাফল্য, পদমর্যাদা, খ্যাতি এবং সমাজে অর্জিত প্রতিষ্ঠা নির্দেশ করে।",
+    d7Title: "সপ্তাংশ চক্র (D7) — সন্তান ও সৃজনশীলতা",
+    d7Sub: "সপ্তাংশ কুন্ডলী (D7) সন্তানসুখ, বংশধর, উদ্ভাবনী ক্ষমতা এবং সৃষ্টিশীল মেধা নির্দেশ করে।",
+    d1Desc: "लग्न কুন্ডলী (D1) সমগ্র মানবজীবনের শারীরিক গঠন, স্বাস্থ্য, প্রবৃত্তি এবং ভাগ্যের মূল স্তম্ভ নির্দেশ করে।",
+    d9Desc: "নবাংশ কুন্ডলী (D9) আত্মার অন্তর্নিহিত শক্তি, আধ্যাত্মিক সাধনা এবং দাম্পত্য জীবনের পূর্ণতা নির্দেশ করে।",
+    d10Desc: "দশমাংশ কুন্ডলী (D10) কর্মজীবন, পেশাগত সাফল্য, পদমর্যাদা, খ্যাতি এবং সমাজে অর্জিত প্রতিষ্ঠা নির্দেশ করে।",
+    d7Desc: "সপ্তাংশ কুন্ডলী (D7) সন্তানসুখ, বংশধর, উদ্ভাবনী ক্ষমতা এবং সৃষ্টিশীল মেধা নির্দেশ করে।",
+    d1Tab: "D1: লগ্ন ছক (সাধারণ জীবন)",
+    d9Tab: "D9: নবাংশ ছক (দাম্পত্য ও ভাগ্য)",
+    d10Tab: "D10: দশমাংশ ছক (ক্যারিয়ার ও পদমর্যাদা)",
+    d7Tab: "D7: সপ্তাংশ ছক (সন্তান ও সৃজনশীলতা)",
+
+    // Yogas & Doshas
+    extendedYogasTitle: "পঞ্চ মহাপুরুষ, রাজযোগ ও ধনযোগ বিশ্লেষণ",
+    extendedYogasSub: "পরাশর হোরা শাস্ত্র ও জাতক পারিজাত অনুসারে গঠিত বিশেষ গ্রহ সংস্থান ও জীবনের শুভ ফলাফল।",
+    effectsLabel: "প্রভাব:",
+    doshasAnalysisTitle: "প্রধান বৈদিক দোষ বিশ্লেষণ ও প্রতিকার",
+    doshasAnalysisSub: "মাঙ্গলিক, কালসর্প, পিতৃ ও গুরু চণ্ডাল দোষের গভীর বিচার, ভঙ্গ নির্ণয় এবং নিশ্চিত বৈদিক প্রতিকার।",
+    doshaActive: "সক্রিয়",
+    doshaClean: "দোষমুক্ত / প্রশমিত",
+    doshaTypeLabel: "প্রকৃতি:",
+    cancellationLabel: "দোষভঙ্গ যোগ:",
+    remedyLabel: "প্রস্তাবিত বৈদিক প্রতিকার:",
+
+    // Remedies & Gemstones
+    remediesTitle: "ব্যক্তিগত রত্ন, রুদ্রাক্ষ ও ইষ্টদেবতা নির্দেশিকা",
+    remediesSub: "বৃহৎ সংহিতা ও জাতক পারিজাত মতে আপনার কুণ্ডলীর ত্রিকোণাধিপতি অনুযায়ী প্রাণ রত্ন, ভাগ্য রত্ন ও রুদ্রাক্ষ বিধান।",
+    lifeStoneTitle: "প্রাণ রত্ন (লগ্ন রত্ন)",
+    lifeStoneBadge: "১ম ভাবাধিপতি",
+    luckyStoneTitle: "ভাগ্য রত্ন (ত্রিকোণ রত্ন)",
+    luckyStoneBadge: "৯ম ভাবাধিপতি",
+    careerStoneTitle: "কর্ম রত্ন (পেশাগত রত্ন)",
+    careerStoneBadge: "১০ম ভাবাধিপতি",
+    metalLabel: "ধাতু:",
+    fingerLabel: "আঙুল:",
+    wearingDayLabel: "ধারণের বার:",
+    rudrakshaTitle: "অনুকূল রুদ্রাক্ষ",
+    ishtaDevataTitle: "ইষ্টদেবতা ও সাধনা",
+    favorableElementsTitle: "অনুকূল দিক, বর্ণ ও সংখ্যা",
+    favorableDirectionLabel: "শুভ দিক:",
+    favorableColorsLabel: "শুভ বর্ণ:",
+    favorableNumbersLabel: "শুভ সংখ্যা:",
   },
   hi: {
     badge: "वैदिक ज्योतिष शास्त्र आधारित सटीक कुण्डली कैलकुलेटर",
@@ -727,6 +997,119 @@ export const KUNDLI_UI_STRINGS: Record<KundliLanguage, KundliUiStrings> = {
     lblLongitude: "रेखांश",
     lblDay: "वार (दिन)",
     lblVedicDay: "वैदिक वार",
+
+    // Toast & Validation
+    toastEnterName: "कृपया अपना नाम दर्ज करें",
+    toastEnterDob: "कृपया मान्य जन्म तिथि दर्ज करें",
+    toastChoosePlace: "कृपया सूची से अपना जन्म स्थान चुनें",
+    toastProfileLoaded: "प्रोफ़ाइल से जानकारी लोड की गई",
+    toastDisabled: "कुंडली सुविधा वर्तमान में अनुपलब्ध है।",
+    toastSuccess: "कुण्डली एवं ग्रह स्थिति की सफल गणना हो गई!",
+    toastSuccessCoins: (coins: number) => `कुण्डली गणना पूर्ण! (${coins} सिक्के प्रयुक्त)`,
+    toastSaved: "कुण्डली आपके खाते में सुरक्षित हो गई है!",
+
+    // Header & Profile Banner
+    languageLabel: "भाषा / Language:",
+    profileSynced: "प्रोफ़ाइल जानकारी लोड की गई",
+    profileSyncSub: "आपका सहेजा गया जन्म विवरण स्वतः भर दिया गया है",
+    reloadBtn: "रीलोड",
+    clearBtn: "साफ़ करें",
+    signInPrompt: "सहेजे गए विवरण को स्वतः भरने के लिए लॉग-इन करें",
+    signInBtn: "लॉग-इन करें",
+
+    // Form Fields
+    genderMale: "पुरुष (Male)",
+    genderFemale: "महिला (Female)",
+    genderOther: "अन्य (Other)",
+    dobDay: "दिन (DD)",
+    dobMonth: "माह (MM)",
+    dobYear: "वर्ष (YYYY)",
+    tobOptional: "वैकल्पिक — 12:00 PM",
+    calculationFee: "गणना शुल्क",
+    freeBadge: "पूर्णतः निःशुल्क",
+    coinsBadge: "सिक्के",
+
+    // Dasha Banner
+    currentRunningDasha: "वर्तमान विंशोत्तरी दशा मार्गदर्शन",
+    dashaEndsLabel: "समाप्ति:",
+
+    // Chart Styles
+    styleNorth: "उत्तर भारत",
+    styleEast: "पूर्व भारत",
+    styleSouth: "दक्षिण भारत",
+    styleDiamond: "डायमंड चक्र",
+
+    // Tables
+    dignitiesTableTitle: "ग्रहों का बलाबल, दग्धावस्था एवं पंचावस्था",
+    dignitiesTableSub: "पाराशर होरा शास्त्र के अनुसार ग्रहों की उच्च/नीच स्थिति, अस्त अवस्था एवं बाल्यादि जाग्रत शक्ति का विश्लेषण।",
+    thDignity: "बलावस्था (Dignity)",
+    thAvastha: "पंचावस्था",
+    thCombustion: "दग्धावस्था",
+    thSpecialYoga: "विशेष मर्यादा",
+    retroTag: "वक्री",
+    houseSuffix: " भाव",
+    combustTag: "सूर्य अस्त",
+    normalTag: "सामान्य",
+    neechabhangaTag: "नीचभंग राजयोग",
+
+    // 12 Houses
+    housesSynthesisTitle: "द्वादश भाव एवं जीवन के १२ क्षेत्रों का फल",
+    housesSynthesisSub: "आपकी कुण्डली के प्रत्येक भाव के भावेश, स्थित ग्रह एवं आजीविका, धन व संबंधों पर प्रभाव का विश्लेषण।",
+    houseOverviewLabel: "भाव परिचय",
+    houseTitleSuffix: "वां भाव:",
+    signLabel: "राशि:",
+    lordLabel: "भावेश:",
+    placementSuffix: "वें भाव में स्थिति",
+    occupantsLabel: "स्थित ग्रह:",
+    emptyHouseNote: "कोई प्रत्यक्ष ग्रह नहीं (दृष्टि प्रभाव लागू)",
+    significanceLabel: "मूल तात्पर्य",
+    careerWealthLabel: "करियर एवं धन भाग्य",
+    familyRelationshipsLabel: "संबंध एवं पारिवारिक सुख",
+
+    // Divisional Charts
+    d10Title: "दशमांश चक्र (D10) — कर्म व राजसम्मान",
+    d10Sub: "दशमांश कुण्डली (D10) आजीविका, व्यावसायिक सफलता, पद-प्रतिष्ठा और सामाजिक ख्याति को दर्शाती है।",
+    d7Title: "सप्तांश चक्र (D7) — संतान व रचनात्मकता",
+    d7Sub: "सप्तांश कुण्डली (D7) संतान सुख, वंश वृद्धि, रचनात्मक प्रतिभा एवं नवाचार क्षमता का विश्लेषण करती है।",
+    d1Desc: "लग्न कुण्डली (D1) मानव जीवन की शारीरिक संरचना, स्वास्थ्य, स्वभाव एवं समग्र भाग्य का आधार है।",
+    d9Desc: "नवांश कुण्डली (D9) आत्मा की आंतरिक शक्ति, आध्यात्मिक उन्नति एवं दांपत्य जीवन की स्थिरता का कारक है।",
+    d10Desc: "दशमांश कुण्डली (D10) आजीविका, व्यावसायिक सफलता, पद-प्रतिष्ठा और सामाजिक ख्याति को दर्शाती है।",
+    d7Desc: "सप्तांश कुण्डली (D7) संतान सुख, वंश वृद्धि, रचनात्मक प्रतिभा एवं नवाचार क्षमता का विश्लेषण करती है।",
+    d1Tab: "D1: लग्न कुंडली (जीवन)",
+    d9Tab: "D9: नवांश कुंडली (भाग्य/दांपत्य)",
+    d10Tab: "D10: दशमांश कुंडली (करियर)",
+    d7Tab: "D7: सप्तांश कुंडली (संतान)",
+
+    // Yogas & Doshas
+    extendedYogasTitle: "पंच महापुरुष, राजयोग एवं धनयोग विश्लेषण",
+    extendedYogasSub: "पाराशर होरा शास्त्र एवं जातक पारिजात के अनुसार विशेष ग्रहीय युति एवं शुभ जीवन फल।",
+    effectsLabel: "प्रभाव:",
+    doshasAnalysisTitle: "प्रमुख वैदिक दोष विश्लेषण एवं उपाय",
+    doshasAnalysisSub: "मांगलिक, कालसर्प, पितृ एवं गुरु चांडाल दोष का गहन परीक्षण, भंग योग एवं प्रामाणिक वैदिक उपाय।",
+    doshaActive: "सक्रिय",
+    doshaClean: "दोषमुक्त / शांत",
+    doshaTypeLabel: "प्रकृति:",
+    cancellationLabel: "दोषभंग योग:",
+    remedyLabel: "प्रस्तावित वैदिक उपाय:",
+
+    // Remedies & Gemstones
+    remediesTitle: "व्यक्तिगत रत्न, रुद्राक्ष एवं इष्टदेवता मार्गदर्शन",
+    remediesSub: "बृहत्संहिता एवं जातक पारिजात के अनुसार आपकी कुण्डली के त्रिकोण स्वामियों के आधार पर प्राण रत्न, भाग्य रत्न एवं रुद्राक्ष निर्देश।",
+    lifeStoneTitle: "प्राण रत्न (लग्न रत्न)",
+    lifeStoneBadge: "प्रथम भावेश (१)",
+    luckyStoneTitle: "भाग्य रत्न (त्रिकोण रत्न)",
+    luckyStoneBadge: "नवम भावेश (९)",
+    careerStoneTitle: "कर्म रत्न (आजीविका रत्न)",
+    careerStoneBadge: "दशम भावेश (१०)",
+    metalLabel: "धातु:",
+    fingerLabel: "अंगुली:",
+    wearingDayLabel: "धारण वार:",
+    rudrakshaTitle: "अनुकूल रुद्राक्ष",
+    ishtaDevataTitle: "इष्टदेवता एवं साधना",
+    favorableElementsTitle: "अनुकूल दिशा, रंग एवं अंक",
+    favorableDirectionLabel: "शुभ दिशा:",
+    favorableColorsLabel: "शुभ रंग:",
+    favorableNumbersLabel: "शुभ अंक:",
   },
   en: {
     badge: "Vedic Astrology Certified Accurate Kundli Calculator",
@@ -797,5 +1180,118 @@ export const KUNDLI_UI_STRINGS: Record<KundliLanguage, KundliUiStrings> = {
     lblLongitude: "Longitude",
     lblDay: "Day",
     lblVedicDay: "Vedic Day",
+
+    // Toast & Validation
+    toastEnterName: "Please enter your name",
+    toastEnterDob: "Please enter a valid birth date (DD, MM, YYYY)",
+    toastChoosePlace: "Please choose your birth place from the list",
+    toastProfileLoaded: "Details reloaded from your profile",
+    toastDisabled: "Kundli feature is temporarily unavailable.",
+    toastSuccess: "Kundli & Planetary Position calculated successfully!",
+    toastSuccessCoins: (coins: number) => `Kundli calculated! (${coins} coins used)`,
+    toastSaved: "Kundli saved to your account!",
+
+    // Header & Profile Banner
+    languageLabel: "Language:",
+    profileSynced: "Profile Details Synced",
+    profileSyncSub: "Your saved birth details have been auto-filled",
+    reloadBtn: "Reload",
+    clearBtn: "Clear",
+    signInPrompt: "Sign in to auto-fill your saved details",
+    signInBtn: "Sign In",
+
+    // Form Fields
+    genderMale: "Male",
+    genderFemale: "Female",
+    genderOther: "Other",
+    dobDay: "Day (DD)",
+    dobMonth: "Month (MM)",
+    dobYear: "Year (YYYY)",
+    tobOptional: "Optional — 12:00 PM if omitted",
+    calculationFee: "Calculation Fee",
+    freeBadge: "100% Free",
+    coinsBadge: "coins",
+
+    // Dasha Banner
+    currentRunningDasha: "Current Vimshottari Dasha Insight",
+    dashaEndsLabel: "Ends:",
+
+    // Chart Styles
+    styleNorth: "North",
+    styleEast: "East",
+    styleSouth: "South",
+    styleDiamond: "Diamond Chart",
+
+    // Tables
+    dignitiesTableTitle: "Planetary Dignities, Combustion & Avasthas",
+    dignitiesTableSub: "Classical Brihat Parashara analysis of planetary dignity, combustion and operational vitality.",
+    thDignity: "Dignity",
+    thAvastha: "Avastha",
+    thCombustion: "Combustion",
+    thSpecialYoga: "Special Yoga",
+    retroTag: "Retro",
+    houseSuffix: "th House",
+    combustTag: "Combust",
+    normalTag: "Normal",
+    neechabhangaTag: "Neechabhanga",
+
+    // 12 Houses
+    housesSynthesisTitle: "12 Houses Deep Astrological Synthesis",
+    housesSynthesisSub: "Comprehensive house-by-house analysis of career, wealth, health and relationships.",
+    houseOverviewLabel: "House Overview",
+    houseTitleSuffix: "th House:",
+    signLabel: "Sign:",
+    lordLabel: "Lord:",
+    placementSuffix: "th house placement",
+    occupantsLabel: "Occupants:",
+    emptyHouseNote: "No direct occupants (aspectual influence applies)",
+    significanceLabel: "Significance",
+    careerWealthLabel: "Career & Wealth",
+    familyRelationshipsLabel: "Family & Relationships",
+
+    // Divisional Charts
+    d10Title: "Dasamsha Chart (D10) — Career & Honor",
+    d10Sub: "Dasamsha Chart (D10) governs profession, authority, achievements and social stature.",
+    d7Title: "Saptamsha Chart (D7) — Children & Creativity",
+    d7Sub: "Saptamsha Chart (D7) governs children, progeny, lineage and creative intellect.",
+    d1Desc: "Lagna Chart (D1) represents the foundational core, physical life, vitality and basic destiny.",
+    d9Desc: "Navamsha Chart (D9) reveals soul destiny, spiritual evolution and marriage longevity.",
+    d10Desc: "Dasamsha Chart (D10) governs profession, authority, achievements and social stature.",
+    d7Desc: "Saptamsha Chart (D7) governs children, progeny, lineage and creative intellect.",
+    d1Tab: "D1: Rasi (Foundation)",
+    d9Tab: "D9: Navamsha (Destiny)",
+    d10Tab: "D10: Dasamsha (Career)",
+    d7Tab: "D7: Saptamsha (Children)",
+
+    // Yogas & Doshas
+    extendedYogasTitle: "Pancha Mahapurusha, Raj Yogas & Dhana Yogas",
+    extendedYogasSub: "Classical Vedic planetary configurations conferring wealth, authority, wisdom and fortune.",
+    effectsLabel: "Effects:",
+    doshasAnalysisTitle: "Classical Vedic Dosha Analysis & Remedies",
+    doshasAnalysisSub: "Authentic Parashari checks for Manglik, Kaal Sarp, Pitra and Guru Chandal doshas.",
+    doshaActive: "Active",
+    doshaClean: "Clean / Cancelled",
+    doshaTypeLabel: "Type:",
+    cancellationLabel: "Cancellation:",
+    remedyLabel: "Recommended Remedy:",
+
+    // Remedies & Gemstones
+    remediesTitle: "Personalized Gemstones, Rudraksha & Ishta Devata Guide",
+    remediesSub: "Classical Brihat Samhita prescriptions for Life Stone, Lucky Stone, Rudraksha and Ishta Devata.",
+    lifeStoneTitle: "Life Stone (Lagna Stone)",
+    lifeStoneBadge: "1st Lord",
+    luckyStoneTitle: "Lucky Stone (Fortune Stone)",
+    luckyStoneBadge: "9th Lord",
+    careerStoneTitle: "Career Stone",
+    careerStoneBadge: "10th Lord",
+    metalLabel: "Metal:",
+    fingerLabel: "Finger:",
+    wearingDayLabel: "Day:",
+    rudrakshaTitle: "Auspicious Rudraksha",
+    ishtaDevataTitle: "Ishta Devata",
+    favorableElementsTitle: "Favorable Elements",
+    favorableDirectionLabel: "Direction:",
+    favorableColorsLabel: "Colors:",
+    favorableNumbersLabel: "Numbers:",
   },
 };
