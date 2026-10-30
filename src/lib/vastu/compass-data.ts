@@ -92,6 +92,22 @@ export const ENTRANCE_RATINGS = {
 
 // ---------------------------------------------------------------------------
 // 32 Padas Master Definitions (Calculated for N5 center = 0.0° True North)
+//
+// `entrance_rating` is capped by the client's own rule. RESOURCES-MASTER.md
+// §20.1, drawn from the Rahul Pandat Vastu PDFs, names exactly eight
+// auspicious entrance padas — the Golden Doors, flagged here as
+// `isGoldenDoor` — and states that the other twenty-four "produce distinct
+// afflictions when used as main entrances", naming W5 Dauvarika as an example.
+//
+// The upstream Newmeric Compass app grades five further padas (N5, N8, E5, E6,
+// W5) as excellent or good. Those are capped at "conditional" here, because the
+// backend's paid Vastu audit (`vastu_engine.py`, locked by
+// `test_auspicious_entrances`) follows the client's eight. Left as they were,
+// this compass would call a due-north N5 entrance "Excellent" while the audit
+// called the same entrance প্রতিকূল and docked its score — one product giving two
+// opposite answers about the same door.
+//
+// The gradation below the cap is still the upstream app's.
 // ---------------------------------------------------------------------------
 export const VASTU_PADAS: VastuPada[] = [
   // 1: N5 (Center 0.0°)
@@ -103,7 +119,7 @@ export const VASTU_PADAS: VastuPada[] = [
     isGoldenDoor: false,
     entrance_challenge: "Calm, spiritual and domestic energy; excessive emotionality or introversion can occur.",
     entrance_challenge_bn: "শান্তিপূর্ণ ও আধ্যাত্মিক শক্তি, তবে অতিরিক্ত ভাবাবেগ ও পারিবারিক মানসিক চাপ দেখা দিতে পারে।",
-    entrance_rating: "excellent", entrance_rating_label: "Excellent", entrance_rating_color: "#1B7F4B",
+    entrance_rating: "conditional", entrance_rating_label: "Conditional", entrance_rating_color: "#E7B416",
     element: "Water", dosha: "Kapha", organ: "Kidney",
     life_aspect: "Money & Opportunities", life_aspect_bn: "অর্থোপার্জন ও নতুন সুযোগ",
     nakshatra: "Pushya", color: "#CFE8F5", corner: "Uttar Disha (Kubera Sthan)",
@@ -163,7 +179,7 @@ export const VASTU_PADAS: VastuPada[] = [
     isGoldenDoor: false,
     entrance_challenge: "Savings and financial accumulation; can increase possessiveness, expenditure, or material attachment.",
     entrance_challenge_bn: "আয়ের তুলনায় ব্যয়ের প্রবণতা ও অনর্থক খরচ বৃদ্ধি পেতে পারে।",
-    entrance_rating: "good", entrance_rating_label: "Good", entrance_rating_color: "#4CAF50",
+    entrance_rating: "conditional", entrance_rating_label: "Conditional", entrance_rating_color: "#E7B416",
     element: "Water", dosha: "Kapha", organ: "Head",
     life_aspect: "Ideas & Vision", life_aspect_bn: "প্রজ্ঞা, স্পষ্ট দৃষ্টি ও মানসিক শক্তি",
     nakshatra: "Purva Phalguni", color: "#CFE9C6", corner: "Ishanya Kon (ঈশান্য কোণ)",
@@ -263,7 +279,7 @@ export const VASTU_PADAS: VastuPada[] = [
     isGoldenDoor: false,
     entrance_challenge: "Aggression, irritability, ego clashes, and hasty family decisions under stress.",
     entrance_challenge_bn: "অতিরিক্ত আত্মম্ভরিতা, ক্রোধ ও পরিবারের সদস্যদের মধ্যে বিরোধের ঝুঁকি।",
-    entrance_rating: "good", entrance_rating_label: "Good", entrance_rating_color: "#4CAF50",
+    entrance_rating: "conditional", entrance_rating_label: "Conditional", entrance_rating_color: "#E7B416",
     element: "Air", dosha: "Tamas", organ: "Liver",
     life_aspect: "Social Associations", life_aspect_bn: "সামাজিক নেটওয়ার্ক ও নেতৃত্ব",
     nakshatra: "Vishakha", color: "#C4E4A6", corner: "Purva Disha (Indra Sthan)",
@@ -283,7 +299,7 @@ export const VASTU_PADAS: VastuPada[] = [
     isGoldenDoor: false,
     entrance_challenge: "Traditional interpretation associates it with commitment issues, deceit or unreliability.",
     entrance_challenge_bn: "প্রতিশ্রুতি পালনে জটিলতা ও মিথ্যা অপবাদের ঝুঁকি।",
-    entrance_rating: "good", entrance_rating_label: "Good", entrance_rating_color: "#4CAF50",
+    entrance_rating: "conditional", entrance_rating_label: "Conditional", entrance_rating_color: "#E7B416",
     element: "Fire", dosha: "Tamas", organ: "Gall Bladder",
     life_aspect: "Analysis & Churning", life_aspect_bn: "চিন্তন ও গভীর বিশ্লেষণ",
     nakshatra: "Anuradha", color: "#D8E9A6", corner: "Purva Disha (Indra Sthan)",
@@ -583,7 +599,7 @@ export const VASTU_PADAS: VastuPada[] = [
     isGoldenDoor: false,
     entrance_challenge: "Financial opportunities but also over-ambition, high expectations and perfectionism.",
     entrance_challenge_bn: "আকাঙ্ক্ষার অপূর্ণতা, প্রত্যাশার চাপ ও মানসিক হতাশার ঝুঁকি।",
-    entrance_rating: "good", entrance_rating_label: "Good", entrance_rating_color: "#4CAF50",
+    entrance_rating: "conditional", entrance_rating_label: "Conditional", entrance_rating_color: "#E7B416",
     element: "Air", dosha: "Vata", organ: "Large Intestine",
     life_aspect: "Gains & Fulfillment", life_aspect_bn: "ব্যবসায়িক লাভ ও সাফল্য",
     nakshatra: "Mrigashira", color: "#DDCFEC", corner: "Paschim Disha (Varuna Sthan)",
@@ -889,11 +905,11 @@ export const VASTU_CATEGORIES: VastuCategory[] = [
     slug: "staircase", name: "Staircase", name_bn: "সিঁড়ি", name_hi: "सीढ़ियाँ",
     category_group: "architecture", icon: "🪜",
     best_directions: ["S", "SW", "W", "NW"],
-    avoid_directions: ["NE", "N", "E", "Brahmasthan"],
+    avoid_directions: ["NE", "N", "E"],
     benefit: "Steady step-by-step progress without weighing down energy centers.",
     benefit_bn: "ধাপে ধাপে উন্নতি ও গৃহের ইতিবাচক শক্তির অবাধ সঞ্চালন।",
-    remedy: "Climb stairs clockwise; never place a toilet or puja under the staircase.",
-    remedy_bn: "সিঁড়ি ঘড়ির কাঁটার দিকে ঘোরান; সিঁড়ির নিচে টয়লেট বা মন্দির করবেন না।",
+    remedy: "Never build the staircase through the Brahmasthan, the centre of the plot. Climb stairs clockwise, and never place a toilet or puja under the staircase.",
+    remedy_bn: "গৃহের কেন্দ্রস্থল (ব্রহ্মস্থান) দিয়ে কখনও সিঁড়ি করবেন না। সিঁড়ি ঘড়ির কাঁটার দিকে ঘোরান; সিঁড়ির নিচে টয়লেট বা মন্দির করবেন না।",
   },
   {
     slug: "dustbin", name: "Dustbin / Trash Can", name_bn: "ডাস্টবিন / ময়লার ঝুড়ি", name_hi: "कूड़ेदान",
@@ -1029,7 +1045,7 @@ export const VASTU_CATEGORIES: VastuCategory[] = [
     slug: "shoe-rack", name: "Shoe Rack", name_bn: "জুতার র্যাক", name_hi: "जूता स्टैंड",
     category_group: "objects", icon: "👟",
     best_directions: ["NW", "W", "SSW"],
-    avoid_directions: ["NE", "N", "E", "Temple Area"],
+    avoid_directions: ["NE", "N", "E"],
     benefit: "Keeping outside dirt and lower energy isolated from sanctified areas.",
     benefit_bn: "বাইরের নেতিবাচক ধূলিকণা ও শক্তি ঘরের পবিত্র স্থান থেকে দূরে রাখা।",
     remedy: "Keep shoe rack covered; never place directly in front of main entrance or near puja.",
@@ -1089,7 +1105,7 @@ export const VASTU_CATEGORIES: VastuCategory[] = [
     slug: "lift-engineering", name: "Elevator / Lift Shaft", name_bn: "লিফট / এলিভেটর", name_hi: "लिफ्ट",
     category_group: "architecture", icon: "🛗",
     best_directions: ["S", "SW", "W"],
-    avoid_directions: ["NE", "Brahmasthan", "N"],
+    avoid_directions: ["NE", "N"],
     benefit: "Heavy vertical machinery anchored safely in heavy zones.",
     benefit_bn: "ভারী যন্ত্রপাতির ভারসাম্যপূর্ণ অবস্থান।",
     remedy: "Never construct lift in center Brahmasthan or NE corner.",
