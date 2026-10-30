@@ -1197,3 +1197,4 @@ export function activePada(degree: number, padas: VastuPada[] = VASTU_PADAS): Va
   const idx = padaIndexForDegree(degree);
   return padas[idx] || padas[0];
 }
+

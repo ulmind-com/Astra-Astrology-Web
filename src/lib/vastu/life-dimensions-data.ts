@@ -387,3 +387,4 @@ export function lifeDimension(dir16?: string | null): LifeDimension | null {
   if (!dir16) return null;
   return ORIGINAL[dir16.toUpperCase()] ?? null;
 }
+
