@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { AiMarkdown } from "@/components/ai/ai-markdown";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Button } from "@/components/ui";
@@ -630,10 +631,18 @@ export default function AIAstrologerPage() {
                       : "bg-white border border-[#b06d4e]/25 rounded-bl-xs text-[#4D4664]"
                   }`}
                 >
-                  {/* Content */}
-                  <div className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap font-sans">
-                    {msg.content}
-                  </div>
+                  {/* Content.
+                      Only the astrologer's side is rendered as Markdown. What
+                      the user typed is shown exactly as they typed it — nobody
+                      asking about their "7*7 numerology" wants half their
+                      question turned into italics. */}
+                  {isUser ? (
+                    <div className="font-sans text-xs leading-relaxed whitespace-pre-wrap sm:text-sm">
+                      {msg.content}
+                    </div>
+                  ) : (
+                    <AiMarkdown className="font-sans">{msg.content}</AiMarkdown>
+                  )}
 
                   {/* Tools Called Expandable Pill */}
                   {!isUser && msg.tools_called && msg.tools_called.length > 0 && (
