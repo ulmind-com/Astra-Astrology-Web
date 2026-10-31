@@ -22,6 +22,7 @@ import { Button } from "@/components/ui";
 import { vastuApi } from "@/lib/api";
 import type { MedicalVastuItem } from "@/types/vastu";
 import type { AstrologyLanguage } from "@/types";
+import { VASTU_I18N } from "@/lib/vastu-translations";
 
 // Fallback high-fidelity local catalog directly from 115-page a0df3a72402320df.pdf
 const LOCAL_MEDICAL_CATALOG: MedicalVastuItem[] = [
@@ -153,6 +154,7 @@ interface MedicalVastuProps {
 }
 
 export function MedicalVastu({ language = "bn" }: MedicalVastuProps) {
+  const t = VASTU_I18N[language] || VASTU_I18N.en;
   const [items, setItems] = React.useState<MedicalVastuItem[]>(LOCAL_MEDICAL_CATALOG);
   const [selectedId, setSelectedId] = React.useState<string>("depression_sorrow");
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -278,7 +280,7 @@ export function MedicalVastu({ language = "bn" }: MedicalVastuProps) {
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-4">
               <div>
                 <span className="text-xs uppercase tracking-wider text-rose-800 dark:text-rose-300 font-bold">
-                  {language === "bn" ? "চিহ্নিত রোগ / লক্ষণ" : "Diagnosed Ailment"}
+                  {t.diagnosedAilment}
                 </span>
                 <h4 className="text-lg sm:text-xl font-bold text-foreground">
                   {language === "bn" ? selectedItem.name_bn : selectedItem.name_en}
@@ -287,7 +289,7 @@ export function MedicalVastu({ language = "bn" }: MedicalVastuProps) {
 
               <div className="flex items-center gap-2">
                 <span className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-400/30 text-amber-900 dark:text-amber-300 font-extrabold text-sm shadow-2xs">
-                  {selectedItem.affected_zone} জোন
+                  {selectedItem.affected_zone} {t.zoneSuffix}
                 </span>
               </div>
             </div>
@@ -297,7 +299,7 @@ export function MedicalVastu({ language = "bn" }: MedicalVastuProps) {
               <div className="p-3 rounded-xl bg-surface-muted/60 border border-border/60 space-y-1">
                 <p className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
                   <Layers className="size-3 text-brand-500" />
-                  {language === "bn" ? "আক্রান্ত পঞ্চভূত তত্ত্ব" : "Elemental Domain"}
+                  {t.elementalDomain}
                 </p>
                 <p className="text-xs font-bold text-foreground">{selectedItem.affected_element}</p>
               </div>
@@ -305,7 +307,7 @@ export function MedicalVastu({ language = "bn" }: MedicalVastuProps) {
               <div className="p-3 rounded-xl bg-surface-muted/60 border border-border/60 space-y-1">
                 <p className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
                   <Heart className="size-3 text-rose-500" />
-                  {language === "bn" ? "সংবেদনশীল শারীরবৃত্তীয় অঙ্গ" : "Body Organ"}
+                  {t.bodyOrgan}
                 </p>
                 <p className="text-xs font-bold text-foreground">{selectedItem.body_organ_bn}</p>
               </div>
@@ -313,7 +315,7 @@ export function MedicalVastu({ language = "bn" }: MedicalVastuProps) {
               <div className="p-3 rounded-xl bg-surface-muted/60 border border-border/60 space-y-1">
                 <p className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
                   <Brain className="size-3 text-purple-500" />
-                  {language === "bn" ? "আয়ুর্বেদিক দোষ" : "Ayurvedic Dosha"}
+                  {t.ayurvedicDosha}
                 </p>
                 <p className="text-xs font-bold text-foreground">{selectedItem.dosha}</p>
               </div>
@@ -323,7 +325,7 @@ export function MedicalVastu({ language = "bn" }: MedicalVastuProps) {
             <div className="p-4 rounded-xl bg-rose-500/5 border border-rose-500/20 space-y-2">
               <div className="flex items-center gap-2 text-rose-800 dark:text-rose-300 font-bold text-xs">
                 <AlertTriangle className="size-4" />
-                <span>{language === "bn" ? "বাস্তুগত মূল কারণ (Root Cause in House)" : "Vastu Root Cause"}</span>
+                <span>{t.rootCause}</span>
               </div>
               <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed">
                 {selectedItem.root_cause_bn}
@@ -334,11 +336,7 @@ export function MedicalVastu({ language = "bn" }: MedicalVastuProps) {
             <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-2.5">
               <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-xs">
                 <CheckCircle2 className="size-4" />
-                <span>
-                  {language === "bn"
-                    ? "ভাঙচুরবিহীন সমাধান ও প্রতিকার (Non-Demolition Remedy)"
-                    : "Non-Demolition Remedy"}
-                </span>
+                <span>{t.medicalRemedy}</span>
               </div>
               <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed font-medium">
                 {selectedItem.remedy_bn}

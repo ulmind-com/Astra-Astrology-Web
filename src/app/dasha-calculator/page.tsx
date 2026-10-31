@@ -36,7 +36,21 @@ import { astrologyApi } from "@/lib/api";
 import { LocationPickerModal } from "@/components/astrology/location-picker-modal";
 import { KPChartViewer } from "@/components/astrology/kp-chart-viewer";
 import { KP_PLANET_NAMES } from "@/lib/kp-translations";
-import { DASHA_I18N, type DashaTranslations } from "@/lib/dasha-translations";
+import {
+  translatePlanetName,
+  translateRashiName,
+  translateNakshatraName,
+  toLocalizedDigits,
+} from "@/lib/kundli-translations";
+import {
+  DASHA_I18N,
+  type DashaTranslations,
+  translateActivePath,
+  translateFunctionalNature,
+  translateDignity,
+  translateSadeSatiPhase,
+  translateYoginiNature,
+} from "@/lib/dasha-translations";
 import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
 import { useProfile } from "@/hooks/use-profile";
@@ -68,7 +82,7 @@ const PLANET_PILLS: Array<{
   bgClass: string;
 }> = [
   { key: "Sun", code: "Su", nameEn: "Sun", nameBn: "সূর্য", nameHi: "सूर्य", color: "#f97316", bgClass: "bg-orange-100 border-orange-400 text-orange-900" },
-  { key: "Moon", code: "Mo", nameEn: "Moon", nameBn: "চন্দ্র", nameHi: "चंद्र", color: "#64748b", bgClass: "bg-slate-100 border-slate-400 text-slate-900" },
+  { key: "Moon", code: "Mo", nameEn: "Moon", nameBn: "চন্দ্র", nameHi: "चन्द्र", color: "#64748b", bgClass: "bg-slate-100 border-slate-400 text-slate-900" },
   { key: "Mars", code: "Ma", nameEn: "Mars", nameBn: "মঙ্গল", nameHi: "मंगल", color: "#ef4444", bgClass: "bg-red-100 border-red-400 text-red-900" },
   { key: "Rahu", code: "Ra", nameEn: "Rahu", nameBn: "রাহু", nameHi: "राहु", color: "#6366f1", bgClass: "bg-indigo-100 border-indigo-400 text-indigo-900" },
   { key: "Jupiter", code: "Ju", nameEn: "Jupiter", nameBn: "বৃহস্পতি", nameHi: "बृहस्पति", color: "#f59e0b", bgClass: "bg-amber-100 border-amber-400 text-amber-900" },
@@ -109,7 +123,7 @@ export default function DashaCalculatorPage() {
 
   // Centralized Language state
   const { language, setLanguage } = useLanguage();
-  const ui = DASHA_I18N[language] || DASHA_I18N.en;
+  const ui = DASHA_I18N[language] || DASHA_I18N.bn;
 
   // Active Tab
   const [activeTab, setActiveTab] = React.useState<
@@ -137,6 +151,7 @@ export default function DashaCalculatorPage() {
   // Loading & Result
   const [loading, setLoading] = React.useState(false);
   const [result, setResult] = React.useState<KPCalculateResult | null>(null);
+  const lastPayloadRef = React.useRef<KPCalculatePayload | null>(null);
 
   // Stepper Drilldown States for Vimshottari Tree (1 = MD, 2 = AD, 3 = PD)
   const [activeTreeStep, setActiveTreeStep] = React.useState<1 | 2 | 3>(1);
@@ -242,6 +257,23 @@ export default function DashaCalculatorPage() {
     }
   }, [profile, user, populateFromProfileData]);
 
+  // When language preference switches, re-fetch calculation with the new language seamlessly
+  React.useEffect(() => {
+    if (lastPayloadRef.current && result && !loading) {
+      const updatedPayload: KPCalculatePayload = {
+        ...lastPayloadRef.current,
+        language,
+      };
+      astrologyApi
+        .calculateDasha(updatedPayload)
+        .then((resp) => {
+          setResult(resp);
+          lastPayloadRef.current = updatedPayload;
+        })
+        .catch(() => {});
+    }
+  }, [language]);
+
   const handleReset = () => {
     setName("");
     setGender("male");
@@ -257,11 +289,18 @@ export default function DashaCalculatorPage() {
     setLongitude(null);
     setTimezone("5.5");
     setResult(null);
+    lastPayloadRef.current = null;
     setActiveTreeStep(1);
     setSelectedMD(null);
     setSelectedAD(null);
     setSelectedYogini(null);
-    toast.info(language === "bn" ? "ফর্ম রিসেট করা হয়েছে।" : "Form cleared.");
+    toast.info(
+      language === "bn"
+        ? "ফর্ম রিসেট করা হয়েছে।"
+        : language === "hi"
+        ? "फ़ॉर्म रीसेट कर दिया गया है।"
+        : "Form cleared.",
+    );
   };
 
   const handleCalculate = async (e: React.FormEvent) => {
@@ -272,17 +311,35 @@ export default function DashaCalculatorPage() {
     const y = parseInt(year, 10);
 
     if (!day || isNaN(d) || d < 1 || d > 31) {
-      toast.error(language === "bn" ? "সঠিক জন্ম দিন (১-৩১) লিখুন।" : "Enter a valid birth day (1-31).");
+      toast.error(
+        language === "bn"
+          ? "সঠিক জন্ম দিন (১-৩১) লিখুন।"
+          : language === "hi"
+          ? "सही जन्म दिन (१-३१) लिखें।"
+          : "Enter a valid birth day (1-31).",
+      );
       dayRef.current?.focus();
       return;
     }
     if (!month || isNaN(m) || m < 1 || m > 12) {
-      toast.error(language === "bn" ? "সঠিক জন্ম মাস (১-১২) লিখুন।" : "Enter a valid birth month (1-12).");
+      toast.error(
+        language === "bn"
+          ? "সঠিক জন্ম মাস (১-১২) লিখুন।"
+          : language === "hi"
+          ? "सही जन्म माह (१-१२) लिखें।"
+          : "Enter a valid birth month (1-12).",
+      );
       monthRef.current?.focus();
       return;
     }
     if (!year || isNaN(y) || y < 1800 || y > 2100) {
-      toast.error(language === "bn" ? "সঠিক জন্ম বছর লিখুন।" : "Enter a valid 4-digit birth year.");
+      toast.error(
+        language === "bn"
+          ? "সঠিক জন্ম বছর লিখুন।"
+          : language === "hi"
+          ? "सही जन्म वर्ष लिखें।"
+          : "Enter a valid 4-digit birth year.",
+      );
       yearRef.current?.focus();
       return;
     }
@@ -325,11 +382,7 @@ export default function DashaCalculatorPage() {
     const access = checkAccess("dasha_calculator");
     if (!access.allowed) {
       if (access.reason === "disabled") {
-        toast.error(
-          language === "bn"
-            ? "দশা ক্যালকুলেটর ফিচারটি বর্তমানে অ্যাডমিন দ্বারা বন্ধ রয়েছে।"
-            : "Dasha calculator feature is temporarily unavailable.",
-        );
+        toast.error(ui.formFeatureDisabled);
         return;
       }
       setCoinModalReason(access.reason || "insufficient_coins");
@@ -341,6 +394,7 @@ export default function DashaCalculatorPage() {
     try {
       const resp = await astrologyApi.calculateDasha(payload);
       setResult(resp);
+      lastPayloadRef.current = payload;
 
       // Auto-set selections
       const currentMD = resp.dashas?.find((d) => d.is_current) || resp.dashas?.[0];
@@ -358,6 +412,8 @@ export default function DashaCalculatorPage() {
       toast.success(
         language === "bn"
           ? "বিংশোত্তরী ও যোগিনী দশা নির্ভুল গণনা সম্পন্ন হয়েছে!"
+          : language === "hi"
+          ? "विंशोत्तरी एवं योगिनी दशा की सटीक गणना पूर्ण हुई!"
           : "Dasha calculated with 100% precision!",
       );
 
@@ -438,13 +494,18 @@ export default function DashaCalculatorPage() {
             {ui.subtitleMain}
           </p>
 
-          <div className="pt-4 flex justify-center">
-            <FeatureCoinBadge
-              feature={dashaFeature}
-              coins={dashaFeature?.coins ?? 15}
-              language={language}
-            />
-          </div>
+          {profile && (
+            <div className="mt-4 flex items-center justify-center">
+              <button
+                type="button"
+                onClick={() => populateFromProfileData(profile, user)}
+                className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50/80 px-3 py-1 text-xs font-bold text-amber-900 hover:bg-amber-100 transition-colors"
+              >
+                <User className="size-3.5" />
+                <span>{ui.profileSync}</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -462,7 +523,7 @@ export default function DashaCalculatorPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                  {language === "bn" ? "পূর্ণ নাম" : "Full Name"}
+                  {ui.formFullName}
                 </label>
                 <div className="relative">
                   <User className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
@@ -470,7 +531,7 @@ export default function DashaCalculatorPage() {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder={language === "bn" ? "আপনার নাম" : "Your Name"}
+                    placeholder={ui.formFullNamePlaceholder}
                     className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm focus:border-amber-500 focus:outline-none"
                   />
                 </div>
@@ -478,7 +539,7 @@ export default function DashaCalculatorPage() {
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                  {language === "bn" ? "লিঙ্গ" : "Gender"}
+                  {ui.formGender}
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {(["male", "female", "other"] as const).map((g) => (
@@ -493,10 +554,10 @@ export default function DashaCalculatorPage() {
                       }`}
                     >
                       {g === "male"
-                        ? language === "bn" ? "পুরুষ" : "Male"
+                        ? ui.formMale
                         : g === "female"
-                        ? language === "bn" ? "মহিলা" : "Female"
-                        : language === "bn" ? "অন্যান্য" : "Other"}
+                        ? ui.formFemale
+                        : ui.formOther}
                     </button>
                   ))}
                 </div>
@@ -509,7 +570,7 @@ export default function DashaCalculatorPage() {
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                   <Calendar className="inline-block size-3.5 mr-1 text-amber-600" />
-                  <span>{language === "bn" ? "জন্ম তারিখ (দিন - মাস - বছর) *" : "Date of Birth (DD - MM - YYYY) *"}</span>
+                  <span>{ui.formDob}</span>
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   <input
@@ -558,7 +619,7 @@ export default function DashaCalculatorPage() {
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                   <Clock className="inline-block size-3.5 mr-1 text-amber-600" />
-                  <span>{language === "bn" ? "জন্ম সময় (ঘণ্টা : মিনিট : সেকেন্ড)" : "Time of Birth (HH : MM : SS)"}</span>
+                  <span>{ui.formTob}</span>
                 </label>
                 <div className="grid grid-cols-4 gap-2">
                   <input
@@ -624,14 +685,14 @@ export default function DashaCalculatorPage() {
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                 <MapPin className="inline-block size-3.5 mr-1 text-amber-600" />
-                <span>{language === "bn" ? "জন্মস্থান *" : "Birth Place *"}</span>
+                <span>{ui.formPob}</span>
               </label>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={place}
                   onChange={(e) => setPlace(e.target.value)}
-                  placeholder="Kolkata, West Bengal, India"
+                  placeholder={ui.formPobPlaceholder}
                   className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-amber-500 focus:outline-none"
                 />
                 <button
@@ -640,7 +701,7 @@ export default function DashaCalculatorPage() {
                   className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-xs font-bold text-amber-800 hover:bg-amber-100 transition-colors"
                 >
                   <Compass className="size-4" />
-                  <span>{language === "bn" ? "মানচিত্র" : "Map"}</span>
+                  <span>{ui.formMap}</span>
                 </button>
               </div>
             </div>
@@ -653,13 +714,15 @@ export default function DashaCalculatorPage() {
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800"
               >
                 <Sliders className="size-3.5" />
-                <span>{language === "bn" ? "উন্নত জ্যোতিষ সেটিংস (অয়নাংশ ও স্থানাঙ্ক)" : "Advanced Astro Settings"}</span>
+                <span>{ui.formAdvancedSettings}</span>
               </button>
 
               {showAdvance && (
                 <div className="mt-3 p-4 rounded-xl border border-slate-100 bg-slate-50/70 grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Ayanamsa</label>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                      {ui.formAyanamsa}
+                    </label>
                     <select
                       value={ayanamsa}
                       onChange={(e) => setAyanamsa(e.target.value as AyanamsaType)}
@@ -671,7 +734,9 @@ export default function DashaCalculatorPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Timezone</label>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                      {ui.formTimezone}
+                    </label>
                     <input
                       type="text"
                       value={timezone}
@@ -689,7 +754,7 @@ export default function DashaCalculatorPage() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 py-2.5 px-4 rounded-xl hover:bg-slate-100 transition-colors order-2 sm:order-1"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 py-2.5 px-4 rounded-xl hover:bg-slate-100 transition-colors order-2 sm:order-1 cursor-pointer"
               >
                 <RotateCcw className="size-3.5" />
                 <span>{ui.resetBtn}</span>
@@ -705,7 +770,7 @@ export default function DashaCalculatorPage() {
                 <button
                   type="submit"
                   disabled={loading || (dashaFeature ? !dashaFeature.enabled : false)}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
                 >
                   {loading ? (
                     <>
@@ -747,28 +812,34 @@ export default function DashaCalculatorPage() {
             <div className="rounded-2xl border-2 border-amber-300 bg-white p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700">
-                  {language === "bn" ? "বিশ্লেষিত জন্ম বিবরণ" : "Analyzed Birth Details"}
+                  {ui.analyzedDetailsTitle}
                 </span>
                 <h3 className="font-display text-2xl font-bold text-slate-900">
-                  {result.name || name || "Native"} ({result.gender})
+                  {result.name || name || "Native"} (
+                  {result.gender === "female"
+                    ? ui.formFemale
+                    : result.gender === "other"
+                    ? ui.formOther
+                    : ui.formMale}
+                  )
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  📅 {result.birth_date_formatted} · ⏰ {result.birth_time_formatted} · 📍 {result.birth_place}
+                  📅 {toLocalizedDigits(result.birth_date_formatted, language)} · ⏰ {toLocalizedDigits(result.birth_time_formatted, language)} · 📍 {result.birth_place}
                 </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-lg bg-amber-100 border border-amber-300 px-3 py-1 text-xs font-bold text-amber-900">
-                  Lagna: {result.panchang.ascendant_sign}
+                  {ui.lagnaPrefix} {translateRashiName(result.panchang.ascendant_sign, language)}
                 </span>
                 <span className="rounded-lg bg-slate-100 border border-slate-300 px-3 py-1 text-xs font-bold text-slate-800">
-                  Moon: {result.panchang.moon_rashi} ({result.panchang.moon_nakshatra})
+                  {ui.moonPrefix} {translateRashiName(result.panchang.moon_rashi, language)} ({translateNakshatraName(result.panchang.moon_nakshatra, language)})
                 </span>
               </div>
             </div>
 
             {/* 6-Tab Navigation Bar */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 [scrollbar-width:thin]">
               {[
                 { id: "radar", label: ui.tabActiveRadar, icon: Activity },
                 { id: "tree", label: ui.tabVimshottari, icon: Layers },
@@ -784,7 +855,7 @@ export default function DashaCalculatorPage() {
                     key={t.id}
                     type="button"
                     onClick={() => setActiveTab(t.id as any)}
-                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
+                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
                       isActive
                         ? "bg-amber-500 text-white shadow-md shadow-amber-500/20"
                         : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -820,7 +891,7 @@ export default function DashaCalculatorPage() {
                       {ui.activePathTitle}
                     </span>
                     <p className="font-display text-lg sm:text-2xl font-extrabold text-amber-950 mt-1">
-                      {runningSnapshot.active_path}
+                      {translateActivePath(runningSnapshot.active_path, language)}
                     </p>
                   </div>
 
@@ -833,13 +904,13 @@ export default function DashaCalculatorPage() {
                           {ui.levelMahadasha}
                         </span>
                         <h4 className="font-display text-xl font-bold text-slate-900 mt-1">
-                          {KP_PLANET_NAMES[runningSnapshot.mahadasha]?.[language] || runningSnapshot.mahadasha}
+                          {translatePlanetName(runningSnapshot.mahadasha, language)}
                         </h4>
                       </div>
                       <div className="mt-3 pt-2 border-t border-blue-200/60 text-[11px] text-slate-600 space-y-0.5">
-                        <p><span className="font-semibold">{ui.startDate}:</span> {formatDateDisplay(runningSnapshot.md_start)}</p>
-                        <p><span className="font-semibold">{ui.endDate}:</span> {formatDateDisplay(runningSnapshot.md_end)}</p>
-                        <p className="text-blue-700 font-bold">{runningSnapshot.remaining_days_md} {ui.remainingDays}</p>
+                        <p><span className="font-semibold">{ui.startDate}:</span> {toLocalizedDigits(formatDateDisplay(runningSnapshot.md_start), language)}</p>
+                        <p><span className="font-semibold">{ui.endDate}:</span> {toLocalizedDigits(formatDateDisplay(runningSnapshot.md_end), language)}</p>
+                        <p className="text-blue-700 font-bold">{toLocalizedDigits(runningSnapshot.remaining_days_md, language)} {ui.remainingDays}</p>
                       </div>
                     </div>
 
@@ -850,13 +921,13 @@ export default function DashaCalculatorPage() {
                           {ui.levelAntardasha}
                         </span>
                         <h4 className="font-display text-xl font-bold text-slate-900 mt-1">
-                          {KP_PLANET_NAMES[runningSnapshot.antardasha]?.[language] || runningSnapshot.antardasha}
+                          {translatePlanetName(runningSnapshot.antardasha, language)}
                         </h4>
                       </div>
                       <div className="mt-3 pt-2 border-t border-emerald-200/60 text-[11px] text-slate-600 space-y-0.5">
-                        <p><span className="font-semibold">{ui.startDate}:</span> {formatDateDisplay(runningSnapshot.ad_start)}</p>
-                        <p><span className="font-semibold">{ui.endDate}:</span> {formatDateDisplay(runningSnapshot.ad_end)}</p>
-                        <p className="text-emerald-700 font-bold">{runningSnapshot.remaining_days_ad} {ui.remainingDays}</p>
+                        <p><span className="font-semibold">{ui.startDate}:</span> {toLocalizedDigits(formatDateDisplay(runningSnapshot.ad_start), language)}</p>
+                        <p><span className="font-semibold">{ui.endDate}:</span> {toLocalizedDigits(formatDateDisplay(runningSnapshot.ad_end), language)}</p>
+                        <p className="text-emerald-700 font-bold">{toLocalizedDigits(runningSnapshot.remaining_days_ad, language)} {ui.remainingDays}</p>
                       </div>
                     </div>
 
@@ -867,12 +938,12 @@ export default function DashaCalculatorPage() {
                           {ui.levelPratyantardasha}
                         </span>
                         <h4 className="font-display text-xl font-bold text-slate-900 mt-1">
-                          {KP_PLANET_NAMES[runningSnapshot.pratyantardasha]?.[language] || runningSnapshot.pratyantardasha}
+                          {translatePlanetName(runningSnapshot.pratyantardasha, language)}
                         </h4>
                       </div>
                       <div className="mt-3 pt-2 border-t border-amber-200/60 text-[11px] text-slate-600 space-y-0.5">
-                        <p><span className="font-semibold">{ui.startDate}:</span> {formatDateDisplay(runningSnapshot.pd_start)}</p>
-                        <p><span className="font-semibold">{ui.endDate}:</span> {formatDateDisplay(runningSnapshot.pd_end)}</p>
+                        <p><span className="font-semibold">{ui.startDate}:</span> {toLocalizedDigits(formatDateDisplay(runningSnapshot.pd_start), language)}</p>
+                        <p><span className="font-semibold">{ui.endDate}:</span> {toLocalizedDigits(formatDateDisplay(runningSnapshot.pd_end), language)}</p>
                       </div>
                     </div>
 
@@ -883,12 +954,12 @@ export default function DashaCalculatorPage() {
                           {ui.levelSookshma}
                         </span>
                         <h4 className="font-display text-xl font-bold text-slate-900 mt-1">
-                          {KP_PLANET_NAMES[runningSnapshot.sookshma_dasha || "Sun"]?.[language] || runningSnapshot.sookshma_dasha}
+                          {translatePlanetName(runningSnapshot.sookshma_dasha || "Sun", language)}
                         </h4>
                       </div>
                       <div className="mt-3 pt-2 border-t border-purple-200/60 text-[11px] text-slate-600 space-y-0.5">
-                        <p><span className="font-semibold">{ui.startDate}:</span> {formatDateDisplay(runningSnapshot.sd_start)}</p>
-                        <p><span className="font-semibold">{ui.endDate}:</span> {formatDateDisplay(runningSnapshot.sd_end)}</p>
+                        <p><span className="font-semibold">{ui.startDate}:</span> {toLocalizedDigits(formatDateDisplay(runningSnapshot.sd_start), language)}</p>
+                        <p><span className="font-semibold">{ui.endDate}:</span> {toLocalizedDigits(formatDateDisplay(runningSnapshot.sd_end), language)}</p>
                       </div>
                     </div>
 
@@ -899,12 +970,12 @@ export default function DashaCalculatorPage() {
                           {ui.levelPran}
                         </span>
                         <h4 className="font-display text-xl font-bold text-slate-900 mt-1">
-                          {KP_PLANET_NAMES[runningSnapshot.pran_dasha || "Sun"]?.[language] || runningSnapshot.pran_dasha}
+                          {translatePlanetName(runningSnapshot.pran_dasha || "Sun", language)}
                         </h4>
                       </div>
                       <div className="mt-3 pt-2 border-t border-rose-200/60 text-[11px] text-slate-600 space-y-0.5">
-                        <p><span className="font-semibold">{ui.startDate}:</span> {formatDateDisplay(runningSnapshot.pran_start)}</p>
-                        <p><span className="font-semibold">{ui.endDate}:</span> {formatDateDisplay(runningSnapshot.pran_end)}</p>
+                        <p><span className="font-semibold">{ui.startDate}:</span> {toLocalizedDigits(formatDateDisplay(runningSnapshot.pran_start), language)}</p>
+                        <p><span className="font-semibold">{ui.endDate}:</span> {toLocalizedDigits(formatDateDisplay(runningSnapshot.pran_end), language)}</p>
                       </div>
                     </div>
                   </div>
@@ -913,8 +984,12 @@ export default function DashaCalculatorPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                     <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
                       <div className="flex justify-between text-xs font-bold mb-1.5">
-                        <span>Antardasha Progress ({runningSnapshot.antardasha})</span>
-                        <span className="text-emerald-700">{runningSnapshot.percentage_completed_ad}%</span>
+                        <span>
+                          {ui.antardashaProgress} ({translatePlanetName(runningSnapshot.antardasha, language)})
+                        </span>
+                        <span className="text-emerald-700">
+                          {toLocalizedDigits(runningSnapshot.percentage_completed_ad, language)}%
+                        </span>
                       </div>
                       <div className="h-2.5 w-full bg-slate-200 rounded-full overflow-hidden">
                         <div
@@ -926,8 +1001,12 @@ export default function DashaCalculatorPage() {
 
                     <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
                       <div className="flex justify-between text-xs font-bold mb-1.5">
-                        <span>Mahadasha Progress ({runningSnapshot.mahadasha})</span>
-                        <span className="text-blue-700">{runningSnapshot.percentage_completed_md}%</span>
+                        <span>
+                          {ui.mahadashaProgress} ({translatePlanetName(runningSnapshot.mahadasha, language)})
+                        </span>
+                        <span className="text-blue-700">
+                          {toLocalizedDigits(runningSnapshot.percentage_completed_md, language)}%
+                        </span>
                       </div>
                       <div className="h-2.5 w-full bg-slate-200 rounded-full overflow-hidden">
                         <div
@@ -945,10 +1024,10 @@ export default function DashaCalculatorPage() {
                     <div className="flex items-center justify-between">
                       <h4 className="font-display text-lg font-bold text-slate-900 flex items-center gap-2">
                         <Sparkles className="size-4 text-purple-600" />
-                        <span>Sookshma Dashas (Level 4 Micro Periods)</span>
+                        <span>{ui.sookshmaTitle}</span>
                       </h4>
                       <span className="text-xs text-slate-500 font-semibold">
-                        Under {runningSnapshot.pratyantardasha} Pratyantardasha
+                        {ui.underPratyantar} {translatePlanetName(runningSnapshot.pratyantardasha, language)}
                       </span>
                     </div>
 
@@ -956,11 +1035,11 @@ export default function DashaCalculatorPage() {
                       <table className="w-full text-xs text-left">
                         <thead>
                           <tr className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
-                            <th className="py-2.5 px-3">Lord</th>
-                            <th className="py-2.5 px-3 text-center">Start</th>
-                            <th className="py-2.5 px-3 text-center">End</th>
-                            <th className="py-2.5 px-3 text-center">Duration</th>
-                            <th className="py-2.5 px-3 text-center">Status</th>
+                            <th className="py-2.5 px-3">{ui.tableLord}</th>
+                            <th className="py-2.5 px-3 text-center">{ui.tableStart}</th>
+                            <th className="py-2.5 px-3 text-center">{ui.tableEnd}</th>
+                            <th className="py-2.5 px-3 text-center">{ui.tableDuration}</th>
+                            <th className="py-2.5 px-3 text-center">{ui.tableStatus}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -969,20 +1048,22 @@ export default function DashaCalculatorPage() {
                               key={i}
                               className={sd.is_current ? "bg-purple-50 font-bold" : "hover:bg-slate-50"}
                             >
-                              <td className="py-2.5 px-3">
-                                {KP_PLANET_NAMES[sd.lord]?.[language] || sd.lord}
+                              <td className="py-2.5 px-3 font-semibold">
+                                {translatePlanetName(sd.lord, language)}
                               </td>
                               <td className="py-2.5 px-3 text-center text-slate-600">
-                                {sd.start_date} {sd.start_time}
+                                {toLocalizedDigits(sd.start_date, language)} {toLocalizedDigits(sd.start_time, language)}
                               </td>
                               <td className="py-2.5 px-3 text-center text-slate-600">
-                                {sd.end_date} {sd.end_time}
+                                {toLocalizedDigits(sd.end_date, language)} {toLocalizedDigits(sd.end_time, language)}
                               </td>
-                              <td className="py-2.5 px-3 text-center text-slate-600">{sd.duration}</td>
+                              <td className="py-2.5 px-3 text-center text-slate-600">
+                                {toLocalizedDigits(sd.duration, language)}
+                              </td>
                               <td className="py-2.5 px-3 text-center">
                                 {sd.is_current ? (
                                   <span className="rounded-full bg-purple-100 text-purple-800 px-2 py-0.5 text-[10px] font-bold border border-purple-300">
-                                    Active Now
+                                    {ui.activeNow}
                                   </span>
                                 ) : (
                                   "—"
@@ -1017,13 +1098,13 @@ export default function DashaCalculatorPage() {
                     <button
                       type="button"
                       onClick={() => setActiveTreeStep(1)}
-                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer ${
                         activeTreeStep === 1
                           ? "bg-amber-500 text-white border-amber-500 shadow-xs"
                           : "bg-white border-slate-200 text-slate-600 hover:border-amber-400"
                       }`}
                     >
-                      <span>1. Mahadasha</span>
+                      <span>{ui.stepper1}</span>
                     </button>
 
                     <div className="h-0.5 w-6 sm:w-10 bg-slate-200" />
@@ -1032,13 +1113,13 @@ export default function DashaCalculatorPage() {
                       type="button"
                       onClick={() => selectedMD && setActiveTreeStep(2)}
                       disabled={!selectedMD}
-                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${
                         activeTreeStep === 2
                           ? "bg-amber-500 text-white border-amber-500 shadow-xs"
                           : "bg-white border-slate-200 text-slate-600 hover:border-amber-400"
                       }`}
                     >
-                      <span>2. Antardasha</span>
+                      <span>{ui.stepper2}</span>
                     </button>
 
                     <div className="h-0.5 w-6 sm:w-10 bg-slate-200" />
@@ -1047,13 +1128,13 @@ export default function DashaCalculatorPage() {
                       type="button"
                       onClick={() => selectedAD && setActiveTreeStep(3)}
                       disabled={!selectedAD}
-                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${
                         activeTreeStep === 3
                           ? "bg-amber-500 text-white border-amber-500 shadow-xs"
                           : "bg-white border-slate-200 text-slate-600 hover:border-amber-400"
                       }`}
                     >
-                      <span>3. Pratyantardasha</span>
+                      <span>{ui.stepper3}</span>
                     </button>
                   </div>
                 </div>
@@ -1063,25 +1144,27 @@ export default function DashaCalculatorPage() {
                   <div className="flex items-center gap-1.5">
                     <span
                       onClick={() => setActiveTreeStep(1)}
-                      className="cursor-pointer hover:underline text-amber-800"
+                      className="cursor-pointer hover:underline text-amber-800 font-bold"
                     >
-                      All Mahadashas
+                      {ui.allMahadashas}
                     </span>
                     {selectedMD && activeTreeStep >= 2 && (
                       <>
                         <span>➔</span>
                         <span
                           onClick={() => setActiveTreeStep(2)}
-                          className="cursor-pointer hover:underline text-amber-800"
+                          className="cursor-pointer hover:underline text-amber-800 font-bold"
                         >
-                          {selectedMD.lord}
+                          {translatePlanetName(selectedMD.lord, language)}
                         </span>
                       </>
                     )}
                     {selectedAD && activeTreeStep === 3 && (
                       <>
                         <span>➔</span>
-                        <span className="text-slate-900">{selectedAD.lord}</span>
+                        <span className="text-slate-900 font-bold">
+                          {translatePlanetName(selectedAD.lord, language)}
+                        </span>
                       </>
                     )}
                   </div>
@@ -1093,11 +1176,11 @@ export default function DashaCalculatorPage() {
                   <table className="w-full text-sm text-left">
                     <thead>
                       <tr className="bg-slate-100 text-slate-900 font-bold border-b border-slate-200">
-                        <th className="py-3 px-4">Lord</th>
+                        <th className="py-3 px-4">{ui.tableLord}</th>
                         <th className="py-3 px-4 text-center">{ui.startDate}</th>
                         <th className="py-3 px-4 text-center">{ui.endDate}</th>
                         <th className="py-3 px-4 text-center">{ui.duration}</th>
-                        <th className="py-3 px-4 text-center">Status</th>
+                        <th className="py-3 px-4 text-center">{ui.tableStatus}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 bg-white">
@@ -1115,15 +1198,17 @@ export default function DashaCalculatorPage() {
                           >
                             <td className="py-3.5 px-4 font-bold text-slate-900 flex items-center gap-2">
                               <span>➔</span>
-                              <span>{KP_PLANET_NAMES[md.lord]?.[language] || md.lord}</span>
+                              <span>{translatePlanetName(md.lord, language)}</span>
                             </td>
                             <td className="py-3.5 px-4 text-center text-slate-600 tabular-nums">
-                              {formatDateDisplay(md.start_date)}
+                              {toLocalizedDigits(formatDateDisplay(md.start_date), language)}
                             </td>
                             <td className="py-3.5 px-4 text-center text-slate-600 tabular-nums">
-                              {formatDateDisplay(md.end_date)}
+                              {toLocalizedDigits(formatDateDisplay(md.end_date), language)}
                             </td>
-                            <td className="py-3.5 px-4 text-center text-slate-600">{md.duration}</td>
+                            <td className="py-3.5 px-4 text-center text-slate-600">
+                              {toLocalizedDigits(md.duration, language)}
+                            </td>
                             <td className="py-3.5 px-4 text-center">
                               {md.is_current ? (
                                 <span className="rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-xs font-bold border border-emerald-300">
@@ -1150,15 +1235,17 @@ export default function DashaCalculatorPage() {
                           >
                             <td className="py-3.5 px-4 font-bold text-slate-900 flex items-center gap-2">
                               <span>➔</span>
-                              <span>{KP_PLANET_NAMES[ad.lord]?.[language] || ad.lord}</span>
+                              <span>{translatePlanetName(ad.lord, language)}</span>
                             </td>
                             <td className="py-3.5 px-4 text-center text-slate-600 tabular-nums">
-                              {formatDateDisplay(ad.start_date)}
+                              {toLocalizedDigits(formatDateDisplay(ad.start_date), language)}
                             </td>
                             <td className="py-3.5 px-4 text-center text-slate-600 tabular-nums">
-                              {formatDateDisplay(ad.end_date)}
+                              {toLocalizedDigits(formatDateDisplay(ad.end_date), language)}
                             </td>
-                            <td className="py-3.5 px-4 text-center text-slate-600">{ad.duration}</td>
+                            <td className="py-3.5 px-4 text-center text-slate-600">
+                              {toLocalizedDigits(ad.duration, language)}
+                            </td>
                             <td className="py-3.5 px-4 text-center">
                               {ad.is_current ? (
                                 <span className="rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-xs font-bold border border-emerald-300">
@@ -1179,15 +1266,17 @@ export default function DashaCalculatorPage() {
                           >
                             <td className="py-3.5 px-4 font-bold text-slate-900 flex items-center gap-2">
                               <span>•</span>
-                              <span>{KP_PLANET_NAMES[pad.lord]?.[language] || pad.lord}</span>
+                              <span>{translatePlanetName(pad.lord, language)}</span>
                             </td>
                             <td className="py-3.5 px-4 text-center text-slate-600 tabular-nums">
-                              {formatDateDisplay(pad.start_date)}
+                              {toLocalizedDigits(formatDateDisplay(pad.start_date), language)}
                             </td>
                             <td className="py-3.5 px-4 text-center text-slate-600 tabular-nums">
-                              {formatDateDisplay(pad.end_date)}
+                              {toLocalizedDigits(formatDateDisplay(pad.end_date), language)}
                             </td>
-                            <td className="py-3.5 px-4 text-center text-slate-600">{pad.duration}</td>
+                            <td className="py-3.5 px-4 text-center text-slate-600">
+                              {toLocalizedDigits(pad.duration, language)}
+                            </td>
                             <td className="py-3.5 px-4 text-center">
                               {pad.is_current ? (
                                 <span className="rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-xs font-bold border border-emerald-300">
@@ -1230,22 +1319,30 @@ export default function DashaCalculatorPage() {
                     </div>
                     <div>
                       <span className="font-semibold text-slate-500">{ui.balanceAtBirth}:</span>
-                      <p className="font-bold text-slate-900 text-sm mt-0.5">{yoginiSys.balance_str}</p>
+                      <p className="font-bold text-slate-900 text-sm mt-0.5">
+                        {toLocalizedDigits(yoginiSys.balance_str, language)}
+                      </p>
                     </div>
                     <div>
                       <span className="font-semibold text-slate-500">{ui.currentRunningYogini}:</span>
-                      <p className="font-bold text-amber-800 text-sm mt-0.5">{yoginiSys.current_yogini} ({yoginiSys.current_sub_yogini})</p>
+                      <p className="font-bold text-amber-800 text-sm mt-0.5">
+                        {yoginiSys.current_yogini} ({yoginiSys.current_sub_yogini})
+                      </p>
                     </div>
                     <div>
                       <span className="font-semibold text-slate-500">{ui.cycleNumber}:</span>
-                      <p className="font-bold text-slate-900 text-sm mt-0.5">Cycle {yoginiSys.current_cycle_number}</p>
+                      <p className="font-bold text-slate-900 text-sm mt-0.5">
+                        {toLocalizedDigits(yoginiSys.current_cycle_number, language)}
+                      </p>
                     </div>
                   </div>
 
                   {/* Verdict */}
-                  <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700">
-                    💡 {yoginiSys.verdict}
-                  </div>
+                  {yoginiSys.verdict && (
+                    <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700">
+                      💡 {yoginiSys.verdict}
+                    </div>
+                  )}
 
                   {/* Yoginis Table */}
                   <div className="overflow-x-auto rounded-xl border border-slate-200 mt-4">
@@ -1253,12 +1350,12 @@ export default function DashaCalculatorPage() {
                       <thead>
                         <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
                           <th className="py-3 px-3">Yogini</th>
-                          <th className="py-3 px-3">Ruler</th>
-                          <th className="py-3 px-3 text-center">Years</th>
-                          <th className="py-3 px-3 text-center">Nature</th>
-                          <th className="py-3 px-3 text-center">Start</th>
-                          <th className="py-3 px-3 text-center">End</th>
-                          <th className="py-3 px-3 text-center">Status</th>
+                          <th className="py-3 px-3">{ui.rulerPlanet}</th>
+                          <th className="py-3 px-3 text-center">{ui.tableDuration}</th>
+                          <th className="py-3 px-3 text-center">{ui.yoginiNature}</th>
+                          <th className="py-3 px-3 text-center">{ui.startDate}</th>
+                          <th className="py-3 px-3 text-center">{ui.endDate}</th>
+                          <th className="py-3 px-3 text-center">{ui.tableStatus}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
@@ -1274,8 +1371,12 @@ export default function DashaCalculatorPage() {
                               <span>➔</span>
                               <span>{yp.name}</span>
                             </td>
-                            <td className="py-3 px-3 text-slate-700">{yp.ruler_planet}</td>
-                            <td className="py-3 px-3 text-center text-slate-600">{yp.duration_years} Y</td>
+                            <td className="py-3 px-3 text-slate-700 font-semibold">
+                              {translatePlanetName(yp.ruler_planet, language)}
+                            </td>
+                            <td className="py-3 px-3 text-center text-slate-600">
+                              {toLocalizedDigits(yp.duration_years, language)} {ui.yearsSuffix}
+                            </td>
                             <td className="py-3 px-3 text-center">
                               <span
                                 className={`rounded-full px-2 py-0.5 text-[10px] font-bold border ${
@@ -1286,15 +1387,19 @@ export default function DashaCalculatorPage() {
                                     : "bg-slate-100 text-slate-700 border-slate-300"
                                 }`}
                               >
-                                {yp.nature}
+                                {translateYoginiNature(yp.nature, language)}
                               </span>
                             </td>
-                            <td className="py-3 px-3 text-center text-slate-600 tabular-nums">{yp.start_date}</td>
-                            <td className="py-3 px-3 text-center text-slate-600 tabular-nums">{yp.end_date}</td>
+                            <td className="py-3 px-3 text-center text-slate-600 tabular-nums">
+                              {toLocalizedDigits(yp.start_date, language)}
+                            </td>
+                            <td className="py-3 px-3 text-center text-slate-600 tabular-nums">
+                              {toLocalizedDigits(yp.end_date, language)}
+                            </td>
                             <td className="py-3 px-3 text-center">
                               {yp.is_current ? (
                                 <span className="rounded-full bg-amber-500 text-white px-2 py-0.5 text-[10px] font-bold">
-                                  Running
+                                  {ui.runningTag}
                                 </span>
                               ) : (
                                 "—"
@@ -1310,7 +1415,7 @@ export default function DashaCalculatorPage() {
                   {selectedYogini?.sub_periods && selectedYogini.sub_periods.length > 0 && (
                     <div className="mt-6 pt-4 border-t border-slate-200 space-y-3">
                       <h4 className="font-display text-sm font-bold text-slate-900">
-                        Antar-Yoginis (Sub-Periods) under {selectedYogini.name}
+                        {selectedYogini.name} {ui.antarYoginisUnder}
                       </h4>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                         {selectedYogini.sub_periods.map((sub, sidx) => (
@@ -1324,12 +1429,16 @@ export default function DashaCalculatorPage() {
                           >
                             <div className="flex justify-between items-center mb-1">
                               <span className="font-bold text-slate-900">{sub.name}</span>
-                              <span className="text-[10px] text-slate-500">({sub.ruler_planet})</span>
+                              <span className="text-[10px] text-slate-500 font-semibold">
+                                ({translatePlanetName(sub.ruler_planet, language)})
+                              </span>
                             </div>
-                            <p className="text-[11px] text-slate-600">{sub.start_date} to {sub.end_date}</p>
+                            <p className="text-[11px] text-slate-600">
+                              {toLocalizedDigits(sub.start_date, language)} – {toLocalizedDigits(sub.end_date, language)}
+                            </p>
                             {sub.is_current && (
                               <span className="inline-block mt-1 text-[9px] font-bold bg-amber-600 text-white px-1.5 py-0.2 rounded">
-                                Active
+                                {ui.activeNow}
                               </span>
                             )}
                           </div>
@@ -1367,14 +1476,16 @@ export default function DashaCalculatorPage() {
                           key={pill.key}
                           type="button"
                           onClick={() => setSelectedPhalaPlanet(pill.key)}
-                          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold border transition-all ${
+                          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold border transition-all cursor-pointer ${
                             isSelected
                               ? "ring-2 ring-amber-500 scale-105 shadow-xs " + pill.bgClass
                               : "border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900"
                           }`}
                         >
                           <span className="size-2 rounded-full" style={{ backgroundColor: pill.color }} />
-                          <span>{pill.nameEn}</span>
+                          <span>
+                            {language === "bn" ? pill.nameBn : language === "hi" ? pill.nameHi : pill.nameEn}
+                          </span>
                         </button>
                       );
                     })}
@@ -1386,14 +1497,16 @@ export default function DashaCalculatorPage() {
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-amber-200/60">
                         <div>
                           <span className="text-xs font-bold uppercase tracking-widest text-amber-700">
-                            {selectedPhalaItem.lagna} Lagna Analysis
+                            {translateRashiName(selectedPhalaItem.lagna, language)} {ui.lagnaAnalysisSuffix}
                           </span>
                           <h4 className="font-display text-2xl font-bold text-slate-900 mt-0.5">
-                            {KP_PLANET_NAMES[selectedPhalaItem.planet]?.[language] || selectedPhalaItem.planet} –{" "}
-                            {selectedPhalaItem.functional_nature}
+                            {translatePlanetName(selectedPhalaItem.planet, language)} –{" "}
+                            {translateFunctionalNature(selectedPhalaItem.functional_nature, language)}
                           </h4>
                           <p className="text-xs text-slate-500 mt-1">
-                            Placed in House {selectedPhalaItem.house_placed} ({selectedPhalaItem.sign_placed}) · Dignity: {selectedPhalaItem.dignity}
+                            {toLocalizedDigits(selectedPhalaItem.house_placed, language)}
+                            {ui.placedInHouseText} ({translateRashiName(selectedPhalaItem.sign_placed, language)}) ·{" "}
+                            {ui.dignityText} {translateDignity(selectedPhalaItem.dignity, language)}
                           </p>
                         </div>
 
@@ -1401,7 +1514,9 @@ export default function DashaCalculatorPage() {
                         <div className="flex items-center gap-3">
                           <div className="text-right">
                             <span className="text-[11px] font-bold text-slate-500">{ui.favorabilityScore}</span>
-                            <p className="text-2xl font-black text-amber-900">{selectedPhalaItem.favorability_score}%</p>
+                            <p className="text-2xl font-black text-amber-900">
+                              {toLocalizedDigits(selectedPhalaItem.favorability_score, language)}%
+                            </p>
                           </div>
                           <div className="size-14 rounded-full border-4 border-amber-500 flex items-center justify-center bg-white font-extrabold text-sm">
                             {selectedPhalaItem.favorability_score >= 60 ? "🌟" : "⚖️"}
@@ -1517,7 +1632,7 @@ export default function DashaCalculatorPage() {
                               <span>{ui.sandhiAlertTitle}</span>
                             </span>
                             <span className="rounded-full bg-amber-200 px-2 py-0.5 text-[10px] font-bold text-amber-950">
-                              {sandhiInfo.days_to_transition} Days Left
+                              {toLocalizedDigits(sandhiInfo.days_to_transition, language)} {ui.daysLeft}
                             </span>
                           </div>
                           <p>{sandhiInfo.sandhi_message}</p>
@@ -1528,7 +1643,7 @@ export default function DashaCalculatorPage() {
                         <div className="p-3.5 rounded-xl border border-emerald-300 bg-emerald-50 text-xs text-emerald-900 flex items-center gap-2">
                           <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
                           <span>
-                            Dasha Transition Stability: You are currently safely inside your stable mid-period of {sandhiInfo.current_md_lord} Mahadasha.
+                            {ui.transitionStabilityMsg}
                           </span>
                         </div>
                       )}
@@ -1544,26 +1659,32 @@ export default function DashaCalculatorPage() {
                           <span>{ui.transitPositionTitle}</span>
                         </h4>
                         <span className="text-xs font-bold text-amber-800">
-                          {ui.synergyScore}: {transitSynergy.synergy_score}%
+                          {ui.synergyScore}: {toLocalizedDigits(transitSynergy.synergy_score, language)}%
                         </span>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                         <div className="p-3.5 rounded-lg bg-white border border-slate-200">
                           <span className="font-bold text-slate-800">
-                            Mahadasha Lord ({transitSynergy.md_lord}):
+                            {ui.levelMahadasha.split(" ")[0]} ({translatePlanetName(transitSynergy.md_lord, language)}):
                           </span>
                           <p className="text-slate-600 mt-1">
-                            Transiting in {transitSynergy.md_transit_sign} ({transitSynergy.md_transit_house_from_moon}th from Moon - {transitSynergy.md_transit_nature})
+                            {ui.transitingIn} {translateRashiName(transitSynergy.md_transit_sign, language)} (
+                            {toLocalizedDigits(transitSynergy.md_transit_house_from_moon, language)} {ui.fromMoon} –{" "}
+                            {transitSynergy.md_transit_nature === "Favorable" ? ui.favorablePhase : ui.neutralPhase}
+                            )
                           </p>
                         </div>
 
                         <div className="p-3.5 rounded-lg bg-white border border-slate-200">
                           <span className="font-bold text-slate-800">
-                            Antardasha Lord ({transitSynergy.ad_lord}):
+                            {ui.levelAntardasha.split(" ")[0]} ({translatePlanetName(transitSynergy.ad_lord, language)}):
                           </span>
                           <p className="text-slate-600 mt-1">
-                            Transiting in {transitSynergy.ad_transit_sign} ({transitSynergy.ad_transit_house_from_moon}th from Moon - {transitSynergy.ad_transit_nature})
+                            {ui.transitingIn} {translateRashiName(transitSynergy.ad_transit_sign, language)} (
+                            {toLocalizedDigits(transitSynergy.ad_transit_house_from_moon, language)} {ui.fromMoon} –{" "}
+                            {transitSynergy.ad_transit_nature === "Favorable" ? ui.favorablePhase : ui.neutralPhase}
+                            )
                           </p>
                         </div>
                       </div>
@@ -1579,15 +1700,17 @@ export default function DashaCalculatorPage() {
                                 : "bg-emerald-100 text-emerald-800 border border-emerald-300"
                             }`}
                           >
-                            {transitSynergy.sade_sati_phase}
+                            {translateSadeSatiPhase(transitSynergy.sade_sati_phase, language)}
                           </span>
                         </div>
                         <p className="text-slate-600 text-[11px]">{transitSynergy.sade_sati_description}</p>
                       </div>
 
-                      <div className="text-xs font-medium text-slate-700 bg-amber-50/70 p-3 rounded-lg border border-amber-200">
-                        🌟 <strong>Verdict:</strong> {transitSynergy.synergy_verdict}
-                      </div>
+                      {transitSynergy.synergy_verdict && (
+                        <div className="text-xs font-medium text-slate-700 bg-amber-50/70 p-3 rounded-lg border border-amber-200">
+                          🌟 <strong>{ui.verdictLabel}</strong> {transitSynergy.synergy_verdict}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1624,7 +1747,7 @@ export default function DashaCalculatorPage() {
                         return (
                           <div
                             key={sidx}
-                            title={`${seg.lord} (${seg.age_start}-${seg.age_end} yrs)`}
+                            title={`${translatePlanetName(seg.lord, language)} (${toLocalizedDigits(seg.age_start, language)}-${toLocalizedDigits(seg.age_end, language)} ${ui.yearsLabel})`}
                             className={`h-full ${bg} border-r border-white/50 transition-all hover:opacity-80`}
                             style={{ flex: seg.duration_years }}
                           />
@@ -1660,13 +1783,15 @@ export default function DashaCalculatorPage() {
                         >
                           <div className="flex justify-between items-center">
                             <span className="font-bold text-sm text-slate-900">
-                              {KP_PLANET_NAMES[seg.lord]?.[language] || seg.lord} Mahadasha
+                              {translatePlanetName(seg.lord, language)} {ui.levelMahadasha.split(" ")[0]}
                             </span>
                             <span className="text-[10px] font-bold text-slate-500">
-                              Age {seg.age_start}–{seg.age_end}
+                              {ui.ageLabel} {toLocalizedDigits(seg.age_start, language)}–{toLocalizedDigits(seg.age_end, language)} {ui.yearsLabel}
                             </span>
                           </div>
-                          <p className="text-[11px] text-slate-500">{seg.start_date} to {seg.end_date}</p>
+                          <p className="text-[11px] text-slate-500">
+                            {toLocalizedDigits(seg.start_date, language)} – {toLocalizedDigits(seg.end_date, language)}
+                          </p>
                           <p className="text-slate-700 text-xs pt-1">{seg.theme}</p>
                         </div>
                       ))}
@@ -1683,13 +1808,13 @@ export default function DashaCalculatorPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                       <div className="p-4 rounded-xl border border-amber-300 bg-amber-50/60 space-y-2">
                         <span className="font-bold text-amber-900 uppercase tracking-wider text-[11px]">
-                          {ui.beejMantra} (Daily Japa)
+                          {ui.beejMantra}
                         </span>
                         <p className="font-serif text-sm font-extrabold text-slate-900">
-                          ॐ ग्रां ग्रीं ग्रौं सः गुरवे नमः / ॐ शुं शुक्राय नमः
+                          ॐ ग्राং গ্রীং গ্রৌং সঃ গুরবে নমঃ / ॐ শুং শুক্রায় নমঃ
                         </p>
-                        <p className="text-slate-600 text-[11px]">
-                          Chant 108 times daily facing East using a Rudraksha or Tulsi mala to dissolve obstacles.
+                        <p className="text-slate-600 text-[11px] leading-relaxed">
+                          {ui.beejMantraInstruction}
                         </p>
                       </div>
 
@@ -1698,22 +1823,22 @@ export default function DashaCalculatorPage() {
                           {ui.gayatriMantra}
                         </span>
                         <p className="font-serif text-xs font-bold text-slate-900">
-                          ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं भर्गो देवस्य धीमहि धियो यो नः प्रचोदयात्॥
+                          ॐ ভूर्ভুবঃ স্বঃ তৎসবিতুর্বরেণ্যং ভর্গো দেবস্য ধীমহি ধিয়ো য়ো নঃ প্রচোদয়াৎ॥
                         </p>
-                        <p className="text-slate-600 text-[11px]">
-                          Reciting Gayatri Mantra at sunrise neutralizes malefic transit friction during major Dasha transitions.
+                        <p className="text-slate-600 text-[11px] leading-relaxed">
+                          {ui.gayatriMantraInstruction}
                         </p>
                       </div>
                     </div>
 
                     {/* Consultation CTA */}
-                    <div className="rounded-xl border border-amber-300 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-amber-500/10 p-5 text-center space-y-3">
+                    <div className="rounded-xl border border-amber-300 bg-gradient-to-r from-amber-500/10 via-amber-50/40 to-amber-500/10 p-5 text-center space-y-3">
                       <p className="text-sm font-semibold text-slate-800">
                         {ui.consultationCta}
                       </p>
                       <Link
                         href="/astrologers"
-                        className="inline-flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold px-6 py-2.5 text-xs shadow-md transition-all"
+                        className="inline-flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold px-6 py-2.5 text-xs shadow-md transition-all cursor-pointer"
                       >
                         <span>{ui.bookAstrologer}</span>
                         <ArrowRight className="size-4" />
@@ -1727,7 +1852,7 @@ export default function DashaCalculatorPage() {
             {/* Rashi Kundli Chart Viewer */}
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
               <h3 className="font-display text-xl font-bold text-slate-900 text-center">
-                {language === "bn" ? "রাশি কুন্ডলী ও ভাব চক্র" : "Rashi Kundli & Bhava Chart"}
+                {ui.rashiKundliTitle}
               </h3>
               <KPChartViewer
                 planets={result.planets}
@@ -1750,7 +1875,7 @@ export default function DashaCalculatorPage() {
       <FeatureCoinModal
         open={coinModalOpen}
         onClose={() => setCoinModalOpen(false)}
-        featureName={dashaFeature?.name || (language === "bn" ? "দশা ক্যালকুলেটর" : "Dasha Calculator")}
+        featureName={dashaFeature?.name || (language === "bn" ? "দশা ক্যালকুলেটর" : language === "hi" ? "दशा कैलकुलेटर" : "Dasha Calculator")}
         requiredCoins={dashaFeature?.coins ?? 15}
         walletBalance={walletBalance}
         reason={coinModalReason}

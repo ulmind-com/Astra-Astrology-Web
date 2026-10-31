@@ -7,6 +7,7 @@ import { Button } from "@/components/ui";
 import { numerologyApi } from "@/lib/api";
 import type { VehicleBankAuditResponse } from "@/types/numerology";
 import type { AstrologyLanguage } from "@/types";
+import { VEHICLE_BANK_I18N } from "@/lib/numerology-translations";
 
 interface VehicleBankAuditProps {
   mulank?: number;
@@ -19,6 +20,7 @@ export function VehicleBankAuditSection({
   bhagyank = 1,
   language = "bn",
 }: VehicleBankAuditProps) {
+  const t = VEHICLE_BANK_I18N[language] || VEHICLE_BANK_I18N.en;
   const [auditType, setAuditType] = React.useState<"vehicle" | "bank">("vehicle");
   const [inputString, setInputString] = React.useState("WB 02 AK 1234");
   const [loading, setLoading] = React.useState(false);
@@ -27,11 +29,7 @@ export function VehicleBankAuditSection({
   const handleAudit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputString.trim()) {
-      toast.error(
-        language === "bn"
-          ? "অনুগ্রহ করে গাড়ির নম্বর অথবা ব্যাংক অ্যাকাউন্ট নম্বর দিন"
-          : "Please enter a vehicle plate or bank account number"
-      );
+      toast.error(t.emptyInputError);
       return;
     }
 
@@ -45,11 +43,7 @@ export function VehicleBankAuditSection({
       });
       if (res) {
         setResult(res);
-        toast.success(
-          language === "bn"
-            ? `${auditType === "vehicle" ? "গাড়ির নম্বর" : "ব্যাংক অ্যাকাউন্ট"} অডিট সফলভাবে সম্পন্ন হয়েছে!`
-            : "Audit completed successfully!"
-        );
+        toast.success(t.successToast(auditType));
       }
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Failed to audit vehicle/bank number.");
@@ -70,21 +64,17 @@ export function VehicleBankAuditSection({
               ) : (
                 <Landmark className="size-5 text-brand-600 dark:text-brand-400" />
               )}
-              {language === "bn"
-                ? "গাড়ির নম্বর প্লেট ও ব্যাংক অ্যাকাউন্ট নিউমারোলজি অডিট"
-                : "Vehicle Number Plate & Bank Account Numerology Audit"}
+              {t.title}
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {language === "bn"
-                ? "গাড়ির ক্ষেত্রে পথদুর্ঘটনা ও জরিমানা ঝুঁকি এবং ব্যাংকের ক্ষেত্রে অর্থ ধরে রাখার ক্ষমতা পরীক্ষা ও প্রতিকার"
-                : "Check vehicle accident vulnerability and bank account wealth retention with precise remedies."}
+              {t.subtitle}
             </p>
           </div>
 
           <div className="flex items-center gap-2 text-xs font-mono bg-surface-muted/60 px-3 py-1.5 rounded-lg border border-border/60">
-            <span className="text-muted-foreground">মূলাঙ্ক:</span>
+            <span className="text-muted-foreground">{t.mulank}</span>
             <span className="font-bold text-brand-600">{mulank}</span>
-            <span className="text-muted-foreground ml-2">ভাগ্যাঙ্ক:</span>
+            <span className="text-muted-foreground ml-2">{t.bhagyank}</span>
             <span className="font-bold text-brand-600">{bhagyank}</span>
           </div>
         </div>
@@ -105,7 +95,7 @@ export function VehicleBankAuditSection({
             }`}
           >
             <Car className="size-3.5" />
-            {language === "bn" ? "গাড়ির নম্বর (Vehicle)" : "Vehicle Plate"}
+            {t.vehicleTab}
           </button>
           <button
             type="button"
@@ -121,20 +111,14 @@ export function VehicleBankAuditSection({
             }`}
           >
             <Landmark className="size-3.5" />
-            {language === "bn" ? "ব্যাংক অ্যাকাউন্ট (Bank)" : "Bank Account"}
+            {t.bankTab}
           </button>
         </div>
 
         <form onSubmit={handleAudit} className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 items-end">
           <div className="sm:col-span-9 space-y-1.5">
             <label className="text-xs font-semibold text-foreground">
-              {auditType === "vehicle"
-                ? language === "bn"
-                  ? "গাড়ির সম্পূর্ণ নম্বর প্লেট (অক্ষর ও সংখ্যা সহ)"
-                  : "Complete Vehicle Plate (Letters & Digits)"
-                : language === "bn"
-                ? "সম্পূর্ণ ব্যাংক অ্যাকাউন্ট নম্বর"
-                : "Complete Bank Account Number"}
+              {auditType === "vehicle" ? t.vehicleInputLabel : t.bankInputLabel}
             </label>
             <input
               type="text"
@@ -152,9 +136,7 @@ export function VehicleBankAuditSection({
               className="w-full h-10 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs shadow-xs"
             >
               <Sparkles className="size-4 mr-1.5" />
-              {loading
-                ? language === "bn" ? "অডিট হচ্ছে..." : "Auditing..."
-                : language === "bn" ? "অডিট সম্পন্ন করুন" : "Run Audit"}
+              {loading ? t.auditing : t.auditBtn}
             </Button>
           </div>
         </form>
@@ -167,14 +149,14 @@ export function VehicleBankAuditSection({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="rounded-2xl border border-border/80 bg-surface p-5 shadow-xs space-y-2">
               <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
-                নিষ্কাশিত মান ও টোটাল
+                {t.extractedTotal}
               </span>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-serif font-black text-brand-600 dark:text-brand-400">
                   {result.single_digit}
                 </span>
                 <span className="text-xs font-mono font-bold text-muted-foreground">
-                  (কম্পাউন্ড: {result.compound_number})
+                  {t.compoundLabel(result.compound_number)}
                 </span>
               </div>
               <p className="text-[11px] font-mono text-muted-foreground truncate">
@@ -184,7 +166,7 @@ export function VehicleBankAuditSection({
 
             <div className="rounded-2xl border border-border/80 bg-surface p-5 shadow-xs space-y-2 md:col-span-2">
               <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
-                {result.audit_type === "vehicle" ? "নিরাপত্তা ও দুর্ঘটনা রেটিং" : "আর্থিক প্রবাহ ও সঞ্চয় রেটিং"}
+                {result.audit_type === "vehicle" ? t.vehicleRatingTitle : t.bankRatingTitle}
               </span>
               <div className="flex items-center gap-2">
                 <ShieldCheck className="size-5 text-brand-600" />
@@ -193,7 +175,7 @@ export function VehicleBankAuditSection({
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">
-                কম্পাউন্ড গুণমান: {result.compound_quality}
+                {t.compoundQuality} {result.compound_quality}
               </p>
             </div>
           </div>
@@ -203,7 +185,7 @@ export function VehicleBankAuditSection({
             <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-950 dark:text-rose-200 text-xs flex items-start gap-2.5">
               <ShieldAlert className="size-4 shrink-0 text-rose-600 mt-0.5" />
               <div>
-                <span className="font-bold">সতর্কতামূলক বার্তা: </span>
+                <span className="font-bold">{t.riskAlertTitle}</span>
                 {result.risk_alert}
               </div>
             </div>
@@ -213,9 +195,7 @@ export function VehicleBankAuditSection({
           <div className="rounded-2xl border border-emerald-500/30 bg-surface p-5 sm:p-6 shadow-xs space-y-3">
             <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-sm">
               <CheckCircle2 className="size-4 text-emerald-600" />
-              {language === "bn"
-                ? "বৈদিক বাস্তু ও নিউমারোলজি নিশ্চিত প্রতিষেধক (Auspicious Remedy)"
-                : "Vedic Numerology & Vastu Verified Remedy"}
+              {t.remedyTitle}
             </div>
             <p className="text-xs text-foreground leading-relaxed">
               {result.remedy_bn}

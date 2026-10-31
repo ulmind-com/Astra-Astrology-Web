@@ -48,6 +48,18 @@ import { CalculationDetails } from "@/components/astrology/calculation-details";
 import { MoonSignWheel } from "@/components/astrology/moon-sign-wheel";
 import { KundaliChart } from "@/components/astrology/kundali-chart";
 import { getClientRashiTraits } from "@/lib/astrology-translations";
+import {
+  RASHI_I18N,
+  translatePlanetList,
+  translateRashiList,
+  translatePayaBadge,
+} from "@/lib/rashi-translations";
+import {
+  translatePlanetName,
+  translateRashiName,
+  translateNakshatraName,
+  toLocalizedDigits,
+} from "@/lib/kundli-translations";
 import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
 import { useProfile } from "@/hooks/use-profile";
@@ -79,6 +91,8 @@ export default function RashiCalculatorPage() {
 
   // Centralized Global Language Selection for Output & UI (English, বাংলা, हिन्दी)
   const { language, setLanguage } = useLanguage();
+  const t = RASHI_I18N[language] || RASHI_I18N.en;
+  const lastPayloadRef = React.useRef<RashiCalculatePayload | null>(null);
 
   // Form State - initialized empty, dynamically populated from logged-in profile
   const [name, setName] = React.useState("");
@@ -130,6 +144,20 @@ export default function RashiCalculatorPage() {
 
   const resultsRef = React.useRef<HTMLDivElement>(null);
   const hasAutoFilled = React.useRef(false);
+
+  // Auto re-calculate when language preference changes so backend-generated narratives update instantly
+  React.useEffect(() => {
+    if (!lastPayloadRef.current || !result) return;
+    if (lastPayloadRef.current.language === language) return;
+    const nextPayload = { ...lastPayloadRef.current, language };
+    lastPayloadRef.current = nextPayload;
+    astrologyApi
+      .calculateRashi(nextPayload)
+      .then((res) => {
+        if (res) setResult(res);
+      })
+      .catch(() => {});
+  }, [language, result]);
 
   // Focus navigation refs for smooth input
   const dayRef = React.useRef<HTMLInputElement>(null);
@@ -293,26 +321,15 @@ export default function RashiCalculatorPage() {
     setLonDir("E");
     setTimezone("5.5");
     setResult(null);
-    toast.info(
-      language === "bn"
-        ? "ফর্ম খালি করা হয়েছে।"
-        : language === "hi"
-        ? "फ़ॉर्म साफ़ कर दिया गया है।"
-        : "Form cleared."
-    );
+    lastPayloadRef.current = null;
+    toast.info(t.toastFormCleared);
   };
 
   // Re-sync with profile
   const handleReloadFromProfile = () => {
     if (profile) {
       populateFromProfileData(profile, user);
-      toast.success(
-        language === "bn"
-          ? "প্রোফাইল থেকে তথ্য পুনরায় লোড করা হয়েছে।"
-          : language === "hi"
-          ? "प्रोफ़ाइल से विवरण पुनः लोड किया गया।"
-          : "Loaded details from your profile."
-      );
+      toast.success(t.toastProfileLoaded);
     }
   };
 
@@ -463,13 +480,7 @@ export default function RashiCalculatorPage() {
 
     // Validation
     if (!name.trim()) {
-      toast.error(
-        language === "bn"
-          ? "অনুগ্রহ করে আপনার নাম লিখুন"
-          : language === "hi"
-          ? "कृपया अपना नाम दर्ज करें"
-          : "Please enter your name"
-      );
+      toast.error(t.toastNameRequired);
       return;
     }
 
@@ -479,13 +490,7 @@ export default function RashiCalculatorPage() {
     const y = parseInt(year, 10);
 
     if (isNaN(d) || d < 1 || d > 31 || isNaN(m) || m < 1 || m > 12 || isNaN(y) || y < 1900) {
-      toast.error(
-        language === "bn"
-          ? "অনুগ্রহ করে সঠিক জন্মতারিখ দিন (DD-MM-YYYY) — জন্মতারিখ বাধ্যতামূলক"
-          : language === "hi"
-          ? "कृपया सही जन्म तिथि दर्ज करें (DD-MM-YYYY) — जन्म तिथि अनिवार्य है"
-          : "Please enter a valid birth date (DD-MM-YYYY) — DOB is required"
-      );
+      toast.error(t.toastDobRequired);
       return;
     }
 
@@ -502,13 +507,7 @@ export default function RashiCalculatorPage() {
       const parsedSec = second.trim() !== "" ? parseInt(second, 10) : 0;
 
       if (isNaN(parsedH) || parsedH < 1 || parsedH > 12 || isNaN(parsedMin) || parsedMin < 0 || parsedMin > 59) {
-        toast.error(
-          language === "bn"
-            ? "অনুগ্রহ করে সঠিক জন্মসময় দিন (০১-১২ ঘন্টা, ০০-৫৯ মিনিট)"
-            : language === "hi"
-            ? "कृपया सही जन्म समय दर्ज करें (01-12 घंटे, 00-59 मिनट)"
-            : "Please enter a valid birth time (01-12 hours, 00-59 minutes)"
-        );
+        toast.error(t.toastTobInvalid);
         return;
       }
       finalHour = parsedH;
@@ -523,13 +522,7 @@ export default function RashiCalculatorPage() {
     // which used to default to Kolkata and shifted the ascendant silently.
     if (!selectedPlace && !(latDeg && lonDeg)) {
       setPlaceTouched(true);
-      toast.error(
-        language === "bn"
-          ? "অনুগ্রহ করে তালিকা থেকে জন্মস্থান বেছে নিন — সঠিক লগ্ন ও সময়াঞ্চলের জন্য এটি প্রয়োজন"
-          : language === "hi"
-          ? "कृपया सूची से जन्म स्थान चुनें — सही लग्न एवं समय क्षेत्र हेतु यह आवश्यक है"
-          : "Please choose your birth place from the list — the ascendant and timezone depend on it"
-      );
+      toast.error(t.toastPlaceRequired);
       return;
     }
 
@@ -564,11 +557,7 @@ export default function RashiCalculatorPage() {
     const access = checkAccess("rashi_calculator");
     if (!access.allowed) {
       if (access.reason === "disabled") {
-        toast.error(
-          language === "bn"
-            ? "রাশি ক্যালকুলেটর ফিচারটি বর্তমানে বন্ধ রাখা হয়েছে।"
-            : "Rashi calculator feature is temporarily unavailable.",
-        );
+        toast.error(t.featureDisabled);
         return;
       }
       setCoinModalReason(access.reason || "insufficient_coins");
@@ -581,20 +570,26 @@ export default function RashiCalculatorPage() {
       const res = await astrologyApi.calculateRashi(payload);
       if (res) {
         setResult(res);
+        lastPayloadRef.current = payload;
         if (access.requiredCoins > 0) {
           toast.success(
             language === "bn"
               ? `রাশি গণনা সম্পন্ন হয়েছে! (${access.requiredCoins} কয়েন খরচ হয়েছে)`
+              : language === "hi"
+              ? `राशि गणना पूर्ण! (${access.requiredCoins} सिक्के प्रयुक्त)`
               : `Rashi calculated! (${access.requiredCoins} coins used)`,
           );
           refreshWallet();
         } else {
           toast.success(
-            language === "bn"
-              ? `চন্দ্রের অবস্থান: ${res.rashi_name_bn} রাশি (${res.nakshatra_name} নক্ষত্র)`
-              : language === "hi"
-              ? `गणना पूर्ण: ${res.rashi_name_hi} राशि (${res.nakshatra_name} नक्षत्र)`
-              : `Calculated Moon Sign: ${res.rashi_name_en} (${res.rashi_name_hi})`,
+            t.toastCalculationSuccess(
+              language === "bn"
+                ? res.rashi_name_bn
+                : language === "hi"
+                ? res.rashi_name_hi
+                : res.rashi_name_en,
+              translateNakshatraName(res.nakshatra_name, language)
+            )
           );
         }
         setTimeout(() => {
@@ -634,29 +629,15 @@ export default function RashiCalculatorPage() {
         <div className="mx-auto max-w-5xl px-4 pt-10 sm:px-6 lg:px-8 text-center space-y-3">
           <div className="inline-flex items-center gap-2 rounded-full bg-amber-100/90 text-amber-950 border border-amber-300 font-bold px-4 py-1.5 text-xs shadow-2xs">
             <Sparkles className="size-3.5 text-amber-600" />
-            <span>
-              {language === "bn"
-                ? "বৈদিক জ্যোতিষশাস্ত্র ভিত্তিক নির্ভুল রাশি ক্যালকুলেটর"
-                : language === "hi"
-                ? "वैदिक ज्योतिष सम्मत सटीक चंद्र राशि कैलकुलेटर"
-                : "Vedic Sidereal Moon Sign & Nakshatra Calculator"}
-            </span>
+            <span>{t.badge}</span>
           </div>
 
           <h1 className="font-display text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
-            {language === "bn"
-              ? "জন্মতারিখ দিয়ে নিজের রাশি ও প্রতিকার জানুন — সম্পূর্ণ ফ্রি"
-              : language === "hi"
-              ? "जन्मतिथि से जानें अपनी राशि, सावधानियां एवं अचूक उपाय"
-              : "Find Your Rashi by Date of Birth - Accurate Moon Sign Calculator"}
+            {t.title}
           </h1>
 
           <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto">
-            {language === "bn"
-              ? "সঠিক চন্দ্রের অবস্থান, ২৭ নক্ষত্র, ৪ পদ, কৃষ্ণমূর্তি (KP) সাব-লর্ড, কী কী থেকে সাবধান থাকবেন এবং কী করলে সৌভাগ্য বৃদ্ধি পাবে তার পূর্ণাঙ্গ বিশ্লেষণ।"
-              : language === "hi"
-              ? "सटीक चंद्र स्थिति, २७ नक्षत्र, ४ चरण, केपी सब-लॉर्ड, किन बातों से सावधान रहें और किन उपायों से भाग्य चमकेगा—सब कुछ विस्तार से जानें।"
-              : "Accurate planetary calculations powered by Vedic Sidereal Ephemeris with KP Sub-Lord, astrological warnings, and Vedic remedies."}
+            {t.subtitle}
           </p>
 
           {/* Feature Coin Badge */}
@@ -673,7 +654,7 @@ export default function RashiCalculatorPage() {
             <div className="inline-flex items-center gap-1.5 p-1 rounded-2xl bg-white border border-amber-300/80 shadow-xs">
               <span className="text-[11px] font-bold text-muted-foreground px-2 flex items-center gap-1">
                 <Languages className="size-3 text-amber-600" />
-                <span>ভাষা / Language:</span>
+                <span>{t.languageLabel}</span>
               </span>
               <button
                 type="button"
@@ -718,17 +699,13 @@ export default function RashiCalculatorPage() {
         <div className="mx-auto max-w-3xl px-4 pt-7 sm:px-6">
           <div className="rounded-[28px] border border-amber-300/70 bg-card p-6 sm:p-9 shadow-[0_12px_40px_-15px_rgba(26,18,8,0.08)] backdrop-blur-md">
             <h2 className="text-center font-display text-xl sm:text-2xl font-bold text-foreground mb-4">
-              {language === "bn"
-                ? "আপনার জন্ম বিবরণ প্রবেশ করান"
-                : language === "hi"
-                ? "अपना जन्म विवरण दर्ज करें"
-                : "Enter Your Birth Details"}
+              {t.formTitle}
             </h2>
 
             {rashiFeature && !rashiFeature.enabled && (
               <div className="mb-6">
                 <FeatureDisabledAlert
-                  featureName={language === "bn" ? "রাশি ক্যালকুলেটর" : "Rashi Calculator"}
+                  featureName={language === "bn" ? "রাশি ক্যালকুলেটর" : language === "hi" ? "राशि कैलकुलेटर" : "Rashi Calculator"}
                   language={language}
                 />
               </div>
@@ -743,24 +720,12 @@ export default function RashiCalculatorPage() {
                   </div>
                   <div>
                     <span className="font-bold">
-                      {language === "bn"
-                        ? `স্বাগত, ${profile?.full_name || user?.full_name || user?.first_name || "সম্মানিত ব্যবহারকারী"}!`
-                        : language === "hi"
-                        ? `स्वागत है, ${profile?.full_name || user?.full_name || user?.first_name || "उपयोगकर्ता"}!`
-                        : `Welcome, ${profile?.full_name || user?.full_name || user?.first_name || "User"}!`}
+                      {t.profileSyncWelcome(profile?.full_name || user?.full_name || user?.first_name || (language === "bn" ? "সম্মানিত ব্যবহারকারী" : language === "hi" ? "उपयोगकर्ता" : "User"))}
                     </span>
                     <span className="text-muted-foreground ml-1.5 block sm:inline">
                       {profile?.birth?.date_of_birth
-                        ? language === "bn"
-                          ? "আপনার প্রোফাইল থেকে সংরক্ষিত জন্ম বিবরণ স্বয়ংক্রিয়ভাবে লোড করা হয়েছে।"
-                          : language === "hi"
-                          ? "आपकी प्रोफ़ाइल से सहेजा गया जन्म विवरण स्वतः भर दिया गया है।"
-                          : "Saved birth details loaded from your profile."
-                        : language === "bn"
-                        ? "আপনার প্রোফাইলের নাম লোড করা হয়েছে।"
-                        : language === "hi"
-                        ? "आपकी प्रोफ़ाइल का नाम लोड किया गया है।"
-                        : "Name loaded from your profile."}
+                        ? t.profileSyncSaved
+                        : t.profileSyncNameOnly}
                     </span>
                   </div>
                 </div>
@@ -773,7 +738,7 @@ export default function RashiCalculatorPage() {
                       className="inline-flex items-center gap-1 rounded-xl bg-white/90 hover:bg-white px-2.5 py-1 text-[11px] font-bold text-amber-900 border border-amber-300 shadow-2xs transition-colors cursor-pointer"
                     >
                       <RefreshCw className="size-3 text-amber-700" />
-                      <span>{language === "bn" ? "রিলোড" : language === "hi" ? "रीलोड" : "Reload"}</span>
+                      <span>{t.reloadProfile}</span>
                     </button>
                   )}
                   <button
@@ -782,7 +747,7 @@ export default function RashiCalculatorPage() {
                     className="inline-flex items-center gap-1 rounded-xl bg-white/90 hover:bg-white px-2.5 py-1 text-[11px] font-bold text-rose-800 border border-rose-300 shadow-2xs transition-colors cursor-pointer"
                   >
                     <RotateCcw className="size-3 text-rose-600" />
-                    <span>{language === "bn" ? "খালি করুন" : language === "hi" ? "साफ़ करें" : "Clear"}</span>
+                    <span>{t.clearForm}</span>
                   </button>
                 </div>
               </div>
@@ -792,19 +757,13 @@ export default function RashiCalculatorPage() {
               <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-surface-muted/50 border border-border/80 px-4 py-3 text-xs text-muted-foreground shadow-2xs">
                 <div className="flex items-center gap-2">
                   <User className="size-4 text-amber-600 shrink-0" />
-                  <span>
-                    {language === "bn"
-                      ? "লগ-ইন করলে আপনার প্রোফাইলের সেভ করা জন্ম বিবরণ সরাসরি এখানে পূরণ হয়ে যাবে।"
-                      : language === "hi"
-                      ? "लॉग-इन करने पर आपकी प्रोफ़ाइल का विवरण स्वतः यहाँ भर जाएगा।"
-                      : "Sign in to automatically load your saved profile and birth details."}
-                  </span>
+                  <span>{t.signInPrompt}</span>
                 </div>
                 <Link
                   href="/login"
                   className="rounded-xl bg-amber-500 text-amber-950 px-3 py-1 text-[11px] font-bold shadow-2xs hover:bg-amber-400 transition-colors ml-auto"
                 >
-                  {language === "bn" ? "লগ-ইন করুন" : language === "hi" ? "लॉग-इन करें" : "Sign In"}
+                  {t.signInBtn}
                 </Link>
               </div>
             )}
@@ -814,14 +773,14 @@ export default function RashiCalculatorPage() {
               <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                 <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
                   <User className="size-4 text-amber-600" />
-                  <span>{language === "bn" ? "নাম" : language === "hi" ? "नाम" : "Name"}</span>
+                  <span>{t.fullName}</span>
                 </label>
                 <div className="sm:col-span-9">
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder={language === "bn" ? "আপনার নাম লিখুন..." : language === "hi" ? "अपना नाम लिखें..." : "Enter your name..."}
+                    placeholder={t.fullNamePlaceholder}
                     className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs font-medium"
                   />
                 </div>
@@ -831,7 +790,7 @@ export default function RashiCalculatorPage() {
               <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                 <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
                   <HeartHandshake className="size-4 text-indigo-500" />
-                  <span>{language === "bn" ? "লিঙ্গ" : language === "hi" ? "लिंग" : "Gender"}</span>
+                  <span>{t.gender}</span>
                 </label>
                 <div className="sm:col-span-9">
                   <select
@@ -839,9 +798,9 @@ export default function RashiCalculatorPage() {
                     onChange={(e) => setGender(e.target.value as any)}
                     className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs cursor-pointer font-medium"
                   >
-                    <option value="male">{language === "bn" ? "পুরুষ (Male)" : language === "hi" ? "पुरुष (Male)" : "Male"}</option>
-                    <option value="female">{language === "bn" ? "মহিলা (Female)" : language === "hi" ? "महिला (Female)" : "Female"}</option>
-                    <option value="other">{language === "bn" ? "অন্যান্য (Other)" : language === "hi" ? "अन्य (Other)" : "Other"}</option>
+                    <option value="male">{t.male}</option>
+                    <option value="female">{t.female}</option>
+                    <option value="other">{t.other}</option>
                   </select>
                 </div>
               </div>
@@ -851,9 +810,9 @@ export default function RashiCalculatorPage() {
                 <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
                   <Calendar className="size-4 text-amber-600" />
                   <span>
-                    {language === "bn" ? "জন্মতারিখ" : language === "hi" ? "जन्म तिथि" : "Birth Day"}
+                    {t.dob}
                     <span className="text-[11px] font-bold text-rose-600 ml-1.5">
-                      * ({language === "bn" ? "বাধ্যতামূলক" : language === "hi" ? "अनिवार्य" : "Required"})
+                      * ({t.mandatory})
                     </span>
                   </span>
                 </label>
@@ -901,9 +860,9 @@ export default function RashiCalculatorPage() {
                 <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
                   <Clock className="size-4 text-emerald-600" />
                   <span>
-                    {language === "bn" ? "জন্মসময়" : language === "hi" ? "जन्म समय" : "Birth Time"}
+                    {t.tob}
                     <span className="text-[11px] font-semibold text-emerald-700 ml-1.5">
-                      ({language === "bn" ? "ঐচ্ছিক — না দিলে ১২:০০ PM" : language === "hi" ? "वैकल्पिक — 12:00 PM" : "Optional — 12:00 PM"})
+                      ({t.optionalTob})
                     </span>
                   </span>
                 </label>
@@ -962,11 +921,7 @@ export default function RashiCalculatorPage() {
                 >
                   <MapPin className="mt-0.5 size-4 shrink-0 text-rose-500" />
                   <span>
-                    {language === "bn"
-                      ? "জন্মস্থান"
-                      : language === "hi"
-                        ? "जन्म स्थान"
-                        : "Birth Place"}
+                    {t.pob}
                     <span className="ml-1 text-rose-500">*</span>
                   </span>
                 </label>
@@ -995,13 +950,7 @@ export default function RashiCalculatorPage() {
                 >
                   <span className="flex items-center gap-2 text-amber-900">
                     <Sliders className="size-4 text-amber-600" />
-                    <span>
-                      {language === "bn"
-                        ? "উন্নত সেটিংস (ঐচ্ছিক)"
-                        : language === "hi"
-                        ? "उन्नत सेटिंग्स (वैकल्पिक)"
-                        : "Advance Settings (Optional)"}
-                    </span>
+                    <span>{t.advancedSettings}</span>
                   </span>
                   {showAdvance ? (
                     <ChevronUp className="size-4 text-muted-foreground" />
@@ -1018,7 +967,7 @@ export default function RashiCalculatorPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                     <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
                       <Compass className="size-4 text-indigo-500" />
-                      <span>Longitude</span>
+                      <span>{t.longitude}</span>
                     </label>
                     <div className="sm:col-span-9 grid grid-cols-3 gap-2">
                       <input
@@ -1046,8 +995,8 @@ export default function RashiCalculatorPage() {
                         onChange={(e) => setLonDir(e.target.value as any)}
                         className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-bold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer"
                       >
-                        <option value="E">East</option>
-                        <option value="W">West</option>
+                        <option value="E">{t.east}</option>
+                        <option value="W">{t.west}</option>
                       </select>
                     </div>
                   </div>
@@ -1056,7 +1005,7 @@ export default function RashiCalculatorPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                     <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
                       <Compass className="size-4 text-rose-500" />
-                      <span>Latitude</span>
+                      <span>{t.latitude}</span>
                     </label>
                     <div className="sm:col-span-9 grid grid-cols-3 gap-2">
                       <input
@@ -1084,29 +1033,20 @@ export default function RashiCalculatorPage() {
                         onChange={(e) => setLatDir(e.target.value as any)}
                         className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-bold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer"
                       >
-                        <option value="N">North</option>
-                        <option value="S">South</option>
+                        <option value="N">{t.north}</option>
+                        <option value="S">{t.south}</option>
                       </select>
                     </div>
                   </div>
 
-                  {/* Timezone. Read-only once a place is chosen, because the
-                      backend resolves the exact offset from the zone at the birth
-                      instant; editable as a free-form override otherwise, so any
-                      offset is reachable rather than only eight preset ones. */}
+                  {/* Timezone */}
                   <div className="grid grid-cols-1 sm:grid-cols-12 items-start gap-2 sm:gap-4">
                     <label
                       htmlFor="timezone"
                       className="sm:col-span-3 flex items-center gap-2 pt-2 font-bold text-foreground"
                     >
                       <Globe className="size-4 text-emerald-500" />
-                      <span>
-                        {language === "bn"
-                          ? "সময়াঞ্চল"
-                          : language === "hi"
-                            ? "समय क्षेत्र"
-                            : "Time Zone"}
-                      </span>
+                      <span>{t.timezone}</span>
                     </label>
                     <div className="sm:col-span-9">
                       {selectedPlace?.timezoneName ? (
@@ -1125,11 +1065,7 @@ export default function RashiCalculatorPage() {
                             )}
                           </p>
                           <p className="mt-1 text-[11px] leading-relaxed text-emerald-800/90">
-                            {language === "bn"
-                              ? "জন্মস্থান ও জন্মতারিখ অনুসারে সঠিক সময়াঞ্চল নির্ণীত — ডেলাইট সেভিং ও ঐতিহাসিক পরিবর্তন সহ।"
-                              : language === "hi"
-                                ? "जन्म स्थान एवं जन्म तिथि अनुसार सही समय क्षेत्र निर्धारित — डेलाइट सेविंग एवं ऐतिहासिक परिवर्तन सहित।"
-                                : "Resolved from your birth place and date, including daylight saving and historical changes."}
+                            {t.timezoneResolved}
                           </p>
                         </div>
                       ) : (
@@ -1146,11 +1082,7 @@ export default function RashiCalculatorPage() {
                             className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs font-semibold tabular-nums text-foreground shadow-2xs focus:outline-hidden focus:ring-2 focus:ring-amber-500 sm:text-sm"
                           />
                           <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">
-                            {language === "bn"
-                              ? "UTC থেকে ঘণ্টার হিসেবে, যেমন ভারত 5.5, বাংলাদেশ 6, নেপাল 5.75। তালিকা থেকে জন্মস্থান বেছে নিলে এটি স্বয়ংক্রিয়ভাবে ঠিক হয়ে যাবে।"
-                              : language === "hi"
-                                ? "UTC से घंटों में, जैसे भारत 5.5, बांग्लादेश 6, नेपाल 5.75। सूची से जन्म स्थान चुनने पर यह स्वतः सही हो जाएगा।"
-                                : "Hours from UTC, e.g. India 5.5, Bangladesh 6, Nepal 5.75. Choosing your birth place from the list sets this automatically."}
+                            {t.timezoneManualHelp}
                           </p>
                         </>
                       )}
@@ -1161,7 +1093,7 @@ export default function RashiCalculatorPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                     <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
                       <Sliders className="size-4 text-indigo-400" />
-                      <span>Ayanamsa</span>
+                      <span>{t.ayanamsa}</span>
                     </label>
                     <div className="sm:col-span-9">
                       <select
@@ -1184,7 +1116,7 @@ export default function RashiCalculatorPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                     <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
                       <Sliders className="size-4 text-amber-500" />
-                      <span>House System</span>
+                      <span>{t.houseSystem}</span>
                     </label>
                     <div className="sm:col-span-9">
                       <select
@@ -1204,7 +1136,7 @@ export default function RashiCalculatorPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                     <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
                       <Sliders className="size-4 text-indigo-400" />
-                      <span>Chart Style</span>
+                      <span>{t.chartStyle}</span>
                     </label>
                     <div className="sm:col-span-9">
                       <select
@@ -1239,26 +1171,14 @@ export default function RashiCalculatorPage() {
                   {loading ? (
                     <span className="flex items-center gap-2">
                       <span className="animate-spin text-base">✦</span>
-                      <span>
-                        {language === "bn"
-                          ? "চন্দ্র রাশি গণনা করা হচ্ছে…"
-                          : language === "hi"
-                          ? "चंद्र राशि की गणना हो रही है…"
-                          : "Calculating Moon Sign…"}
-                      </span>
+                      <span>{t.calculatingBtn}</span>
                     </span>
                   ) : (
                     <span className="flex items-center gap-2">
                       <span>
                         {rashiFeature && !rashiFeature.enabled
-                          ? language === "bn"
-                            ? "ফিচারটি বন্ধ রয়েছে"
-                            : "Feature Disabled"
-                          : language === "bn"
-                          ? "আপনার রাশি জানুন"
-                          : language === "hi"
-                          ? "अपनी राशि जानें"
-                          : "Know Your Rashi"}
+                          ? t.featureDisabledBtn
+                          : t.calculateBtn}
                       </span>
                       <ArrowRight className="size-4" />
                     </span>
@@ -1281,13 +1201,7 @@ export default function RashiCalculatorPage() {
               {/* Top Banner with High-Contrast Text */}
               <div className="inline-flex items-center gap-2 rounded-full bg-amber-100 text-amber-950 border border-amber-300 font-extrabold px-4 py-1.5 text-xs shadow-2xs mb-4">
                 <Sparkles className="size-3.5 text-amber-700" />
-                <span>
-                  {language === "bn"
-                    ? `${result.name} এর জন্য বৈদিক চন্দ্র রাশি গণনা সম্পন্ন`
-                    : language === "hi"
-                    ? `${result.name} के लिए वैदिक चंद्र राशि गणना पूर्ण`
-                    : `Vedic Moon Sign Calculated for ${result.name}`}
-                </span>
+                <span>{t.calculatedFor(result.name)}</span>
               </div>
 
               {/* Big Sign Symbol & Typography */}
@@ -1298,12 +1212,12 @@ export default function RashiCalculatorPage() {
 
                 <h2 className="font-display text-3xl sm:text-5xl font-black text-ink-950 tracking-tight">
                   {language === "bn"
-                    ? `${result.rashi_name_bn} রাশি`
+                    ? `${result.rashi_name_bn} ${t.rashiSuffix}`
                     : language === "hi"
-                    ? `${result.rashi_name_hi} राशि`
-                    : result.rashi_name_en}
+                    ? `${result.rashi_name_hi} ${t.rashiSuffix}`
+                    : `${result.rashi_name_en} ${t.rashiSuffix}`}
                   <span className="text-amber-600 font-extrabold text-2xl sm:text-3xl ml-2">
-                    ({language === "bn" ? result.rashi_name_en : `${result.rashi_name_hi} / ${result.rashi_name_bn}`})
+                    ({language === "bn" ? result.rashi_name_en : language === "hi" ? result.rashi_name_en : `${result.rashi_name_hi} / ${result.rashi_name_bn}`})
                   </span>
                 </h2>
 
@@ -1315,13 +1229,7 @@ export default function RashiCalculatorPage() {
                 {result.is_vargottama && (
                   <div className="mt-3.5 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500/20 via-purple-500/20 to-amber-500/20 border-2 border-amber-400 px-4 py-1.5 text-xs font-black text-amber-950 shadow-sm animate-pulse">
                     <Award className="size-4 text-amber-600 fill-amber-500 shrink-0" />
-                    <span>
-                      {language === "bn"
-                        ? "পরম শুভ বর্গোত্তম চন্দ্র (Vargottama Moon) — জন্ম রাশি (D1) ও নবাংশ (D9) উভয় চক্রেই একই রাশিতে অবস্থিত!"
-                        : language === "hi"
-                        ? "परम शुभ वर्गोत्तम चंद्र (Vargottama Moon) — लग्न (D1) एवं नवांश (D9) दोनों चक्रों में एक ही राशि में स्थित!"
-                        : "Sacred Vargottama Moon — Positioned in the same sign in both D1 & D9 Navamsha!"}
-                    </span>
+                    <span>{t.vargottamaBadge}</span>
                   </div>
                 )}
               </div>
@@ -1329,23 +1237,23 @@ export default function RashiCalculatorPage() {
               {/* High-Contrast Badges Strip */}
               <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs font-bold">
                 <span className="rounded-xl bg-white px-3.5 py-1.5 text-ink-950 border border-border/80 shadow-2xs">
-                  {language === "bn" ? "অধিপতি গ্রহ:" : language === "hi" ? "स्वामी ग्रह:" : "Ruling Lord:"}{" "}
-                  <strong className="text-amber-700">{result.rashi_lord}</strong>
+                  {t.rulingLord}{" "}
+                  <strong className="text-amber-700">{translatePlanetName(result.rashi_lord, language)}</strong>
                 </span>
                 <span className="rounded-xl bg-white px-3.5 py-1.5 text-ink-950 border border-border/80 shadow-2xs">
-                  {language === "bn" ? "চন্দ্রের অবস্থান:" : language === "hi" ? "चंद्रमा स्थिति:" : "Moon Position:"}{" "}
-                  <strong className="tabular-nums text-amber-700">{result.moon_degree_formatted}</strong>
+                  {t.moonPosition}{" "}
+                  <strong className="tabular-nums text-amber-700">{toLocalizedDigits(result.moon_degree_formatted, language)}</strong>
                 </span>
                 <span className="rounded-xl bg-white px-3.5 py-1.5 text-ink-950 border border-border/80 shadow-2xs">
-                  {language === "bn" ? "তত্ত্ব:" : language === "hi" ? "तत्व:" : "Element:"}{" "}
+                  {t.element}{" "}
                   <strong className="text-ink-900">{activeTraits.element}</strong>
                 </span>
                 <span className="rounded-xl bg-white px-3.5 py-1.5 text-ink-950 border border-border/80 shadow-2xs">
-                  {language === "bn" ? "স্বভাব:" : language === "hi" ? "स्वभाव:" : "Modality:"}{" "}
+                  {t.modality}{" "}
                   <strong className="text-ink-900">{activeTraits.modality}</strong>
                 </span>
                 <span className="rounded-xl bg-white px-3.5 py-1.5 text-ink-950 border border-border/80 shadow-2xs">
-                  {language === "bn" ? "প্রকৃতি:" : language === "hi" ? "प्रकृति:" : "Polarity:"}{" "}
+                  {t.polarity}{" "}
                   <strong className="text-ink-900">{activeTraits.polarity}</strong>
                 </span>
               </div>
@@ -1355,49 +1263,49 @@ export default function RashiCalculatorPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
               <div className="rounded-2xl border border-border/80 bg-card p-4 text-center shadow-2xs">
                 <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                  {language === "bn" ? "নক্ষত্র ও পদ" : language === "hi" ? "नक्षत्र एवं चरण" : "Nakshatra & Pada"}
+                  {t.nakshatraPada}
                 </p>
                 <p className="mt-1 font-display text-base sm:text-lg font-black text-ink-950">
-                  {result.nakshatra_name}
+                  {translateNakshatraName(result.nakshatra_name, language)}
                 </p>
                 <span className="inline-block mt-1.5 rounded-full bg-amber-100 text-amber-950 border border-amber-300 px-3 py-0.5 text-xs font-black shadow-2xs">
-                  {language === "bn" ? `${result.nakshatra_pada} নং পদ` : language === "hi" ? `चरण ${result.nakshatra_pada}` : `Pada ${result.nakshatra_pada}`}
+                  {t.padaSuffix(result.nakshatra_pada)}
                 </span>
               </div>
 
               <div className="rounded-2xl border border-border/80 bg-card p-4 text-center shadow-2xs">
                 <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                  {language === "bn" ? "নক্ষত্রাধিপতি (KP)" : language === "hi" ? "नक्षत्र स्वामी" : "Star Lord (KP)"}
+                  {t.starLordKP}
                 </p>
                 <p className="mt-1 font-display text-base sm:text-lg font-black text-ink-950">
-                  {result.nakshatra_lord}
+                  {translatePlanetName(result.nakshatra_lord, language)}
                 </p>
                 <span className="text-[10px] font-semibold text-muted-foreground">
-                  {language === "bn" ? "ফল নির্দেশক" : language === "hi" ? "फल का स्रोत" : "Governs Result"}
+                  {t.governsResult}
                 </span>
               </div>
 
               <div className="rounded-2xl border border-border/80 bg-card p-4 text-center shadow-2xs">
                 <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                  {language === "bn" ? "উপ-অধিপতি (KP Sub)" : language === "hi" ? "उप-स्वामी (KP Sub)" : "KP Sub-Lord"}
+                  {t.kpSubLord}
                 </p>
                 <p className="mt-1 font-display text-base sm:text-lg font-black text-amber-700">
-                  {result.kp_sub_lord}
+                  {translatePlanetName(result.kp_sub_lord, language)}
                 </p>
                 <span className="text-[10px] font-semibold text-muted-foreground">
-                  {language === "bn" ? "ফলাফল নির্ধারক" : language === "hi" ? "अंतिम परिणाम" : "Qualifies Outcome"}
+                  {t.qualifiesOutcome}
                 </span>
               </div>
 
               <div className="rounded-2xl border border-border/80 bg-card p-4 text-center shadow-2xs">
                 <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                  {language === "bn" ? "লগ্ন (Ascendant)" : language === "hi" ? "लग्न (Ascendant)" : "Ascendant (Lagna)"}
+                  {t.ascendantLagna}
                 </p>
                 <p className="mt-1 font-display text-base sm:text-lg font-black text-ink-950">
-                  {result.ascendant_rashi_name_en}
+                  {translateRashiName(result.ascendant_rashi_name_en, language)}
                 </p>
                 <span className="text-[10px] font-mono font-bold text-amber-700">
-                  {result.ascendant_degree_formatted}
+                  {toLocalizedDigits(result.ascendant_degree_formatted, language)}
                 </span>
               </div>
             </div>
@@ -1405,11 +1313,11 @@ export default function RashiCalculatorPage() {
             {/* 3. 5-Tab Navigation System */}
             <div className="flex items-center justify-start sm:justify-center overflow-x-auto gap-2 p-1.5 rounded-2xl bg-surface-muted border border-border/80 shadow-inner scrollbar-none">
               {[
-                { id: "core", labelBn: "অবকহড়া ও মূল চক্র", labelHi: "अवकहड़ा एवं मूल चक्र", labelEn: "Core & Avakahada", icon: Sparkles },
-                { id: "rules", labelBn: "১৫টি শাস্ত্রীয় নিয়ম (01.pdf)", labelHi: "१५ शास्त्रीय नियम", labelEn: "15 Classical Rules", icon: BookOpen },
-                { id: "kundali", labelBn: "চন্দ্র লগ্ন ও গ্রহ সম্বন্ধ", labelHi: "चंद्र लग्न एवं ग्रह संबंध", labelEn: "Chandra Lagna & Dignity", icon: Eye },
-                { id: "transit", labelBn: "লাইভ গোচর ও সাড়ে সাতি", labelHi: "लाइव गोचर एवं साढ़े साती", labelEn: "Transit & Sade Sati", icon: Activity },
-                { id: "predictions", labelBn: "সতর্কতা, প্রতিকার ও জীবন", labelHi: "सावधानियां एवं उपाय", labelEn: "Cautions & Remedies", icon: Shield },
+                { id: "core", label: t.tabCore, icon: Sparkles },
+                { id: "rules", label: t.tabRules, icon: BookOpen },
+                { id: "kundali", label: t.tabKundali, icon: Eye },
+                { id: "transit", label: t.tabTransit, icon: Activity },
+                { id: "predictions", label: t.tabPredictions, icon: Shield },
               ].map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -1425,7 +1333,7 @@ export default function RashiCalculatorPage() {
                     }`}
                   >
                     <Icon className={`size-4 ${isActive ? "text-amber-950" : "text-muted-foreground"}`} />
-                    <span>{language === "bn" ? tab.labelBn : language === "hi" ? tab.labelHi : tab.labelEn}</span>
+                    <span>{tab.label}</span>
                   </button>
                 );
               })}
@@ -1442,20 +1350,10 @@ export default function RashiCalculatorPage() {
                     <div>
                       <h3 className="font-display text-lg font-bold text-ink-950 flex items-center gap-2">
                         <Sparkles className="size-4 text-amber-600" />
-                        <span>
-                          {language === "bn"
-                            ? "মহাজাগতিক অবকহড়া চক্র (Avakahada Chakra)"
-                            : language === "hi"
-                            ? "वैदिक अवकहड़ा चक्र (Avakahada Chakra)"
-                            : "Vedic Avakahada Chakra Attributes"}
-                        </span>
+                        <span>{t.avakahadaHeading}</span>
                       </h3>
                       <p className="text-xs text-muted-foreground">
-                        {language === "bn"
-                          ? "ক্লায়েন্টের ম্যাচমেকিং ও কুণ্ডলী শাস্ত্রের মূল ৭টি বৈশিষ্ট্য এবং বৈদিক নামাক্ষর"
-                          : language === "hi"
-                          ? "क्लाइंट के कुंडली शास्त्र अनुसार प्रमुख ७ गुण एवं वैदिक नामाक्षर"
-                          : "Foundational 7 attributes transcribed from classical Vedic matchmaking documents"}
+                        {t.avakahadaSub}
                       </p>
                     </div>
 
@@ -1463,7 +1361,7 @@ export default function RashiCalculatorPage() {
                       <div className="inline-flex items-center gap-2 rounded-xl bg-amber-500/10 border border-amber-300 px-3.5 py-1.5 text-xs font-black text-amber-950 shadow-2xs">
                         <Star className="size-3.5 text-amber-600 fill-amber-500" />
                         <span>
-                          {language === "bn" ? "শুভ নামাক্ষর:" : language === "hi" ? "शुभ नामाक्षर:" : "Auspicious Letter:"}{" "}
+                          {t.auspiciousLetter}{" "}
                           <strong className="text-base text-amber-800 ml-1 font-mono">{result.namakshar}</strong>
                         </span>
                       </div>
@@ -1474,73 +1372,73 @@ export default function RashiCalculatorPage() {
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
                     <div className="rounded-xl bg-surface-muted/60 p-3.5 border border-border/60">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                        {language === "bn" ? "১. বর্ণ (Varna)" : language === "hi" ? "१. वर्ण (Varna)" : "1. Varna"}
+                        {t.varna}
                       </p>
                       <p className="mt-1 font-extrabold text-ink-950 text-sm">
                         {result.avakahada_chakra?.varna || activeTraits.element}
                       </p>
                       <span className="text-[10px] text-muted-foreground">
-                        {language === "bn" ? "স্বভাবগত শ্রেণী" : "Temperament"}
+                        {t.varnaSub}
                       </span>
                     </div>
 
                     <div className="rounded-xl bg-surface-muted/60 p-3.5 border border-border/60">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                        {language === "bn" ? "২. বশ্য (Vashya)" : language === "hi" ? "२. वश्य (Vashya)" : "2. Vashya"}
+                        {t.vashya}
                       </p>
                       <p className="mt-1 font-extrabold text-ink-950 text-sm">
                         {result.avakahada_chakra?.vashya || "—"}
                       </p>
                       <span className="text-[10px] text-muted-foreground">
-                        {language === "bn" ? "নিয়ন্ত্রণ ও আকর্ষণ" : "Influence"}
+                        {t.vashyaSub}
                       </span>
                     </div>
 
                     <div className="rounded-xl bg-surface-muted/60 p-3.5 border border-border/60">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                        {language === "bn" ? "৩. যোনি প্রাণী (Yoni)" : language === "hi" ? "३. योनि (Yoni)" : "3. Yoni Animal"}
+                        {t.yoni}
                       </p>
                       <p className="mt-1 font-extrabold text-ink-950 text-sm">
                         {result.avakahada_chakra?.yoni || "—"}
                       </p>
                       <span className="text-[10px] text-muted-foreground">
-                        {language === "bn" ? "জৈবিক প্রবৃত্তি" : "Instinct"}
+                        {t.yoniSub}
                       </span>
                     </div>
 
                     <div className="rounded-xl bg-surface-muted/60 p-3.5 border border-border/60">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                        {language === "bn" ? "৪. গণ (Gana)" : language === "hi" ? "४. गण (Gana)" : "4. Gana"}
+                        {t.gana}
                       </p>
                       <p className="mt-1 font-extrabold text-ink-950 text-sm">
                         {result.avakahada_chakra?.gana || "—"}
                       </p>
                       <span className="text-[10px] text-muted-foreground">
-                        {language === "bn" ? "মানসিক চরিত্র" : "Disposition"}
+                        {t.ganaSub}
                       </span>
                     </div>
 
                     <div className="rounded-xl bg-surface-muted/60 p-3.5 border border-border/60">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                        {language === "bn" ? "৫. নাড়ী (Nadi)" : language === "hi" ? "५. नाड़ी (Nadi)" : "5. Nadi"}
+                        {t.nadi}
                       </p>
                       <p className="mt-1 font-extrabold text-ink-950 text-sm">
                         {result.avakahada_chakra?.nadi || "—"}
                       </p>
                       <span className="text-[10px] text-muted-foreground">
-                        {language === "bn" ? "শারীরিক ধারা" : "Physiology"}
+                        {t.nadiSub}
                       </span>
                     </div>
 
                     <div className="rounded-xl bg-surface-muted/60 p-3.5 border border-border/60">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                        {language === "bn" ? "৬. তত্ত্ব (Tatva)" : language === "hi" ? "६. तत्व (Tatva)" : "6. Tatva"}
+                        {t.tatva}
                       </p>
                       <p className="mt-1 font-extrabold text-ink-950 text-sm">
                         {result.avakahada_chakra?.tatva || activeTraits.element}
                       </p>
                       <span className="text-[10px] text-muted-foreground">
-                        {language === "bn" ? "মহাজাগতিক মৌল" : "Cosmic Element"}
+                        {t.tatvaSub}
                       </span>
                     </div>
                   </div>
@@ -1554,10 +1452,10 @@ export default function RashiCalculatorPage() {
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <h4 className="font-display text-sm font-extrabold text-ink-950">
-                            {language === "bn" ? "জন্মকালীন পায়া (Paya of Birth):" : language === "hi" ? "जन्म कालीन पाया (Paya):" : "Birth Foot (Paya):"}
+                            {t.payaHeading}
                           </h4>
                           <span className="rounded-md bg-amber-100 text-amber-950 border border-amber-300 px-2.5 py-0.5 text-xs font-black shadow-2xs">
-                            {result.avakahada_chakra.paya.split("-")[0].trim()}
+                            {translatePayaBadge(result.avakahada_chakra.paya, language)}
                           </span>
                         </div>
                         <p className="text-xs text-ink-800 leading-relaxed font-medium">
@@ -1572,7 +1470,7 @@ export default function RashiCalculatorPage() {
                     <div className="flex items-center gap-2">
                       <span className="size-2 rounded-full bg-indigo-600" />
                       <span className="text-muted-foreground">
-                        {language === "bn" ? "নবাংশ রাশি (D9 Navamsha Moon):" : language === "hi" ? "नवांश राशि (D9 Navamsha):" : "Navamsha Moon Sign (D9):"}
+                        {t.navamshaMoon}
                       </span>
                       <strong className="text-ink-950 font-extrabold">
                         {language === "bn" ? result.navamsha_rashi_name_bn : language === "hi" ? result.navamsha_rashi_name_hi : result.navamsha_rashi_name_en}
@@ -1581,16 +1479,14 @@ export default function RashiCalculatorPage() {
 
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground">
-                        {language === "bn" ? "বর্গোত্তম স্ট্যাটাস:" : "Vargottama Status:"}
+                        {t.vargottamaStatus}
                       </span>
                       <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-black ${
                         result.is_vargottama
                           ? "bg-emerald-100 text-emerald-950 border border-emerald-300"
                           : "bg-surface-muted text-muted-foreground border border-border"
                       }`}>
-                        {result.is_vargottama
-                          ? (language === "bn" ? "বর্গোত্তম (অত্যন্ত বলবান)" : "Vargottama (Supreme Fortitude)")
-                          : (language === "bn" ? "সাধারণ নবাংশ" : "Standard Navamsha")}
+                        {result.is_vargottama ? t.vargottamaActive : t.vargottamaInactive}
                       </span>
                     </div>
                   </div>
@@ -1600,18 +1496,10 @@ export default function RashiCalculatorPage() {
                 <div className="rounded-[28px] border border-border/80 bg-card p-6 sm:p-8 shadow-2xs space-y-6">
                   <div className="text-center space-y-1">
                     <h3 className="font-display text-lg sm:text-xl font-bold text-foreground">
-                      {language === "bn"
-                        ? "১২ রাশি ও ২৭ নক্ষত্রের মহাজাগতিক চক্র (Zodiac Wheel)"
-                        : language === "hi"
-                        ? "१२ राशि एवं २७ नक्षत्रों का ब्रह्मांडीय चक्र"
-                        : "12 Zodiac Signs & 27 Nakshatras Interactive Wheel"}
+                      {t.wheelHeading}
                     </h3>
                     <p className="text-xs text-muted-foreground max-w-xl mx-auto">
-                      {language === "bn"
-                        ? "আপনার রাশি ও নক্ষত্রের তাৎক্ষণিক মহাজাগতিক অবস্থান নিচে আলোকিত করে নির্দেশ করা হয়েছে।"
-                        : language === "hi"
-                        ? "आपकी राशि एवं नक्षत्र की खगोलीय स्थिति नीचे चक्र में प्रदर्शित है।"
-                        : "Your calculated Moon Sign and Nakshatra are illuminated on the zodiac mandala below."}
+                      {t.wheelSub}
                     </p>
                   </div>
 
@@ -1619,6 +1507,7 @@ export default function RashiCalculatorPage() {
                     <MoonSignWheel
                       activeRashiIndex={result.rashi_index}
                       activeNakshatraIndex={result.nakshatra_index}
+                      language={language}
                     />
                   </div>
                 </div>
@@ -1639,7 +1528,7 @@ export default function RashiCalculatorPage() {
                   />
                 ) : (
                   <div className="rounded-2xl border border-border bg-card p-6 text-center text-muted-foreground text-xs">
-                    {language === "bn" ? "শাস্ত্রীয় নিয়মের তথ্য উপলব্ধ নয়।" : "Classical rules data not available."}
+                    {t.rulesUnavailable}
                   </div>
                 )}
               </div>
@@ -1657,19 +1546,13 @@ export default function RashiCalculatorPage() {
                       <h3 className="font-display text-lg font-bold text-ink-950 flex items-center gap-2">
                         <Eye className="size-4 text-amber-600" />
                         <span>
-                          {chartMode === "chandra"
-                            ? (language === "bn" ? "চন্দ্র লগ্ন কুষ্ঠী চক্র (Chandra Lagna Chart)" : "Chandra Lagna Kundali Chart")
-                            : (language === "bn" ? "জন্ম লগ্ন কুষ্ঠী চক্র (Janma Lagna D1 Chart)" : "Janma Lagna D1 Kundali Chart")}
+                          {chartMode === "chandra" ? t.chandraLagnaChart : t.janmaLagnaChart}
                         </span>
                       </h3>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {chartMode === "chandra"
-                          ? (language === "bn"
-                              ? "চন্দ্রকে ১ম ভাব (লগ্ন) ধরে মানসিক স্থিতি, দৃষ্টিভঙ্গি ও গোচর প্রভাব নির্ণয়ের প্রামাণ্য চার্ট"
-                              : "Moon placed in 1st House for psychological resilience and transit evaluation")
-                          : (language === "bn"
-                              ? `${result.ayanamsa_name} অয়নামশা অনুসারে জন্ম লগ্ন ও ৯টি গ্রহের মূল অবস্থান`
-                              : `Ascendant (Lagna) and 9 planets in natal birth horoscope with ${result.ayanamsa_name}`)}
+                          ? t.chandraLagnaSub
+                          : t.janmaLagnaSub(result.ayanamsa_name)}
                       </p>
                     </div>
 
@@ -1685,7 +1568,7 @@ export default function RashiCalculatorPage() {
                               : "text-amber-900/80 hover:text-amber-950 hover:bg-amber-100/50"
                           }`}
                         >
-                          {language === "bn" ? "চন্দ্র লগ্ন চক্র" : language === "hi" ? "चंद्र लग्न चक्र" : "Chandra Lagna"}
+                          {t.chandraLagnaBtn}
                         </button>
                         <button
                           type="button"
@@ -1696,7 +1579,7 @@ export default function RashiCalculatorPage() {
                               : "text-amber-900/80 hover:text-amber-950 hover:bg-amber-100/50"
                           }`}
                         >
-                          {language === "bn" ? "লগ্ন চক্র (D1)" : language === "hi" ? "लग्न चक्र (D1)" : "Lagna D1"}
+                          {t.janmaLagnaBtn}
                         </button>
                       </div>
 
@@ -1714,10 +1597,10 @@ export default function RashiCalculatorPage() {
                             }`}
                           >
                             {style === "north_indian"
-                              ? "North"
+                              ? t.chartNorth
                               : style === "south_indian"
-                              ? "South"
-                              : "বাংলা"}
+                              ? t.chartSouth
+                              : t.chartEast}
                           </button>
                         ))}
                       </div>
@@ -1742,17 +1625,17 @@ export default function RashiCalculatorPage() {
                       <h3 className="font-display text-base sm:text-lg font-extrabold text-ink-950 flex items-center gap-2">
                         <Award className="size-4 text-amber-600" />
                         <span>
-                          {language === "bn"
-                            ? `এই রাশিতে গ্রহদের উচ্চ-নীচ ও নৈসর্গিক মৈত্রী সম্বন্ধ`
-                            : language === "hi"
-                            ? `इस राशि में ग्रहों का उच्च-नीच एवं नैसर्गिक मैत्री संबंध`
-                            : `Planetary Dignities & Natural Friendships for ${result.rashi_name_en}`}
+                          {t.dignityTitle(
+                            language === "bn"
+                              ? result.rashi_name_bn
+                              : language === "hi"
+                              ? result.rashi_name_hi
+                              : result.rashi_name_en
+                          )}
                         </span>
                       </h3>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {language === "bn"
-                          ? "সূত্র: ক্লায়েন্টের রিসোর্স নথি 'Basics of Kundali Reading Explained' (পৃষ্ঠা ১-৫)"
-                          : "Source: Client Resource Document 'Basics of Kundali Reading Explained' (pp. 1-5)"}
+                        {t.dignitySub}
                       </p>
                     </div>
 
@@ -1762,34 +1645,37 @@ export default function RashiCalculatorPage() {
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-emerald-800 flex items-center gap-1.5">
                             <CheckCircle2 className="size-4 text-emerald-600" />
-                            <span>{language === "bn" ? "উচ্চ গ্রহ (Exalted Graha):" : "Exalted Planets:"}</span>
+                            <span>{t.exaltedPlanets}</span>
                           </span>
                           <span className="font-extrabold text-ink-950">
                             {result.planetary_dignity.exalted_planets?.length
-                              ? result.planetary_dignity.exalted_planets.join(", ")
-                              : (language === "bn" ? "কোনো গ্রহ উচ্চ নয়" : "None")}
+                              ? translatePlanetList(result.planetary_dignity.exalted_planets, language)
+                              : t.noneText}
                           </span>
                         </div>
 
                         <div className="flex items-center justify-between pt-2 border-t border-border/60">
                           <span className="font-bold text-rose-800 flex items-center gap-1.5">
                             <AlertTriangle className="size-4 text-rose-600" />
-                            <span>{language === "bn" ? "নীচ গ্রহ (Debilitated Graha):" : "Debilitated Planets:"}</span>
+                            <span>{t.debilitatedPlanets}</span>
                           </span>
                           <span className="font-extrabold text-ink-950">
                             {result.planetary_dignity.debilitated_planets?.length
-                              ? result.planetary_dignity.debilitated_planets.join(", ")
-                              : (language === "bn" ? "কোনো গ্রহ নীচ নয়" : "None")}
+                              ? translatePlanetList(result.planetary_dignity.debilitated_planets, language)
+                              : t.noneText}
                           </span>
                         </div>
 
                         <div className="flex items-center justify-between pt-2 border-t border-border/60">
                           <span className="font-bold text-indigo-800 flex items-center gap-1.5">
                             <Star className="size-4 text-indigo-600" />
-                            <span>{language === "bn" ? "মূলত্রিকোণ / স্বক্ষেত্র:" : "Moolatrikona / Own:"}</span>
+                            <span>{t.moolatrikonaOwn}</span>
                           </span>
                           <span className="font-extrabold text-ink-950">
-                            {result.planetary_dignity.moolatrikona || result.planetary_dignity.own_lord}
+                            {translatePlanetName(
+                              result.planetary_dignity.moolatrikona || result.planetary_dignity.own_lord,
+                              language
+                            )}
                           </span>
                         </div>
                       </div>
@@ -1797,37 +1683,41 @@ export default function RashiCalculatorPage() {
                       {/* Natural Friendships of Ruling Lord */}
                       <div className="rounded-2xl border border-border/80 bg-surface-muted/50 p-4 space-y-2.5">
                         <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                          {language === "bn"
-                            ? `${result.rashi_lord} গ্রহের নৈসর্গিক মৈত্রী (Friendship Table)`
-                            : `Natural Friendships of Lord ${result.rashi_lord}`}
+                          {t.naturalFriendships(
+                            translatePlanetName(result.rashi_lord, language)
+                          )}
                         </p>
 
                         <div className="flex items-start gap-2 pt-1">
                           <span className="rounded-md bg-emerald-100 text-emerald-950 px-2 py-0.5 font-bold text-[10px] shrink-0">
-                            {language === "bn" ? "মিত্র (Friends)" : "Friends"}
+                            {t.friends}
                           </span>
                           <span className="text-ink-950 font-medium">
-                            {result.planetary_dignity.ruler_friends?.join(", ") || "—"}
+                            {result.planetary_dignity.ruler_friends?.length
+                              ? translatePlanetList(result.planetary_dignity.ruler_friends, language)
+                              : "—"}
                           </span>
                         </div>
 
                         <div className="flex items-start gap-2 pt-1 border-t border-border/40">
                           <span className="rounded-md bg-rose-100 text-rose-950 px-2 py-0.5 font-bold text-[10px] shrink-0">
-                            {language === "bn" ? "শত্রু (Enemies)" : "Enemies"}
+                            {t.enemies}
                           </span>
                           <span className="text-ink-950 font-medium">
                             {result.planetary_dignity.ruler_enemies?.length
-                              ? result.planetary_dignity.ruler_enemies.join(", ")
-                              : (language === "bn" ? "কোনো শত্রু গ্রহ নেই (None)" : "No natural enemies")}
+                              ? translatePlanetList(result.planetary_dignity.ruler_enemies, language)
+                              : t.noEnemies}
                           </span>
                         </div>
 
                         <div className="flex items-start gap-2 pt-1 border-t border-border/40">
                           <span className="rounded-md bg-amber-100 text-amber-950 px-2 py-0.5 font-bold text-[10px] shrink-0">
-                            {language === "bn" ? "সম (Neutrals)" : "Neutrals"}
+                            {t.neutrals}
                           </span>
                           <span className="text-ink-950 font-medium">
-                            {result.planetary_dignity.ruler_neutrals?.join(", ") || "—"}
+                            {result.planetary_dignity.ruler_neutrals?.length
+                              ? translatePlanetList(result.planetary_dignity.ruler_neutrals, language)
+                              : "—"}
                           </span>
                         </div>
                       </div>
@@ -1849,18 +1739,10 @@ export default function RashiCalculatorPage() {
                       <div>
                         <h3 className="font-display text-base sm:text-lg font-extrabold text-ink-950 flex items-center gap-2">
                           <Activity className="size-4 text-amber-600" />
-                          <span>
-                            {language === "bn"
-                              ? "বর্তমান চন্দ্র বল গোচর (Real-Time Chandra Bala)"
-                              : language === "hi"
-                              ? "वर्तमान चंद्र बल गोचर"
-                              : "Current Chandra Bala (Lunar Transit Strength)"}
-                          </span>
+                          <span>{t.chandraBalaHeading}</span>
                         </h3>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {language === "bn"
-                            ? "আজকের দিনে চন্দ্র আপনার জন্ম রাশি থেকে কোন রাশিতে ভ্রমণ করছে তার ভিত্তিতে শুভাশুভ বল"
-                            : "Daily transit evaluation of Moon relative to your Natal Moon Sign"}
+                          {t.chandraBalaSub}
                         </p>
                       </div>
 
@@ -1879,35 +1761,35 @@ export default function RashiCalculatorPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                       <div className="rounded-xl bg-surface-muted/60 p-3.5 border border-border/60">
                         <p className="text-[10px] font-bold text-muted-foreground uppercase">
-                          {language === "bn" ? "চন্দ্রের বর্তমান রাশি" : "Transiting Moon Sign"}
+                          {t.transitingMoonSign}
                         </p>
                         <p className="mt-1 font-extrabold text-ink-950 text-base">
-                          {result.chandra_bala.current_moon_sign_name}
+                          {translateRashiName(result.chandra_bala.current_moon_sign_name, language)}
                         </p>
                       </div>
 
                       <div className="rounded-xl bg-surface-muted/60 p-3.5 border border-border/60">
                         <p className="text-[10px] font-bold text-muted-foreground uppercase">
-                          {language === "bn" ? "জন্ম রাশি থেকে ভাব" : "House from Natal Moon"}
+                          {t.houseFromMoon}
                         </p>
                         <p className="mt-1 font-extrabold text-amber-700 text-base">
-                          {result.chandra_bala.house_from_natal_moon}
+                          {toLocalizedDigits(result.chandra_bala.house_from_natal_moon, language)}
                           <span className="text-xs text-muted-foreground ml-1">
-                            {language === "bn" ? "ম ভাব" : "th House"}
+                            {t.houseSuffix(result.chandra_bala.house_from_natal_moon)}
                           </span>
                         </p>
                       </div>
 
                       <div className="rounded-xl bg-surface-muted/60 p-3.5 border border-border/60">
                         <p className="text-[10px] font-bold text-muted-foreground uppercase">
-                          {language === "bn" ? "ফল নির্ণয়" : "Result Category"}
+                          {t.resultCategory}
                         </p>
                         <p className="mt-1 font-extrabold text-ink-950 text-sm">
                           {result.chandra_bala.house_from_natal_moon === 8
-                            ? (language === "bn" ? "চন্দ্রাষ্টম (সতর্কতা)" : "Chandrashtama")
+                            ? t.chandrashtama
                             : result.chandra_bala.is_auspicious
-                            ? (language === "bn" ? "পরম শুভ ও সহায়ক" : "Highly Auspicious")
-                            : (language === "bn" ? "সাধারণ / নিরপেক্ষ" : "Neutral / Moderate")}
+                            ? t.auspiciousTransit
+                            : t.neutralTransit}
                         </p>
                       </div>
                     </div>
@@ -1918,9 +1800,7 @@ export default function RashiCalculatorPage() {
                         {result.chandra_bala.description}
                       </p>
                       <p className="text-[11px] text-muted-foreground italic pt-1 border-t border-border/40">
-                        {language === "bn"
-                          ? "শাস্ত্রীয় নিয়ম: জন্ম রাশি থেকে ১, ৩, ৬, ৭, ১০, ১১ ভাবে চন্দ্র শুভফলদায়ক; ২, ৫, ৯ মধ্যম; ৪, ৮, ১২ ভাবে সতর্কতা কাম্য।"
-                          : "Classical Muhurta rule: 1st, 3rd, 6th, 7th, 10th, 11th from Moon are auspicious; 4th, 8th, 12th demand mindfulness."}
+                        {t.muhurtaRule}
                       </p>
                     </div>
                   </div>
@@ -1933,18 +1813,10 @@ export default function RashiCalculatorPage() {
                       <div>
                         <h3 className="font-display text-base sm:text-lg font-extrabold text-ink-950 flex items-center gap-2">
                           <Shield className="size-4 text-amber-600" />
-                          <span>
-                            {language === "bn"
-                              ? "শনির সাড়ে সাতি ও ধাইয়া ট্র্যাকার (Saturn Sade Sati Tracker)"
-                              : language === "hi"
-                              ? "शनि साढ़े साती एवं ढैया ट्रैकर"
-                              : "Saturn Sade Sati & Dhaiya Transit Tracker"}
-                          </span>
+                          <span>{t.sadeSatiHeading}</span>
                         </h3>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {language === "bn"
-                            ? "জন্ম রাশি সাপেক্ষে শনির বর্তমান গোচর অবস্থান ও শাস্ত্রসম্মত উপশম"
-                            : "Real-time planetary analysis of Saturn's current transit relative to your Moon Sign"}
+                          {t.sadeSatiSub}
                         </p>
                       </div>
 
@@ -1956,8 +1828,8 @@ export default function RashiCalculatorPage() {
                           : "bg-emerald-100 text-emerald-950 border-emerald-300"
                       }`}>
                         {result.sade_sati_status.is_active
-                          ? (language === "bn" ? "প্রভাব সক্রিয়" : "Active Transit")
-                          : (language === "bn" ? "অনুকূল অবস্থা" : "Favorable Transit")}
+                          ? t.sadeSatiActive
+                          : t.sadeSatiInactive}
                       </span>
                     </div>
 
@@ -1966,17 +1838,19 @@ export default function RashiCalculatorPage() {
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div>
                           <p className="text-[10px] font-bold text-muted-foreground uppercase">
-                            {language === "bn" ? "শনির বর্তমান পর্যায়" : "Active Phase"}
+                            {t.activePhase}
                           </p>
                           <h4 className="font-display text-base sm:text-lg font-black text-ink-950 mt-0.5">
                             {result.sade_sati_status.phase_title}
                           </h4>
                         </div>
                         <span className="text-xs text-ink-800 font-bold">
-                          {language === "bn" ? "শনির রাশি:" : "Saturn Sign:"}{" "}
-                          <strong className="text-amber-800">{result.sade_sati_status.saturn_sign_name}</strong>{" "}
-                          ({result.sade_sati_status.saturn_house_from_moon}
-                          {language === "bn" ? "ম ভাব" : "th House"})
+                          {t.saturnSign}{" "}
+                          <strong className="text-amber-800">
+                            {translateRashiName(result.sade_sati_status.saturn_sign_name, language)}
+                          </strong>{" "}
+                          ({toLocalizedDigits(result.sade_sati_status.saturn_house_from_moon, language)}
+                          {t.houseSuffix(result.sade_sati_status.saturn_house_from_moon)})
                         </span>
                       </div>
 
@@ -1989,7 +1863,7 @@ export default function RashiCalculatorPage() {
                     <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.05] p-4 sm:p-5 space-y-1.5">
                       <div className="flex items-center gap-2 text-emerald-800 font-black text-xs uppercase tracking-wider">
                         <CheckCircle2 className="size-4" />
-                        <span>{language === "bn" ? "শাস্ত্রসম্মত শনি শান্তি প্রতিকার:" : "Prescribed Classical Remedy:"}</span>
+                        <span>{t.remedyHeading}</span>
                       </div>
                       <p className="text-xs sm:text-[13px] text-ink-950 font-medium leading-relaxed">
                         {result.sade_sati_status.remedy_summary}
@@ -2015,18 +1889,10 @@ export default function RashiCalculatorPage() {
                       </div>
                       <div>
                         <h3 className="font-display text-base sm:text-lg font-extrabold text-ink-950">
-                          {language === "bn"
-                            ? "কী কী থেকে সাবধান থাকবেন (সতর্কতা)"
-                            : language === "hi"
-                            ? "किन-किन बातों से सावधान रहें (सावधानियां)"
-                            : "Cautions & Pitfalls (What to Avoid)"}
+                          {t.cautionsHeading}
                         </h3>
                         <p className="text-[11px] font-semibold text-rose-700/90">
-                          {language === "bn"
-                            ? "আপনার রাশির স্বভাবজাত দুর্বলতা ও প্রতিকূল ক্ষেত্র"
-                            : language === "hi"
-                            ? "आपकी राशि की स्वाभाविक कमजोरियां और प्रतिकूल क्षेत्र"
-                            : "Innate vulnerabilities and traits to be mindful of"}
+                          {t.cautionsSub}
                         </p>
                       </div>
                     </div>
@@ -2049,18 +1915,10 @@ export default function RashiCalculatorPage() {
                       </div>
                       <div>
                         <h3 className="font-display text-base sm:text-lg font-extrabold text-ink-950">
-                          {language === "bn"
-                            ? "কী করলে আপনার ভালো হবে (শুভ প্রতিকার)"
-                            : language === "hi"
-                            ? "क्या करने से आपका कल्याण होगा (शुभ उपाय)"
-                            : "Beneficial Actions & Remedies (What to Do)"}
+                          {t.remediesHeading}
                         </h3>
                         <p className="text-[11px] font-semibold text-emerald-700/90">
-                          {language === "bn"
-                            ? "সৌভাগ্য বৃদ্ধি, মানসিক শান্তি ও সাফল্যের বৈদিক উপায়"
-                            : language === "hi"
-                            ? "सौभाग्य, मानसिक शांति और सफलता के अचूक उपाय"
-                            : "Auspicious Vedic practices to enhance luck and peace"}
+                          {t.remediesSub}
                         </p>
                       </div>
                     </div>
@@ -2081,16 +1939,10 @@ export default function RashiCalculatorPage() {
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-3 border-b border-border/60">
                     <h3 className="font-display text-base sm:text-lg font-extrabold text-ink-950 flex items-center gap-2">
                       <Star className="size-4 text-amber-500 fill-amber-500" />
-                      <span>
-                        {language === "bn"
-                          ? "শুভ বৈশিষ্ট্য ও রাশির কারকতা"
-                          : language === "hi"
-                          ? "शुभ गुण एवं राशि की विशेषताएं"
-                          : "Lucky Attributes & Key Strengths"}
-                      </span>
+                      <span>{t.luckyHeading}</span>
                     </h3>
                     <span className="text-xs text-muted-foreground">
-                      {language === "bn" ? "শারীরিক শাসন (কালপুরুষ):" : "Kalapurusha Governance:"}{" "}
+                      {t.kalapurusha}{" "}
                       <strong className="text-ink-950">{activeTraits.body_parts}</strong>
                     </span>
                   </div>
@@ -2100,7 +1952,7 @@ export default function RashiCalculatorPage() {
                     <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
                         <Gem className="size-3 text-amber-600 shrink-0" />{" "}
-                        <span>{language === "bn" ? "শুভ রত্ন" : language === "hi" ? "शुभ रत्न" : "Lucky Gem"}</span>
+                        <span>{t.luckyGem}</span>
                       </p>
                       <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{activeTraits.lucky_gemstone}</p>
                     </div>
@@ -2108,38 +1960,40 @@ export default function RashiCalculatorPage() {
                     <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
                         <Palette className="size-3 text-indigo-600 shrink-0" />{" "}
-                        <span>{language === "bn" ? "শুভ বর্ণ" : language === "hi" ? "शुभ रंग" : "Lucky Colors"}</span>
+                        <span>{t.luckyColors}</span>
                       </p>
                       <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{activeTraits.lucky_color}</p>
                     </div>
 
                     <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase">
-                        {language === "bn" ? "শুভ সংখ্যা" : language === "hi" ? "शुभ अंक" : "Lucky Numbers"}
+                        {t.luckyNumbers}
                       </p>
-                      <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{result.traits.lucky_numbers.join(", ")}</p>
+                      <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">
+                        {result.traits.lucky_numbers.map((num) => toLocalizedDigits(num, language)).join(", ")}
+                      </p>
                     </div>
 
                     <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase">
-                        {language === "bn" ? "শুভ বার" : language === "hi" ? "शुभ दिन" : "Lucky Day"}
+                        {t.luckyDay}
                       </p>
                       <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{activeTraits.lucky_day}</p>
                     </div>
 
                     <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase">
-                        {language === "bn" ? "উপাস্য দেবতা" : language === "hi" ? "पूज्य देवता" : "Ruling Deity"}
+                        {t.rulingDeity}
                       </p>
                       <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">{activeTraits.ruling_deity}</p>
                     </div>
 
                     <div className="rounded-xl bg-surface-muted/60 p-3 border border-border/60 flex flex-col justify-start">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase">
-                        {language === "bn" ? "অনুকূল রাশি" : language === "hi" ? "अनुकूल राशियां" : "Compatible Signs"}
+                        {t.compatibleSigns}
                       </p>
                       <p className="mt-1.5 font-extrabold text-ink-950 break-words leading-snug">
-                        {activeTraits.compatible_rashis?.join(", ") || result.traits.compatible_rashis.join(", ")}
+                        {translateRashiList(activeTraits.compatible_rashis || result.traits.compatible_rashis, language)}
                       </p>
                     </div>
                   </div>
@@ -2147,7 +2001,7 @@ export default function RashiCalculatorPage() {
                   {/* Strengths Pills */}
                   <div className="pt-2">
                     <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2.5">
-                      {language === "bn" ? "ব্যক্তিত্বের প্রধান শক্তিসমূহ" : language === "hi" ? "व्यक्तित्व की प्रमुख विशेषताएं" : "Personality Strengths"}
+                      {t.personalityStrengths}
                     </p>
                     <div className="flex flex-wrap gap-2 text-xs">
                       {activeTraits.strengths.map((str, idx) => (
@@ -2176,23 +2030,13 @@ export default function RashiCalculatorPage() {
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 <RotateCcw className="size-3.5" />
-                <span>
-                  {language === "bn"
-                    ? "অন্য জন্ম বিবরণ দিয়ে পুনরায় গণনা করুন"
-                    : language === "hi"
-                    ? "अन्य जन्म विवरण से पुनः गणना करें"
-                    : "Recalculate with different details"}
-                </span>
+                <span>{t.recalculateBtn}</span>
               </button>
 
               <div className="flex items-center gap-2">
                 <Link href="/appointments">
                   <Button size="sm" className="bg-amber-500 text-amber-950 font-black hover:bg-amber-400">
-                    {language === "bn"
-                      ? "অভিজ্ঞ জ্যোতিষীর সাথে বিস্তারিত পরামর্শ করুন"
-                      : language === "hi"
-                      ? "विस्तृत कुंडली विश्लेषण के लिए ज्योतिषी से परामर्श लें"
-                      : "Consult an Astrologer for Detailed Kundali"}
+                    {t.consultAstrologerBtn}
                   </Button>
                 </Link>
               </div>
@@ -2214,7 +2058,7 @@ export default function RashiCalculatorPage() {
       <FeatureCoinModal
         open={coinModalOpen}
         onClose={() => setCoinModalOpen(false)}
-        featureName={rashiFeature?.name || (language === "bn" ? "রাশি ক্যালকুলেটর" : "Rashi Calculator")}
+        featureName={rashiFeature?.name || (language === "bn" ? "রাশি ক্যালকুলেটর" : language === "hi" ? "राशि कैलकुलेटर" : "Rashi Calculator")}
         requiredCoins={rashiFeature?.coins ?? 10}
         walletBalance={walletBalance}
         reason={coinModalReason}

@@ -383,7 +383,13 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
           }`}
         >
           <Compass className="size-4" />
-          <span>{language === "bn" ? "কম্পাস ও লাইভ পর্যবেক্ষণ" : "Compass Dial"}</span>
+          <span>
+            {language === "bn"
+              ? "কম্পাস ও লাইভ পর্যবেক্ষণ"
+              : language === "hi"
+              ? "कम्पास एवं लाइव प्रेक्षण"
+              : "Compass Dial"}
+          </span>
         </button>
 
         <button
@@ -396,7 +402,13 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
           }`}
         >
           <Layers className="size-4" />
-          <span>{language === "bn" ? "১৬ জোন বিশ্লেষণ" : "16-Zone Deep Dive"}</span>
+          <span>
+            {language === "bn"
+              ? "১৬ জোন বিশ্লেষণ"
+              : language === "hi"
+              ? "16 ज़ोन विश्लेषण"
+              : "16-Zone Deep Dive"}
+          </span>
         </button>
 
         <button
@@ -409,7 +421,13 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
           }`}
         >
           <Sparkles className="size-4" />
-          <span>{language === "bn" ? "৩২ পদ ও ৭ডি নেক্সাস" : "32 Padas Nexus"}</span>
+          <span>
+            {language === "bn"
+              ? "৩২ পদ ও ৭ডি নেক্সাস"
+              : language === "hi"
+              ? "32 पद एवं 7D नेक्सस"
+              : "32 Padas Nexus"}
+          </span>
         </button>
       </div>
 
@@ -423,7 +441,11 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
           </div>
           <div>
             <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              {language === "bn" ? "নির্বাচিত বাস্তু উপাদান" : "Selected Vastu Element"}
+              {language === "bn"
+                ? "নির্বাচিত বাস্তু উপাদান"
+                : language === "hi"
+                ? "चयनित वास्तु तत्व"
+                : "Selected Vastu Element"}
             </div>
             <div className="text-base font-extrabold text-foreground flex items-center gap-2">
               <span>{language === "bn" ? activeCategory.name_bn : activeCategory.name}</span>
@@ -431,9 +453,13 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
                 {activeCategory.category_group === "architecture"
                   ? language === "bn"
                     ? "স্থাপত্য"
+                    : language === "hi"
+                    ? "कक्ष"
                     : "Room"
                   : language === "bn"
                   ? "উপকরণ"
+                  : language === "hi"
+                  ? "वस्तु"
                   : "Object"}
               </span>
             </div>
@@ -448,7 +474,13 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
             className="rounded-xl border-amber-500/30 text-amber-600 dark:text-amber-400 font-bold hover:bg-amber-500/10 gap-1.5"
           >
             <Sliders className="size-3.5" />
-            <span>{language === "bn" ? "৩৮টি ক্যাটাগরি ব্রাউজ করুন" : "Change Category (38)"}</span>
+            <span>
+              {language === "bn"
+                ? "৩৮টি ক্যাটাগরি ব্রাউজ করুন"
+                : language === "hi"
+                ? "38 श्रेणियां देखें"
+                : "Change Category (38)"}
+            </span>
           </Button>
 
           <Button

@@ -42,6 +42,7 @@ import { AstroVastu } from "@/components/vastu/astro-vastu";
 import { AyadiShadvarga } from "@/components/vastu/ayadi-shadvarga";
 import type { PadaInfo, VastuAuditResponse, VastuZoneInfo, VastuRemedyItem } from "@/types/vastu";
 import type { AstrologyLanguage } from "@/types";
+import { VASTU_I18N } from "@/lib/vastu-translations";
 
 export default function VastuPage() {
   const { getFeature, checkAccess, walletBalance, refresh: refreshWallet } = useFeaturePricing();
@@ -50,6 +51,7 @@ export default function VastuPage() {
   const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
 
   const { language, setLanguage } = useLanguage();
+  const t = VASTU_I18N[language] || VASTU_I18N.en;
   const [entranceDegree, setEntranceDegree] = React.useState<number>(335.0);
   const [currentPada, setCurrentPada] = React.useState<PadaInfo | null>(null);
   const [propertyType, setPropertyType] = React.useState<"residential" | "commercial" | "industrial">("residential");
@@ -101,11 +103,7 @@ export default function VastuPage() {
     const access = checkAccess("vastu");
     if (!access.allowed) {
       if (access.reason === "disabled") {
-        toast.error(
-          language === "bn"
-            ? "বাস্তু শাস্ত্র ফিচারটি বর্তমানে অ্যাডমিন দ্বারা বন্ধ রয়েছে।"
-            : "Vastu Shastra feature is temporarily unavailable."
-        );
+        toast.error(t.featureDisabled);
         return;
       }
       setCoinModalReason(access.reason || "insufficient_coins");
@@ -124,19 +122,9 @@ export default function VastuPage() {
         setAuditResult(res);
         if (vastuFeature && vastuFeature.coins > 0) {
           refreshWallet();
-          toast.success(
-            language === "bn"
-              ? `${vastuFeature.coins} কয়েন ব্যালেন্স থেকে কাটা হয়েছে`
-              : `${vastuFeature.coins} coins deducted from wallet`
-          );
+          toast.success(t.coinsDeducted(vastuFeature.coins));
         }
-        toast.success(
-          language === "bn"
-            ? "৩৬০° বাস্তু অডিট রিপোর্ট সফলভাবে তৈরি হয়েছে!"
-            : language === "hi"
-            ? "360° वास्तु ऑडिट रिपोर्ट सफलतापूर्वक तैयार हुई!"
-            : "360° Vastu audit report generated successfully!"
-        );
+        toast.success(t.auditSuccess);
       }
     } catch (err: any) {
       if (err?.code === "insufficient_coins") {
@@ -183,29 +171,15 @@ export default function VastuPage() {
         <div className="mx-auto max-w-4xl text-center space-y-3">
           <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/10 text-amber-900 dark:text-amber-300 border border-amber-400/30 font-bold px-4 py-1.5 text-xs shadow-2xs">
             <Sparkles className="size-3.5 text-amber-600 dark:text-amber-400" />
-            <span>
-              {language === "bn"
-                ? "বৈজ্ঞানিক বাস্তু শাস্ত্র (১৬টি জোন ও ৩২টি পদ চক্র)"
-                : language === "hi"
-                ? "वैज्ञानिक वास्तु शास्त्र (16 ज़ोन एवं 32 पद चक्र)"
-                : "Scientific Vastu Shastra (16 Zones & 32 Padas)"}
-            </span>
+            <span>{t.badge}</span>
           </div>
 
           <h1 className="font-display text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
-            {language === "bn"
-              ? "১৬-জোন পঞ্চভূত ভারসাম্য ও ভাঙচুরবিহীন মেটাল প্রতিকার"
-              : language === "hi"
-              ? "16-ज़ोन पंचतत्व संतुलन एवं बिना तोड़-फोड़ धातु पट्टी उपचार"
-              : "16-Zone Panchabhuta Energy & Non-Demolition Remedies"}
+            {t.title}
           </h1>
 
           <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto">
-            {language === "bn"
-              ? "অথরিটেটিভ ৩৭৪ পৃষ্ঠার ক্লায়েন্ট ম্যানুয়াল দ্বারা পরিচালিত কোণভিত্তিক ৩২-পদ এনার্জি গ্রিড, স্বর্ণদ্বার এন্ট্রান্স, পঞ্চভূত দোষ শোধন এবং ১২০টি অলৌকিক বাস্তু প্রতিকার।"
-              : language === "hi"
-              ? "प्रमाणित 374 पृष्ठों की वास्तु नियमावली द्वारा संचालित कोण-आधारित 32 पद ऊर्जा चक्र, स्वर्णिम द्वार, पंचतत्व विश्लेषण एवं बिना तोड़-फोड़ उपचार।"
-              : "Authoritative 374-page Vedic manual-driven 32-pada energy grid, 8 golden entrance doors, 16 directional zones with elemental balance, and 120 miraculous non-demolition remedies."}
+            {t.subtitle}
           </p>
 
           {/* Language Switcher Bar */}
@@ -257,76 +231,40 @@ export default function VastuPage() {
           {[
             {
               id: "compass",
-              label:
-                language === "bn"
-                  ? "স্মার্ট কম্পাস ও এআর (Live & AR)"
-                  : language === "hi"
-                  ? "स्मार्ट कम्पास एवं एआर"
-                  : "Smart Compass & AR",
+              label: t.tabCompass,
               icon: Compass,
             },
             {
               id: "medical",
-              label:
-                language === "bn"
-                  ? "মেডিকেল বাস্তু (Medical Vastu)"
-                  : language === "hi"
-                  ? "मेडिकल वास्तु निदान"
-                  : "Medical Vastu",
+              label: t.tabMedical,
               icon: Activity,
             },
             {
               id: "astrovastu",
-              label:
-                language === "bn"
-                  ? "অ্যাস্ট্রো-বাস্তু কুণ্ডলী (Astro-Vastu)"
-                  : language === "hi"
-                  ? "एस्ट्रो-वास्तु कुण्डली"
-                  : "Astro-Vastu Synergy",
+              label: t.tabAstroVastu,
               icon: Sun,
             },
             {
               id: "ayadi",
-              label:
-                language === "bn"
-                  ? "আয়াদি ষড়বর্গ (Ayadi Vedic)"
-                  : language === "hi"
-                  ? "आयादि षड्वर्ग गणक"
-                  : "Ayadi Shadvarga",
+              label: t.tabAyadi,
               icon: Calculator,
             },
             {
               id: "audit",
-              label:
-                language === "bn"
-                  ? "৩৬০° প্রপার্টি অডিট"
-                  : language === "hi"
-                  ? "360° प्रॉपर्टी ऑडिट"
-                  : "360° Property Audit",
+              label: t.tabAudit,
               icon: Home,
             },
             {
               id: "zones",
-              label:
-                language === "bn"
-                  ? "১৬টি দিক ও পঞ্চভূত জোন"
-                  : language === "hi"
-                  ? "16 दिशाएं व पंचतत्व"
-                  : "16 Elemental Zones",
+              label: t.tabZones,
               icon: Layers,
             },
             {
               id: "remedies",
-              label:
-                language === "bn"
-                  ? "১২০ অলৌকিক প্রতিকার"
-                  : language === "hi"
-                  ? "120 अचूक उपाय"
-                  : "120 Miraculous Remedies",
+              label: t.tabRemedies,
               icon: Flame,
             },
           ].map((tab) => {
-
             const Icon = tab.icon;
             return (
               <button
@@ -356,39 +294,25 @@ export default function VastuPage() {
                 <div>
                   <h3 className="text-base sm:text-lg font-serif font-bold text-foreground flex items-center gap-2">
                     <Sparkles className="size-4 text-amber-500" />
-                    {language === "bn"
-                      ? "ভবনের মূল প্রবেশদ্বার ও কক্ষ মূল্যায়ন"
-                      : language === "hi"
-                      ? "भवन का मुख्य प्रवेश द्वार एवं कक्ष मूल्यांकन"
-                      : "Property Entrance & Room Alignment Audit"}
+                    {t.auditSectionTitle}
                   </h3>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {language === "bn"
-                      ? "মূল প্রবেশদ্বারের নিখুঁত কোণ ও কক্ষসমূহের জোন নির্বাচন করে পূর্ণাঙ্গ বাস্তু স্কোর জানুন।"
-                      : language === "hi"
-                      ? "मुख्य प्रवेश द्वार का सटीक कोण और कमरों का क्षेत्र चुनकर संपूर्ण वास्तु स्कोर जानें।"
-                      : "Set exact entrance compass degree and room positions for a comprehensive Vedic compliance audit."}
+                    {t.auditSectionSub}
                   </p>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground font-medium">
-                    {language === "bn" ? "প্রপার্টির ধরন:" : language === "hi" ? "प्रॉपर्टी का प्रकार:" : "Property Type:"}
+                    {t.propertyTypeLabel}
                   </span>
                   <select
                     value={propertyType}
                     onChange={(e) => setPropertyType(e.target.value as any)}
                     className="bg-surface border border-input rounded-lg px-2.5 py-1 text-xs text-foreground font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
                   >
-                    <option value="residential">
-                      {language === "bn" ? "আবাসিক (Residential)" : language === "hi" ? "आवासीय (Residential)" : "Residential"}
-                    </option>
-                    <option value="commercial">
-                      {language === "bn" ? "বাণিজ্যিক (Commercial)" : language === "hi" ? "व्यावसायिक (Commercial)" : "Commercial"}
-                    </option>
-                    <option value="industrial">
-                      {language === "bn" ? "শিল্প কারখানা (Industrial)" : language === "hi" ? "औद्योगिक (Industrial)" : "Industrial"}
-                    </option>
+                    <option value="residential">{t.typeResidential}</option>
+                    <option value="commercial">{t.typeCommercial}</option>
+                    <option value="industrial">{t.typeIndustrial}</option>
                   </select>
                 </div>
               </div>
@@ -398,11 +322,7 @@ export default function VastuPage() {
                 <div className="p-4 bg-surface rounded-xl border border-border/80 space-y-3">
                   <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                     <label className="text-xs font-semibold text-foreground uppercase tracking-wider">
-                      {language === "bn"
-                        ? "মূল প্রবেশদ্বারের কম্পাস কোণ:"
-                        : language === "hi"
-                        ? "मुख्य प्रवेश द्वार कम्पास कोण:"
-                        : "Main Entrance Compass Angle:"}{" "}
+                      {t.entranceAngleLabel}{" "}
                       <span className="text-amber-600 dark:text-amber-400 font-mono font-bold text-sm">
                         {entranceDegree.toFixed(1)}°
                       </span>
@@ -421,17 +341,7 @@ export default function VastuPage() {
                           <ShieldAlert className="size-3.5 text-red-500" />
                         )}
                         {currentPada.pada_id} ({currentPada.deity}) —{" "}
-                        {currentPada.is_auspicious
-                          ? language === "bn"
-                            ? "স্বর্ণদ্বার (Golden Door)"
-                            : language === "hi"
-                            ? "स्वर्णिम द्वार (शुभ)"
-                            : "Auspicious Golden Door"
-                          : language === "bn"
-                          ? "প্রতিকূল (Needs Remedy)"
-                          : language === "hi"
-                          ? "अशुभ (उपाय आवश्यक)"
-                          : "Needs Remedy"}
+                        {currentPada.is_auspicious ? t.goldenDoor : t.needsRemedy}
                       </span>
                     )}
                   </div>
@@ -458,77 +368,18 @@ export default function VastuPage() {
                 {/* Rooms Matrix */}
                 <div>
                   <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider mb-3">
-                    {language === "bn"
-                      ? "কক্ষ ও কাঠামোর বর্তমান জোন অবস্থান (Room & Fixture Positions)"
-                      : language === "hi"
-                      ? "कमरों एवं संरचनाओं की वर्तमान स्थिति (Room Placements)"
-                      : "Room & Structure Zone Positions"}
+                    {t.roomPositionsTitle}
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {[
-                      {
-                        id: "kitchen",
-                        label: language === "bn" ? "রান্নাঘর (Kitchen)" : language === "hi" ? "रसोई घर (Kitchen)" : "Kitchen",
-                      },
-                      {
-                        id: "master_bed",
-                        label:
-                          language === "bn"
-                            ? "মাস্টার বেডরুম (Master Bed)"
-                            : language === "hi"
-                            ? "मुख्य शयनकक्ष (Master Bed)"
-                            : "Master Bedroom",
-                      },
-                      {
-                        id: "toilet",
-                        label:
-                          language === "bn"
-                            ? "টয়লেট / কমোড (Toilet)"
-                            : language === "hi"
-                            ? "शौचालय (Toilet)"
-                            : "Toilet / Commode",
-                      },
-                      {
-                        id: "puja_room",
-                        label:
-                          language === "bn"
-                            ? "পূজা ঘর / মন্দির (Puja)"
-                            : language === "hi"
-                            ? "पूजा घर / मंदिर (Temple)"
-                            : "Puja Room / Temple",
-                      },
-                      {
-                        id: "underground_water",
-                        label:
-                          language === "bn"
-                            ? "আন্ডারগ্রাউন্ড ট্যাঙ্ক (Borewell)"
-                            : language === "hi"
-                            ? "भूमिगत जल स्रोत (Borewell)"
-                            : "Underground Borewell",
-                      },
-                      {
-                        id: "overhead_tank",
-                        label:
-                          language === "bn"
-                            ? "ওভারহেড ট্যাঙ্ক (Overhead Tank)"
-                            : language === "hi"
-                            ? "छत पर पानी की टंकी"
-                            : "Overhead Water Tank",
-                      },
-                      {
-                        id: "locker",
-                        label:
-                          language === "bn"
-                            ? "টাকার সিন্দুক (Cash Locker)"
-                            : language === "hi"
-                            ? "तिजोरी / लॉकर (Cash Locker)"
-                            : "Cash Locker / Safe",
-                      },
-                      {
-                        id: "staircase",
-                        label:
-                          language === "bn" ? "সিঁড়ি (Staircase)" : language === "hi" ? "सीढ़ियाँ (Staircase)" : "Staircase",
-                      },
+                      { id: "kitchen", label: t.roomKitchen },
+                      { id: "master_bed", label: t.roomMasterBed },
+                      { id: "toilet", label: t.roomToilet },
+                      { id: "puja_room", label: t.roomPuja },
+                      { id: "underground_water", label: t.roomBorewell },
+                      { id: "overhead_tank", label: t.roomOverheadTank },
+                      { id: "locker", label: t.roomCashLocker },
+                      { id: "staircase", label: t.roomStaircase },
                     ].map((item) => (
                       <div key={item.id} className="p-3 bg-surface rounded-xl border border-border/80 space-y-1.5">
                         <label className="block text-xs font-semibold text-foreground truncate">{item.label}</label>
@@ -558,13 +409,7 @@ export default function VastuPage() {
                   ) : (
                     <>
                       <Sparkles className="size-4" />
-                      <span>
-                        {language === "bn"
-                          ? "বাস্তু অডিট রিপোর্ট তৈরি করুন (Generate Full Audit)"
-                          : language === "hi"
-                          ? "वास्तु ऑडिट रिपोर्ट तैयार करें (Generate Full Audit)"
-                          : "Generate Complete 360° Vastu Audit"}
-                      </span>
+                      <span>{t.generateAuditBtn}</span>
                     </>
                   )}
                 </Button>
@@ -578,14 +423,10 @@ export default function VastuPage() {
                 <div className="card-surface rounded-2xl border border-border/80 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs">
                   <div className="space-y-2 text-center md:text-left">
                     <div className="inline-block px-3 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-bold rounded-full">
-                      {language === "bn" ? `গ্রেড: ${auditResult.grade}` : `Grade: ${auditResult.grade}`}
+                      {t.gradeLabel(auditResult.grade)}
                     </div>
                     <h3 className="text-xl sm:text-2xl font-serif font-bold text-foreground">
-                      {language === "bn"
-                        ? `বাস্তু সঙ্গতি স্কোর: ${auditResult.overall_score}%`
-                        : language === "hi"
-                        ? `वास्तु अनुकूलता स्कोर: ${auditResult.overall_score}%`
-                        : `Vastu Harmony Score: ${auditResult.overall_score}%`}
+                      {t.harmonyScoreLabel(auditResult.overall_score)}
                     </h3>
                     <p className="text-xs sm:text-sm text-muted-foreground max-w-xl leading-relaxed">
                       {auditResult.summary_bn}
@@ -636,11 +477,7 @@ export default function VastuPage() {
                   <div className="p-5 bg-red-500/10 border border-red-500/30 rounded-2xl space-y-2">
                     <div className="text-xs font-bold text-red-700 dark:text-red-300 uppercase tracking-wider flex items-center gap-1.5">
                       <ShieldAlert className="size-4 text-red-500" />
-                      {language === "bn"
-                        ? `গুরুতর বাস্তু ত্রুটি চিহ্নিত হয়েছে (${auditResult.warnings_critical.length}টি)`
-                        : language === "hi"
-                        ? `गंभीर वास्तु दोष पाए गए (${auditResult.warnings_critical.length})`
-                        : `Critical Vastu Flaws Identified (${auditResult.warnings_critical.length})`}
+                      {t.criticalFlawsTitle(auditResult.warnings_critical.length)}
                     </div>
                     <ul className="space-y-1.5 text-xs text-red-900 dark:text-red-200">
                       {auditResult.warnings_critical.map((w, idx) => (
@@ -657,11 +494,7 @@ export default function VastuPage() {
                 <div className="card-surface rounded-2xl border border-border/80 p-6 sm:p-8 space-y-4 shadow-xs">
                   <h3 className="text-base font-serif font-bold text-foreground flex items-center gap-2">
                     <Layers className="size-4 text-amber-500" />
-                    {language === "bn"
-                      ? "কক্ষভিত্তিক মূল্যায়ন ও ভাঙচুরবিহীন রেমেডি"
-                      : language === "hi"
-                      ? "कक्ष-वार मूल्यांकन एवं धातु पट्टी उपचार"
-                      : "Zone Evaluation & Non-Demolition Metal Strip Remedies"}
+                    {t.zoneEvaluationTitle}
                   </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -687,11 +520,7 @@ export default function VastuPage() {
                           </span>
                         </div>
                         <div className="text-xs text-muted-foreground font-medium">
-                          {language === "bn"
-                            ? `অবস্থান: ${ev.placed_zone} জোন`
-                            : language === "hi"
-                            ? `स्थिति: ${ev.placed_zone} क्षेत्र`
-                            : `Zone: ${ev.placed_zone}`}
+                          {t.zonePlacedLabel(ev.placed_zone)}
                         </div>
                         <p className="text-xs text-foreground/80 leading-relaxed">{ev.impact_bn}</p>
 
@@ -699,15 +528,13 @@ export default function VastuPage() {
                           <div className="pt-2 border-t border-border/80 text-[11px] space-y-1">
                             <div>
                               <span className="font-bold text-amber-600 dark:text-amber-400">
-                                {language === "bn" ? "প্রতিকার:" : language === "hi" ? "उपाय:" : "Remedy:"}
+                                {t.remedyLabel}
                               </span>{" "}
                               <span className="text-foreground/90">{ev.remedy_bn}</span>
                             </div>
                             {ev.metal_strip_blocking && (
                               <div className="text-emerald-600 dark:text-emerald-400 font-medium">
-                                {language === "bn"
-                                  ? `মেটাল স্ট্রিপ ব্লক: ${ev.metal_strip_blocking}`
-                                  : `Metal Strip Blocking: ${ev.metal_strip_blocking}`}
+                                {t.metalStripLabel(ev.metal_strip_blocking)}
                               </div>
                             )}
                           </div>
@@ -741,18 +568,10 @@ export default function VastuPage() {
               <div className="space-y-1 text-center sm:text-left">
                 <div className="text-xs font-bold text-foreground flex items-center justify-center sm:justify-start gap-1.5">
                   <Sparkles className="size-3.5 text-amber-500" />
-                  <span>
-                    {language === "bn"
-                      ? "এই কম্পাস কোণটি দিয়ে সম্পূর্ণ ভবনের অডিট করতে চান?"
-                      : language === "hi"
-                      ? "क्या आप इस कोण से संपूर्ण भवन का ऑडिट करना चाहते हैं?"
-                      : "Audit entire property with this compass orientation?"}
-                  </span>
+                  <span>{t.compassCtaTitle}</span>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {language === "bn"
-                    ? `বর্তমান প্রবেশদ্বার কোণ: ${entranceDegree.toFixed(1)}° — রান্নাঘর, মাস্টার বেডরুম, টয়লেট সহ সব কক্ষের পূর্ণাঙ্গ অডিট ও স্কোরকার্ড দেখুন।`
-                    : `Current entrance angle: ${entranceDegree.toFixed(1)}° — Evaluate all rooms at once.`}
+                  {t.compassCtaSub(entranceDegree)}
                 </div>
               </div>
               <Button
@@ -763,7 +582,7 @@ export default function VastuPage() {
                 className="shrink-0 text-xs font-bold cursor-pointer bg-brand-500 hover:bg-brand-600 text-brand-foreground shadow-sm flex items-center gap-1.5"
               >
                 <Home className="size-3.5" />
-                {language === "bn" ? "৩৬০° প্রপার্টি অডিট খুলুন" : "Open 360° Audit"}
+                {t.openAuditBtn}
               </Button>
             </div>
           </div>
@@ -798,16 +617,10 @@ export default function VastuPage() {
           <div className="space-y-4">
             <div className="text-center max-w-xl mx-auto space-y-1 mb-2">
               <h3 className="text-xl font-serif font-bold text-foreground">
-                {language === "bn"
-                  ? "১৬টি দিক ও পঞ্চভূত ভারসাম্য জোন"
-                  : language === "hi"
-                  ? "16 दिशाएं एवं पंचतत्व संतुलन"
-                  : "16 Directional Energy Zones"}
+                {t.zonesTabTitle}
               </h3>
               <p className="text-xs text-muted-foreground">
-                {language === "bn"
-                  ? "প্রত্যেকটি জোনের নিয়ন্ত্রক দেবতা, তত্ত্ব, শুভ-অশুভ রঙ ও শারীরিক অঙ্গ।"
-                  : "Elemental rulers, body organ associations, and auspicious colors for all 16 zones."}
+                {t.zonesTabSub}
               </p>
             </div>
 
@@ -829,22 +642,22 @@ export default function VastuPage() {
                   </div>
                   <div className="text-[11px] text-foreground/80">
                     <span className="font-semibold text-muted-foreground">
-                      {language === "bn" ? "শারীরিক অঙ্গ:" : "Organ:"}
+                      {t.organLabel}
                     </span>{" "}
                     {z.body_organs}
                   </div>
                   <div className="text-[11px] text-foreground/80">
                     <span className="font-semibold text-muted-foreground">
-                      {language === "bn" ? "জীবন ক্ষেত্র:" : "Aspect:"}
+                      {t.aspectLabel}
                     </span>{" "}
                     {z.life_aspect}
                   </div>
                   <div className="pt-2 border-t border-border/80 text-[10px] space-y-1">
                     <div className="text-emerald-600 dark:text-emerald-400 truncate">
-                      {language === "bn" ? "শুভ রঙ:" : "Colors:"} {z.self_colors.join(", ")}
+                      {t.colorsLabel} {z.self_colors.join(", ")}
                     </div>
                     <div className="text-red-500 truncate">
-                      {language === "bn" ? "বর্জনীয় রঙ:" : "Avoid:"} {z.destructive_colors.join(", ")}
+                      {t.avoidColorsLabel} {z.destructive_colors.join(", ")}
                     </div>
                   </div>
                 </div>
@@ -860,12 +673,12 @@ export default function VastuPage() {
           <div className="space-y-6">
             <div className="flex flex-wrap gap-2 justify-center">
               {[
-                { id: "all", bn: "সকল প্রতিকার", en: "All Remedies" },
-                { id: "Financial Growth", bn: "আর্থিক সমৃদ্ধি", en: "Financial Growth" },
-                { id: "Health & Vitality", bn: "স্বাস্থ্য ও আরোগ্য", en: "Health & Vitality" },
-                { id: "Brand & Fame", bn: "যশ ও পরিচিতি", en: "Brand & Fame" },
-                { id: "Social Ties", bn: "সামাজিক সংযোগ", en: "Social Ties" },
-                { id: "Opportunities", bn: "নতুন সুযোগ", en: "Opportunities" },
+                { id: "all", label: t.remedyCatAll },
+                { id: "Financial Growth", label: t.remedyCatFinance },
+                { id: "Health & Vitality", label: t.remedyCatHealth },
+                { id: "Brand & Fame", label: t.remedyCatFame },
+                { id: "Social Ties", label: t.remedyCatSocial },
+                { id: "Opportunities", label: t.remedyCatOpportunity },
               ].map((cat) => (
                 <button
                   key={cat.id}
@@ -876,7 +689,7 @@ export default function VastuPage() {
                       : "bg-surface border border-border text-muted-foreground hover:text-foreground hover:bg-surface-muted"
                   }`}
                 >
-                  {language === "bn" ? cat.bn : cat.en}
+                  {cat.label}
                 </button>
               ))}
             </div>
@@ -893,12 +706,12 @@ export default function VastuPage() {
                       <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/20">
                         {rem.category}
                       </span>
-                      <span className="font-bold text-muted-foreground">{rem.target_zone} জোন</span>
+                      <span className="font-bold text-muted-foreground">{rem.target_zone} {t.zoneSuffix}</span>
                     </div>
                     <h4 className="text-sm font-bold text-foreground">{rem.title_bn}</h4>
                     <p className="text-xs text-foreground/80 leading-relaxed">{rem.action_bn}</p>
                     <div className="text-[11px] text-amber-600 dark:text-amber-400 font-medium pt-2 border-t border-border/80">
-                      {language === "bn" ? "প্রয়োজনীয় সামগ্রী:" : "Required Item:"} {rem.item_required}
+                      {t.requiredItemLabel} {rem.item_required}
                     </div>
                   </div>
                 ))}

@@ -19,6 +19,7 @@ import { Button } from "@/components/ui";
 import { vastuApi } from "@/lib/api";
 import type { AstroVastuRule } from "@/types/vastu";
 import type { AstrologyLanguage } from "@/types";
+import { VASTU_I18N } from "@/lib/vastu-translations";
 
 const LOCAL_PLANETS_RULES: AstroVastuRule[] = [
   {
@@ -118,6 +119,7 @@ interface AstroVastuProps {
 }
 
 export function AstroVastu({ language = "bn" }: AstroVastuProps) {
+  const t = VASTU_I18N[language] || VASTU_I18N.en;
   const [rules, setRules] = React.useState<AstroVastuRule[]>(LOCAL_PLANETS_RULES);
   const [activePlanet, setActivePlanet] = React.useState<string>("rahu");
 
@@ -195,10 +197,10 @@ export function AstroVastu({ language = "bn" }: AstroVastuProps) {
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border/60 pb-4">
             <div className="space-y-1">
               <span className="text-xs uppercase tracking-wider text-indigo-800 dark:text-indigo-300 font-bold">
-                {language === "bn" ? "সক্রিয় গ্রহ ও নিয়ন্ত্রক দিক" : "Active Planet & Zone"}
+                {t.activePlanetZone}
               </span>
               <h4 className="text-xl sm:text-2xl font-extrabold text-foreground">
-                {selectedRule.planet_name_bn} মহাদশা
+                {selectedRule.planet_name_bn}
               </h4>
             </div>
 
@@ -216,7 +218,7 @@ export function AstroVastu({ language = "bn" }: AstroVastuProps) {
           <div className="p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/20 space-y-2">
             <p className="text-xs font-bold text-indigo-800 dark:text-indigo-300 flex items-center gap-1.5">
               <Sparkles className="size-3.5" />
-              {language === "bn" ? "মহাদশায় এই দিকের গুরুত্ব" : "Significance During This Dasha"}
+              {t.dashaSignificance}
             </p>
             <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed font-medium">
               {selectedRule.importance_during_dasha_bn}
@@ -229,7 +231,7 @@ export function AstroVastu({ language = "bn" }: AstroVastuProps) {
             <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/25 space-y-3">
               <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-xs uppercase tracking-wider">
                 <CheckCircle2 className="size-4" />
-                <span>{language === "bn" ? "বাধ্যতামূলক করণীয় (Critical DOs)" : "Critical DOs"}</span>
+                <span>{t.criticalDos}</span>
               </div>
               <ul className="space-y-2">
                 {selectedRule.critical_dos_bn.map((item, idx) => (
@@ -245,7 +247,7 @@ export function AstroVastu({ language = "bn" }: AstroVastuProps) {
             <div className="p-4 rounded-xl bg-rose-500/5 border border-rose-500/25 space-y-3">
               <div className="flex items-center gap-2 text-rose-800 dark:text-rose-300 font-bold text-xs uppercase tracking-wider">
                 <XCircle className="size-4" />
-                <span>{language === "bn" ? "কঠোরভাবে বর্জনীয় (Critical DONTs)" : "Critical DONTs"}</span>
+                <span>{t.criticalDonts}</span>
               </div>
               <ul className="space-y-2">
                 {selectedRule.critical_donts_bn.map((item, idx) => (
@@ -263,7 +265,7 @@ export function AstroVastu({ language = "bn" }: AstroVastuProps) {
             <Award className="size-5 text-amber-500 shrink-0 mt-0.5" />
             <div className="space-y-1">
               <p className="text-xs font-bold text-amber-800 dark:text-amber-300">
-                {language === "bn" ? "তালিকাসিদ্ধ বস্তুর সক্রিয়করণ প্রতিকার (Talismanic Object Activation)" : "Talismanic Remedy"}
+                {t.talismanicRemedy}
               </p>
               <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed font-semibold">
                 {selectedRule.talismanic_remedy_bn}

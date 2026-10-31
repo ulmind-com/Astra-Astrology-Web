@@ -432,8 +432,10 @@ export type HouseZoneCorrelation = {
   planets_occupying?: string;
   significance_en: string;
   significance_bn?: string;
+  significance_hi?: string;
   status_note_en?: string;
   status_note_bn?: string;
+  status_note_hi?: string;
 };
 
 export type KundliFaceSync = {
@@ -458,22 +460,28 @@ export type KundliFaceSync = {
     lord: string;
     body_part_en: string;
     body_part_bn?: string;
+    body_part_hi?: string;
     explanation_en: string;
     explanation_bn?: string;
+    explanation_hi?: string;
   } | null;
   til_masaka: Array<{
     planet: string;
     type_en: string;
     type_bn?: string;
+    type_hi?: string;
     zone_en: string;
     zone_bn?: string;
+    zone_hi?: string;
     body_correlation_en: string;
     body_correlation_bn?: string;
+    body_correlation_hi?: string;
   }>;
   remedies: Array<{
     category: string;
     upaya_en: string;
     upaya_bn?: string;
+    upaya_hi?: string;
     gemstone?: string;
   }>;
 };

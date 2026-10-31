@@ -38,6 +38,8 @@ import { ApiError } from "@/lib/api/client";
 import { cn, coinsPerMinute, formatNumber } from "@/lib/utils";
 import { DurationPicker } from "@/components/consult/duration-picker";
 import { ReviewList } from "@/components/reviews/review-list";
+import { useLanguage } from "@/providers/language-provider";
+import { ASTROLOGERS_I18N } from "@/lib/astrologers-translations";
 import { useAuth } from "@/providers/auth-provider";
 import {
   MODE_LABELS,
@@ -51,6 +53,8 @@ import {
 const MODE_ICONS = { chat: MessageCircle, call: Phone, video: Video } as const;
 
 export default function AstrologerDetailPage() {
+  const { language } = useLanguage();
+  const t = ASTROLOGERS_I18N[language] || ASTROLOGERS_I18N.en;
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
 
@@ -72,24 +76,24 @@ export default function AstrologerDetailPage() {
           className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-surface/50 px-3.5 py-1.5 text-sm text-muted-foreground backdrop-blur transition-all hover:border-brand-500/40 hover:bg-surface-muted hover:text-foreground"
         >
           <ArrowLeft className="size-3.5" />
-          All astrologers
+          {t.backAll}
         </Link>
 
         {isLoading ? (
-          <LoadingBlock label="Loading profile…" />
+          <LoadingBlock label={t.loadingProfile} />
         ) : apiError?.status === 404 ? (
           <EmptyState
             icon={UserX}
-            title="This astrologer is not available"
-            description="They may have been taken off the directory. Browse the others instead."
+            title={t.notAvailableTitle}
+            description={t.notAvailableDesc}
             action={
               <Link href="/astrologers">
-                <Button>Browse astrologers</Button>
+                <Button>{t.browseOthersBtn}</Button>
               </Link>
             }
           />
         ) : apiError ? (
-          <Alert tone="error" title="Could not load this profile">
+          <Alert tone="error" title={t.errorTitle}>
             {apiError.message}
           </Alert>
         ) : astrologer ? (
@@ -128,7 +132,7 @@ export default function AstrologerDetailPage() {
                       <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-foreground">
                         {astrologer.display_name}
                       </h1>
-                      {astrologer.is_featured && <Badge tone="gold">✦ Featured</Badge>}
+                      {astrologer.is_featured && <Badge tone="gold">{t.featuredBadge}</Badge>}
                       <Badge
                         tone={
                           astrologer.availability.is_busy
@@ -139,10 +143,10 @@ export default function AstrologerDetailPage() {
                         }
                       >
                         {astrologer.availability.is_busy
-                          ? "◉ In Session"
+                          ? t.inSessionBadge
                           : astrologer.availability.is_online
-                          ? "● Online"
-                          : "○ Offline"}
+                          ? t.onlineBadge
+                          : t.offlineBadge}
                       </Badge>
                     </div>
 
@@ -162,13 +166,13 @@ export default function AstrologerDetailPage() {
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-2.5 py-1 sm:px-3 border border-brand-500/30">
                         <Award className="size-3.5 text-brand-700" />
                         <span className="font-semibold text-foreground">{astrologer.experience_years}</span>
-                        <span className="text-muted-foreground text-[11px] sm:text-xs">yrs exp</span>
+                        <span className="text-muted-foreground text-[11px] sm:text-xs">{t.expYrsLabel}</span>
                       </span>
                       {astrologer.total_consultations > 0 && (
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-2.5 py-1 sm:px-3 border border-brand-500/30">
                           <Sparkles className="size-3.5 text-brand-700" />
                           <span className="font-semibold text-foreground">{formatNumber(astrologer.total_consultations)}</span>
-                          <span className="text-muted-foreground text-[11px] sm:text-xs">consults</span>
+                          <span className="text-muted-foreground text-[11px] sm:text-xs">{t.consultsCountLabel}</span>
                         </span>
                       )}
                     </div>
@@ -188,9 +192,9 @@ export default function AstrologerDetailPage() {
             <aside className="lg:col-span-1 lg:row-span-2 lg:sticky lg:top-24 lg:self-start">
               <Card className="border-brand-500/30 shadow-soft">
                 <CardHeader>
-                  <CardTitle className="text-base sm:text-lg">Start a consultation</CardTitle>
+                  <CardTitle className="text-base sm:text-lg">{t.startConsultationTitle}</CardTitle>
                   <CardDescription className="text-xs sm:text-sm">
-                    Connect instantly via live chat, audio, or video.
+                    {t.startConsultationDesc}
                   </CardDescription>
                 </CardHeader>
                 <CardBody className="space-y-3 pt-0">
@@ -204,7 +208,7 @@ export default function AstrologerDetailPage() {
               {astrologer.skills.length > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Specialities</CardTitle>
+                    <CardTitle>{t.specialitiesTitle}</CardTitle>
                   </CardHeader>
                   <CardBody className="flex flex-wrap gap-2 pt-0">
                     {astrologer.skills.map((skill) => (
@@ -222,7 +226,7 @@ export default function AstrologerDetailPage() {
               {astrologer.bio && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>About</CardTitle>
+                    <CardTitle>{t.aboutTitle}</CardTitle>
                   </CardHeader>
                   <CardBody className="pt-0">
                     <p className="text-sm leading-relaxed whitespace-pre-wrap text-muted-foreground">
@@ -235,7 +239,7 @@ export default function AstrologerDetailPage() {
               {astrologer.qualifications.length > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Qualifications</CardTitle>
+                    <CardTitle>{t.qualificationsTitle}</CardTitle>
                   </CardHeader>
                   <CardBody className="pt-0">
                     <ul className="space-y-2">
@@ -255,9 +259,9 @@ export default function AstrologerDetailPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Reviews</CardTitle>
+                  <CardTitle>{t.reviewsTitle}</CardTitle>
                   <CardDescription>
-                    From people who have actually consulted them.
+                    {t.reviewsDesc}
                   </CardDescription>
                 </CardHeader>
                 <CardBody className="pt-0">
@@ -268,7 +272,7 @@ export default function AstrologerDetailPage() {
               {astrologer.gallery.length > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Gallery</CardTitle>
+                    <CardTitle>{t.galleryTitle}</CardTitle>
                   </CardHeader>
                   <CardBody className="grid grid-cols-2 gap-3 pt-0 sm:grid-cols-3">
                     {astrologer.gallery.map((image) => (
@@ -308,6 +312,8 @@ export default function AstrologerDetailPage() {
  * come back rather than assuming the app is broken.
  */
 function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
+  const { language } = useLanguage();
+  const t = ASTROLOGERS_I18N[language] || ASTROLOGERS_I18N.en;
   const router = useRouter();
   const { user } = useAuth();
   const [picking, setPicking] = React.useState<ConsultationMode | null>(null);
@@ -328,17 +334,17 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
   if (modes.length === 0) {
     return (
       <Alert tone="info">
-        {astrologer.display_name} is not taking consultations yet.
+        {t.notTakingYet(astrologer.display_name)}
       </Alert>
     );
   }
 
   function pausedReason(mode: ConsultationMode): string | null {
-    if (!online) return "Offline right now";
+    if (!online) return t.offlineRightNow;
     const a = astrologer.availability;
-    if (mode === "chat" && !a.is_available_for_chat) return "Chat paused";
-    if (mode === "call" && !a.is_available_for_call) return "Calls paused";
-    if (mode === "video" && !a.is_available_for_video) return "Video paused";
+    if (mode === "chat" && !a.is_available_for_chat) return t.chatPaused;
+    if (mode === "call" && !a.is_available_for_call) return t.callPaused;
+    if (mode === "video" && !a.is_available_for_video) return t.videoPaused;
     return null;
   }
 
@@ -389,7 +395,7 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
 
             <span className="text-right">
               <span className="text-base font-bold text-foreground">{formatCoins(rate)}</span>
-              <span className="block text-xs text-muted-foreground">{coinWord(rate)}/min</span>
+              <span className="block text-xs text-muted-foreground">{coinWord(rate)}{t.perMinute}</span>
             </span>
           </button>
         );
@@ -397,7 +403,7 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
 
       {!user && (
         <p className="pt-1 text-center text-xs text-muted-foreground">
-          You will be asked to sign in first.
+          {t.signInNotice}
         </p>
       )}
 

@@ -4,6 +4,8 @@ import { Search, SlidersHorizontal, X } from "lucide-react";
 import * as React from "react";
 
 import { Badge, Button, Input, Select, Switch } from "@/components/ui";
+import { useLanguage } from "@/providers/language-provider";
+import { ASTROLOGERS_I18N } from "@/lib/astrologers-translations";
 import { cn } from "@/lib/utils";
 import {
   COMMON_LANGUAGES,
@@ -52,6 +54,8 @@ export function DirectoryFilters({
   onChange: (next: Filters) => void;
   total?: number;
 }) {
+  const { language } = useLanguage();
+  const t = ASTROLOGERS_I18N[language] || ASTROLOGERS_I18N.en;
   const [open, setOpen] = React.useState(false);
   const active = countActive(filters);
 
@@ -66,7 +70,7 @@ export function DirectoryFilters({
           <Input
             value={filters.search}
             onChange={(e) => set("search", e.target.value)}
-            placeholder="Search by name or speciality"
+            placeholder={t.searchPlaceholder}
             className="pl-9"
             aria-label="Search astrologers"
           />
@@ -87,7 +91,7 @@ export function DirectoryFilters({
           aria-expanded={open}
         >
           <SlidersHorizontal className="size-4" />
-          Filters
+          {t.filtersBtn}
           {active > 0 && (
             <span className="ml-0.5 rounded-full bg-ink-900/10 px-1.5 text-xs">{active}</span>
           )}
@@ -106,7 +110,7 @@ export function DirectoryFilters({
           )}
         >
           <span className="size-1.5 rounded-full bg-success" />
-          Online now
+          {t.onlineNow}
         </button>
 
         <button
@@ -118,12 +122,12 @@ export function DirectoryFilters({
               : "border-border text-muted-foreground hover:border-border-strong",
           )}
         >
-          ★ Featured
+          {t.featuredPill}
         </button>
 
         {typeof total === "number" && (
           <span className="ml-auto text-sm text-muted-foreground">
-            {total} astrologer{total === 1 ? "" : "s"}
+            {t.countAstrologers(total)}
           </span>
         )}
       </div>
@@ -131,9 +135,9 @@ export function DirectoryFilters({
       {open && (
         <div className="card-surface grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
           <label className="space-y-1.5">
-            <span className="text-xs font-medium text-muted-foreground">Speciality</span>
+            <span className="text-xs font-medium text-muted-foreground">{t.specialityLabel}</span>
             <Select value={filters.skill} onChange={(e) => set("skill", e.target.value as Skill)}>
-              <option value="">Any speciality</option>
+              <option value="">{t.anySpeciality}</option>
               {SKILLS.map((skill) => (
                 <option key={skill} value={skill}>
                   {SKILL_LABELS[skill]}
@@ -143,9 +147,9 @@ export function DirectoryFilters({
           </label>
 
           <label className="space-y-1.5">
-            <span className="text-xs font-medium text-muted-foreground">Language</span>
+            <span className="text-xs font-medium text-muted-foreground">{t.languageLabel}</span>
             <Select value={filters.language} onChange={(e) => set("language", e.target.value)}>
-              <option value="">Any language</option>
+              <option value="">{t.anyLanguage}</option>
               {COMMON_LANGUAGES.map((language) => (
                 <option key={language} value={language}>
                   {language}
@@ -155,12 +159,12 @@ export function DirectoryFilters({
           </label>
 
           <label className="space-y-1.5">
-            <span className="text-xs font-medium text-muted-foreground">Available for</span>
+            <span className="text-xs font-medium text-muted-foreground">{t.availableForLabel}</span>
             <Select
               value={filters.mode}
               onChange={(e) => set("mode", e.target.value as ConsultationMode)}
             >
-              <option value="">Any mode</option>
+              <option value="">{t.anyMode}</option>
               {MODES.map((mode) => (
                 <option key={mode} value={mode}>
                   {MODE_LABELS[mode]}
@@ -171,7 +175,7 @@ export function DirectoryFilters({
 
           <div className="grid grid-cols-2 gap-3">
             <label className="space-y-1.5">
-              <span className="text-xs font-medium text-muted-foreground">Min. years</span>
+              <span className="text-xs font-medium text-muted-foreground">{t.minYearsLabel}</span>
               <Input
                 type="number"
                 min={0}
@@ -182,7 +186,7 @@ export function DirectoryFilters({
               />
             </label>
             <label className="space-y-1.5">
-              <span className="text-xs font-medium text-muted-foreground">Max coins/min</span>
+              <span className="text-xs font-medium text-muted-foreground">{t.maxCoinsLabel}</span>
               <Input
                 type="number"
                 min={0}
@@ -201,7 +205,7 @@ export function DirectoryFilters({
                 onClick={() => onChange({ ...EMPTY_FILTERS, search: filters.search })}
               >
                 <X className="size-4" />
-                Clear all filters
+                {t.clearFiltersBtn}
               </Button>
             </div>
           )}
