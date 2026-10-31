@@ -316,7 +316,9 @@ export type Review = S["ReviewOut"] & {
   author_avatar?: string | null;
   session_id?: string | null;
 };
-export type ReviewPage = S["ReviewPage"];
+export type ReviewPage = Omit<S["ReviewPage"], "items"> & {
+  items: Review[];
+};
 export type ReviewSummary = S["ReviewSummary"];
 export type PendingReview = S["PendingReview"];
 export type ReviewKind = S["ReviewKind"];
