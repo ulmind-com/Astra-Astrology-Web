@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cinzel, Cinzel_Decorative, Geist_Mono, Poppins } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "sonner";
 
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
@@ -72,6 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     closeButton
                     toastOptions={{ className: "font-sans" }}
                   />
+                  <Analytics />
                 </LanguageProvider>
               </AuthProvider>
             </RealtimeProvider>
