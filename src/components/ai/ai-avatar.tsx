@@ -102,7 +102,7 @@ export function AiAvatar({
     <span
       className={cn(
         "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-2xl",
-        "bg-gradient-to-br from-[#b06d4e] to-[#8a5038] shadow-sm ring-1 ring-black/5",
+        "bg-gradient-to-br from-amber-400 via-amber-500 to-amber-700 shadow-[0_4px_14px_rgba(217,119,6,0.35)] ring-1 ring-amber-300/50",
         className,
       )}
       style={{ width: size, height: size }}

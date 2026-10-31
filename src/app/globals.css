@@ -592,6 +592,12 @@
   }
 }
 
+@media (max-width: 767px) {
+  body:has([data-full-viewport]) {
+    padding-bottom: 0 !important;
+  }
+}
+
 /* --------------------------------------------------------------------------
    Biometric Laser Scanline for 3D Face & Palm Scanning
    -------------------------------------------------------------------------- */
