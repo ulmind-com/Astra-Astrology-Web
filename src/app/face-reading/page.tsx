@@ -162,16 +162,28 @@ export default function FaceReadingPage() {
 
         {!isSignedIn ? (
           <div className="card-surface mt-8 p-8 text-center">
-            <p className="text-muted-foreground">Sign in to have your face read.</p>
+            <p className="text-muted-foreground">
+              {language === "bn"
+                ? "আপনার মুখাবয়ব বিশ্লেষণের জন্য সাইন ইন করুন।"
+                : language === "hi"
+                ? "मुखाकृति विश्लेषण के लिए कृपया साइन इन करें।"
+                : "Sign in to have your face read."}
+            </p>
             <Link href="/login?next=/face-reading" className="mt-5 inline-block">
-              <Button>Sign in</Button>
+              <Button>
+                {language === "bn" ? "সাইন ইন করুন" : language === "hi" ? "साइन इन करें" : "Sign in"}
+              </Button>
             </Link>
           </div>
         ) : isLoading ? (
           <LoadingBlock />
         ) : !availability?.enabled ? (
           <Alert tone="info" className="mt-8">
-            Face reading is not available at the moment.
+            {language === "bn"
+              ? "মুখাবয়ব বিশ্লেষণ বর্তমানে উপলব্ধ নেই।"
+              : language === "hi"
+              ? "मुखाकृति विश्लेषण वर्तमान में उपलब्ध नहीं है।"
+              : "Face reading is not available at the moment."}
           </Alert>
         ) : stage === "reading" && reading ? (
           <Reading
@@ -1366,15 +1378,15 @@ function Reading({
                     </span>
                     <div>
                       <div className="text-[11px] font-bold uppercase tracking-wider text-brand-900">
-                        {isBn ? "ধর্মেন্দ্র কুমার বনসল বৈদিক কুণ্ডলী-মুখ সমন্বয়" : "Dharmender Bansal Kundli-Face Alignment"}
+                        {isBn ? "ধর্মেন্দ্র কুমার বনসল বৈদিক কুণ্ডলী-মুখ সমন্বয়" : isHi ? "धर्मेंद्र कुमार बंसल वैदिक कुंडली-मुखाकृति संरेखण" : "Dharmender Bansal Kundli-Face Alignment"}
                       </div>
                       <h3 className="font-display text-lg font-bold text-ink-950">
-                        {isBn ? kundliSync.ascendant_sign_bn : isHi ? kundliSync.ascendant_sign_hi : kundliSync.ascendant_sign} (লগ্নেশ: {kundliSync.ascendant_lord})
+                        {isBn ? kundliSync.ascendant_sign_bn : isHi ? kundliSync.ascendant_sign_hi : kundliSync.ascendant_sign} ({isBn ? `লগ্নেশ: ${kundliSync.ascendant_lord}` : isHi ? `लग्नेश: ${kundliSync.ascendant_lord}` : `Lagna Lord: ${kundliSync.ascendant_lord}`})
                       </h3>
                     </div>
                   </div>
                   <span className="text-xs px-3 py-1 rounded-full font-bold bg-brand-500/15 text-brand-950 border border-brand-400/30">
-                    {isBn ? "১০০% নির্ভুল বৈদিক সূত্র" : "Classical Vedic Rules"}
+                    {isBn ? "১০০% নির্ভুল বৈদিক সূত্র" : isHi ? "100% सटीक वैदिक सूत्र" : "Classical Vedic Rules"}
                   </span>
                 </div>
 
@@ -1399,14 +1411,14 @@ function Reading({
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
                         <BookOpen className="size-3.5 text-amber-800" />
-                        {isBn ? "কালপুরুষের মুখস্থ ১০ নক্ষত্র চক্র" : "Kalpurush 10 Nakshatras on Face"}
+                        {isBn ? "কালপুরুষের মুখস্থ ১০ নক্ষত্র চক্র" : isHi ? "कालपुरुष का मुखस्थ 10 नक्षत्र चक्र" : "Kalpurush 10 Nakshatras on Face"}
                       </span>
                       <span className="text-[11px] font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded">
-                        {kundliSync.kalpurush_highlight.nakshatra} ({isBn ? "অধিপতি:" : "Lord:"} {kundliSync.kalpurush_highlight.lord})
+                        {kundliSync.kalpurush_highlight.nakshatra} ({isBn ? "অধিপতি:" : isHi ? "स्वामी:" : "Lord:"} {kundliSync.kalpurush_highlight.lord})
                       </span>
                     </div>
                     <p className="text-xs text-ink-800 leading-relaxed">
-                      {isBn ? kundliSync.kalpurush_highlight.explanation_bn : kundliSync.kalpurush_highlight.explanation_en}
+                      {isBn ? kundliSync.kalpurush_highlight.explanation_bn : isHi ? (kundliSync.kalpurush_highlight.explanation_hi || kundliSync.kalpurush_highlight.explanation_en) : kundliSync.kalpurush_highlight.explanation_en}
                     </p>
                   </div>
                 )}
@@ -1435,21 +1447,21 @@ function Reading({
                             {h.house}
                           </span>
                           <span className="text-[10px] font-bold uppercase tracking-wide text-brand-800 bg-brand-50 px-2 py-0.5 rounded">
-                            {isBn ? h.face_part_bn : h.face_part}
+                            {isBn ? h.face_part_bn : isHi ? (h.face_part_hi || h.face_part) : h.face_part}
                           </span>
                         </div>
                         <div>
                           <div className="font-bold text-ink-950 text-xs">
-                            {isBn ? h.house_name_bn : h.house_name}
+                            {isBn ? h.house_name_bn : isHi ? (h.house_name_hi || h.house_name) : h.house_name}
                           </div>
                           {h.planets_occupying && (
                             <div className="text-[10px] text-amber-800 font-semibold mt-0.5">
-                              {isBn ? `অবস্থিত গ্রহ: ${h.planets_occupying}` : `Occupying: ${h.planets_occupying}`}
+                              {isBn ? `অবস্থিত গ্রহ: ${h.planets_occupying}` : isHi ? `स्थित ग्रह: ${h.planets_occupying}` : `Occupying: ${h.planets_occupying}`}
                             </div>
                           )}
                         </div>
                         <p className="text-[11px] text-ink-700 leading-relaxed border-t border-ink-900/5 pt-1.5">
-                          {isBn ? h.significance_bn : h.significance_en}
+                          {isBn ? h.significance_bn : isHi ? (h.significance_hi || h.significance_en) : h.significance_en}
                         </p>
                       </div>
                     ))}
@@ -1464,7 +1476,7 @@ function Reading({
                     <div className="flex items-center gap-2">
                       <Zap className="size-4 text-brand-700" />
                       <h3 className="font-display text-base font-bold text-ink-950">
-                        {isBn ? "তিল ও মসক বিচার (মুখের চিহ্নের সাথে শরীরের মিল)" : "Til & Masaka Vichar (Facial Marks to Body Alignment)"}
+                        {isBn ? "তিল ও মসক বিচার (মুখের চিহ্নের সাথে শরীরের মিল)" : isHi ? "तिल व मसक विचार (चेहरे के निशान से शरीर का संरेखण)" : "Til & Masaka Vichar (Facial Marks to Body Alignment)"}
                       </h3>
                     </div>
                   </div>
@@ -1477,17 +1489,17 @@ function Reading({
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-ink-900 text-xs">
-                            {isBn ? til.zone_bn : til.zone_en}
+                            {isBn ? til.zone_bn : isHi ? (til.zone_hi || til.zone_en) : til.zone_en}
                           </span>
                           <span className="text-[10px] font-bold text-brand-800 bg-brand-50 px-2 py-0.5 rounded border border-brand-200">
                             {til.planet}
                           </span>
                         </div>
                         <div className="text-[11px] text-brand-950 font-medium">
-                          {isBn ? til.type_bn : til.type_en}
+                          {isBn ? til.type_bn : isHi ? (til.type_hi || til.type_en) : til.type_en}
                         </div>
                         <p className="text-[11px] text-ink-700 leading-relaxed pt-1 border-t border-ink-900/5">
-                          {isBn ? til.body_correlation_bn : til.body_correlation_en}
+                          {isBn ? til.body_correlation_bn : isHi ? (til.body_correlation_hi || til.body_correlation_en) : til.body_correlation_en}
                         </p>
                       </div>
                     ))}
@@ -1502,17 +1514,19 @@ function Reading({
               </span>
               <div>
                 <h3 className="font-display text-lg font-bold text-ink-950">
-                  {isBn ? "বৈদিক কুণ্ডলী সামঞ্জস্য সংযুক্ত করুন" : "Enable Vedic Kundli Synchronization"}
+                  {isBn ? "বৈদিক কুণ্ডলী সামঞ্জস্য সংযুক্ত করুন" : isHi ? "वैदिक कुंडली संरेखण जोड़ें" : "Enable Vedic Kundli Synchronization"}
                 </h3>
                 <p className="mt-1.5 text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
                   {isBn
                     ? "আপনার জন্ম তারিখ ও সময় প্রদান করে স্ক্যান করলে ধর্মেন্দ্র কুমার বনসলের গ্রন্থানুসারে ১২টি ভাব, লগ্ন ও কালপুরুষের নক্ষত্র সমন্বিত ১০০% নিখুঁত জ্যোতিষীয় সামঞ্জস্য উন্মোচিত হবে।"
+                    : isHi
+                    ? "अपनी जन्म तिथि व समय दर्ज करके स्कैन करने पर धर्मेंद्र कुमार बंसल के ग्रंथानुसार 12 भाव, लग्न व कालपुरुष नक्षत्रों का 100% सटीक मिलान प्राप्त होगा।"
                     : "Enter your birth details before scanning to unlock 100% accurate correlation with 12 Bhavas, Lagna Lord, and Kalpurush Nakshatras."}
                 </p>
               </div>
               <Button onClick={onAgain} variant="secondary">
                 <RefreshCw className="size-4" />
-                {isBn ? "নতুন স্ক্যানে জন্ম বিবরণ যোগ করুন" : "Scan Again with Birth Details"}
+                {isBn ? "নতুন স্ক্যানে জন্ম বিবরণ যোগ করুন" : isHi ? "नए स्कैन में जन्म विवरण जोड़ें" : "Scan Again with Birth Details"}
               </Button>
             </div>
           )}
@@ -1645,7 +1659,7 @@ function Reading({
                       )}
                     </div>
                     <p className="text-xs text-ink-800 leading-relaxed">
-                      {isBn ? rem.upaya_bn || rem.upaya_en : rem.upaya_en}
+                      {isBn ? rem.upaya_bn || rem.upaya_en : isHi ? rem.upaya_hi || rem.upaya_en : rem.upaya_en}
                     </p>
                   </div>
                 ))}
@@ -1704,10 +1718,10 @@ function Reading({
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-ink-900/10 text-[10px] uppercase text-muted-foreground">
-                    <th className="py-1.5 pr-2">Metric</th>
-                    <th className="py-1.5 px-2">Value</th>
-                    <th className="py-1.5 px-2">Formula</th>
-                    <th className="py-1.5 pl-2">Description</th>
+                    <th className="py-1.5 pr-2">{isBn ? "পরিমাপ" : isHi ? "माप" : "Metric"}</th>
+                    <th className="py-1.5 px-2">{isBn ? "মান" : isHi ? "मान" : "Value"}</th>
+                    <th className="py-1.5 px-2">{isBn ? "সূত্র" : isHi ? "सूत्र" : "Formula"}</th>
+                    <th className="py-1.5 pl-2">{isBn ? "বিবরণ" : isHi ? "विवरण" : "Description"}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-ink-900/5 text-[11px]">

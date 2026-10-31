@@ -710,3 +710,4 @@ export function translatePayaBadge(paya: string | undefined | null, lang: Astrol
   }
   return paya.split("-")[0].trim();
 }
+

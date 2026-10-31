@@ -227,6 +227,8 @@ export default function PalmReadingPage() {
         toast.error(
           language === "bn"
             ? "পাম রিডিং ফিচারটি বর্তমানে বন্ধ রাখা হয়েছে।"
+            : language === "hi"
+            ? "पाम रीडिंग सुविधा वर्तमान में बंद है।"
             : "Palm reading feature is temporarily unavailable.",
         );
         return;
@@ -260,6 +262,8 @@ export default function PalmReadingPage() {
           toast.success(
             language === "bn"
               ? `পাম রিডিং বিশ্লেষণ সম্পন্ন হয়েছে! (${access.requiredCoins} কয়েন খরচ হয়েছে)`
+              : language === "hi"
+              ? `हस्तरेखा विश्लेषण संपन्न हुआ! (${access.requiredCoins} सिक्के प्रयुक्त)`
               : `Palm scan completed! (${access.requiredCoins} coins used)`,
           );
           refreshWallet();
@@ -370,6 +374,8 @@ export default function PalmReadingPage() {
         toast.error(
           language === "bn"
             ? "পাম রিডিং ফিচারটি বর্তমানে বন্ধ রাখা হয়েছে।"
+            : language === "hi"
+            ? "पाम रीडिंग सुविधा वर्तमान में बंद है।"
             : "Palm reading feature is temporarily unavailable.",
         );
         return;
@@ -380,11 +386,23 @@ export default function PalmReadingPage() {
     }
 
     if (!file.type.startsWith("image/")) {
-      toast.error("Please choose a valid photo.");
+      toast.error(
+        language === "bn"
+          ? "অনুগ্রহ করে একটি সঠিক ছবি নির্বাচন করুন।"
+          : language === "hi"
+          ? "कृपया एक वैध फोटो चुनें।"
+          : "Please choose a valid photo."
+      );
       return;
     }
     if (file.size > 25 * 1024 * 1024) {
-      toast.error("That photo is larger than 25 MB. Please use a smaller one.");
+      toast.error(
+        language === "bn"
+          ? "ছবিটির আকার ২৫ মেগাবাইটের বেশি। অনুগ্রহ করে ছোট ছবি ব্যবহার করুন।"
+          : language === "hi"
+          ? "फोटो 25 MB से अधिक है। कृपया छोटी फोटो चुनें।"
+          : "That photo is larger than 25 MB. Please use a smaller one."
+      );
       return;
     }
 
@@ -403,6 +421,8 @@ export default function PalmReadingPage() {
           toast.success(
             language === "bn"
               ? `পাম রিডিং বিশ্লেষণ সম্পন্ন হয়েছে! (${access.requiredCoins} কয়েন খরচ হয়েছে)`
+              : language === "hi"
+              ? `हस्तरेखा विश्लेषण संपन्न हुआ! (${access.requiredCoins} सिक्के प्रयुक्त)`
               : `Palm scan completed! (${access.requiredCoins} coins used)`,
           );
           refreshWallet();
@@ -581,7 +601,9 @@ export default function PalmReadingPage() {
             </p>
             <div className="mt-5">
               <Link href="/login">
-                <Button>Sign In</Button>
+                <Button>
+                  {language === "bn" ? "সাইন ইন করুন" : language === "hi" ? "साइन इन करें" : "Sign In"}
+                </Button>
               </Link>
             </div>
           </div>
@@ -592,7 +614,13 @@ export default function PalmReadingPage() {
               {palmFeature && !palmFeature.enabled && (
                 <div className="mb-5">
                   <FeatureDisabledAlert
-                    featureName={language === "bn" ? "পাম রিডিং (হস্তরেখা বিচার)" : "Palm Reading"}
+                    featureName={
+                      language === "bn"
+                        ? "পাম রিডিং (হস্তরেখা বিচার)"
+                        : language === "hi"
+                        ? "पाम रीडिंग (हस्तरेखा विज्ञान)"
+                        : "Palm Reading"
+                    }
                     language={language}
                   />
                 </div>
@@ -651,6 +679,8 @@ export default function PalmReadingPage() {
                       <p className="text-[11px] text-muted-foreground">
                         {language === "bn"
                           ? "হস্তরেখা ও গ্রহ সংস্থানকে একসাথে ১০০% নিখুঁত করতে জন্ম বিবরণ যুক্ত করুন"
+                          : language === "hi"
+                          ? "हस्तरेखा व ग्रह स्थिति को 100% सटीक बनाने के लिए जन्म विवरण जोड़ें"
                           : "Cross-correlate 9 planetary Grahas with your palm mount topography"}
                       </p>
                     </div>
@@ -676,7 +706,7 @@ export default function PalmReadingPage() {
                   <div className="mt-4 pt-3 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-3 animate-fadeIn">
                     <div>
                       <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                        {language === "bn" ? "জন্ম তারিখ" : "Birth Date"}
+                        {language === "bn" ? "জন্ম তারিখ" : language === "hi" ? "जन्म तिथि" : "Birth Date"}
                       </label>
                       <input
                         type="date"
@@ -687,7 +717,7 @@ export default function PalmReadingPage() {
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                        {language === "bn" ? "জন্ম সময়" : "Birth Time"}
+                        {language === "bn" ? "জন্ম সময়" : language === "hi" ? "जन्म समय" : "Birth Time"}
                       </label>
                       <input
                         type="time"
@@ -698,7 +728,7 @@ export default function PalmReadingPage() {
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                        {language === "bn" ? "জন্ম স্থান" : "Birth Place"}
+                        {language === "bn" ? "জন্ম স্থান" : language === "hi" ? "जन्म स्थान" : "Birth Place"}
                       </label>
                       <input
                         type="text"
@@ -885,6 +915,8 @@ export default function PalmReadingPage() {
                       {palmFeature && !palmFeature.enabled
                         ? language === "bn"
                           ? "ফিচারটি বর্তমানে বন্ধ রয়েছে"
+                          : language === "hi"
+                          ? "सुविधा वर्तमान में बंद है"
                           : "Feature Disabled"
                         : t.scanWithCamera}
                     </span>
@@ -1019,7 +1051,7 @@ export default function PalmReadingPage() {
                           <div className="flex shrink-0 gap-3 rounded-xl bg-brand-50/70 p-3 text-center">
                             <div>
                               <span className="block text-[10px] font-bold text-muted-foreground uppercase">
-                                Aspect Ratio
+                                {language === "bn" ? "তালুর অনুপাত" : language === "hi" ? "हथेली अनुपात" : "Aspect Ratio"}
                               </span>
                               <span className="text-sm font-extrabold text-brand-950">
                                 {result.hand_type.palm_aspect.toFixed(2)}
@@ -1028,7 +1060,7 @@ export default function PalmReadingPage() {
                             <div className="h-8 w-px bg-brand-200" />
                             <div>
                               <span className="block text-[10px] font-bold text-muted-foreground uppercase">
-                                Finger Ratio
+                                {language === "bn" ? "আঙুলের অনুপাত" : language === "hi" ? "अंगुली अनुपात" : "Finger Ratio"}
                               </span>
                               <span className="text-sm font-extrabold text-brand-950">
                                 {result.hand_type.finger_palm_ratio?.toFixed(2) ?? "1.00"}
@@ -1103,7 +1135,7 @@ export default function PalmReadingPage() {
                           </p>
                           <div className="mt-3.5 rounded-2xl border border-brand-200/60 bg-white/80 p-3 text-xs">
                             <span className="font-bold text-brand-950">
-                              {language === "bn" ? "কার্মিক সামঞ্জস্য:" : "Karmic Balance:"}
+                              {language === "bn" ? "কার্মিক সামঞ্জস্য:" : language === "hi" ? "कर्मिक संतुलन:" : "Karmic Balance:"}
                             </span>{" "}
                             <span className="text-muted-foreground">
                               {result.karmic_summary.karmic_harmony}
@@ -1118,10 +1150,10 @@ export default function PalmReadingPage() {
                           <div className="flex items-center justify-between">
                             <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-rose-700">
                               <Activity className="size-3 text-rose-600" />
-                              {language === "bn" ? "আয়ুর্বেদিক ওজঃ ও কান্তি" : "Ayurvedic Prana Flush"}
+                              {language === "bn" ? "আয়ুর্বেদিক ওজঃ ও কান্তি" : language === "hi" ? "आयुर्वेदिक ओज व कांति" : "Ayurvedic Prana Flush"}
                             </span>
                             <span className="rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-black text-rose-800">
-                              {result.skin_vitality.vitality_score}% Vitality
+                              {result.skin_vitality.vitality_score}% {language === "bn" ? "প্রাণশক্তি" : language === "hi" ? "प्राणशक्ति" : "Vitality"}
                             </span>
                           </div>
                           <div className="mt-2.5 flex items-baseline gap-2">
@@ -1137,7 +1169,7 @@ export default function PalmReadingPage() {
                           </p>
                           <div className="mt-3.5 flex items-center justify-between rounded-2xl border border-rose-200/60 bg-white/80 p-3 text-xs">
                             <span className="font-bold text-ink-950">
-                              {language === "bn" ? "রক্তসঞ্চালন ও প্রাণবায়ু:" : "Circulation Rating:"}
+                              {language === "bn" ? "রক্তসঞ্চালন ও প্রাণবায়ু:" : language === "hi" ? "रक्तसंचार व प्राणवायु:" : "Circulation Rating:"}
                             </span>
                             <span className="font-extrabold text-rose-700 capitalize">
                               {result.skin_vitality.circulation_rating}
@@ -1154,11 +1186,15 @@ export default function PalmReadingPage() {
                           <div className="space-y-1">
                             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-100">
                               <Sparkles className="size-3 text-amber-200" />
-                              {language === "bn" ? "দুর্লভ বৈদিক শুভ যোগ সনাক্ত" : "Auspicious Sacred Yogas Detected"}
+                              {language === "bn" ? "দুর্লভ বৈদিক শুভ যোগ সনাক্ত" : language === "hi" ? "दुर्लभ वैदिक शुभ योग मिले" : "Auspicious Sacred Yogas Detected"}
                             </span>
                             <h3 className="text-lg font-black sm:text-xl">
                               {result.sacred_marks.filter((m) => m.found).length}{" "}
-                              {language === "bn" ? "টি পবিত্র শুভ চিহ্ন আপনার হাতে বিদ্যমান" : "Sacred Vedic Marks Found"}
+                              {language === "bn"
+                                ? "টি পবিত্র শুভ চিহ্ন আপনার হাতে বিদ্যমান"
+                                : language === "hi"
+                                ? "पवित्र शुभ चिह्न आपकी हथेली में उपस्थित हैं"
+                                : "Sacred Vedic Marks Found"}
                             </h3>
                             <p className="text-xs text-amber-100/90">
                               {result.sacred_marks
@@ -1172,7 +1208,7 @@ export default function PalmReadingPage() {
                             className="shrink-0 gap-2 bg-white font-black text-amber-950 shadow hover:bg-amber-50"
                           >
                             <Gem className="size-4 text-amber-600" />
-                            {language === "bn" ? "চিহ্নগুলোর মহিমা দেখুন" : "Explore Sacred Marks"}
+                            {language === "bn" ? "চিহ্নগুলোর মহিমা দেখুন" : language === "hi" ? "चिह्नों का विवरण देखें" : "Explore Sacred Marks"}
                           </Button>
                         </div>
                       </div>
@@ -1233,9 +1269,13 @@ export default function PalmReadingPage() {
                                 {showOverlay
                                   ? language === "bn"
                                     ? "আসল ছবি"
+                                    : language === "hi"
+                                    ? "मूल फोटो"
                                     : "Show Original"
                                   : language === "bn"
                                     ? "স্ক্যান রেখা"
+                                    : language === "hi"
+                                    ? "स्कैन रेखाएं"
                                     : "Show Overlay"}
                               </button>
                             )}
@@ -1253,6 +1293,8 @@ export default function PalmReadingPage() {
                           <p className="mt-2.5 text-center text-[10px] text-muted-foreground">
                             {language === "bn"
                               ? "উচ্চ স্পষ্টতাসম্পন্ন গাবর ফিল্টার এবং ল্যান্ডমার্ক দ্বারা চিহ্নিত রেখা"
+                              : language === "hi"
+                              ? "उच्च परिशुद्धता गाबोर फिल्टर और लैंडमार्क द्वारा चिह्नित रेखाएं"
                               : "Precision Gabor valley filters and MediaPipe landmarks"}
                           </p>
                         </div>
@@ -1270,7 +1312,7 @@ export default function PalmReadingPage() {
                                 (result.secondary_lines
                                   ? Object.values(result.secondary_lines).filter((c) => c.found).length
                                   : 0)}{" "}
-                              {language === "bn" ? "টি রেখা চিহ্নিত" : "Traced Lines"}
+                              {language === "bn" ? "টি রেখা চিহ্নিত" : language === "hi" ? "रेखाएं चिह्नित" : "Traced Lines"}
                             </span>
                           </div>
                           <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
@@ -1325,7 +1367,7 @@ export default function PalmReadingPage() {
                         {/* Top Highlights */}
                         <div className="rounded-3xl border border-border bg-surface p-5 shadow-sm">
                           <h4 className="text-xs font-extrabold uppercase tracking-wider text-brand-700">
-                            {language === "bn" ? "প্রধান বৈশিষ্ট্যসমূহ" : "Core Findings Summary"}
+                            {language === "bn" ? "প্রধান বৈশিষ্ট্যসমূহ" : language === "hi" ? "प्रमुख लक्षण सारांश" : "Core Findings Summary"}
                           </h4>
                           <div className="mt-3 space-y-2.5">
                             {result.sections.slice(0, 4).map((sec) => (
@@ -1426,10 +1468,10 @@ export default function PalmReadingPage() {
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-400/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-brand-300">
                             <Compass className="size-3" />
-                            {result.temperament_archetype.elemental_signature} Element Signature
+                            {result.temperament_archetype.elemental_signature} {language === "bn" ? "উপাদান" : language === "hi" ? "तत्व" : "Element Signature"}
                           </span>
                           <span className="text-xs font-bold text-white/70">
-                            {language === "bn" ? "প্রকৃতি মিল" : "Affinity Match"}:{" "}
+                            {language === "bn" ? "প্রকৃতি মিল" : language === "hi" ? "प्रकृति मिलान" : "Affinity Match"}:{" "}
                             <strong className="text-brand-300 text-sm">
                               {result.temperament_archetype.affinity_score_pct}%
                             </strong>
@@ -1469,7 +1511,11 @@ export default function PalmReadingPage() {
                             <AlertTriangle className="size-4 shrink-0 text-amber-400 mt-0.5" />
                             <div>
                               <h4 className="text-xs font-bold text-white">
-                                {language === "bn" ? "আধ্যাত্মিক ও কর্মজীবনের নির্দেশিকা" : "Karmic Growth & Life Counsel"}
+                                {language === "bn"
+                                  ? "আধ্যাত্মিক ও কর্মজীবনের নির্দেশিকা"
+                                  : language === "hi"
+                                  ? "आध्यात्मिक व कर्म मार्गदर्शन"
+                                  : "Karmic Growth & Life Counsel"}
                               </h4>
                               <p className="mt-1 text-xs text-white/75 leading-relaxed">
                                 {result.temperament_archetype.growth_counsel}
@@ -1482,7 +1528,11 @@ export default function PalmReadingPage() {
                         {result.temperament_archetype.secondary_affinity && (
                           <div className="mt-4 flex items-center justify-between rounded-xl bg-black/30 px-4 py-2 text-xs">
                             <span className="text-white/70">
-                              {language === "bn" ? "দ্বিতীয় প্রধান প্রভাব" : "Secondary Archetype Influence"}:{" "}
+                              {language === "bn"
+                                ? "দ্বিতীয় প্রধান প্রভাব"
+                                : language === "hi"
+                                ? "द्वितीय मुख्य प्रभाव"
+                                : "Secondary Archetype Influence"}:{" "}
                               <strong className="text-white">
                                 {result.temperament_archetype.secondary_affinity.title} (
                                 {result.temperament_archetype.secondary_affinity.vedic_name})
@@ -1548,7 +1598,17 @@ export default function PalmReadingPage() {
                                 pat.auspicious ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-800"
                               )}
                             >
-                              {pat.auspicious ? "Auspicious Union" : "Karmic Growth Phase"}
+                              {pat.auspicious
+                                ? language === "bn"
+                                  ? "শুভ দাম্পত্য যোগ"
+                                  : language === "hi"
+                                  ? "शुभ वैवाहिक योग"
+                                  : "Auspicious Union"
+                                : language === "bn"
+                                ? "কার্মিক পরীক্ষা ও পরিপক্কতা"
+                                : language === "hi"
+                                ? "कर्मिक विकास काल"
+                                : "Karmic Growth Phase"}
                             </span>
                           </div>
 
@@ -1559,7 +1619,11 @@ export default function PalmReadingPage() {
                           {pat.remedy && (
                             <div className="mt-4 rounded-xl bg-surface-muted p-3 border border-border/60">
                               <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                                {language === "bn" ? "শাস্ত্রীয় প্রতিকার ও উপায়" : "Vedic Upaya / Remedy"}
+                                {language === "bn"
+                                  ? "শাস্ত্রীয় প্রতিকার ও উপায়"
+                                  : language === "hi"
+                                  ? "शास्त्रीय उपाय"
+                                  : "Vedic Upaya / Remedy"}
                               </span>
                               <span className="mt-0.5 block text-xs font-semibold text-foreground">
                                 {pat.remedy}
@@ -1569,7 +1633,7 @@ export default function PalmReadingPage() {
 
                           <p className="mt-3 text-[10px] font-semibold text-muted-foreground/70 flex items-center gap-1">
                             <FileText className="size-3" />
-                            Reference: {pat.image_ref}
+                            {language === "bn" ? "তথ্যসূত্র:" : language === "hi" ? "संदर्भ:" : "Reference:"} {pat.image_ref}
                           </p>
                         </div>
                       ))}
@@ -1584,7 +1648,7 @@ export default function PalmReadingPage() {
                       <div className="flex flex-col gap-2">
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-400/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-cyan-300 w-fit">
                           <Waves className="size-3" />
-                          {language === "bn" ? "হাতের চর্মরেখা লুপ ও প্যাটার্ন" : "Palmer Dermatoglyphics & Energy Loops"}
+                          {language === "bn" ? "হাতের চর্মরেখা লুপ ও প্যাটার্ন" : language === "hi" ? "त्वचा-रेखा लूप व पैटर्न" : "Palmer Dermatoglyphics & Energy Loops"}
                         </span>
                         <h3 className="text-xl font-black sm:text-2xl">
                           {language === "bn"
@@ -1595,7 +1659,9 @@ export default function PalmReadingPage() {
                         </h3>
                         <p className="text-xs text-white/75 max-w-2xl leading-relaxed">
                           {language === "bn"
-                            ? "ক্লায়েন্টের Loops.docx নির্দেশিকা অনুসারে হাতের তালু ও আঙুলের সংযোগস্থলের প্রাকৃতিক লুপসমূহের পুঙ্খানুপুঙ্খ বিশ্লেষণ।"
+                            ? "হাতের তালু ও আঙুলের সংযোগস্থলের প্রাকৃতিক লুপসমূহের পুঙ্খানুপুঙ্খ বিশ্লেষণ।"
+                            : language === "hi"
+                            ? "हथेली और अंगुलियों के जोड़ पर स्थित प्राकृतिक लूपों का प्रामाणिक विश्लेषण।"
                             : "Loops bind the energies of two fingers or mounts: Leisure (Mercury-Sun), Industry (Saturn), Raja Leadership (Jupiter), Sensitivity, and Courage."}
                         </p>
                       </div>
@@ -1613,20 +1679,20 @@ export default function PalmReadingPage() {
                               {loop.category}
                             </span>
                             <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700">
-                              {Math.round(loop.confidence * 100)}% Confidence
+                              {Math.round(loop.confidence * 100)}% {language === "bn" ? "নিশ্চয়তা" : language === "hi" ? "विश्वसनीयता" : "Confidence"}
                             </span>
                           </div>
 
                           <h4 className="mt-3 text-base font-extrabold text-foreground">{loop.name}</h4>
                           <p className="text-xs font-semibold text-cyan-600">{loop.sanskrit_name}</p>
                           <p className="mt-1 text-[11px] text-muted-foreground font-medium">
-                            Location: {loop.location}
+                            {language === "bn" ? "অবস্থান:" : language === "hi" ? "स्थान:" : "Location:"} {loop.location}
                           </p>
                           <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{loop.meaning}</p>
 
                           <p className="mt-3 text-[10px] font-semibold text-muted-foreground/70 flex items-center gap-1">
                             <FileText className="size-3" />
-                            Citation: {loop.source}
+                            {language === "bn" ? "উৎস:" : language === "hi" ? "स्रोत:" : "Citation:"} {loop.source}
                           </p>
                         </div>
                       ))}
@@ -1668,7 +1734,11 @@ export default function PalmReadingPage() {
                             </div>
                             <div>
                               <h4 className="text-sm font-bold text-foreground">
-                                {language === "bn" ? "তালুর বর্ণ ও বিপাকীয় লক্ষণ" : "Pallor Diagnosis & Metabolic State"}
+                                {language === "bn"
+                                  ? "তালুর বর্ণ ও বিপাকীয় লক্ষণ"
+                                  : language === "hi"
+                                  ? "हथेली का वर्ण व चयापचय"
+                                  : "Pallor Diagnosis & Metabolic State"}
                               </h4>
                               <p className="text-xs font-extrabold text-emerald-700">
                                 {result.medical_constitution.pallor_diagnosis.state}
@@ -1680,7 +1750,11 @@ export default function PalmReadingPage() {
                           </p>
                           <div className="mt-3 rounded-xl bg-surface-muted p-3 border border-border">
                             <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                              {language === "bn" ? "আয়ুর্বেদিক প্রতিকার ও পথ্য" : "Ayurvedic Rasayana & Remedy"}
+                              {language === "bn"
+                                ? "আয়ুর্বেদিক প্রতিকার ও পথ্য"
+                                : language === "hi"
+                                ? "आयुर्वेदिक उपाय व पथ्य"
+                                : "Ayurvedic Rasayana & Remedy"}
                             </span>
                             <span className="mt-0.5 block text-xs font-semibold text-foreground">
                               {result.medical_constitution.pallor_diagnosis.ayurvedic_remedy}
@@ -1696,7 +1770,11 @@ export default function PalmReadingPage() {
                             </div>
                             <div>
                               <h4 className="text-sm font-bold text-foreground">
-                                {language === "bn" ? "সেরোটোনিন ও মানসিক স্থিতি অক্ষ" : "Neuro-Serotonin Axis & Resilience"}
+                                {language === "bn"
+                                  ? "সেরোটোনিন ও মানসিক স্থিতি অক্ষ"
+                                  : language === "hi"
+                                  ? "सेरोटोनिन व तंत्रिका संतुलन"
+                                  : "Neuro-Serotonin Axis & Resilience"}
                               </h4>
                               <p className="text-xs font-extrabold text-purple-700">
                                 {result.medical_constitution.neuro_serotonin_axis.status}
@@ -1708,7 +1786,11 @@ export default function PalmReadingPage() {
                           </p>
                           <div className="mt-3 rounded-xl bg-surface-muted p-3 border border-border">
                             <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                              {language === "bn" ? "সেরোটোনিন উদ্দীপক বৈদিক উপায়" : "Vedic Neuro-Upaya"}
+                              {language === "bn"
+                                ? "সেরোটোনিন উদ্দীপক বৈদিক উপায়"
+                                : language === "hi"
+                                ? "सेरोटोनिन प्रेरक उपाय"
+                                : "Vedic Neuro-Upaya"}
                             </span>
                             <span className="mt-0.5 block text-xs font-semibold text-foreground">
                               {result.medical_constitution.neuro_serotonin_axis.vedic_neuro_upaya}
@@ -1719,7 +1801,11 @@ export default function PalmReadingPage() {
                         {/* Organ Sensitivities Grid */}
                         <div className="rounded-3xl border border-border bg-white p-6 shadow-xs">
                           <h4 className="text-sm font-bold text-foreground mb-3">
-                            {language === "bn" ? "সংবেদনশীল অঙ্গ ও প্রতিবর্ত রেখা" : "Organ Meridian Sensitivities"}
+                            {language === "bn"
+                              ? "সংবেদনশীল অঙ্গ ও প্রতিবর্ত রেখা"
+                              : language === "hi"
+                              ? "संवेदनशील अंग व मेरिडियन"
+                              : "Organ Meridian Sensitivities"}
                           </h4>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             {result.medical_constitution.organ_sensitivities?.map((org, i) => (
@@ -1735,7 +1821,11 @@ export default function PalmReadingPage() {
                         {/* Nail & Minerals */}
                         <div className="rounded-3xl border border-border bg-white p-6 shadow-xs">
                           <h4 className="text-sm font-bold text-foreground mb-3">
-                            {language === "bn" ? "নখের লক্ষণ ও খনিজ সূচক" : "Nail & Mineral Diagnostics"}
+                            {language === "bn"
+                              ? "নখের লক্ষণ ও খনিজ সূচক"
+                              : language === "hi"
+                              ? "नाखून व खनिज संकेतक"
+                              : "Nail & Mineral Diagnostics"}
                           </h4>
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             {Object.entries(result.medical_constitution.nail_mineral_diagnostics || {}).map(([k, v]) => (
@@ -1760,10 +1850,14 @@ export default function PalmReadingPage() {
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-amber-300">
                           <Sun className="size-3" />
-                          {language === "bn" ? "কুণ্ডলী ও হস্তরেখা ঐক্যবদ্ধ সংমিশ্রণ" : "Kundli-Palm Planetary Synchronization"}
+                          {language === "bn"
+                            ? "কুণ্ডলী ও হস্তরেখা ঐক্যবদ্ধ সংমিশ্রণ"
+                            : language === "hi"
+                            ? "कुंडली एवं हस्तरेखा ग्रह समन्वय"
+                            : "Kundli-Palm Planetary Synchronization"}
                         </span>
                         <span className="text-xs font-bold text-white/70">
-                          {language === "bn" ? "ঐক্যবদ্ধ সামঞ্জস্য" : "Concordance"}:{" "}
+                          {language === "bn" ? "ঐক্যবদ্ধ সামঞ্জস্য" : language === "hi" ? "समग्र मिलान" : "Concordance"}:{" "}
                           <strong className="text-amber-300 text-sm">
                             {result.kundli_palm_sync?.overall_alignment_pct ?? 91}%
                           </strong>
@@ -1783,7 +1877,11 @@ export default function PalmReadingPage() {
 
                       <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-md">
                         <span className="block text-[10px] font-bold uppercase tracking-wider text-amber-300">
-                          {language === "bn" ? "সার্বজনীন প্রধান প্রতিকার" : "Master Astrological Remedy"}
+                          {language === "bn"
+                            ? "সার্বজনীন প্রধান প্রতিকার"
+                            : language === "hi"
+                            ? "सार्वभौमिक मुख्य उपाय"
+                            : "Master Astrological Remedy"}
                         </span>
                         <p className="mt-1 text-xs text-white/85 leading-relaxed font-semibold">
                           {result.kundli_palm_sync?.master_remedy}
@@ -1802,12 +1900,12 @@ export default function PalmReadingPage() {
                               {pl.graha} ({pl.english_name})
                             </span>
                             <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-800">
-                              {pl.alignment_pct}% Match
+                              {pl.alignment_pct}% {language === "bn" ? "মিল" : language === "hi" ? "संरेखण" : "Match"}
                             </span>
                           </div>
 
                           <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground font-medium">
-                            <span>Mount: {pl.palm_mount}</span>
+                            <span>{language === "bn" ? "পর্বত:" : language === "hi" ? "पर्वत:" : "Mount:"} {pl.palm_mount}</span>
                             <span className="font-bold text-foreground">{pl.elevation_mm} mm</span>
                           </div>
 
@@ -1819,11 +1917,11 @@ export default function PalmReadingPage() {
 
                           <div className="mt-4 border-t border-border/60 pt-3 space-y-1.5 text-xs">
                             <div className="flex items-center justify-between">
-                              <span className="text-muted-foreground text-[11px]">Gemstone:</span>
+                              <span className="text-muted-foreground text-[11px]">{language === "bn" ? "রত্ন প্রতিকার:" : language === "hi" ? "रत्न उपाय:" : "Gemstone:"}</span>
                               <span className="font-bold text-foreground text-[11px]">{pl.gemstone_upaya}</span>
                             </div>
                             <div>
-                              <span className="block text-[10px] text-muted-foreground">Mantra:</span>
+                              <span className="block text-[10px] text-muted-foreground">{language === "bn" ? "বৈদিক বীজমন্ত্র:" : language === "hi" ? "वैदिक मंत्र:" : "Mantra:"}</span>
                               <span className="block text-[10px] font-mono text-ink-950 font-semibold bg-surface-muted p-1.5 rounded-lg mt-0.5">
                                 {pl.vedic_mantra}
                               </span>
@@ -1843,7 +1941,11 @@ export default function PalmReadingPage() {
                       <div className="flex flex-col gap-2">
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-400/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-brand-300 w-fit">
                           <Clock className="size-3" />
-                          {language === "bn" ? "সমুদ্রিক শাস্ত্রীয় আয়ু নির্ণয়" : "Samudrika Shastra Chronological Timeline"}
+                          {language === "bn"
+                            ? "সমুদ্রিক শাস্ত্রীয় আয়ু নির্ণয়"
+                            : language === "hi"
+                            ? "सामुद्रिक शास्त्रीय आयु गणना"
+                            : "Samudrika Shastra Chronological Timeline"}
                         </span>
                         <h3 className="text-xl font-black sm:text-2xl">
                           {language === "bn"
@@ -1855,6 +1957,8 @@ export default function PalmReadingPage() {
                         <p className="text-xs text-white/70 max-w-2xl leading-relaxed">
                           {language === "bn"
                             ? "জীবনরেখার প্রারম্ভ (বৃদ্ধাঙ্গুলি ও তর্জনীর মধ্যস্থল) থেকে মণিবন্ধ এবং ভাগ্যরেখার বিস্তার পরিমাপ করে ৬টি বয়সের গুরুত্বপূর্ণ সন্ধিক্ষণ নির্ধারণ করা হয়েছে।"
+                            : language === "hi"
+                            ? "जीवनरेखा के आरंभ से मणिबंध और भाग्यरेखा के विस्तार को मापकर ६ प्रमुख आयु पड़ावों का निर्धारण किया गया है।"
                             : "Proportional projection along the Life corridor and central Saturn axis divides your life path into 6 distinct karmic epochs."}
                         </p>
                       </div>
@@ -1867,11 +1971,19 @@ export default function PalmReadingPage() {
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div>
                               <span className="text-[10px] font-black uppercase tracking-wider text-brand-700">
-                                {language === "bn" ? "ইন্টারেক্টিভ বয়স নির্দেশক" : "Interactive Age Selector"}
+                                {language === "bn"
+                                  ? "ইন্টারেক্টিভ বয়স নির্দেশক"
+                                  : language === "hi"
+                                  ? "इंटरैक्टिव आयु चयनकर्ता"
+                                  : "Interactive Age Selector"}
                               </span>
                               <h4 className="text-base font-black text-foreground">
-                                {language === "bn" ? "বয়স নির্বাচন করুন:" : "Select an Age Epoch:"}{" "}
-                                <span className="text-brand-600 font-extrabold">{selectedAge} {language === "bn" ? "বছর" : "Years"}</span>
+                                {language === "bn"
+                                  ? "বয়স নির্বাচন করুন:"
+                                  : language === "hi"
+                                  ? "आयु का चयन करें:"
+                                  : "Select an Age Epoch:"}{" "}
+                                <span className="text-brand-600 font-extrabold">{selectedAge} {language === "bn" ? "বছর" : language === "hi" ? "वर्ष" : "Years"}</span>
                               </h4>
                             </div>
 
@@ -1889,7 +2001,7 @@ export default function PalmReadingPage() {
                                       : "bg-surface-muted text-muted-foreground hover:bg-brand-50 hover:text-brand-700",
                                   )}
                                 >
-                                  {m.age} {language === "bn" ? "বছর" : "yrs"}
+                                  {m.age} {language === "bn" ? "বছর" : language === "hi" ? "वर्ष" : "yrs"}
                                 </button>
                               ))}
                             </div>
@@ -1906,10 +2018,10 @@ export default function PalmReadingPage() {
                               className="w-full accent-brand-500 cursor-pointer h-2 bg-brand-100 rounded-lg appearance-none"
                             />
                             <div className="flex justify-between text-[10px] font-bold text-muted-foreground">
-                              <span>18 {language === "bn" ? "বছর (কৈশোর)" : "yrs"}</span>
-                              <span>35 {language === "bn" ? "বছর (যৌবন)" : "yrs"}</span>
-                              <span>50 {language === "bn" ? "বছর (প্রৌঢ়)" : "yrs"}</span>
-                              <span>75+ {language === "bn" ? "বছর (বার্ধক্য)" : "yrs"}</span>
+                              <span>18 {language === "bn" ? "বছর (কৈশোর)" : language === "hi" ? "वर्ष (किशोरावस्था)" : "yrs"}</span>
+                              <span>35 {language === "bn" ? "বছর (যৌবন)" : language === "hi" ? "वर्ष (युवावस्था)" : "yrs"}</span>
+                              <span>50 {language === "bn" ? "বছর (প্রৌঢ়)" : language === "hi" ? "वर्ष (प्रौढ़ावस्था)" : "yrs"}</span>
+                              <span>75+ {language === "bn" ? "বছর (বার্ধক্য)" : language === "hi" ? "वर्ष (वृद्धावस्था)" : "yrs"}</span>
                             </div>
                           </div>
 
@@ -1932,7 +2044,7 @@ export default function PalmReadingPage() {
                                   </div>
                                   <div className="flex items-center gap-2">
                                     <span className="text-xs font-bold text-muted-foreground">
-                                      {language === "bn" ? "জীবনীশক্তি অনুপাত:" : "Vitality Ratio:"}
+                                      {language === "bn" ? "জীবনীশক্তি অনুপাত:" : language === "hi" ? "प्राणशक्ति अनुपात:" : "Vitality Ratio:"}
                                     </span>
                                     <span className="rounded-md bg-emerald-100 px-2 py-0.5 text-xs font-black text-emerald-800">
                                       {activeMilestone.vitality_pct}%
@@ -1942,7 +2054,7 @@ export default function PalmReadingPage() {
 
                                 <div className="space-y-1">
                                   <h5 className="text-sm font-black text-foreground">
-                                    {language === "bn" ? "প্রধান কেন্দ্রবিন্দু:" : "Core Focus:"} {activeMilestone.focus}
+                                    {language === "bn" ? "প্রধান কেন্দ্রবিন্দু:" : language === "hi" ? "मुख्य ध्यान:" : "Core Focus:"} {activeMilestone.focus}
                                   </h5>
                                   <p className="text-xs leading-relaxed text-muted-foreground">
                                     {activeMilestone.forecast}
@@ -1951,13 +2063,21 @@ export default function PalmReadingPage() {
 
                                 <div className="flex items-center gap-3 border-t border-brand-200/60 pt-3 text-[11px] text-muted-foreground">
                                   <span className="font-semibold">
-                                    📍 {language === "bn" ? "নিয়ামক রেখা:" : "Governing Axis:"} {activeMilestone.primary_line}
+                                    📍 {language === "bn" ? "নিয়ামক রেখা:" : language === "hi" ? "शासक रेखा:" : "Governing Axis:"} {activeMilestone.primary_line}
                                   </span>
                                   <span>•</span>
                                   <span className="font-semibold text-emerald-700">
                                     {activeMilestone.auspicious
-                                      ? language === "bn" ? "✓ শুভ ফলদায়ক সময়কাল" : "Auspicious Phase"
-                                      : language === "bn" ? "সতর্কতা ও আত্মশুদ্ধি প্রয়োজন" : "Caution Recommended"}
+                                      ? language === "bn"
+                                        ? "✓ শুভ ফলদায়ক সময়কাল"
+                                        : language === "hi"
+                                        ? "✓ शुभ फलदायी काल"
+                                        : "Auspicious Phase"
+                                      : language === "bn"
+                                      ? "সতর্কতা ও আত্মশুদ্ধি প্রয়োজন"
+                                      : language === "hi"
+                                      ? "सावधानी एवं शुद्धि अपेक्षित"
+                                      : "Caution Recommended"}
                                   </span>
                                 </div>
                               </div>
@@ -1968,7 +2088,7 @@ export default function PalmReadingPage() {
                         {/* Full Chronological Milestones Grid */}
                         <div className="space-y-3">
                           <h4 className="text-xs font-extrabold uppercase tracking-wider text-brand-700">
-                            {language === "bn" ? "পূর্ণ ৬টি পর্যায়ক্রমিক কালচক্র" : "All 6 Chronological Epochs"}
+                            {language === "bn" ? "পূর্ণ ৬টি পর্যায়ক্রমিক কালচক্র" : language === "hi" ? "पूर्ण ६ कालखंड" : "All 6 Chronological Epochs"}
                           </h4>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {result.timeline.map((m) => (
@@ -1987,7 +2107,7 @@ export default function PalmReadingPage() {
                                     {m.age_range}
                                   </span>
                                   <span className="text-[11px] font-bold text-emerald-700">
-                                    {m.vitality_pct}% {language === "bn" ? "প্রাণশক্তি" : "Vitality"}
+                                    {m.vitality_pct}% {language === "bn" ? "প্রাণশক্তি" : language === "hi" ? "प्राणशक्ति" : "Vitality"}
                                   </span>
                                 </div>
                                 <h5 className="mt-2 text-sm font-black text-foreground">
@@ -2002,7 +2122,17 @@ export default function PalmReadingPage() {
                                 <div className="mt-3 border-t border-border/50 pt-2 text-[10px] text-muted-foreground flex justify-between">
                                   <span>{m.primary_line}</span>
                                   <span className="font-bold text-brand-600">
-                                    {selectedAge === m.age ? "✓ নির্বাচিত" : "নির্বাচন করুন →"}
+                                    {selectedAge === m.age
+                                      ? language === "bn"
+                                        ? "✓ নির্বাচিত"
+                                        : language === "hi"
+                                        ? "✓ चयनित"
+                                        : "Selected"
+                                      : language === "bn"
+                                      ? "নির্বাচন করুন →"
+                                      : language === "hi"
+                                      ? "चुनें →"
+                                      : "Select →"}
                                   </span>
                                 </div>
                               </div>
@@ -2014,6 +2144,8 @@ export default function PalmReadingPage() {
                       <div className="rounded-2xl border border-dashed border-border bg-surface-muted p-8 text-center text-xs text-muted-foreground">
                         {language === "bn"
                           ? "জীবনরেখার স্পষ্টতার অভাবে কালানুক্রমিক কালচক্র নির্ধারণ করা যায়নি।"
+                          : language === "hi"
+                          ? "जीवनरेखा की स्पष्टता के अभाव में कालक्रम का निर्धारण नहीं हो सका।"
                           : "Timeline milestones require a distinct Life or Fate line corridor."}
                       </div>
                     )}
@@ -2077,15 +2209,23 @@ export default function PalmReadingPage() {
                                 )}
                               >
                                 {mark.found
-                                  ? language === "bn" ? "✓ সনাক্ত হয়েছে" : "Found"
-                                  : language === "bn" ? "সুপ্ত বা অনুপস্থিত" : "Not Present"}
+                                  ? language === "bn"
+                                    ? "✓ সনাক্ত হয়েছে"
+                                    : language === "hi"
+                                    ? "✓ उपस्थित"
+                                    : "Found"
+                                  : language === "bn"
+                                  ? "সুপ্ত বা অনুপস্থিত"
+                                  : language === "hi"
+                                  ? "अनुपस्थित"
+                                  : "Not Present"}
                               </span>
                             </div>
 
                             <div className="mt-3.5 space-y-2">
                               <div className="flex items-center gap-2 text-xs">
                                 <span className="font-bold text-muted-foreground">
-                                  {language === "bn" ? "প্রকৃতি ও বিরলতা:" : "Rarity Index:"}
+                                  {language === "bn" ? "প্রকৃতি ও বিরলতা:" : language === "hi" ? "दुर्लभता स्तर:" : "Rarity Index:"}
                                 </span>
                                 <span className="font-black text-amber-800">
                                   {mark.rarity}
@@ -2099,10 +2239,20 @@ export default function PalmReadingPage() {
 
                             <div className="mt-4 border-t border-amber-200/60 pt-3 flex items-center justify-between text-[11px]">
                               <span className="font-mono text-muted-foreground">
-                                📍 {language === "bn" ? "তালু স্থানাঙ্ক:" : "Coords:"} [{mark.location_norm.map((n) => n.toFixed(2)).join(", ")}]
+                                📍 {language === "bn" ? "তালু স্থানাঙ্ক:" : language === "hi" ? "निर्देशांक:" : "Coords:"} [{mark.location_norm.map((n) => n.toFixed(2)).join(", ")}]
                               </span>
                               <span className="font-bold text-amber-700">
-                                {mark.auspicious ? "★ পরম কল্যাণকর যোগ" : "নিরীক্ষণাধীন"}
+                                {mark.auspicious
+                                  ? language === "bn"
+                                    ? "★ পরম কল্যাণকর যোগ"
+                                    : language === "hi"
+                                    ? "★ कल्याणकारी योग"
+                                    : "★ Auspicious Yoga"
+                                  : language === "bn"
+                                  ? "নিরীক্ষণাধীন"
+                                  : language === "hi"
+                                  ? "अवलोकन"
+                                  : "Neutral"}
                               </span>
                             </div>
                           </div>
@@ -2112,6 +2262,8 @@ export default function PalmReadingPage() {
                       <div className="rounded-2xl border border-dashed border-border bg-surface-muted p-8 text-center text-xs text-muted-foreground">
                         {language === "bn"
                           ? "এই ফটোতে কোনো বিশেষ বৈদিক চিহ্ন স্পষ্টভাবে ধরা পড়েনি।"
+                          : language === "hi"
+                          ? "इस फोटो में कोई विशेष वैदिक चिह्न स्पष्ट रूप से नहीं दिखा।"
                           : "No distinct sacred marks were visible at this resolution."}
                       </div>
                     )}
@@ -2315,7 +2467,11 @@ export default function PalmReadingPage() {
                   <div className="space-y-6">
                     <div className="rounded-3xl border border-border bg-white p-6 shadow-xs">
                       <h3 className="text-sm font-black text-foreground">
-                        {language === "bn" ? "তালুর পুঙ্খানুপুঙ্খ গাণিতিক অনুপাত" : "Hand Geometry Ratios"}
+                        {language === "bn"
+                          ? "তালুর পুঙ্খানুপুঙ্খ গাণিতিক অনুপাত"
+                          : language === "hi"
+                          ? "हथेली के विस्तृत गणितीय अनुपात"
+                          : "Hand Geometry Ratios"}
                       </h3>
                       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         {Object.entries(result.measurements).map(([key, val]) => (
@@ -2374,7 +2530,14 @@ export default function PalmReadingPage() {
       <FeatureCoinModal
         open={coinModalOpen}
         onClose={() => setCoinModalOpen(false)}
-        featureName={palmFeature?.name || (language === "bn" ? "পাম রিডিং" : "Palm Reading")}
+        featureName={
+          palmFeature?.name ||
+          (language === "bn"
+            ? "পাম রিডিং"
+            : language === "hi"
+            ? "हस्तरेखा विज्ञान"
+            : "Palm Reading")
+        }
         requiredCoins={palmFeature?.coins ?? 25}
         walletBalance={walletBalance}
         reason={coinModalReason}

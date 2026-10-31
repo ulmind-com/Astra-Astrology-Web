@@ -19,6 +19,7 @@ import { Button } from "@/components/ui";
 import { vastuApi } from "@/lib/api";
 import type { AyadiCalculationResponse } from "@/types/vastu";
 import type { AstrologyLanguage } from "@/types";
+import { VASTU_I18N } from "@/lib/vastu-translations";
 
 const NAKSHATRA_NAMES = [
   "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashirsha", "Ardra",
@@ -80,6 +81,7 @@ interface AyadiShadvargaProps {
 }
 
 export function AyadiShadvarga({ language = "bn" }: AyadiShadvargaProps) {
+  const t = VASTU_I18N[language] || VASTU_I18N.en;
   const [length, setLength] = React.useState<number>(40);
   const [width, setWidth] = React.useState<number>(30);
   const [unit, setUnit] = React.useState<"feet" | "meter">("feet");
@@ -90,7 +92,7 @@ export function AyadiShadvarga({ language = "bn" }: AyadiShadvargaProps) {
 
   const handleCalculate = async () => {
     if (length <= 0 || width <= 0) {
-      toast.error(language === "bn" ? "সঠিক দৈর্ঘ্য ও প্রস্থ লিখুন।" : "Please enter valid dimensions.");
+      toast.error(t.validDimensionsError);
       return;
     }
     setLoading(true);
@@ -101,11 +103,7 @@ export function AyadiShadvarga({ language = "bn" }: AyadiShadvargaProps) {
       } else {
         setResult(computeLocalAyadi(length, width, unit));
       }
-      toast.success(
-        language === "bn"
-          ? "আয়াদি ষড়বর্গ ফলাফল সফলভাবে নির্ণীত হয়েছে!"
-          : "Ayadi Shadvarga calculated successfully!"
-      );
+      toast.success(t.ayadiSuccess);
     } catch {
       setResult(computeLocalAyadi(length, width, unit));
     } finally {
@@ -121,20 +119,10 @@ export function AyadiShadvarga({ language = "bn" }: AyadiShadvargaProps) {
           <div className="space-y-1.5">
             <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/15 text-amber-900 dark:text-amber-300 px-3 py-1 text-xs font-bold border border-amber-400/30">
               <Calculator className="size-3.5" />
-              <span>
-                {language === "bn"
-                  ? "শাস্ত্রীয় আয়াদি ষড়বর্গ ক্যালকুলেটর (Classical Ayadi Shadvarga)"
-                  : language === "hi"
-                  ? "शास्त्रीय आयादि षड्वर्ग गणक"
-                  : "Classical Ayadi Shadvarga Vedic Engine"}
-              </span>
+              <span>{t.ayadiTitle}</span>
             </div>
             <h3 className="text-xl sm:text-2xl font-bold text-foreground">
-              {language === "bn"
-                ? "জমির দৈর্ঘ্য ও প্রস্থ থেকে বৈদিক আয়, ব্যয়, নক্ষত্র ও আয়ু নির্ধারণ করুন"
-                : language === "hi"
-                ? "भूखंड की लम्बाई-चौड़ाई से वैदिक आय, व्यय, नक्षत्र एवं आयु जानें"
-                : "Calculate Vedic Aaya, Longevity & Building Nakshatra"}
+              {t.ayadiSub}
             </h3>
             <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl">
               {language === "bn"
@@ -152,7 +140,7 @@ export function AyadiShadvarga({ language = "bn" }: AyadiShadvargaProps) {
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-3">
           <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
             <Compass className="size-4 text-amber-500" />
-            <span>{language === "bn" ? "জমির বা ঘরের মাপ লিখুন" : "Enter Dimensions"}</span>
+            <span>{t.enterDimensions}</span>
           </h4>
 
           {/* Unit Toggle */}
@@ -168,7 +156,7 @@ export function AyadiShadvarga({ language = "bn" }: AyadiShadvargaProps) {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {u === "feet" ? (language === "bn" ? "ফুট (Feet)" : "Feet") : (language === "bn" ? "মিটার (Meter)" : "Meter")}
+                {u === "feet" ? t.feetUnit : t.meterUnit}
               </button>
             ))}
           </div>
@@ -177,7 +165,7 @@ export function AyadiShadvarga({ language = "bn" }: AyadiShadvargaProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-end">
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-muted-foreground">
-              {language === "bn" ? "দৈর্ঘ্য (Length)" : "Length"} ({unit})
+              {t.lengthLabel(unit)}
             </label>
             <input
               type="number"
@@ -191,7 +179,7 @@ export function AyadiShadvarga({ language = "bn" }: AyadiShadvargaProps) {
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-muted-foreground">
-              {language === "bn" ? "প্রস্থ (Width)" : "Width"} ({unit})
+              {t.widthLabel(unit)}
             </label>
             <input
               type="number"
@@ -211,7 +199,7 @@ export function AyadiShadvarga({ language = "bn" }: AyadiShadvargaProps) {
               className="w-full py-2.5 rounded-xl font-bold bg-amber-500 hover:bg-amber-600 text-amber-950 shadow-sm cursor-pointer"
             >
               <Sparkles className="size-4 mr-1.5" />
-              <span>{language === "bn" ? "আয়াদি গণনা করুন" : "Calculate Ayadi"}</span>
+              <span>{t.calculateAyadiBtn}</span>
             </Button>
           </div>
         </div>
@@ -231,7 +219,7 @@ export function AyadiShadvarga({ language = "bn" }: AyadiShadvargaProps) {
             <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border/60 pb-4">
               <div>
                 <span className="text-xs uppercase font-bold tracking-wider text-muted-foreground">
-                  {language === "bn" ? "নির্ধারিত বৈদিক আয়" : "Calculated Vedic Aaya"}
+                  {t.calculatedAaya}
                 </span>
                 <h4 className="text-2xl sm:text-3xl font-extrabold text-foreground">
                   {result.aaya_name_bn}
@@ -249,9 +237,13 @@ export function AyadiShadvarga({ language = "bn" }: AyadiShadvargaProps) {
                   {result.is_auspicious
                     ? language === "bn"
                       ? "🌟 পরম শুভ আয়"
+                      : language === "hi"
+                      ? "🌟 परम शुभ आय"
                       : "🌟 Highly Auspicious"
                     : language === "bn"
                     ? "⚠️ অশুভ আয় (সংশোধনযোগ্য)"
+                    : language === "hi"
+                    ? "⚠️ अशुभ आय (संशोधन योग्य)"
                     : "⚠️ Inauspicious Aaya"}
                 </span>
               </div>
@@ -266,7 +258,7 @@ export function AyadiShadvarga({ language = "bn" }: AyadiShadvargaProps) {
               <div className="p-3.5 rounded-xl bg-surface/80 border border-border/70 space-y-1">
                 <p className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
                   <Layers className="size-3 text-amber-500" />
-                  {language === "bn" ? "মোট ক্ষেত্রফল" : "Total Area"}
+                  {t.totalArea}
                 </p>
                 <p className="text-sm font-extrabold text-foreground">{result.area_sqft} sq ft</p>
               </div>
@@ -274,14 +266,14 @@ export function AyadiShadvarga({ language = "bn" }: AyadiShadvargaProps) {
               <div className="p-3.5 rounded-xl bg-surface/80 border border-border/70 space-y-1">
                 <p className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
                   <TrendingUp className="size-3 text-emerald-500" />
-                  {language === "bn" ? "ধন (আয়) বনাম ঋণ" : "Dhana vs Rina"}
+                  {t.dhanaVsRina}
                 </p>
                 <p className="text-sm font-extrabold text-foreground">
                   <span className="text-emerald-800 dark:text-emerald-300">{result.dhana_score}</span> :{" "}
                   <span className="text-rose-800 dark:text-rose-300">{result.rina_score}</span>
                   {result.is_dhana_dominant && (
                     <span className="text-[10px] text-emerald-800 dark:text-emerald-300 ml-1 font-bold">
-                      ({language === "bn" ? "শুভ" : "Good"})
+                      ({t.goodStatus})
                     </span>
                   )}
                 </p>
@@ -290,17 +282,17 @@ export function AyadiShadvarga({ language = "bn" }: AyadiShadvargaProps) {
               <div className="p-3.5 rounded-xl bg-surface/80 border border-border/70 space-y-1">
                 <p className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
                   <Clock className="size-3 text-blue-500" />
-                  {language === "bn" ? "ভবনের আয়ু" : "Longevity"}
+                  {t.longevity}
                 </p>
                 <p className="text-sm font-extrabold text-foreground">
-                  {result.structure_longevity_years} {language === "bn" ? "বছর" : "Years"}
+                  {t.yearsSuffix(result.structure_longevity_years)}
                 </p>
               </div>
 
               <div className="p-3.5 rounded-xl bg-surface/80 border border-border/70 space-y-1">
                 <p className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
                   <Star className="size-3 text-purple-500" />
-                  {language === "bn" ? "ভবন নক্ষত্র" : "Nakshatra"}
+                  {t.buildingNakshatra}
                 </p>
                 <p className="text-sm font-extrabold text-foreground">
                   {result.building_nakshatra_name} ({result.building_nakshatra_number})
@@ -312,11 +304,13 @@ export function AyadiShadvarga({ language = "bn" }: AyadiShadvargaProps) {
             <div className="p-4 rounded-xl bg-surface/90 border border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div className="space-y-0.5">
                 <p className="text-xs font-bold text-foreground">
-                  {language === "bn" ? "এই আয়ার জন্য শ্রেষ্ঠ প্রবেশদ্বার অভিমুখ" : "Ideal Entrance Directions for this Aaya"}
+                  {t.idealDirections}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {language === "bn"
                     ? "এই অভিমুখের দরজাই এই আয়াতে সর্বাধিক সমৃদ্ধি প্রদান করে।"
+                    : language === "hi"
+                    ? "इस दिशा के प्रवेश द्वार इस आय में सर्वाधिक समृद्धि प्रदान करते हैं।"
                     : "Entrances facing these cardinal zones yield maximum abundance."}
                 </p>
               </div>
