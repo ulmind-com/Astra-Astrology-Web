@@ -51,6 +51,21 @@ import {
   KP_PLANET_NAMES,
   KP_SIGN_NAMES,
   KP_LOCALIZED_DASHA_INSIGHTS,
+  toLocalizedDigits,
+  translateKPPlanet,
+  translateKPSign,
+  translateKPNakshatra,
+  translateKPTithi,
+  translateKPYoga,
+  translateKPKarana,
+  translateKPDay,
+  translateKPBalDasa,
+  translateKPDuration,
+  translateKPAscendantType,
+  translateKPAspectName,
+  translateKPAspectNature,
+  translateKPLifeEventVerdict,
+  translateKPLifeEventCategoryTitle,
 } from "@/lib/kp-translations";
 import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
@@ -403,11 +418,7 @@ export default function KPCalculatorPage() {
     const access = checkAccess("kp_calculator");
     if (!access.allowed) {
       if (access.reason === "disabled") {
-        toast.error(
-          language === "bn"
-            ? "কেপি অ্যাস্ট্রোলজি ফিচারটি বর্তমানে অ্যাডমিন দ্বারা বন্ধ রয়েছে।"
-            : "KP Astrology feature is temporarily unavailable.",
-        );
+        toast.error(ui.featureDisabledNotice);
         return;
       }
       setCoinModalReason(access.reason || "insufficient_coins");
@@ -431,19 +442,14 @@ export default function KPCalculatorPage() {
 
       if (access.requiredCoins > 0) {
         toast.success(
-          language === "bn"
-            ? `কেপি নির্ভুল চার্ট নির্ণয় সম্পন্ন হয়েছে! (${access.requiredCoins} কয়েন খরচ হয়েছে)`
-            : `KP Chart calculated! (${access.requiredCoins} coins used)`,
+          ui.coinsUsedSuccess.replace(
+            "{coins}",
+            toLocalizedDigits(access.requiredCoins, language)
+          )
         );
         refreshWallet();
       } else {
-        toast.success(
-          language === "bn"
-            ? `কেপি নির্ভুল চার্ট নির্ণয় সম্পন্ন হয়েছে!`
-            : language === "hi"
-            ? `केपी ज्योतिष गणना सफलतापूर्वक संपन्न!`
-            : `KP Astrology Chart calculated successfully!`,
-        );
+        toast.success(ui.calcSuccessToast);
       }
 
       // Smooth scroll to results
@@ -459,14 +465,7 @@ export default function KPCalculatorPage() {
         setCoinModalReason("unauthorized");
         setCoinModalOpen(true);
       } else {
-        toast.error(
-          err?.message ||
-            (language === "bn"
-              ? "কেপি চার্ট গণনায় ত্রুটি হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।"
-              : language === "hi"
-              ? "केपी चक्र गणना में त्रुटि हुई। कृपया पुनः प्रयास करें।"
-              : "Failed to calculate KP Chart. Please try again."),
-        );
+        toast.error(err?.message || ui.calcFailedToast);
       }
     } finally {
       setLoading(false);
@@ -474,11 +473,11 @@ export default function KPCalculatorPage() {
   };
 
   const getLocalizedSign = (sign: string) => {
-    return KP_SIGN_NAMES[sign]?.[language] || sign;
+    return translateKPSign(sign, language);
   };
 
   const getLocalizedPlanet = (planet: string) => {
-    return KP_PLANET_NAMES[planet]?.[language] || planet;
+    return translateKPPlanet(planet, language);
   };
 
   // Ascendant sign index
@@ -550,7 +549,7 @@ export default function KPCalculatorPage() {
           {kpFeature && !kpFeature.enabled && (
             <div className="mb-6">
               <FeatureDisabledAlert
-                featureName={language === "bn" ? "কেপি অ্যাস্ট্রোলজি" : "KP Astrology"}
+                featureName={ui.featureName}
                 language={language}
               />
             </div>
@@ -774,13 +773,7 @@ export default function KPCalculatorPage() {
                       : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
                   }`}
                 >
-                  {isHoraryMode
-                    ? language === "bn"
-                      ? "হোরারি সক্রিয় ✓"
-                      : "Horary Active ✓"
-                    : language === "bn"
-                    ? "হোরারি চালু করুন"
-                    : "Enable Horary"}
+                  {isHoraryMode ? ui.horaryActive : ui.horaryEnable}
                 </button>
               </div>
             </div>
@@ -793,7 +786,7 @@ export default function KPCalculatorPage() {
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900"
               >
                 <Sliders className="w-3.5 h-3.5" />
-                <span>Advanced Astrological Settings (Ayanamsa & Coordinates)</span>
+                <span>{ui.advancedSettingsToggle}</span>
                 {showAdvance ? (
                   <ChevronDown className="w-3.5 h-3.5" />
                 ) : (
@@ -821,7 +814,7 @@ export default function KPCalculatorPage() {
                   </div>
                   <div>
                     <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
-                      Latitude
+                      {ui.latitudeLabel}
                     </label>
                     <input
                       type="number"
@@ -836,7 +829,7 @@ export default function KPCalculatorPage() {
                   </div>
                   <div>
                     <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
-                      Longitude
+                      {ui.longitudeLabel}
                     </label>
                     <input
                       type="number"
@@ -914,11 +907,11 @@ export default function KPCalculatorPage() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-extrabold text-amber-700 uppercase tracking-wider">
-                    KP Astrology Analysis
+                    {ui.analysisTitle}
                   </span>
                   {result.horary_details && (
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-2xs">
-                      Horary #{result.horary_details.horary_number}
+                      {ui.horaryDetailsHeading.replace("#{num}", `#${toLocalizedDigits(result.horary_details.horary_number, language)}`)}
                     </span>
                   )}
                 </div>
@@ -926,10 +919,10 @@ export default function KPCalculatorPage() {
                   {result.name}
                 </h2>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600 mt-1">
-                  <span>📅 {result.birth_date_formatted}</span>
-                  <span>⏰ {result.birth_time_formatted}</span>
+                  <span>📅 {toLocalizedDigits(result.birth_date_formatted, language)}</span>
+                  <span>⏰ {toLocalizedDigits(result.birth_time_formatted, language)}</span>
                   <span>📍 {result.birth_place}</span>
-                  <span>🧭 {result.panchang.ascendant_sign} Ascendant</span>
+                  <span>🧭 {translateKPSign(result.panchang.ascendant_sign, language)} {ui.ascendantLabel}</span>
                 </div>
               </div>
 
@@ -938,7 +931,7 @@ export default function KPCalculatorPage() {
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex flex-col gap-1 max-w-sm">
                   <span className="text-[11px] font-black text-amber-900 flex items-center gap-1.5">
                     <Star className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
-                    Untenanted Planets (Supreme Fruitful)
+                    {ui.untenantedSupreme}
                   </span>
                   <div className="flex flex-wrap gap-1.5 mt-0.5">
                     {result.untenanted_planets.map((p) => (
@@ -946,7 +939,7 @@ export default function KPCalculatorPage() {
                         key={`untenanted-badge-${p}`}
                         className="px-2.5 py-0.5 rounded-md text-[11px] font-extrabold bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-2xs"
                       >
-                        {p} ★
+                        {translateKPPlanet(p, language)} ★
                       </span>
                     ))}
                   </div>
@@ -996,18 +989,18 @@ export default function KPCalculatorPage() {
                       {ui.ayanamsaTitle}
                     </div>
                     <div className="text-lg font-black text-slate-800 tracking-tight">
-                      {result.panchang.ayanamsa_name} ({result.panchang.ayanamsa_degrees.toFixed(2)}°)
+                      {result.panchang.ayanamsa_name} ({toLocalizedDigits(result.panchang.ayanamsa_degrees.toFixed(2), language)}°)
                     </div>
                     <div className="mt-3 pt-3 border-t border-slate-100 text-xs space-y-1 text-slate-600">
                       <div>
                         <span className="font-semibold">{ui.castingTimeTitle}:</span>{" "}
                         <span className="font-mono text-slate-800">
-                          {result.ruling_planets_casting.time_formatted || result.birth_time_formatted}
+                          {toLocalizedDigits(result.ruling_planets_casting.time_formatted || result.birth_time_formatted, language)}
                         </span>
                       </div>
                       <div>
                         <span className="font-semibold">{ui.julianDayTitle}:</span>{" "}
-                        <span className="font-mono text-slate-800">{result.panchang.julian_day}</span>
+                        <span className="font-mono text-slate-800">{toLocalizedDigits(result.panchang.julian_day, language)}</span>
                       </div>
                     </div>
                   </div>
@@ -1020,20 +1013,20 @@ export default function KPCalculatorPage() {
                     <div className="space-y-1.5 text-xs text-slate-700">
                       <div className="flex justify-between">
                         <span className="font-medium text-slate-500">{ui.tithiLabel}:</span>
-                        <span className="font-bold text-slate-800">{result.panchang.tithi}</span>
+                        <span className="font-bold text-slate-800">{translateKPTithi(result.panchang.tithi, language)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="font-medium text-slate-500">{ui.karanaLabel}:</span>
-                        <span className="font-bold text-slate-800">{result.panchang.karana}</span>
+                        <span className="font-bold text-slate-800">{translateKPKarana(result.panchang.karana, language)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="font-medium text-slate-500">{ui.yogaLabel}:</span>
-                        <span className="font-bold text-slate-800">{result.panchang.yoga}</span>
+                        <span className="font-bold text-slate-800">{translateKPYoga(result.panchang.yoga, language)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="font-medium text-slate-500">{ui.dayLabel}:</span>
                         <span className="font-bold text-slate-800">
-                          {result.panchang.vedic_day_name || result.panchang.day_name}
+                          {translateKPDay(result.panchang.vedic_day_name || result.panchang.day_name, language)}
                         </span>
                       </div>
                     </div>
@@ -1052,7 +1045,7 @@ export default function KPCalculatorPage() {
                             {ui.sunriseLabel}
                           </div>
                           <div className="text-sm font-extrabold text-slate-800 font-mono">
-                            {result.panchang.sunrise}
+                            {toLocalizedDigits(result.panchang.sunrise, language)}
                           </div>
                         </div>
                       </div>
@@ -1063,7 +1056,7 @@ export default function KPCalculatorPage() {
                             {ui.sunsetLabel}
                           </div>
                           <div className="text-sm font-extrabold text-slate-800 font-mono">
-                            {result.panchang.sunset}
+                            {toLocalizedDigits(result.panchang.sunset, language)}
                           </div>
                         </div>
                       </div>
@@ -1076,10 +1069,10 @@ export default function KPCalculatorPage() {
                       {ui.dashaBalanceHeading}
                     </div>
                     <div className="text-base font-extrabold text-slate-900">
-                      {result.panchang.balance_dasha}
+                      {translateKPBalDasa(result.panchang.balance_dasha, language)}
                     </div>
                     <div className="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500">
-                      {result.panchang.moon_rashi} • {result.panchang.moon_nakshatra}
+                      {translateKPSign(result.panchang.moon_rashi, language)} • {translateKPNakshatra(result.panchang.moon_nakshatra, language)}
                     </div>
                   </div>
                 </div>
@@ -1089,36 +1082,36 @@ export default function KPCalculatorPage() {
                   <div className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 p-5 sm:p-6 shadow-xs">
                     <div className="flex items-center gap-2 text-amber-900 font-extrabold text-base mb-2">
                       <Sparkles className="w-5 h-5 text-amber-600" />
-                      <span>KP Horary Prashna Details (Seed #{result.horary_details.horary_number})</span>
+                      <span>{ui.horaryDetailsHeading.replace("#{num}", `#${toLocalizedDigits(result.horary_details.horary_number, language)}`)}</span>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs mt-3">
                       <div className="bg-white p-3 rounded-xl border border-amber-200">
-                        <span className="text-slate-500 font-medium">Ascendant Sign:</span>
+                        <span className="text-slate-500 font-medium">{ui.ascendantSignLabel}</span>
                         <div className="text-sm font-extrabold text-slate-800">
-                          {result.horary_details.sign} ({result.horary_details.sign_lord})
+                          {translateKPSign(result.horary_details.sign, language)} ({translateKPPlanet(result.horary_details.sign_lord, language)})
                         </div>
                       </div>
                       <div className="bg-white p-3 rounded-xl border border-amber-200">
-                        <span className="text-slate-500 font-medium">Star Lord (Nakshatra):</span>
+                        <span className="text-slate-500 font-medium">{ui.lagnaStarLord}:</span>
                         <div className="text-sm font-extrabold text-amber-800">
-                          {result.horary_details.star_lord}
+                          {translateKPPlanet(result.horary_details.star_lord, language)}
                         </div>
                       </div>
                       <div className="bg-white p-3 rounded-xl border border-amber-200">
-                        <span className="text-slate-500 font-medium">Sub Lord:</span>
+                        <span className="text-slate-500 font-medium">{ui.lagnaSubLord}:</span>
                         <div className="text-sm font-extrabold text-amber-900">
-                          {result.horary_details.sub_lord}
+                          {translateKPPlanet(result.horary_details.sub_lord, language)}
                         </div>
                       </div>
                       <div className="bg-white p-3 rounded-xl border border-amber-200">
-                        <span className="text-slate-500 font-medium">Sub-Sub Lord:</span>
+                        <span className="text-slate-500 font-medium">{ui.subSubLordCol} (SSL):</span>
                         <div className="text-sm font-extrabold text-slate-900">
-                          {result.horary_details.sub_sub_lord}
+                          {translateKPPlanet(result.horary_details.sub_sub_lord, language) || "-"}
                         </div>
                       </div>
                     </div>
                     <div className="mt-3 text-xs text-amber-900/80">
-                      <strong>Sub-Arc Range:</strong> {result.horary_details.sub_span_formatted} (Zodiac Longitude: {result.horary_details.sub_start_degree}° to {result.horary_details.sub_end_degree}°)
+                      <strong>{ui.subArcRange}</strong> {toLocalizedDigits(result.horary_details.sub_span_formatted, language)} ({ui.zodiacLongitude} {toLocalizedDigits(result.horary_details.sub_start_degree, language)}° {language === "bn" ? "থেকে" : language === "hi" ? "से" : "to"} {toLocalizedDigits(result.horary_details.sub_end_degree, language)}°)
                     </div>
                   </div>
                 )}
@@ -1150,22 +1143,16 @@ export default function KPCalculatorPage() {
               <div className="space-y-8 animate-fadeIn">
                 <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-l-4 border-amber-500 p-4 rounded-r-xl text-xs text-slate-700 leading-relaxed space-y-1">
                   <div className="font-extrabold text-slate-900 text-sm">
-                    {language === "bn"
-                      ? "কেপি ৪-স্তরের কারকত্ব তত্ত্ব (Prof. K.S. Krishnamurti 4-Step Significators)"
-                      : "KP 4-Fold Significators Theory (Prof. K.S. Krishnamurti)"}
+                    {ui.sigTheoryTitle}
                   </div>
-                  <p>
-                    {language === "bn"
-                      ? "গ্রেড A (লেভেল A): ভাবাধিপতি/ভাবস্থ গ্রহের নক্ষত্রে অবস্থানকারী গ্রহ (সবচেয়ে শক্তিশালী)। গ্রেড B (লেভেল B): ভাবস্থ গ্রহ। গ্রেড C (লেভেল C): ভাবাধিপতির নক্ষত্রে অবস্থানকারী গ্রহ। গ্রেড D (লেভেল D): ভাবাধিপতি গ্রহ।"
-                      : "Level A: Houses occupied by star lord (Strongest). Level B: House occupied by planet itself. Level C: Houses owned by star lord. Level D: Houses owned by planet itself."}
-                  </p>
+                  <p>{ui.sigTheoryDesc}</p>
                 </div>
 
                 {/* Table 1: Planetary Significators */}
                 <div className="bg-white rounded-2xl border border-amber-200/90 shadow-xs overflow-hidden">
                   <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
                     <h3 className="text-base font-extrabold text-slate-900">{ui.planetSignificatorsHeading}</h3>
-                    <span className="text-xs font-semibold text-amber-700">Level A → B → C → D</span>
+                    <span className="text-xs font-semibold text-amber-700">{ui.levelHierarchy}</span>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
@@ -1176,26 +1163,26 @@ export default function KPCalculatorPage() {
                           <th className="py-3 px-4">{ui.levelBTitle}</th>
                           <th className="py-3 px-4">{ui.levelCTitle}</th>
                           <th className="py-3 px-4">{ui.levelDTitle}</th>
-                          <th className="py-3 px-4">All Houses Signified</th>
+                          <th className="py-3 px-4">{ui.allHousesSignified}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {result.planet_significators?.map((ps) => (
                           <tr key={`planet-sig-${ps.planet}`} className="hover:bg-amber-50/50 transition-colors">
                             <td className="py-3 px-4 font-extrabold text-slate-900">
-                              {ps.planet}
+                              {translateKPPlanet(ps.planet, language)}
                             </td>
                             <td className="py-3 px-4 font-mono font-bold text-amber-800">
-                              {ps.level_a.length > 0 ? ps.level_a.join(", ") : "-"}
+                              {ps.level_a.length > 0 ? ps.level_a.map((h) => toLocalizedDigits(h, language)).join(", ") : "-"}
                             </td>
                             <td className="py-3 px-4 font-mono font-bold text-slate-700">
-                              {ps.level_b.length > 0 ? ps.level_b.join(", ") : "-"}
+                              {ps.level_b.length > 0 ? ps.level_b.map((h) => toLocalizedDigits(h, language)).join(", ") : "-"}
                             </td>
                             <td className="py-3 px-4 font-mono font-bold text-slate-600">
-                              {ps.level_c.length > 0 ? ps.level_c.join(", ") : "-"}
+                              {ps.level_c.length > 0 ? ps.level_c.map((h) => toLocalizedDigits(h, language)).join(", ") : "-"}
                             </td>
                             <td className="py-3 px-4 font-mono font-bold text-slate-500">
-                              {ps.level_d.length > 0 ? ps.level_d.join(", ") : "-"}
+                              {ps.level_d.length > 0 ? ps.level_d.map((h) => toLocalizedDigits(h, language)).join(", ") : "-"}
                             </td>
                             <td className="py-3 px-4">
                               <div className="flex flex-wrap gap-1">
@@ -1204,7 +1191,7 @@ export default function KPCalculatorPage() {
                                     key={`sig-h-${ps.planet}-${h}`}
                                     className="px-2 py-0.5 rounded text-[11px] font-black bg-amber-100 text-amber-900 border border-amber-200"
                                   >
-                                    H{h}
+                                    {ui.housePrefix} {toLocalizedDigits(h, language)}
                                   </span>
                                 ))}
                               </div>
@@ -1220,7 +1207,7 @@ export default function KPCalculatorPage() {
                 <div className="bg-white rounded-2xl border border-amber-200/90 shadow-xs overflow-hidden">
                   <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
                     <h3 className="text-base font-extrabold text-slate-900">{ui.houseSignificatorsHeading}</h3>
-                    <span className="text-xs font-semibold text-slate-500">Houses 1 to 12</span>
+                    <span className="text-xs font-semibold text-slate-500">{ui.houses1to12}</span>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
@@ -1237,19 +1224,19 @@ export default function KPCalculatorPage() {
                         {result.house_significators?.map((hs) => (
                           <tr key={`house-sig-${hs.house}`} className="hover:bg-amber-50/50 transition-colors">
                             <td className="py-3 px-4 font-extrabold text-slate-900">
-                              House {hs.house}
+                              {ui.housePrefix} {toLocalizedDigits(hs.house, language)}
                             </td>
                             <td className="py-3 px-4 font-bold text-amber-800">
-                              {hs.level_a.length > 0 ? hs.level_a.join(", ") : "-"}
+                              {hs.level_a.length > 0 ? hs.level_a.map((p) => translateKPPlanet(p, language)).join(", ") : "-"}
                             </td>
                             <td className="py-3 px-4 font-bold text-slate-700">
-                              {hs.level_b.length > 0 ? hs.level_b.join(", ") : "-"}
+                              {hs.level_b.length > 0 ? hs.level_b.map((p) => translateKPPlanet(p, language)).join(", ") : "-"}
                             </td>
                             <td className="py-3 px-4 font-bold text-slate-600">
-                              {hs.level_c.length > 0 ? hs.level_c.join(", ") : "-"}
+                              {hs.level_c.length > 0 ? hs.level_c.map((p) => translateKPPlanet(p, language)).join(", ") : "-"}
                             </td>
                             <td className="py-3 px-4 font-bold text-slate-500">
-                              {hs.level_d.length > 0 ? hs.level_d.join(", ") : "-"}
+                              {hs.level_d.length > 0 ? hs.level_d.map((p) => translateKPPlanet(p, language)).join(", ") : "-"}
                             </td>
                           </tr>
                         ))}
@@ -1294,9 +1281,13 @@ export default function KPCalculatorPage() {
                                 <CategoryIcon className="w-5 h-5" />
                               </div>
                               <div>
-                                <h3 className="text-sm font-extrabold text-slate-900">{ev.title}</h3>
+                                <h3 className="text-sm font-extrabold text-slate-900">
+                                  {translateKPLifeEventCategoryTitle(ev.category, ev.title, language)}
+                                </h3>
                                 <div className="text-[11px] text-slate-500">
-                                  Primary: Cusp {ev.primary_cusp} • CSL: <strong className="text-slate-800">{ev.cuspal_sub_lord}</strong> (Star: {ev.csl_star_lord || "-"})
+                                  {ui.primaryCusp} {toLocalizedDigits(ev.primary_cusp, language)} • {ui.cslLabel}{" "}
+                                  <strong className="text-slate-800">{translateKPPlanet(ev.cuspal_sub_lord, language)}</strong>{" "}
+                                  ({ui.starLabel} {translateKPPlanet(ev.csl_star_lord, language) || "-"})
                                 </div>
                               </div>
                             </div>
@@ -1310,7 +1301,7 @@ export default function KPCalculatorPage() {
                                   : "bg-rose-50 text-rose-800 border-rose-300"
                               }`}
                             >
-                              {ev.verdict}
+                              {translateKPLifeEventVerdict(ev.verdict, language)}
                             </span>
                           </div>
 
@@ -1318,7 +1309,7 @@ export default function KPCalculatorPage() {
                           <div className="space-y-1">
                             <div className="flex justify-between text-xs">
                               <span className="font-semibold text-slate-600">{ui.promiseScoreLabel}:</span>
-                              <span className="font-extrabold text-slate-900">{ev.promise_score}%</span>
+                              <span className="font-extrabold text-slate-900">{toLocalizedDigits(ev.promise_score, language)}%</span>
                             </div>
                             <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
                               <div
@@ -1337,21 +1328,21 @@ export default function KPCalculatorPage() {
                           {/* Houses Signified vs Favorable */}
                           <div className="pt-2 border-t border-slate-100 grid grid-cols-2 gap-2 text-[11px]">
                             <div>
-                              <span className="text-slate-500 block">Favorable Houses:</span>
+                              <span className="text-slate-500 block">{ui.favorableHouses}</span>
                               <div className="flex flex-wrap gap-1 mt-0.5">
                                 {ev.favorable_houses.map((h) => (
                                   <span key={`fav-h-${ev.category}-${h}`} className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold">
-                                    H{h}
+                                    {ui.housePrefix} {toLocalizedDigits(h, language)}
                                   </span>
                                 ))}
                               </div>
                             </div>
                             <div>
-                              <span className="text-slate-500 block">Houses Signified by CSL:</span>
+                              <span className="text-slate-500 block">{ui.housesSignifiedByCSL}</span>
                               <div className="flex flex-wrap gap-1 mt-0.5">
                                 {ev.signified_houses.map((h) => (
                                   <span key={`signified-h-${ev.category}-${h}`} className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 font-bold">
-                                    H{h}
+                                    {ui.housePrefix} {toLocalizedDigits(h, language)}
                                   </span>
                                 ))}
                               </div>
@@ -1367,7 +1358,7 @@ export default function KPCalculatorPage() {
                         {/* Timing hint */}
                         {ev.timing_hint && (
                           <div className="text-[11px] text-amber-800 bg-amber-50/70 p-2 rounded-lg border border-amber-200/70">
-                            <strong>Timing Hint:</strong> {ev.timing_hint}
+                            <strong>{ui.timingHintLabel}</strong> {toLocalizedDigits(ev.timing_hint, language)}
                           </div>
                         )}
                       </div>
@@ -1385,10 +1376,10 @@ export default function KPCalculatorPage() {
                   <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
                     <div>
                       <h3 className="text-base font-extrabold text-slate-900">{ui.cuspsHeading}</h3>
-                      <p className="text-xs text-slate-500 mt-0.5">Placidus Unequal Division • Sign, Star, Sub & Sub-Sub Lord (SSL)</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{ui.cuspsSubheading}</p>
                     </div>
                     <span className="text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
-                      12 Cusps
+                      {ui.twelveCuspsBadge}
                     </span>
                   </div>
                   <div className="overflow-x-auto">
@@ -1408,21 +1399,21 @@ export default function KPCalculatorPage() {
                         {result.cusps.map((c) => (
                           <tr key={`cusp-${c.cusp}`} className="hover:bg-amber-50/50 transition-colors">
                             <td className="py-3 px-4 font-bold text-slate-800">
-                              {c.cusp === 1 ? `I (${c.cusp}) [Lagna]` : `${c.cusp}`}
+                              {c.cusp === 1 ? ui.lagnaCuspLabel : toLocalizedDigits(c.cusp, language)}
                             </td>
                             <td className="py-3 px-4 font-mono font-medium text-slate-700">
-                              {c.degree_formatted}
+                              {toLocalizedDigits(c.degree_formatted, language)}
                             </td>
                             <td className="py-3 px-4 font-semibold text-slate-800">
-                              {getLocalizedSign(c.sign)}
+                              {translateKPSign(c.sign, language)}
                             </td>
-                            <td className="py-3 px-4 font-bold text-slate-700">{c.sign_lord}</td>
-                            <td className="py-3 px-4 font-bold text-amber-700">{c.star_lord}</td>
+                            <td className="py-3 px-4 font-bold text-slate-700">{translateKPPlanet(c.sign_lord, language)}</td>
+                            <td className="py-3 px-4 font-bold text-amber-700">{translateKPPlanet(c.star_lord, language)}</td>
                             <td className="py-3 px-4 font-extrabold text-amber-900 bg-amber-50/80">
-                              {c.sub_lord}
+                              {translateKPPlanet(c.sub_lord, language)}
                             </td>
                             <td className="py-3 px-4 font-extrabold text-indigo-900 bg-indigo-50/50">
-                              {c.sub_sub_lord || "-"}
+                              {translateKPPlanet(c.sub_sub_lord, language) || "-"}
                             </td>
                           </tr>
                         ))}
@@ -1436,9 +1427,9 @@ export default function KPCalculatorPage() {
                   <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
                     <div>
                       <h3 className="text-base font-extrabold text-slate-900">{ui.planetsHeading}</h3>
-                      <p className="text-xs text-slate-500 mt-0.5">9 Grahas + Untenanted Status & Sub-Sub Lord</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{ui.planetsSubheading}</p>
                     </div>
-                    <span className="text-xs font-semibold text-slate-500">Nirayana Placements</span>
+                    <span className="text-xs font-semibold text-slate-500">{ui.nirayanaPlacements}</span>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
@@ -1452,7 +1443,7 @@ export default function KPCalculatorPage() {
                           <th className="py-3 px-4">{ui.starLordCol}</th>
                           <th className="py-3 px-4">{ui.subLordCol}</th>
                           <th className="py-3 px-4 font-black text-indigo-900">{ui.subSubLordCol} (SSL)</th>
-                          <th className="py-3 px-4">Untenanted?</th>
+                          <th className="py-3 px-4">{ui.untenantedQuestion}</th>
                           <th className="py-3 px-4">{ui.houseCol}</th>
                         </tr>
                       </thead>
@@ -1460,7 +1451,7 @@ export default function KPCalculatorPage() {
                         {result.planets.map((p) => (
                           <tr key={`planet-pos-${p.name}`} className="hover:bg-amber-50/50 transition-colors">
                             <td className="py-3 px-4 font-bold text-slate-900 flex items-center gap-1.5">
-                              <span>{p.name}</span>
+                              <span>{translateKPPlanet(p.name, language)}</span>
                               <span className="text-[10px] text-slate-400">({p.code})</span>
                             </td>
                             <td className="py-3 px-4">
@@ -1475,31 +1466,31 @@ export default function KPCalculatorPage() {
                               )}
                             </td>
                             <td className="py-3 px-4 font-mono font-medium text-slate-700">
-                              {p.degree_formatted}
+                              {toLocalizedDigits(p.degree_formatted, language)}
                             </td>
                             <td className="py-3 px-4 font-semibold text-slate-800">
-                              {getLocalizedSign(p.sign)}
+                              {translateKPSign(p.sign, language)}
                             </td>
-                            <td className="py-3 px-4 font-bold text-slate-700">{p.sign_lord}</td>
-                            <td className="py-3 px-4 font-bold text-amber-700">{p.star_lord}</td>
+                            <td className="py-3 px-4 font-bold text-slate-700">{translateKPPlanet(p.sign_lord, language)}</td>
+                            <td className="py-3 px-4 font-bold text-amber-700">{translateKPPlanet(p.star_lord, language)}</td>
                             <td className="py-3 px-4 font-extrabold text-amber-900 bg-amber-50/80">
-                              {p.sub_lord}
+                              {translateKPPlanet(p.sub_lord, language)}
                             </td>
                             <td className="py-3 px-4 font-extrabold text-indigo-900 bg-indigo-50/50">
-                              {p.sub_sub_lord || "-"}
+                              {translateKPPlanet(p.sub_sub_lord, language) || "-"}
                             </td>
                             <td className="py-3 px-4">
                               {p.is_untenanted ? (
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 shadow-2xs">
                                   <Star className="w-2.5 h-2.5 fill-amber-950" />
-                                  Untenanted
+                                  {ui.untenantedBadge}
                                 </span>
                               ) : (
                                 <span className="text-slate-400 text-[11px]">-</span>
                               )}
                             </td>
                             <td className="py-3 px-4 font-black text-amber-800 text-sm">
-                              {p.bhav_house}
+                              {toLocalizedDigits(p.bhav_house, language)}
                             </td>
                           </tr>
                         ))}
@@ -1518,19 +1509,19 @@ export default function KPCalculatorPage() {
                   <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 shadow-xs space-y-2">
                     <div className="flex items-center gap-2 text-emerald-900 font-extrabold text-sm">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      <span>Fruitful Ruling Planets (Event Fructification)</span>
+                      <span>{ui.fruitfulRPHeading}</span>
                     </div>
                     <p className="text-xs text-emerald-800/80 leading-relaxed">
-                      Ruling planets whose star lords are direct in transit. These act as powerful, unobstructed triggers for timing key events.
+                      {ui.fruitfulRPDesc}
                     </p>
                     <div className="flex flex-wrap gap-1.5 pt-2">
                       {result.ruling_planets_dob.fruitful_planets?.map((fp) => (
                         <span key={`fp-${fp}`} className="px-3 py-1 rounded-lg text-xs font-black bg-emerald-600 text-white shadow-2xs">
-                          {fp} ✓
+                          {translateKPPlanet(fp, language)} ✓
                         </span>
                       ))}
                       {(!result.ruling_planets_dob.fruitful_planets || result.ruling_planets_dob.fruitful_planets.length === 0) && (
-                        <span className="text-xs text-slate-500">None</span>
+                        <span className="text-xs text-slate-500">{ui.noneText}</span>
                       )}
                     </div>
                   </div>
@@ -1538,19 +1529,19 @@ export default function KPCalculatorPage() {
                   <div className="bg-rose-50 border border-rose-200 rounded-2xl p-5 shadow-xs space-y-2">
                     <div className="flex items-center gap-2 text-rose-900 font-extrabold text-sm">
                       <AlertTriangle className="w-4 h-4 text-rose-600" />
-                      <span>Discarded Ruling Planets (Retrograde Star Filter)</span>
+                      <span>{ui.discardedRPHeading}</span>
                     </div>
                     <p className="text-xs text-rose-800/80 leading-relaxed">
-                      Per Rahul Kaushik Rule 6 (Page 56): Any ruling planet in the star of a retrograde planet cannot deliver favorable results and is discarded.
+                      {ui.discardedRPDesc}
                     </p>
                     <div className="flex flex-wrap gap-1.5 pt-2">
                       {result.ruling_planets_dob.discarded_planets?.map((dp) => (
                         <span key={`dp-${dp}`} className="px-3 py-1 rounded-lg text-xs font-black bg-rose-600 text-white shadow-2xs">
-                          {dp} ✕
+                          {translateKPPlanet(dp, language)} ✕
                         </span>
                       ))}
                       {(!result.ruling_planets_dob.discarded_planets || result.ruling_planets_dob.discarded_planets.length === 0) && (
-                        <span className="text-xs text-emerald-700 font-semibold">No planets discarded — all star lords direct.</span>
+                        <span className="text-xs text-emerald-700 font-semibold">{ui.noPlanetsDiscarded}</span>
                       )}
                     </div>
                   </div>
@@ -1573,43 +1564,43 @@ export default function KPCalculatorPage() {
                         <div className="py-2.5 flex justify-between items-center">
                           <span className="font-semibold text-slate-600">{ui.lagnaSignLord}</span>
                           <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
-                            {result.ruling_planets_dob.lagna_rashi_lord}
+                            {translateKPPlanet(result.ruling_planets_dob.lagna_rashi_lord, language)}
                           </span>
                         </div>
                         <div className="py-2.5 flex justify-between items-center">
                           <span className="font-semibold text-slate-600">{ui.lagnaStarLord}</span>
                           <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
-                            {result.ruling_planets_dob.lagna_nakshatra_lord}
+                            {translateKPPlanet(result.ruling_planets_dob.lagna_nakshatra_lord, language)}
                           </span>
                         </div>
                         <div className="py-2.5 flex justify-between items-center">
                           <span className="font-semibold text-slate-600">{ui.lagnaSubLord}</span>
                           <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
-                            {result.ruling_planets_dob.lagna_sub_lord}
+                            {translateKPPlanet(result.ruling_planets_dob.lagna_sub_lord, language)}
                           </span>
                         </div>
                         <div className="py-2.5 flex justify-between items-center">
                           <span className="font-semibold text-slate-600">{ui.moonSignLord}</span>
                           <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
-                            {result.ruling_planets_dob.moon_rashi_lord}
+                            {translateKPPlanet(result.ruling_planets_dob.moon_rashi_lord, language)}
                           </span>
                         </div>
                         <div className="py-2.5 flex justify-between items-center">
                           <span className="font-semibold text-slate-600">{ui.moonStarLord}</span>
                           <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
-                            {result.ruling_planets_dob.moon_nakshatra_lord}
+                            {translateKPPlanet(result.ruling_planets_dob.moon_nakshatra_lord, language)}
                           </span>
                         </div>
                         <div className="py-2.5 flex justify-between items-center">
                           <span className="font-semibold text-slate-600">{ui.moonSubLord}</span>
                           <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
-                            {result.ruling_planets_dob.moon_sub_lord}
+                            {translateKPPlanet(result.ruling_planets_dob.moon_sub_lord, language)}
                           </span>
                         </div>
                         <div className="py-2.5 flex justify-between items-center">
                           <span className="font-semibold text-slate-600">{ui.dayLordLabel}</span>
                           <span className="font-extrabold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
-                            {result.ruling_planets_dob.day_lord}
+                            {translateKPPlanet(result.ruling_planets_dob.day_lord, language)}
                           </span>
                         </div>
                       </div>
@@ -1624,43 +1615,43 @@ export default function KPCalculatorPage() {
                         <div className="py-2.5 flex justify-between items-center">
                           <span className="font-semibold text-slate-600">{ui.lagnaSignLord}</span>
                           <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                            {result.ruling_planets_casting.lagna_rashi_lord}
+                            {translateKPPlanet(result.ruling_planets_casting.lagna_rashi_lord, language)}
                           </span>
                         </div>
                         <div className="py-2.5 flex justify-between items-center">
                           <span className="font-semibold text-slate-600">{ui.lagnaStarLord}</span>
                           <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                            {result.ruling_planets_casting.lagna_nakshatra_lord}
+                            {translateKPPlanet(result.ruling_planets_casting.lagna_nakshatra_lord, language)}
                           </span>
                         </div>
                         <div className="py-2.5 flex justify-between items-center">
                           <span className="font-semibold text-slate-600">{ui.lagnaSubLord}</span>
                           <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                            {result.ruling_planets_casting.lagna_sub_lord}
+                            {translateKPPlanet(result.ruling_planets_casting.lagna_sub_lord, language)}
                           </span>
                         </div>
                         <div className="py-2.5 flex justify-between items-center">
                           <span className="font-semibold text-slate-600">{ui.moonSignLord}</span>
                           <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                            {result.ruling_planets_casting.moon_rashi_lord}
+                            {translateKPPlanet(result.ruling_planets_casting.moon_rashi_lord, language)}
                           </span>
                         </div>
                         <div className="py-2.5 flex justify-between items-center">
                           <span className="font-semibold text-slate-600">{ui.moonStarLord}</span>
                           <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                            {result.ruling_planets_casting.moon_nakshatra_lord}
+                            {translateKPPlanet(result.ruling_planets_casting.moon_nakshatra_lord, language)}
                           </span>
                         </div>
                         <div className="py-2.5 flex justify-between items-center">
                           <span className="font-semibold text-slate-600">{ui.moonSubLord}</span>
                           <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                            {result.ruling_planets_casting.moon_sub_lord}
+                            {translateKPPlanet(result.ruling_planets_casting.moon_sub_lord, language)}
                           </span>
                         </div>
                         <div className="py-2.5 flex justify-between items-center">
                           <span className="font-semibold text-slate-600">{ui.dayLordLabel}</span>
                           <span className="font-extrabold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                            {result.ruling_planets_casting.day_lord}
+                            {translateKPPlanet(result.ruling_planets_casting.day_lord, language)}
                           </span>
                         </div>
                       </div>
@@ -1682,7 +1673,7 @@ export default function KPCalculatorPage() {
                         <h3 className="text-base font-extrabold text-slate-900">{ui.badhakaTitle}</h3>
                       </div>
                       <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-900 border border-amber-300">
-                        Ascendant: {result.badhaka_maraka.ascendant_type}
+                        {ui.ascendantTypeLabel}: {translateKPAscendantType(result.badhaka_maraka.ascendant_type, language)}
                       </span>
                     </div>
 
@@ -1690,32 +1681,32 @@ export default function KPCalculatorPage() {
                       {/* Badhaka details */}
                       <div className="bg-amber-50/50 p-4 rounded-xl border border-amber-200 space-y-2">
                         <div className="text-xs font-bold text-amber-900 uppercase">
-                          {ui.badhakaHouseLabel}: House {result.badhaka_maraka.badhaka_house} ({result.badhaka_maraka.badhaka_sign})
+                          {ui.badhakaHouseLabel}: {toLocalizedDigits(result.badhaka_maraka.badhaka_house, language)} ({translateKPSign(result.badhaka_maraka.badhaka_sign, language)})
                         </div>
                         <div className="text-xs text-slate-700">
-                          <strong>Badhaka Lord:</strong> {result.badhaka_maraka.badhaka_lord}
+                          <strong>{ui.badhakaLordLabel}:</strong> {translateKPPlanet(result.badhaka_maraka.badhaka_lord, language)}
                         </div>
                         <div className="text-xs text-slate-700">
-                          <strong>Badhaka Connected Planets:</strong>{" "}
+                          <strong>{ui.badhakaConnectedLabel}:</strong>{" "}
                           {result.badhaka_maraka.badhaka_planets.length > 0
-                            ? result.badhaka_maraka.badhaka_planets.join(", ")
-                            : "None"}
+                            ? result.badhaka_maraka.badhaka_planets.map(p => translateKPPlanet(p, language)).join(", ")
+                            : ui.noneText}
                         </div>
                       </div>
 
                       {/* Maraka details */}
                       <div className="bg-rose-50/50 p-4 rounded-xl border border-rose-200 space-y-2">
                         <div className="text-xs font-bold text-rose-900 uppercase">
-                          {ui.marakaHousesLabel}: Houses 2 & 7
+                          {ui.marakaHousesHeading}
                         </div>
                         <div className="text-xs text-slate-700">
-                          <strong>Maraka Lords:</strong> {result.badhaka_maraka.maraka_lords.join(", ")}
+                          <strong>{ui.marakaLordsLabel}:</strong> {result.badhaka_maraka.maraka_lords.map(p => translateKPPlanet(p, language)).join(", ")}
                         </div>
                         <div className="text-xs text-slate-700">
-                          <strong>Maraka Connected Planets:</strong>{" "}
+                          <strong>{ui.marakaConnectedLabel}:</strong>{" "}
                           {result.badhaka_maraka.maraka_planets.length > 0
-                            ? result.badhaka_maraka.maraka_planets.join(", ")
-                            : "None"}
+                            ? result.badhaka_maraka.maraka_planets.map(p => translateKPPlanet(p, language)).join(", ")
+                            : ui.noneText}
                         </div>
                       </div>
                     </div>
@@ -1734,36 +1725,36 @@ export default function KPCalculatorPage() {
                       <p className="text-xs text-slate-500 mt-0.5">{ui.aspectsSubheading}</p>
                     </div>
                     <span className="text-xs font-semibold text-slate-600">
-                      {result.aspects?.length || 0} Aspects Detected
+                      {toLocalizedDigits(result.aspects?.length || 0, language)} {ui.aspectsDetected}
                     </span>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
                       <thead className="bg-slate-100/75 text-slate-700 font-bold uppercase tracking-wider border-b border-slate-200">
                         <tr>
-                          <th className="py-3 px-4">Planets Involved</th>
-                          <th className="py-3 px-4">Aspect</th>
-                          <th className="py-3 px-4">Angle</th>
-                          <th className="py-3 px-4">Orb</th>
-                          <th className="py-3 px-4">Nature</th>
-                          <th className="py-3 px-4">Significance</th>
+                          <th className="py-3 px-4">{ui.colPlanetsInvolved}</th>
+                          <th className="py-3 px-4">{ui.colAspect}</th>
+                          <th className="py-3 px-4">{ui.colAngle}</th>
+                          <th className="py-3 px-4">{ui.colOrb}</th>
+                          <th className="py-3 px-4">{ui.colNature}</th>
+                          <th className="py-3 px-4">{ui.colSignificance}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {result.aspects?.map((asp, idx) => (
                           <tr key={`aspect-${asp.planet_1}-${asp.planet_2}-${idx}`} className="hover:bg-amber-50/50 transition-colors">
                             <td className="py-3 px-4 font-extrabold text-slate-900 whitespace-nowrap">
-                              {asp.planet_1} ↔ {asp.planet_2}
+                              {translateKPPlanet(asp.planet_1, language)} ↔ {translateKPPlanet(asp.planet_2, language)}
                             </td>
                             <td className="py-3 px-4 font-bold text-amber-800 whitespace-nowrap">
                               <span className="mr-1 text-sm font-black">{asp.aspect_symbol}</span>
-                              <span>{asp.aspect_name}</span>
+                              <span>{translateKPAspectName(asp.aspect_name, language)}</span>
                             </td>
                             <td className="py-3 px-4 font-mono font-medium text-slate-700 whitespace-nowrap">
-                              {asp.angle_degrees.toFixed(2)}°
+                              {toLocalizedDigits(asp.angle_degrees.toFixed(2), language)}°
                             </td>
                             <td className="py-3 px-4 font-mono text-slate-500 whitespace-nowrap">
-                              ±{asp.orb_degrees.toFixed(2)}°
+                              ±{toLocalizedDigits(asp.orb_degrees.toFixed(2), language)}°
                             </td>
                             <td className="py-3 px-4 whitespace-nowrap">
                               <span
@@ -1773,7 +1764,7 @@ export default function KPCalculatorPage() {
                                     : "bg-rose-50 text-rose-800 border border-rose-200"
                                 }`}
                               >
-                                {asp.nature}
+                                {translateKPAspectNature(asp.nature, language)}
                               </span>
                             </td>
                             <td className="py-3 px-4 text-slate-600 leading-relaxed min-w-[280px]">
@@ -1807,29 +1798,31 @@ export default function KPCalculatorPage() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Flame className="w-5 h-5 text-amber-500" />
-                            <h3 className="text-sm font-black text-slate-900">{rem.planet} Remedy</h3>
+                            <h3 className="text-sm font-black text-slate-900">
+                              {translateKPPlanet(rem.planet, language)} {ui.remedySuffix}
+                            </h3>
                           </div>
                           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300">
-                            Afflicted House {rem.house_involved}
+                            {ui.afflictedHousePrefix} {toLocalizedDigits(rem.house_involved, language)}
                           </span>
                         </div>
 
                         <div className="text-xs text-slate-600">
-                          <strong>Problem / Symptom:</strong> {rem.problem}
+                          <strong>{ui.problemSymptomLabel}:</strong> {rem.problem}
                         </div>
 
                         <div className="bg-amber-50/70 p-3 rounded-xl border border-amber-200/80 text-xs text-amber-950 space-y-1">
-                          <strong className="block text-amber-900 font-extrabold">🏺 43-Day Lal Kitab Upaya:</strong>
+                          <strong className="block text-amber-900 font-extrabold">{ui.lalKitabUpayaHeading}:</strong>
                           <p className="leading-relaxed">{rem.lal_kitab_upaya}</p>
                         </div>
 
                         <div className="bg-indigo-50/50 p-3 rounded-xl border border-indigo-200/60 text-xs text-indigo-950 space-y-1">
-                          <strong className="block text-indigo-900 font-extrabold">🕉️ Vedic Mantra:</strong>
+                          <strong className="block text-indigo-900 font-extrabold">{ui.vedicMantraHeading}:</strong>
                           <p className="font-serif italic leading-relaxed">{rem.vedic_mantra}</p>
                         </div>
 
                         <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs text-slate-700">
-                          <strong>🤝 Recommended Charity:</strong> {rem.charity_recommendation}
+                          <strong>{ui.recommendedCharityHeading}:</strong> {rem.charity_recommendation}
                         </div>
                       </div>
                     ))}
@@ -1876,10 +1869,10 @@ export default function KPCalculatorPage() {
                               <div>
                                 <div className="flex items-center gap-2">
                                   <span className="text-sm sm:text-base font-extrabold text-slate-900">
-                                    {md.lord} {ui.mahadashaTitle}
+                                    {translateKPPlanet(md.lord, language)} {ui.mahadashaTitle}
                                   </span>
                                   <span className="text-xs font-semibold text-slate-500">
-                                    ({md.duration})
+                                    ({translateKPDuration(md.duration, language)})
                                   </span>
                                   {md.is_current && (
                                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs animate-pulse">
@@ -1889,7 +1882,7 @@ export default function KPCalculatorPage() {
                                   )}
                                 </div>
                                 <div className="text-[11px] font-mono text-slate-500 mt-0.5">
-                                  {md.start_date} → {md.end_date}
+                                  {toLocalizedDigits(md.start_date, language)} → {toLocalizedDigits(md.end_date, language)}
                                 </div>
                               </div>
                             </button>
@@ -1989,16 +1982,16 @@ export default function KPCalculatorPage() {
                                           <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                                         )}
                                         <span className="font-bold text-slate-800">
-                                          {ad.lord} {ui.antardashaTitle}
+                                          {translateKPPlanet(ad.lord, language)} {ui.antardashaTitle}
                                         </span>
                                         {ad.is_current && (
                                           <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-500 text-white">
-                                            ACTIVE
+                                            {ui.activeStatus}
                                           </span>
                                         )}
                                       </div>
                                       <div className="font-mono text-[11px] text-slate-500">
-                                        {ad.start_date} → {ad.end_date} ({ad.duration})
+                                        {toLocalizedDigits(ad.start_date, language)} → {toLocalizedDigits(ad.end_date, language)} ({translateKPDuration(ad.duration, language)})
                                       </div>
                                     </button>
 
@@ -2016,15 +2009,15 @@ export default function KPCalculatorPage() {
                                               }`}
                                             >
                                               <span className="flex items-center gap-1 font-semibold text-slate-800">
-                                                <span>{pd.lord}</span>
+                                                <span>{translateKPPlanet(pd.lord, language)}</span>
                                                 {pd.is_current && (
                                                   <span className="text-[9px] font-black text-amber-700">
-                                                    ● Active
+                                                    {ui.activeDot}
                                                   </span>
                                                 )}
                                               </span>
                                               <span className="font-mono text-[10px] text-slate-500">
-                                                {pd.start_date}
+                                                {toLocalizedDigits(pd.start_date, language)}
                                               </span>
                                             </div>
                                           ))}
@@ -2050,7 +2043,7 @@ export default function KPCalculatorPage() {
       <FeatureCoinModal
         open={coinModalOpen}
         onClose={() => setCoinModalOpen(false)}
-        featureName={kpFeature?.name || (language === "bn" ? "কেপি অ্যাস্ট্রোলজি" : "KP Astrology")}
+        featureName={kpFeature?.name || ui.featureName}
         requiredCoins={kpFeature?.coins ?? 20}
         walletBalance={walletBalance}
         reason={coinModalReason}

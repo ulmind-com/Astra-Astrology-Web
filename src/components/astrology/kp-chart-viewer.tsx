@@ -3,6 +3,7 @@
 import * as React from "react";
 import type { KPPlanetDetail, KPCuspDetail } from "@/types";
 import { Download, Eye, Sparkles } from "lucide-react";
+import { translateKPPlanet, toLocalizedDigits } from "@/lib/kp-translations";
 
 export type KPChartStyle = "north" | "south" | "east" | "wheel";
 export type KPChartMode = "combine" | "rashi" | "bhav";
@@ -684,9 +685,11 @@ export function KPChartViewer({
                     : "bg-white text-slate-700 border-slate-200 hover:border-amber-300 hover:bg-amber-50"
                 }`}
               >
-                <span style={{ color: isSelected ? "#ffffff" : color }}>{p.name}</span>
+                <span style={{ color: isSelected ? "#ffffff" : color }}>
+                  {translateKPPlanet(p.name, language)}
+                </span>
                 <span className="ml-1 text-[10px] opacity-75">
-                  {Math.floor(p.degree_in_sign)}°
+                  {toLocalizedDigits(Math.floor(p.degree_in_sign), language)}°
                 </span>
               </button>
             );
@@ -695,9 +698,9 @@ export function KPChartViewer({
             <button
               type="button"
               onClick={() => setSelectedPlanet(null)}
-              className="text-xs text-amber-700 hover:underline px-2 py-1"
+              className="text-xs text-amber-700 hover:underline px-2 py-1 font-bold"
             >
-              Clear
+              {language === "bn" ? "মুছুন" : language === "hi" ? "साफ़ करें" : "Clear"}
             </button>
           )}
         </div>
@@ -705,11 +708,11 @@ export function KPChartViewer({
         <button
           type="button"
           onClick={handleDownload}
-          title="Download Chart SVG"
+          title={language === "bn" ? "চার্ট ডাউনলোড করুন (SVG)" : language === "hi" ? "चार्ट डाउनलोड करें (SVG)" : "Download Chart SVG"}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-colors"
         >
           <Download className="w-3.5 h-3.5" />
-          <span>Save SVG</span>
+          <span>{language === "bn" ? "চার্ট সেভ করুন" : language === "hi" ? "चार्ट सहेजें" : "Save SVG"}</span>
         </button>
       </div>
     </div>

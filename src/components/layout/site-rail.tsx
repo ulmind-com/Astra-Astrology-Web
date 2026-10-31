@@ -39,6 +39,7 @@ import {
   Star,
   UserRound,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
@@ -119,8 +120,15 @@ export function SiteRail() {
         href="/"
         className="group mx-3 flex h-12 shrink-0 items-center gap-3 rounded-2xl px-2.5 outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
       >
-        <span className="medallion flex size-9 shrink-0 items-center justify-center rounded-xl text-ink-900 shadow-soft transition-transform duration-300 group-hover:scale-105">
-          <Sparkles className="size-4" />
+        <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-soft transition-transform duration-300 group-hover:scale-105">
+          <Image
+            src="/logo.png"
+            alt="DivinLink"
+            width={36}
+            height={36}
+            className="size-full object-contain"
+            priority
+          />
         </span>
         <span
           className={cn(

@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { Year } from "@/components/ui";
 import { UlmindCredit } from "@/components/ulmind-credit";
@@ -19,8 +19,15 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <span className="orb-gold orb absolute left-10 bottom-32 size-10 opacity-85" />
         </div>
         <Link href="/" className="relative flex items-center gap-2 font-semibold text-brand-950">
-          <span className="medallion flex size-9 items-center justify-center rounded-xl">
-            <Sparkles className="size-4" />
+          <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-soft">
+            <Image
+              src="/logo.png"
+              alt="DivinLink"
+              width={36}
+              height={36}
+              className="size-full object-contain"
+              priority
+            />
           </span>
           <span className="font-display tracking-wide">DivinLink</span>
         </Link>
@@ -53,8 +60,15 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             href="/"
             className="mb-8 flex items-center justify-center gap-2 font-semibold lg:hidden"
           >
-            <span className="medallion flex size-9 items-center justify-center rounded-xl text-ink-900">
-              <Sparkles className="size-4" />
+            <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-soft">
+              <Image
+                src="/logo.png"
+                alt="DivinLink"
+                width={36}
+                height={36}
+                className="size-full object-contain"
+                priority
+              />
             </span>
             <span className="font-display tracking-wide">DivinLink</span>
           </Link>
