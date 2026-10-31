@@ -613,21 +613,25 @@ export default function AIAstrologerPage() {
     if (!query || loading) return;
 
     setInputQuery("");
+    const userMsgId = `user_${Date.now()}`;
     const userMsg: AIChatMessage = {
+      id: userMsgId,
       role: "user",
       content: query,
       timestamp: new Date().toISOString(),
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    const asstMsgId = `asst_${Date.now()}`;
+    const initialAssistantMsg: AIChatMessage = {
+      id: asstMsgId,
+      role: "assistant",
+      content: "",
+      timestamp: new Date().toISOString(),
+    };
+
+    setMessages((prev) => [...prev, userMsg, initialAssistantMsg]);
     setLoading(true);
     setStatusLine(t.thinking);
-
-    const slot = messages.length + 1;
-    setMessages((prev) => [
-      ...prev,
-      { role: "assistant", content: "", timestamp: new Date().toISOString() },
-    ]);
 
     const controller = new AbortController();
     streamRef.current?.abort();
@@ -655,7 +659,24 @@ export default function AIAstrologerPage() {
           setStatusLine(null);
           setMessages((prev) => {
             const next = [...prev];
-            if (next[slot]) next[slot] = { ...next[slot], content: streamed };
+            let targetIdx = -1;
+            for (let i = next.length - 1; i >= 0; i--) {
+              if (next[i].id === asstMsgId) {
+                targetIdx = i;
+                break;
+              }
+            }
+            if (targetIdx === -1) {
+              for (let i = next.length - 1; i >= 0; i--) {
+                if (next[i].role === "assistant") {
+                  targetIdx = i;
+                  break;
+                }
+              }
+            }
+            if (targetIdx !== -1) {
+              next[targetIdx] = { ...next[targetIdx], content: streamed };
+            }
             return next;
           });
         } else if (event.type === "error") {
@@ -668,9 +689,24 @@ export default function AIAstrologerPage() {
           setStatusLine(null);
           setMessages((prev) => {
             const next = [...prev];
-            if (next[slot]) {
-              next[slot] = {
-                ...next[slot],
+            let targetIdx = -1;
+            for (let i = next.length - 1; i >= 0; i--) {
+              if (next[i].id === asstMsgId) {
+                targetIdx = i;
+                break;
+              }
+            }
+            if (targetIdx === -1) {
+              for (let i = next.length - 1; i >= 0; i--) {
+                if (next[i].role === "assistant") {
+                  targetIdx = i;
+                  break;
+                }
+              }
+            }
+            if (targetIdx !== -1) {
+              next[targetIdx] = {
+                ...next[targetIdx],
                 content: event.reply || streamed,
                 tools_called: event.tools_called,
                 citations: event.citations as AIChatMessage["citations"],
@@ -679,11 +715,13 @@ export default function AIAstrologerPage() {
             }
             return next;
           });
+          setLoading(false);
+          break;
         }
       }
     } catch (err: unknown) {
       if ((err as { name?: string })?.name === "AbortError") return;
-      setMessages((prev) => prev.filter((m, i) => !(i === slot && !m.content)));
+      setMessages((prev) => prev.filter((m) => !(m.id === asstMsgId && !m.content)));
       console.error("Chat error:", err);
       toast.error(
         language === "bn"
@@ -695,6 +733,7 @@ export default function AIAstrologerPage() {
       setMessages((prev) => [
         ...prev,
         {
+          id: `asst_err_${Date.now()}`,
           role: "assistant",
           content:
             language === "bn"
@@ -994,17 +1033,19 @@ export default function AIAstrologerPage() {
                 return null;
               }
 
+              const isCurrentStreaming = loading && idx === messages.length - 1;
+
               return (
                 <div
-                  key={idx}
-                  className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-2 duration-300`}
+                  key={msg.id || idx}
+                  className={`flex items-start gap-3 ${isUser ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-2 duration-300`}
                 >
-                  {/* Assistant Avatar */}
+                  {/* Assistant Avatar - Pinned to top-left */}
                   {!isUser && (
                     <AiAvatar
                       size={36}
-                      className="mt-1 ring-2 ring-amber-300/40"
-                      active={loading && idx === messages.length - 1}
+                      className="mt-0.5 shrink-0 ring-2 ring-amber-300/40"
+                      active={isCurrentStreaming}
                     />
                   )}
 
@@ -1020,10 +1061,28 @@ export default function AIAstrologerPage() {
                       <div className="font-sans text-xs sm:text-sm leading-relaxed whitespace-pre-wrap text-slate-100">
                         {msg.content}
                       </div>
+                    ) : !msg.content ? (
+                      /* Live Calculating / Thinking state inside the bubble while waiting for stream */
+                      <div className="space-y-2 py-1">
+                        <div className="flex items-center gap-2 text-xs font-bold text-amber-800">
+                          <RefreshCw className="size-3.5 animate-spin text-amber-600 shrink-0" />
+                          <span>{statusLine || t.thinking}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 py-0.5">
+                          <span className="size-2 rounded-full bg-amber-400 animate-bounce" />
+                          <span className="size-2 rounded-full bg-amber-500 animate-bounce [animation-delay:0.2s]" />
+                          <span className="size-2 rounded-full bg-amber-600 animate-bounce [animation-delay:0.4s]" />
+                        </div>
+                      </div>
                     ) : (
-                      <AiMarkdown className="font-sans leading-relaxed text-slate-800">
-                        {msg.content}
-                      </AiMarkdown>
+                      <div className="relative">
+                        <AiMarkdown className="font-sans leading-relaxed text-slate-800">
+                          {msg.content}
+                        </AiMarkdown>
+                        {isCurrentStreaming && (
+                          <span className="inline-block size-2 ml-1 rounded-full bg-amber-500 animate-pulse align-middle" />
+                        )}
+                      </div>
                     )}
 
                     {/* Tools Called Collapsible Pill */}
@@ -1187,33 +1246,15 @@ export default function AIAstrologerPage() {
                     )}
                   </div>
 
-                  {/* User Avatar */}
+                  {/* User Avatar - Pinned to top-right */}
                   {isUser && (
-                    <div className="size-9 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-700 text-white flex items-center justify-center shrink-0 shadow-sm mt-1 ring-1 ring-amber-400/50">
+                    <div className="size-9 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-700 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5 ring-1 ring-amber-400/50">
                       <User className="size-4" />
                     </div>
                   )}
                 </div>
               );
             })}
-
-            {/* Live Calculating / Stream Status Bubble */}
-            {loading && (
-              <div className="flex gap-3 justify-start animate-in fade-in duration-300">
-                <AiAvatar size={36} className="mt-1 ring-2 ring-amber-300/40" active />
-                <div className="rounded-2xl rounded-tl-xs bg-white/95 border border-amber-200/70 p-4 shadow-sm space-y-2 backdrop-blur-md">
-                  <div className="flex items-center gap-2 text-xs font-bold text-amber-800">
-                    <RefreshCw className="size-3.5 animate-spin text-amber-600" />
-                    <span>{statusLine || t.thinking}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 py-1">
-                    <span className="size-2 rounded-full bg-amber-400 animate-bounce" />
-                    <span className="size-2 rounded-full bg-amber-500 animate-bounce [animation-delay:0.2s]" />
-                    <span className="size-2 rounded-full bg-amber-600 animate-bounce [animation-delay:0.4s]" />
-                  </div>
-                </div>
-              </div>
-            )}
 
             <div ref={chatBottomRef} />
           </div>
