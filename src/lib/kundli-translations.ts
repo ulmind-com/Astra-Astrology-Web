@@ -8,7 +8,8 @@ export type KundliLanguage = "en" | "bn" | "hi";
 export const BENGALI_DIGITS = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
 export const HINDI_DIGITS = ["०", "१", "२", "३", "४", "५", "६", "७", "८", "९"];
 
-export function toLocalizedDigits(str: string | number, lang: KundliLanguage): string {
+export function toLocalizedDigits(str: string | number | undefined | null, lang: KundliLanguage): string {
+  if (str === undefined || str === null) return "";
   const s = String(str);
   if (lang === "bn") {
     return s.replace(/\d/g, (d) => BENGALI_DIGITS[parseInt(d, 10)]);
