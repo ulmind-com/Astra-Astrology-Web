@@ -219,29 +219,28 @@ export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic })
           </div>
         </div>
 
-        {/* Astrotalk-style Service Delivered Hours Breakdown */}
+        {/* Dynamic Realtime Service Duration Breakdown */}
         {(() => {
           const sd = astrologer.service_duration;
-          const baseConsults = astrologer.total_consultations || (astrologer.experience_years * 60) || 45;
-          const videoHours = sd?.video_hours ?? Math.max(5, Math.round(baseConsults * 0.35));
-          const chatHours = sd?.chat_hours ?? Math.max(5, Math.round(baseConsults * 0.40));
-          const callHours = sd?.call_hours ?? Math.max(3, Math.round(baseConsults * 0.25));
+          const videoMinutes = sd?.video_minutes ?? (sd?.video_hours ? Math.round(sd.video_hours * 60) : 0);
+          const chatMinutes = sd?.chat_minutes ?? (sd?.chat_hours ? Math.round(sd.chat_hours * 60) : 0);
+          const callMinutes = sd?.call_minutes ?? (sd?.call_hours ? Math.round(sd.call_hours * 60) : 0);
 
           return (
             <div className="mb-3.5 flex items-center justify-between gap-1 rounded-xl bg-gradient-to-r from-purple-50/70 via-amber-50/70 to-emerald-50/70 border border-black/[0.06] px-2.5 py-1.5 text-[10px] sm:text-[11px] font-semibold text-ink-950 shadow-2xs">
               <span className="flex items-center gap-1 text-purple-900" title="Video Call">
                 <Video className="size-3 text-purple-600 shrink-0" />
-                <span className="tabular-nums">{t.videoCallHours(videoHours)}</span>
+                <span className="tabular-nums">{t.videoCallDuration(videoMinutes)}</span>
               </span>
               <span className="text-black/20">·</span>
               <span className="flex items-center gap-1 text-amber-900" title="Chat Session">
                 <MessageSquare className="size-3 text-amber-600 shrink-0" />
-                <span className="tabular-nums">{t.chatHours(chatHours)}</span>
+                <span className="tabular-nums">{t.chatDuration(chatMinutes)}</span>
               </span>
               <span className="text-black/20">·</span>
               <span className="flex items-center gap-1 text-emerald-900" title="Voice Call">
                 <Phone className="size-3 text-emerald-600 shrink-0" />
-                <span className="tabular-nums">{t.callHours(callHours)}</span>
+                <span className="tabular-nums">{t.callDuration(callMinutes)}</span>
               </span>
             </div>
           );

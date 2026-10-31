@@ -55,6 +55,7 @@ export interface ServiceDurationStats {
   chat_minutes: number;
   call_minutes: number;
   video_minutes: number;
+  total_minutes?: number;
   chat_hours: number;
   call_hours: number;
   video_hours: number;
@@ -62,6 +63,7 @@ export interface ServiceDurationStats {
   formatted_chat?: string;
   formatted_call?: string;
   formatted_video?: string;
+  formatted_total?: string;
 }
 
 export type AstrologerPublic = S["AstrologerPublic"] & {

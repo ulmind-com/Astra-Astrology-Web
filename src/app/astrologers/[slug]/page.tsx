@@ -64,6 +64,7 @@ export default function AstrologerDetailPage() {
     queryKey: ["astrologer", slug],
     queryFn: () => astrologerApi.detail(slug),
     enabled: Boolean(slug),
+    refetchInterval: 15000,
   });
 
   const [selectedPhotoUrl, setSelectedPhotoUrl] = React.useState<string | null>(null);
@@ -188,14 +189,13 @@ export default function AstrologerDetailPage() {
                       </p>
                     )}
 
-                    {/* Astrotalk-style Service Hours Delivery */}
+                    {/* Dynamic Realtime Service Duration Delivery */}
                     {(() => {
                       const sd = astrologer.service_duration;
-                      const baseConsults = astrologer.total_consultations || (astrologer.experience_years * 60) || 45;
-                      const videoHours = sd?.video_hours ?? Math.max(5, Math.round(baseConsults * 0.35));
-                      const chatHours = sd?.chat_hours ?? Math.max(5, Math.round(baseConsults * 0.40));
-                      const callHours = sd?.call_hours ?? Math.max(3, Math.round(baseConsults * 0.25));
-                      const totalHours = sd?.total_hours ?? (videoHours + chatHours + callHours);
+                      const videoMinutes = sd?.video_minutes ?? (sd?.video_hours ? Math.round(sd.video_hours * 60) : 0);
+                      const chatMinutes = sd?.chat_minutes ?? (sd?.chat_hours ? Math.round(sd.chat_hours * 60) : 0);
+                      const callMinutes = sd?.call_minutes ?? (sd?.call_hours ? Math.round(sd.call_hours * 60) : 0);
+                      const totalMinutes = sd?.total_minutes ?? (videoMinutes + chatMinutes + callMinutes);
 
                       return (
                         <div className="mt-4 rounded-2xl bg-gradient-to-r from-purple-50/80 via-amber-50/80 to-emerald-50/80 border border-brand-500/20 p-3 sm:p-3.5 shadow-2xs">
@@ -205,30 +205,30 @@ export default function AstrologerDetailPage() {
                               <span>{t.serviceDeliveryTitle}</span>
                             </span>
                             <span className="text-[11px] font-bold text-muted-foreground bg-white/80 px-2.5 py-0.5 rounded-full border border-black/[0.06] shadow-2xs">
-                              {t.totalHoursDelivered(totalHours)}
+                              {t.totalDurationDelivered(totalMinutes)}
                             </span>
                           </div>
                           <div className="grid grid-cols-3 gap-2 text-center text-xs">
                             <div className="flex flex-col items-center justify-center rounded-xl bg-white/95 p-2 border border-purple-200/60 shadow-2xs">
                               <div className="flex items-center gap-1 text-purple-700 font-bold">
                                 <Video className="size-3.5" />
-                                <span className="tabular-nums">{videoHours}h</span>
+                                <span className="tabular-nums">{t.formatDurationBadge(videoMinutes)}</span>
                               </div>
-                              <span className="text-[10px] sm:text-[11px] font-medium text-purple-900 mt-0.5 truncate max-w-full px-1">{t.videoCallHours(videoHours)}</span>
+                              <span className="text-[10px] sm:text-[11px] font-medium text-purple-900 mt-0.5 truncate max-w-full px-1">{t.videoCallDuration(videoMinutes)}</span>
                             </div>
                             <div className="flex flex-col items-center justify-center rounded-xl bg-white/95 p-2 border border-amber-200/60 shadow-2xs">
                               <div className="flex items-center gap-1 text-amber-700 font-bold">
                                 <MessageCircle className="size-3.5" />
-                                <span className="tabular-nums">{chatHours}h</span>
+                                <span className="tabular-nums">{t.formatDurationBadge(chatMinutes)}</span>
                               </div>
-                              <span className="text-[10px] sm:text-[11px] font-medium text-amber-900 mt-0.5 truncate max-w-full px-1">{t.chatHours(chatHours)}</span>
+                              <span className="text-[10px] sm:text-[11px] font-medium text-amber-900 mt-0.5 truncate max-w-full px-1">{t.chatDuration(chatMinutes)}</span>
                             </div>
                             <div className="flex flex-col items-center justify-center rounded-xl bg-white/95 p-2 border border-emerald-200/60 shadow-2xs">
                               <div className="flex items-center gap-1 text-emerald-700 font-bold">
                                 <Phone className="size-3.5" />
-                                <span className="tabular-nums">{callHours}h</span>
+                                <span className="tabular-nums">{t.formatDurationBadge(callMinutes)}</span>
                               </div>
-                              <span className="text-[10px] sm:text-[11px] font-medium text-emerald-900 mt-0.5 truncate max-w-full px-1">{t.callHours(callHours)}</span>
+                              <span className="text-[10px] sm:text-[11px] font-medium text-emerald-900 mt-0.5 truncate max-w-full px-1">{t.callDuration(callMinutes)}</span>
                             </div>
                           </div>
                         </div>

@@ -41,6 +41,11 @@ export interface AstrologersTranslations {
   chatHours: (hrs: number) => string;
   callHours: (hrs: number) => string;
   totalHoursDelivered: (hrs: number) => string;
+  formatDurationBadge: (minutes: number) => string;
+  videoCallDuration: (minutes: number) => string;
+  chatDuration: (minutes: number) => string;
+  callDuration: (minutes: number) => string;
+  totalDurationDelivered: (minutes: number) => string;
 
   // Detail Page
   backAll: string;
@@ -109,6 +114,31 @@ export const ASTROLOGERS_I18N: Record<AstrologyLanguage, AstrologersTranslations
     chatHours: (hrs) => `${hrs} ঘণ্টা চ্যাট`,
     callHours: (hrs) => `${hrs} ঘণ্টা কল`,
     totalHoursDelivered: (hrs) => `সর্বমোট ${hrs} ঘণ্টা সেবা প্রদান`,
+    formatDurationBadge: (minutes) => {
+      if (minutes < 60) return `${minutes}m`;
+      const hrs = (minutes / 60).toFixed(minutes % 60 === 0 ? 0 : 1);
+      return `${hrs}h`;
+    },
+    videoCallDuration: (minutes) => {
+      if (minutes < 60) return `${minutes} মিনিট ভিডিও কল`;
+      const hrs = (minutes / 60).toFixed(minutes % 60 === 0 ? 0 : 1);
+      return `${hrs} ঘণ্টা ভিডিও কল`;
+    },
+    chatDuration: (minutes) => {
+      if (minutes < 60) return `${minutes} মিনিট চ্যাট`;
+      const hrs = (minutes / 60).toFixed(minutes % 60 === 0 ? 0 : 1);
+      return `${hrs} ঘণ্টা চ্যাট`;
+    },
+    callDuration: (minutes) => {
+      if (minutes < 60) return `${minutes} মিনিট কল`;
+      const hrs = (minutes / 60).toFixed(minutes % 60 === 0 ? 0 : 1);
+      return `${hrs} ঘণ্টা কল`;
+    },
+    totalDurationDelivered: (minutes) => {
+      if (minutes < 60) return `সর্বমোট ${minutes} মিনিট সেবা প্রদান`;
+      const hrs = (minutes / 60).toFixed(minutes % 60 === 0 ? 0 : 1);
+      return `সর্বমোট ${hrs} ঘণ্টা সেবা প্রদান`;
+    },
 
     backAll: "সকল জ্যোতিষী",
     loadingProfile: "প্রোফাইল লোড হচ্ছে…",
@@ -174,6 +204,31 @@ export const ASTROLOGERS_I18N: Record<AstrologyLanguage, AstrologersTranslations
     chatHours: (hrs) => `${hrs} घंटे चैट`,
     callHours: (hrs) => `${hrs} घंटे कॉल`,
     totalHoursDelivered: (hrs) => `कुल ${hrs} घंटे सेवा प्रदान`,
+    formatDurationBadge: (minutes) => {
+      if (minutes < 60) return `${minutes}m`;
+      const hrs = (minutes / 60).toFixed(minutes % 60 === 0 ? 0 : 1);
+      return `${hrs}h`;
+    },
+    videoCallDuration: (minutes) => {
+      if (minutes < 60) return `${minutes} मिनट वीडियो कॉल`;
+      const hrs = (minutes / 60).toFixed(minutes % 60 === 0 ? 0 : 1);
+      return `${hrs} घंटे वीडियो कॉल`;
+    },
+    chatDuration: (minutes) => {
+      if (minutes < 60) return `${minutes} मिनट चैट`;
+      const hrs = (minutes / 60).toFixed(minutes % 60 === 0 ? 0 : 1);
+      return `${hrs} घंटे चैट`;
+    },
+    callDuration: (minutes) => {
+      if (minutes < 60) return `${minutes} मिनट कॉल`;
+      const hrs = (minutes / 60).toFixed(minutes % 60 === 0 ? 0 : 1);
+      return `${hrs} घंटे कॉल`;
+    },
+    totalDurationDelivered: (minutes) => {
+      if (minutes < 60) return `कुल ${minutes} मिनट सेवा प्रदान`;
+      const hrs = (minutes / 60).toFixed(minutes % 60 === 0 ? 0 : 1);
+      return `कुल ${hrs} घंटे सेवा प्रदान`;
+    },
 
     backAll: "सभी ज्योतिषी",
     loadingProfile: "प्रोफाइल लोड हो रही है…",
@@ -239,6 +294,31 @@ export const ASTROLOGERS_I18N: Record<AstrologyLanguage, AstrologersTranslations
     chatHours: (hrs) => `${hrs} hrs chat`,
     callHours: (hrs) => `${hrs} hrs call`,
     totalHoursDelivered: (hrs) => `Total ${hrs} hrs delivered`,
+    formatDurationBadge: (minutes) => {
+      if (minutes < 60) return `${minutes}m`;
+      const hrs = (minutes / 60).toFixed(minutes % 60 === 0 ? 0 : 1);
+      return `${hrs}h`;
+    },
+    videoCallDuration: (minutes) => {
+      if (minutes < 60) return `${minutes} mins video call`;
+      const hrs = (minutes / 60).toFixed(minutes % 60 === 0 ? 0 : 1);
+      return `${hrs} hrs video call`;
+    },
+    chatDuration: (minutes) => {
+      if (minutes < 60) return `${minutes} mins chat`;
+      const hrs = (minutes / 60).toFixed(minutes % 60 === 0 ? 0 : 1);
+      return `${hrs} hrs chat`;
+    },
+    callDuration: (minutes) => {
+      if (minutes < 60) return `${minutes} mins call`;
+      const hrs = (minutes / 60).toFixed(minutes % 60 === 0 ? 0 : 1);
+      return `${hrs} hrs call`;
+    },
+    totalDurationDelivered: (minutes) => {
+      if (minutes < 60) return `${minutes} mins total delivered`;
+      const hrs = (minutes / 60).toFixed(minutes % 60 === 0 ? 0 : 1);
+      return `${hrs} hrs total delivered`;
+    },
 
     backAll: "All astrologers",
     loadingProfile: "Loading profile…",
