@@ -161,13 +161,24 @@ export const COMMON_LANGUAGES = [
 ];
 
 // ------------------------------------------------------------------ wallet
+export interface ConsultationMetadata {
+  session_id?: string | null;
+  astrologer_id?: string | null;
+  astrologer_name?: string | null;
+  astrologer_avatar?: string | null;
+  mode?: "chat" | "call" | "video" | "appointment" | string | null;
+  duration_seconds?: number | null;
+}
+
 export type WalletBalance = S["WalletBalance"];
 export type WalletSummary = S["WalletSummary"];
 export type WalletTransaction = S["TransactionOut"] & {
   astrologer_id?: string | null;
   astrologer_name?: string | null;
   astrologer_image_url?: string | null;
+  astrologer_avatar?: string | null;
   consultation_mode?: string | null;
+  consultation?: ConsultationMetadata | null;
 };
 export type TransactionDirection = S["TransactionDirection"];
 export type TransactionReason = S["TransactionReason"] | "feature_usage";
@@ -321,8 +332,14 @@ export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {
 };
 
 // ----------------------------------------------------------------- reviews
-export type Review = S["ReviewOut"];
-export type ReviewPage = S["ReviewPage"];
+export type Review = S["ReviewOut"] & {
+  author_avatar?: string | null;
+  author_avatar_url?: string | null;
+  session_id?: string | null;
+};
+export type ReviewPage = Omit<S["ReviewPage"], "items"> & {
+  items: Review[];
+};
 export type ReviewSummary = S["ReviewSummary"];
 export type PendingReview = S["PendingReview"];
 export type ReviewKind = S["ReviewKind"];

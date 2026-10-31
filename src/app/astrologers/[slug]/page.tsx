@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   Award,
   Languages,
+  Maximize2,
   MessageCircle,
   Phone,
   Sparkles,
@@ -31,6 +32,7 @@ import {
   CardTitle,
   EmptyState,
   LoadingBlock,
+  Modal,
   StatusDot,
 } from "@/components/ui";
 import { astrologerApi, callApi, chatApi } from "@/lib/api";
@@ -63,6 +65,8 @@ export default function AstrologerDetailPage() {
     queryFn: () => astrologerApi.detail(slug),
     enabled: Boolean(slug),
   });
+
+  const [selectedPhotoUrl, setSelectedPhotoUrl] = React.useState<string | null>(null);
 
   const apiError = error as ApiError | null;
 
@@ -318,23 +322,41 @@ export default function AstrologerDetailPage() {
 
               {astrologer.gallery.length > 0 && (
                 <Card>
-                  <CardHeader>
-                    <CardTitle>{t.galleryTitle}</CardTitle>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle>{t.galleryTitle || "Portfolio & Gallery"}</CardTitle>
+                      <CardDescription>
+                        Puja ceremonies, certifications, and consultation sanctuary.
+                      </CardDescription>
+                    </div>
+                    <span className="rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-xs font-bold text-amber-700">
+                      {astrologer.gallery.length}{" "}
+                      {astrologer.gallery.length === 1 ? "Photo" : "Photos"}
+                    </span>
                   </CardHeader>
-                  <CardBody className="grid grid-cols-2 gap-3 pt-0 sm:grid-cols-3">
-                    {astrologer.gallery.map((image) => (
+                  <CardBody className="grid grid-cols-2 gap-3.5 pt-0 sm:grid-cols-3">
+                    {astrologer.gallery.map((image, idx) => (
                       <div
                         key={image.public_id}
-                        className="relative aspect-square overflow-hidden rounded-xl bg-surface-muted"
+                        onClick={() => setSelectedPhotoUrl(image.url)}
+                        className="group relative aspect-square overflow-hidden rounded-2xl bg-surface-muted cursor-pointer border border-border/80 shadow-xs hover:shadow-md hover:scale-[1.02] transition-all"
                       >
                         <Image
                           src={image.url}
-                          alt=""
+                          alt={`Astrologer Gallery Photo ${idx + 1}`}
                           fill
                           sizes="(max-width: 640px) 50vw, 200px"
-                          className="object-cover"
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
                           unoptimized
                         />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <span className="rounded-xl bg-white/90 p-2 text-slate-900 shadow-md">
+                            <Maximize2 className="size-4" />
+                          </span>
+                        </div>
+                        <span className="absolute bottom-2 left-2 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                          #{idx + 1}
+                        </span>
                       </div>
                     ))}
                   </CardBody>
@@ -344,6 +366,26 @@ export default function AstrologerDetailPage() {
           </article>
         ) : null}
       </main>
+
+      {/* Lightbox Modal */}
+      <Modal
+        open={Boolean(selectedPhotoUrl)}
+        onClose={() => setSelectedPhotoUrl(null)}
+        title="Portfolio Photo Preview"
+        size="lg"
+      >
+        {selectedPhotoUrl && (
+          <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black my-2">
+            <Image
+              src={selectedPhotoUrl}
+              alt="Astrologer photo"
+              fill
+              className="object-contain"
+              unoptimized
+            />
+          </div>
+        )}
+      </Modal>
 
       <SiteFooter />
     </>

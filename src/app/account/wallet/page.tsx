@@ -3,6 +3,7 @@
 import {
   ArrowDownLeft,
   ArrowUpRight,
+  Calendar,
   Coins,
   Loader2,
   MessageSquare,
@@ -50,9 +51,10 @@ import {
 function TransactionRow({ txn }: { txn: WalletTransaction }) {
   const isCredit = txn.direction === "credit";
   const rawRef = (txn.ref as Record<string, any>) || {};
-  const astroName = txn.astrologer_name || rawRef.astrologer_name;
-  const astroImg = txn.astrologer_image_url || rawRef.astrologer_image_url;
-  const mode = (txn.consultation_mode || rawRef.consultation_mode || "").toLowerCase();
+  const consultation = txn.consultation;
+  const astroName = txn.astrologer_name || consultation?.astrologer_name || rawRef.astrologer_name;
+  const astroImg = txn.astrologer_image_url || txn.astrologer_avatar || consultation?.astrologer_avatar || rawRef.astrologer_image_url;
+  const mode = (txn.consultation_mode || consultation?.mode || rawRef.consultation_mode || "").toLowerCase();
   const isConsultation = txn.reason === "consultation" || Boolean(astroName);
 
   const getModeBadge = () => {
@@ -77,7 +79,7 @@ function TransactionRow({ txn }: { txn: WalletTransaction }) {
     };
   };
 
-  const modeBadge = isConsultation ? getModeBadge() : null;
+  const modeBadge = isConsultation && mode ? getModeBadge() : null;
   const ModeIcon = modeBadge?.icon;
 
   return (
@@ -132,6 +134,9 @@ function TransactionRow({ txn }: { txn: WalletTransaction }) {
         </div>
         <p className="text-[11px] sm:text-xs text-muted-foreground truncate mt-0.5">
           {formatDateTime(txn.created_at)}
+          {consultation?.duration_seconds != null && consultation.duration_seconds > 0 && (
+            ` · ${Math.max(1, Math.round(consultation.duration_seconds / 60))} mins`
+          )}
           {txn.note && astroName && ` · ${txn.note}`}
           {txn.amount_paise != null && ` · paid ${formatPaise(txn.amount_paise)}`}
         </p>
