@@ -58,6 +58,15 @@ import {
 import {
   KUNDLI_MATCHING_STRINGS,
   type KundliMatchingTranslations,
+  translateKootaAttribute,
+  translateKootaValue,
+  translatePoruthamStatus,
+  translatePersonalityTrait,
+  translatePersonalitySummary,
+  translateSeverity,
+  translateAvakahadaAttr,
+  translateAvakahadaValue,
+  translateDoshaName,
 } from "@/lib/kundli-matching-translations";
 import {
   translatePlanetName,
@@ -331,11 +340,7 @@ export default function KundliMatchingPage() {
       const access = checkAccess("kundli_matching");
       if (!access.allowed) {
         if (access.reason === "disabled") {
-          toast.error(
-            language === "bn"
-              ? "কুন্ডলী মিলন ফিচারটি বর্তমানে বন্ধ রাখা হয়েছে।"
-              : "Kundli matching feature is temporarily unavailable.",
-          );
+          toast.error(t.toastDisabled);
           return;
         }
         setCoinModalReason(access.reason || "insufficient_coins");
@@ -348,20 +353,10 @@ export default function KundliMatchingPage() {
       if (res) {
         setResult(res);
         if (access.requiredCoins > 0) {
-          toast.success(
-            language === "bn"
-              ? `কুন্ডলী মিলন গণনা সম্পন্ন হয়েছে! (${access.requiredCoins} কয়েন খরচ হয়েছে)`
-              : `Kundli matching calculated! (${access.requiredCoins} coins used)`,
-          );
+          toast.success(t.toastSuccessCoins(access.requiredCoins));
           refreshWallet();
         } else {
-          toast.success(
-            language === "bn"
-              ? "কুন্ডলী মিলন গণনা সফলভাবে সম্পন্ন হয়েছে!"
-              : language === "hi"
-              ? "कुंडली मिलान सफलतापूर्वक पूरा हुआ!"
-              : "Kundli matching calculated successfully!",
-          );
+          toast.success(t.toastSuccess);
         }
         setTimeout(() => {
           document.getElementById("matching-results")?.scrollIntoView({ behavior: "smooth" });
@@ -376,12 +371,7 @@ export default function KundliMatchingPage() {
         setCoinModalReason("unauthorized");
         setCoinModalOpen(true);
       } else {
-        toast.error(
-          err?.message ||
-            (language === "bn"
-              ? "কুন্ডলী মিলন গণনা করতে সমস্যা হয়েছে। তথ্য পরীক্ষা করুন।"
-              : "Failed to calculate Kundli matching. Please check inputs."),
-        );
+        toast.error(err?.message || t.toastErrorCalc);
       }
     } finally {
       setIsLoading(false);
@@ -522,13 +512,7 @@ export default function KundliMatchingPage() {
             <div className="space-y-6 animate-fadeIn">
               <div className="flex items-center gap-2 text-amber-800 font-semibold text-base sm:text-lg border-b border-amber-100 pb-2">
                 <span className="text-xl">♂</span>
-                <span>
-                  {language === "bn"
-                    ? "বরের বিবরণ লিখুন"
-                    : language === "hi"
-                    ? "वर का विवरण दर्ज करें"
-                    : "Enter Groom's Details"}
-                </span>
+                <span>{t.groomFormHeading}</span>
               </div>
 
               {/* Full Name */}
@@ -589,7 +573,7 @@ export default function KundliMatchingPage() {
                 <label className="block text-xs font-bold text-slate-700 tracking-wide uppercase">
                   {t.form.tobLabel}{" "}
                   <span className="text-[11px] font-semibold text-emerald-700 lowercase">
-                    ({language === "bn" ? "ঐচ্ছিক — না দিলে ১২:০০ PM" : language === "hi" ? "वैकल्पिक — 12:00 PM" : "optional — 12:00 PM"})
+                    ({t.timeOptionalSuffix})
                   </span>
                 </label>
                 <div className="grid grid-cols-4 gap-2 sm:gap-3">
@@ -755,13 +739,7 @@ export default function KundliMatchingPage() {
             <div className="space-y-6 animate-fadeIn">
               <div className="flex items-center gap-2 text-amber-800 font-semibold text-base sm:text-lg border-b border-amber-100 pb-2">
                 <span className="text-xl">♀</span>
-                <span>
-                  {language === "bn"
-                    ? "কনের বিবরণ লিখুন"
-                    : language === "hi"
-                    ? "वधू का विवरण दर्ज करें"
-                    : "Enter Bride's Details"}
-                </span>
+                <span>{t.brideFormHeading}</span>
               </div>
 
               {/* Full Name */}
@@ -822,7 +800,7 @@ export default function KundliMatchingPage() {
                 <label className="block text-xs font-bold text-slate-700 tracking-wide uppercase">
                   {t.form.tobLabel}{" "}
                   <span className="text-[11px] font-semibold text-emerald-700 lowercase">
-                    ({language === "bn" ? "ঐচ্ছিক — না দিলে ১২:০০ PM" : language === "hi" ? "वैकल्पिक — 12:00 PM" : "optional — 12:00 PM"})
+                    ({t.timeOptionalSuffix})
                   </span>
                 </label>
                 <div className="grid grid-cols-4 gap-2 sm:gap-3">
@@ -1007,15 +985,13 @@ export default function KundliMatchingPage() {
                       {isLoading ? (
                         <>
                           <RefreshCw className="size-4 animate-spin" />
-                          <span>{language === "bn" ? "গণনা করা হচ্ছে..." : "Calculating..."}</span>
+                          <span>{t.calculatingBtn}</span>
                         </>
                       ) : (
                         <>
                           <span>
                             {matchingFeature && !matchingFeature.enabled
-                              ? language === "bn"
-                                ? "ফিচারটি বন্ধ রয়েছে"
-                                : "Feature Disabled"
+                              ? t.featureUnavailable
                               : t.matchButton}
                           </span>
                           <HeartHandshake className="size-4" />
@@ -1063,7 +1039,7 @@ export default function KundliMatchingPage() {
                     <span>{t.groomTitle}</span>
                   </h3>
                   <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-800">
-                    {result.groom.manglik_status_text}
+                    {result.groom.is_manglik ? t.groomManglikBadge : t.groomNonManglikBadge}
                   </span>
                 </div>
                 <div className="divide-y divide-slate-100 text-xs sm:text-sm">
@@ -1092,7 +1068,9 @@ export default function KundliMatchingPage() {
                   </div>
                   <div className="px-5 py-2.5 flex justify-between">
                     <span className="text-slate-500">{t.rashiLord}</span>
-                    <span className="font-medium text-slate-800">{result.groom.rasi_lord}</span>
+                    <span className="font-medium text-slate-800">
+                      {translatePlanetName(result.groom.rasi_lord, language)}
+                    </span>
                   </div>
                   <div className="px-5 py-2.5 flex justify-between">
                     <span className="text-slate-500">{t.janamNakshatra}</span>
@@ -1102,7 +1080,9 @@ export default function KundliMatchingPage() {
                   </div>
                   <div className="px-5 py-2.5 flex justify-between">
                     <span className="text-slate-500">{t.nakshatraLord}</span>
-                    <span className="font-medium text-slate-800">{result.groom.nakshatra_lord}</span>
+                    <span className="font-medium text-slate-800">
+                      {translatePlanetName(result.groom.nakshatra_lord, language)}
+                    </span>
                   </div>
                   <div className="px-5 py-2.5 flex justify-between">
                     <span className="text-slate-500">{t.pada}</span>
@@ -1121,7 +1101,7 @@ export default function KundliMatchingPage() {
                     <span>{t.brideTitle}</span>
                   </h3>
                   <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-800">
-                    {result.bride.manglik_status_text}
+                    {result.bride.is_manglik ? t.brideManglikBadge : t.brideNonManglikBadge}
                   </span>
                 </div>
                 <div className="divide-y divide-slate-100 text-xs sm:text-sm">
@@ -1150,7 +1130,9 @@ export default function KundliMatchingPage() {
                   </div>
                   <div className="px-5 py-2.5 flex justify-between">
                     <span className="text-slate-500">{t.rashiLord}</span>
-                    <span className="font-medium text-slate-800">{result.bride.rasi_lord}</span>
+                    <span className="font-medium text-slate-800">
+                      {translatePlanetName(result.bride.rasi_lord, language)}
+                    </span>
                   </div>
                   <div className="px-5 py-2.5 flex justify-between">
                     <span className="text-slate-500">{t.janamNakshatra}</span>
@@ -1160,7 +1142,9 @@ export default function KundliMatchingPage() {
                   </div>
                   <div className="px-5 py-2.5 flex justify-between">
                     <span className="text-slate-500">{t.nakshatraLord}</span>
-                    <span className="font-medium text-slate-800">{result.bride.nakshatra_lord}</span>
+                    <span className="font-medium text-slate-800">
+                      {translatePlanetName(result.bride.nakshatra_lord, language)}
+                    </span>
                   </div>
                   <div className="px-5 py-2.5 flex justify-between">
                     <span className="text-slate-500">{t.pada}</span>
@@ -1197,12 +1181,8 @@ export default function KundliMatchingPage() {
                   </p>
                   <p className="text-xs text-slate-600 mt-0.5">
                     {result.doshas.manglik_match
-                      ? language === "bn"
-                        ? "উভয়ের মধ্যে মাঙ্গলিক সামঞ্জস্য শুভ ও বিবাহযোগ্য।"
-                        : "Manglik compatibility is favorable for this marriage."
-                      : language === "bn"
-                      ? "মাঙ্গলিক অসামঞ্জস্য রয়েছে, অভিজ্ঞ জ্যোতিষীর পরামর্শ বা শান্তি স্বস্ত্যয়ন প্রয়োজন।"
-                      : "Manglik disparity detected; astrological consultation recommended."}
+                      ? t.manglikDescFavorable
+                      : t.manglikDescCaution}
                   </p>
                 </div>
               </div>
@@ -1217,12 +1197,8 @@ export default function KundliMatchingPage() {
                   <ShieldCheck className="size-3.5" />
                   <span>
                     {result.doshas.manglik_match
-                      ? language === "bn"
-                        ? "মাঙ্গলিক সামঞ্জস্য: হ্যাঁ"
-                        : "Manglik Match: Yes"
-                      : language === "bn"
-                      ? "মাঙ্গলিক সামঞ্জস্য: না"
-                      : "Manglik Match: No"}
+                      ? t.manglikMatchYes
+                      : t.manglikMatchNo}
                   </span>
                 </span>
               </div>
@@ -1369,12 +1345,8 @@ export default function KundliMatchingPage() {
                         }`}
                       >
                         {result.total_received >= 18
-                          ? language === "bn"
-                            ? "শুভ মিলন"
-                            : "Auspicious"
-                          : language === "bn"
-                          ? "অশুভ মিলন"
-                          : "Inauspicious"}
+                          ? t.auspiciousMatch
+                          : t.inauspiciousMatch}
                       </span>
                     </div>
 
@@ -1394,12 +1366,8 @@ export default function KundliMatchingPage() {
                         }`}
                       >
                         {!result.doshas.rajjoo_dosha
-                          ? language === "bn"
-                            ? "দোষ মুক্ত"
-                            : "Dosha Free"
-                          : language === "bn"
-                          ? "রজ্জু দোষ বিদ্যমান"
-                          : "Dosha Present"}
+                          ? t.doshaFree
+                          : t.doshaPresent}
                       </span>
                     </div>
 
@@ -1419,12 +1387,8 @@ export default function KundliMatchingPage() {
                         }`}
                       >
                         {!result.doshas.vedha_dosha
-                          ? language === "bn"
-                            ? "দোষ মুক্ত"
-                            : "Dosha Free"
-                          : language === "bn"
-                          ? "বেধ দোষ বিদ্যমান"
-                          : "Dosha Present"}
+                          ? t.doshaFree
+                          : t.doshaPresent}
                       </span>
                     </div>
 
@@ -1444,12 +1408,8 @@ export default function KundliMatchingPage() {
                         }`}
                       >
                         {result.doshas.manglik_match
-                          ? language === "bn"
-                            ? "অনুকূল"
-                            : "Compatible"
-                          : language === "bn"
-                          ? "প্রতিকার সাপেক্ষ"
-                          : "Remedy Needed"}
+                          ? t.compatibleBadge
+                          : t.remedyNeededBadge}
                       </span>
                     </div>
                   </div>
@@ -1462,12 +1422,8 @@ export default function KundliMatchingPage() {
                     <div className="space-y-1">
                       <h4 className="text-sm font-serif font-bold text-slate-900">
                         {result.is_compatible
-                          ? language === "bn"
-                            ? "বিবাহের জন্য শুভ ও অনুকূল যোটক"
-                            : "Favorable Alliance for Marriage"
-                          : language === "bn"
-                          ? "সতর্কতা ও জ্যোতিষীয় প্রতিকার পরামর্শিত"
-                          : "Remedial Consultation Strongly Advised"}
+                          ? t.verdictAuspiciousTitle
+                          : t.verdictCautionTitle}
                       </h4>
                       <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
                         {result.is_compatible ? t.verdict.favorable : t.verdict.unfavorable}
@@ -1499,7 +1455,7 @@ export default function KundliMatchingPage() {
                         <tbody className="divide-y divide-slate-100">
                           {result.kootas.map((k, idx) => {
                             const attrTrans = t.attributes[k.attribute];
-                            const attrName = attrTrans?.name || k.attribute;
+                            const attrName = translateKootaAttribute(k.attribute, language) || attrTrans?.name || k.attribute;
                             const areaOfLife = attrTrans?.areaOfLife || k.area_of_life;
                             const isFull = k.received === k.out_of;
                             const isZero = k.received === 0;
@@ -1515,10 +1471,10 @@ export default function KundliMatchingPage() {
                                   {attrName}
                                 </td>
                                 <td className="py-3 px-4 text-slate-700 font-medium">
-                                  {k.male}
+                                  {translateKootaValue(k.attribute, k.male, language)}
                                 </td>
                                 <td className="py-3 px-4 text-slate-700 font-medium">
-                                  {k.female}
+                                  {translateKootaValue(k.attribute, k.female, language)}
                                 </td>
                                 <td className="py-3 px-4 text-center font-bold text-slate-600">
                                   {toLocalizedDigits(k.out_of, language)}
@@ -1574,16 +1530,14 @@ export default function KundliMatchingPage() {
                         </div>
                         <div>
                           <p className="font-serif font-bold text-amber-950 text-sm sm:text-base">
-                            {language === "bn"
-                              ? "দাম্পত্য ভবিষ্যৎ ও শুভ বিবাহের সময় গণনা প্রস্তুত"
-                              : language === "hi"
-                              ? "दांपत्य भविष्य एवं शुभ विवाह समय गणना उपलब्ध"
-                              : "Marriage Life Forecast & Auspicious Timing Ready"}
+                            {t.forecastBannerTitle}
                           </p>
                           <p className="text-xs text-amber-800 mt-0.5">
-                            {language === "bn"
-                              ? `শুভ বছর: ${result.forecast.auspicious_marriage_years.map((y) => toLocalizedDigits(y, language)).join(", ")} • দাম্পত্য সুখ: ${toLocalizedDigits(result.forecast.marital_harmony_score, language)}% • সন্তান সুখ: ${toLocalizedDigits(result.forecast.children_progeny_score, language)}%`
-                              : `Auspicious Years: ${result.forecast.auspicious_marriage_years.join(", ")} • Harmony: ${result.forecast.marital_harmony_score}% • Progeny: ${result.forecast.children_progeny_score}%`}
+                            {t.forecastBannerSubtitle(
+                              result.forecast.auspicious_marriage_years.map((y) => toLocalizedDigits(y, language)).join(", "),
+                              toLocalizedDigits(result.forecast.marital_harmony_score, language),
+                              toLocalizedDigits(result.forecast.children_progeny_score, language)
+                            )}
                           </p>
                         </div>
                       </div>
@@ -1592,7 +1546,7 @@ export default function KundliMatchingPage() {
                         onClick={() => setActiveTab("forecast")}
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer"
                       >
-                        <span>{language === "bn" ? "সম্পূর্ণ ভবিষ্যৎ বিশ্লেষণ দেখুন" : language === "hi" ? "संपूर्ण भविष्य देखें" : "View Full Forecast"}</span>
+                        <span>{t.viewFullForecastBtn}</span>
                         <ArrowRight className="size-3.5" />
                       </button>
                     </div>
@@ -1613,16 +1567,13 @@ export default function KundliMatchingPage() {
                       </div>
                       <div>
                         <h4 className="font-serif font-bold text-amber-950 text-base">
-                          {language === "bn"
-                            ? "দক্ষিণ ভারতীয় দশকূট মিলন (১০ পরুথাম)"
-                            : language === "hi"
-                            ? "दक्षिण भारतीय दशकूट मिलान (10 पोरुथम)"
-                            : "South Indian Dashakoota (10 Poruthams)"}
+                          {t.dashakootTitle}
                         </h4>
                         <p className="text-xs text-amber-900/80 mt-0.5">
-                          {language === "bn"
-                            ? `মোট প্রাপ্ত স্কোর: ${toLocalizedDigits(result.dashakoot.total_received, language)} / ৩৬ • অনুকূল পরুথাম: ${toLocalizedDigits(result.dashakoot.porutham_count, language)} / ১০`
-                            : `Total Score: ${result.dashakoot.total_received} / 36 • Favorable Poruthams: ${result.dashakoot.porutham_count} / 10`}
+                          {t.dashakootSummary(
+                            toLocalizedDigits(result.dashakoot.total_received, language),
+                            toLocalizedDigits(result.dashakoot.porutham_count, language)
+                          )}
                         </p>
                       </div>
                     </div>
@@ -1634,12 +1585,8 @@ export default function KundliMatchingPage() {
                       }`}
                     >
                       {result.dashakoot.is_favorable
-                        ? language === "bn"
-                          ? "অনুকূল দশকূট মিলন"
-                          : "Favorable Dashakoot"
-                        : language === "bn"
-                        ? "মধ্যম দশকূট মিলন"
-                        : "Moderate Dashakoot"}
+                        ? t.dashakootFavorableBadge
+                        : t.dashakootModerateBadge}
                     </span>
                   </div>
 
@@ -1647,28 +1594,22 @@ export default function KundliMatchingPage() {
                   <div className="bg-white rounded-2xl border border-amber-200/80 shadow-xs overflow-hidden">
                     <div className="bg-amber-500/10 px-5 py-4 border-b border-amber-200/70">
                       <h3 className="font-serif font-bold text-amber-950 text-base sm:text-lg">
-                        {language === "bn"
-                          ? "দশ পরুথাম বিস্তারিত ফলাফল সারণী"
-                          : language === "hi"
-                          ? "दस पोरुथम विस्तृत परिणाम तालिका"
-                          : "10 Porutham Detailed Agreement Table"}
+                        {t.dashakootTableTitle}
                       </h3>
                       <p className="text-xs text-slate-500">
-                        {language === "bn"
-                          ? "দিন, গণ, যোনি, রাশি, রাশ্যাধিপতি, রজ্জু, বেধ, বশ্য, মহেন্দ্র ও স্ত্রী দীর্ঘ বিচার"
-                          : "Dina, Gana, Yoni, Rasi, Rasyadhipati, Rajju, Vedha, Vashya, Mahendra, Stree Deergha"}
+                        {t.dashakootTableSubtitle}
                       </p>
                     </div>
                     <div className="overflow-x-auto">
                       <table className="w-full text-left border-collapse text-xs sm:text-sm">
                         <thead>
                           <tr className="bg-amber-50/70 border-b border-amber-200/70 text-slate-700 font-bold">
-                            <th className="py-3 px-4">{language === "bn" ? "পরুথাম (Koota)" : "Porutham"}</th>
+                            <th className="py-3 px-4">{t.attributeTh}</th>
                             <th className="py-3 px-4">{t.pointsTable.colMale}</th>
                             <th className="py-3 px-4">{t.pointsTable.colFemale}</th>
                             <th className="py-3 px-4 text-center">{t.pointsTable.colOutOf}</th>
                             <th className="py-3 px-4 text-center">{t.pointsTable.colReceived}</th>
-                            <th className="py-3 px-4">{language === "bn" ? "তাৎপর্য ও ব্যাখ্যা" : "Significance"}</th>
+                            <th className="py-3 px-4">{t.significanceTh}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -1677,9 +1618,9 @@ export default function KundliMatchingPage() {
                               key={item.attribute}
                               className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/30"}
                             >
-                              <td className="py-3 px-4 font-bold text-slate-900">{item.attribute}</td>
-                              <td className="py-3 px-4 text-slate-700">{item.male}</td>
-                              <td className="py-3 px-4 text-slate-700">{item.female}</td>
+                              <td className="py-3 px-4 font-bold text-slate-900">{translateKootaAttribute(item.attribute, language)}</td>
+                              <td className="py-3 px-4 text-slate-700">{translateKootaValue(item.attribute, item.male, language)}</td>
+                              <td className="py-3 px-4 text-slate-700">{translateKootaValue(item.attribute, item.female, language)}</td>
                               <td className="py-3 px-4 text-center font-bold text-slate-600">
                                 {toLocalizedDigits(item.out_of, language)}
                               </td>
@@ -1696,7 +1637,7 @@ export default function KundliMatchingPage() {
                                   {toLocalizedDigits(item.received, language)}
                                 </span>
                               </td>
-                              <td className="py-3 px-4 text-slate-600 text-xs">{item.description}</td>
+                              <td className="py-3 px-4 text-slate-600 text-xs">{translatePoruthamStatus(item.description, language)}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -1727,18 +1668,10 @@ export default function KundliMatchingPage() {
                   <div className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50/60 p-5 shadow-xs">
                     <h3 className="font-serif font-bold text-slate-900 text-base sm:text-lg flex items-center gap-2">
                       <ShieldCheck className="size-5 text-emerald-600" />
-                      <span>
-                        {language === "bn"
-                          ? "মহাদোষ ও শাস্ত্রীয় দোষভঙ্গ (Dosha Cancellation) বিশ্লেষণ"
-                          : language === "hi"
-                          ? "महादोष एवं शास्त्रीय दोषभंग विश्लेषण"
-                          : "Maha Dosha & Classical Cancellation Analysis"}
-                      </span>
+                      <span>{t.cancellationsTitle}</span>
                     </h3>
                     <p className="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
-                      {language === "bn"
-                        ? "শাস্ত্রীয় জ্যোতিষ (মুহূর্ত চিন্তামণি ও পরাশর শাস্ত্র) অনুসারে সাধারণ গণনায় দোষ দেখা গেলেও বিশেষ রাশিনাথ মিত্রতা, চরণভেদ ও নক্ষত্রভেদে অনেক দোষ স্বয়ং বিনষ্ট হয় (দোষভঙ্গ)। নিচে বিস্তারিত পরীক্ষা দেওয়া হলো:"
-                        : "According to Brihat Parashara Hora Shastra & Muhurta Chintamani, apparent doshas are often cancelled by planetary friendship and constellation variations."}
+                      {t.cancellationsSubtitle}
                     </p>
                   </div>
 
@@ -1750,7 +1683,7 @@ export default function KundliMatchingPage() {
                         className="bg-white rounded-2xl border border-amber-200/80 p-5 shadow-xs space-y-3"
                       >
                         <div className="flex items-center justify-between">
-                          <h4 className="font-serif font-bold text-slate-900 text-base">{c.dosha_name}</h4>
+                          <h4 className="font-serif font-bold text-slate-900 text-base">{translateDoshaName(c.dosha_name, language)}</h4>
                           <span
                             className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                               !c.is_present
@@ -1761,16 +1694,10 @@ export default function KundliMatchingPage() {
                             }`}
                           >
                             {!c.is_present
-                              ? language === "bn"
-                                ? "দোষ মুক্ত"
-                                : "Dosha Free"
+                              ? t.doshaFree
                               : c.is_cancelled
-                              ? language === "bn"
-                                ? "দোষভঙ্গ (বাতিল)"
-                                : "Cancelled (Bhanga)"
-                              : language === "bn"
-                              ? "দোষ বিদ্যমান"
-                              : "Dosha Present"}
+                              ? t.cancelledBhanga
+                              : t.doshaPresent}
                           </span>
                         </div>
 
@@ -1780,10 +1707,10 @@ export default function KundliMatchingPage() {
 
                         <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
                           <span>
-                            <strong>{language === "bn" ? "শাস্ত্র সূত্র:" : "Reference:"}</strong> {c.shastra_citation}
+                            <strong>{t.shastraCitationLabel}</strong> {c.shastra_citation}
                           </span>
                           <span>
-                            <strong>{language === "bn" ? "তীব্রতা:" : "Severity:"}</strong> {c.severity}
+                            <strong>{t.severityLabel}</strong> {translateSeverity(c.severity, language)}
                           </span>
                         </div>
 
@@ -1791,7 +1718,7 @@ export default function KundliMatchingPage() {
                           <div className="text-xs text-amber-900 bg-amber-100/40 p-2.5 rounded-lg border border-amber-200 flex items-start gap-2">
                             <Sparkles className="size-3.5 text-amber-700 shrink-0 mt-0.5" />
                             <span>
-                              <strong>{language === "bn" ? "শাস্ত্রসম্মত প্রতিকার:" : "Remedy:"}</strong> {c.remedy}
+                              <strong>{t.remedyLabel}</strong> {c.remedy}
                             </span>
                           </div>
                         )}
@@ -1804,18 +1731,14 @@ export default function KundliMatchingPage() {
                     <div className="bg-white rounded-2xl border border-amber-200/80 p-5 shadow-xs space-y-4">
                       <h4 className="font-serif font-bold text-amber-950 text-base flex items-center gap-2">
                         <Flame className="size-4 text-orange-500" />
-                        <span>
-                          {language === "bn"
-                            ? "মাঙ্গলিক কারণ ও দৃষ্টি বিশদ বিবরণী (Based On House & Aspects)"
-                            : "Manglik Breakdown: Based On House & Aspects"}
-                        </span>
+                        <span>{t.manglikAspectsTitle}</span>
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                           <div className="flex justify-between items-center font-bold text-slate-900 text-xs sm:text-sm pb-1 border-b border-slate-200">
-                            <span>{result.groom.name} ({language === "bn" ? "বর" : "Groom"})</span>
+                            <span>{result.groom.name} ({t.groomLabel})</span>
                             <span className="text-amber-800 font-serif">
-                              {result.manglik_detail.groom_percentage}% ({result.manglik_detail.groom_severity})
+                              {toLocalizedDigits(result.manglik_detail.groom_percentage, language)}% ({translateSeverity(result.manglik_detail.groom_severity, language)})
                             </span>
                           </div>
                           <ul className="text-xs text-slate-700 space-y-1">
@@ -1828,7 +1751,7 @@ export default function KundliMatchingPage() {
                           </ul>
                           {result.manglik_detail.groom_cancellations?.length > 0 && (
                             <div className="mt-2 text-xs text-emerald-800 bg-emerald-50 p-2 rounded-lg border border-emerald-200">
-                              <strong>{language === "bn" ? "উপশম / নিবৃত্তি:" : "Relief:"}</strong>{" "}
+                              <strong>{t.relativesReliefLabel}</strong>{" "}
                               {result.manglik_detail.groom_cancellations.join("; ")}
                             </div>
                           )}
@@ -1836,9 +1759,9 @@ export default function KundliMatchingPage() {
 
                         <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                           <div className="flex justify-between items-center font-bold text-slate-900 text-xs sm:text-sm pb-1 border-b border-slate-200">
-                            <span>{result.bride.name} ({language === "bn" ? "কনে" : "Bride"})</span>
+                            <span>{result.bride.name} ({t.brideLabel})</span>
                             <span className="text-amber-800 font-serif">
-                              {result.manglik_detail.bride_percentage}% ({result.manglik_detail.bride_severity})
+                              {toLocalizedDigits(result.manglik_detail.bride_percentage, language)}% ({translateSeverity(result.manglik_detail.bride_severity, language)})
                             </span>
                           </div>
                           <ul className="text-xs text-slate-700 space-y-1">
@@ -1851,7 +1774,7 @@ export default function KundliMatchingPage() {
                           </ul>
                           {result.manglik_detail.bride_cancellations?.length > 0 && (
                             <div className="mt-2 text-xs text-emerald-800 bg-emerald-50 p-2 rounded-lg border border-emerald-200">
-                              <strong>{language === "bn" ? "উপশম / নিবৃত্তি:" : "Relief:"}</strong>{" "}
+                              <strong>{t.relativesReliefLabel}</strong>{" "}
                               {result.manglik_detail.bride_cancellations.join("; ")}
                             </div>
                           )}
@@ -1875,16 +1798,14 @@ export default function KundliMatchingPage() {
                       </div>
                       <div>
                         <h4 className="font-serif font-bold text-slate-900 text-base">
-                          {language === "bn"
-                            ? "পাপসাম্য সামঞ্জস্য সূচক (Papasamya Balance)"
-                            : language === "hi"
-                            ? "पापसाम्य संतुलन सूचकांक"
-                            : "Papasamya Malefic Balance"}
+                          {t.papasamyaTitle}
                         </h4>
                         <p className="text-xs text-slate-600 mt-0.5">
-                          {language === "bn"
-                            ? `বরের পাপ পয়েন্ট: ${toLocalizedDigits(result.papasamya.groom_score.total_points, language)} | কনের পাপ পয়েন্ট: ${toLocalizedDigits(result.papasamya.bride_score.total_points, language)} (ব্যবধান: ${toLocalizedDigits(result.papasamya.difference, language)})`
-                            : `Groom Points: ${result.papasamya.groom_score.total_points} | Bride Points: ${result.papasamya.bride_score.total_points} (Diff: ${result.papasamya.difference})`}
+                          {t.papasamyaSubtitle(
+                            toLocalizedDigits(result.papasamya.groom_score.total_points, language),
+                            toLocalizedDigits(result.papasamya.bride_score.total_points, language),
+                            toLocalizedDigits(result.papasamya.difference, language)
+                          )}
                         </p>
                       </div>
                     </div>
@@ -1909,58 +1830,58 @@ export default function KundliMatchingPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
                         <div className="font-bold text-slate-900 text-sm flex justify-between border-b border-slate-200 pb-1">
-                          <span>{result.groom.name} ({language === "bn" ? "বর" : "Groom"})</span>
+                          <span>{result.groom.name} ({t.groomLabel})</span>
                           <span className="text-indigo-700 font-serif text-base">
-                            {result.papasamya.groom_score.total_points} pts
+                            {toLocalizedDigits(result.papasamya.groom_score.total_points, language)} pts
                           </span>
                         </div>
                         <div className="grid grid-cols-3 gap-2 text-center py-2">
                           <div className="bg-white p-2 rounded border border-slate-200">
                             <span className="text-slate-500 text-[10px] block">
-                              {language === "bn" ? "লগ্ন থেকে" : "From Lagna"}
+                              {t.fromLagna}
                             </span>
-                            <strong className="text-slate-800">{result.papasamya.groom_score.lagna_points}</strong>
+                            <strong className="text-slate-800">{toLocalizedDigits(result.papasamya.groom_score.lagna_points, language)}</strong>
                           </div>
                           <div className="bg-white p-2 rounded border border-slate-200">
                             <span className="text-slate-500 text-[10px] block">
-                              {language === "bn" ? "চন্দ্র থেকে" : "From Moon"}
+                              {t.fromMoon}
                             </span>
-                            <strong className="text-slate-800">{result.papasamya.groom_score.moon_points}</strong>
+                            <strong className="text-slate-800">{toLocalizedDigits(result.papasamya.groom_score.moon_points, language)}</strong>
                           </div>
                           <div className="bg-white p-2 rounded border border-slate-200">
                             <span className="text-slate-500 text-[10px] block">
-                              {language === "bn" ? "শুক্র থেকে" : "From Venus"}
+                              {t.fromVenus}
                             </span>
-                            <strong className="text-slate-800">{result.papasamya.groom_score.venus_points}</strong>
+                            <strong className="text-slate-800">{toLocalizedDigits(result.papasamya.groom_score.venus_points, language)}</strong>
                           </div>
                         </div>
                       </div>
 
                       <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
                         <div className="font-bold text-slate-900 text-sm flex justify-between border-b border-slate-200 pb-1">
-                          <span>{result.bride.name} ({language === "bn" ? "কনে" : "Bride"})</span>
+                          <span>{result.bride.name} ({t.brideLabel})</span>
                           <span className="text-indigo-700 font-serif text-base">
-                            {result.papasamya.bride_score.total_points} pts
+                            {toLocalizedDigits(result.papasamya.bride_score.total_points, language)} pts
                           </span>
                         </div>
                         <div className="grid grid-cols-3 gap-2 text-center py-2">
                           <div className="bg-white p-2 rounded border border-slate-200">
                             <span className="text-slate-500 text-[10px] block">
-                              {language === "bn" ? "লগ্ন থেকে" : "From Lagna"}
+                              {t.fromLagna}
                             </span>
-                            <strong className="text-slate-800">{result.papasamya.bride_score.lagna_points}</strong>
+                            <strong className="text-slate-800">{toLocalizedDigits(result.papasamya.bride_score.lagna_points, language)}</strong>
                           </div>
                           <div className="bg-white p-2 rounded border border-slate-200">
                             <span className="text-slate-500 text-[10px] block">
-                              {language === "bn" ? "চন্দ্র থেকে" : "From Moon"}
+                              {t.fromMoon}
                             </span>
-                            <strong className="text-slate-800">{result.papasamya.bride_score.moon_points}</strong>
+                            <strong className="text-slate-800">{toLocalizedDigits(result.papasamya.bride_score.moon_points, language)}</strong>
                           </div>
                           <div className="bg-white p-2 rounded border border-slate-200">
                             <span className="text-slate-500 text-[10px] block">
-                              {language === "bn" ? "শুক্র থেকে" : "From Venus"}
+                              {t.fromVenus}
                             </span>
-                            <strong className="text-slate-800">{result.papasamya.bride_score.venus_points}</strong>
+                            <strong className="text-slate-800">{toLocalizedDigits(result.papasamya.bride_score.venus_points, language)}</strong>
                           </div>
                         </div>
                       </div>
@@ -1977,30 +1898,24 @@ export default function KundliMatchingPage() {
                   <div className="bg-white rounded-2xl border border-amber-200/80 shadow-xs overflow-hidden">
                     <div className="bg-amber-500/10 px-5 py-4 border-b border-amber-200/70">
                       <h3 className="font-serif font-bold text-amber-950 text-base sm:text-lg">
-                        {language === "bn"
-                          ? "অবকহড়া চক্র ও পঞ্চাঙ্গ তুলনামূলক সারণী"
-                          : language === "hi"
-                          ? "अवकहड़ा चक्र एवं पंचांग तुलनात्मक विवरण"
-                          : "Side-by-Side Avakahada Chakra & Panchang Matrix"}
+                        {t.avakahadaTableTitle}
                       </h3>
                       <p className="text-xs text-slate-500">
-                        {language === "bn"
-                          ? "ক্লায়েন্ট রেফারেন্স রিপোর্ট (পৃষ্ঠা ২) অনুযায়ী উভয় জাতক-জাতিকার ১৬টি মৌলিক সূচকের তুলনা"
-                          : "16 Astrological attributes side-by-side conforming strictly to client reference specification"}
+                        {t.avakahadaTableSubtitle}
                       </p>
                     </div>
                     <div className="overflow-x-auto">
                       <table className="w-full text-left border-collapse text-xs sm:text-sm">
                         <thead>
                           <tr className="bg-amber-50/70 border-b border-amber-200/70 text-slate-700 font-bold">
-                            <th className="py-3 px-4">{language === "bn" ? "বৈশিষ্ট্য (Attribute)" : "Attribute"}</th>
+                            <th className="py-3 px-4">{t.pointsTable.colAttribute}</th>
                             <th className="py-3 px-4 text-center font-bold text-amber-900">
-                              {result.groom.name} ({language === "bn" ? "বর" : "Groom"})
+                              {result.groom.name} ({t.groomLabel})
                             </th>
                             <th className="py-3 px-4 text-center font-bold text-amber-900">
-                              {result.bride.name} ({language === "bn" ? "কনে" : "Bride"})
+                              {result.bride.name} ({t.brideLabel})
                             </th>
-                            <th className="py-3 px-4">{language === "bn" ? "তাৎপর্য" : "Significance"}</th>
+                            <th className="py-3 px-4">{t.significanceTh}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -2009,9 +1924,9 @@ export default function KundliMatchingPage() {
                               key={item.attribute}
                               className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/30"}
                             >
-                              <td className="py-2.5 px-4 font-bold text-slate-900">{item.attribute}</td>
-                              <td className="py-2.5 px-4 text-center text-slate-800 font-medium">{item.male}</td>
-                              <td className="py-2.5 px-4 text-center text-slate-800 font-medium">{item.female}</td>
+                              <td className="py-2.5 px-4 font-bold text-slate-900">{translateAvakahadaAttr(item.attribute, language)}</td>
+                              <td className="py-2.5 px-4 text-center text-slate-800 font-medium">{translateAvakahadaValue(item.attribute, item.male, language)}</td>
+                              <td className="py-2.5 px-4 text-center text-slate-800 font-medium">{translateAvakahadaValue(item.attribute, item.female, language)}</td>
                               <td className="py-2.5 px-4 text-slate-500 text-xs">{item.description}</td>
                             </tr>
                           ))}
@@ -2030,11 +1945,7 @@ export default function KundliMatchingPage() {
                   {/* Summary */}
                   <div className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50/60 p-5 shadow-xs">
                     <h4 className="font-serif font-bold text-slate-900 text-base">
-                      {language === "bn"
-                        ? "মনস্তাত্ত্বিক ও চারিত্রিক বৈশিষ্ট্য বিশ্লেষণ"
-                        : language === "hi"
-                        ? "मनोवैज्ञानिक एवं चारित्रिक विशेषता विश्लेषण"
-                        : "Psychological & Trait Compatibility"}
+                      {t.personalityTitle}
                     </h4>
                     <p className="text-xs sm:text-sm text-slate-700 mt-1 leading-relaxed">
                       {result.personality.compatibility_summary}
@@ -2046,13 +1957,15 @@ export default function KundliMatchingPage() {
                     {/* Groom */}
                     <div className="bg-white rounded-2xl border border-amber-200/80 p-5 shadow-xs space-y-4">
                       <h4 className="font-serif font-bold text-amber-950 text-base border-b border-amber-100 pb-2">
-                        {result.groom.name} ({language === "bn" ? "বর" : "Groom"}) — {result.groom.janam_rasi}
+                        {result.groom.name} ({t.groomLabel}) — {translateRashiName(result.groom.janam_rasi, language)}
                       </h4>
-                      <p className="text-xs text-slate-600 italic">{result.personality.groom_summary}</p>
+                      <p className="text-xs text-slate-600 italic">
+                        {translatePersonalitySummary(result.personality.groom_summary, language)}
+                      </p>
 
                       <div>
                         <span className="text-xs font-bold text-emerald-800 uppercase tracking-wide block mb-2">
-                          {language === "bn" ? "ইতিবাচক গুণাবলী (Positive Traits)" : "Positive Traits"}
+                          {t.traitsPositiveTitle}
                         </span>
                         <div className="flex flex-wrap gap-1.5">
                           {result.personality.groom_positive_traits.map((tr) => (
@@ -2060,7 +1973,7 @@ export default function KundliMatchingPage() {
                               key={tr}
                               className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 text-xs font-semibold border border-emerald-200"
                             >
-                              {tr}
+                              {translatePersonalityTrait(tr, language)}
                             </span>
                           ))}
                         </div>
@@ -2068,7 +1981,7 @@ export default function KundliMatchingPage() {
 
                       <div>
                         <span className="text-xs font-bold text-rose-800 uppercase tracking-wide block mb-2">
-                          {language === "bn" ? "সতর্কতার ক্ষেত্র (Areas for Patience)" : "Sensitive Traits"}
+                          {t.traitsSensitiveTitle}
                         </span>
                         <div className="flex flex-wrap gap-1.5">
                           {result.personality.groom_negative_traits.map((tr) => (
@@ -2076,7 +1989,7 @@ export default function KundliMatchingPage() {
                               key={tr}
                               className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-800 text-xs font-semibold border border-rose-200"
                             >
-                              {tr}
+                              {translatePersonalityTrait(tr, language)}
                             </span>
                           ))}
                         </div>
@@ -2086,13 +1999,15 @@ export default function KundliMatchingPage() {
                     {/* Bride */}
                     <div className="bg-white rounded-2xl border border-amber-200/80 p-5 shadow-xs space-y-4">
                       <h4 className="font-serif font-bold text-amber-950 text-base border-b border-amber-100 pb-2">
-                        {result.bride.name} ({language === "bn" ? "কনে" : "Bride"}) — {result.bride.janam_rasi}
+                        {result.bride.name} ({t.brideLabel}) — {translateRashiName(result.bride.janam_rasi, language)}
                       </h4>
-                      <p className="text-xs text-slate-600 italic">{result.personality.bride_summary}</p>
+                      <p className="text-xs text-slate-600 italic">
+                        {translatePersonalitySummary(result.personality.bride_summary, language)}
+                      </p>
 
                       <div>
                         <span className="text-xs font-bold text-emerald-800 uppercase tracking-wide block mb-2">
-                          {language === "bn" ? "ইতিবাচক গুণাবলী (Positive Traits)" : "Positive Traits"}
+                          {t.traitsPositiveTitle}
                         </span>
                         <div className="flex flex-wrap gap-1.5">
                           {result.personality.bride_positive_traits.map((tr) => (
@@ -2100,7 +2015,7 @@ export default function KundliMatchingPage() {
                               key={tr}
                               className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 text-xs font-semibold border border-emerald-200"
                             >
-                              {tr}
+                              {translatePersonalityTrait(tr, language)}
                             </span>
                           ))}
                         </div>
@@ -2108,7 +2023,7 @@ export default function KundliMatchingPage() {
 
                       <div>
                         <span className="text-xs font-bold text-rose-800 uppercase tracking-wide block mb-2">
-                          {language === "bn" ? "সতর্কতার ক্ষেত্র (Areas for Patience)" : "Sensitive Traits"}
+                          {t.traitsSensitiveTitle}
                         </span>
                         <div className="flex flex-wrap gap-1.5">
                           {result.personality.bride_negative_traits.map((tr) => (
@@ -2116,7 +2031,7 @@ export default function KundliMatchingPage() {
                               key={tr}
                               className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-800 text-xs font-semibold border border-rose-200"
                             >
-                              {tr}
+                              {translatePersonalityTrait(tr, language)}
                             </span>
                           ))}
                         </div>
@@ -2137,20 +2052,10 @@ export default function KundliMatchingPage() {
                       <div>
                         <div className="inline-flex items-center gap-2 text-amber-800 text-xs font-bold uppercase tracking-wider mb-1">
                           <Calendar className="size-4" />
-                          <span>
-                            {language === "bn"
-                              ? "বৃহস্পতি গোচর ও গুরু বল গণনা"
-                              : language === "hi"
-                              ? "गुरु गोचर एवं गुरु बल गणना"
-                              : "Jupiter Transit (Guru Bala) & Timing"}
-                          </span>
+                          <span>{t.jupiterTransitSubtitle}</span>
                         </div>
                         <h3 className="font-serif text-xl sm:text-2xl font-bold text-amber-950">
-                          {language === "bn"
-                            ? "বিবাহের শুভ বছর ও সময়কাল"
-                            : language === "hi"
-                            ? "विवाह हेतु सर्वाधिक शुभ वर्ष"
-                            : "Most Auspicious Years for Marriage"}
+                          {t.forecastAuspiciousTitle}
                         </h3>
                       </div>
                       <div className="flex items-center gap-2 flex-wrap">
@@ -2172,7 +2077,7 @@ export default function KundliMatchingPage() {
                     <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-amber-200/70">
                       <div className="rounded-xl bg-white/85 border border-amber-200/80 p-3.5">
                         <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-                          {language === "bn" ? "বরের উপযুক্ত বিবাহ বয়স" : language === "hi" ? "वर की उपयुक्त विवाह आयु" : "Groom's Ideal Marriage Age"}
+                          {t.idealMarriageAgeBoy}
                         </span>
                         <p className="mt-1 font-bold text-slate-900 text-xs sm:text-sm">
                           {result.forecast.ideal_marriage_age_groom}
@@ -2180,7 +2085,7 @@ export default function KundliMatchingPage() {
                       </div>
                       <div className="rounded-xl bg-white/85 border border-amber-200/80 p-3.5">
                         <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-                          {language === "bn" ? "কনের উপযুক্ত বিবাহ বয়স" : language === "hi" ? "वधू की उपयुक्त विवाह आयु" : "Bride's Ideal Marriage Age"}
+                          {t.idealMarriageAgeGirl}
                         </span>
                         <p className="mt-1 font-bold text-slate-900 text-xs sm:text-sm">
                           {result.forecast.ideal_marriage_age_bride}
@@ -2197,7 +2102,7 @@ export default function KundliMatchingPage() {
                         <div className="flex items-center gap-2 text-rose-600">
                           <Heart className="size-5" />
                           <h4 className="font-serif font-bold text-slate-900 text-base">
-                            {language === "bn" ? "দাম্পত্য জীবন ও প্রেম" : language === "hi" ? "दांपत्य जीवन एवं प्रेम" : "Marital Harmony & Love"}
+                            {t.forecastHarmonyTitle}
                           </h4>
                         </div>
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-800 border border-rose-200">
@@ -2218,7 +2123,7 @@ export default function KundliMatchingPage() {
                         <div className="flex items-center gap-2 text-indigo-600">
                           <Baby className="size-5" />
                           <h4 className="font-serif font-bold text-slate-900 text-base">
-                            {language === "bn" ? "সন্তানের স্বাস্থ্য ও বংশবৃদ্ধি" : language === "hi" ? "संतान सुख एवं स्वास्थ्य" : "Progeny & Child Health"}
+                            {t.forecastProgenyTitle}
                           </h4>
                         </div>
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-800 border border-indigo-200">
@@ -2239,7 +2144,7 @@ export default function KundliMatchingPage() {
                         <div className="flex items-center gap-2 text-amber-600">
                           <Activity className="size-5" />
                           <h4 className="font-serif font-bold text-slate-900 text-base">
-                            {language === "bn" ? "ঝগড়াঝাঁটি ও মেজাজের সামঞ্জস্য" : language === "hi" ? "विवाद एवं स्वभाव संतुलन" : "Temperament & Conflict Control"}
+                            {t.forecastTemperamentTitle}
                           </h4>
                         </div>
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
@@ -2260,7 +2165,7 @@ export default function KundliMatchingPage() {
                         <div className="flex items-center gap-2 text-emerald-600">
                           <Coins className="size-5" />
                           <h4 className="font-serif font-bold text-slate-900 text-base">
-                            {language === "bn" ? "বিয়ের পর অর্থভাগ্য ও যৌথ সমৃদ্ধি" : language === "hi" ? "विवाह उपरांत धन-समृद्धि" : "Post-Marriage Wealth & Growth"}
+                            {t.forecastWealthTitle}
                           </h4>
                         </div>
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
@@ -2282,7 +2187,7 @@ export default function KundliMatchingPage() {
                       <div className="flex items-center gap-2 text-purple-700">
                         <TrendingUp className="size-5" />
                         <h4 className="font-serif font-bold text-slate-900 text-base sm:text-lg">
-                          {language === "bn" ? "উভয়ের যৌথ ভবিষ্যৎ ও দীর্ঘস্থায়িত্ব" : language === "hi" ? "संयुक्त भविष्य एवं दीर्घायु" : "Mutual Future & Longevity"}
+                          {t.forecastMutualTitle}
                         </h4>
                       </div>
                       <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-900 border border-purple-200">
@@ -2305,16 +2210,10 @@ export default function KundliMatchingPage() {
                           <Clock className="size-5 text-indigo-600" />
                           <div>
                             <h4 className="font-serif font-bold text-base sm:text-lg">
-                              {language === "bn"
-                                ? "বিংশোত্তরী দশা ও দশা সন্ধি বিচার"
-                                : language === "hi"
-                                ? "विंशोत्तरी दशा एवं दशा संधि विचार"
-                                : "Vimshottari Dasha & Dasha Sandhi Match"}
+                              {t.dashaComparisonTitle}
                             </h4>
                             <p className="text-xs text-slate-500">
-                              {language === "bn"
-                                ? "উভয়ের বর্তমান মহাদশা ও অন্তর্দশার সামঞ্জস্যপূর্ণ বিশ্লেষণ"
-                                : "Analysis of running Mahadashas and critical transit juncture"}
+                              {t.dashaComparisonSubtitle}
                             </p>
                           </div>
                         </div>
@@ -2327,12 +2226,8 @@ export default function KundliMatchingPage() {
                             }`}
                           >
                             {result.dasha_comparison.dasha_sandhi_present
-                              ? language === "bn"
-                                ? "দশা সন্ধি বিদ্যমান"
-                                : "Dasha Sandhi Alert"
-                              : language === "bn"
-                              ? "দশা সন্ধি মুক্ত"
-                              : "No Dasha Sandhi"}
+                              ? t.dashaSandhiPresentBadge
+                              : t.dashaSandhiAbsentBadge}
                           </span>
                         </div>
                       </div>
@@ -2342,22 +2237,22 @@ export default function KundliMatchingPage() {
                         {/* Groom Dasha */}
                         <div className="p-4 rounded-xl bg-indigo-50/40 border border-indigo-100 space-y-2">
                           <span className="text-xs font-bold text-indigo-900 uppercase tracking-wider block">
-                            {result.groom.name} — {language === "bn" ? "বর্তমান দশা" : "Current Dasha"}
+                            {result.groom.name} — {t.currentDashaTitle}
                           </span>
                           <div className="flex items-baseline gap-2">
                             <span className="text-sm font-semibold text-slate-600">
-                              {language === "bn" ? "মহাদশা:" : "Mahadasha:"}
+                              {t.mahadashaLabel}
                             </span>
                             <span className="text-base font-bold text-slate-900">
-                              {result.dasha_comparison.groom_dasha.current_mahadasha}
+                              {translatePlanetName(result.dasha_comparison.groom_dasha.current_mahadasha, language)}
                             </span>
                           </div>
                           <div className="flex items-baseline gap-2">
                             <span className="text-xs font-semibold text-slate-600">
-                              {language === "bn" ? "অন্তর্দশা:" : "Antardasha:"}
+                              {t.antardashaLabel}
                             </span>
                             <span className="text-xs font-bold text-slate-800">
-                              {result.dasha_comparison.groom_dasha.current_antardasha}
+                              {translatePlanetName(result.dasha_comparison.groom_dasha.current_antardasha, language)}
                             </span>
                           </div>
                           {result.dasha_comparison.groom_dasha.dasha_sequence && (
@@ -2367,7 +2262,7 @@ export default function KundliMatchingPage() {
                                   key={idx}
                                   className="text-[11px] px-2 py-0.5 rounded-md font-medium border bg-white text-slate-600 border-slate-200"
                                 >
-                                  {p.planet}: {p.start_date.split("-")[0]} - {p.end_date.split("-")[0]}
+                                  {translatePlanetName(p.planet, language)}: {toLocalizedDigits(p.start_date.split("-")[0], language)} - {toLocalizedDigits(p.end_date.split("-")[0], language)}
                                 </span>
                               ))}
                             </div>
@@ -2377,22 +2272,22 @@ export default function KundliMatchingPage() {
                         {/* Bride Dasha */}
                         <div className="p-4 rounded-xl bg-pink-50/40 border border-pink-100 space-y-2">
                           <span className="text-xs font-bold text-pink-900 uppercase tracking-wider block">
-                            {result.bride.name} — {language === "bn" ? "বর্তমান দশা" : "Current Dasha"}
+                            {result.bride.name} — {t.currentDashaTitle}
                           </span>
                           <div className="flex items-baseline gap-2">
                             <span className="text-sm font-semibold text-slate-600">
-                              {language === "bn" ? "মহাদশা:" : "Mahadasha:"}
+                              {t.mahadashaLabel}
                             </span>
                             <span className="text-base font-bold text-slate-900">
-                              {result.dasha_comparison.bride_dasha.current_mahadasha}
+                              {translatePlanetName(result.dasha_comparison.bride_dasha.current_mahadasha, language)}
                             </span>
                           </div>
                           <div className="flex items-baseline gap-2">
                             <span className="text-xs font-semibold text-slate-600">
-                              {language === "bn" ? "অন্তর্দশা:" : "Antardasha:"}
+                              {t.antardashaLabel}
                             </span>
                             <span className="text-xs font-bold text-slate-800">
-                              {result.dasha_comparison.bride_dasha.current_antardasha}
+                              {translatePlanetName(result.dasha_comparison.bride_dasha.current_antardasha, language)}
                             </span>
                           </div>
                           {result.dasha_comparison.bride_dasha.dasha_sequence && (
@@ -2402,7 +2297,7 @@ export default function KundliMatchingPage() {
                                   key={idx}
                                   className="text-[11px] px-2 py-0.5 rounded-md font-medium border bg-white text-slate-600 border-slate-200"
                                 >
-                                  {p.planet}: {p.start_date.split("-")[0]} - {p.end_date.split("-")[0]}
+                                  {translatePlanetName(p.planet, language)}: {toLocalizedDigits(p.start_date.split("-")[0], language)} - {toLocalizedDigits(p.end_date.split("-")[0], language)}
                                 </span>
                               ))}
                             </div>
@@ -2427,7 +2322,7 @@ export default function KundliMatchingPage() {
                     <div className="flex items-center gap-2.5 text-amber-900 mb-3">
                       <ShieldCheck className="size-5 text-amber-600" />
                       <h4 className="font-serif font-bold text-base sm:text-lg">
-                        {language === "bn" ? "শাস্ত্রীয় বৈদিক প্রতিকার ও মঙ্গল উপায়" : language === "hi" ? "शास्त्रीय वैदिक उपाय एवं शांति" : "Classical Vedic Remedies & Astrological Guidance"}
+                        {t.vedicRemediesTitle}
                       </h4>
                     </div>
                     <ul className="space-y-2.5 text-xs sm:text-sm text-slate-700">
@@ -2441,15 +2336,13 @@ export default function KundliMatchingPage() {
 
                     <div className="mt-5 pt-4 border-t border-amber-200/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <p className="text-xs text-slate-500">
-                        {language === "bn"
-                          ? "সম্পূর্ণ জন্মছক মিলিয়ে আরও বিস্তারিত যোটক বিচারের জন্য আমাদের অভিজ্ঞ জ্যোতিষীদের সাথে সরাসরি কথা বলুন।"
-                          : "For in-depth personalized birth chart remedies, consult verified astrologers."}
+                        {t.vedicRemediesNotice}
                       </p>
                       <Link
                         href="/astrologers"
                         className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 text-white font-bold text-xs hover:bg-amber-700 transition-colors shrink-0 shadow-2xs"
                       >
-                        <span>{language === "bn" ? "জ্যোতিষীর পরামর্শ নিন" : "Talk to Astrologer"}</span>
+                        <span>{t.talkAstrologerBtn}</span>
                         <ArrowRight className="size-3.5" />
                       </Link>
                     </div>
@@ -2465,14 +2358,10 @@ export default function KundliMatchingPage() {
                   <div className="bg-white rounded-2xl border border-amber-200/80 shadow-xs overflow-hidden">
                     <div className="bg-amber-500/10 px-5 py-4 border-b border-amber-200/70">
                       <h3 className="font-serif font-bold text-amber-950 text-base sm:text-lg">
-                        {language === "bn"
-                          ? "উভয়ের গ্রহ অবস্থান তুলনামূলক সারণী"
-                          : "Comparative Planetary Positions"}
+                        {t.planetsTableTitle}
                       </h3>
                       <p className="text-xs text-slate-500">
-                        {language === "bn"
-                          ? "বর ও কনের গ্রহের নির্ভুল ডিগ্রি, রাশি ও নক্ষত্র অবস্থান"
-                          : "High precision sidereal longitudes, signs and nakshatras for Groom & Bride"}
+                        {t.planetsTableSubtitle}
                       </p>
                     </div>
 
@@ -2515,7 +2404,7 @@ export default function KundliMatchingPage() {
                                   </span>
                                 </td>
                                 <td className="py-3 px-4 text-slate-700">
-                                  {translateNakshatraName(gp.nakshatra, language)} (পাদ:{" "}
+                                  {translateNakshatraName(gp.nakshatra, language)} ({t.padaLabel}:{" "}
                                   {toLocalizedDigits(gp.pada, language)})
                                 </td>
                                 <td className="py-3 px-4 text-slate-700 font-medium">
@@ -2533,7 +2422,7 @@ export default function KundliMatchingPage() {
                                 <td className="py-3 px-4 text-slate-700">
                                   {bp ? (
                                     <>
-                                      {translateNakshatraName(bp.nakshatra, language)} (পাদ:{" "}
+                                      {translateNakshatraName(bp.nakshatra, language)} ({t.padaLabel}:{" "}
                                       {toLocalizedDigits(bp.pada, language)})
                                     </>
                                   ) : (
@@ -2560,7 +2449,7 @@ export default function KundliMatchingPage() {
                     {/* Chart Type Selector */}
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mr-1">
-                        {language === "bn" ? "ছক নির্বাচন:" : language === "hi" ? "कुंडली प्रकार:" : "Chart Type:"}
+                        {t.chartTypeLabel}
                       </span>
                       <button
                         type="button"
@@ -2571,7 +2460,7 @@ export default function KundliMatchingPage() {
                             : "bg-white text-slate-700 border-slate-200 hover:bg-amber-50"
                         }`}
                       >
-                        {language === "bn" ? "D1 লগ্ন ছক" : language === "hi" ? "D1 लग्न कुंडली" : "D1 Lagna"}
+                        {t.chartTypeD1}
                       </button>
                       <button
                         type="button"
@@ -2582,7 +2471,7 @@ export default function KundliMatchingPage() {
                             : "bg-white text-slate-700 border-slate-200 hover:bg-amber-50"
                         }`}
                       >
-                        {language === "bn" ? "D9 নবাংশ ছক (দাম্পত্য)" : language === "hi" ? "D9 नवांश (दांपत्य)" : "D9 Navamsha"}
+                        {t.chartTypeD9}
                       </button>
                       <button
                         type="button"
@@ -2593,7 +2482,7 @@ export default function KundliMatchingPage() {
                             : "bg-white text-slate-700 border-slate-200 hover:bg-amber-50"
                         }`}
                       >
-                        {language === "bn" ? "ভাব চলিত ছক" : language === "hi" ? "भाव चलित" : "Bhava Chalit"}
+                        {t.chartTypeChalit}
                       </button>
                       <button
                         type="button"
@@ -2604,14 +2493,14 @@ export default function KundliMatchingPage() {
                             : "bg-white text-slate-700 border-slate-200 hover:bg-amber-50"
                         }`}
                       >
-                        {language === "bn" ? "চন্দ্র কুন্ডলী" : language === "hi" ? "चंद्र कुंडली" : "Chandra Kundli"}
+                        {t.chartTypeMoon}
                       </button>
                     </div>
 
                     {/* Chart Style Switcher (North, East, South) */}
                     <div className="flex items-center gap-1.5 shrink-0">
                       <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mr-1">
-                        {language === "bn" ? "শৈলী:" : language === "hi" ? "शैली:" : "Style:"}
+                        {t.chartStyleLabel}
                       </span>
                       <button
                         type="button"
@@ -2653,28 +2542,12 @@ export default function KundliMatchingPage() {
                   <div className="rounded-xl bg-amber-50 border border-amber-200/80 px-4 py-3 flex items-center justify-between text-xs text-amber-900">
                     <p className="font-medium">
                       {selectedChartType === "d1"
-                        ? language === "bn"
-                          ? "D1 জন্ম লগ্ন কুন্ডলী: ব্যক্তিত্ব, দেহগঠন ও সামগ্রিক জীবনের মূল ভিত্তি প্রকাশ করে।"
-                          : language === "hi"
-                          ? "D1 जन्म लग्न कुंडली: समग्र व्यक्तित्व एवं जीवन आधार का मुख्य विश्लेषण।"
-                          : "D1 Birth Chart: Core representation of physical constitution and life foundation."
+                        ? t.chartD1Desc
                         : selectedChartType === "d9"
-                        ? language === "bn"
-                          ? "D9 নবাংশ কুন্ডলী (Navamsha): বৈদিক জ্যোতিষে বিবাহ, জীবনসঙ্গীর স্বভাব, দাম্পত্য সুখ ও অন্তিম সৌভাগ্যের সুনির্দিষ্ট দিক নির্দেশ করে।"
-                          : language === "hi"
-                          ? "D9 नवांश कुंडली: विवाह, जीवनसाथी के स्वभाव एवं दांपत्य सुख का अंतिम शास्त्रीय प्रमाण।"
-                          : "D9 Navamsha Chart: The paramount divisional chart for marriage, spouse disposition, and marital harmony."
+                        ? t.chartD9Desc
                         : selectedChartType === "chalit"
-                        ? language === "bn"
-                          ? "ভাব চলিত কুন্ডলী: শ্রীপতি ভাবারম্ভ পদ্ধতি অনুসারে গ্রহদের প্রকৃত ভাব অবস্থানের দিক নির্দেশ করে।"
-                          : language === "hi"
-                          ? "भाव चलित कुंडली: श्रीपति भाव पद्धति अनुसार ग्रहों की वास्तविक भाव स्थिति।"
-                          : "Bhava Chalit Chart: Actual house placements according to classical house cusps."
-                        : language === "bn"
-                        ? "চন্দ্র কুন্ডলী: মানসিক সংযোগ, সংবেদনশীলতা ও উভয় মনের অভ্যন্তরীণ রসায়ন বোঝার মাপকাঠি।"
-                        : language === "hi"
-                        ? "चंद्र कुंडली: मानसिक सामंजस्य एवं भावनात्मक तालमेल का विश्लेषण।"
-                        : "Chandra Kundli: Mental disposition, emotional compatibility, and subconscious harmony."}
+                        ? t.chartChalitDesc
+                        : t.chartMoonDesc}
                     </p>
                   </div>
 
@@ -2722,7 +2595,7 @@ export default function KundliMatchingPage() {
                         <div className="bg-white rounded-2xl border border-amber-200/80 p-5 shadow-xs text-center space-y-4">
                           <div>
                             <span className="text-xs font-bold text-amber-700 uppercase tracking-wider block mb-0.5">
-                              {language === "bn" ? "বরের কুন্ডলী" : language === "hi" ? "वर की कुंडली" : "Groom's Chart"}
+                              {t.groomChartSub}
                             </span>
                             <h4 className="font-serif font-bold text-slate-900 text-base">
                               {result.groom.name} —{" "}
@@ -2750,7 +2623,7 @@ export default function KundliMatchingPage() {
                         <div className="bg-white rounded-2xl border border-amber-200/80 p-5 shadow-xs text-center space-y-4">
                           <div>
                             <span className="text-xs font-bold text-rose-700 uppercase tracking-wider block mb-0.5">
-                              {language === "bn" ? "কনের কুন্ডলী" : language === "hi" ? "वधू की कुंडली" : "Bride's Chart"}
+                              {t.brideChartSub}
                             </span>
                             <h4 className="font-serif font-bold text-slate-900 text-base">
                               {result.bride.name} —{" "}
@@ -2799,12 +2672,8 @@ export default function KundliMatchingPage() {
                   }`}
                 >
                   {result.is_compatible
-                    ? language === "bn"
-                      ? "অনুকূল যোটক"
-                      : "Favorable Match"
-                    : language === "bn"
-                    ? "সতর্কতা প্রয়োজন"
-                    : "Caution Needed"}
+                    ? t.floatingFavorable
+                    : t.floatingCaution}
                 </span>
               </div>
 
@@ -2832,11 +2701,7 @@ export default function KundliMatchingPage() {
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all"
                 >
                   <MessageCircle className="size-3.5" />
-                  <span>
-                    {language === "bn"
-                      ? "জ্যোতিষীর পরামর্শ নিন"
-                      : "Consult Astrologer"}
-                  </span>
+                  <span>{t.consultAstrologerBtn}</span>
                 </Link>
               </div>
             </div>
@@ -2847,7 +2712,7 @@ export default function KundliMatchingPage() {
       <FeatureCoinModal
         open={coinModalOpen}
         onClose={() => setCoinModalOpen(false)}
-        featureName={matchingFeature?.name || (language === "bn" ? "কুন্ডলী মিলন" : "Kundli Matching")}
+        featureName={matchingFeature?.name || t.pageTitle}
         requiredCoins={matchingFeature?.coins ?? 20}
         walletBalance={walletBalance}
         reason={coinModalReason}
