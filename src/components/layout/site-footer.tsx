@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { Year } from "@/components/ui";
 import { UlmindCredit } from "@/components/ulmind-credit";
@@ -42,8 +42,14 @@ export function SiteFooter() {
         <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-4">
           <div className="md:col-span-2">
             <div className="flex items-center gap-2 font-semibold">
-              <span className="medallion flex size-9 items-center justify-center rounded-xl text-ink-900">
-                <Sparkles className="size-4" />
+              <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl">
+                <Image
+                  src="/logo.png"
+                  alt="DivinLink"
+                  width={36}
+                  height={36}
+                  className="size-full object-contain"
+                />
               </span>
               <span className="font-display tracking-wide">DivinLink</span>
             </div>

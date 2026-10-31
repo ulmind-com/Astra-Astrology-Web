@@ -14,6 +14,7 @@
  */
 
 import { Coins, Globe, LogOut, Menu, Sparkles, User, Wallet, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
@@ -70,8 +71,15 @@ export function SiteHeader() {
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-xl md:hidden">
         <div className="flex h-14 items-center justify-between gap-3 px-4">
           <Link href="/" className="group flex shrink-0 items-center gap-2.5">
-            <span className="medallion flex size-8 items-center justify-center rounded-xl text-ink-900 shadow-soft transition-transform duration-300 group-active:scale-95">
-              <Sparkles className="size-[15px]" />
+            <span className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-soft transition-transform duration-300 group-active:scale-95">
+              <Image
+                src="/logo.png"
+                alt="DivinLink"
+                width={32}
+                height={32}
+                className="size-full object-contain"
+                priority
+              />
             </span>
             <span className="font-display text-[14px] font-bold tracking-wide text-foreground">
               DivinLink
