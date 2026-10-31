@@ -22,7 +22,10 @@ import {
   Moon,
   Plus,
   RefreshCw,
+  Loader2,
+  Mic,
   Send,
+  Square,
   Share2,
   ShieldAlert,
   Sparkles,
@@ -33,6 +36,13 @@ import {
   User,
   Wand2,
 } from "lucide-react";
+import {
+  askAstrologer,
+  canRecord,
+  startRecording,
+  transcribe,
+  type Recorder,
+} from "@/lib/ai-stream";
 import { toast } from "sonner";
 
 import { AiMarkdown } from "@/components/ai/ai-markdown";
@@ -186,6 +196,17 @@ export default function AIAstrologerPage() {
   const { pricing } = useFeaturePricing();
   const { language, setLanguage } = useLanguage();
 
+  // What the astrologer is doing while the bubble is still empty — "Reading
+  // your chart…" is both true and far better than a spinner.
+  const [statusLine, setStatusLine] = React.useState<string | null>(null);
+  const streamRef = React.useRef<AbortController | null>(null);
+
+  // Voice. `recording` drives the button; the recorder itself is a ref because
+  // it is not rendered and must survive re-renders mid-recording.
+  const [recording, setRecording] = React.useState(false);
+  const [transcribing, setTranscribing] = React.useState(false);
+  const recorderRef = React.useRef<Recorder | null>(null);
+
   const [messages, setMessages] = React.useState<AIChatMessage[]>(() => {
     const welcome = WELCOME_MESSAGES[language] || WELCOME_MESSAGES.bn;
     return [
@@ -300,6 +321,64 @@ export default function AIAstrologerPage() {
     }
   }
 
+  async function beginRecording() {
+    if (recording || transcribing || loading) return;
+    if (!canRecord()) {
+      // Checked here rather than in an effect: `navigator` does not exist when
+      // the page is rendered on the server, and a browser that cannot record
+      // deserves a sentence explaining why rather than a button that does
+      // nothing. Recording needs https (or localhost) in every browser.
+      toast.error(
+        language === "bn"
+          ? "এই ব্রাউজারে ভয়েস রেকর্ড করা যাচ্ছে না।"
+          : language === "hi"
+            ? "इस ब्राउज़र में वॉइस रिकॉर्ड नहीं हो सकती।"
+            : "Voice recording is not available in this browser.",
+      );
+      return;
+    }
+    try {
+      recorderRef.current = await startRecording();
+      setRecording(true);
+    } catch {
+      toast.error(
+        language === "bn"
+          ? "মাইক্রোফোন ব্যবহারের অনুমতি দিন।"
+          : language === "hi"
+            ? "कृपया माइक्रोफ़ोन की अनुमति दें।"
+            : "Please allow microphone access.",
+      );
+    }
+  }
+
+  async function finishRecording() {
+    const recorder = recorderRef.current;
+    recorderRef.current = null;
+    setRecording(false);
+    if (!recorder) return;
+
+    setTranscribing(true);
+    try {
+      const audio = await recorder.stop();
+      // Anything this short is a mis-tap, not a question.
+      if (audio.size < 1200) return;
+      const text = await transcribe(audio);
+      // Put the words in the box rather than sending them. A mis-heard word
+      // should be correctable before it is answered.
+      setInputQuery((prev) => (prev ? `${prev} ${text}` : text));
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Could not read that recording.");
+    } finally {
+      setTranscribing(false);
+    }
+  }
+
+  function abandonRecording() {
+    recorderRef.current?.cancel();
+    recorderRef.current = null;
+    setRecording(false);
+  }
+
   async function handleSendMessage(textToSend?: string) {
     const query = (textToSend || inputQuery).trim();
     if (!query || loading) return;
@@ -313,35 +392,75 @@ export default function AIAstrologerPage() {
 
     setMessages((prev) => [...prev, userMsg]);
     setLoading(true);
+    setStatusLine(null);
+
+    // An empty assistant bubble, filled in as the words arrive. Created up
+    // front so the reader has something to watch rather than a blank screen.
+    const slot = messages.length + 1;
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: "", timestamp: new Date().toISOString() },
+    ]);
+
+    const controller = new AbortController();
+    streamRef.current?.abort();
+    streamRef.current = controller;
 
     try {
-      const res = await aiAstrologerApi.chat({
-        message: query,
-        session_id: sessionId || undefined,
-        birth_date: birthDate || undefined,
-        birth_time: birthTime || undefined,
-        birth_place: birthPlace || undefined,
-        latitude: latitude || (birthPlace ? 22.5726 : undefined),
-        longitude: longitude || (birthPlace ? 88.3639 : undefined),
-        preferred_language: language,
-      });
-
-      if (res.session_id && res.session_id !== sessionId) {
-        setSessionId(res.session_id);
-        localStorage.setItem("astra_ai_session_id", res.session_id);
+      let streamed = "";
+      for await (const event of askAstrologer(
+        {
+          message: query,
+          session_id: sessionId || undefined,
+          birth_date: birthDate || undefined,
+          birth_time: birthTime || undefined,
+          birth_place: birthPlace || undefined,
+          latitude: latitude || (birthPlace ? 22.5726 : undefined),
+          longitude: longitude || (birthPlace ? 88.3639 : undefined),
+          preferred_language: language,
+        },
+        controller.signal,
+      )) {
+        if (event.type === "status") {
+          setStatusLine(event.message);
+        } else if (event.type === "delta") {
+          streamed += event.text;
+          setStatusLine(null);
+          setMessages((prev) => {
+            const next = [...prev];
+            if (next[slot]) next[slot] = { ...next[slot], content: streamed };
+            return next;
+          });
+        } else if (event.type === "error") {
+          throw new Error(event.message);
+        } else if (event.type === "done") {
+          if (event.session_id && event.session_id !== sessionId) {
+            setSessionId(event.session_id);
+            localStorage.setItem("astra_ai_session_id", event.session_id);
+          }
+          setStatusLine(null);
+          setMessages((prev) => {
+            const next = [...prev];
+            if (next[slot]) {
+              next[slot] = {
+                ...next[slot],
+                // The final text wins: the stream held back control tags, and
+                // this is the copy with them properly removed.
+                content: event.reply || streamed,
+                tools_called: event.tools_called,
+                citations: event.citations as AIChatMessage["citations"],
+                suggested_followups: event.suggested_followups,
+              };
+            }
+            return next;
+          });
+        }
       }
-
-      const assistantMsg: AIChatMessage = {
-        role: "assistant",
-        content: res.reply,
-        tools_called: res.tools_called,
-        citations: res.citations,
-        suggested_followups: res.suggested_followups,
-        timestamp: new Date().toISOString(),
-      };
-
-      setMessages((prev) => [...prev, assistantMsg]);
     } catch (err: unknown) {
+      if ((err as { name?: string })?.name === "AbortError") return;
+      // Drop the empty bubble before showing the error, so there is not a
+      // blank message sitting above it.
+      setMessages((prev) => prev.filter((m, i) => !(i === slot && !m.content)));
       console.error("Chat error:", err);
       toast.error("উত্তর প্রদানে কিছুটা সমস্যা হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।");
       setMessages((prev) => [
@@ -355,6 +474,8 @@ export default function AIAstrologerPage() {
       ]);
     } finally {
       setLoading(false);
+      setStatusLine(null);
+      streamRef.current = null;
     }
   }
 
@@ -810,6 +931,23 @@ export default function AIAstrologerPage() {
             </div>
           )}
 
+          {/* What it is doing, while the bubble is still empty. Shown instead
+              of a spinner because "Reading your chart…" is both true and more
+              reassuring than an animation. */}
+          {(statusLine || (loading && !recording)) && (
+            <div className="flex items-center gap-2 px-3 py-2 text-xs text-[#b06d4e]">
+              <Loader2 className="size-3.5 animate-spin" />
+              <span>
+                {statusLine ||
+                  (language === "bn"
+                    ? "ভাবছি…"
+                    : language === "hi"
+                      ? "सोच रहा हूँ…"
+                      : "Thinking…")}
+              </span>
+            </div>
+          )}
+
           <div ref={chatBottomRef} />
         </div>
 
@@ -837,6 +975,50 @@ export default function AIAstrologerPage() {
               className="flex-1 bg-transparent px-4 py-2.5 text-xs sm:text-sm text-[#4D4664] placeholder:text-[#4D4664]/50 focus:outline-none"
             />
 
+            {/* Hold to speak.
+                Typing Bengali or Hindi on a phone keyboard is the barrier for
+                a great many of the people this is for, and for older users it
+                is often the whole barrier. Held rather than toggled, so it
+                cannot be left recording by accident. */}
+            {(
+              <button
+                type="button"
+                onMouseDown={beginRecording}
+                onMouseUp={finishRecording}
+                onMouseLeave={() => recording && finishRecording()}
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  beginRecording();
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  finishRecording();
+                }}
+                onContextMenu={(e) => e.preventDefault()}
+                disabled={loading || transcribing}
+                aria-label={
+                  language === "bn"
+                    ? "ধরে রেখে বলুন"
+                    : language === "hi"
+                      ? "दबाकर बोलें"
+                      : "Hold to speak"
+                }
+                className={`shrink-0 rounded-2xl px-3 py-2.5 transition-all ${
+                  recording
+                    ? "bg-red-500 text-white scale-105 shadow-md"
+                    : "bg-[#f4e9de] text-[#b06d4e] hover:bg-[#ecdccb]"
+                } disabled:opacity-50`}
+              >
+                {transcribing ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : recording ? (
+                  <Square className="size-4 fill-current" />
+                ) : (
+                  <Mic className="size-4" />
+                )}
+              </button>
+            )}
+
             <Button
               type="submit"
               disabled={!inputQuery.trim() || loading}
@@ -848,6 +1030,16 @@ export default function AIAstrologerPage() {
               </span>
             </Button>
           </form>
+
+          {recording && (
+            <p className="mt-2 text-center text-[11px] font-semibold text-red-600">
+              {language === "bn"
+                ? "শুনছি… বলা শেষ হলে ছেড়ে দিন"
+                : language === "hi"
+                  ? "सुन रहा हूँ… बोलने के बाद छोड़ें"
+                  : "Listening… release when you have finished"}
+            </p>
+          )}
 
           <p className="text-[11px] text-center text-[#4D4664]/60 mt-2">
             {language === "bn"
