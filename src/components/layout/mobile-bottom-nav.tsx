@@ -29,8 +29,11 @@ export function MobileBottomNav() {
   const pathname = usePathname();
   const { user, isSignedIn } = useAuth();
 
-  // Hide during live consultations so the video or chat has the whole screen.
-  const hidden = pathname.startsWith("/chat/") || pathname.startsWith("/call/");
+  // Hide during live consultations and AI Astrologer so the chat has the whole screen.
+  const hidden =
+    pathname.startsWith("/chat/") ||
+    pathname.startsWith("/call/") ||
+    pathname.startsWith("/ai-astrologer");
 
   const navItems = React.useMemo(
     () => [
