@@ -3,15 +3,20 @@
 import {
   ArrowDownLeft,
   ArrowUpRight,
+  Calendar,
   Coins,
   Loader2,
+  MessageSquare,
+  Phone,
   Snowflake,
+  Video,
   Wallet as WalletIcon,
 } from "lucide-react";
 import * as React from "react";
 
 import {
   Alert,
+  Avatar,
   Badge,
   Button,
   Card,
@@ -45,27 +50,56 @@ import {
 
 function TransactionRow({ txn }: { txn: WalletTransaction }) {
   const isCredit = txn.direction === "credit";
+  const consultation = txn.consultation;
+
+  const modeBadge = consultation?.mode ? (
+    <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase bg-brand-50 text-brand-700 border border-brand-200">
+      {consultation.mode === "chat" && <MessageSquare className="size-2.5" />}
+      {consultation.mode === "call" && <Phone className="size-2.5" />}
+      {consultation.mode === "video" && <Video className="size-2.5" />}
+      {consultation.mode === "appointment" && <Calendar className="size-2.5" />}
+      {consultation.mode}
+    </span>
+  ) : null;
+
   return (
-    <li className="flex items-center gap-2.5 sm:gap-3 border-b border-border px-3.5 sm:px-5 py-3 sm:py-3.5 last:border-0">
-      <span
-        className={cn(
-          "flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-full",
-          isCredit ? "bg-success-surface text-success" : "bg-warning-surface text-warning",
-        )}
-      >
-        {isCredit ? (
-          <ArrowDownLeft className="size-3.5 sm:size-4" />
-        ) : (
-          <ArrowUpRight className="size-3.5 sm:size-4" />
-        )}
-      </span>
+    <li className="flex items-center gap-2.5 sm:gap-3.5 border-b border-border px-3.5 sm:px-5 py-3 sm:py-3.5 last:border-0 hover:bg-muted/30 transition-colors">
+      {consultation?.astrologer_name ? (
+        <Avatar
+          src={consultation.astrologer_avatar}
+          name={consultation.astrologer_name}
+          size="sm"
+          className="size-8 sm:size-9 shrink-0"
+        />
+      ) : (
+        <span
+          className={cn(
+            "flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-full",
+            isCredit ? "bg-success-surface text-success" : "bg-warning-surface text-warning",
+          )}
+        >
+          {isCredit ? (
+            <ArrowDownLeft className="size-3.5 sm:size-4" />
+          ) : (
+            <ArrowUpRight className="size-3.5 sm:size-4" />
+          )}
+        </span>
+      )}
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-xs sm:text-sm font-medium">
-          {txn.note ?? TRANSACTION_REASON_LABELS[txn.reason]}
-        </p>
-        <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
+        <div className="flex items-center gap-2 flex-wrap">
+          <p className="truncate text-xs sm:text-sm font-medium">
+            {consultation?.astrologer_name
+              ? `Consultation with ${consultation.astrologer_name}`
+              : (txn.note ?? TRANSACTION_REASON_LABELS[txn.reason])}
+          </p>
+          {modeBadge}
+        </div>
+        <p className="text-[11px] sm:text-xs text-muted-foreground truncate mt-0.5">
           {formatDateTime(txn.created_at)}
+          {consultation?.duration_seconds != null && consultation.duration_seconds > 0 && (
+            ` · ${Math.max(1, Math.round(consultation.duration_seconds / 60))} mins`
+          )}
           {txn.amount_paise != null && ` · paid ${formatPaise(txn.amount_paise)}`}
         </p>
       </div>
