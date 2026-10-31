@@ -45,6 +45,7 @@ import {
 } from "@/lib/ai-stream";
 import { toast } from "sonner";
 
+import { AiAvatar } from "@/components/ai/ai-avatar";
 import { AiMarkdown } from "@/components/ai/ai-markdown";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -740,16 +741,21 @@ export default function AIAstrologerPage() {
                 className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"} animate-in fade-in duration-300`}
               >
                 {!isUser && (
-                  <div className="size-9 rounded-2xl bg-gradient-to-tr from-[#b06d4e] to-[#c7886a] text-white flex items-center justify-center shrink-0 shadow-sm mt-1">
-                    <Bot className="size-5" />
-                  </div>
+                  // Animated only while this message is the one being written.
+                  // Twenty looping marks down a long conversation is a lot of
+                  // movement for a page someone is trying to read.
+                  <AiAvatar
+                    size={36}
+                    className="mt-1"
+                    active={loading && idx === messages.length - 1}
+                  />
                 )}
 
                 <div
-                  className={`max-w-[88%] sm:max-w-[78%] rounded-3xl p-4 sm:p-5 shadow-2xs ${
+                  className={`max-w-[88%] sm:max-w-[76%] rounded-[26px] p-4 sm:p-5 transition-shadow ${
                     isUser
-                      ? "bg-[#4D4664] text-white rounded-br-xs"
-                      : "bg-white border border-[#b06d4e]/25 rounded-bl-xs text-[#4D4664]"
+                      ? "bg-[#4D4664] text-white rounded-br-md shadow-[0_6px_18px_-8px_rgba(77,70,100,0.6)]"
+                      : "bg-white border border-[#b06d4e]/20 rounded-bl-md text-[#4D4664] shadow-[0_6px_20px_-14px_rgba(77,70,100,0.5)]"
                   }`}
                 >
                   {/* Content.
@@ -914,9 +920,7 @@ export default function AIAstrologerPage() {
 
           {loading && (
             <div className="flex gap-3 justify-start animate-in fade-in duration-300">
-              <div className="size-9 rounded-2xl bg-gradient-to-tr from-[#b06d4e] to-[#c7886a] text-white flex items-center justify-center shrink-0 shadow-sm mt-1 animate-pulse">
-                <Bot className="size-5" />
-              </div>
+              <AiAvatar size={36} className="mt-1" active />
               <div className="rounded-3xl rounded-bl-xs bg-white border border-[#b06d4e]/25 p-4 shadow-2xs space-y-2">
                 <div className="flex items-center gap-2 text-xs text-[#b06d4e] font-semibold">
                   <RefreshCw className="size-3.5 animate-spin" />
@@ -958,21 +962,26 @@ export default function AIAstrologerPage() {
               e.preventDefault();
               handleSendMessage();
             }}
-            className="flex items-center gap-2 rounded-3xl border border-[#b06d4e]/30 bg-white/95 p-2 shadow-lg backdrop-blur-md"
+            className="flex items-center gap-1.5 rounded-[28px] border border-[#b06d4e]/25 bg-white/98 p-1.5 shadow-[0_8px_30px_-12px_rgba(77,70,100,0.35)] backdrop-blur-md transition-shadow focus-within:border-[#b06d4e]/50 focus-within:shadow-[0_10px_34px_-10px_rgba(176,109,78,0.4)]"
           >
             <input
               type="text"
+              // Short enough to read at a glance on a phone. The old
+              // placeholder ran to three examples and was clipped mid-word on
+              // every screen narrower than a laptop.
               placeholder={
                 language === "bn"
-                  ? "আপনার প্রশ্ন এখানে লিখুন (যেমন: শনির সাড়ে সাতি প্রতিকার, ক্যারিয়ার বা মাঙ্গলিক বিচার)..."
+                  ? "আপনার প্রশ্ন লিখুন…"
                   : language === "hi"
-                  ? "अपना प्रश्न यहाँ लिखें (जैसे: शनि साढ़े साती उपाय, करियर या मांगलिक विचार)..."
-                  : "Type your Vedic question here (e.g. Sade Sati remedies, career timing, Manglik Dosha)..."
+                    ? "अपना प्रश्न लिखें…"
+                    : "Ask your question…"
               }
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
               disabled={loading}
-              className="flex-1 bg-transparent px-4 py-2.5 text-xs sm:text-sm text-[#4D4664] placeholder:text-[#4D4664]/50 focus:outline-none"
+              enterKeyHint="send"
+              autoComplete="off"
+              className="min-w-0 flex-1 bg-transparent px-4 py-3 text-sm text-[#4D4664] placeholder:text-[#4D4664]/45 focus:outline-none disabled:opacity-60"
             />
 
             {/* Hold to speak.
@@ -1003,7 +1012,7 @@ export default function AIAstrologerPage() {
                       ? "दबाकर बोलें"
                       : "Hold to speak"
                 }
-                className={`shrink-0 rounded-2xl px-3 py-2.5 transition-all ${
+                className={`shrink-0 rounded-[22px] px-3.5 py-3 transition-all active:scale-95 ${
                   recording
                     ? "bg-red-500 text-white scale-105 shadow-md"
                     : "bg-[#f4e9de] text-[#b06d4e] hover:bg-[#ecdccb]"
@@ -1022,11 +1031,15 @@ export default function AIAstrologerPage() {
             <Button
               type="submit"
               disabled={!inputQuery.trim() || loading}
-              className="rounded-2xl bg-[#b06d4e] hover:bg-[#975c40] text-white px-4 py-2.5 shrink-0 shadow-xs transition-all"
+              className="shrink-0 rounded-[22px] bg-[#b06d4e] px-4 py-3 text-white shadow-xs transition-all hover:bg-[#975c40] active:scale-95 disabled:opacity-40 disabled:hover:bg-[#b06d4e]"
             >
-              <Send className="size-4 mr-1 sm:mr-1.5" />
-              <span className="hidden sm:inline text-xs font-semibold">
-                {language === "bn" ? "জিজ্ঞাসা করুন" : language === "hi" ? "पूछें" : "Ask AI"}
+              {loading ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Send className="size-4 sm:mr-1.5" />
+              )}
+              <span className="hidden text-xs font-semibold sm:inline">
+                {language === "bn" ? "জিজ্ঞাসা করুন" : language === "hi" ? "पूछें" : "Ask"}
               </span>
             </Button>
           </form>
