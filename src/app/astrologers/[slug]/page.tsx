@@ -1,9 +1,10 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Award,
+  Heart,
   Languages,
   Maximize2,
   MessageCircle,
@@ -59,12 +60,62 @@ export default function AstrologerDetailPage() {
   const t = ASTROLOGERS_I18N[language] || ASTROLOGERS_I18N.en;
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
+  const router = useRouter();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const { data: astrologer, isLoading, error } = useQuery({
     queryKey: ["astrologer", slug],
     queryFn: () => astrologerApi.detail(slug),
     enabled: Boolean(slug),
   });
+
+  const { data: favData } = useQuery({
+    queryKey: ["astrologer-favorite", slug],
+    queryFn: () => astrologerApi.favoriteStatus(slug),
+    enabled: Boolean(slug),
+  });
+
+  const [isFav, setIsFav] = React.useState(false);
+  const [favCount, setFavCount] = React.useState(0);
+
+  React.useEffect(() => {
+    if (favData) {
+      setIsFav(favData.is_favorite);
+      setFavCount(favData.favorites_count);
+    } else if (astrologer?.followers_count !== undefined) {
+      setFavCount(astrologer.followers_count);
+    }
+  }, [favData, astrologer?.followers_count]);
+
+  const toggleFavMutation = useMutation({
+    mutationFn: () => astrologerApi.toggleFavorite(slug),
+    onMutate: async () => {
+      const nextIsFav = !isFav;
+      const nextCount = nextIsFav ? favCount + 1 : Math.max(0, favCount - 1);
+      setIsFav(nextIsFav);
+      setFavCount(nextCount);
+    },
+    onSuccess: (data) => {
+      setIsFav(data.is_favorite);
+      setFavCount(data.favorites_count);
+      queryClient.invalidateQueries({ queryKey: ["astrologer-favorite", slug] });
+      queryClient.invalidateQueries({ queryKey: ["astrologer", slug] });
+    },
+    onError: () => {
+      // Revert on error
+      setIsFav(!isFav);
+      setFavCount(favCount);
+    },
+  });
+
+  const handleToggleFavorite = () => {
+    if (!user) {
+      router.push(`/login?redirect=/astrologers/${slug}`);
+      return;
+    }
+    toggleFavMutation.mutate();
+  };
 
   const [selectedPhotoUrl, setSelectedPhotoUrl] = React.useState<string | null>(null);
 
@@ -152,6 +203,28 @@ export default function AstrologerDetailPage() {
                           ? t.onlineBadge
                           : t.offlineBadge}
                       </Badge>
+
+                      {/* Interactive Heart Favorite Button */}
+                      <button
+                        type="button"
+                        onClick={handleToggleFavorite}
+                        className={cn(
+                          "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all duration-300 cursor-pointer shadow-xs active:scale-95",
+                          isFav
+                            ? "bg-rose-50 text-rose-600 border border-rose-300 hover:bg-rose-100"
+                            : "bg-surface text-muted-foreground border border-border/80 hover:border-rose-300 hover:text-rose-500 hover:bg-rose-50/50"
+                        )}
+                        title={isFav ? "Saved in favorites" : "Add to favorites"}
+                      >
+                        <Heart
+                          className={cn(
+                            "size-3.5 transition-transform duration-300",
+                            isFav ? "fill-rose-500 text-rose-500 scale-110" : "text-muted-foreground"
+                          )}
+                        />
+                        <span>{isFav ? "Favorited" : "Add to Favorites"}</span>
+                        <span className="font-bold">({favCount})</span>
+                      </button>
                     </div>
 
                     {astrologer.tagline && (
@@ -179,6 +252,11 @@ export default function AstrologerDetailPage() {
                           <span className="text-muted-foreground text-[11px] sm:text-xs">{t.consultsCountLabel}</span>
                         </span>
                       )}
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 sm:px-3 border border-rose-200/80 text-rose-800">
+                        <Heart className="size-3.5 fill-rose-500 text-rose-500" />
+                        <span className="font-semibold text-rose-900">{formatNumber(favCount)}</span>
+                        <span className="text-rose-700/80 text-[11px] sm:text-xs">favorites</span>
+                      </span>
                     </div>
 
                     {astrologer.languages.length > 0 && (
