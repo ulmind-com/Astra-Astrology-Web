@@ -146,9 +146,20 @@ export const COMMON_LANGUAGES = [
 ];
 
 // ------------------------------------------------------------------ wallet
+export interface ConsultationMetadata {
+  session_id?: string | null;
+  astrologer_id?: string | null;
+  astrologer_name?: string | null;
+  astrologer_avatar?: string | null;
+  mode?: "chat" | "call" | "video" | "appointment" | string | null;
+  duration_seconds?: number | null;
+}
+
 export type WalletBalance = S["WalletBalance"];
 export type WalletSummary = S["WalletSummary"];
-export type WalletTransaction = S["TransactionOut"];
+export type WalletTransaction = S["TransactionOut"] & {
+  consultation?: ConsultationMetadata | null;
+};
 export type TransactionDirection = S["TransactionDirection"];
 export type TransactionReason = S["TransactionReason"] | "feature_usage";
 export type RechargeOptions = S["RechargeOptions"];
@@ -301,7 +312,10 @@ export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {
 };
 
 // ----------------------------------------------------------------- reviews
-export type Review = S["ReviewOut"];
+export type Review = S["ReviewOut"] & {
+  author_avatar?: string | null;
+  session_id?: string | null;
+};
 export type ReviewPage = S["ReviewPage"];
 export type ReviewSummary = S["ReviewSummary"];
 export type PendingReview = S["PendingReview"];
