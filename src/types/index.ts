@@ -51,11 +51,26 @@ export type Gender = S["Gender"];
 export type MaritalStatus = S["MaritalStatus"];
 
 // -------------------------------------------------------------- astrologer
+export interface ServiceDurationStats {
+  chat_minutes: number;
+  call_minutes: number;
+  video_minutes: number;
+  chat_hours: number;
+  call_hours: number;
+  video_hours: number;
+  total_hours: number;
+  formatted_chat?: string;
+  formatted_call?: string;
+  formatted_video?: string;
+}
+
 export type AstrologerPublic = S["AstrologerPublic"] & {
   banner_image_url?: string | null;
+  service_duration?: ServiceDurationStats | null;
 };
 export type AstrologerProfile = S["AstrologerProfile"] & {
   banner_image_url?: string | null;
+  service_duration?: ServiceDurationStats | null;
 };
 export type AstrologerCreate = S["AstrologerCreate"];
 export type AstrologerCreated = S["AstrologerCreated"];
@@ -148,7 +163,12 @@ export const COMMON_LANGUAGES = [
 // ------------------------------------------------------------------ wallet
 export type WalletBalance = S["WalletBalance"];
 export type WalletSummary = S["WalletSummary"];
-export type WalletTransaction = S["TransactionOut"];
+export type WalletTransaction = S["TransactionOut"] & {
+  astrologer_id?: string | null;
+  astrologer_name?: string | null;
+  astrologer_image_url?: string | null;
+  consultation_mode?: string | null;
+};
 export type TransactionDirection = S["TransactionDirection"];
 export type TransactionReason = S["TransactionReason"] | "feature_usage";
 export type RechargeOptions = S["RechargeOptions"];

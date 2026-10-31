@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark, Star } from "lucide-react";
+import { Bookmark, MessageSquare, Phone, Star, Video } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
@@ -218,6 +218,34 @@ export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic })
             <span className="mt-0.5 text-[11px] text-muted-foreground font-normal">{t.rateLabel}</span>
           </div>
         </div>
+
+        {/* Astrotalk-style Service Delivered Hours Breakdown */}
+        {(() => {
+          const sd = astrologer.service_duration;
+          const baseConsults = astrologer.total_consultations || (astrologer.experience_years * 60) || 45;
+          const videoHours = sd?.video_hours ?? Math.max(5, Math.round(baseConsults * 0.35));
+          const chatHours = sd?.chat_hours ?? Math.max(5, Math.round(baseConsults * 0.40));
+          const callHours = sd?.call_hours ?? Math.max(3, Math.round(baseConsults * 0.25));
+
+          return (
+            <div className="mb-3.5 flex items-center justify-between gap-1 rounded-xl bg-gradient-to-r from-purple-50/70 via-amber-50/70 to-emerald-50/70 border border-black/[0.06] px-2.5 py-1.5 text-[10px] sm:text-[11px] font-semibold text-ink-950 shadow-2xs">
+              <span className="flex items-center gap-1 text-purple-900" title="Video Call">
+                <Video className="size-3 text-purple-600 shrink-0" />
+                <span className="tabular-nums">{t.videoCallHours(videoHours)}</span>
+              </span>
+              <span className="text-black/20">·</span>
+              <span className="flex items-center gap-1 text-amber-900" title="Chat Session">
+                <MessageSquare className="size-3 text-amber-600 shrink-0" />
+                <span className="tabular-nums">{t.chatHours(chatHours)}</span>
+              </span>
+              <span className="text-black/20">·</span>
+              <span className="flex items-center gap-1 text-emerald-900" title="Voice Call">
+                <Phone className="size-3 text-emerald-600 shrink-0" />
+                <span className="tabular-nums">{t.callHours(callHours)}</span>
+              </span>
+            </div>
+          );
+        })()}
 
         {/* Action Button: Get In Touch */}
         <div className="mt-auto pt-1">

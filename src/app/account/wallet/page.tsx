@@ -5,13 +5,17 @@ import {
   ArrowUpRight,
   Coins,
   Loader2,
+  MessageSquare,
+  Phone,
   Snowflake,
+  Video,
   Wallet as WalletIcon,
 } from "lucide-react";
 import * as React from "react";
 
 import {
   Alert,
+  Avatar,
   Badge,
   Button,
   Card,
@@ -45,36 +49,100 @@ import {
 
 function TransactionRow({ txn }: { txn: WalletTransaction }) {
   const isCredit = txn.direction === "credit";
-  return (
-    <li className="flex items-center gap-2.5 sm:gap-3 border-b border-border px-3.5 sm:px-5 py-3 sm:py-3.5 last:border-0">
-      <span
-        className={cn(
-          "flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-full",
-          isCredit ? "bg-success-surface text-success" : "bg-warning-surface text-warning",
-        )}
-      >
-        {isCredit ? (
-          <ArrowDownLeft className="size-3.5 sm:size-4" />
-        ) : (
-          <ArrowUpRight className="size-3.5 sm:size-4" />
-        )}
-      </span>
+  const rawRef = (txn.ref as Record<string, any>) || {};
+  const astroName = txn.astrologer_name || rawRef.astrologer_name;
+  const astroImg = txn.astrologer_image_url || rawRef.astrologer_image_url;
+  const mode = (txn.consultation_mode || rawRef.consultation_mode || "").toLowerCase();
+  const isConsultation = txn.reason === "consultation" || Boolean(astroName);
 
+  const getModeBadge = () => {
+    if (mode === "video") {
+      return {
+        label: "Video Call",
+        icon: Video,
+        cls: "bg-purple-50 text-purple-700 border-purple-200/80",
+      };
+    }
+    if (mode === "call") {
+      return {
+        label: "Voice Call",
+        icon: Phone,
+        cls: "bg-emerald-50 text-emerald-700 border-emerald-200/80",
+      };
+    }
+    return {
+      label: "Chat",
+      icon: MessageSquare,
+      cls: "bg-amber-50 text-amber-700 border-amber-200/80",
+    };
+  };
+
+  const modeBadge = isConsultation ? getModeBadge() : null;
+  const ModeIcon = modeBadge?.icon;
+
+  return (
+    <li className="flex items-center gap-3 border-b border-border px-3.5 sm:px-5 py-3.5 sm:py-4 last:border-0 hover:bg-black/[0.015] transition-colors">
+      {/* Icon or Astrologer Avatar */}
+      {isConsultation && astroName ? (
+        <div className="relative shrink-0">
+          <Avatar
+            src={astroImg}
+            name={astroName}
+            size="sm"
+            className="size-9 sm:size-10 ring-1 ring-border/80 shadow-xs"
+          />
+          {ModeIcon && (
+            <span className="absolute -bottom-1 -right-1 flex size-4.5 items-center justify-center rounded-full bg-white shadow-xs border border-border">
+              <ModeIcon className="size-2.5 text-ink-950" />
+            </span>
+          )}
+        </div>
+      ) : (
+        <span
+          className={cn(
+            "flex size-9 sm:size-10 shrink-0 items-center justify-center rounded-full shadow-xs",
+            isCredit ? "bg-success-surface text-success" : "bg-warning-surface text-warning",
+          )}
+        >
+          {isCredit ? (
+            <ArrowDownLeft className="size-4" />
+          ) : (
+            <ArrowUpRight className="size-4" />
+          )}
+        </span>
+      )}
+
+      {/* Details */}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-xs sm:text-sm font-medium">
-          {txn.note ?? TRANSACTION_REASON_LABELS[txn.reason]}
-        </p>
-        <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <p className="truncate text-xs sm:text-sm font-semibold text-ink-950">
+            {astroName ? `Consultation with ${astroName}` : (txn.note ?? TRANSACTION_REASON_LABELS[txn.reason])}
+          </p>
+          {modeBadge && (
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-bold tracking-wide uppercase",
+                modeBadge.cls,
+              )}
+            >
+              <modeBadge.icon className="size-2.5" />
+              {modeBadge.label}
+            </span>
+          )}
+        </div>
+        <p className="text-[11px] sm:text-xs text-muted-foreground truncate mt-0.5">
           {formatDateTime(txn.created_at)}
+          {txn.note && astroName && ` · ${txn.note}`}
           {txn.amount_paise != null && ` · paid ${formatPaise(txn.amount_paise)}`}
         </p>
       </div>
 
+      {/* Coins & Balance */}
       <div className="shrink-0 text-right">
         <p
           className={cn(
-            "text-xs sm:text-sm font-semibold tabular-nums",
-            isCredit ? "text-success" : "text-foreground",
+            "text-xs sm:text-sm font-bold tabular-nums",
+            isCredit ? "text-success" : "text-ink-950",
           )}
         >
           {isCredit ? "+" : "−"}

@@ -35,6 +35,13 @@ export interface AstrologersTranslations {
   bookmarkSaved: string;
   yearsSuffix: string;
 
+  // Astrotalk-style Service Hours Delivery
+  serviceDeliveryTitle: string;
+  videoCallHours: (hrs: number) => string;
+  chatHours: (hrs: number) => string;
+  callHours: (hrs: number) => string;
+  totalHoursDelivered: (hrs: number) => string;
+
   // Detail Page
   backAll: string;
   loadingProfile: string;
@@ -97,6 +104,12 @@ export const ASTROLOGERS_I18N: Record<AstrologyLanguage, AstrologersTranslations
     bookmarkSaved: "পছন্দের তালিকায় যুক্ত হয়েছে",
     yearsSuffix: "+ বছর",
 
+    serviceDeliveryTitle: "মোট সেবা প্রদানের সময়",
+    videoCallHours: (hrs) => `${hrs} ঘণ্টা ভিডিও কল`,
+    chatHours: (hrs) => `${hrs} ঘণ্টা চ্যাট`,
+    callHours: (hrs) => `${hrs} ঘণ্টা কল`,
+    totalHoursDelivered: (hrs) => `সর্বমোট ${hrs} ঘণ্টা সেবা প্রদান`,
+
     backAll: "সকল জ্যোতিষী",
     loadingProfile: "প্রোফাইল লোড হচ্ছে…",
     notAvailableTitle: "এই জ্যোতিষী বর্তমানে উপলব্ধ নন",
@@ -156,6 +169,12 @@ export const ASTROLOGERS_I18N: Record<AstrologyLanguage, AstrologersTranslations
     bookmarkSaved: "पसंदीदा सूची में सहेजा गया",
     yearsSuffix: "+ वर्ष",
 
+    serviceDeliveryTitle: "कुल परामर्श सेवा समय",
+    videoCallHours: (hrs) => `${hrs} घंटे वीडियो कॉल`,
+    chatHours: (hrs) => `${hrs} घंटे चैट`,
+    callHours: (hrs) => `${hrs} घंटे कॉल`,
+    totalHoursDelivered: (hrs) => `कुल ${hrs} घंटे सेवा प्रदान`,
+
     backAll: "सभी ज्योतिषी",
     loadingProfile: "प्रोफाइल लोड हो रही है…",
     notAvailableTitle: "यह ज्योतिषी वर्तमान में उपलब्ध नहीं हैं",
@@ -214,6 +233,12 @@ export const ASTROLOGERS_I18N: Record<AstrologyLanguage, AstrologersTranslations
     bookmarkRemoved: "Removed from saved astrologers.",
     bookmarkSaved: "Saved to favorites.",
     yearsSuffix: "+ yrs",
+
+    serviceDeliveryTitle: "Total Consultation Service Delivered",
+    videoCallHours: (hrs) => `${hrs} hrs video call`,
+    chatHours: (hrs) => `${hrs} hrs chat`,
+    callHours: (hrs) => `${hrs} hrs call`,
+    totalHoursDelivered: (hrs) => `Total ${hrs} hrs delivered`,
 
     backAll: "All astrologers",
     loadingProfile: "Loading profile…",

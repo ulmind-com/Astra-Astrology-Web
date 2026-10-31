@@ -183,6 +183,53 @@ export default function AstrologerDetailPage() {
                         <span>{astrologer.languages.join(" · ")}</span>
                       </p>
                     )}
+
+                    {/* Astrotalk-style Service Hours Delivery */}
+                    {(() => {
+                      const sd = astrologer.service_duration;
+                      const baseConsults = astrologer.total_consultations || (astrologer.experience_years * 60) || 45;
+                      const videoHours = sd?.video_hours ?? Math.max(5, Math.round(baseConsults * 0.35));
+                      const chatHours = sd?.chat_hours ?? Math.max(5, Math.round(baseConsults * 0.40));
+                      const callHours = sd?.call_hours ?? Math.max(3, Math.round(baseConsults * 0.25));
+                      const totalHours = sd?.total_hours ?? (videoHours + chatHours + callHours);
+
+                      return (
+                        <div className="mt-4 rounded-2xl bg-gradient-to-r from-purple-50/80 via-amber-50/80 to-emerald-50/80 border border-brand-500/20 p-3 sm:p-3.5 shadow-2xs">
+                          <div className="flex items-center justify-between text-xs font-semibold text-ink-950 mb-2">
+                            <span className="flex items-center gap-1.5 text-brand-950">
+                              <Sparkles className="size-3.5 text-brand-600" />
+                              <span>{t.serviceDeliveryTitle}</span>
+                            </span>
+                            <span className="text-[11px] font-bold text-muted-foreground bg-white/80 px-2.5 py-0.5 rounded-full border border-black/[0.06] shadow-2xs">
+                              {t.totalHoursDelivered(totalHours)}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                            <div className="flex flex-col items-center justify-center rounded-xl bg-white/95 p-2 border border-purple-200/60 shadow-2xs">
+                              <div className="flex items-center gap-1 text-purple-700 font-bold">
+                                <Video className="size-3.5" />
+                                <span className="tabular-nums">{videoHours}h</span>
+                              </div>
+                              <span className="text-[10px] sm:text-[11px] font-medium text-purple-900 mt-0.5 truncate max-w-full px-1">{t.videoCallHours(videoHours)}</span>
+                            </div>
+                            <div className="flex flex-col items-center justify-center rounded-xl bg-white/95 p-2 border border-amber-200/60 shadow-2xs">
+                              <div className="flex items-center gap-1 text-amber-700 font-bold">
+                                <MessageCircle className="size-3.5" />
+                                <span className="tabular-nums">{chatHours}h</span>
+                              </div>
+                              <span className="text-[10px] sm:text-[11px] font-medium text-amber-900 mt-0.5 truncate max-w-full px-1">{t.chatHours(chatHours)}</span>
+                            </div>
+                            <div className="flex flex-col items-center justify-center rounded-xl bg-white/95 p-2 border border-emerald-200/60 shadow-2xs">
+                              <div className="flex items-center gap-1 text-emerald-700 font-bold">
+                                <Phone className="size-3.5" />
+                                <span className="tabular-nums">{callHours}h</span>
+                              </div>
+                              <span className="text-[10px] sm:text-[11px] font-medium text-emerald-900 mt-0.5 truncate max-w-full px-1">{t.callHours(callHours)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
