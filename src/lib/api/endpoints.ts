@@ -34,6 +34,8 @@ export const endpoints = {
     image: "/astrologers/me/image",
     gallery: "/astrologers/me/gallery",
     galleryImage: (publicId: string) => `/astrologers/me/gallery/${publicId}`,
+    favorite: (slugOrId: string) => `/astrologers/${slugOrId}/favorite`,
+    myFavorites: "/astrologers/favorites/my",
   },
 
   wallet: {

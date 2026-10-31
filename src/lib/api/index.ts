@@ -198,6 +198,20 @@ export const astrologerApi = {
 
   removeGalleryImage: (publicId: string) =>
     api.delete<null>(endpoints.astrologers.galleryImage(publicId)),
+
+  toggleFavorite: (slugOrId: string) =>
+    api.post<{ is_favorite: boolean; favorites_count: number; message: string }>(
+      endpoints.astrologers.favorite(slugOrId),
+      {},
+    ),
+
+  favoriteStatus: (slugOrId: string) =>
+    api.get<{ is_favorite: boolean; favorites_count: number }>(
+      endpoints.astrologers.favorite(slugOrId),
+    ),
+
+  myFavorites: () =>
+    api.get<AstrologerPublic[]>(endpoints.astrologers.myFavorites),
 };
 
 // ------------------------------------------------------------------ admin
