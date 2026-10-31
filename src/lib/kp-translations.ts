@@ -158,6 +158,86 @@ export interface KPUITranslations {
   // Remedies
   remediesDashboardTitle: string;
   remediesDashboardSubheading: string;
+
+  // Advanced & Form Options
+  advancedSettingsToggle: string;
+  latitudeLabel: string;
+  longitudeLabel: string;
+  horaryActive: string;
+  horaryEnable: string;
+  featureName: string;
+  featureDisabledNotice: string;
+  coinsUsedSuccess: string;
+  calcSuccessToast: string;
+  calcFailedToast: string;
+
+  // Header & Result Card
+  analysisTitle: string;
+  ascendantLabel: string;
+  untenantedSupreme: string;
+  horaryDetailsHeading: string;
+  ascendantSignLabel: string;
+  subArcRange: string;
+  zodiacLongitude: string;
+
+  // Significators Tab
+  sigTheoryTitle: string;
+  sigTheoryDesc: string;
+  allHousesSignified: string;
+  levelHierarchy: string;
+  houses1to12: string;
+  housePrefix: string;
+
+  // Life Events Tab
+  primaryCusp: string;
+  cslLabel: string;
+  starLabel: string;
+  favorableHouses: string;
+  housesSignifiedByCSL: string;
+  timingHintLabel: string;
+
+  // Cusps & Planets Tab
+  cuspsSubheading: string;
+  twelveCuspsBadge: string;
+  lagnaCuspLabel: string;
+  planetsSubheading: string;
+  nirayanaPlacements: string;
+  untenantedQuestion: string;
+
+  // Ruling Planets & Horary Tab
+  fruitfulRPHeading: string;
+  fruitfulRPDesc: string;
+  noneText: string;
+  discardedRPHeading: string;
+  discardedRPDesc: string;
+  noPlanetsDiscarded: string;
+
+  // Aspects & Badhaka Tab
+  ascendantTypeLabel: string;
+  badhakaLordLabel: string;
+  badhakaConnectedLabel: string;
+  marakaHousesHeading: string;
+  marakaLordsLabel: string;
+  marakaConnectedLabel: string;
+  aspectsDetected: string;
+  colPlanetsInvolved: string;
+  colAspect: string;
+  colAngle: string;
+  colOrb: string;
+  colNature: string;
+  colSignificance: string;
+
+  // Remedies & Dasha Tab
+  remedySuffix: string;
+  afflictedHousePrefix: string;
+  problemSymptomLabel: string;
+  lalKitabUpayaHeading: string;
+  vedicMantraHeading: string;
+  recommendedCharityHeading: string;
+  activeDot: string;
+  clearSelection: string;
+  saveSvg: string;
+  downloadChartTitle: string;
 }
 
 export const KP_UI_TRANSLATIONS: Record<"en" | "bn" | "hi", KPUITranslations> = {
@@ -304,6 +384,81 @@ export const KP_UI_TRANSLATIONS: Record<"en" | "bn" | "hi", KPUITranslations> = 
 
     remediesDashboardTitle: "Classical 43-Day Lal Kitab & Vedic Remedies",
     remediesDashboardSubheading: "Specific prescribed upayas and mantras for afflicted planets occupying houses 6, 8, or 12.",
+
+    advancedSettingsToggle: "Advanced Astrological Settings (Ayanamsa & Coordinates)",
+    latitudeLabel: "Latitude",
+    longitudeLabel: "Longitude",
+    horaryActive: "Horary Active ✓",
+    horaryEnable: "Enable Horary",
+    featureName: "KP Astrology",
+    featureDisabledNotice: "KP Astrology feature is temporarily unavailable.",
+    coinsUsedSuccess: "KP Chart calculated! ({coins} coins used)",
+    calcSuccessToast: "KP Astrology Chart calculated successfully!",
+    calcFailedToast: "Failed to calculate KP Chart. Please try again.",
+
+    analysisTitle: "KP Astrology Analysis",
+    ascendantLabel: "Ascendant",
+    untenantedSupreme: "Untenanted Planets (Supreme Fruitful)",
+    horaryDetailsHeading: "KP Horary Prashna Details (Seed #{num})",
+    ascendantSignLabel: "Ascendant Sign:",
+    subArcRange: "Sub-Arc Range:",
+    zodiacLongitude: "Zodiac Longitude:",
+
+    sigTheoryTitle: "KP 4-Fold Significators Theory (Prof. K.S. Krishnamurti)",
+    sigTheoryDesc:
+      "Level A: Houses occupied by star lord (Strongest). Level B: House occupied by planet itself. Level C: Houses owned by star lord. Level D: Houses owned by planet itself.",
+    allHousesSignified: "All Houses Signified",
+    levelHierarchy: "Level A → B → C → D",
+    houses1to12: "Houses 1 to 12",
+    housePrefix: "House",
+
+    primaryCusp: "Primary: Cusp",
+    cslLabel: "CSL:",
+    starLabel: "Star:",
+    favorableHouses: "Favorable Houses:",
+    housesSignifiedByCSL: "Houses Signified by CSL:",
+    timingHintLabel: "Timing Hint:",
+
+    cuspsSubheading: "Placidus Unequal Division • Sign, Star, Sub & Sub-Sub Lord (SSL)",
+    twelveCuspsBadge: "12 Cusps",
+    lagnaCuspLabel: "I (1) [Lagna]",
+    planetsSubheading: "9 Grahas + Untenanted Status & Sub-Sub Lord",
+    nirayanaPlacements: "Nirayana Placements",
+    untenantedQuestion: "Untenanted?",
+
+    fruitfulRPHeading: "Fruitful Ruling Planets (Event Fructification)",
+    fruitfulRPDesc:
+      "Ruling planets whose star lords are direct in transit. These act as powerful, unobstructed triggers for timing key events.",
+    noneText: "None",
+    discardedRPHeading: "Discarded Ruling Planets (Retrograde Star Filter)",
+    discardedRPDesc:
+      "Per Rahul Kaushik Rule 6 (Page 56): Any ruling planet in the star of a retrograde planet cannot deliver favorable results and is discarded.",
+    noPlanetsDiscarded: "No planets discarded — all star lords direct.",
+
+    ascendantTypeLabel: "Ascendant:",
+    badhakaLordLabel: "Badhaka Lord:",
+    badhakaConnectedLabel: "Badhaka Connected Planets:",
+    marakaHousesHeading: "Maraka Houses: Houses 2 & 7",
+    marakaLordsLabel: "Maraka Lords:",
+    marakaConnectedLabel: "Maraka Connected Planets:",
+    aspectsDetected: "{count} Aspects Detected",
+    colPlanetsInvolved: "Planets Involved",
+    colAspect: "Aspect",
+    colAngle: "Angle",
+    colOrb: "Orb",
+    colNature: "Nature",
+    colSignificance: "Significance",
+
+    remedySuffix: "Remedy",
+    afflictedHousePrefix: "Afflicted House",
+    problemSymptomLabel: "Problem / Symptom:",
+    lalKitabUpayaHeading: "🏺 43-Day Lal Kitab Upaya:",
+    vedicMantraHeading: "🕉️ Vedic Mantra:",
+    recommendedCharityHeading: "🤝 Recommended Charity:",
+    activeDot: "● Active",
+    clearSelection: "Clear",
+    saveSvg: "Save SVG",
+    downloadChartTitle: "Download Chart SVG",
   },
   bn: {
     badge: "কেপি জ্যোতিষ পদ্ধতি (Krishnamurti Paddhati)",
@@ -447,6 +602,81 @@ export const KP_UI_TRANSLATIONS: Record<"en" | "bn" | "hi", KPUITranslations> = 
 
     remediesDashboardTitle: "৪৩ দিনের লাল কিতাব ও শাস্ত্রীয় বৈদিক প্রতিকার",
     remediesDashboardSubheading: "৬ষ্ঠ, ৮ম বা ১২শ ভাবে পীড়িত গ্রহদের কুফল প্রশমনের জন্য বিশেষ উপাচার ও দান।",
+
+    advancedSettingsToggle: "উন্নত জ্যোতিষ সেটিংস (অয়নাংশ ও স্থানাঙ্ক)",
+    latitudeLabel: "অক্ষরেখা (Latitude)",
+    longitudeLabel: "দ্রাঘিমারেখা (Longitude)",
+    horaryActive: "হোরারি সক্রিয় ✓",
+    horaryEnable: "হোরারি চালু করুন",
+    featureName: "কেপি অ্যাস্ট্রোলজি",
+    featureDisabledNotice: "কেপি অ্যাস্ট্রোলজি ফিচারটি বর্তমানে অ্যাডমিন দ্বারা বন্ধ রয়েছে।",
+    coinsUsedSuccess: "কেপি চার্ট গণনা সম্পন্ন! ({coins} কয়েন ব্যবহৃত)",
+    calcSuccessToast: "কেপি জ্যোতিষ নির্ভুল চার্ট সফলভাবে নির্ণয় করা হয়েছে!",
+    calcFailedToast: "কেপি চার্ট গণনায় ত্রুটি হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
+
+    analysisTitle: "কেপি জ্যোতিষ বিশ্লেষণ",
+    ascendantLabel: "লগ্ন",
+    untenantedSupreme: "আনটেন্যান্টেড গ্রহ (সর্বাধিক ফলদায়ক)",
+    horaryDetailsHeading: "কেপি হোরারি প্রশ্ন বিবরণ (বীজ সংখ্যা #{num})",
+    ascendantSignLabel: "লগ্ন রাশি:",
+    subArcRange: "সাব-আর্ক পরিধি:",
+    zodiacLongitude: "রাশিচক্র দ্রাঘিমা:",
+
+    sigTheoryTitle: "কেপি ৪-স্তরের কারকত্ব তত্ত্ব (প্রফেসর কে.এস. কৃষ্ণমূর্তি)",
+    sigTheoryDesc:
+      "গ্রেড A (লেভেল A): ভাবস্থ গ্রহের নক্ষত্রে অবস্থানকারী গ্রহ (সবচেয়ে শক্তিশালী)। গ্রেড B (লেভেল B): ভাবস্থ গ্রহ। গ্রেড C (লেভেল C): ভাবাধিপতির নক্ষত্রে অবস্থানকারী গ্রহ। গ্রেড D (লেভেল D): ভাবাধিপতি গ্রহ।",
+    allHousesSignified: "সকল নির্দেশিত ভাব",
+    levelHierarchy: "লেভেল A → B → C → D",
+    houses1to12: "১ থেকে ১২ ভাব",
+    housePrefix: "ভাব",
+
+    primaryCusp: "মূল ভাব:",
+    cslLabel: "কুসপ্যাল সাব লর্ড:",
+    starLabel: "নক্ষত্র:",
+    favorableHouses: "অনুকূল ভাবসমূহ:",
+    housesSignifiedByCSL: "CSL দ্বারা নির্দেশিত ভাব:",
+    timingHintLabel: "সম্ভাব্য সময়কাল:",
+
+    cuspsSubheading: "প্লাসিডাস অসম ভাব বিভাজন • রাশি, নক্ষত্র, সাব ও সাব-সাব লর্ড (SSL)",
+    twelveCuspsBadge: "১২টি ভাব",
+    lagnaCuspLabel: "১ম (১) [লগ্ন]",
+    planetsSubheading: "৯টি গ্রহ + আনটেন্যান্টেড স্থিতি ও সাব-সাব লর্ড",
+    nirayanaPlacements: "নিরয়ণ গ্রহাবস্থান",
+    untenantedQuestion: "আনটেন্যান্টেড?",
+
+    fruitfulRPHeading: "ফলপ্রসূ রুলিং প্ল্যানেটস (ঘটনা বাস্তবায়ন)",
+    fruitfulRPDesc:
+      "যেসব রুলিং প্ল্যানেটের নক্ষত্রাধিপতি গোচরে মার্গী। এরা যেকোনো শুভ ঘটনা বা ফলাফলের মূল নিয়ামক হিসেবে কাজ করে।",
+    noneText: "কোনোটি নয়",
+    discardedRPHeading: "বর্জিত রুলিং প্ল্যানেটস (বক্রী নক্ষত্র ফিল্টার)",
+    discardedRPDesc:
+      "রাহুল কৌশিক নিয়ম ৬ (পৃষ্ঠা ৫৬): বক্রী গ্রহের নক্ষত্রে অবস্থিত কোনো রুলিং প্ল্যানেট শুভ ফল দিতে পারে না এবং তা বর্জিত হয়।",
+    noPlanetsDiscarded: "কোনো গ্রহ বর্জিত নয় — সকল নক্ষত্রপতি মার্গী।",
+
+    ascendantTypeLabel: "লগ্ন প্রকৃতি:",
+    badhakaLordLabel: "বাধক অধিপতি:",
+    badhakaConnectedLabel: "বাধক সংযুক্ত গ্রহ:",
+    marakaHousesHeading: "মারক স্থান: ২য় ও ৭ম ভাব",
+    marakaLordsLabel: "মারক অধিপতি:",
+    marakaConnectedLabel: "মারক সংযুক্ত গ্রহ:",
+    aspectsDetected: "{count}টি দৃষ্টি শনাক্ত হয়েছে",
+    colPlanetsInvolved: "সংশ্লিষ্ট গ্রহসমূহ",
+    colAspect: "দৃষ্টির ধরন",
+    colAngle: "কোণ",
+    colOrb: "অর্ব (Orb)",
+    colNature: "প্রকৃতি",
+    colSignificance: "তাৎপর্য",
+
+    remedySuffix: "প্রতিকার",
+    afflictedHousePrefix: "পীড়িত ভাব",
+    problemSymptomLabel: "সমস্যা বা লক্ষণ:",
+    lalKitabUpayaHeading: "🏺 ৪৩ দিনের লাল কিতাব প্রতিকার:",
+    vedicMantraHeading: "🕉️ বৈদিক মন্ত্র:",
+    recommendedCharityHeading: "🤝 দান ও সৎকর্ম:",
+    activeDot: "● সক্রিয়",
+    clearSelection: "মুছুন",
+    saveSvg: "চার্ট সেভ করুন (SVG)",
+    downloadChartTitle: "চার্ট ডাউনলোড করুন",
   },
   hi: {
     badge: "कृष्णमूर्ति पद्धति (KP System)",
@@ -590,20 +820,105 @@ export const KP_UI_TRANSLATIONS: Record<"en" | "bn" | "hi", KPUITranslations> = 
 
     remediesDashboardTitle: "४३ दिवसीय लाल किताब एवं वैदिक उपाय",
     remediesDashboardSubheading: "६, ८ या १२वें भाव में पीड़ित ग्रहों की शांति हेतु अचूक उपाय एवं दान।",
+
+    advancedSettingsToggle: "उन्नत ज्योतिष सेटिंग्स (अयनांश एवं निर्देशांक)",
+    latitudeLabel: "अक्षांश (Latitude)",
+    longitudeLabel: "रेखांश (Longitude)",
+    horaryActive: "होरी सक्रिय ✓",
+    horaryEnable: "होरी चालू करें",
+    featureName: "केपी ज्योतिष",
+    featureDisabledNotice: "केपी ज्योतिष सुविधा वर्तमान में व्यवस्थापक द्वारा अक्षम है।",
+    coinsUsedSuccess: "केपी चक्र गणना संपन्न! ({coins} सिक्के प्रयुक्त)",
+    calcSuccessToast: "केपी ज्योतिष चक्र सफलतापूर्वक संगणित!",
+    calcFailedToast: "केपी चक्र गणना में त्रुटि हुई। कृपया पुनः प्रयास करें।",
+
+    analysisTitle: "केपी ज्योतिष विश्लेषण",
+    ascendantLabel: "लग्न",
+    untenantedSupreme: "अनटेनेंटेड ग्रह (अत्यधिक फलदायी)",
+    horaryDetailsHeading: "केपी प्रश्न कुंडली विवरण (संख्या #{num})",
+    ascendantSignLabel: "लग्न राशि:",
+    subArcRange: "सब-आर्क विस्तार:",
+    zodiacLongitude: "राशि चक्र रेखांश:",
+
+    sigTheoryTitle: "केपी ४-स्तरीय कारकत्व सिद्धांत (प्रो. के.एस. कृष्णमूर्ति)",
+    sigTheoryDesc:
+      "ग्रेड A (लेवल A): भाव में स्थित ग्रह के नक्षत्र में स्थित ग्रह (सर्वाधिक बलवान)। ग्रेड B (लेवल B): भाव में स्थित ग्रह। ग्रेड C (लेवल C): भावेश के नक्षत्र में स्थित ग्रह। ग्रेड D (लेवल D): भावेश ग्रह।",
+    allHousesSignified: "सभी भाव कारकত্ব",
+    levelHierarchy: "लेवल A → B → C → D",
+    houses1to12: "१ से १२ भाव",
+    housePrefix: "भाव",
+
+    primaryCusp: "मुख्य भाव:",
+    cslLabel: "कस्पल सब लॉर्ड:",
+    starLabel: "नक्षत्र:",
+    favorableHouses: "अनुकूल भाव:",
+    housesSignifiedByCSL: "CSL द्वारा सूचित भाव:",
+    timingHintLabel: "संभावित समय:",
+
+    cuspsSubheading: "प्लेसिडस असमान भाव विभाजन • राशि, नक्षत्र, सब एवं सब-सब लॉर्ड (SSL)",
+    twelveCuspsBadge: "१२ भाव",
+    lagnaCuspLabel: "१म (१) [लग्न]",
+    planetsSubheading: "९ ग्रह + अनटेनेंटेड स्थिति एवं सब-सब लॉर्ड",
+    nirayanaPlacements: "निरयण ग्रह स्थिति",
+    untenantedQuestion: "अनटेनेंटेड?",
+
+    fruitfulRPHeading: "फलदायी रूलिंग प्लैनेट्स (घटना सिद्धि)",
+    fruitfulRPDesc:
+      "वे रूलिंग प्लैनेट्स जिनके नक्षत्र स्वामी गोचर में मार्गी हैं। ये घटनाओं के सिद्धि काल के अचूक निर्धारक हैं।",
+    noneText: "कोई नहीं",
+    discardedRPHeading: "वर्जित रूलिंग प्लैनेट्स (वक्री नक्षत्र फ़िल्टर)",
+    discardedRPDesc:
+      "राहुल कौशिक नियम ६ (पृष्ठ ५६): वक्री ग्रह के नक्षत्र में स्थित रूलिंग प्लैनेट अनुकूल फल नहीं दे सकता और वर्जित माना जाता है।",
+    noPlanetsDiscarded: "कोई ग्रह वर्जित नहीं — सभी नक्षत्र स्वामी मार्गी हैं।",
+
+    ascendantTypeLabel: "लग्न प्रकृति:",
+    badhakaLordLabel: "बाधक स्वामी:",
+    badhakaConnectedLabel: "बाधक संबंधित ग्रह:",
+    marakaHousesHeading: "मारक भाव: द्वितीय व सप्तम भाव",
+    marakaLordsLabel: "मारक स्वामी:",
+    marakaConnectedLabel: "मारक संबंधित ग्रह:",
+    aspectsDetected: "{count} दृष्टियां पाई गईं",
+    colPlanetsInvolved: "संबंधित ग्रह",
+    colAspect: "दृष्टि प्रकार",
+    colAngle: "कोण",
+    colOrb: "ऑर्ब (Orb)",
+    colNature: "प्रकृति",
+    colSignificance: "महत्व",
+
+    remedySuffix: "उपाय",
+    afflictedHousePrefix: "पीड़ित भाव",
+    problemSymptomLabel: "समस्या / लक्षण:",
+    lalKitabUpayaHeading: "🏺 ४३ दिवसीय लाल किताब उपाय:",
+    vedicMantraHeading: "🕉️ वैदिक मंत्र:",
+    recommendedCharityHeading: "🤝 अनुशंसित दान:",
+    activeDot: "● सक्रिय",
+    clearSelection: "साफ़ करें",
+    saveSvg: "चार्ट सहेजें (SVG)",
+    downloadChartTitle: "चार्ट डाउनलोड करें",
   },
 };
 
 export const KP_PLANET_NAMES: Record<string, Record<"en" | "bn" | "hi", string>> = {
   Asc: { en: "Ascendant (Asc)", bn: "লগ্ন (Asc)", hi: "लग्न (Asc)" },
+  Ascendant: { en: "Ascendant", bn: "লগ্ন", hi: "लग्न" },
   Su: { en: "Sun (Su)", bn: "সূর্য (Su)", hi: "सूर्य (Su)" },
+  Sun: { en: "Sun", bn: "সূর্য", hi: "सूर्य" },
   Mo: { en: "Moon (Mo)", bn: "চন্দ্র (Mo)", hi: "चन्द्र (Mo)" },
+  Moon: { en: "Moon", bn: "চন্দ্র", hi: "चन्द्र" },
   Ma: { en: "Mars (Ma)", bn: "মঙ্গল (Ma)", hi: "मंगल (Ma)" },
+  Mars: { en: "Mars", bn: "মঙ্গল", hi: "मंगल" },
   Me: { en: "Mercury (Me)", bn: "বুধ (Me)", hi: "बुध (Me)" },
+  Mercury: { en: "Mercury", bn: "বুধ", hi: "बुध" },
   Ju: { en: "Jupiter (Ju)", bn: "বৃহস্পতি (Ju)", hi: "बृहस्पति (Ju)" },
+  Jupiter: { en: "Jupiter", bn: "বৃহস্পতি", hi: "बृहस्पति" },
   Ve: { en: "Venus (Ve)", bn: "শুক্র (Ve)", hi: "शुक्र (Ve)" },
+  Venus: { en: "Venus", bn: "শুক্র", hi: "शुक्र" },
   Sa: { en: "Saturn (Sa)", bn: "শনি (Sa)", hi: "शनि (Sa)" },
+  Saturn: { en: "Saturn", bn: "শনি", hi: "शनि" },
   Ra: { en: "Rahu (Ra)", bn: "রাহু (Ra)", hi: "राहु (Ra)" },
+  Rahu: { en: "Rahu", bn: "রাহু", hi: "राहु" },
   Ke: { en: "Ketu (Ke)", bn: "কেতু (Ke)", hi: "केतु (Ke)" },
+  Ketu: { en: "Ketu", bn: "কেতু", hi: "केतु" },
 };
 
 export const KP_SIGN_NAMES: Record<string, Record<"en" | "bn" | "hi", string>> = {
@@ -1529,3 +1844,407 @@ export const KP_LOCALIZED_DASHA_INSIGHTS: Record<
     },
   },
 };
+
+// ==========================================
+// Localized Number & Date Helpers
+// ==========================================
+
+export function toLocalizedDigits(
+  val: string | number | undefined | null,
+  lang: "en" | "bn" | "hi" = "en"
+): string {
+  if (val === undefined || val === null) return "";
+  const str = String(val);
+  if (lang === "en") return str;
+
+  const bnDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+  const hiDigits = ["०", "१", "२", "३", "४", "५", "६", "७", "८", "९"];
+
+  return str.replace(/\d/g, (d) => {
+    const idx = parseInt(d, 10);
+    return lang === "bn" ? bnDigits[idx] : hiDigits[idx];
+  });
+}
+
+export function translateKPPlanet(
+  planet?: string | null,
+  lang: "en" | "bn" | "hi" = "en"
+): string {
+  if (!planet) return "";
+  const clean = planet.trim();
+  return KP_PLANET_NAMES[clean]?.[lang] || clean;
+}
+
+export function translateKPSign(
+  sign?: string | null,
+  lang: "en" | "bn" | "hi" = "en"
+): string {
+  if (!sign) return "";
+  const clean = sign.trim();
+  if (KP_SIGN_NAMES[clean]?.[lang]) return KP_SIGN_NAMES[clean][lang];
+
+  // Vedic sign names map
+  const vedicSignMap: Record<string, string> = {
+    Mesha: "Aries",
+    Vrishabha: "Taurus",
+    Mithuna: "Gemini",
+    Karka: "Cancer",
+    Simha: "Leo",
+    Kanya: "Virgo",
+    Tula: "Libra",
+    Vrischika: "Scorpio",
+    Dhanu: "Sagittarius",
+    Makara: "Capricorn",
+    Kumbha: "Aquarius",
+    Meena: "Pisces",
+  };
+  const standardSign = vedicSignMap[clean];
+  if (standardSign && KP_SIGN_NAMES[standardSign]?.[lang]) {
+    return KP_SIGN_NAMES[standardSign][lang];
+  }
+
+  return clean;
+}
+
+export function translateKPNakshatra(
+  nak?: string | null,
+  lang: "en" | "bn" | "hi" = "en"
+): string {
+  if (!nak) return "";
+  const clean = nak.trim();
+  const map: Record<string, Record<"en" | "bn" | "hi", string>> = {
+    Ashwini: { bn: "অশ্বিনী", hi: "अश्विनी", en: "Ashwini" },
+    Bharani: { bn: "ভরণী", hi: "भरणी", en: "Bharani" },
+    Krittika: { bn: "কৃত্তিকা", hi: "कृत्तिका", en: "Krittika" },
+    Rohini: { bn: "রোহিণী", hi: "रोहिणी", en: "Rohini" },
+    Mrigashirsha: { bn: "মৃগশিরা", hi: "मृगशिरा", en: "Mrigashirsha" },
+    Mrigashira: { bn: "মৃগশিরা", hi: "मृगशिरा", en: "Mrigashira" },
+    Ardra: { bn: "আর্দ্রা", hi: "आर्द्रा", en: "Ardra" },
+    Punarvasu: { bn: "পুনর্বসু", hi: "पुनर्वसु", en: "Punarvasu" },
+    Pushya: { bn: "পুষ্যা", hi: "पुष्य", en: "Pushya" },
+    Ashlesha: { bn: "অশ্লেষা", hi: "आश्लेषा", en: "Ashlesha" },
+    Magha: { bn: "মঘা", hi: "मघा", en: "Magha" },
+    "Purva Phalguni": { bn: "পূর্ব ফাল্গুনী", hi: "पूर्वा फाल्गुनी", en: "Purva Phalguni" },
+    "P. Phalguni": { bn: "পূর্ব ফাল্গুনী", hi: "पूर्वा फाल्गुनी", en: "P. Phalguni" },
+    "Uttara Phalguni": { bn: "উত্তর ফাল্গুনী", hi: "उत्तरा फाल्गुनी", en: "Uttara Phalguni" },
+    "U. Phalguni": { bn: "উত্তর ফাল্গুনী", hi: "उत्तरा फाल्गुनी", en: "U. Phalguni" },
+    Hasta: { bn: "হস্তা", hi: "हस्त", en: "Hasta" },
+    Chitra: { bn: "চিত্রা", hi: "चित्रा", en: "Chitra" },
+    Swati: { bn: "স্বাতী", hi: "स्वाति", en: "Swati" },
+    Vishakha: { bn: "বিশাখা", hi: "विशाखा", en: "Vishakha" },
+    Anuradha: { bn: "অনুরাধা", hi: "अनुराधा", en: "Anuradha" },
+    Jyeshtha: { bn: "জ্যেষ্ঠা", hi: "ज्येष्ठा", en: "Jyeshtha" },
+    Jyestha: { bn: "জ্যেষ্ঠা", hi: "ज्येष्ठा", en: "Jyestha" },
+    Mula: { bn: "মূলা", hi: "मूल", en: "Mula" },
+    Moola: { bn: "মূলা", hi: "मूल", en: "Moola" },
+    "Purva Ashadha": { bn: "পূর্বাষাঢ়া", hi: "पूर्वाषाढ़ा", en: "Purva Ashadha" },
+    "P. Shada": { bn: "পূর্বাষাঢ়া", hi: "पूर्वाषाढ़ा", en: "P. Shada" },
+    "Uttara Ashadha": { bn: "উত্তরাষাঢ়া", hi: "उत्तराषाढ़ा", en: "Uttara Ashadha" },
+    "U. Ashada": { bn: "উত্তরাষাঢ়া", hi: "उत्तराषाढ़ा", en: "U. Ashada" },
+    Shravana: { bn: "শ্রবণা", hi: "श्रवण", en: "Shravana" },
+    Dhanishta: { bn: "ধনিষ্ঠা", hi: "धनिष्ठा", en: "Dhanishta" },
+    Shatabhisha: { bn: "শতভিষা", hi: "शतभिषा", en: "Shatabhisha" },
+    "Purva Bhadrapada": { bn: "পূর্ব ভাদ্রপদ", hi: "पूर्वाभाद्रपद", en: "Purva Bhadrapada" },
+    "P.Bd.Pada": { bn: "পূর্ব ভাদ্রপদ", hi: "पूर्वाभाद्रपद", en: "P.Bd.Pada" },
+    "Uttara Bhadrapada": { bn: "উত্তর ভাদ্রপদ", hi: "उत्तराभाद्रपद", en: "Uttara Bhadrapada" },
+    "U.Bd.Pada": { bn: "উত্তর ভাদ্রপদ", hi: "उत्तराभाद्रपद", en: "U.Bd.Pada" },
+    Revati: { bn: "রেবতী", hi: "रेवती", en: "Revati" },
+  };
+  return map[clean]?.[lang] || clean;
+}
+
+export function translateKPTithi(
+  tithi?: string | null,
+  lang: "en" | "bn" | "hi" = "en"
+): string {
+  if (!tithi) return "";
+  const clean = tithi.trim();
+  const map: Record<string, Record<"en" | "bn" | "hi", string>> = {
+    "Shukla Pratipada": { bn: "শুক্ল প্রতিপদ", hi: "शुक्ल प्रतिपदा", en: "Shukla Pratipada" },
+    "Shukla Dwitiya": { bn: "শুক্ল দ্বিতীয়া", hi: "शुक्ल द्वितीया", en: "Shukla Dwitiya" },
+    "Shukla Tritiya": { bn: "শুক্ল তৃতীয়া", hi: "शुक्ल तृतीया", en: "Shukla Tritiya" },
+    "Shukla Chaturthi": { bn: "শুক্ল চতুর্থী", hi: "शुक्ल चतुर्थी", en: "Shukla Chaturthi" },
+    "Shukla Panchami": { bn: "শুক্ল পঞ্চমী", hi: "शुक्ल पंचमी", en: "Shukla Panchami" },
+    "Shukla Shashthi": { bn: "শুক্ল ষষ্ঠী", hi: "शुक्ल षष्ठी", en: "Shukla Shashthi" },
+    "Shukla Saptami": { bn: "শুক্ল সপ্তমী", hi: "शुक्ल सप्तमी", en: "Shukla Saptami" },
+    "Shukla Ashtami": { bn: "শুক্ল অষ্টমী", hi: "शुक्ल अष्टमी", en: "Shukla Ashtami" },
+    "Shukla Navami": { bn: "শুক্ল নবমী", hi: "शुक्ल नवमी", en: "Shukla Navami" },
+    "Shukla Dashami": { bn: "শুক্ল দশমী", hi: "शुक्ल दशमी", en: "Shukla Dashami" },
+    "Shukla Ekadashi": { bn: "শুক্ল একাদশী", hi: "शुक्ल एकादशी", en: "Shukla Ekadashi" },
+    "Shukla Dwadashi": { bn: "শুক্ল দ্বাদশী", hi: "शुक्ल द्वादशी", en: "Shukla Dwadashi" },
+    "Shukla Trayodashi": { bn: "শুক্ল ত্রয়োদশী", hi: "शुक्ल त्रयोदशी", en: "Shukla Trayodashi" },
+    "Shukla Chaturdashi": { bn: "শুক্ল চতুর্দশী", hi: "शुक्ल चतुर्दशी", en: "Shukla Chaturdashi" },
+    Purnima: { bn: "পূর্ণিমা", hi: "पूर्णिमा", en: "Purnima" },
+    "Krishna Pratipada": { bn: "কৃষ্ণ প্রতিপদ", hi: "कृष्ण प्रतिपदा", en: "Krishna Pratipada" },
+    "Krishna Dwitiya": { bn: "কৃষ্ণ দ্বিতীয়া", hi: "कृष्ण द्वितीया", en: "Krishna Dwitiya" },
+    "Krishna Tritiya": { bn: "কৃষ্ণ তৃতীয়া", hi: "कृष्ण तृतीया", en: "Krishna Tritiya" },
+    "Krishna Chaturthi": { bn: "কৃষ্ণ চতুর্থী", hi: "कृष्ण चतुर्थी", en: "Krishna Chaturthi" },
+    "Krishna Panchami": { bn: "কৃষ্ণ পঞ্চমী", hi: "कृष्ण पंचमी", en: "Krishna Panchami" },
+    "Krishna Shashthi": { bn: "কৃষ্ণ ষষ্ঠী", hi: "कृष्ण षष्ठी", en: "Krishna Shashthi" },
+    "Krishna Saptami": { bn: "কৃষ্ণ সপ্তমী", hi: "कृष्ण सप्तमी", en: "Krishna Saptami" },
+    "Krishna Ashtami": { bn: "কৃষ্ণ অষ্টমী", hi: "कृष्ण अष्टमी", en: "Krishna Ashtami" },
+    "Krishna Navami": { bn: "কৃষ্ণ নবমী", hi: "कृष्ण नवमी", en: "Krishna Navami" },
+    "Krishna Dashami": { bn: "কৃষ্ণ দশমী", hi: "कृष्ण दशमी", en: "Krishna Dashami" },
+    "Krishna Ekadashi": { bn: "কৃষ্ণ একাদশী", hi: "कृष्ण एकादशी", en: "Krishna Ekadashi" },
+    "Krishna Dwadashi": { bn: "কৃষ্ণ দ্বাদশী", hi: "कृष्ण द्वादशी", en: "Krishna Dwadashi" },
+    "Krishna Trayodashi": { bn: "কৃষ্ণ ত্রয়োদশী", hi: "कृष्ण त्रयोदशी", en: "Krishna Trayodashi" },
+    "Krishna Chaturdashi": { bn: "কৃষ্ণ চতুর্দশী", hi: "कृष्ण चतुर्दशी", en: "Krishna Chaturdashi" },
+    Amavasya: { bn: "অমাবস্যা", hi: "अमावस्या", en: "Amavasya" },
+  };
+  return map[clean]?.[lang] || clean;
+}
+
+export function translateKPYoga(
+  yoga?: string | null,
+  lang: "en" | "bn" | "hi" = "en"
+): string {
+  if (!yoga) return "";
+  const clean = yoga.trim();
+  const map: Record<string, Record<"en" | "bn" | "hi", string>> = {
+    Vishkambha: { bn: "বিষ্কম্ভ", hi: "विष्कुम्भ", en: "Vishkambha" },
+    Priti: { bn: "প্রীতি", hi: "प्रीति", en: "Priti" },
+    Ayushman: { bn: "আয়ুষ্মান", hi: "आयुष्मान", en: "Ayushman" },
+    Saubhagya: { bn: "সৌভাগ্য", hi: "सौभाग्य", en: "Saubhagya" },
+    Shobhana: { bn: "শোভন", hi: "शोभन", en: "Shobhana" },
+    Atiganda: { bn: "অতিগণ্ড", hi: "अतिगण्ड", en: "Atiganda" },
+    Sukarma: { bn: "সুকর্মা", hi: "सुकर्मा", en: "Sukarma" },
+    Dhriti: { bn: "ধৃতি", hi: "धृति", en: "Dhriti" },
+    Shula: { bn: "শূল", hi: "शूल", en: "Shula" },
+    Ganda: { bn: "গণ্ড", hi: "गण्ड", en: "Ganda" },
+    Vriddhi: { bn: "বৃদ্ধি", hi: "वृद्धि", en: "Vriddhi" },
+    Dhruva: { bn: "ধ্রুব", hi: "ध्रुव", en: "Dhruva" },
+    Vyaghata: { bn: "ব্যাঘাত", hi: "व्याघात", en: "Vyaghata" },
+    Harshana: { bn: "হর্ষণ", hi: "हर्षण", en: "Harshana" },
+    Vajra: { bn: "বজ্র", hi: "वज्र", en: "Vajra" },
+    Siddhi: { bn: "সিদ্ধি", hi: "सिद्धि", en: "Siddhi" },
+    Vyatipata: { bn: "ব্যতীপাত", hi: "व्यतीपात", en: "Vyatipata" },
+    Variyana: { bn: "বরীয়ান", hi: "वरीयान", en: "Variyana" },
+    Parigha: { bn: "পরিঘ", hi: "परिघ", en: "Parigha" },
+    Shiva: { bn: "শিব", hi: "शिव", en: "Shiva" },
+    Siddha: { bn: "সিদ্ধ", hi: "सिद्ध", en: "Siddha" },
+    Sadhya: { bn: "সাধ্য", hi: "साध्य", en: "Sadhya" },
+    Shubha: { bn: "শুভ", hi: "शुभ", en: "Shubha" },
+    Shukla: { bn: "শুক্ল", hi: "शुक्ल", en: "Shukla" },
+    Brahma: { bn: "ব্রহ্ম", hi: "ब्रह्म", en: "Brahma" },
+    Indra: { bn: "ইন্দ্র", hi: "इन्द्र", en: "Indra" },
+    Vaidhriti: { bn: "বৈধৃতি", hi: "वैधृति", en: "Vaidhriti" },
+  };
+  return map[clean]?.[lang] || clean;
+}
+
+export function translateKPKarana(
+  karana?: string | null,
+  lang: "en" | "bn" | "hi" = "en"
+): string {
+  if (!karana) return "";
+  const clean = karana.trim();
+  const map: Record<string, Record<"en" | "bn" | "hi", string>> = {
+    Bava: { bn: "বব", hi: "बव", en: "Bava" },
+    Balava: { bn: "বালব", hi: "बालव", en: "Balava" },
+    Kaulava: { bn: "কৌলব", hi: "कौलव", en: "Kaulava" },
+    Taitila: { bn: "তৈতিল", hi: "तैतिल", en: "Taitila" },
+    Gara: { bn: "গর", hi: "गर", en: "Gara" },
+    Vanija: { bn: "বণিজ", hi: "वणिज", en: "Vanija" },
+    Vishti: { bn: "ভাদ্রা (বিষ্টিকরন)", hi: "भद्रा (विष्टि)", en: "Vishti (Bhadra)" },
+    Shakuni: { bn: "শকুনি", hi: "शकुनि", en: "Shakuni" },
+    Chatushpada: { bn: "চতুস্পদ", hi: "चतुष्पद", en: "Chatushpada" },
+    Naga: { bn: "নাগ", hi: "नाग", en: "Naga" },
+    Kintughna: { bn: "কিম্স্তুঘ্ন", hi: "किंस्तुघ्न", en: "Kintughna" },
+  };
+  return map[clean]?.[lang] || clean;
+}
+
+export function translateKPDay(
+  day?: string | null,
+  lang: "en" | "bn" | "hi" = "en"
+): string {
+  if (!day) return "";
+  const clean = day.trim();
+  const map: Record<string, Record<"en" | "bn" | "hi", string>> = {
+    Sunday: { bn: "রবিবার", hi: "रविवार", en: "Sunday" },
+    Monday: { bn: "সোমবার", hi: "सोमवार", en: "Monday" },
+    Tuesday: { bn: "মঙ্গলবার", hi: "मंगलवार", en: "Tuesday" },
+    Wednesday: { bn: "বুধবার", hi: "बुधवार", en: "Wednesday" },
+    Thursday: { bn: "বৃহস্পতিবার", hi: "गुरुवार", en: "Thursday" },
+    Friday: { bn: "শুক্রবার", hi: "शुक्रवार", en: "Friday" },
+    Saturday: { bn: "শনিবার", hi: "शनिवार", en: "Saturday" },
+    Ravivara: { bn: "রবিবার", hi: "रविवार", en: "Ravivara" },
+    Somavara: { bn: "সোমবার", hi: "सोमवार", en: "Somavara" },
+    Mangalavara: { bn: "মঙ্গলবার", hi: "मंगलवार", en: "Mangalavara" },
+    Budhavara: { bn: "বুধবার", hi: "बुधवार", en: "Budhavara" },
+    Guruvara: { bn: "বৃহস্পতিবার", hi: "गुरुवार", en: "Guruvara" },
+    Shukravara: { bn: "শুক্রবার", hi: "शुक्रवार", en: "Shukravara" },
+    Shanivara: { bn: "শনিবার", hi: "शनिवार", en: "Shanivara" },
+  };
+  return map[clean]?.[lang] || clean;
+}
+
+export function translateKPBalDasa(
+  str?: string | null,
+  lang: "en" | "bn" | "hi" = "en"
+): string {
+  if (!str) return "";
+  if (lang === "en") return str;
+
+  const m = str.match(/^([A-Za-z]+):\s*(\d+(?:\.\d+)?)\s*y(?:ears?)?(?:\s*(\d+)\s*m(?:onths?)?)?(?:\s*(\d+)\s*d(?:ays?)?)?/i);
+  if (m) {
+    const planet = translateKPPlanet(m[1], lang);
+    const y = toLocalizedDigits(m[2], lang);
+    const mon = m[3] ? toLocalizedDigits(m[3], lang) : null;
+    const d = m[4] ? toLocalizedDigits(m[4], lang) : null;
+
+    if (lang === "bn") {
+      let res = `${planet}: ${y} বছর`;
+      if (mon) res += ` ${mon} মাস`;
+      if (d) res += ` ${d} দিন`;
+      return res;
+    } else {
+      let res = `${planet}: ${y} वर्ष`;
+      if (mon) res += ` ${mon} माह`;
+      if (d) res += ` ${d} दिन`;
+      return res;
+    }
+  }
+
+  return toLocalizedDigits(str, lang);
+}
+
+export function translateKPDuration(
+  dur?: string | null,
+  lang: "en" | "bn" | "hi" = "en"
+): string {
+  if (!dur) return "";
+  if (lang === "en") return dur;
+
+  const m = dur.match(/^(\d+(?:\.\d+)?)\s*y(?:ears?)?/i);
+  if (m) {
+    const val = toLocalizedDigits(m[1], lang);
+    return lang === "bn" ? `${val} বছর` : `${val} वर्ष`;
+  }
+  return toLocalizedDigits(dur, lang);
+}
+
+export function translateKPAscendantType(
+  ascType?: string | null,
+  lang: "en" | "bn" | "hi" = "en"
+): string {
+  if (!ascType) return "";
+  const clean = ascType.trim();
+  const map: Record<string, Record<"en" | "bn" | "hi", string>> = {
+    "Movable (Chara)": { bn: "চর রাশি (Movable)", hi: "चर राशि (Movable)", en: "Movable (Chara)" },
+    "Fixed (Sthira)": { bn: "স্থির রাশি (Fixed)", hi: "स्थिर राशि (Fixed)", en: "Fixed (Sthira)" },
+    "Dual (Dwiswabhava)": { bn: "দ্বি-স্বভাব রাশি (Dual)", hi: "द्विस्वभाव राशि (Dual)", en: "Dual (Dwiswabhava)" },
+    "চর (Movable)": { bn: "চর রাশি (Movable)", hi: "चर राशि (Movable)", en: "Movable (Chara)" },
+    "স্থির (Fixed)": { bn: "স্থির রাশি (Fixed)", hi: "स्थिर राशि (Fixed)", en: "Fixed (Sthira)" },
+    "দ্বি-স্বভাব (Dual)": { bn: "দ্বি-স্বভাব রাশি (Dual)", hi: "द्विस्वभाव राशि (Dual)", en: "Dual (Dwiswabhava)" },
+    "चर (Movable)": { bn: "চর রাশি (Movable)", hi: "चर राशि (Movable)", en: "Movable (Chara)" },
+    "स्थिर (Fixed)": { bn: "স্থির রাশি (Fixed)", hi: "स्थिर राशि (Fixed)", en: "Fixed (Sthira)" },
+    "द्विस्वभाव (Dual)": { bn: "দ্বি-স্বভাব রাশি (Dual)", hi: "द्विस्वभाव राशि (Dual)", en: "Dual (Dwiswabhava)" },
+  };
+  return map[clean]?.[lang] || clean;
+}
+
+export function translateKPAspectName(
+  name?: string | null,
+  lang: "en" | "bn" | "hi" = "en"
+): string {
+  if (!name) return "";
+  const clean = name.trim();
+  const map: Record<string, Record<"en" | "bn" | "hi", string>> = {
+    Conjunction: { bn: "যুতি (Conjunction - ০°)", hi: "युति (Conjunction - ०°)", en: "Conjunction" },
+    Sextile: { bn: "সেক্সটাইল (Sextile - ৬০°)", hi: "लाभ दृष्टि (Sextile - ६०°)", en: "Sextile" },
+    Square: { bn: "কেন্দ্র দৃষ্টি (Square - ৯০°)", hi: "केंद्र दृष्टि (Square - ९०°)", en: "Square" },
+    Trine: { bn: "ত্রিকোণ দৃষ্টি (Trine - ১২০°)", hi: "त्रिकोण दृष्टि (Trine - १२०°)", en: "Trine" },
+    Opposition: { bn: "সমসপ্তক দৃষ্টি (Opposition - ১৮০°)", hi: "प्रतियुति (Opposition - १८০°)", en: "Opposition" },
+  };
+  return map[clean]?.[lang] || clean;
+}
+
+export function translateKPAspectNature(
+  nature?: string | null,
+  lang: "en" | "bn" | "hi" = "en"
+): string {
+  if (!nature) return "";
+  const clean = nature.trim();
+  const map: Record<string, Record<"en" | "bn" | "hi", string>> = {
+    Harmonious: { bn: "শুভ / অনুকূল", hi: "शुभ / अनुकूल", en: "Harmonious" },
+    Challenging: { bn: "চ্যালেঞ্জিং / প্রতিকূল", hi: "कठिन / चुनौतीपूर्ण", en: "Challenging" },
+  };
+  return map[clean]?.[lang] || clean;
+}
+
+export function translateKPLifeEventVerdict(
+  verdict?: string | null,
+  lang: "en" | "bn" | "hi" = "en"
+): string {
+  if (!verdict) return "";
+  const clean = verdict.trim();
+  const map: Record<string, Record<"en" | "bn" | "hi", string>> = {
+    "Highly Favorable & Promised": {
+      bn: "অত্যন্ত শুভ ও শাস্ত্রসম্মত অনুকূল",
+      hi: "अत्यधिक शुभ एवं फलदायी",
+      en: "Highly Favorable & Promised",
+    },
+    "Moderately Favorable / Mixed": {
+      bn: "মধ্যম অনুকূল / মিশ্র ফলপ্রসূ",
+      hi: "मध्यम अनुकूल / मिश्रित फल",
+      en: "Moderately Favorable / Mixed",
+    },
+    "Caution / Challenging Period": {
+      bn: "সতর্কতা প্রয়োজন / প্রতিকূল",
+      hi: "सावधानी अपेक्षित / प्रतिकूल",
+      en: "Caution / Challenging Period",
+    },
+    "অত্যন্ত শুভ ও শাস্ত্রসম্মত অনুকূল": {
+      bn: "অত্যন্ত শুভ ও শাস্ত্রসম্মত অনুকূল",
+      hi: "अत्यधिक शुभ एवं फलदायी",
+      en: "Highly Favorable & Promised",
+    },
+    "মধ্যম অনুকূল / মিশ্র ফলপ্রসূ": {
+      bn: "মধ্যম অনুকূল / মিশ্র ফলপ্রসূ",
+      hi: "मध्यम अनुकूल / मिश्रित फल",
+      en: "Moderately Favorable / Mixed",
+    },
+    "সতর্কতা প্রয়োজন / প্রতিকূল": {
+      bn: "সতর্কতা প্রয়োজন / প্রতিকূল",
+      hi: "सावधानी अपेक्षित / प्रतिकूल",
+      en: "Caution / Challenging Period",
+    },
+    "अत्यधिक शुभ एवं फलदायी": {
+      bn: "অত্যন্ত শুভ ও শাস্ত্রসম্মত অনুকূল",
+      hi: "अत्यधिक शुभ एवं फलदायी",
+      en: "Highly Favorable & Promised",
+    },
+    "मध्यम अनुकूल / मिश्रित फल": {
+      bn: "মধ্যম অনুকূল / মিশ্র ফলপ্রসূ",
+      hi: "मध्यम अनुकूल / मिश्रित फल",
+      en: "Moderately Favorable / Mixed",
+    },
+    "सावधानी अपेक्षित / प्रतिकूल": {
+      bn: "সতর্কতা প্রয়োজন / প্রতিকূল",
+      hi: "सावधानी अपेक्षित / प्रतिकूल",
+      en: "Caution / Challenging Period",
+    },
+  };
+  return map[clean]?.[lang] || clean;
+}
+
+export function translateKPLifeEventCategoryTitle(
+  category?: string | null,
+  defaultTitle?: string | null,
+  lang: "en" | "bn" | "hi" = "en"
+): string {
+  if (!category) return defaultTitle || "";
+  const cat = category.toLowerCase().trim();
+  const map: Record<string, Record<"en" | "bn" | "hi", string>> = {
+    career: { bn: "চাকরি ও কর্মজীবন", hi: "नौकरी एवं आजीविका", en: "Career & Employment (Job)" },
+    business: { bn: "ব্যবসা ও স্বাধীন বাণিজ্য", hi: "व्यापार एवं व्यवसाय", en: "Business & Commercial Venture" },
+    marriage: { bn: "বিবাহ ও দাম্পত্য সুখ", hi: "विवाह एवं वैवाहिक सुख", en: "Marriage & Marital Prospects" },
+    love_marriage: { bn: "প্রেম ও প্রণয় বিবাহ", hi: "प्रेम संबंध एवं प्रेम विवाह", en: "Love & Romance Marriage" },
+    wealth: { bn: "ধনলাভ ও আর্থিক সমৃদ্ধি", hi: "धन लाभ एवं आर्थिक समृद्धि", en: "Wealth & Financial Prosperity" },
+    property: { bn: "বাড়ি, জমি ও স্থায়ী সম্পত্তি", hi: "भवन, भूमि एवं अचल संपत्ति", en: "Property, Vehicle & Land" },
+    health: { bn: "স্বাস্থ্য ও রোগমুক্তি বিচার", hi: "स्वास्थ्य एवं रोग विचार", en: "Health, Vitality & Recovery" },
+    foreign: { bn: "বিদেশ যাত্রা ও দূর প্রবাস", hi: "विदेश यात्रा एवं दूर प्रवास", en: "Foreign Travel & Relocation" },
+  };
+  return map[cat]?.[lang] || defaultTitle || category;
+}
