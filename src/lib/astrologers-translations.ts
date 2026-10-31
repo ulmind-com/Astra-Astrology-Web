@@ -241,3 +241,4 @@ export const ASTROLOGERS_I18N: Record<AstrologyLanguage, AstrologersTranslations
     galleryTitle: "Gallery",
   },
 };
+

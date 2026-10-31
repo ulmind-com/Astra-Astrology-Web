@@ -425,3 +425,4 @@ export const VASTU_I18N: Record<AstrologyLanguage, VastuTranslations> = {
     ayadiSuccess: "Ayadi calculation completed successfully!",
   },
 };
+
