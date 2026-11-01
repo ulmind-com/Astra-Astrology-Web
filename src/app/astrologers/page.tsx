@@ -16,7 +16,7 @@ import {
 } from "@/components/astrologers/directory-filters";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
-import { Alert, Button, EmptyState, Pagination } from "@/components/ui";
+import { Alert, Button, EmptyState, Pagination, Reveal } from "@/components/ui";
 import { astrologerApi, type DirectoryFilters as ApiFilters } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { ConsultationMode, Skill } from "@/types";
@@ -121,7 +121,10 @@ function DirectoryInner() {
             />
           ) : (
             <>
-              <div
+              {/* The wrapper stays mounted across pages, so the cards of the
+                  next page animate in the same way the first page's did. */}
+              <Reveal
+                stagger
                 className={`grid gap-5 transition-opacity duration-300 sm:grid-cols-2 lg:grid-cols-3 ${
                   isFetching ? "opacity-50" : "opacity-100"
                 }`}
@@ -129,7 +132,7 @@ function DirectoryInner() {
                 {data.items.map((astrologer) => (
                   <AstrologerCard key={astrologer.id} astrologer={astrologer} />
                 ))}
-              </div>
+              </Reveal>
 
               <div className="mt-8">
                 <Pagination meta={data.meta} onPage={setPage} />

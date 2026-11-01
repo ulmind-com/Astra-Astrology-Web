@@ -199,7 +199,7 @@ export function AstrologersSideScroll() {
           <div className="flex items-center gap-3">
             <Link
               href="/astrologers"
-              className="text-xs sm:text-sm font-semibold text-[#b06d4e] hover:underline mr-2"
+              className="inline-flex min-h-9 items-center text-xs sm:text-sm font-semibold text-[#b06d4e] hover:underline mr-2"
             >
               View All Astrologers →
             </Link>
@@ -209,7 +209,7 @@ export function AstrologersSideScroll() {
               onClick={() => scroll("left")}
               disabled={!canScrollLeft}
               aria-label="Previous Astrologer"
-              className={`flex size-10 items-center justify-center rounded-full border border-[#d6b7a2] bg-[#fbf1e7] text-[#4D4664] transition-all duration-200 hover:bg-[#faebd9] hover:scale-105 active:scale-95 ${
+              className={`flex size-10 items-center justify-center rounded-full border border-[#d6b7a2] bg-[#fbf1e7] text-[#4D4664] press transition-all duration-200 hover:bg-[#faebd9] hover:scale-105 active:scale-95 ${
                 !canScrollLeft ? "opacity-40 cursor-not-allowed" : "shadow-sm"
               }`}
             >
@@ -220,7 +220,7 @@ export function AstrologersSideScroll() {
               onClick={() => scroll("right")}
               disabled={!canScrollRight}
               aria-label="Next Astrologer"
-              className={`flex size-10 items-center justify-center rounded-full border border-[#d6b7a2] bg-[#fbf1e7] text-[#4D4664] transition-all duration-200 hover:bg-[#faebd9] hover:scale-105 active:scale-95 ${
+              className={`flex size-10 items-center justify-center rounded-full border border-[#d6b7a2] bg-[#fbf1e7] text-[#4D4664] press transition-all duration-200 hover:bg-[#faebd9] hover:scale-105 active:scale-95 ${
                 !canScrollRight ? "opacity-40 cursor-not-allowed" : "shadow-sm"
               }`}
             >

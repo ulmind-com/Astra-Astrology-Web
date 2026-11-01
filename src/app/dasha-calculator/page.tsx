@@ -470,7 +470,7 @@ export default function DashaCalculatorPage() {
                 key={lang.code}
                 type="button"
                 onClick={() => setLanguage(lang.code)}
-                className={`rounded-full px-3 py-1 text-xs font-bold transition-all ${
+                className={`min-h-9 inline-flex items-center justify-center rounded-full px-3 py-2 text-xs font-bold press transition-all ${
                   language === lang.code
                     ? "bg-amber-500 text-white shadow-xs"
                     : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900"
@@ -499,7 +499,7 @@ export default function DashaCalculatorPage() {
               <button
                 type="button"
                 onClick={() => populateFromProfileData(profile, user)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50/80 px-3 py-1 text-xs font-bold text-amber-900 hover:bg-amber-100 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50/80 px-3 py-1 text-xs font-bold text-amber-900 hover:bg-amber-100 press transition-colors"
               >
                 <User className="size-3.5" />
                 <span>{ui.profileSync}</span>
@@ -547,7 +547,7 @@ export default function DashaCalculatorPage() {
                       key={g}
                       type="button"
                       onClick={() => setGender(g)}
-                      className={`rounded-xl py-2.5 text-xs font-bold capitalize transition-all border ${
+                      className={`rounded-xl py-2.5 text-xs font-bold capitalize press transition-all border ${
                         gender === g
                           ? "bg-amber-500 text-white border-amber-500 shadow-xs"
                           : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
@@ -698,7 +698,7 @@ export default function DashaCalculatorPage() {
                 <button
                   type="button"
                   onClick={() => setIsMapModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-xs font-bold text-amber-800 hover:bg-amber-100 transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-xs font-bold text-amber-800 hover:bg-amber-100 press transition-colors"
                 >
                   <Compass className="size-4" />
                   <span>{ui.formMap}</span>
@@ -711,7 +711,7 @@ export default function DashaCalculatorPage() {
               <button
                 type="button"
                 onClick={() => setShowAdvance(!showAdvance)}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800"
+                className="inline-flex min-h-10 w-full items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800"
               >
                 <Sliders className="size-3.5" />
                 <span>{ui.formAdvancedSettings}</span>
@@ -754,7 +754,7 @@ export default function DashaCalculatorPage() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 py-2.5 px-4 rounded-xl hover:bg-slate-100 transition-colors order-2 sm:order-1 cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 py-2.5 px-4 rounded-xl hover:bg-slate-100 press transition-colors order-2 sm:order-1 cursor-pointer"
               >
                 <RotateCcw className="size-3.5" />
                 <span>{ui.resetBtn}</span>
@@ -770,7 +770,7 @@ export default function DashaCalculatorPage() {
                 <button
                   type="submit"
                   disabled={loading || (dashaFeature ? !dashaFeature.enabled : false)}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed press transition-all cursor-pointer"
                 >
                   {loading ? (
                     <>
@@ -807,7 +807,7 @@ export default function DashaCalculatorPage() {
 
         {/* Results Section */}
         {result && (
-          <div ref={resultsRef} className="space-y-8 pt-4">
+          <div ref={resultsRef} className="space-y-8 reveal-cascade pt-4">
             {/* User Profile Header Card */}
             <div className="rounded-2xl border-2 border-amber-300 bg-white p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
@@ -855,7 +855,7 @@ export default function DashaCalculatorPage() {
                     key={t.id}
                     type="button"
                     onClick={() => setActiveTab(t.id as any)}
-                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
+                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap press transition-all cursor-pointer ${
                       isActive
                         ? "bg-amber-500 text-white shadow-md shadow-amber-500/20"
                         : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -1098,7 +1098,7 @@ export default function DashaCalculatorPage() {
                     <button
                       type="button"
                       onClick={() => setActiveTreeStep(1)}
-                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer ${
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border press transition-all cursor-pointer ${
                         activeTreeStep === 1
                           ? "bg-amber-500 text-white border-amber-500 shadow-xs"
                           : "bg-white border-slate-200 text-slate-600 hover:border-amber-400"
@@ -1113,7 +1113,7 @@ export default function DashaCalculatorPage() {
                       type="button"
                       onClick={() => selectedMD && setActiveTreeStep(2)}
                       disabled={!selectedMD}
-                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border press transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${
                         activeTreeStep === 2
                           ? "bg-amber-500 text-white border-amber-500 shadow-xs"
                           : "bg-white border-slate-200 text-slate-600 hover:border-amber-400"
@@ -1128,7 +1128,7 @@ export default function DashaCalculatorPage() {
                       type="button"
                       onClick={() => selectedAD && setActiveTreeStep(3)}
                       disabled={!selectedAD}
-                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border press transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${
                         activeTreeStep === 3
                           ? "bg-amber-500 text-white border-amber-500 shadow-xs"
                           : "bg-white border-slate-200 text-slate-600 hover:border-amber-400"
@@ -1476,7 +1476,7 @@ export default function DashaCalculatorPage() {
                           key={pill.key}
                           type="button"
                           onClick={() => setSelectedPhalaPlanet(pill.key)}
-                          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold border transition-all cursor-pointer ${
+                          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold border press transition-all cursor-pointer ${
                             isSelected
                               ? "ring-2 ring-amber-500 scale-105 shadow-xs " + pill.bgClass
                               : "border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900"
@@ -1838,7 +1838,7 @@ export default function DashaCalculatorPage() {
                       </p>
                       <Link
                         href="/astrologers"
-                        className="inline-flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold px-6 py-2.5 text-xs shadow-md transition-all cursor-pointer"
+                        className="inline-flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold px-6 py-2.5 text-xs shadow-md press transition-all cursor-pointer"
                       >
                         <span>{ui.bookAstrologer}</span>
                         <ArrowRight className="size-4" />

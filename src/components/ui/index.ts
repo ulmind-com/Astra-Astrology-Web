@@ -6,5 +6,6 @@ export { Alert, EmptyState, LoadingBlock, Skeleton, Spinner } from "./feedback";
 export { Field, Input, Select, Textarea } from "./input";
 export { ConfirmModal, Modal } from "./modal";
 export { Pagination } from "./pagination";
+export { Reveal } from "./reveal";
 export { Switch } from "./switch";
 export { Year } from "./year";

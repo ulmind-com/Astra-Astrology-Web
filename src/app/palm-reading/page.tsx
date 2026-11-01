@@ -564,7 +564,7 @@ export default function PalmReadingPage() {
                 type="button"
                 onClick={() => setLanguage(lang)}
                 className={cn(
-                  "rounded-lg px-2.5 py-1 text-xs font-semibold transition-all",
+                  "inline-flex min-h-9 items-center justify-center rounded-lg px-2.5 py-2 text-xs font-semibold transition-all",
                   language === lang
                     ? "bg-brand-500 text-white shadow-sm"
                     : "text-muted-foreground hover:bg-surface-muted hover:text-foreground",
@@ -600,7 +600,7 @@ export default function PalmReadingPage() {
               {t.signInPrompt}
             </p>
             <div className="mt-5">
-              <Link href="/login">
+              <Link href="/login" className="inline-flex">
                 <Button>
                   {language === "bn" ? "সাইন ইন করুন" : language === "hi" ? "साइन इन करें" : "Sign In"}
                 </Button>
@@ -703,7 +703,7 @@ export default function PalmReadingPage() {
                 </div>
 
                 {syncKundli && (
-                  <div className="mt-4 pt-3 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-3 animate-fadeIn">
+                  <div className="mt-4 pt-3 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-3 fade-in">
                     <div>
                       <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
                         {language === "bn" ? "জন্ম তারিখ" : language === "hi" ? "जन्म तिथि" : "Birth Date"}
@@ -906,7 +906,7 @@ export default function PalmReadingPage() {
                     type="button"
                     onClick={() => void startCamera()}
                     disabled={scanning || (palmFeature ? !palmFeature.enabled : false)}
-                    className="flex w-full flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-brand-300 bg-brand-50/50 p-10 transition-all hover:bg-brand-50 disabled:opacity-50"
+                    className="flex w-full flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-brand-300 bg-brand-50/50 p-10 press transition-all hover:bg-brand-50 disabled:opacity-50"
                   >
                     <span className="flex size-14 items-center justify-center rounded-2xl bg-brand-400 text-ink-950 shadow-sm">
                       <Camera className="size-6" />
@@ -929,7 +929,7 @@ export default function PalmReadingPage() {
                     type="button"
                     onClick={() => fileInput.current?.click()}
                     disabled={scanning || (palmFeature ? !palmFeature.enabled : false)}
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-surface-muted py-3.5 text-xs font-bold text-foreground transition-colors hover:bg-surface disabled:opacity-50"
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-surface-muted py-3.5 text-xs font-bold text-foreground press transition-colors hover:bg-surface disabled:opacity-50"
                   >
                     <Upload className="size-4" />
                     {t.uploadPhoto}

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
 import {
   AlertCircle,
@@ -38,6 +38,7 @@ export function FeatureCoinBadge({
   showWallet = true,
 }: FeatureCoinBadgeProps) {
   const { isSignedIn } = useAuth();
+  const pathname = usePathname();
   const cost = explicitCoins !== undefined ? explicitCoins : feature ? feature.coins : 0;
   const isFree = cost <= 0;
   const isEnabled = feature ? feature.enabled !== false : true;
@@ -110,8 +111,11 @@ export function FeatureCoinBadge({
             </span>
           ) : (
             <Link
-              href={`/login?redirect=${typeof window !== "undefined" ? encodeURIComponent(window.location.pathname) : ""}`}
-              className="text-primary hover:underline font-semibold"
+              href={`/login?redirect=${encodeURIComponent(pathname)}`}
+              // Inline in a sentence, so it cannot be a block — but 17px tall
+              // is not a target anyone can hit. Padding gives it height
+              // without breaking the line it sits in.
+              className="inline-flex min-h-9 items-center rounded-md px-1.5 py-1 font-semibold text-primary hover:underline"
             >
               {language === "bn" ? "লগইন করুন" : "Sign in"}
             </Link>
@@ -180,7 +184,7 @@ export function FeatureCoinModal({
   language = "bn",
 }: FeatureCoinModalProps) {
   const router = useRouter();
-  const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
+  const currentPath = usePathname();
 
   const isAuth = reason === "unauthorized";
   const missing = Math.max(0, requiredCoins - walletBalance);

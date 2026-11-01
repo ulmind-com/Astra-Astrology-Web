@@ -659,7 +659,7 @@ export default function RashiCalculatorPage() {
               <button
                 type="button"
                 onClick={() => setLanguage("bn")}
-                className={`rounded-xl px-3 py-1 text-xs font-bold transition-all ${
+                className={`min-h-9 inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-bold press transition-all ${
                   language === "bn"
                     ? "bg-amber-500 text-amber-950 shadow-xs scale-105 font-black"
                     : "text-muted-foreground hover:text-foreground"
@@ -670,7 +670,7 @@ export default function RashiCalculatorPage() {
               <button
                 type="button"
                 onClick={() => setLanguage("hi")}
-                className={`rounded-xl px-3 py-1 text-xs font-bold transition-all ${
+                className={`min-h-9 inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-bold press transition-all ${
                   language === "hi"
                     ? "bg-amber-500 text-amber-950 shadow-xs scale-105 font-black"
                     : "text-muted-foreground hover:text-foreground"
@@ -681,7 +681,7 @@ export default function RashiCalculatorPage() {
               <button
                 type="button"
                 onClick={() => setLanguage("en")}
-                className={`rounded-xl px-3 py-1 text-xs font-bold transition-all ${
+                className={`min-h-9 inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-bold press transition-all ${
                   language === "en"
                     ? "bg-amber-500 text-amber-950 shadow-xs scale-105 font-black"
                     : "text-muted-foreground hover:text-foreground"
@@ -735,7 +735,7 @@ export default function RashiCalculatorPage() {
                     <button
                       type="button"
                       onClick={handleReloadFromProfile}
-                      className="inline-flex items-center gap-1 rounded-xl bg-white/90 hover:bg-white px-2.5 py-1 text-[11px] font-bold text-amber-900 border border-amber-300 shadow-2xs transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1 rounded-xl bg-white/90 hover:bg-white px-2.5 py-1 text-[11px] font-bold text-amber-900 border border-amber-300 shadow-2xs press transition-colors cursor-pointer"
                     >
                       <RefreshCw className="size-3 text-amber-700" />
                       <span>{t.reloadProfile}</span>
@@ -744,7 +744,7 @@ export default function RashiCalculatorPage() {
                   <button
                     type="button"
                     onClick={handleResetForm}
-                    className="inline-flex items-center gap-1 rounded-xl bg-white/90 hover:bg-white px-2.5 py-1 text-[11px] font-bold text-rose-800 border border-rose-300 shadow-2xs transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1 rounded-xl bg-white/90 hover:bg-white px-2.5 py-1 text-[11px] font-bold text-rose-800 border border-rose-300 shadow-2xs press transition-colors cursor-pointer"
                   >
                     <RotateCcw className="size-3 text-rose-600" />
                     <span>{t.clearForm}</span>
@@ -761,7 +761,7 @@ export default function RashiCalculatorPage() {
                 </div>
                 <Link
                   href="/login"
-                  className="rounded-xl bg-amber-500 text-amber-950 px-3 py-1 text-[11px] font-bold shadow-2xs hover:bg-amber-400 transition-colors ml-auto"
+                  className="ml-auto inline-flex min-h-9 items-center rounded-xl bg-amber-500 text-amber-950 px-3.5 py-2 text-[11px] font-bold shadow-2xs hover:bg-amber-400 press transition-colors"
                 >
                   {t.signInBtn}
                 </Link>
@@ -788,12 +788,13 @@ export default function RashiCalculatorPage() {
 
               {/* 2. Gender */}
               <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
-                <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
+                <label htmlFor="rashi-gender" className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
                   <HeartHandshake className="size-4 text-indigo-500" />
                   <span>{t.gender}</span>
                 </label>
                 <div className="sm:col-span-9">
                   <select
+                    id="rashi-gender"
                     value={gender}
                     onChange={(e) => setGender(e.target.value as any)}
                     className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs cursor-pointer font-medium"
@@ -903,6 +904,7 @@ export default function RashiCalculatorPage() {
                     className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                   <select
+                    aria-label="AM or PM"
                     value={period}
                     onChange={(e) => setPeriod(e.target.value as any)}
                     className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-bold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs cursor-pointer"
@@ -946,7 +948,7 @@ export default function RashiCalculatorPage() {
                 <button
                   type="button"
                   onClick={() => setShowAdvance((prev) => !prev)}
-                  className="w-full flex items-center justify-between rounded-xl bg-surface-muted/60 hover:bg-surface-muted px-4 py-3 text-xs font-bold text-foreground transition-colors border border-border/60"
+                  className="w-full flex items-center justify-between rounded-xl bg-surface-muted/60 hover:bg-surface-muted px-4 py-3 text-xs font-bold text-foreground press transition-colors border border-border/60"
                 >
                   <span className="flex items-center gap-2 text-amber-900">
                     <Sliders className="size-4 text-amber-600" />
@@ -962,7 +964,7 @@ export default function RashiCalculatorPage() {
 
               {/* Advance Settings Body */}
               {showAdvance && (
-                <div className="rounded-2xl border border-border/80 bg-surface-muted/20 p-4 sm:p-5 space-y-4 animate-in fade-in-50 duration-200">
+                <div className="rounded-2xl border border-border/80 bg-surface-muted/20 p-4 sm:p-5 space-y-4 fade-in">
                   {/* Longitude */}
                   <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                     <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
@@ -1193,7 +1195,7 @@ export default function RashiCalculatorPage() {
             RESULTS DASHBOARD (When Calculated)
         ========================================================================= */}
         {result && activeTraits && (
-          <div ref={resultsRef} className="mx-auto max-w-5xl px-4 pt-12 sm:px-6 lg:px-8 space-y-8 animate-in fade-in-50 duration-300">
+          <div ref={resultsRef} className="mx-auto max-w-5xl px-4 pt-12 sm:px-6 lg:px-8 space-y-8 reveal-cascade">
             {/* 1. Main Rashi Announcement Hero Card */}
             <div className="rounded-[32px] border border-amber-400/80 bg-gradient-to-br from-card via-[#fffdf0] to-card p-6 sm:p-10 shadow-[0_20px_50px_-20px_rgba(234,179,8,0.22)] text-center relative overflow-hidden">
               <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-transparent via-amber-500 to-transparent" />
@@ -1326,7 +1328,7 @@ export default function RashiCalculatorPage() {
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex items-center gap-2 px-3.5 sm:px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                    className={`flex items-center gap-2 px-3.5 sm:px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap press transition-all duration-200 cursor-pointer ${
                       isActive
                         ? "bg-amber-500 text-amber-950 font-black shadow-md shadow-amber-500/20 scale-[1.02]"
                         : "text-muted-foreground hover:text-foreground hover:bg-card/70"
@@ -1343,7 +1345,7 @@ export default function RashiCalculatorPage() {
                 TAB 1: CORE RASHI & AVAKAHADA CHAKRA
             ========================================================================= */}
             {activeTab === "core" && (
-              <div className="space-y-6 animate-in fade-in-50 duration-300">
+              <div className="space-y-6 fade-in">
                 {/* Avakahada Chakra Grid */}
                 <div className="rounded-[28px] border border-amber-300/80 bg-card p-6 sm:p-8 shadow-2xs space-y-6">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-border/60">
@@ -1518,7 +1520,7 @@ export default function RashiCalculatorPage() {
                 TAB 2: 15 CLASSICAL CLASSIFICATIONS (01.PDF)
             ========================================================================= */}
             {activeTab === "rules" && (
-              <div className="space-y-6 animate-in fade-in-50 duration-300">
+              <div className="space-y-6 fade-in">
                 {result.client_rules ? (
                   <ClientRulesPanel
                     profile={result.client_rules}
@@ -1538,7 +1540,7 @@ export default function RashiCalculatorPage() {
                 TAB 3: CHANDRA LAGNA KUNDLI & PLANETARY DIGNITY
             ========================================================================= */}
             {activeTab === "kundali" && (
-              <div className="space-y-6 animate-in fade-in-50 duration-300">
+              <div className="space-y-6 fade-in">
                 {/* Kundali Chart Visualizer with Chandra Lagna Toggle */}
                 <div className="rounded-[28px] border border-amber-300/80 bg-card p-6 sm:p-8 shadow-2xs space-y-6">
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-border/60">
@@ -1562,7 +1564,7 @@ export default function RashiCalculatorPage() {
                         <button
                           type="button"
                           onClick={() => setChartMode("chandra")}
-                          className={`rounded-lg px-3 py-1.5 transition-all cursor-pointer ${
+                          className={`rounded-lg px-3 py-1.5 press transition-all cursor-pointer ${
                             chartMode === "chandra"
                               ? "bg-amber-500 text-amber-950 shadow-xs"
                               : "text-amber-900/80 hover:text-amber-950 hover:bg-amber-100/50"
@@ -1573,7 +1575,7 @@ export default function RashiCalculatorPage() {
                         <button
                           type="button"
                           onClick={() => setChartMode("lagna")}
-                          className={`rounded-lg px-3 py-1.5 transition-all cursor-pointer ${
+                          className={`rounded-lg px-3 py-1.5 press transition-all cursor-pointer ${
                             chartMode === "lagna"
                               ? "bg-amber-500 text-amber-950 shadow-xs"
                               : "text-amber-900/80 hover:text-amber-950 hover:bg-amber-100/50"
@@ -1590,7 +1592,7 @@ export default function RashiCalculatorPage() {
                             key={style}
                             type="button"
                             onClick={() => setChartStyle(style)}
-                            className={`rounded-lg px-2.5 py-1.5 transition-all cursor-pointer ${
+                            className={`rounded-lg px-2.5 py-1.5 press transition-all cursor-pointer ${
                               chartStyle === style
                                 ? "bg-card text-foreground font-black shadow-2xs border border-border/60"
                                 : "text-muted-foreground hover:text-foreground"
@@ -1731,7 +1733,7 @@ export default function RashiCalculatorPage() {
                 TAB 4: REAL-TIME TRANSIT, CHANDRA BALA & SADE SATI
             ========================================================================= */}
             {activeTab === "transit" && (
-              <div className="space-y-6 animate-in fade-in-50 duration-300">
+              <div className="space-y-6 fade-in">
                 {/* 1. Chandra Bala Meter */}
                 {result.chandra_bala && (
                   <div className="rounded-[28px] border border-amber-300/80 bg-card p-6 sm:p-8 shadow-2xs space-y-5">
@@ -1878,7 +1880,7 @@ export default function RashiCalculatorPage() {
                 TAB 5: PREDICTIONS, CAUTIONS & BENEFICIAL REMEDIES
             ========================================================================= */}
             {activeTab === "predictions" && (
-              <div className="space-y-6 animate-in fade-in-50 duration-300">
+              <div className="space-y-6 fade-in">
                 {/* Warnings and Beneficial Actions Dual Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Warnings & Cautions */}

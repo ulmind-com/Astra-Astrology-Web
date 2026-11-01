@@ -437,7 +437,9 @@ export function BirthPlaceField({
           type="button"
           onClick={useCurrentLocation}
           disabled={locating}
-          className="inline-flex items-center gap-1.5 rounded-lg px-1.5 py-0.5 text-[11px] font-semibold text-brand-800 transition-colors hover:bg-brand-100 disabled:opacity-60"
+          // "Use my current location" was 19px tall — and it is the control
+          // that spares someone typing their birth place by hand.
+          className="inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2 py-1.5 text-[11px] font-semibold text-brand-800 transition-colors hover:bg-brand-100 disabled:opacity-60"
         >
           {locating ? (
             <Loader2 className="size-3 animate-spin" />

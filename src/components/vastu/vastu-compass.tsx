@@ -71,9 +71,19 @@ export interface VastuCompassProps {
 // ---------------------------------------------------------------------------
 // Polar & SVG Arc Math (N5 Dial Exact Geometry)
 // ---------------------------------------------------------------------------
+// Rounded to three decimals on purpose. React serialises a numeric attribute
+// on the server and compares it against the freshly computed number on the
+// client; the two disagree in the last binary digit for some angles, which
+// React reports as a hydration mismatch across hundreds of tick marks. Three
+// decimals of a 400-unit viewBox is a thousandth of a pixel, so the dial looks
+// identical and both renders now produce the same string.
+function round3(n: number) {
+  return Math.round(n * 1000) / 1000;
+}
+
 function polar(cx: number, cy: number, r: number, deg: number) {
   const a = (deg * Math.PI) / 180;
-  return { x: cx + r * Math.sin(a), y: cy - r * Math.cos(a) };
+  return { x: round3(cx + r * Math.sin(a)), y: round3(cy - r * Math.cos(a)) };
 }
 
 function sectorPath(cx: number, cy: number, rIn: number, rOut: number, a1: number, a2: number) {
@@ -504,7 +514,7 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
           CATEGORY PICKER MODAL (Full 38 Categories Grouped into Architecture & Objects)
       --------------------------------------------------------------------- */}
       {isPickerOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 animate-in fade-in">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 fade-in">
           <div className="bg-background rounded-3xl border border-border shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
             {/* Header */}
             <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between">
@@ -1127,7 +1137,10 @@ export function VastuCompass({ language = "bn", onAngleSelect }: VastuCompassPro
                     key={d}
                     type="button"
                     onClick={() => setHeading(targetDeg)}
-                    className={`px-2 py-1 rounded-lg text-[10px] font-extrabold transition-all ${
+                    // Sixteen of these sit in a grid and each was 23px tall.
+                    // On a compass people use one-handed while walking round a
+                    // room, a mis-tap means a wrong reading.
+                    className={`inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg px-2 py-2 text-[11px] font-extrabold transition-all ${
                       isSelected
                         ? "bg-amber-500 text-white shadow-xs scale-105"
                         : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"

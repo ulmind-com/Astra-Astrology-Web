@@ -415,7 +415,7 @@ function AppointmentsContent() {
             <div className="flex items-center gap-2 self-start sm:self-auto">
               <Link
                 href="/account/appointments"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-semibold text-foreground shadow-2xs hover:bg-surface-muted hover:border-brand-500/30 transition-all"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-semibold text-foreground shadow-2xs hover:bg-surface-muted hover:border-brand-500/30 press transition-all"
               >
                 <CalendarCheck className="size-3.5 text-brand-600 dark:text-brand-400" />
                 <span>My Appointments</span>
@@ -649,7 +649,7 @@ function AppointmentsContent() {
                               href={`/appointments/${astrologer.slug ?? astrologer.id}`}
                               onClick={(e) => e.stopPropagation()}
                               title="Open dedicated booking page"
-                              className="rounded-xl p-2 text-muted-foreground hover:text-brand-600 hover:bg-surface-muted border border-border/60 transition-all shrink-0"
+                              className="rounded-xl p-2 text-muted-foreground hover:text-brand-600 hover:bg-surface-muted border border-border/60 press transition-all shrink-0"
                             >
                               <ExternalLink className="size-3.5" />
                             </Link>
@@ -942,7 +942,7 @@ function AppointmentsContent() {
                             type="button"
                             onClick={prevMonth}
                             aria-label="Previous month"
-                            className="flex size-7 items-center justify-center rounded-lg border border-border hover:bg-surface-muted text-muted-foreground hover:text-foreground transition-all"
+                            className="flex size-7 items-center justify-center rounded-lg border border-border hover:bg-surface-muted text-muted-foreground hover:text-foreground press transition-all"
                           >
                             <ChevronLeft className="size-4" />
                           </button>
@@ -950,7 +950,7 @@ function AppointmentsContent() {
                             type="button"
                             onClick={nextMonth}
                             aria-label="Next month"
-                            className="flex size-7 items-center justify-center rounded-lg border border-border hover:bg-surface-muted text-muted-foreground hover:text-foreground transition-all"
+                            className="flex size-7 items-center justify-center rounded-lg border border-border hover:bg-surface-muted text-muted-foreground hover:text-foreground press transition-all"
                           >
                             <ChevronRight className="size-4" />
                           </button>

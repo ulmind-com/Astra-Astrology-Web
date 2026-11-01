@@ -91,7 +91,7 @@ export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic })
       className={cn(
         "group relative flex flex-col justify-between overflow-hidden rounded-[28px] sm:rounded-[30px]",
         "bg-white border border-black/[0.08] shadow-[0_10px_30px_-15px_rgba(26,18,8,0.08)]",
-        "transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-15px_rgba(26,18,8,0.16)]",
+        "press focus-ring hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-15px_rgba(26,18,8,0.16)]",
       )}
     >
       {/* 3D Top Banner */}

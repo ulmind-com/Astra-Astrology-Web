@@ -595,7 +595,7 @@ export default function NakshatraCalculatorPage() {
                   key={lang.code}
                   type="button"
                   onClick={() => handleLanguageSwitch(lang.code)}
-                  className={`px-3 py-1 text-xs rounded-full font-semibold transition-all duration-200 ${
+                  className={`inline-flex min-h-9 items-center justify-center px-3 py-2 text-xs rounded-full font-semibold press transition-all duration-200 ${
                     language === lang.code
                       ? "bg-brand-500 text-white shadow-soft scale-102"
                       : "text-muted-foreground hover:text-foreground hover:bg-surface-elevated/80"
@@ -652,7 +652,7 @@ export default function NakshatraCalculatorPage() {
                 <button
                   type="button"
                   onClick={handleReloadFromProfile}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-brand-500/20 hover:bg-brand-500/30 text-brand-900 font-semibold transition-colors"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-brand-500/20 hover:bg-brand-500/30 text-brand-900 font-semibold press transition-colors"
                 >
                   <RefreshCw className="size-3" />
                   <span>{ui.syncProfileBtn}</span>
@@ -695,7 +695,7 @@ export default function NakshatraCalculatorPage() {
                         key={g.id}
                         type="button"
                         onClick={() => setGender(g.id)}
-                        className={`py-2.5 px-2 rounded-xl text-xs font-semibold border transition-all ${
+                        className={`py-2.5 px-2 rounded-xl text-xs font-semibold border press transition-all ${
                           gender === g.id
                             ? "border-brand-500 bg-brand-500/15 text-brand-900 shadow-2xs"
                             : "border-border bg-surface-muted/30 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
@@ -805,7 +805,7 @@ export default function NakshatraCalculatorPage() {
                     <button
                       type="button"
                       onClick={() => setPeriod(period === "AM" ? "PM" : "AM")}
-                      className="py-2.5 px-2 rounded-xl border border-border bg-surface-muted/70 text-foreground font-bold text-xs hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-brand-500/40 transition-all"
+                      className="py-2.5 px-2 rounded-xl border border-border bg-surface-muted/70 text-foreground font-bold text-xs hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-brand-500/40 press transition-all"
                     >
                       {period}
                     </button>
@@ -840,7 +840,7 @@ export default function NakshatraCalculatorPage() {
                 <button
                   type="button"
                   onClick={() => setShowAdvance(!showAdvance)}
-                  className="w-full px-4 py-2.5 flex items-center justify-between text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-surface-muted/40 transition-all"
+                  className="w-full px-4 py-2.5 flex items-center justify-between text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-surface-muted/40 press transition-all"
                 >
                   <span className="flex items-center gap-2">
                     <Sliders className="size-3.5 text-brand-500" />
@@ -967,7 +967,7 @@ export default function NakshatraCalculatorPage() {
         {/* Results Dashboard Section (5-Tab Cosmic UI) */}
         {/* =================================================================== */}
         {result && (
-          <section ref={resultsRef} className="max-w-5xl mx-auto px-4 mt-14 space-y-8 animate-fade-in">
+          <section ref={resultsRef} className="max-w-5xl mx-auto px-4 mt-14 space-y-8 reveal-cascade">
             {/* Grand Header Card */}
             <div className="relative overflow-hidden rounded-3xl border border-amber-500/40 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 p-6 sm:p-10 shadow-2xl text-white">
               <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -1118,7 +1118,7 @@ export default function NakshatraCalculatorPage() {
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-bold transition-all ${
+                    className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-bold press transition-all ${
                       isActive
                         ? "bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-amber-950 shadow-md font-black scale-102"
                         : "text-muted-foreground hover:text-foreground hover:bg-surface-muted/60"
@@ -1137,7 +1137,7 @@ export default function NakshatraCalculatorPage() {
             {/* TAB 1: CORE STAR & CONSTELLATIONS WHEEL */}
             {/* =================================================================== */}
             {activeTab === "core" && (
-              <div className="space-y-8 animate-fade-in">
+              <div className="space-y-8 fade-in">
                 {/* Sacred Identity Cards Grid */}
                 <div>
                   <h3 className="font-display text-xl font-bold text-foreground mb-4 flex items-center gap-2">
@@ -1292,7 +1292,7 @@ export default function NakshatraCalculatorPage() {
             {/* TAB 2: PANCHANG & AVAKAHADA CHAKRA */}
             {/* =================================================================== */}
             {activeTab === "panchang" && (
-              <div className="space-y-8 animate-fade-in">
+              <div className="space-y-8 fade-in">
                 {/* Panchang Strip */}
                 {result.panchang && (
                   <PanchangStrip
@@ -1394,7 +1394,7 @@ export default function NakshatraCalculatorPage() {
                             key={style}
                             type="button"
                             onClick={() => setChartStyle(style)}
-                            className={`rounded-lg px-2.5 py-1 transition-all ${
+                            className={`rounded-lg px-2.5 py-1 press transition-all ${
                               chartStyle === style
                                 ? "bg-amber-500 text-amber-950 font-black shadow-2xs"
                                 : "text-muted-foreground hover:text-foreground"
@@ -1423,7 +1423,7 @@ export default function NakshatraCalculatorPage() {
             {/* TAB 3: GANDANTA, PUSHKARA & DASHA BALANCE */}
             {/* =================================================================== */}
             {activeTab === "gandanta_dasha" && (
-              <div className="space-y-8 animate-fade-in">
+              <div className="space-y-8 fade-in">
                 {/* 1. Gandanta Dosha Analysis */}
                 <div
                   className={`rounded-3xl border p-6 sm:p-8 shadow-sm transition-all ${
@@ -1642,7 +1642,7 @@ export default function NakshatraCalculatorPage() {
             {/* TAB 4: NAVATARA & TODAY'S LIVE TRANSIT TARA BALA */}
             {/* =================================================================== */}
             {activeTab === "tarabala" && (
-              <div className="space-y-8 animate-fade-in">
+              <div className="space-y-8 fade-in">
                 {/* 1. Real-Time Daily Tara Bala Live Card */}
                 {result.daily_tara_bala && (
                   <div
@@ -1763,7 +1763,7 @@ export default function NakshatraCalculatorPage() {
             {/* TAB 5: TRAITS, CAREER & VEDIC REMEDIES */}
             {/* =================================================================== */}
             {activeTab === "traits" && (
-              <div className="space-y-8 animate-fade-in">
+              <div className="space-y-8 fade-in">
                 {/* 1. Nakshatra Disposition & Totem Matrix */}
                 {result.disposition && (
                   <div className="rounded-3xl border border-border/80 bg-surface-elevated p-6 sm:p-8 shadow-sm">
