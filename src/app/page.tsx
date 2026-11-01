@@ -25,6 +25,54 @@ import { ParallaxRibbon } from "@/components/home/parallax-ribbon";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Button, Reveal } from "@/components/ui";
+import { useQuery } from "@tanstack/react-query";
+import { cmsApi, type HomePageCMSData } from "@/lib/api";
+
+const DEFAULT_HOMEPAGE_CMS: HomePageCMSData = {
+  hero_eyebrow: "Explore the Horoscope",
+  hero_title_line1: "WELCOME TO THE",
+  hero_title_line2: "WORLD OF",
+  hero_title_highlight: "ASTROLOGY",
+  hero_description:
+    "Learn about astrology, zodiac signs, retrogrades, and more! Your world becomes clear once you understand how the universe influences it.",
+  hero_cta_primary_text: "Find an Astrologer",
+  hero_cta_primary_link: "/astrologers",
+  hero_cta_secondary_text: "Kundli Matching",
+  hero_cta_secondary_link: "/kundli-matching",
+  hero_chakra_image_url: "/zodiac-chakra.png",
+  hero_chakra_speed_seconds: 60,
+  hero_chakra_enabled: true,
+  hero_cards: [
+    { title: "Zodiac Signs", subtitle: "READ MORE", link: "/rashi-calculator", icon: "zodiac" },
+    { title: "Chinese Signs", subtitle: "READ MORE", link: "modal:chinese", icon: "chinese" },
+    { title: "Planets", subtitle: "READ MORE", link: "/kundli", icon: "planets" },
+    { title: "Houses", subtitle: "READ MORE", link: "/kp-calculator", icon: "houses" },
+  ],
+  trust_stats: [
+    { value: "500+", label: "Verified astrologers" },
+    { value: "50K+", label: "Consultations completed" },
+    { value: "4.9★", label: "Average rating" },
+  ],
+  services_eyebrow: "What we offer",
+  services_title: "What you can ask about",
+  services_description: "Traditional methods, interpreted by people who practise them every day.",
+  how_it_works_badge: "How it works",
+  how_it_works_title: "Three steps to clarity",
+  step1_title: "Tell us when you were born",
+  step1_body: "Date, time and place. Saved once, used by every reading that follows.",
+  step2_title: "Pick an astrologer",
+  step2_body: "Filter by skill, language and experience. See who is online right now.",
+  step3_title: "Chat or call",
+  step3_body: "Ask what is actually on your mind. Pay only for the minutes you use.",
+  cta_badge: "Get started today",
+  cta_title: "Ready when you are",
+  cta_description:
+    "Create an account, add your birth details once, and every reading after that is a click away.",
+  cta_primary_text: "Get started — it's free",
+  cta_primary_link: "/register",
+  cta_secondary_text: "Browse astrologers",
+  cta_secondary_link: "/astrologers",
+};
 
 const SERVICES = [
   {
@@ -148,9 +196,26 @@ function AstrologicalHouseIcon({ className = "size-7" }: { className?: string })
   );
 }
 
+function getCardIcon(iconName?: string) {
+  const norm = (iconName || "").toLowerCase();
+  if (norm.includes("chinese")) return <YinYangIcon />;
+  if (norm.includes("planet")) return <SaturnPlanetIcon />;
+  if (norm.includes("house")) return <AstrologicalHouseIcon />;
+  return <ZodiacStarIcon />;
+}
+
 export default function HomePage() {
   const [isChineseModalOpen, setIsChineseModalOpen] = React.useState(false);
   const [scrollY, setScrollY] = React.useState(0);
+
+  const { data: cmsData } = useQuery({
+    queryKey: ["cms", "homepage"],
+    queryFn: cmsApi.getHomepage,
+    staleTime: 60_000,
+    retry: 1,
+  });
+
+  const cms = cmsData || DEFAULT_HOMEPAGE_CMS;
 
   React.useEffect(() => {
     let ticking = false;
@@ -235,7 +300,7 @@ export default function HomePage() {
                 {/* 1. Explore the Horoscope Eyebrow */}
                 <div className="inline-flex items-center gap-2 text-[#b06d4e]">
                   <span className="text-xs sm:text-sm font-serif italic tracking-wide font-medium">
-                    Explore the Horoscope
+                    {cms.hero_eyebrow || "Explore the Horoscope"}
                   </span>
                   <div className="flex items-center gap-1.5 text-[#b06d4e]">
                     <span className="h-px w-12 sm:w-20 bg-gradient-to-r from-[#b06d4e] to-transparent" />
@@ -245,10 +310,10 @@ export default function HomePage() {
 
                 {/* 2. Main Title: WELCOME TO THE WORLD OF ASTROLOGY */}
                 <h1 className="mt-3 sm:mt-5 text-3xl sm:text-5xl xl:text-[3.75rem] font-black leading-[1.08] tracking-tight text-[#4D4664]">
-                  WELCOME TO THE<br />
-                  <span>WORLD OF </span>
+                  {cms.hero_title_line1 || "WELCOME TO THE"}<br />
+                  <span>{cms.hero_title_line2 || "WORLD OF"} </span>
                   <span className="relative inline-block font-cinzel-decorative font-bold text-stroke-terracotta tracking-wider">
-                    ASTROLOGY
+                    {cms.hero_title_highlight || "ASTROLOGY"}
                     {/* Celestial Sparkle Badge */}
                     <span className="absolute -top-1 -right-6 sm:-right-8 text-[#b06d4e] text-xl sm:text-3xl select-none animate-pulse">
                       ✦
@@ -258,102 +323,78 @@ export default function HomePage() {
 
                 {/* 3. Subtitle Paragraph */}
                 <p className="mt-4 sm:mt-5 max-w-xl text-sm sm:text-base leading-relaxed text-[#555062] font-normal">
-                  Learn about astrology, zodiac signs, retrogrades, and more! Your world becomes clear once you understand how the universe influences it.
+                  {cms.hero_description ||
+                    "Learn about astrology, zodiac signs, retrogrades, and more! Your world becomes clear once you understand how the universe influences it."}
                 </p>
 
                 {/* 4. 2x2 Feature Cards Grid */}
                 <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 max-w-xl">
-                  
-                  {/* Card 1: Zodiac Signs */}
-                  <Link
-                    href="/rashi-calculator"
-                    className="group relative flex items-center gap-3.5 rounded-2xl border border-[#e5cebd] bg-[#fbf1e7]/90 hover:bg-[#faebd9] p-3.5 sm:p-4 press transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_20px_-6px_rgba(176,109,78,0.22)]"
-                  >
-                    <div className="flex size-12 shrink-0 items-center justify-center rounded-full border border-[#d6b7a2] bg-[#fdf5ed] text-[#b06d4e] group-hover:scale-105 transition-transform duration-300">
-                      <ZodiacStarIcon />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-bold text-sm sm:text-base text-[#4D4664] group-hover:text-[#b06d4e] transition-colors">
-                        Zodiac Signs
-                      </h3>
-                      <span className="mt-0.5 inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#b06d4e]">
-                        READ MORE <span className="transition-transform duration-200 group-hover:translate-x-1">───────▶</span>
-                      </span>
-                    </div>
-                  </Link>
+                  {(cms.hero_cards && cms.hero_cards.length > 0
+                    ? cms.hero_cards
+                    : DEFAULT_HOMEPAGE_CMS.hero_cards
+                  ).map((card, idx) => {
+                    const isModalTrigger =
+                      card.link === "modal:chinese" || card.link?.toLowerCase().includes("chinese");
 
-                  {/* Card 2: Chinese Signs (Interactive Modal) */}
-                  <button
-                    type="button"
-                    onClick={() => setIsChineseModalOpen(true)}
-                    className="group relative flex items-center gap-3.5 rounded-2xl border border-[#e5cebd] bg-[#fbf1e7]/90 hover:bg-[#faebd9] p-3.5 sm:p-4 text-left press transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_20px_-6px_rgba(176,109,78,0.22)]"
-                  >
-                    <div className="flex size-12 shrink-0 items-center justify-center rounded-full border border-[#d6b7a2] bg-[#fdf5ed] text-[#b06d4e] group-hover:scale-105 transition-transform duration-300">
-                      <YinYangIcon />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-bold text-sm sm:text-base text-[#4D4664] group-hover:text-[#b06d4e] transition-colors">
-                        Chinese Signs
-                      </h3>
-                      <span className="mt-0.5 inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#b06d4e]">
-                        READ MORE <span className="transition-transform duration-200 group-hover:translate-x-1">───────▶</span>
-                      </span>
-                    </div>
-                  </button>
+                    const content = (
+                      <>
+                        <div className="flex size-12 shrink-0 items-center justify-center rounded-full border border-[#d6b7a2] bg-[#fdf5ed] text-[#b06d4e] group-hover:scale-105 transition-transform duration-300">
+                          {getCardIcon(card.icon || card.title)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-bold text-sm sm:text-base text-[#4D4664] group-hover:text-[#b06d4e] transition-colors">
+                            {card.title}
+                          </h3>
+                          <span className="mt-0.5 inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#b06d4e]">
+                            {card.subtitle || "READ MORE"}{" "}
+                            <span className="transition-transform duration-200 group-hover:translate-x-1">
+                              ───────▶
+                            </span>
+                          </span>
+                        </div>
+                      </>
+                    );
 
-                  {/* Card 3: Planets */}
-                  <Link
-                    href="/kundli"
-                    className="group relative flex items-center gap-3.5 rounded-2xl border border-[#e5cebd] bg-[#fbf1e7]/90 hover:bg-[#faebd9] p-3.5 sm:p-4 press transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_20px_-6px_rgba(176,109,78,0.22)]"
-                  >
-                    <div className="flex size-12 shrink-0 items-center justify-center rounded-full border border-[#d6b7a2] bg-[#fdf5ed] text-[#b06d4e] group-hover:scale-105 transition-transform duration-300">
-                      <SaturnPlanetIcon />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-bold text-sm sm:text-base text-[#4D4664] group-hover:text-[#b06d4e] transition-colors">
-                        Planets
-                      </h3>
-                      <span className="mt-0.5 inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#b06d4e]">
-                        READ MORE <span className="transition-transform duration-200 group-hover:translate-x-1">───────▶</span>
-                      </span>
-                    </div>
-                  </Link>
+                    if (isModalTrigger) {
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setIsChineseModalOpen(true)}
+                          className="group relative flex items-center gap-3.5 rounded-2xl border border-[#e5cebd] bg-[#fbf1e7]/90 hover:bg-[#faebd9] p-3.5 sm:p-4 text-left press transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_20px_-6px_rgba(176,109,78,0.22)]"
+                        >
+                          {content}
+                        </button>
+                      );
+                    }
 
-                  {/* Card 4: Houses */}
-                  <Link
-                    href="/kp-calculator"
-                    className="group relative flex items-center gap-3.5 rounded-2xl border border-[#e5cebd] bg-[#fbf1e7]/90 hover:bg-[#faebd9] p-3.5 sm:p-4 press transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_20px_-6px_rgba(176,109,78,0.22)]"
-                  >
-                    <div className="flex size-12 shrink-0 items-center justify-center rounded-full border border-[#d6b7a2] bg-[#fdf5ed] text-[#b06d4e] group-hover:scale-105 transition-transform duration-300">
-                      <AstrologicalHouseIcon />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-bold text-sm sm:text-base text-[#4D4664] group-hover:text-[#b06d4e] transition-colors">
-                        Houses
-                      </h3>
-                      <span className="mt-0.5 inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#b06d4e]">
-                        READ MORE <span className="transition-transform duration-200 group-hover:translate-x-1">───────▶</span>
-                      </span>
-                    </div>
-                  </Link>
-
+                    return (
+                      <Link
+                        key={idx}
+                        href={card.link || "/"}
+                        className="group relative flex items-center gap-3.5 rounded-2xl border border-[#e5cebd] bg-[#fbf1e7]/90 hover:bg-[#faebd9] p-3.5 sm:p-4 press transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_20px_-6px_rgba(176,109,78,0.22)]"
+                      >
+                        {content}
+                      </Link>
+                    );
+                  })}
                 </div>
 
                 {/* Quick Astrologer Consultation Row */}
                 <div className="mt-8 flex flex-wrap items-center gap-3">
-                  <Link href="/astrologers">
+                  <Link href={cms.hero_cta_primary_link || "/astrologers"}>
                     <Button size="lg" className="h-11 sm:h-12 px-6 text-sm sm:text-base font-semibold shadow-glow">
-                      Find an Astrologer
+                      {cms.hero_cta_primary_text || "Find an Astrologer"}
                       <ArrowRight className="size-4 ml-1 transition-transform duration-200 group-hover:translate-x-0.5" />
                     </Button>
                   </Link>
-                  <Link href="/kundli-matching">
+                  <Link href={cms.hero_cta_secondary_link || "/kundli-matching"}>
                     <Button
                       size="lg"
                       variant="outline"
                       className="h-11 sm:h-12 px-6 text-sm sm:text-base font-semibold border-[#d6b7a2] text-[#4D4664] hover:bg-[#faebd9]"
                     >
-                      Kundli Matching
+                      {cms.hero_cta_secondary_text || "Kundli Matching"}
                     </Button>
                   </Link>
                 </div>
@@ -366,7 +407,11 @@ export default function HomePage() {
                 style={{ transform: `translateY(${Math.min(scrollY * 0.06, 35)}px)` }}
               >
                 <div className="relative w-full max-w-[500px] sm:max-w-[580px] lg:max-w-[660px] xl:max-w-[740px] 2xl:max-w-[800px] flex items-center justify-center">
-                  <ZodiacChakra speedSeconds={60} />
+                  <ZodiacChakra
+                    speedSeconds={cms.hero_chakra_speed_seconds || 60}
+                    imageUrl={cms.hero_chakra_image_url || "/zodiac-chakra.png"}
+                    enabled={cms.hero_chakra_enabled ?? true}
+                  />
                 </div>
               </div>
 
@@ -375,19 +420,21 @@ export default function HomePage() {
             {/* Trust Stats Strip: Seamlessly bridging hero to services */}
             <div className="mt-12 lg:mt-16 pt-8 border-t border-[#ebd7c8]/50">
               <dl className="grid grid-cols-3 gap-2 sm:gap-6 max-w-3xl mx-auto">
-                {TRUST_STATS.map(({ value, label }) => (
-                  <div
-                    key={label}
-                    className="flex flex-col items-center p-3 sm:p-4 text-center rounded-2xl bg-[#fcf5ed]/70 border border-[#ebd7c8]/60 transition-all hover:bg-[#faebd9]"
-                  >
-                    <dt className="font-cinzel text-xl sm:text-3xl font-bold text-[#b06d4e]">
-                      {value}
-                    </dt>
-                    <dd className="mt-1 text-[10px] sm:text-xs font-semibold text-[#555062] tracking-wide">
-                      {label}
-                    </dd>
-                  </div>
-                ))}
+                {(cms.trust_stats && cms.trust_stats.length > 0 ? cms.trust_stats : TRUST_STATS).map(
+                  ({ value, label }) => (
+                    <div
+                      key={label}
+                      className="flex flex-col items-center p-3 sm:p-4 text-center rounded-2xl bg-[#fcf5ed]/70 border border-[#ebd7c8]/60 transition-all hover:bg-[#faebd9]"
+                    >
+                      <dt className="font-cinzel text-xl sm:text-3xl font-bold text-[#b06d4e]">
+                        {value}
+                      </dt>
+                      <dd className="mt-1 text-[10px] sm:text-xs font-semibold text-[#555062] tracking-wide">
+                        {label}
+                      </dd>
+                    </div>
+                  )
+                )}
               </dl>
             </div>
 
@@ -413,13 +460,13 @@ export default function HomePage() {
         <section id="services" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-12 sm:py-24">
           <Reveal className="mb-10 sm:mb-12 text-center">
             <span className="inline-block rounded-full bg-brand-500/12 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-700 border border-brand-500/30 mb-3 sm:mb-4">
-              What we offer
+              {cms.services_eyebrow || "What we offer"}
             </span>
             <h2 className="font-display text-2xl font-bold tracking-tight sm:text-4xl">
-              What you can ask about
+              {cms.services_title || "What you can ask about"}
             </h2>
             <p className="mt-2.5 sm:mt-3 mx-auto max-w-lg text-sm sm:text-base text-muted-foreground leading-relaxed">
-              Traditional methods, interpreted by people who practise them every day.
+              {cms.services_description || "Traditional methods, interpreted by people who practise them every day."}
             </p>
           </Reveal>
 
@@ -462,10 +509,10 @@ export default function HomePage() {
               <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <span className="inline-block rounded-full bg-brand-200/60 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-700 border border-brand-500/30 mb-2 sm:mb-3">
-                    How it works
+                    {cms.how_it_works_badge || "How it works"}
                   </span>
                   <h2 className="font-display text-2xl font-bold tracking-tight sm:text-4xl">
-                    Three steps to clarity
+                    {cms.how_it_works_title || "Three steps to clarity"}
                   </h2>
                 </div>
                 <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground mt-3 sm:mt-0">
@@ -485,10 +532,26 @@ export default function HomePage() {
             {/* Steps */}
             <div className="p-6 sm:px-12 sm:py-10">
               <ol className="grid gap-6 sm:gap-8 md:grid-cols-3">
-                {STEPS.map((step, index) => (
+                {[
+                  {
+                    num: "01",
+                    title: cms.step1_title || STEPS[0].title,
+                    body: cms.step1_body || STEPS[0].body,
+                  },
+                  {
+                    num: "02",
+                    title: cms.step2_title || STEPS[1].title,
+                    body: cms.step2_body || STEPS[1].body,
+                  },
+                  {
+                    num: "03",
+                    title: cms.step3_title || STEPS[2].title,
+                    body: cms.step3_body || STEPS[2].body,
+                  },
+                ].map((step, index) => (
                   <li key={step.title} className="relative flex flex-col gap-4">
                     {/* Connector line for desktop */}
-                    {index < STEPS.length - 1 && (
+                    {index < 2 && (
                       <div className="hidden md:block absolute left-[calc(50%+2.5rem)] top-5 h-px w-[calc(100%_-_2.5rem)] bg-gradient-to-r from-brand-400/40 to-transparent" />
                     )}
                     <div className="flex items-start gap-3.5 sm:gap-4">
@@ -561,29 +624,29 @@ export default function HomePage() {
 
             <div className="relative">
               <span className="inline-block rounded-full bg-brand-200/60 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-700 border border-brand-500/30 mb-4 sm:mb-6">
-                Get started today
+                {cms.cta_badge || "Get started today"}
               </span>
               <h2 className="glow-text font-display text-2xl font-bold tracking-tight text-brand-950 sm:text-5xl">
-                Ready when you are
+                {cms.cta_title || "Ready when you are"}
               </h2>
               <p className="mx-auto mt-4 max-w-md text-ink-500 leading-relaxed">
-                Create an account, add your birth details once, and every reading after
-                that is a click away.
+                {cms.cta_description ||
+                  "Create an account, add your birth details once, and every reading after that is a click away."}
               </p>
               <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-                <Link href="/register">
+                <Link href={cms.cta_primary_link || "/register"}>
                   <Button size="lg" className="group w-full sm:w-auto">
-                    Get started — it's free
+                    {cms.cta_primary_text || "Get started — it's free"}
                     <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                   </Button>
                 </Link>
-                <Link href="/astrologers">
+                <Link href={cms.cta_secondary_link || "/astrologers"}>
                   <Button
                     size="lg"
                     variant="outline"
                     className="w-full border-brand-300/30 text-ink-900 hover:bg-brand-100 sm:w-auto"
                   >
-                    Browse astrologers
+                    {cms.cta_secondary_text || "Browse astrologers"}
                   </Button>
                 </Link>
               </div>

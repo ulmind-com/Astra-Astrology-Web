@@ -625,4 +625,56 @@ export const vastuApi = {
     api.get<AstroVastuRule[]>(endpoints.vastu.astrovastu, { query: planet_id ? { planet_id } : undefined }),
 };
 
+export interface HeroCardConfig {
+  title: string;
+  subtitle: string;
+  link: string;
+  icon: string;
+}
+
+export interface TrustStatConfig {
+  value: string;
+  label: string;
+}
+
+export interface HomePageCMSData {
+  hero_eyebrow: string;
+  hero_title_line1: string;
+  hero_title_line2: string;
+  hero_title_highlight: string;
+  hero_description: string;
+  hero_cta_primary_text: string;
+  hero_cta_primary_link: string;
+  hero_cta_secondary_text: string;
+  hero_cta_secondary_link: string;
+  hero_chakra_image_url: string;
+  hero_chakra_speed_seconds: number;
+  hero_chakra_enabled: boolean;
+  hero_cards: HeroCardConfig[];
+  trust_stats: TrustStatConfig[];
+  services_eyebrow: string;
+  services_title: string;
+  services_description: string;
+  how_it_works_badge: string;
+  how_it_works_title: string;
+  step1_title: string;
+  step1_body: string;
+  step2_title: string;
+  step2_body: string;
+  step3_title: string;
+  step3_body: string;
+  cta_badge: string;
+  cta_title: string;
+  cta_description: string;
+  cta_primary_text: string;
+  cta_primary_link: string;
+  cta_secondary_text: string;
+  cta_secondary_link: string;
+}
+
+export const cmsApi = {
+  getHomepage: () => api.get<HomePageCMSData>(endpoints.cms.homepage, { auth: false }),
+};
+
+
 
