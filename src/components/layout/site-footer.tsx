@@ -67,7 +67,10 @@ export function SiteFooter() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      // 20px tall with no padding: two of these stacked are
+                      // almost impossible to tap apart on a phone. The block
+                      // display and vertical padding give each its own row.
+                      className="inline-flex min-h-9 items-center text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {link.label}
                     </Link>

@@ -514,7 +514,7 @@ export default function KPCalculatorPage() {
                 key={lang}
                 type="button"
                 onClick={() => setLanguage(lang)}
-                className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                className={`min-h-9 inline-flex items-center justify-center px-3.5 py-2 text-xs font-bold rounded-lg press transition-all ${
                   language === lang
                     ? "bg-amber-500 text-white shadow-xs"
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
@@ -538,7 +538,7 @@ export default function KPCalculatorPage() {
               <button
                 type="button"
                 onClick={handleReloadFromProfile}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg border border-amber-200 transition-colors self-start sm:self-auto"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg border border-amber-200 press transition-colors self-start sm:self-auto"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 <span>{ui.syncProfileBtn}</span>
@@ -585,7 +585,7 @@ export default function KPCalculatorPage() {
                       key={g}
                       type="button"
                       onClick={() => setGender(g)}
-                      className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all ${
+                      className={`py-2.5 px-3 rounded-xl text-xs font-bold border press transition-all ${
                         gender === g
                           ? "bg-amber-500 text-white border-amber-600 shadow-xs"
                           : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
@@ -695,7 +695,7 @@ export default function KPCalculatorPage() {
                   <button
                     type="button"
                     onClick={() => setPeriod(period === "AM" ? "PM" : "AM")}
-                    className="py-2.5 rounded-xl text-xs font-extrabold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 transition-colors"
+                    className="py-2.5 rounded-xl text-xs font-extrabold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 press transition-colors"
                   >
                     {period}
                   </button>
@@ -721,7 +721,7 @@ export default function KPCalculatorPage() {
                   <button
                     type="button"
                     onClick={() => setIsMapModalOpen(true)}
-                    className="px-4 py-2.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-xs font-bold transition-colors shrink-0"
+                    className="px-4 py-2.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-xs font-bold press transition-colors shrink-0"
                   >
                     {ui.searchCity}
                   </button>
@@ -767,7 +767,7 @@ export default function KPCalculatorPage() {
                 <button
                   type="button"
                   onClick={() => setIsHoraryMode(!isHoraryMode)}
-                  className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all border ${
+                  className={`px-4 py-2 rounded-xl text-xs font-extrabold press transition-all border ${
                     isHoraryMode
                       ? "bg-amber-600 text-white border-amber-700 shadow-xs"
                       : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
@@ -783,7 +783,7 @@ export default function KPCalculatorPage() {
               <button
                 type="button"
                 onClick={() => setShowAdvance(!showAdvance)}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900"
+                className="inline-flex min-h-10 w-full items-center gap-1.5 rounded-lg px-1 text-xs font-bold text-slate-600 press transition-colors hover:bg-slate-50 hover:text-slate-900"
               >
                 <Sliders className="w-3.5 h-3.5" />
                 <span>{ui.advancedSettingsToggle}</span>
@@ -851,7 +851,7 @@ export default function KPCalculatorPage() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 py-2.5 px-4 rounded-xl hover:bg-slate-100 transition-colors order-2 sm:order-1"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 py-2.5 px-4 rounded-xl hover:bg-slate-100 press transition-colors order-2 sm:order-1"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>{ui.resetBtn}</span>
@@ -867,7 +867,7 @@ export default function KPCalculatorPage() {
                 <button
                   type="submit"
                   disabled={loading || (kpFeature ? !kpFeature.enabled : false)}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed press transition-all"
                 >
                   {loading ? (
                     <>
@@ -901,7 +901,7 @@ export default function KPCalculatorPage() {
 
         {/* Calculation Results Dashboard */}
         {result && (
-          <div ref={resultsRef} className="space-y-8 animate-in fade-in duration-300">
+          <div ref={resultsRef} className="space-y-8 reveal-cascade">
             {/* Header Result Card */}
             <div className="bg-white rounded-2xl border border-amber-200/90 p-5 sm:p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
@@ -965,7 +965,7 @@ export default function KPCalculatorPage() {
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveTab(tab.id as KPTab)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold press transition-all whitespace-nowrap shrink-0 ${
                       isActive
                         ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-sm"
                         : "text-slate-600 hover:text-slate-900 hover:bg-white/80"
@@ -980,7 +980,7 @@ export default function KPCalculatorPage() {
 
             {/* TAB 1: OVERVIEW & CHARTS */}
             {activeTab === "overview" && (
-              <div className="space-y-8 animate-fadeIn">
+              <div className="space-y-8 fade-in">
                 {/* 4-Column Key Metrics */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {/* Column 1: Ayanamsa & Casting Time */}
@@ -1140,7 +1140,7 @@ export default function KPCalculatorPage() {
 
             {/* TAB 2: 4-FOLD SIGNIFICATORS */}
             {activeTab === "significators" && (
-              <div className="space-y-8 animate-fadeIn">
+              <div className="space-y-8 fade-in">
                 <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-l-4 border-amber-500 p-4 rounded-r-xl text-xs text-slate-700 leading-relaxed space-y-1">
                   <div className="font-extrabold text-slate-900 text-sm">
                     {ui.sigTheoryTitle}
@@ -1249,7 +1249,7 @@ export default function KPCalculatorPage() {
 
             {/* TAB 3: CSL LIFE EVENTS */}
             {activeTab === "life_events" && (
-              <div className="space-y-6 animate-fadeIn">
+              <div className="space-y-6 fade-in">
                 <div>
                   <h2 className="text-xl font-extrabold text-slate-900">{ui.lifeEventsHeading}</h2>
                   <p className="text-xs text-slate-600 mt-0.5">{ui.lifeEventsSubheading}</p>
@@ -1370,7 +1370,7 @@ export default function KPCalculatorPage() {
 
             {/* TAB 4: CUSPS & PLANETS */}
             {activeTab === "cusps_planets" && (
-              <div className="space-y-8 animate-fadeIn">
+              <div className="space-y-8 fade-in">
                 {/* 1. Placidus 12 House Cusps Table */}
                 <div className="bg-white rounded-2xl border border-amber-200/90 shadow-xs overflow-hidden">
                   <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
@@ -1503,7 +1503,7 @@ export default function KPCalculatorPage() {
 
             {/* TAB 5: RULING PLANETS & HORARY */}
             {activeTab === "ruling_horary" && (
-              <div className="space-y-8 animate-fadeIn">
+              <div className="space-y-8 fade-in">
                 {/* Retrograde Filter Engine Card */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 shadow-xs space-y-2">
@@ -1663,7 +1663,7 @@ export default function KPCalculatorPage() {
 
             {/* TAB 6: ASPECTS & BADHAKA */}
             {activeTab === "aspects_badhaka" && (
-              <div className="space-y-8 animate-fadeIn">
+              <div className="space-y-8 fade-in">
                 {/* Badhaka & Maraka Card */}
                 {result.badhaka_maraka && (
                   <div className="bg-white rounded-2xl border border-amber-200/90 p-5 sm:p-6 shadow-xs space-y-4">
@@ -1781,7 +1781,7 @@ export default function KPCalculatorPage() {
 
             {/* TAB 7: DASHA & REMEDIES */}
             {activeTab === "remedies" && (
-              <div className="space-y-8 animate-fadeIn">
+              <div className="space-y-8 fade-in">
                 {/* 43-Day Lal Kitab & Vedic Remedies Dashboard */}
                 <div>
                   <div className="mb-4">
@@ -1859,7 +1859,7 @@ export default function KPCalculatorPage() {
                             <button
                               type="button"
                               onClick={() => setExpandedMD(isMDExpanded ? null : md.lord)}
-                              className="flex items-center gap-2.5 text-left hover:opacity-80 transition-opacity"
+                              className="flex items-center gap-2.5 text-left hover:opacity-80 press transition-opacity"
                             >
                               {isMDExpanded ? (
                                 <ChevronDown className="w-4 h-4 text-amber-600 shrink-0" />
@@ -1894,7 +1894,7 @@ export default function KPCalculatorPage() {
                                 onClick={() =>
                                   setExpandedInsightMD(isInsightExpanded ? null : md.lord)
                                 }
-                                className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-all ${
+                                className={`text-xs font-bold px-3 py-1.5 rounded-lg border press transition-all ${
                                   isInsightExpanded
                                     ? "bg-amber-100 text-amber-900 border-amber-300"
                                     : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"

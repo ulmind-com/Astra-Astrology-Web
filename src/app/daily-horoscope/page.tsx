@@ -757,7 +757,7 @@ function HoroscopeContent() {
               <button
                 type="button"
                 onClick={() => setSelectedDate(yesterdayStr)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                className={`inline-flex min-h-9 items-center px-3 py-2 rounded-xl text-xs font-medium press transition-all ${
                   selectedDate === yesterdayStr
                     ? "bg-[#b06d4e] text-white shadow-xs"
                     : "bg-[#f5ece3] text-[#5e5369] hover:bg-[#ebdccf]"
@@ -768,7 +768,7 @@ function HoroscopeContent() {
               <button
                 type="button"
                 onClick={() => setSelectedDate(todayStr)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                className={`inline-flex min-h-9 items-center px-3.5 py-2 rounded-xl text-xs font-semibold press transition-all ${
                   selectedDate === todayStr
                     ? "bg-[#b06d4e] text-white shadow-xs ring-2 ring-[#b06d4e]/30"
                     : "bg-[#f5ece3] text-[#5e5369] hover:bg-[#ebdccf]"
@@ -779,7 +779,7 @@ function HoroscopeContent() {
               <button
                 type="button"
                 onClick={() => setSelectedDate(tomorrowStr)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                className={`inline-flex min-h-9 items-center px-3.5 py-2 rounded-xl text-xs font-medium press transition-all ${
                   selectedDate === tomorrowStr
                     ? "bg-[#b06d4e] text-white shadow-xs"
                     : "bg-[#f5ece3] text-[#5e5369] hover:bg-[#ebdccf]"
@@ -797,7 +797,7 @@ function HoroscopeContent() {
                   onChange={(e) => {
                     if (e.target.value) setSelectedDate(e.target.value);
                   }}
-                  className="rounded-lg border border-[#e2d0bf] bg-[#fffaf5] px-2 py-1 text-xs text-[#4D4664] focus:outline-none focus:ring-1 focus:ring-[#b06d4e]"
+                  className="min-h-9 rounded-lg border border-[#e2d0bf] bg-[#fffaf5] px-2 py-2 text-xs text-[#4D4664] focus:outline-none focus:ring-1 focus:ring-[#b06d4e]"
                 />
               </div>
             </div>
@@ -809,7 +809,7 @@ function HoroscopeContent() {
               <button
                 type="button"
                 onClick={() => setShowPersonalize(!showPersonalize)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all shadow-2xs ${
+                className={`flex min-h-9 items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium press transition-all shadow-2xs ${
                   showPersonalize || selectedNakshatra !== null
                     ? "border-[#b06d4e] bg-[#fbf1e7] text-[#b06d4e] ring-2 ring-[#b06d4e]/20"
                     : "border-[#e2d0bf] bg-[#fbf4ec] text-[#5e5369] hover:text-[#b06d4e]"
@@ -833,7 +833,7 @@ function HoroscopeContent() {
                 <button
                   type="button"
                   onClick={() => setLanguage("bn")}
-                  className={`px-2.5 py-1 rounded-lg transition-colors font-medium ${
+                  className={`min-h-9 inline-flex items-center justify-center px-2.5 py-2 rounded-lg press transition-colors font-medium ${
                     language === "bn" ? "bg-[#b06d4e] text-white shadow-2xs" : "text-[#5e5369] hover:text-[#332c39]"
                   }`}
                 >
@@ -842,7 +842,7 @@ function HoroscopeContent() {
                 <button
                   type="button"
                   onClick={() => setLanguage("hi")}
-                  className={`px-2.5 py-1 rounded-lg transition-colors font-medium ${
+                  className={`min-h-9 inline-flex items-center justify-center px-2.5 py-2 rounded-lg press transition-colors font-medium ${
                     language === "hi" ? "bg-[#b06d4e] text-white shadow-2xs" : "text-[#5e5369] hover:text-[#332c39]"
                   }`}
                 >
@@ -851,7 +851,7 @@ function HoroscopeContent() {
                 <button
                   type="button"
                   onClick={() => setLanguage("en")}
-                  className={`px-2.5 py-1 rounded-lg transition-colors font-medium ${
+                  className={`min-h-9 inline-flex items-center justify-center px-2.5 py-2 rounded-lg press transition-colors font-medium ${
                     language === "en" ? "bg-[#b06d4e] text-white shadow-2xs" : "text-[#5e5369] hover:text-[#332c39]"
                   }`}
                 >
@@ -881,7 +881,7 @@ function HoroscopeContent() {
                 type="button"
                 onClick={handleShare}
                 title={t.share}
-                className="flex size-8 items-center justify-center rounded-xl border border-[#e2d0bf] bg-[#fbf4ec] text-[#5e5369] hover:text-[#b06d4e] transition-colors shadow-2xs"
+                className="flex size-8 items-center justify-center rounded-xl border border-[#e2d0bf] bg-[#fbf4ec] text-[#5e5369] hover:text-[#b06d4e] press transition-colors shadow-2xs"
               >
                 <Share2 className="size-3.5" />
               </button>
@@ -890,7 +890,7 @@ function HoroscopeContent() {
 
           {/* Personalization Drawer / Panel */}
           {showPersonalize && (
-            <div className="mb-8 rounded-2xl border border-[#d6b7a2] bg-gradient-to-r from-[#fdf7f0] via-[#fbf1e6] to-[#fdf7f0] p-5 shadow-sm transition-all animate-in fade-in slide-in-from-top-2">
+            <div className="mb-8 rounded-2xl border border-[#d6b7a2] bg-gradient-to-r from-[#fdf7f0] via-[#fbf1e6] to-[#fdf7f0] p-5 shadow-sm transition-all fade-in slide-in-from-top-2">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-[#ebd7c8]">
                 <div className="flex items-center gap-2">
                   <UserCheck className="size-5 text-[#b06d4e]" />
@@ -919,10 +919,11 @@ function HoroscopeContent() {
                 
                 {/* Method 1: Direct Nakshatra Selector */}
                 <div>
-                  <label className="block text-xs font-bold text-[#4D4664] mb-1">
+                  <label htmlFor="dh-nakshatra" className="block text-xs font-bold text-[#4D4664] mb-1">
                     {t.personalizeStep1}
                   </label>
                   <select
+                    id="dh-nakshatra"
                     value={selectedNakshatra !== null ? selectedNakshatra : ""}
                     onChange={(e) => {
                       const val = e.target.value === "" ? null : Number(e.target.value);
@@ -947,6 +948,7 @@ function HoroscopeContent() {
                   <div className="flex items-center gap-2">
                     <input
                       type="date"
+                      aria-label={t.birthDatePlaceholder}
                       value={birthDateInput}
                       onChange={(e) => setBirthDateInput(e.target.value)}
                       placeholder={t.birthDatePlaceholder}
@@ -954,6 +956,7 @@ function HoroscopeContent() {
                     />
                     <input
                       type="time"
+                      aria-label={t.birthTimePlaceholder}
                       value={birthTimeInput}
                       onChange={(e) => setBirthTimeInput(e.target.value)}
                       placeholder={t.birthTimePlaceholder}
@@ -964,10 +967,11 @@ function HoroscopeContent() {
 
                 {/* Method 3: Birth Lagna Selector for Dual Transit */}
                 <div className="md:col-span-2 pt-2 border-t border-[#ebd7c8]/60">
-                  <label className="block text-xs font-bold text-[#4D4664] mb-1">
+                  <label htmlFor="dh-lagna" className="block text-xs font-bold text-[#4D4664] mb-1">
                     {t.personalizeStep3}
                   </label>
                   <select
+                    id="dh-lagna"
                     value={selectedLagna !== null ? selectedLagna : ""}
                     onChange={(e) => {
                       const val = e.target.value === "" ? null : Number(e.target.value);
@@ -1248,7 +1252,7 @@ function HoroscopeContent() {
 
           {/* Interactive 24-Hour Planetary Hora Timeline Drawer */}
           {showHoras && horoscopeData?.panchang.horas && (
-            <div className="mb-8 rounded-3xl border border-[#d6b7a2] bg-gradient-to-br from-[#fbf4eb] via-[#f8ebe0] to-[#fbf4eb] p-6 shadow-sm animate-in fade-in slide-in-from-top-3">
+            <div className="mb-8 rounded-3xl border border-[#d6b7a2] bg-gradient-to-br from-[#fbf4eb] via-[#f8ebe0] to-[#fbf4eb] p-6 shadow-sm fade-in slide-in-from-top-3">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[#ebd7c8]">
                 <div>
                   <h3 className="font-cinzel text-lg font-bold text-[#4D4664] flex items-center gap-2">
@@ -1262,7 +1266,7 @@ function HoroscopeContent() {
                   <button
                     type="button"
                     onClick={() => setHoraViewPeriod("day")}
-                    className={`px-3 py-1 rounded-lg transition-colors font-semibold ${
+                    className={`px-3 py-1 rounded-lg press transition-colors font-semibold ${
                       horaViewPeriod === "day" ? "bg-[#b06d4e] text-white shadow-xs" : "text-[#5e5369]"
                     }`}
                   >
@@ -1271,7 +1275,7 @@ function HoroscopeContent() {
                   <button
                     type="button"
                     onClick={() => setHoraViewPeriod("night")}
-                    className={`px-3 py-1 rounded-lg transition-colors font-semibold ${
+                    className={`px-3 py-1 rounded-lg press transition-colors font-semibold ${
                       horaViewPeriod === "night" ? "bg-[#b06d4e] text-white shadow-xs" : "text-[#5e5369]"
                     }`}
                   >
@@ -1348,7 +1352,7 @@ function HoroscopeContent() {
 
           {/* Interactive 16 Vedic Choghadiya Drawer */}
           {showChoghadiya && horoscopeData?.panchang.choghadiya && (
-            <div className="mb-8 rounded-3xl border border-[#d6b7a2] bg-gradient-to-br from-[#fbf4eb] via-[#f8ebe0] to-[#fbf4eb] p-6 shadow-sm animate-in fade-in slide-in-from-top-3">
+            <div className="mb-8 rounded-3xl border border-[#d6b7a2] bg-gradient-to-br from-[#fbf4eb] via-[#f8ebe0] to-[#fbf4eb] p-6 shadow-sm fade-in slide-in-from-top-3">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[#ebd7c8]">
                 <div>
                   <h3 className="font-cinzel text-lg font-bold text-[#4D4664] flex items-center gap-2">
@@ -1362,7 +1366,7 @@ function HoroscopeContent() {
                   <button
                     type="button"
                     onClick={() => setChoghadiyaViewPeriod("day")}
-                    className={`px-3 py-1 rounded-lg transition-colors font-semibold ${
+                    className={`px-3 py-1 rounded-lg press transition-colors font-semibold ${
                       choghadiyaViewPeriod === "day" ? "bg-[#b06d4e] text-white shadow-xs" : "text-[#5e5369]"
                     }`}
                   >
@@ -1371,7 +1375,7 @@ function HoroscopeContent() {
                   <button
                     type="button"
                     onClick={() => setChoghadiyaViewPeriod("night")}
-                    className={`px-3 py-1 rounded-lg transition-colors font-semibold ${
+                    className={`px-3 py-1 rounded-lg press transition-colors font-semibold ${
                       choghadiyaViewPeriod === "night" ? "bg-[#b06d4e] text-white shadow-xs" : "text-[#5e5369]"
                     }`}
                   >
@@ -1424,7 +1428,7 @@ function HoroscopeContent() {
 
           {/* Interactive 24-Hour Cosmic Biorhythm Drawer */}
           {showBiorhythm && horoscopeData?.biorhythm_timeline && (
-            <div className="mb-8 rounded-3xl border border-emerald-600/30 bg-gradient-to-br from-[#f6fcf8] via-[#f0f9f3] to-[#f6fcf8] p-6 shadow-sm animate-in fade-in slide-in-from-top-3">
+            <div className="mb-8 rounded-3xl border border-emerald-600/30 bg-gradient-to-br from-[#f6fcf8] via-[#f0f9f3] to-[#f6fcf8] p-6 shadow-sm fade-in slide-in-from-top-3">
               <div className="pb-4 border-b border-emerald-600/20">
                 <h3 className="font-cinzel text-lg font-bold text-emerald-950 flex items-center gap-2">
                   <Activity className="size-5 text-emerald-700" />
@@ -1494,7 +1498,7 @@ function HoroscopeContent() {
                     key={sign.id}
                     type="button"
                     onClick={() => setActiveSignIndex(sign.index)}
-                    className={`group relative rounded-2xl border p-3 text-left transition-all duration-200 ${
+                    className={`group relative rounded-2xl border p-3 text-left press transition-all duration-200 ${
                       isSelected
                         ? "border-[#b06d4e] bg-[#fbf1e7] shadow-md -translate-y-0.5 ring-2 ring-[#b06d4e]/30"
                         : "border-[#e8d7c9] bg-[#fffaf5] hover:border-[#b06d4e]/60 hover:bg-[#faf2ea]"
@@ -2110,7 +2114,7 @@ function HoroscopeContent() {
                       <button
                         type="button"
                         onClick={() => handleCopyMantra(activeSignData.beej_mantra!)}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#d6bca8] bg-[#fbf3e9] text-[#8c5035] hover:bg-[#b06d4e] hover:text-white transition-colors text-xs font-semibold shrink-0"
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#d6bca8] bg-[#fbf3e9] text-[#8c5035] hover:bg-[#b06d4e] hover:text-white press transition-colors text-xs font-semibold shrink-0"
                       >
                         {copiedMantra ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
                         <span>{copiedMantra ? t.copied : t.copyMantra}</span>

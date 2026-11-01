@@ -564,7 +564,7 @@ export default function KundliPage() {
                   key={lang.code}
                   type="button"
                   onClick={() => setLanguage(lang.code)}
-                  className={`rounded-full px-3 py-1 text-xs font-bold transition-all ${
+                  className={`min-h-9 inline-flex items-center justify-center rounded-full px-3 py-2 text-xs font-bold press transition-all ${
                     language === lang.code
                       ? "bg-amber-500 text-white shadow-2xs"
                       : "text-foreground-muted hover:text-foreground"
@@ -618,7 +618,7 @@ export default function KundliPage() {
                     <button
                       type="button"
                       onClick={handleReloadFromProfile}
-                      className="inline-flex items-center gap-1 rounded-xl bg-white/90 hover:bg-white px-2.5 py-1 text-[11px] font-bold text-amber-900 border border-amber-300 shadow-2xs transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1 rounded-xl bg-white/90 hover:bg-white px-2.5 py-1 text-[11px] font-bold text-amber-900 border border-amber-300 shadow-2xs press transition-colors cursor-pointer"
                     >
                       <RefreshCw className="size-3 text-amber-700" />
                       <span>{t.reloadBtn}</span>
@@ -627,7 +627,7 @@ export default function KundliPage() {
                   <button
                     type="button"
                     onClick={handleResetForm}
-                    className="inline-flex items-center gap-1 rounded-xl bg-white/90 hover:bg-white px-2.5 py-1 text-[11px] font-bold text-rose-800 border border-rose-300 shadow-2xs transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1 rounded-xl bg-white/90 hover:bg-white px-2.5 py-1 text-[11px] font-bold text-rose-800 border border-rose-300 shadow-2xs press transition-colors cursor-pointer"
                   >
                     <RotateCcw className="size-3 text-rose-600" />
                     <span>{t.clearBtn}</span>
@@ -644,7 +644,7 @@ export default function KundliPage() {
                 </div>
                 <Link
                   href="/login"
-                  className="rounded-xl bg-amber-500 text-amber-950 px-3 py-1 text-[11px] font-bold shadow-2xs hover:bg-amber-400 transition-colors ml-auto"
+                  className="ml-auto inline-flex min-h-9 items-center rounded-xl bg-amber-500 px-3.5 py-2 text-[11px] font-bold text-amber-950 shadow-2xs press transition-colors hover:bg-amber-400"
                 >
                   {t.signInBtn}
                 </Link>
@@ -671,12 +671,13 @@ export default function KundliPage() {
 
               {/* 2. Gender */}
               <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
-                <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
+                <label htmlFor="kundli-gender" className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
                   <HeartHandshake className="size-4 text-indigo-500" />
                   <span>{t.genderLabel}</span>
                 </label>
                 <div className="sm:col-span-9">
                   <select
+                    id="kundli-gender"
                     value={gender}
                     onChange={(e) => setGender(e.target.value as any)}
                     className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs cursor-pointer font-medium"
@@ -774,6 +775,7 @@ export default function KundliPage() {
                     className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
                   />
                   <select
+                    aria-label="AM or PM"
                     value={period}
                     onChange={(e) => setPeriod(e.target.value as any)}
                     className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-bold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs cursor-pointer"
@@ -821,7 +823,9 @@ export default function KundliPage() {
                 <button
                   type="button"
                   onClick={() => setShowAdvance((prev) => !prev)}
-                  className="flex items-center gap-1.5 text-xs font-bold text-amber-800 hover:text-amber-950 transition-colors cursor-pointer"
+                  // 16px tall. A disclosure that reveals the ayanamsa and
+                  // house-system choices deserves a row of its own.
+                  className="flex min-h-10 w-full items-center gap-1.5 rounded-lg px-1 text-xs font-bold text-amber-800 press transition-colors hover:bg-amber-50 hover:text-amber-950"
                 >
                   <Sliders className="size-3.5" />
                   <span>{t.advancedSettings}</span>
@@ -829,10 +833,11 @@ export default function KundliPage() {
                 </button>
 
                 {showAdvance && (
-                  <div className="mt-3 p-4 rounded-2xl bg-surface-muted/30 border border-border/80 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-200">
+                  <div className="mt-3 p-4 rounded-2xl bg-surface-muted/30 border border-border/80 grid grid-cols-1 sm:grid-cols-2 gap-4 fade-in">
                     <div>
-                      <label className="block text-xs font-bold text-foreground mb-1">Ayanamsa</label>
+                      <label htmlFor="kundli-ayanamsa" className="block text-xs font-bold text-foreground mb-1">Ayanamsa</label>
                       <select
+                        id="kundli-ayanamsa"
                         value={ayanamsa}
                         onChange={(e) => setAyanamsa(e.target.value as any)}
                         className="w-full rounded-xl border border-border bg-white px-3 py-2 text-xs font-semibold cursor-pointer"
@@ -845,8 +850,9 @@ export default function KundliPage() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-foreground mb-1">House System</label>
+                      <label htmlFor="kundli-house-system" className="block text-xs font-bold text-foreground mb-1">House System</label>
                       <select
+                        id="kundli-house-system"
                         value={houseSystem}
                         onChange={(e) => setHouseSystem(e.target.value as any)}
                         className="w-full rounded-xl border border-border bg-white px-3 py-2 text-xs font-semibold cursor-pointer"
@@ -887,7 +893,7 @@ export default function KundliPage() {
                 <button
                   type="submit"
                   disabled={loading || (kundliFeature ? !kundliFeature.enabled : false)}
-                  className="w-full h-12 rounded-xl bg-brand-400 hover:bg-brand-500 text-ink-900 font-bold shadow-glow text-base transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-12 rounded-xl bg-brand-400 hover:bg-brand-500 text-ink-900 font-bold shadow-glow text-base press transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Sparkles className="size-4" />
                   <span>
@@ -907,7 +913,7 @@ export default function KundliPage() {
             SECTION 2: Kundli Results Section (Only rendered after calculation)
         ───────────────────────────────────────────────────────────── */}
         {result && (
-          <div ref={resultsRef} className="space-y-8 pt-4">
+          <div ref={resultsRef} className="space-y-8 reveal-cascade pt-4">
             {/* Profile Card matching Screenshot 1 */}
             <div className="rounded-3xl border border-amber-200/80 bg-white p-6 sm:p-8 shadow-soft text-center space-y-4">
               <h2 className="font-display text-2xl font-bold tracking-tight text-foreground">
@@ -936,7 +942,7 @@ export default function KundliPage() {
                     handleResetForm();
                     formRef.current?.scrollIntoView({ behavior: "smooth" });
                   }}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50/80 hover:bg-amber-100 px-4 py-2 text-xs font-bold text-amber-950 transition-colors shadow-2xs cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50/80 hover:bg-amber-100 px-4 py-2 text-xs font-bold text-amber-950 press transition-colors shadow-2xs cursor-pointer"
                 >
                   <FilePlus className="size-4 text-amber-600" />
                   <span>{t.createNewKundli}</span>
@@ -945,7 +951,7 @@ export default function KundliPage() {
                 <button
                   type="button"
                   onClick={() => toast.success(t.toastSaved)}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50/80 hover:bg-amber-100 px-4 py-2 text-xs font-bold text-amber-950 transition-colors shadow-2xs cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50/80 hover:bg-amber-100 px-4 py-2 text-xs font-bold text-amber-950 press transition-colors shadow-2xs cursor-pointer"
                 >
                   <Lock className="size-4 text-amber-600" />
                   <span>{t.saveKundli}</span>
@@ -956,7 +962,7 @@ export default function KundliPage() {
                   onClick={() => {
                     formRef.current?.scrollIntoView({ behavior: "smooth" });
                   }}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50/80 hover:bg-amber-100 px-4 py-2 text-xs font-bold text-amber-950 transition-colors shadow-2xs cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50/80 hover:bg-amber-100 px-4 py-2 text-xs font-bold text-amber-950 press transition-colors shadow-2xs cursor-pointer"
                 >
                   <Edit className="size-4 text-amber-600" />
                   <span>{t.editDetails}</span>
@@ -1258,7 +1264,7 @@ export default function KundliPage() {
                     key={s.key}
                     type="button"
                     onClick={() => setChartStyle(s.key)}
-                    className={`rounded-lg px-4 py-1.5 text-xs font-bold transition-all ${
+                    className={`rounded-lg px-4 py-1.5 text-xs font-bold press transition-all ${
                       chartStyle === s.key
                         ? "bg-amber-500 text-white shadow-2xs"
                         : "text-amber-950 hover:bg-amber-100 cursor-pointer"
@@ -1548,7 +1554,7 @@ export default function KundliPage() {
                         key={`h-tab-${h.house_number}`}
                         type="button"
                         onClick={() => setActiveHouseTab(h.house_number)}
-                        className={`p-2 rounded-xl text-center border transition-all cursor-pointer ${
+                        className={`p-2 rounded-xl text-center border press transition-all cursor-pointer ${
                           isSelected
                             ? "bg-amber-600 text-white border-amber-600 shadow-sm"
                             : "bg-amber-50/60 hover:bg-amber-100 text-amber-950 border-amber-200"
@@ -1757,7 +1763,7 @@ export default function KundliPage() {
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveChartTab(tab.id as any)}
-                      className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                      className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold press transition-all cursor-pointer border ${
                         activeChartTab === tab.id
                           ? "bg-amber-600 text-white border-amber-600 shadow-sm"
                           : "bg-amber-50/70 text-amber-950 border-amber-300/80 hover:bg-amber-100"
@@ -1781,7 +1787,7 @@ export default function KundliPage() {
                       key={s.key}
                       type="button"
                       onClick={() => setChartStyle(s.key as any)}
-                      className={`rounded-lg px-4 py-1 text-xs font-bold transition-all cursor-pointer ${
+                      className={`rounded-lg px-4 py-1 text-xs font-bold press transition-all cursor-pointer ${
                         chartStyle === s.key
                           ? "bg-amber-500 text-white shadow-2xs"
                           : "text-amber-950 hover:bg-amber-100"
@@ -2240,7 +2246,7 @@ export default function KundliPage() {
             <button
               type="button"
               onClick={() => toast.success(t.toastSaved)}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 py-2.5 px-3 text-xs font-bold text-amber-950 transition-colors shadow-2xs cursor-pointer"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 py-2.5 px-3 text-xs font-bold text-amber-950 press transition-colors shadow-2xs cursor-pointer"
             >
               <Lock className="size-3.5 text-amber-600" />
               <span>{t.saveKundli}</span>
@@ -2249,7 +2255,7 @@ export default function KundliPage() {
             <button
               type="button"
               onClick={handlePrintDownload}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 py-2.5 px-3 text-xs font-bold text-white shadow-xs transition-colors cursor-pointer"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 py-2.5 px-3 text-xs font-bold text-white shadow-xs press transition-colors cursor-pointer"
             >
               <Download className="size-3.5" />
               <span>{t.downloadBtn}</span>
@@ -2257,7 +2263,7 @@ export default function KundliPage() {
 
             <Link
               href="/astrologers"
-              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-400 hover:bg-brand-500 py-2.5 px-3 text-xs font-bold text-ink-900 shadow-glow transition-all"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-400 hover:bg-brand-500 py-2.5 px-3 text-xs font-bold text-ink-900 shadow-glow press transition-all"
             >
               <MessageCircle className="size-3.5 text-ink-900" />
               <span>{t.consultBtn}</span>

@@ -199,7 +199,7 @@ export function ChineseZodiacModal({ isOpen, onClose }: ChineseZodiacModalProps)
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-xs animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-xs fade-in">
       <div
         className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl border border-[#e5cebd] bg-[#fffaf5] p-6 sm:p-8 shadow-2xl text-[#372e5c]"
         onClick={(e) => e.stopPropagation()}

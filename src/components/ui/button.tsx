@@ -45,7 +45,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       disabled={disabled || loading}
       className={cn(
         "inline-flex items-center justify-center font-medium",
-        "transition-all disabled:cursor-not-allowed disabled:opacity-55",
+        // `press` replaces `transition-all`: it animates only transform,
+        // shadow and colour, and adds the scale-down on touch. `transition-all`
+        // also animated width and height, so a button that grew when its label
+        // changed length slid into its new size.
+        "press disabled:cursor-not-allowed disabled:opacity-55",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
         VARIANTS[variant],
         SIZES[size],

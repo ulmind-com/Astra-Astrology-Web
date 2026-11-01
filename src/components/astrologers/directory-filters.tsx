@@ -103,7 +103,7 @@ export function DirectoryFilters({
         <button
           onClick={() => set("online_only", !filters.online_only)}
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+            "inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-medium transition-colors",
             filters.online_only
               ? "border-success/40 bg-success-surface text-success"
               : "border-border text-muted-foreground hover:border-border-strong",
@@ -116,7 +116,7 @@ export function DirectoryFilters({
         <button
           onClick={() => set("featured_only", !filters.featured_only)}
           className={cn(
-            "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+            "inline-flex min-h-9 items-center rounded-full border px-3 py-2 text-xs font-medium transition-colors",
             filters.featured_only
               ? "border-gold-300 bg-gold-50 text-gold-800 dark:border-gold-500/40 dark:bg-gold-100 dark:text-gold-600"
               : "border-border text-muted-foreground hover:border-border-strong",

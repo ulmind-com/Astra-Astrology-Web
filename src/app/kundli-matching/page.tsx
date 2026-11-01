@@ -426,7 +426,7 @@ export default function KundliMatchingPage() {
             <button
               type="button"
               onClick={() => setLanguage("bn")}
-              className={`px-3 py-1 rounded-full transition-all duration-200 ${
+              className={`min-h-9 inline-flex items-center justify-center px-3 py-2 rounded-full press transition-all duration-200 ${
                 language === "bn"
                   ? "bg-amber-500 text-white font-semibold shadow-xs"
                   : "text-slate-600 hover:text-slate-900 hover:bg-amber-50"
@@ -437,7 +437,7 @@ export default function KundliMatchingPage() {
             <button
               type="button"
               onClick={() => setLanguage("hi")}
-              className={`px-3 py-1 rounded-full transition-all duration-200 ${
+              className={`min-h-9 inline-flex items-center justify-center px-3 py-2 rounded-full press transition-all duration-200 ${
                 language === "hi"
                   ? "bg-amber-500 text-white font-semibold shadow-xs"
                   : "text-slate-600 hover:text-slate-900 hover:bg-amber-50"
@@ -448,7 +448,7 @@ export default function KundliMatchingPage() {
             <button
               type="button"
               onClick={() => setLanguage("en")}
-              className={`px-3 py-1 rounded-full transition-all duration-200 ${
+              className={`min-h-9 inline-flex items-center justify-center px-3 py-2 rounded-full press transition-all duration-200 ${
                 language === "en"
                   ? "bg-amber-500 text-white font-semibold shadow-xs"
                   : "text-slate-600 hover:text-slate-900 hover:bg-amber-50"
@@ -468,7 +468,7 @@ export default function KundliMatchingPage() {
             <button
               type="button"
               onClick={() => setStep(1)}
-              className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl border text-sm font-semibold transition-all ${
+              className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl border text-sm font-semibold press transition-all ${
                 step === 1
                   ? "border-amber-400 bg-amber-50/70 text-amber-900 shadow-xs"
                   : "border-slate-200 bg-slate-50/60 text-slate-500 hover:bg-slate-100"
@@ -489,7 +489,7 @@ export default function KundliMatchingPage() {
               onClick={() => {
                 if (validatePerson(groom, t.groomLabel)) setStep(2);
               }}
-              className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl border text-sm font-semibold transition-all ${
+              className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl border text-sm font-semibold press transition-all ${
                 step === 2
                   ? "border-amber-400 bg-amber-50/70 text-amber-900 shadow-xs"
                   : "border-slate-200 bg-slate-50/60 text-slate-500 hover:bg-slate-100"
@@ -509,7 +509,7 @@ export default function KundliMatchingPage() {
           {/* Form Content */}
           {step === 1 ? (
             /* STEP 1: GROOM FORM */
-            <div className="space-y-6 animate-fadeIn">
+            <div className="space-y-6 fade-in">
               <div className="flex items-center gap-2 text-amber-800 font-semibold text-base sm:text-lg border-b border-amber-100 pb-2">
                 <span className="text-xl">♂</span>
                 <span>{t.groomFormHeading}</span>
@@ -576,7 +576,7 @@ export default function KundliMatchingPage() {
                     ({t.timeOptionalSuffix})
                   </span>
                 </label>
-                <div className="grid grid-cols-4 gap-2 sm:gap-3">
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3">
                   <input
                     type="number"
                     min="1"
@@ -604,11 +604,11 @@ export default function KundliMatchingPage() {
                     placeholder={t.form.secondPlaceholder}
                     className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-center"
                   />
-                  <div className="flex rounded-xl border border-slate-200 overflow-hidden bg-slate-50 p-0.5">
+                  <div className="col-span-3 flex rounded-xl border border-slate-200 overflow-hidden bg-slate-50 p-0.5 sm:col-span-1">
                     <button
                       type="button"
                       onClick={() => setGroom({ ...groom, period: "AM" })}
-                      className={`flex-1 py-1 text-xs font-bold rounded-lg transition-all ${
+                      className={`flex-1 min-h-9 py-2 text-xs font-bold rounded-lg press transition-all ${
                         groom.period === "AM"
                           ? "bg-amber-500 text-white shadow-xs"
                           : "text-slate-600 hover:text-slate-900"
@@ -619,7 +619,7 @@ export default function KundliMatchingPage() {
                     <button
                       type="button"
                       onClick={() => setGroom({ ...groom, period: "PM" })}
-                      className={`flex-1 py-1 text-xs font-bold rounded-lg transition-all ${
+                      className={`flex-1 min-h-9 py-2 text-xs font-bold rounded-lg press transition-all ${
                         groom.period === "PM"
                           ? "bg-amber-500 text-white shadow-xs"
                           : "text-slate-600 hover:text-slate-900"
@@ -662,7 +662,9 @@ export default function KundliMatchingPage() {
                 <button
                   type="button"
                   onClick={() => setGroom({ ...groom, showAdvanced: !groom.showAdvanced })}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 hover:text-amber-800 transition-colors"
+                  // A disclosure that reveals the ayanamsa and house-system choices
+                  // was 16px tall; it needs a row of its own.
+                  className="inline-flex min-h-10 w-full items-center gap-1.5 rounded-lg px-1 text-xs font-semibold text-amber-700 press transition-colors hover:bg-amber-50 hover:text-amber-800"
                 >
                   {groom.showAdvanced ? (
                     <>
@@ -678,7 +680,7 @@ export default function KundliMatchingPage() {
                 </button>
 
                 {groom.showAdvanced && (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 mt-2 rounded-xl bg-amber-50/50 border border-amber-200/60 animate-fadeIn">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 mt-2 rounded-xl bg-amber-50/50 border border-amber-200/60 fade-in">
                     <div>
                       <label className="block text-[11px] font-medium text-slate-600 mb-1">
                         {t.form.latitude}
@@ -727,7 +729,7 @@ export default function KundliMatchingPage() {
                 <button
                   type="button"
                   onClick={handleNextToBride}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold text-sm shadow-sm hover:shadow-md transition-all cursor-pointer"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold text-sm shadow-sm hover:shadow-md press transition-all cursor-pointer"
                 >
                   <span>{t.nextStepButton}</span>
                   <ArrowRight className="size-4" />
@@ -736,7 +738,7 @@ export default function KundliMatchingPage() {
             </div>
           ) : (
             /* STEP 2: BRIDE FORM */
-            <div className="space-y-6 animate-fadeIn">
+            <div className="space-y-6 fade-in">
               <div className="flex items-center gap-2 text-amber-800 font-semibold text-base sm:text-lg border-b border-amber-100 pb-2">
                 <span className="text-xl">♀</span>
                 <span>{t.brideFormHeading}</span>
@@ -803,7 +805,7 @@ export default function KundliMatchingPage() {
                     ({t.timeOptionalSuffix})
                   </span>
                 </label>
-                <div className="grid grid-cols-4 gap-2 sm:gap-3">
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3">
                   <input
                     type="number"
                     min="1"
@@ -831,11 +833,11 @@ export default function KundliMatchingPage() {
                     placeholder={t.form.secondPlaceholder}
                     className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-center"
                   />
-                  <div className="flex rounded-xl border border-slate-200 overflow-hidden bg-slate-50 p-0.5">
+                  <div className="col-span-3 flex rounded-xl border border-slate-200 overflow-hidden bg-slate-50 p-0.5 sm:col-span-1">
                     <button
                       type="button"
                       onClick={() => setBride({ ...bride, period: "AM" })}
-                      className={`flex-1 py-1 text-xs font-bold rounded-lg transition-all ${
+                      className={`flex-1 min-h-9 py-2 text-xs font-bold rounded-lg press transition-all ${
                         bride.period === "AM"
                           ? "bg-amber-500 text-white shadow-xs"
                           : "text-slate-600 hover:text-slate-900"
@@ -846,7 +848,7 @@ export default function KundliMatchingPage() {
                     <button
                       type="button"
                       onClick={() => setBride({ ...bride, period: "PM" })}
-                      className={`flex-1 py-1 text-xs font-bold rounded-lg transition-all ${
+                      className={`flex-1 min-h-9 py-2 text-xs font-bold rounded-lg press transition-all ${
                         bride.period === "PM"
                           ? "bg-amber-500 text-white shadow-xs"
                           : "text-slate-600 hover:text-slate-900"
@@ -889,7 +891,9 @@ export default function KundliMatchingPage() {
                 <button
                   type="button"
                   onClick={() => setBride({ ...bride, showAdvanced: !bride.showAdvanced })}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 hover:text-amber-800 transition-colors"
+                  // A disclosure that reveals the ayanamsa and house-system choices
+                  // was 16px tall; it needs a row of its own.
+                  className="inline-flex min-h-10 w-full items-center gap-1.5 rounded-lg px-1 text-xs font-semibold text-amber-700 press transition-colors hover:bg-amber-50 hover:text-amber-800"
                 >
                   {bride.showAdvanced ? (
                     <>
@@ -905,7 +909,7 @@ export default function KundliMatchingPage() {
                 </button>
 
                 {bride.showAdvanced && (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 mt-2 rounded-xl bg-amber-50/50 border border-amber-200/60 animate-fadeIn">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 mt-2 rounded-xl bg-amber-50/50 border border-amber-200/60 fade-in">
                     <div>
                       <label className="block text-[11px] font-medium text-slate-600 mb-1">
                         {t.form.latitude}
@@ -962,7 +966,7 @@ export default function KundliMatchingPage() {
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm transition-all"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm press transition-all"
                   >
                     <ArrowLeft className="size-4" />
                     <span>{t.backButton}</span>
@@ -980,7 +984,7 @@ export default function KundliMatchingPage() {
                       type="button"
                       disabled={isLoading || (matchingFeature ? !matchingFeature.enabled : false)}
                       onClick={handleCalculateMatch}
-                      className="inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all disabled:opacity-50 cursor-pointer"
+                      className="inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white font-bold text-sm shadow-md hover:shadow-lg press transition-all disabled:opacity-50 cursor-pointer"
                     >
                       {isLoading ? (
                         <>
@@ -1009,7 +1013,7 @@ export default function KundliMatchingPage() {
             RESULTS SECTION (Visible after calculation)
            ========================================================================= */}
         {result && (
-          <div id="matching-results" className="space-y-8 animate-fadeIn pt-4">
+          <div id="matching-results" className="space-y-8 reveal-cascade pt-4">
             {/* 1. WEDDING RINGS GRAPHIC BANNER matching screenshot */}
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-white p-6 sm:p-8 text-center shadow-md">
               <div className="relative z-10 space-y-2">
@@ -1211,7 +1215,7 @@ export default function KundliMatchingPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("dosha")}
-                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl press transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     activeTab === "dosha"
                       ? "bg-amber-500 text-white shadow-xs font-extrabold"
                       : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/60"
@@ -1223,7 +1227,7 @@ export default function KundliMatchingPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("dashakoot")}
-                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl press transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     activeTab === "dashakoot"
                       ? "bg-amber-500 text-white shadow-xs font-extrabold"
                       : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/60"
@@ -1235,7 +1239,7 @@ export default function KundliMatchingPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("cancellations")}
-                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl press transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     activeTab === "cancellations"
                       ? "bg-amber-500 text-white shadow-xs font-extrabold"
                       : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/60"
@@ -1247,7 +1251,7 @@ export default function KundliMatchingPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("papasamya")}
-                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl press transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     activeTab === "papasamya"
                       ? "bg-amber-500 text-white shadow-xs font-extrabold"
                       : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/60"
@@ -1259,7 +1263,7 @@ export default function KundliMatchingPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("charts")}
-                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl press transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     activeTab === "charts"
                       ? "bg-amber-500 text-white shadow-xs font-extrabold"
                       : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/60"
@@ -1271,7 +1275,7 @@ export default function KundliMatchingPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("avakahada")}
-                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl press transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     activeTab === "avakahada"
                       ? "bg-amber-500 text-white shadow-xs font-extrabold"
                       : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/60"
@@ -1283,7 +1287,7 @@ export default function KundliMatchingPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("forecast")}
-                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl press transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     activeTab === "forecast"
                       ? "bg-amber-500 text-white shadow-xs font-extrabold"
                       : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/60"
@@ -1295,7 +1299,7 @@ export default function KundliMatchingPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("personality")}
-                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl press transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     activeTab === "personality"
                       ? "bg-amber-500 text-white shadow-xs font-extrabold"
                       : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/60"
@@ -1307,7 +1311,7 @@ export default function KundliMatchingPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("planets")}
-                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                  className={`py-2.5 px-3.5 sm:px-4 text-xs sm:text-sm font-bold rounded-xl press transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                     activeTab === "planets"
                       ? "bg-amber-500 text-white shadow-xs font-extrabold"
                       : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/60"
@@ -1322,7 +1326,7 @@ export default function KundliMatchingPage() {
                   TAB 1: DOSHA & ASHTAKOOT POINTS
                  ================================================================= */}
               {activeTab === "dosha" && (
-                <div className="space-y-6 animate-fadeIn">
+                <div className="space-y-6 fade-in">
                   {/* 4 Metric Cards matching screenshot */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {/* Card 1: Ashtakoot */}
@@ -1544,7 +1548,7 @@ export default function KundliMatchingPage() {
                       <button
                         type="button"
                         onClick={() => setActiveTab("forecast")}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold press transition-all shadow-xs shrink-0 cursor-pointer"
                       >
                         <span>{t.viewFullForecastBtn}</span>
                         <ArrowRight className="size-3.5" />
@@ -1558,7 +1562,7 @@ export default function KundliMatchingPage() {
                   TAB: DASHAKOOT (10 PORUTHAMS - SOUTH INDIAN METHOD)
                  ================================================================= */}
               {activeTab === "dashakoot" && result.dashakoot && (
-                <div className="space-y-6 animate-fadeIn">
+                <div className="space-y-6 fade-in">
                   {/* Summary Card */}
                   <div className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 via-amber-100/40 to-orange-50/50 p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-3.5">
@@ -1663,7 +1667,7 @@ export default function KundliMatchingPage() {
                   TAB: DOSHA CANCELLATIONS & BHANGA ENGINE
                  ================================================================= */}
               {activeTab === "cancellations" && (
-                <div className="space-y-6 animate-fadeIn">
+                <div className="space-y-6 fade-in">
                   {/* Headline */}
                   <div className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50/60 p-5 shadow-xs">
                     <h3 className="font-serif font-bold text-slate-900 text-base sm:text-lg flex items-center gap-2">
@@ -1789,7 +1793,7 @@ export default function KundliMatchingPage() {
                   TAB: PAPASAMYA (MALEFIC BALANCING SCALE)
                  ================================================================= */}
               {activeTab === "papasamya" && result.papasamya && (
-                <div className="space-y-6 animate-fadeIn">
+                <div className="space-y-6 fade-in">
                   {/* Papasamya Meter Banner */}
                   <div className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50/60 p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-3.5">
@@ -1894,7 +1898,7 @@ export default function KundliMatchingPage() {
                   TAB: AVAKAHADA & PANCHANG MATRIX (Matching Client Report Page 2)
                  ================================================================= */}
               {activeTab === "avakahada" && result.avakahada_comparison && (
-                <div className="space-y-6 animate-fadeIn">
+                <div className="space-y-6 fade-in">
                   <div className="bg-white rounded-2xl border border-amber-200/80 shadow-xs overflow-hidden">
                     <div className="bg-amber-500/10 px-5 py-4 border-b border-amber-200/70">
                       <h3 className="font-serif font-bold text-amber-950 text-base sm:text-lg">
@@ -1941,7 +1945,7 @@ export default function KundliMatchingPage() {
                   TAB: PERSONALITY & TRAITS (Matching Client Report Page 21-22)
                  ================================================================= */}
               {activeTab === "personality" && result.personality && (
-                <div className="space-y-6 animate-fadeIn">
+                <div className="space-y-6 fade-in">
                   {/* Summary */}
                   <div className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50/60 p-5 shadow-xs">
                     <h4 className="font-serif font-bold text-slate-900 text-base">
@@ -2045,7 +2049,7 @@ export default function KundliMatchingPage() {
                   TAB: MARRIAGE LIFE FORECAST & TIMING (7 Core Insights)
                  ================================================================= */}
               {activeTab === "forecast" && result.forecast && (
-                <div className="space-y-6 animate-fadeIn">
+                <div className="space-y-6 fade-in">
                   {/* Top Banner: Ideal Age & Auspicious Years */}
                   <div className="rounded-2xl border border-amber-300/80 bg-gradient-to-r from-amber-50 via-amber-100/60 to-amber-50 p-5 sm:p-6 shadow-xs">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-amber-200/80">
@@ -2340,7 +2344,7 @@ export default function KundliMatchingPage() {
                       </p>
                       <Link
                         href="/astrologers"
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 text-white font-bold text-xs hover:bg-amber-700 transition-colors shrink-0 shadow-2xs"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 text-white font-bold text-xs hover:bg-amber-700 press transition-colors shrink-0 shadow-2xs"
                       >
                         <span>{t.talkAstrologerBtn}</span>
                         <ArrowRight className="size-3.5" />
@@ -2354,7 +2358,7 @@ export default function KundliMatchingPage() {
                   TAB 2: PLANET DETAILS (Comparative Table)
                  ================================================================= */}
               {activeTab === "planets" && (
-                <div className="space-y-6 animate-fadeIn">
+                <div className="space-y-6 fade-in">
                   <div className="bg-white rounded-2xl border border-amber-200/80 shadow-xs overflow-hidden">
                     <div className="bg-amber-500/10 px-5 py-4 border-b border-amber-200/70">
                       <h3 className="font-serif font-bold text-amber-950 text-base sm:text-lg">
@@ -2443,7 +2447,7 @@ export default function KundliMatchingPage() {
                   TAB 3: LAGNA CHARTS (Side-by-side D1 Charts)
                  ================================================================= */}
               {activeTab === "charts" && (
-                <div className="space-y-6 animate-fadeIn">
+                <div className="space-y-6 fade-in">
                   {/* Chart Selection Controls: Type & Style */}
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white/80 rounded-2xl border border-amber-200/80 p-4 shadow-xs">
                     {/* Chart Type Selector */}
@@ -2454,7 +2458,7 @@ export default function KundliMatchingPage() {
                       <button
                         type="button"
                         onClick={() => setSelectedChartType("d1")}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border press transition-all ${
                           selectedChartType === "d1"
                             ? "bg-amber-500 text-white border-amber-600 shadow-xs"
                             : "bg-white text-slate-700 border-slate-200 hover:bg-amber-50"
@@ -2465,7 +2469,7 @@ export default function KundliMatchingPage() {
                       <button
                         type="button"
                         onClick={() => setSelectedChartType("d9")}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border press transition-all ${
                           selectedChartType === "d9"
                             ? "bg-amber-500 text-white border-amber-600 shadow-xs"
                             : "bg-white text-slate-700 border-slate-200 hover:bg-amber-50"
@@ -2476,7 +2480,7 @@ export default function KundliMatchingPage() {
                       <button
                         type="button"
                         onClick={() => setSelectedChartType("chalit")}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border press transition-all ${
                           selectedChartType === "chalit"
                             ? "bg-amber-500 text-white border-amber-600 shadow-xs"
                             : "bg-white text-slate-700 border-slate-200 hover:bg-amber-50"
@@ -2487,7 +2491,7 @@ export default function KundliMatchingPage() {
                       <button
                         type="button"
                         onClick={() => setSelectedChartType("moon")}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border press transition-all ${
                           selectedChartType === "moon"
                             ? "bg-amber-500 text-white border-amber-600 shadow-xs"
                             : "bg-white text-slate-700 border-slate-200 hover:bg-amber-50"
@@ -2505,7 +2509,7 @@ export default function KundliMatchingPage() {
                       <button
                         type="button"
                         onClick={() => setChartStyle("north")}
-                        className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all ${
+                        className={`px-3 py-1 rounded-lg text-xs font-semibold border press transition-all ${
                           chartStyle === "north"
                             ? "bg-slate-800 text-white border-slate-900 shadow-xs"
                             : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
@@ -2516,7 +2520,7 @@ export default function KundliMatchingPage() {
                       <button
                         type="button"
                         onClick={() => setChartStyle("east")}
-                        className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all ${
+                        className={`px-3 py-1 rounded-lg text-xs font-semibold border press transition-all ${
                           chartStyle === "east"
                             ? "bg-slate-800 text-white border-slate-900 shadow-xs"
                             : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
@@ -2527,7 +2531,7 @@ export default function KundliMatchingPage() {
                       <button
                         type="button"
                         onClick={() => setChartStyle("south")}
-                        className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all ${
+                        className={`px-3 py-1 rounded-lg text-xs font-semibold border press transition-all ${
                           chartStyle === "south"
                             ? "bg-slate-800 text-white border-slate-900 shadow-xs"
                             : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
@@ -2681,7 +2685,7 @@ export default function KundliMatchingPage() {
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-xs transition-all"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-xs press transition-all"
                 >
                   <Download className="size-3.5" />
                   <span>{t.downloadPdfButton}</span>
@@ -2690,7 +2694,7 @@ export default function KundliMatchingPage() {
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold shadow-xs press transition-all cursor-pointer"
                 >
                   <RotateCcw className="size-3.5" />
                   <span>{t.recalculateButton}</span>
@@ -2698,7 +2702,7 @@ export default function KundliMatchingPage() {
 
                 <Link
                   href="/astrologers"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs press transition-all"
                 >
                   <MessageCircle className="size-3.5" />
                   <span>{t.consultAstrologerBtn}</span>

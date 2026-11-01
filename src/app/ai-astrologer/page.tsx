@@ -878,7 +878,7 @@ export default function AIAstrologerPage() {
                 type="button"
                 onClick={() => setShowBirthModal(true)}
                 title={t.modalTitle}
-                className={`group flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                className={`group flex min-h-9 items-center gap-1.5 rounded-xl border px-2.5 py-2 text-xs font-semibold press transition-all cursor-pointer ${
                   birthDate
                     ? "border-amber-300 bg-gradient-to-r from-amber-100/90 via-amber-50 to-amber-100/80 text-amber-900 shadow-2xs hover:shadow-xs hover:border-amber-400"
                     : "border-amber-200/80 bg-white/90 text-amber-800 shadow-2xs hover:bg-amber-50/80 hover:border-amber-300"
@@ -906,7 +906,7 @@ export default function AIAstrologerPage() {
                     key={l.code}
                     type="button"
                     onClick={() => void setLanguage(l.code)}
-                    className={`rounded-lg px-2 py-1 text-[11px] font-bold transition-all ${
+                    className={`min-h-9 min-w-9 inline-flex items-center justify-center rounded-lg px-2 py-2 text-[11px] font-bold press transition-all ${
                       language === l.code
                         ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-2xs"
                         : "text-slate-600 hover:text-amber-900 hover:bg-amber-50"
@@ -921,7 +921,7 @@ export default function AIAstrologerPage() {
               <button
                 type="button"
                 onClick={clearChat}
-                className="flex size-8 items-center justify-center rounded-xl border border-amber-200/70 bg-white/90 text-slate-500 shadow-2xs transition-colors hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 active:scale-95 cursor-pointer"
+                className="flex size-8 items-center justify-center rounded-xl border border-amber-200/70 bg-white/90 text-slate-500 shadow-2xs press transition-colors hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 active:scale-95 cursor-pointer"
                 title={t.newChat}
               >
                 <RotateCcw className="size-3.5" />
@@ -936,7 +936,7 @@ export default function AIAstrologerPage() {
         <div className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-y-auto px-4 py-4 sm:px-6 [scrollbar-width:thin]">
           {/* Welcome Screen / Hero Cards (Shown only on fresh session) */}
           {isFreshConversation && (
-            <div className="my-auto py-6 text-center animate-in fade-in duration-500">
+            <div className="my-auto py-6 text-center fade-in">
               {/* Celestial Orbit Emblem */}
               <div className="relative mx-auto mb-4 flex size-20 items-center justify-center">
                 <span className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-400/30 via-gold-400/20 to-transparent animate-ping opacity-60" />
@@ -997,7 +997,7 @@ export default function AIAstrologerPage() {
                         type="button"
                         onClick={() => handleSendMessage(p.query)}
                         disabled={loading}
-                        className={`group relative flex flex-col justify-between rounded-2xl border bg-white/95 p-3.5 text-left shadow-2xs backdrop-blur-xs transition-all hover:scale-[1.02] hover:shadow-md cursor-pointer ${p.gradient}`}
+                        className={`group relative flex flex-col justify-between rounded-2xl border bg-white/95 p-3.5 text-left shadow-2xs backdrop-blur-xs press transition-all hover:scale-[1.02] hover:shadow-md cursor-pointer ${p.gradient}`}
                       >
                         <div>
                           <div className="flex items-center justify-between gap-2">
@@ -1038,7 +1038,7 @@ export default function AIAstrologerPage() {
               return (
                 <div
                   key={msg.id || idx}
-                  className={`flex items-start gap-3 ${isUser ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-2 duration-300`}
+                  className={`flex items-start gap-3 ${isUser ? "justify-end" : "justify-start"} fade-in`}
                 >
                   {/* Assistant Avatar - Pinned to top-left */}
                   {!isUser && (
@@ -1093,7 +1093,7 @@ export default function AIAstrologerPage() {
                           onClick={() =>
                             setExpandedTools((prev) => ({ ...prev, [idx]: !prev[idx] }))
                           }
-                          className="flex items-center gap-1.5 text-[11px] font-bold text-amber-800 hover:text-amber-900 transition-colors cursor-pointer"
+                          className="flex items-center gap-1.5 text-[11px] font-bold text-amber-800 hover:text-amber-900 press transition-colors cursor-pointer"
                         >
                           <BrainCircuit className="size-3.5 text-amber-600" />
                           <span>
@@ -1107,7 +1107,7 @@ export default function AIAstrologerPage() {
                         </button>
 
                         {expandedTools[idx] && (
-                          <div className="mt-2 rounded-xl border border-amber-200/60 bg-amber-50/50 p-2.5 text-[11px] space-y-1.5 animate-in fade-in">
+                          <div className="mt-2 rounded-xl border border-amber-200/60 bg-amber-50/50 p-2.5 text-[11px] space-y-1.5 fade-in">
                             {msg.tools_called.map((tool, tIdx) => (
                               <div key={tIdx} className="flex items-center gap-2">
                                 <span className="size-1.5 rounded-full bg-amber-500" />
@@ -1128,7 +1128,7 @@ export default function AIAstrologerPage() {
                           onClick={() =>
                             setExpandedCitations((prev) => ({ ...prev, [idx]: !prev[idx] }))
                           }
-                          className="flex items-center gap-1.5 text-[11px] font-bold text-amber-800 hover:text-amber-900 transition-colors cursor-pointer"
+                          className="flex items-center gap-1.5 text-[11px] font-bold text-amber-800 hover:text-amber-900 press transition-colors cursor-pointer"
                         >
                           <BookOpen className="size-3.5 text-amber-600" />
                           <span>
@@ -1142,7 +1142,7 @@ export default function AIAstrologerPage() {
                         </button>
 
                         {expandedCitations[idx] && (
-                          <div className="mt-2 space-y-2 animate-in fade-in">
+                          <div className="mt-2 space-y-2 fade-in">
                             {msg.citations.map((cite, cIdx) => (
                               <div
                                 key={cIdx}
@@ -1177,7 +1177,7 @@ export default function AIAstrologerPage() {
                               type="button"
                               onClick={() => handleSendMessage(followup)}
                               disabled={loading}
-                              className="group flex items-center gap-1.5 rounded-full border border-amber-300/80 bg-amber-50/70 px-3 py-1 text-[11px] font-medium text-amber-950 shadow-2xs hover:bg-amber-100 hover:border-amber-400 transition-all text-left cursor-pointer"
+                              className="group flex items-center gap-1.5 rounded-full border border-amber-300/80 bg-amber-50/70 px-3 py-1 text-[11px] font-medium text-amber-950 shadow-2xs hover:bg-amber-100 hover:border-amber-400 press transition-all text-left cursor-pointer"
                             >
                               <span>{followup}</span>
                               <span className="text-amber-600 transition-transform group-hover:translate-x-0.5">➔</span>
@@ -1194,7 +1194,7 @@ export default function AIAstrologerPage() {
                           <button
                             type="button"
                             onClick={() => copyToClipboard(msg.content, idx)}
-                            className="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium text-slate-500 hover:bg-amber-100/60 hover:text-amber-900 transition-colors cursor-pointer"
+                            className="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium text-slate-500 hover:bg-amber-100/60 hover:text-amber-900 press transition-colors cursor-pointer"
                             title="Copy message"
                           >
                             {copiedIndex === idx ? (
@@ -1219,7 +1219,7 @@ export default function AIAstrologerPage() {
                             type="button"
                             onClick={() => handleFeedback(idx, 1)}
                             disabled={feedbackGiven[idx] !== undefined}
-                            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                            className={`p-1.5 rounded-lg press transition-colors cursor-pointer ${
                               feedbackGiven[idx] === 1
                                 ? "text-emerald-600 bg-emerald-50"
                                 : "text-slate-400 hover:bg-emerald-50 hover:text-emerald-600"
@@ -1232,7 +1232,7 @@ export default function AIAstrologerPage() {
                             type="button"
                             onClick={() => handleFeedback(idx, -1)}
                             disabled={feedbackGiven[idx] !== undefined}
-                            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                            className={`p-1.5 rounded-lg press transition-colors cursor-pointer ${
                               feedbackGiven[idx] === -1
                                 ? "text-rose-600 bg-rose-50"
                                 : "text-slate-400 hover:bg-rose-50 hover:text-rose-600"
@@ -1277,7 +1277,7 @@ export default function AIAstrologerPage() {
                     type="button"
                     onClick={() => handleSendMessage(p.query)}
                     disabled={loading}
-                    className="shrink-0 rounded-full border border-amber-200/80 bg-amber-50/70 px-2.5 py-0.5 text-[11px] font-medium text-amber-950 hover:bg-amber-100 hover:border-amber-300 transition-colors cursor-pointer"
+                    className="shrink-0 rounded-full border border-amber-200/80 bg-amber-50/70 px-2.5 py-0.5 text-[11px] font-medium text-amber-950 hover:bg-amber-100 hover:border-amber-300 press transition-colors cursor-pointer"
                   >
                     {p.title}
                   </button>
@@ -1312,7 +1312,7 @@ export default function AIAstrologerPage() {
                 disabled={loading || transcribing}
                 aria-label={t.holdToSpeak}
                 title={recording ? t.listening : t.holdToSpeak}
-                className={`flex size-10 shrink-0 items-center justify-center rounded-xl transition-all cursor-pointer ${
+                className={`flex size-10 shrink-0 items-center justify-center rounded-xl press transition-all cursor-pointer ${
                   recording
                     ? "bg-rose-500 text-white animate-pulse shadow-md scale-105"
                     : "bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200/60"
@@ -1331,7 +1331,7 @@ export default function AIAstrologerPage() {
               <button
                 type="submit"
                 disabled={!inputQuery.trim() || loading}
-                className="flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-4 text-xs font-bold text-white shadow-xs transition-all hover:from-amber-600 hover:to-amber-800 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+                className="flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-4 text-xs font-bold text-white shadow-xs press transition-all hover:from-amber-600 hover:to-amber-800 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
               >
                 {loading ? (
                   <Loader2 className="size-4 animate-spin" />
@@ -1361,8 +1361,8 @@ export default function AIAstrologerPage() {
             Personalization Modal Dialog (Sleek, Blurred Backdrop)
             =================================================================== */}
         {showBirthModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-200">
-            <div className="w-full max-w-lg rounded-3xl border border-amber-300/80 bg-white p-5 sm:p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs fade-in">
+            <div className="w-full max-w-lg rounded-3xl border border-amber-300/80 bg-white p-5 sm:p-6 shadow-2xl space-y-4 pop-in">
               {/* Modal Header */}
               <div className="flex items-start justify-between border-b border-amber-100 pb-3">
                 <div className="flex items-center gap-2.5">
@@ -1381,7 +1381,7 @@ export default function AIAstrologerPage() {
                 <button
                   type="button"
                   onClick={() => setShowBirthModal(false)}
-                  className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors cursor-pointer"
+                  className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 press transition-colors cursor-pointer"
                 >
                   <X className="size-4" />
                 </button>
@@ -1396,7 +1396,7 @@ export default function AIAstrologerPage() {
                   <button
                     type="button"
                     onClick={handleAutoFillProfile}
-                    className="flex items-center gap-1.5 rounded-lg bg-white px-2.5 py-1 text-xs font-bold text-amber-800 shadow-2xs border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer"
+                    className="flex items-center gap-1.5 rounded-lg bg-white px-2.5 py-1 text-xs font-bold text-amber-800 shadow-2xs border border-amber-200 hover:bg-amber-100 press transition-colors cursor-pointer"
                   >
                     <UserRound className="size-3" />
                     <span>{t.autofillProfile}</span>
@@ -1470,8 +1470,8 @@ export default function AIAstrologerPage() {
             Dislike Feedback Modal
             =================================================================== */}
         {dislikeModalIndex !== null && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-200">
-            <div className="w-full max-w-md rounded-3xl border border-amber-300/80 bg-white p-5 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs fade-in">
+            <div className="w-full max-w-md rounded-3xl border border-amber-300/80 bg-white p-5 shadow-2xl space-y-4 pop-in">
               <div className="flex items-center gap-2.5 text-amber-900 font-display font-bold text-base">
                 <AlertCircle className="size-5 text-amber-600" />
                 <span>{t.dislikeTitle}</span>

@@ -181,7 +181,7 @@ export default function NumerologyPage() {
               <button
                 key={lang}
                 onClick={() => setLanguage(lang)}
-                className={`px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                className={`min-h-9 inline-flex items-center justify-center px-3 py-2 rounded-full text-xs font-semibold press transition-all cursor-pointer ${
                   language === lang
                     ? "bg-brand-500 text-ink-950 font-bold shadow-xs"
                     : "bg-surface border border-border/80 text-muted-foreground hover:text-foreground"
@@ -227,11 +227,12 @@ export default function NumerologyPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-foreground-muted mb-1.5">
+                <label htmlFor="num-birth-date" className="block text-xs font-semibold text-foreground-muted mb-1.5">
                   {t.birthDate}
                 </label>
                 <input
                   type="date"
+                  id="num-birth-date"
                   value={birthDate}
                   onChange={(e) => setBirthDate(e.target.value)}
                   required
@@ -240,10 +241,11 @@ export default function NumerologyPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-foreground-muted mb-1.5">
+                <label htmlFor="num-gender" className="block text-xs font-semibold text-foreground-muted mb-1.5">
                   {t.gender}
                 </label>
                 <select
+                  id="num-gender"
                   value={gender}
                   onChange={(e) => setGender(e.target.value as "male" | "female" | "other")}
                   className="w-full bg-surface border border-border/80 rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
@@ -293,7 +295,7 @@ export default function NumerologyPage() {
             RESULTS SECTION
         ========================================================================= */}
         {data && (
-          <div className="space-y-8 animate-in fade-in duration-300">
+          <div className="space-y-8 reveal-cascade">
             {/* Top 4 Quick Stat Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 sm:gap-4">
               <div className="rounded-2xl border border-border/80 bg-surface p-4 sm:p-5 shadow-xs relative overflow-hidden">
@@ -360,7 +362,7 @@ export default function NumerologyPage() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold press transition-all cursor-pointer ${
                       activeTab === tab.id
                         ? "bg-brand-500 text-ink-950 font-bold shadow-xs"
                         : "bg-surface border border-border/80 text-muted-foreground hover:text-foreground hover:bg-surface-muted"

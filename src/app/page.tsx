@@ -24,7 +24,7 @@ import { AstrologersSideScroll } from "@/components/home/astrologers-side-scroll
 import { ParallaxRibbon } from "@/components/home/parallax-ribbon";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
-import { Button } from "@/components/ui";
+import { Button, Reveal } from "@/components/ui";
 
 const SERVICES = [
   {
@@ -267,7 +267,7 @@ export default function HomePage() {
                   {/* Card 1: Zodiac Signs */}
                   <Link
                     href="/rashi-calculator"
-                    className="group relative flex items-center gap-3.5 rounded-2xl border border-[#e5cebd] bg-[#fbf1e7]/90 hover:bg-[#faebd9] p-3.5 sm:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_20px_-6px_rgba(176,109,78,0.22)]"
+                    className="group relative flex items-center gap-3.5 rounded-2xl border border-[#e5cebd] bg-[#fbf1e7]/90 hover:bg-[#faebd9] p-3.5 sm:p-4 press transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_20px_-6px_rgba(176,109,78,0.22)]"
                   >
                     <div className="flex size-12 shrink-0 items-center justify-center rounded-full border border-[#d6b7a2] bg-[#fdf5ed] text-[#b06d4e] group-hover:scale-105 transition-transform duration-300">
                       <ZodiacStarIcon />
@@ -286,7 +286,7 @@ export default function HomePage() {
                   <button
                     type="button"
                     onClick={() => setIsChineseModalOpen(true)}
-                    className="group relative flex items-center gap-3.5 rounded-2xl border border-[#e5cebd] bg-[#fbf1e7]/90 hover:bg-[#faebd9] p-3.5 sm:p-4 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_20px_-6px_rgba(176,109,78,0.22)]"
+                    className="group relative flex items-center gap-3.5 rounded-2xl border border-[#e5cebd] bg-[#fbf1e7]/90 hover:bg-[#faebd9] p-3.5 sm:p-4 text-left press transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_20px_-6px_rgba(176,109,78,0.22)]"
                   >
                     <div className="flex size-12 shrink-0 items-center justify-center rounded-full border border-[#d6b7a2] bg-[#fdf5ed] text-[#b06d4e] group-hover:scale-105 transition-transform duration-300">
                       <YinYangIcon />
@@ -304,7 +304,7 @@ export default function HomePage() {
                   {/* Card 3: Planets */}
                   <Link
                     href="/kundli"
-                    className="group relative flex items-center gap-3.5 rounded-2xl border border-[#e5cebd] bg-[#fbf1e7]/90 hover:bg-[#faebd9] p-3.5 sm:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_20px_-6px_rgba(176,109,78,0.22)]"
+                    className="group relative flex items-center gap-3.5 rounded-2xl border border-[#e5cebd] bg-[#fbf1e7]/90 hover:bg-[#faebd9] p-3.5 sm:p-4 press transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_20px_-6px_rgba(176,109,78,0.22)]"
                   >
                     <div className="flex size-12 shrink-0 items-center justify-center rounded-full border border-[#d6b7a2] bg-[#fdf5ed] text-[#b06d4e] group-hover:scale-105 transition-transform duration-300">
                       <SaturnPlanetIcon />
@@ -322,7 +322,7 @@ export default function HomePage() {
                   {/* Card 4: Houses */}
                   <Link
                     href="/kp-calculator"
-                    className="group relative flex items-center gap-3.5 rounded-2xl border border-[#e5cebd] bg-[#fbf1e7]/90 hover:bg-[#faebd9] p-3.5 sm:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_20px_-6px_rgba(176,109,78,0.22)]"
+                    className="group relative flex items-center gap-3.5 rounded-2xl border border-[#e5cebd] bg-[#fbf1e7]/90 hover:bg-[#faebd9] p-3.5 sm:p-4 press transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_20px_-6px_rgba(176,109,78,0.22)]"
                   >
                     <div className="flex size-12 shrink-0 items-center justify-center rounded-full border border-[#d6b7a2] bg-[#fdf5ed] text-[#b06d4e] group-hover:scale-105 transition-transform duration-300">
                       <AstrologicalHouseIcon />
@@ -411,7 +411,7 @@ export default function HomePage() {
 
         {/* ─────────────────────────────────────────── SERVICES */}
         <section id="services" className="mx-auto max-w-6xl scroll-mt-20 px-4 py-12 sm:py-24">
-          <div className="mb-10 sm:mb-12 text-center">
+          <Reveal className="mb-10 sm:mb-12 text-center">
             <span className="inline-block rounded-full bg-brand-500/12 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-700 border border-brand-500/30 mb-3 sm:mb-4">
               What we offer
             </span>
@@ -421,15 +421,14 @@ export default function HomePage() {
             <p className="mt-2.5 sm:mt-3 mx-auto max-w-lg text-sm sm:text-base text-muted-foreground leading-relaxed">
               Traditional methods, interpreted by people who practise them every day.
             </p>
-          </div>
+          </Reveal>
 
-          <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            {SERVICES.map((service, i) => (
+          <Reveal stagger className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            {SERVICES.map((service) => (
               <Link
                 key={service.title}
                 href={service.href}
-                className="card-surface group relative flex flex-col items-center p-6 sm:p-7 text-center hover:card-glow hover:-translate-y-1.5 transition-all duration-300 block cursor-pointer"
-                style={{ animationDelay: `${i * 80}ms` }}
+                className="card-surface press focus-ring group relative flex flex-col items-center p-6 sm:p-7 text-center hover:card-glow hover:-translate-y-1.5 block cursor-pointer"
               >
                 {/* Soft background glow on hover */}
                 <div className="absolute inset-0 rounded-[inherit] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-b from-brand-500/5 to-transparent" />
@@ -452,7 +451,7 @@ export default function HomePage() {
                 </span>
               </Link>
             ))}
-          </div>
+          </Reveal>
         </section>
 
         {/* ─────────────────────────────────────────── HOW IT WORKS */}
@@ -512,7 +511,7 @@ export default function HomePage() {
 
         {/* ─────────────────────────────────────────── WHY US */}
         <section className="mx-auto max-w-6xl px-4 py-12 sm:py-24">
-          <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-3">
+          <Reveal stagger className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-3">
             {[
               {
                 icon: Shield,
@@ -550,12 +549,12 @@ export default function HomePage() {
                 </div>
               </div>
             ))}
-          </div>
+          </Reveal>
         </section>
 
         {/* ─────────────────────────────────────────── CTA */}
         <section className="mx-auto max-w-6xl px-4 pb-12 sm:pb-24">
-          <div className="bg-stars card-glow relative overflow-hidden rounded-2xl bg-cosmos p-6 py-12 text-center sm:px-16 sm:py-20">
+          <Reveal className="bg-stars card-glow relative overflow-hidden rounded-2xl bg-cosmos p-6 py-12 text-center sm:px-16 sm:py-20">
             {/* decorative orbs */}
             <span className="orb pointer-events-none absolute -left-16 -top-16 size-48 opacity-35 blur-[2px]" aria-hidden />
             <span className="orb-gold orb pointer-events-none absolute -right-10 -bottom-10 size-40 opacity-25 blur-[3px]" aria-hidden />
@@ -589,7 +588,7 @@ export default function HomePage() {
                 </Link>
               </div>
             </div>
-          </div>
+          </Reveal>
         </section>
       </main>
 

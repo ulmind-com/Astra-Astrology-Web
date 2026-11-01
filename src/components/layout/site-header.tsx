@@ -148,7 +148,7 @@ export function SiteHeader() {
             ? "translate-y-0 opacity-100"
             : "pointer-events-none -translate-y-4 opacity-0",
         )}
-        {...(open ? {} : { inert: "" as unknown as boolean })}
+        inert={!open}
       >
         {isSignedIn && user && (
           <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-brand-500/20 bg-cream-100/90 p-3.5">
@@ -225,7 +225,9 @@ export function SiteHeader() {
                 key={l.code}
                 type="button"
                 onClick={() => void setLanguage(l.code)}
-                className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+                // 24px tall was below the 44px both Apple and Google ask for,
+                // and this toggle sits in the header of every page.
+                className={`inline-flex min-h-9 items-center justify-center rounded-lg px-3 py-2 text-xs font-bold transition-all ${
                   language === l.code
                     ? "bg-brand-500 text-white shadow-2xs"
                     : "text-muted-foreground hover:text-foreground"

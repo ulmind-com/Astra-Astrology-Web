@@ -197,7 +197,7 @@ export default function VastuPage() {
                   key={lang.code}
                   type="button"
                   onClick={() => setLanguage(lang.code)}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  className={`min-h-9 inline-flex items-center justify-center px-3 py-2 rounded-lg text-xs font-semibold press transition-all cursor-pointer ${
                     language === lang.code
                       ? "bg-brand-500 text-brand-foreground shadow-2xs"
                       : "text-muted-foreground hover:text-foreground"
@@ -270,7 +270,7 @@ export default function VastuPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold press transition-all cursor-pointer ${
                   activeTab === tab.id
                     ? "bg-brand-500 text-brand-foreground shadow-sm shadow-brand-500/20"
                     : "bg-surface border border-border text-muted-foreground hover:text-foreground hover:bg-surface-muted"
@@ -418,7 +418,7 @@ export default function VastuPage() {
 
             {/* Audit Results */}
             {auditResult && (
-              <div className="space-y-6 animate-in fade-in duration-500">
+              <div className="space-y-6 reveal-cascade">
                 {/* Score & Summary Banner */}
                 <div className="card-surface rounded-2xl border border-border/80 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs">
                   <div className="space-y-2 text-center md:text-left">
@@ -683,7 +683,7 @@ export default function VastuPage() {
                 <button
                   key={cat.id}
                   onClick={() => setSelectedRemedyCat(cat.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold press transition-colors cursor-pointer ${
                     selectedRemedyCat === cat.id
                       ? "bg-brand-500 text-brand-foreground shadow-2xs"
                       : "bg-surface border border-border text-muted-foreground hover:text-foreground hover:bg-surface-muted"

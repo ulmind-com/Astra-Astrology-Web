@@ -219,7 +219,7 @@ export function ZodiacSideScroll() {
                   key={elem}
                   type="button"
                   onClick={() => setSelectedElement(elem)}
-                  className={`px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200 ${
+                  className={`inline-flex min-h-9 items-center justify-center px-3 py-2 text-xs font-semibold rounded-full press transition-all duration-200 ${
                     selectedElement === elem
                       ? "bg-[#b06d4e] text-white shadow-sm"
                       : "text-[#5e5369] hover:text-[#b06d4e]"
@@ -237,7 +237,7 @@ export function ZodiacSideScroll() {
                 onClick={() => scroll("left")}
                 disabled={!canScrollLeft}
                 aria-label="Scroll left"
-                className={`flex size-10 items-center justify-center rounded-full border border-[#d6b7a2] bg-[#fbf1e7] text-[#4D4664] transition-all duration-200 hover:bg-[#faebd9] hover:scale-105 active:scale-95 ${
+                className={`flex size-10 items-center justify-center rounded-full border border-[#d6b7a2] bg-[#fbf1e7] text-[#4D4664] press transition-all duration-200 hover:bg-[#faebd9] hover:scale-105 active:scale-95 ${
                   !canScrollLeft ? "opacity-40 cursor-not-allowed" : "shadow-sm"
                 }`}
               >
@@ -248,7 +248,7 @@ export function ZodiacSideScroll() {
                 onClick={() => scroll("right")}
                 disabled={!canScrollRight}
                 aria-label="Scroll right"
-                className={`flex size-10 items-center justify-center rounded-full border border-[#d6b7a2] bg-[#fbf1e7] text-[#4D4664] transition-all duration-200 hover:bg-[#faebd9] hover:scale-105 active:scale-95 ${
+                className={`flex size-10 items-center justify-center rounded-full border border-[#d6b7a2] bg-[#fbf1e7] text-[#4D4664] press transition-all duration-200 hover:bg-[#faebd9] hover:scale-105 active:scale-95 ${
                   !canScrollRight ? "opacity-40 cursor-not-allowed" : "shadow-sm"
                 }`}
               >
@@ -271,7 +271,7 @@ export function ZodiacSideScroll() {
               <Link
                 key={sign.id}
                 href={`/daily-horoscope?sign=${sign.id}`}
-                className={`group shrink-0 snap-start w-[270px] sm:w-[290px] rounded-2xl border border-[#ebd7c8] bg-[#fdf9f4] p-5 transition-all duration-300 hover:-translate-y-1.5 ${style.glow}`}
+                className={`group shrink-0 snap-start w-[270px] sm:w-[290px] rounded-2xl border border-[#ebd7c8] bg-[#fdf9f4] p-5 press transition-all duration-300 hover:-translate-y-1.5 ${style.glow}`}
               >
                 {/* Top: Symbol Glyphs & Element Badge */}
                 <div className="flex items-center justify-between">
