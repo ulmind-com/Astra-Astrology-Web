@@ -79,6 +79,8 @@ export default function AstrologerDetailPage() {
 
   const [isFav, setIsFav] = React.useState(false);
   const [favCount, setFavCount] = React.useState(0);
+  const [showBigHeart, setShowBigHeart] = React.useState(false);
+  const heartTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   React.useEffect(() => {
     if (favData) {
@@ -96,6 +98,14 @@ export default function AstrologerDetailPage() {
       const nextCount = nextIsFav ? favCount + 1 : Math.max(0, favCount - 1);
       setIsFav(nextIsFav);
       setFavCount(nextCount);
+
+      if (nextIsFav) {
+        if (heartTimerRef.current) clearTimeout(heartTimerRef.current);
+        setShowBigHeart(true);
+        heartTimerRef.current = setTimeout(() => {
+          setShowBigHeart(false);
+        }, 900);
+      }
     },
     onSuccess: (data) => {
       setIsFav(data.is_favorite);
@@ -464,6 +474,16 @@ export default function AstrologerDetailPage() {
           </div>
         )}
       </Modal>
+
+      {/* Floating Love Heart Burst in front */}
+      {showBigHeart && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+          <div className="relative flex items-center justify-center animate-in fade-in zoom-in-50 duration-200">
+            <div className="absolute size-40 rounded-full bg-rose-500/25 blur-xl animate-pulse" />
+            <Heart className="size-28 text-rose-500 fill-rose-500 drop-shadow-[0_12px_30px_rgba(239,68,68,0.5)] transition-all" />
+          </div>
+        </div>
+      )}
 
       <SiteFooter />
     </>
