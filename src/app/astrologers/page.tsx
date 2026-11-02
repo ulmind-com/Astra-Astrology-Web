@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Users } from "lucide-react";
+import { Heart, Users } from "lucide-react";
+import Link from "next/link";
 import * as React from "react";
 
 import {
@@ -73,14 +74,23 @@ function DirectoryInner() {
       <SiteHeader />
 
       <main className="mx-auto max-w-6xl px-4 py-10">
-        <header className="mb-10">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-500/30 bg-brand-100 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-700 mb-4">
-            {t.liveDirectoryBadge}
-          </span>
-          <h1 className="font-display text-4xl font-bold tracking-tight">{t.heading}</h1>
-          <p className="mt-2 max-w-lg text-muted-foreground leading-relaxed">
-            {t.subtitle}
-          </p>
+        <header className="mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-500/30 bg-brand-100 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-700 mb-4">
+              {t.liveDirectoryBadge}
+            </span>
+            <h1 className="font-display text-4xl font-bold tracking-tight">{t.heading}</h1>
+            <p className="mt-2 max-w-lg text-muted-foreground leading-relaxed">
+              {t.subtitle}
+            </p>
+          </div>
+          <Link
+            href="/account/favorites"
+            className="inline-flex items-center gap-2 self-start sm:self-auto rounded-full border border-rose-300/70 bg-rose-50/80 px-4 py-2 text-xs sm:text-sm font-semibold text-rose-700 shadow-2xs hover:bg-rose-100/90 transition-colors"
+          >
+            <Heart className="size-4 fill-rose-500 text-rose-500" />
+            <span>My Favorites</span>
+          </Link>
         </header>
 
         <div className="space-y-4">

@@ -1,7 +1,14 @@
 "use client";
 
 import {
-  CalendarDays, CalendarHeart, MapPin, ShieldCheck, UserRound, Wallet } from "lucide-react";
+  CalendarDays,
+  CalendarHeart,
+  Heart,
+  MapPin,
+  ShieldCheck,
+  UserRound,
+  Wallet,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -13,6 +20,7 @@ import { useRequireAuth } from "@/providers/auth-provider";
 
 const NAV = [
   { href: "/account", label: "Profile", icon: UserRound },
+  { href: "/account/favorites", label: "Favorite Astrologers", icon: Heart },
   { href: "/account/birth-details", label: "Birth details", icon: CalendarHeart },
   { href: "/account/wallet", label: "Wallet", icon: Wallet },
   { href: "/account/appointments", label: "Appointments", icon: CalendarDays },
