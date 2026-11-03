@@ -5,12 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   AlertCircle,
-  BookOpen,
   Bot,
-  BrainCircuit,
   Check,
-  ChevronDown,
-  ChevronUp,
   Compass,
   Copy,
   ExternalLink,
@@ -73,12 +69,12 @@ import {
    ------------------------------------------------------------------------- */
 const UI_STRINGS = {
   bn: {
-    title: "ডিভাইনলিঙ্ক এআই বৈদিক জ্যোতিষী",
-    badge: "সুইস এফিমেরিস ২.১০ • পরাশর শাস্ত্র RAG",
+    title: "অ্যাস্ট্রা এআই বৈদিক জ্যোতিষী",
+    badge: "বৈদিক জ্যোতিষ • ব্যক্তিগত কুন্ডলী ও রাশি বিচার",
     statusLive: "সরাসরি সংযুক্ত • নির্ভুল গণনা",
     heroHeading: "নক্ষত্র ও গ্রহের নির্দেশনায় জীবনের সঠিক দিশা পান",
     heroDesc:
-      "মহর্ষি পরাশর হোরা শাস্ত্র, জৈমিনী সূত্র এবং সুইস এফিমেরিসের উচ্চ নির্ভুল জ্যোতির্বিজ্ঞান সূত্রের সমন্বয়ে ২৪ ঘণ্টা ব্যক্তিগত কুন্ডলী, মহাদশা ও বাস্তু বিচার।",
+      "মহর্ষি পরাশর হোরা শাস্ত্র ও প্রাচীন বৈদিক শাস্ত্রের উচ্চ নির্ভুল জ্যোতির্বিজ্ঞান সূত্রের সমন্বয়ে ২৪ ঘণ্টা ব্যক্তিগত কুন্ডলী, মহাদশা ও বাস্তু বিচার।",
     linkKundli: "কুন্ডলী যুক্ত করুন",
     kundliLinked: "কুন্ডলী সংযুক্ত",
     linkKundliPrompt: "ব্যক্তিগত দশা ও গ্রহ বিচার পেতে আপনার জন্মকুন্ডলী যুক্ত করুন",
@@ -111,16 +107,16 @@ const UI_STRINGS = {
     modalTitle: "ব্যক্তিগত জন্মকুন্ডলী সংযোগ (Birth Chart Sync)",
     modalSubtitle: "সঠিক লগ্ন, চন্দ্ররাশি ও বিংশোত্তরী মহাদশা গণনার জন্য আবশ্যক",
     disclaimer:
-      "ডিভাইনলিঙ্ক এআই বৈদিক শাস্ত্র ও এফিমেরিস সূত্র প্রয়োগ করে। জটিল প্রতিকার ও রত্নধারণের জন্য আমাদের অভিজ্ঞ জ্যোতিষীদের সাথেও সরাসরি পরামর্শ করতে পারেন।",
+      "অ্যাস্ট্রা এআই প্রাচীন বৈদিক শাস্ত্র ও প্রামাণিক গণনা প্রয়োগ করে। জটিল প্রতিকার ও রত্নধারণের জন্য আমাদের অভিজ্ঞ জ্যোতিষীদের সাথেও সরাসরি পরামর্শ করতে পারেন।",
     popularTopics: "জনপ্রিয় শাস্ত্রীয় বিষয়সমূহ:",
   },
   en: {
-    title: "DivinLink AI Vedic Astrologer",
-    badge: "Swiss Ephemeris 2.10 • Parashara Shastra RAG",
-    statusLive: "Active • Astronomical Precision",
+    title: "Astra AI Vedic Astrologer",
+    badge: "Vedic Astrology • Authentic Kundli & Horoscopes",
+    statusLive: "Active • Astrological Precision",
     heroHeading: "Discover Celestial Clarity Through Vedic Wisdom",
     heroDesc:
-      "Synthesized from Brihat Parashara Hora Shastra, Jaimini Sutras, and Swiss Ephemeris astronomical calculations for personalized Kundli, Mahadasha, and authentic remedies.",
+      "Synthesized from classical Vedic scriptures and planetary calculations for personalized Kundli, Mahadasha, and authentic remedies.",
     linkKundli: "Link Birth Chart",
     kundliLinked: "Kundli Linked",
     linkKundliPrompt: "Link your birth chart for 100% personalized Dasha & Transit insights",
@@ -153,16 +149,16 @@ const UI_STRINGS = {
     modalTitle: "Personal Vedic Kundli Chart Sync",
     modalSubtitle: "Required for exact Lagna, Moon Sign, Navamsha, and Vimshottari Mahadasha calculations",
     disclaimer:
-      "AI guidance applies authentic Vedic texts and ephemeris algorithms. For personalized gemstones and pooja remedies, consult our verified astrologers.",
+      "AI guidance applies authentic classical Vedic astrological principles. For personalized gemstones and pooja remedies, consult our verified astrologers.",
     popularTopics: "Popular Vedic Topics:",
   },
   hi: {
-    title: "डिवाइनलिंक एआई वैदिक ज्योतिषी",
-    badge: "स्विस एफेमेरिस २.१० • पराशर शास्त्र RAG",
-    statusLive: "सक्रिय • खगोलीय शुद्धता",
+    title: "एस्ट्रा एआई वैदिक ज्योतिषी",
+    badge: "वैदिक ज्योतिष • प्रामाणिक जन्मकुंडली व राशि फल",
+    statusLive: "सक्रिय • शास्त्रीय शुद्धता",
     heroHeading: "ग्रह-नक्षत्रों के मार्गदर्शन से अपने जीवन का सही मार्ग जानें",
     heroDesc:
-      "बृहत् पराशर होरा शास्त्र, जैमिनी सूत्र एवं स्विस एफेमेरिस की खगोलीय गणनाओं पर आधारित २४ घंटे सटीक जन्मकुंडली, महादशा व वास्तु समाधान।",
+      "बृहत् पराशर होरा शास्त्र एवं प्राचीन वैदिक सूत्रों की खगोलीय गणनाओं पर आधारित २४ घंटे सटीक जन्मकुंडली, महादशा व वास्तु समाधान।",
     linkKundli: "जन्म विवरण जोड़ें",
     kundliLinked: "कुंडली जुड़ी हुई",
     linkKundliPrompt: "सटीक दशा व गोचर फल के लिए अपनी जन्मकुंडली विवरण जोड़ें",
@@ -195,7 +191,7 @@ const UI_STRINGS = {
     modalTitle: "व्यक्तिगत जन्मकुंडली विवरण जोड़ें",
     modalSubtitle: "सटीक लग्न, चंद्र राशि एवं विंशोत्तरी महादशा गणना के लिए आवश्यक",
     disclaimer:
-      "एआई वैदिक शास्त्र एवं स्विस एफेमेरिस के सटीक सूत्र लागू करता है। विशेष रत्न एवं अनुष्ठान के लिए हमारे प्रमाणित ज्योतिषियों से भी परामर्श लें।",
+      "एआई प्राचीन वैदिक शास्त्र एवं खगोलीय सूत्रों के आधार पर मार्गदर्शन प्रदान करता है। विशेष रत्न एवं अनुष्ठान के लिए हमारे प्रमाणित ज्योतिषियों से भी परामर्श लें।",
     popularTopics: "लोकप्रिय वैदिक विषय:",
   },
 };
@@ -344,7 +340,7 @@ const SUGGESTED_PROMPTS = {
 const WELCOME_MESSAGES = {
   bn: {
     content:
-      "নমস্কার! আমি **ডিভাইনলিঙ্ক এআই বৈদিক জ্যোতিষী**। মহর্ষি পরাশর ও জৈমিনী শাস্ত্রের প্রাচীন সূত্র এবং সুইস এফিমেরিসের নিখুঁত গণনার ভিত্তিতে আপনার জীবনের প্রতিটি প্রশ্নের শাস্ত্রীয় ও নির্ভুল উত্তর দিতে আমি সদা প্রস্তুত।\n\nআপনি আপনার জন্ম তারিখ, সময় ও স্থান যুক্ত করে ব্যক্তিগত কুন্ডলীর ভিত্তিতে অথবা সাধারণ জ্যোতিষ ও বাস্তু বিষয়ে যেকোনো প্রশ্ন করতে পারেন।",
+      "নমস্কার! আমি **অ্যাস্ট্রা এআই বৈদিক জ্যোতিষী**। প্রাচীন বৈদিক শাস্ত্রের প্রামাণিক সূত্র ও গ্রহাবস্থানের নির্ভুল গণনার ভিত্তিতে আপনার জীবনের প্রতিটি প্রশ্নের গভীর ও সঠিক উত্তর দিতে আমি সদা প্রস্তুত।\n\nআপনি আপনার জন্ম তারিখ, সময় ও স্থান যুক্ত করে ব্যক্তিগত কুন্ডলীর ভিত্তিতে অথবা সাধারণ জ্যোতিষ ও বাস্তু বিষয়ে যেকোনো প্রশ্ন করতে পারেন।",
     suggested_followups: [
       "আমার বর্তমান মহাদশা ও অন্তর্দশা কেমন?",
       "আমার কুন্ডলীতে মাঙ্গলিক দোষ আছে কি?",
@@ -353,7 +349,7 @@ const WELCOME_MESSAGES = {
   },
   en: {
     content:
-      "Greetings! I am **DivinLink AI Vedic Astrologer**. Built on authentic Vedic scriptures (Brihat Parashara Hora Shastra, Jaimini Upadesha Sutras) and Swiss Ephemeris precision, I am here to provide authentic Vedic guidance for all your life questions.\n\nYou can link your birth details (date, time, location) for personalized Kundli readings or ask any questions regarding Vedic astrology, Vastu, and remedies.",
+      "Greetings! I am **Astra AI Vedic Astrologer**. Built on authentic classical Vedic scriptures and precise astronomical principles, I am here to provide authentic Vedic guidance for all your life questions.\n\nYou can link your birth details (date, time, location) for personalized Kundli readings or ask any questions regarding Vedic astrology, Vastu, and remedies.",
     suggested_followups: [
       "How is my current Mahadasha & Antardasha?",
       "Do I have Manglik Dosha in my Kundli?",
@@ -362,7 +358,7 @@ const WELCOME_MESSAGES = {
   },
   hi: {
     content:
-      "नमस्ते! मैं **डिवाइनलिंक एआई वैदिक ज्योतिषी** हूँ। महर्षि पराशर एवं जैमिनी शास्त्र के प्रामाणिक सूत्रों तथा स्विस एफेमेरिस की सटीक गणनाओं के आधार पर आपके सभी प्रश्नों का शास्त्रीय समाधान देने के लिए तत्पर हूँ।\n\nआप अपनी जन्म तिथि, समय व स्थान जोड़कर व्यक्तिगत जन्मकुंडली आधारित प्रश्न पूछ सकते हैं अथवा सामान्य ज्योतिष व वास्तु संबंधी मार्गदर्शन प्राप्त कर सकते हैं।",
+      "नमस्ते! मैं **एस्ट्रा एआई वैदिक ज्योतिषी** हूँ। प्राचीन वैदिक शास्त्रों के प्रामाणिक सूत्रों तथा ग्रहों की सटीक गणनाओं के आधार पर आपके सभी प्रश्नों का शास्त्रीय समाधान देने के लिए तत्पर हूँ।\n\nआप अपनी जन्म तिथि, समय व स्थान जोड़कर व्यक्तिगत जन्मकुंडली आधारित प्रश्न पूछ सकते हैं अथवा सामान्य ज्योतिष व वास्तु संबंधी मार्गदर्शन प्राप्त कर सकते हैं।",
     suggested_followups: [
       "मेरी वर्तमान महादशा और अंतर्दशा कैसी है?",
       "क्या मेरी कुंडली में मांगलिक दोष है?",
@@ -397,10 +393,6 @@ export default function AIAstrologerPage() {
   const [birthPlace, setBirthPlace] = React.useState("");
   const [latitude, setLatitude] = React.useState<number | undefined>(undefined);
   const [longitude, setLongitude] = React.useState<number | undefined>(undefined);
-
-  // Expanded tool/citation states
-  const [expandedTools, setExpandedTools] = React.useState<Record<number, boolean>>({});
-  const [expandedCitations, setExpandedCitations] = React.useState<Record<number, boolean>>({});
 
   // Feedback states
   const [feedbackGiven, setFeedbackGiven] = React.useState<Record<number, number>>({});
@@ -1081,85 +1073,6 @@ export default function AIAstrologerPage() {
                         </AiMarkdown>
                         {isCurrentStreaming && (
                           <span className="inline-block size-2 ml-1 rounded-full bg-amber-500 animate-pulse align-middle" />
-                        )}
-                      </div>
-                    )}
-
-                    {/* Tools Called Collapsible Pill */}
-                    {!isUser && msg.tools_called && msg.tools_called.length > 0 && (
-                      <div className="mt-3.5 pt-3 border-t border-amber-200/60">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setExpandedTools((prev) => ({ ...prev, [idx]: !prev[idx] }))
-                          }
-                          className="flex items-center gap-1.5 text-[11px] font-bold text-amber-800 hover:text-amber-900 press transition-colors cursor-pointer"
-                        >
-                          <BrainCircuit className="size-3.5 text-amber-600" />
-                          <span>
-                            {t.toolsUsed} ({msg.tools_called.length})
-                          </span>
-                          {expandedTools[idx] ? (
-                            <ChevronUp className="size-3" />
-                          ) : (
-                            <ChevronDown className="size-3" />
-                          )}
-                        </button>
-
-                        {expandedTools[idx] && (
-                          <div className="mt-2 rounded-xl border border-amber-200/60 bg-amber-50/50 p-2.5 text-[11px] space-y-1.5 fade-in">
-                            {msg.tools_called.map((tool, tIdx) => (
-                              <div key={tIdx} className="flex items-center gap-2">
-                                <span className="size-1.5 rounded-full bg-amber-500" />
-                                <span className="font-mono font-medium text-amber-950">{tool}</span>
-                                <span className="text-[10px] text-slate-500">— Swiss Ephemeris 2.10 verified</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Scriptural Citations Collapsible Pill */}
-                    {!isUser && msg.citations && msg.citations.length > 0 && (
-                      <div className="mt-2.5 pt-2 border-t border-amber-200/60">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setExpandedCitations((prev) => ({ ...prev, [idx]: !prev[idx] }))
-                          }
-                          className="flex items-center gap-1.5 text-[11px] font-bold text-amber-800 hover:text-amber-900 press transition-colors cursor-pointer"
-                        >
-                          <BookOpen className="size-3.5 text-amber-600" />
-                          <span>
-                            {t.citationsUsed} ({msg.citations.length})
-                          </span>
-                          {expandedCitations[idx] ? (
-                            <ChevronUp className="size-3" />
-                          ) : (
-                            <ChevronDown className="size-3" />
-                          )}
-                        </button>
-
-                        {expandedCitations[idx] && (
-                          <div className="mt-2 space-y-2 fade-in">
-                            {msg.citations.map((cite, cIdx) => (
-                              <div
-                                key={cIdx}
-                                className="rounded-xl border border-amber-200/60 bg-amber-50/40 p-2.5 text-[11px] space-y-1"
-                              >
-                                <div className="flex items-center justify-between font-bold text-amber-900">
-                                  <span>{cite.source}</span>
-                                  <span className="uppercase text-[9px] bg-amber-200/60 text-amber-800 px-1.5 py-0.5 rounded-md font-semibold">
-                                    {cite.category}
-                                  </span>
-                                </div>
-                                <p className="italic text-slate-600 line-clamp-3">
-                                  &ldquo;{cite.snippet}&rdquo;
-                                </p>
-                              </div>
-                            ))}
-                          </div>
                         )}
                       </div>
                     )}
