@@ -1,13 +1,14 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Fingerprint } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 import { toast } from "sonner";
+import { startAuthentication } from "@simplewebauthn/browser";
 
 import { Alert, Button, Field, Input, LoadingBlock } from "@/components/ui";
-import { authApi } from "@/lib/api";
+import { authApi, passkeyApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { GoogleButton } from "@/components/auth/google-button";
 import { useAuth } from "@/providers/auth-provider";
@@ -50,6 +51,35 @@ function LoginForm() {
     }
   }
 
+  async function handlePasskeyLogin() {
+    setError(null);
+    setBusy(true);
+    try {
+      toast.loading("Communicating with device sensor...", { id: "passkey-login" });
+      const optionsRes = await passkeyApi.getLoginOptions({ email: email.trim() || undefined });
+
+      toast.loading("Touch your fingerprint sensor or verify with Face ID...", { id: "passkey-login" });
+      const asseResp = await startAuthentication({ optionsJSON: optionsRes });
+
+      toast.loading("Verifying security credentials with server...", { id: "passkey-login" });
+      const result = await passkeyApi.verifyLogin({ credential: asseResp });
+
+      toast.success(`Welcome back, ${result.user.first_name}!`, { id: "passkey-login" });
+      signIn(result);
+      router.replace(next);
+    } catch (caught: any) {
+      if (caught?.name === "NotAllowedError") {
+        toast.error("Fingerprint verification was cancelled or timed out.", { id: "passkey-login" });
+      } else {
+        const err = caught instanceof ApiError ? caught : new ApiError(caught?.message || "Passkey login failed", 400);
+        setError(err);
+        toast.error(err.message, { id: "passkey-login" });
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const fieldErrors = error?.fieldErrors ?? {};
 
   return (
@@ -58,6 +88,27 @@ function LoginForm() {
       <p className="mt-1.5 text-sm text-muted-foreground">
         Sign in to pick up where you left off.
       </p>
+
+      {/* 1-Click Biometric Fingerprint / Passkey Login */}
+      <div className="mt-5">
+        <button
+          type="button"
+          onClick={handlePasskeyLogin}
+          disabled={busy}
+          className="relative group w-full flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-xl border border-brand-400/60 bg-gradient-to-r from-brand-300/20 via-brand-200/35 to-brand-300/20 hover:from-brand-300/35 hover:via-brand-200/50 hover:to-brand-300/35 text-foreground text-sm font-semibold transition-all duration-200 shadow-2xs hover:shadow-soft hover:border-brand-500/80 disabled:opacity-50 cursor-pointer"
+        >
+          <Fingerprint className="size-4.5 text-brand-800 dark:text-brand-600 group-hover:scale-110 transition-transform" />
+          <span>Sign in with Fingerprint / Passkey</span>
+        </button>
+      </div>
+
+      <div className="my-5 flex items-center gap-3">
+        <span className="h-px flex-1 bg-border" />
+        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          or with password
+        </span>
+        <span className="h-px flex-1 bg-border" />
+      </div>
 
       {error && error.status !== 422 && (
         <Alert tone="error" className="mt-5">
