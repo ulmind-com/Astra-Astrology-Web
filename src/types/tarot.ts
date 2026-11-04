@@ -65,6 +65,7 @@ export interface DrawnCardDetail {
 export interface TarotDrawRequest {
   spread_id: string;
   category: QuestionCategory;
+  language?: "en" | "bn" | "hi";
   question?: string | null;
   user_moon_sign?: string | null;
   active_dasha_lord?: string | null;
@@ -78,6 +79,7 @@ export interface TarotDrawResponse {
   spread_id: string;
   spread_name: string;
   category: QuestionCategory;
+  language?: "en" | "bn" | "hi";
   question?: string | null;
   drawn_cards: DrawnCardDetail[];
   elemental_breakdown: Record<string, number>;
@@ -98,6 +100,7 @@ export interface TarotDrawResponse {
 
 export interface DailyTarotRequest {
   category?: QuestionCategory;
+  language?: "en" | "bn" | "hi";
   date_str?: string | null;
   moon_sign?: string | null;
 }

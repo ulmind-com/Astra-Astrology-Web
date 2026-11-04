@@ -8,23 +8,20 @@ import {
   Droplets,
   Wind,
   Mountain,
-  Sun,
   Copy,
   Check,
   RotateCcw,
   BookOpen,
-  MessageSquare,
   Shield,
   Star,
   Compass,
   ArrowRight,
-  HelpCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui";
 import type { TarotDrawResponse, DrawnCardDetail } from "@/types/tarot";
 import type { AstrologyLanguage } from "@/types";
-import { TAROT_I18N } from "@/lib/tarot-translations";
+import { TAROT_I18N, CARD_NAMES_LOCALIZED, ELEMENTS_LOCALIZED } from "@/lib/tarot-translations";
 
 interface TarotReadingDetailProps {
   reading: TarotDrawResponse;
@@ -37,7 +34,7 @@ interface TarotReadingDetailProps {
 const ELEMENT_BAR_COLORS: Record<string, string> = {
   Fire: "bg-amber-500",
   Water: "bg-cyan-500",
-  Air: "bg-sky-400",
+  Air: "bg-sky-500",
   Earth: "bg-emerald-500",
   Spirit: "bg-purple-500",
 };
@@ -56,7 +53,13 @@ export function TarotReadingDetail({
   const handleCopyMantra = () => {
     navigator.clipboard.writeText(reading.vedic_mantra);
     setCopiedMantra(true);
-    toast.success("Vedic mantra copied to clipboard!");
+    toast.success(
+      language === "bn"
+        ? "বৈদিক মন্ত্র ক্লিপবোর্ডে কপি করা হয়েছে!"
+        : language === "hi"
+        ? "वैदिक मंत्र क्लिपबोर्ड पर कॉपी हो गया!"
+        : "Vedic mantra copied to clipboard!"
+    );
     setTimeout(() => setCopiedMantra(false), 2000);
   };
 
@@ -67,7 +70,14 @@ Spread: ${reading.spread_name} (${reading.category.toUpperCase()})
 Question: ${reading.question || "Universal Reflection"}
 
 Cards Drawn:
-${reading.drawn_cards.map((c) => `- ${c.position_title}: ${c.card.name} (${c.orientation})`).join("\n")}
+${reading.drawn_cards
+  .map(
+    (c) =>
+      `- ${c.position_title}: ${
+        CARD_NAMES_LOCALIZED[language]?.[c.card.id] || c.card.name
+      } (${c.orientation})`
+  )
+  .join("\n")}
 
 Dominant Element: ${reading.dominant_element}
 Karmic Momentum: ${reading.astrological_resonance.karmic_momentum}
@@ -91,49 +101,53 @@ ${reading.vedic_mantra}
     setTimeout(() => setCopiedSummary(false), 2000);
   };
 
+  const dominantElemLocalized =
+    ELEMENTS_LOCALIZED[language]?.[reading.dominant_element] ||
+    reading.dominant_element;
+
   return (
     <div className="space-y-8 mt-10">
       {/* Top Banner: Spread Name & Question */}
-      <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-950/40 via-zinc-900 to-purple-950/40 p-6 shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 rounded-full bg-amber-500/10 blur-2xl pointer-events-none" />
-
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+      <div className="rounded-2xl border border-amber-300/80 bg-gradient-to-r from-amber-50/90 via-white to-amber-50/40 p-6 sm:p-8 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs uppercase font-semibold tracking-wider text-amber-400 bg-amber-950/80 border border-amber-500/30 px-3 py-0.5 rounded-full">
+            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+              <span className="text-xs uppercase font-bold tracking-wider text-amber-900 bg-amber-100 border border-amber-300 px-3 py-0.5 rounded-full shadow-2xs">
                 {reading.spread_name}
               </span>
-              <span className="text-xs text-zinc-400 uppercase tracking-wide">
+              <span className="text-xs text-slate-600 font-semibold uppercase tracking-wide">
                 • {reading.category}
               </span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-amber-100">
+            <h2 className="text-2xl sm:text-3xl font-display font-bold text-slate-950">
               {reading.question || t.readingTitle}
             </h2>
-            <p className="text-sm text-zinc-400 mt-1">
+            <p className="text-sm text-slate-600 mt-1 leading-relaxed">
               {t.readingSubtitle}
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
+          <div className="flex items-center gap-2.5 shrink-0">
+            <button
+              type="button"
               onClick={handleCopySummary}
-              className="border-amber-500/40 hover:bg-amber-500/10 text-amber-200"
+              className="inline-flex items-center justify-center rounded-xl border border-amber-300 bg-white px-3.5 py-2 text-xs font-bold text-amber-900 hover:bg-amber-50 shadow-2xs transition-colors"
             >
-              {copiedSummary ? <Check className="w-4 h-4 mr-1 text-emerald-400" /> : <Copy className="w-4 h-4 mr-1" />}
+              {copiedSummary ? (
+                <Check className="w-3.5 h-3.5 mr-1.5 text-emerald-600" />
+              ) : (
+                <Copy className="w-3.5 h-3.5 mr-1.5 text-amber-600" />
+              )}
               {t.copySummaryBtn}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
+            </button>
+            <button
+              type="button"
               onClick={onReset}
-              className="border-zinc-700 hover:bg-zinc-800 text-zinc-300"
+              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-2xs transition-colors"
             >
-              <RotateCcw className="w-4 h-4 mr-1" />
+              <RotateCcw className="w-3.5 h-3.5 mr-1.5 text-slate-500" />
               {t.newReadingBtn}
-            </Button>
+            </button>
           </div>
         </div>
       </div>
@@ -141,29 +155,35 @@ ${reading.vedic_mantra}
       {/* Grid: Karmic Synthesis + Actionable Guidance */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Karmic Destiny Synthesis */}
-        <div className="rounded-2xl border border-amber-500/30 bg-zinc-950/80 p-6 flex flex-col justify-between shadow-lg">
+        <div className="rounded-2xl border border-amber-300/80 bg-white p-6 sm:p-7 flex flex-col justify-between shadow-sm">
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-400/30 flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-amber-400" />
+            <div className="flex items-center gap-2.5 mb-3.5">
+              <div className="w-8 h-8 rounded-lg bg-amber-100 border border-amber-300 flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-amber-700" />
               </div>
-              <h3 className="text-lg font-serif font-bold text-amber-200">
+              <h3 className="text-lg font-display font-bold text-slate-900">
                 {t.karmicSynthesisTitle}
               </h3>
             </div>
-            <p className="text-zinc-300 leading-relaxed text-sm sm:text-base">
+            <p className="text-slate-700 leading-relaxed text-sm sm:text-base">
               {reading.karmic_synthesis}
             </p>
           </div>
 
           {/* Active Grahas Pill List */}
           {reading.astrological_resonance.active_grahas.length > 0 && (
-            <div className="mt-5 pt-4 border-t border-zinc-800 flex items-center gap-2 flex-wrap">
-              <span className="text-xs text-zinc-400 font-medium">Active Planetary Energies:</span>
+            <div className="mt-5 pt-4 border-t border-slate-100 flex items-center gap-2 flex-wrap">
+              <span className="text-xs text-slate-500 font-semibold">
+                {language === "bn"
+                  ? "সক্রিয় গ্রহের প্রভাব:"
+                  : language === "hi"
+                  ? "सक्रिय ग्रह प्रभाव:"
+                  : "Active Planetary Energies:"}
+              </span>
               {reading.astrological_resonance.active_grahas.map((graha) => (
                 <span
                   key={graha}
-                  className="text-xs font-semibold text-amber-300 bg-amber-950/60 border border-amber-500/30 px-2 py-0.5 rounded-full"
+                  className="text-xs font-bold text-amber-900 bg-amber-50 border border-amber-300 px-2.5 py-0.5 rounded-full"
                 >
                   {graha}
                 </span>
@@ -173,24 +193,26 @@ ${reading.vedic_mantra}
         </div>
 
         {/* Actionable Guidance & Strategy */}
-        <div className="rounded-2xl border border-amber-500/30 bg-zinc-950/80 p-6 flex flex-col justify-between shadow-lg">
+        <div className="rounded-2xl border border-emerald-300/80 bg-white p-6 sm:p-7 flex flex-col justify-between shadow-sm">
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-400/30 flex items-center justify-center">
-                <Compass className="w-4 h-4 text-emerald-400" />
+            <div className="flex items-center gap-2.5 mb-3.5">
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 border border-emerald-300 flex items-center justify-center">
+                <Compass className="w-4 h-4 text-emerald-700" />
               </div>
-              <h3 className="text-lg font-serif font-bold text-emerald-200">
+              <h3 className="text-lg font-display font-bold text-emerald-950">
                 {t.actionableGuidanceTitle}
               </h3>
             </div>
-            <p className="text-zinc-300 leading-relaxed text-sm sm:text-base">
+            <p className="text-slate-700 leading-relaxed text-sm sm:text-base">
               {reading.actionable_guidance}
             </p>
           </div>
 
-          <div className="mt-5 pt-4 border-t border-zinc-800">
-            <span className="text-xs text-zinc-400 font-medium">{t.karmicMomentumLabel}:</span>
-            <p className="text-xs text-amber-300 font-medium mt-1">
+          <div className="mt-5 pt-4 border-t border-slate-100">
+            <span className="text-xs text-slate-500 font-semibold">
+              {t.karmicMomentumLabel}:
+            </span>
+            <p className="text-xs text-amber-900 font-bold mt-1">
               {reading.astrological_resonance.karmic_momentum}
             </p>
           </div>
@@ -198,35 +220,44 @@ ${reading.vedic_mantra}
       </div>
 
       {/* Elemental Dignity & Planetary Balance Meters */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-950/80 p-6 shadow-lg">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-7 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-400/30 flex items-center justify-center">
-              <Flame className="w-4 h-4 text-amber-400" />
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-amber-100 border border-amber-300 flex items-center justify-center">
+              <Flame className="w-4 h-4 text-amber-700" />
             </div>
-            <h3 className="text-lg font-serif font-bold text-amber-100">
+            <h3 className="text-lg font-display font-bold text-slate-900">
               {t.elementalBreakdownTitle}
             </h3>
           </div>
-          <div className="text-xs text-amber-300 bg-amber-950/50 border border-amber-500/30 px-3 py-1 rounded-full self-start">
-            {t.dominantElementLabel}: <strong className="text-amber-200">{reading.dominant_element}</strong>
+          <div className="text-xs text-amber-950 bg-amber-100 border border-amber-300 px-3 py-1 rounded-full font-bold self-start">
+            {t.dominantElementLabel}:{" "}
+            <strong className="text-amber-800">{dominantElemLocalized}</strong>
           </div>
         </div>
 
         {/* Elemental Progress Bars */}
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
           {Object.entries(reading.elemental_breakdown).map(([elem, count]) => {
-            const pct = totalCards > 0 ? Math.round((count / totalCards) * 100) : 0;
+            const pct =
+              totalCards > 0 ? Math.round((count / totalCards) * 100) : 0;
+            const elemName =
+              ELEMENTS_LOCALIZED[language]?.[elem] || elem;
             return (
-              <div key={elem} className="p-3 rounded-xl border border-zinc-800 bg-zinc-900/60 flex flex-col justify-between">
+              <div
+                key={elem}
+                className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 flex flex-col justify-between"
+              >
                 <div className="flex items-center justify-between text-xs mb-1">
-                  <span className="text-zinc-300 font-medium">{elem}</span>
-                  <span className="text-amber-400 font-bold">{count} ({pct}%)</span>
+                  <span className="text-slate-700 font-semibold">{elemName}</span>
+                  <span className="text-slate-900 font-bold">
+                    {count} ({pct}%)
+                  </span>
                 </div>
-                <div className="w-full h-2 rounded-full bg-zinc-800 overflow-hidden mt-1">
+                <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden mt-1.5">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
-                      ELEMENT_BAR_COLORS[elem] || "bg-amber-400"
+                      ELEMENT_BAR_COLORS[elem] || "bg-amber-500"
                     }`}
                     style={{ width: `${pct}%` }}
                   />
@@ -240,128 +271,166 @@ ${reading.vedic_mantra}
       {/* Vedic Remedy & Sacred Mantra */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Prescribed Remedy */}
-        <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-950/30 to-zinc-950 p-6 shadow-lg">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-400/30 flex items-center justify-center">
-              <Shield className="w-4 h-4 text-amber-400" />
+        <div className="rounded-2xl border border-amber-300/80 bg-gradient-to-br from-amber-50/70 via-white to-amber-50/40 p-6 sm:p-7 shadow-sm">
+          <div className="flex items-center gap-2.5 mb-3.5">
+            <div className="w-8 h-8 rounded-lg bg-amber-100 border border-amber-300 flex items-center justify-center">
+              <Shield className="w-4 h-4 text-amber-700" />
             </div>
-            <h3 className="text-lg font-serif font-bold text-amber-200">
+            <h3 className="text-lg font-display font-bold text-amber-950">
               {t.prescribedRemedyTitle}
             </h3>
           </div>
-          <p className="text-sm sm:text-base text-zinc-300 leading-relaxed">
+          <p className="text-sm sm:text-base text-slate-800 leading-relaxed font-medium">
             {reading.prescribed_remedy}
           </p>
         </div>
 
         {/* Sacred Vedic Graha Mantra */}
-        <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-purple-950/30 to-zinc-950 p-6 shadow-lg flex flex-col justify-between">
+        <div className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50/70 via-white to-indigo-50/40 p-6 sm:p-7 shadow-sm flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-400/30 flex items-center justify-center">
-                  <Star className="w-4 h-4 text-purple-400" />
+            <div className="flex items-center justify-between mb-3.5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-indigo-100 border border-indigo-300 flex items-center justify-center">
+                  <Star className="w-4 h-4 text-indigo-700" />
                 </div>
-                <h3 className="text-lg font-serif font-bold text-purple-200">
+                <h3 className="text-lg font-display font-bold text-indigo-950">
                   {t.vedicMantraTitle}
                 </h3>
               </div>
               <button
+                type="button"
                 onClick={handleCopyMantra}
-                className="text-xs text-amber-300 hover:text-amber-100 p-1.5 rounded-lg border border-purple-500/30 bg-purple-950/40 flex items-center gap-1 transition-colors"
-                title="Copy Mantra"
+                className="text-xs text-indigo-900 hover:text-indigo-950 font-bold px-2.5 py-1 rounded-lg border border-indigo-200 bg-white flex items-center gap-1 shadow-2xs transition-colors"
               >
-                {copiedMantra ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                {copiedMantra ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5 text-indigo-600" />
+                )}
                 <span>{copiedMantra ? "Copied" : "Copy"}</span>
               </button>
             </div>
-            <p className="text-base sm:text-lg font-serif font-medium text-amber-200/95 leading-relaxed bg-black/40 p-3.5 rounded-xl border border-purple-500/20">
+            <p className="text-base sm:text-lg font-serif font-semibold text-indigo-950 leading-relaxed bg-white/90 p-4 rounded-xl border border-indigo-200 shadow-2xs">
               {reading.vedic_mantra}
             </p>
           </div>
-          <p className="text-xs text-zinc-400 mt-3">
-            Chant 108 times at sunrise or dusk to harmonize planetary vibrations and dissipate negative karmic residues.
+          <p className="text-xs text-slate-500 mt-3.5 font-medium">
+            {language === "bn"
+              ? "সূর্যোদয় বা গোধূলিলগ্নে শান্ত মনে ১০৮ বার জপ করলে গ্রহগত শান্তি ও শুভ ফল লাভ হয়।"
+              : language === "hi"
+              ? "सूर्योदय अथवा संध्याकाल में 108 बार जप करने से ग्रह शांति और कल्याण प्राप्त होता है।"
+              : "Chant 108 times at sunrise or dusk to harmonize planetary vibrations."}
           </p>
         </div>
       </div>
 
       {/* Detailed Card Breakdowns */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-950/80 p-6 shadow-lg">
-        <h3 className="text-xl font-serif font-bold text-amber-100 mb-6 flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-amber-400" />
-          <span>Card-by-Card Arcana Interpretation</span>
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+        <h3 className="text-xl font-display font-bold text-slate-900 mb-6 flex items-center gap-2.5">
+          <BookOpen className="w-5 h-5 text-amber-600" />
+          <span>
+            {language === "bn"
+              ? "কার্ডভিত্তিক আর্খানা বিশ্লেষণ"
+              : language === "hi"
+              ? "कार्ड अनुसार विस्तृत विश्लेषण"
+              : "Card-by-Card Arcana Interpretation"}
+          </span>
         </h3>
 
-        <div className="space-y-6">
-          {reading.drawn_cards.map((cardDetail, idx) => (
-            <div
-              key={idx}
-              className="p-5 rounded-xl border border-zinc-800 hover:border-amber-500/40 bg-zinc-900/60 transition-all flex flex-col md:flex-row gap-5"
-            >
-              <div className="flex-1">
-                <div className="flex items-center gap-2.5 flex-wrap mb-2">
-                  <span className="text-xs font-semibold text-amber-400 bg-amber-950/80 border border-amber-500/30 px-2.5 py-0.5 rounded-full">
-                    Position {cardDetail.position_index}: {cardDetail.position_title}
-                  </span>
-                  <span className="text-base font-serif font-bold text-zinc-100">
-                    {cardDetail.card.name}
-                  </span>
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
-                      cardDetail.orientation === "reversed"
-                        ? "border-rose-500/40 bg-rose-950/50 text-rose-300"
-                        : "border-emerald-500/40 bg-emerald-950/50 text-emerald-300"
-                    }`}
-                  >
-                    {cardDetail.orientation === "reversed" ? t.reversedBadge : t.uprightBadge}
-                  </span>
-                  <span className="text-xs text-zinc-400">
-                    ({cardDetail.card.astrology} • Graha: {cardDetail.card.vedic_graha})
-                  </span>
-                </div>
+        <div className="space-y-5">
+          {reading.drawn_cards.map((cardDetail, idx) => {
+            const locName =
+              CARD_NAMES_LOCALIZED[language]?.[cardDetail.card.id] ||
+              cardDetail.card.name;
+            const orientBadge =
+              cardDetail.orientation === "reversed"
+                ? t.reversedBadge
+                : t.uprightBadge;
 
-                <p className="text-sm text-zinc-300 leading-relaxed mb-3">
-                  {cardDetail.relevant_interpretation}
-                </p>
-
-                <div className="text-xs text-amber-200/90 bg-amber-950/30 border border-amber-500/20 p-2.5 rounded-lg mb-3">
-                  <strong>Advice:</strong> {cardDetail.advice}
-                </div>
-
-                {cardDetail.elemental_harmony && (
-                  <p className="text-xs text-zinc-400 italic">
-                    {cardDetail.elemental_harmony}
-                  </p>
-                )}
-
-                {/* Keywords */}
-                <div className="mt-3 flex items-center gap-1.5 flex-wrap">
-                  {cardDetail.keywords.map((kw, kIdx) => (
-                    <span
-                      key={kIdx}
-                      className="text-[11px] text-zinc-400 bg-zinc-800/80 border border-zinc-700 px-2 py-0.5 rounded"
-                    >
-                      #{kw}
+            return (
+              <div
+                key={idx}
+                className="p-5 sm:p-6 rounded-2xl border border-slate-200 hover:border-amber-300 bg-slate-50/50 transition-all flex flex-col md:flex-row gap-5"
+              >
+                <div className="flex-1">
+                  <div className="flex items-center gap-2.5 flex-wrap mb-2.5">
+                    <span className="text-xs font-bold text-amber-900 bg-amber-100 border border-amber-300 px-3 py-0.5 rounded-full shadow-2xs">
+                      {cardDetail.position_title}
                     </span>
-                  ))}
+                    <span className="text-base font-display font-bold text-slate-900">
+                      {locName}
+                    </span>
+                    <span
+                      className={`text-xs px-2.5 py-0.5 rounded-full border font-bold ${
+                        cardDetail.orientation === "reversed"
+                          ? "border-rose-200 bg-rose-50 text-rose-800"
+                          : "border-emerald-200 bg-emerald-50 text-emerald-800"
+                      }`}
+                    >
+                      {orientBadge}
+                    </span>
+                    <span className="text-xs text-slate-500 font-medium">
+                      ({cardDetail.card.astrology} • Graha:{" "}
+                      {cardDetail.card.vedic_graha})
+                    </span>
+                  </div>
+
+                  <p className="text-sm text-slate-700 leading-relaxed mb-3.5">
+                    {cardDetail.relevant_interpretation}
+                  </p>
+
+                  <div className="text-xs text-amber-950 bg-amber-50 border border-amber-200 p-3 rounded-xl mb-3 font-medium">
+                    <strong className="text-amber-900">
+                      {language === "bn"
+                        ? "পরামর্শ:"
+                        : language === "hi"
+                        ? "मार्गदर्शन:"
+                        : "Advice:"}
+                    </strong>{" "}
+                    {cardDetail.advice}
+                  </div>
+
+                  {cardDetail.elemental_harmony && (
+                    <p className="text-xs text-slate-500 italic">
+                      {cardDetail.elemental_harmony}
+                    </p>
+                  )}
+
+                  {/* Keywords */}
+                  <div className="mt-3.5 flex items-center gap-1.5 flex-wrap">
+                    {cardDetail.keywords.map((kw, kIdx) => (
+                      <span
+                        key={kIdx}
+                        className="text-[11px] font-semibold text-slate-600 bg-white border border-slate-200 px-2.5 py-0.5 rounded-md shadow-2xs"
+                      >
+                        #{kw}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
       {/* Astrologer Consultation CTA */}
-      <div className="rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-950/60 via-zinc-950 to-indigo-950/60 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+      <div className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 via-white to-amber-100/70 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
         <div className="max-w-xl text-center md:text-left">
-          <div className="inline-flex items-center gap-2 text-xs font-semibold text-amber-400 bg-amber-950/80 border border-amber-500/30 px-3 py-1 rounded-full mb-2">
-            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-            <span>Grandmaster Tarot Consultation</span>
+          <div className="inline-flex items-center gap-2 text-xs font-bold text-amber-900 bg-amber-100 border border-amber-300 px-3 py-1 rounded-full mb-2.5">
+            <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+            <span>
+              {language === "bn"
+                ? "ট্যারো গ্র্যান্ডমাস্টার পরামর্শ"
+                : language === "hi"
+                ? "टैरो ग्रैंडमास्टर परामर्श"
+                : "Grandmaster Tarot Consultation"}
+            </span>
           </div>
-          <h3 className="text-2xl font-serif font-bold text-amber-100">
+          <h3 className="text-2xl font-display font-bold text-slate-950">
             {t.bookAstrologerCta}
           </h3>
-          <p className="text-sm text-zinc-300 mt-2">
+          <p className="text-sm text-slate-600 mt-2 leading-relaxed">
             {t.bookAstrologerDesc}
           </p>
         </div>
@@ -369,7 +438,7 @@ ${reading.vedic_mantra}
         <Link href="/astrologers?skill=tarot">
           <Button
             size="lg"
-            className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-zinc-950 font-bold px-8 shadow-[0_0_25px_rgba(245,158,11,0.4)]"
+            className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold px-8 shadow-md rounded-xl"
           >
             <span>{t.consultNowBtn}</span>
             <ArrowRight className="w-4 h-4 ml-2" />
@@ -379,4 +448,3 @@ ${reading.vedic_mantra}
     </div>
   );
 }
-

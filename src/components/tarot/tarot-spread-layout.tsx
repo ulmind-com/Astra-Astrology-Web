@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import type { DrawnCardDetail } from "@/types/tarot";
+import type { AstrologyLanguage } from "@/types";
 import { TarotCardView } from "./tarot-card-view";
 
 interface TarotSpreadLayoutProps {
@@ -9,6 +10,7 @@ interface TarotSpreadLayoutProps {
   cards: DrawnCardDetail[];
   flippedState: boolean[];
   onFlipCard: (index: number) => void;
+  language?: AstrologyLanguage;
   onSelectCardDetail?: (card: DrawnCardDetail) => void;
 }
 
@@ -17,6 +19,7 @@ export function TarotSpreadLayout({
   cards,
   flippedState,
   onFlipCard,
+  language = "bn",
   onSelectCardDetail,
 }: TarotSpreadLayoutProps) {
   if (!cards || cards.length === 0) return null;
@@ -28,6 +31,7 @@ export function TarotSpreadLayout({
         <TarotCardView
           cardDetail={cards[0]}
           isFlipped={flippedState[0] ?? true}
+          language={language}
           onFlip={() => {
             onFlipCard(0);
             onSelectCardDetail?.(cards[0]);
@@ -42,8 +46,8 @@ export function TarotSpreadLayout({
   if (spreadId === "past_present_future" || cards.length === 3) {
     return (
       <div className="relative py-6">
-        {/* Connecting celestial energy beam */}
-        <div className="hidden md:block absolute top-[45%] left-16 right-16 h-0.5 bg-gradient-to-r from-transparent via-amber-500/40 to-transparent -z-0 pointer-events-none" />
+        {/* Connecting golden cosmic energy beam */}
+        <div className="hidden md:block absolute top-[45%] left-16 right-16 h-1 bg-gradient-to-r from-transparent via-amber-400/60 to-transparent -z-0 pointer-events-none rounded-full" />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 items-center justify-items-center">
           {cards.map((c, idx) => (
@@ -51,6 +55,7 @@ export function TarotSpreadLayout({
               <TarotCardView
                 cardDetail={c}
                 isFlipped={flippedState[idx] ?? true}
+                language={language}
                 onFlip={() => {
                   onFlipCard(idx);
                   onSelectCardDetail?.(c);
@@ -73,6 +78,7 @@ export function TarotSpreadLayout({
           <TarotCardView
             cardDetail={cards[3]}
             isFlipped={flippedState[3] ?? true}
+            language={language}
             onFlip={() => {
               onFlipCard(3);
               onSelectCardDetail?.(cards[3]);
@@ -86,6 +92,7 @@ export function TarotSpreadLayout({
           <TarotCardView
             cardDetail={cards[1]}
             isFlipped={flippedState[1] ?? true}
+            language={language}
             onFlip={() => {
               onFlipCard(1);
               onSelectCardDetail?.(cards[1]);
@@ -95,6 +102,7 @@ export function TarotSpreadLayout({
           <TarotCardView
             cardDetail={cards[2]}
             isFlipped={flippedState[2] ?? true}
+            language={language}
             onFlip={() => {
               onFlipCard(2);
               onSelectCardDetail?.(cards[2]);
@@ -108,6 +116,7 @@ export function TarotSpreadLayout({
           <TarotCardView
             cardDetail={cards[0]}
             isFlipped={flippedState[0] ?? true}
+            language={language}
             onFlip={() => {
               onFlipCard(0);
               onSelectCardDetail?.(cards[0]);
@@ -129,6 +138,7 @@ export function TarotSpreadLayout({
               key={idx}
               cardDetail={c}
               isFlipped={flippedState[idx] ?? true}
+              language={language}
               onFlip={() => {
                 onFlipCard(idx);
                 onSelectCardDetail?.(c);
@@ -141,7 +151,7 @@ export function TarotSpreadLayout({
     );
   }
 
-  // Grand Celtic Cross (10 cards) or general multi-card layout
+  // Grand Celtic Cross (10 cards)
   return (
     <div className="py-6">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 justify-items-center">
@@ -150,6 +160,7 @@ export function TarotSpreadLayout({
             key={idx}
             cardDetail={c}
             isFlipped={flippedState[idx] ?? true}
+            language={language}
             onFlip={() => {
               onFlipCard(idx);
               onSelectCardDetail?.(c);
@@ -161,4 +172,3 @@ export function TarotSpreadLayout({
     </div>
   );
 }
-
