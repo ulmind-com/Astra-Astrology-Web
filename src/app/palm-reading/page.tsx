@@ -56,6 +56,7 @@ import { Palm3DViewer } from "@/components/palm-reading/Palm3DViewer";
 import { AudioGuruPlayer } from "@/components/palm-reading/AudioGuruPlayer";
 import { DualHandSynastryView } from "@/components/palm-reading/DualHandSynastryView";
 import { FingersThumbView } from "@/components/palm-reading/FingersThumbView";
+import { PalmBiometricMeshViewer } from "@/components/palm-reading/PalmBiometricMeshViewer";
 import { Button } from "@/components/ui";
 import { palmReadingApi } from "@/lib/api";
 import {
@@ -1003,15 +1004,56 @@ export default function PalmReadingPage() {
                   </div>
                 </div>
               ) : preview ? (
-                <div className="space-y-3">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={preview}
-                    alt="The palm photo being read"
-                    className="mx-auto max-h-80 rounded-2xl border border-border object-contain shadow-sm"
-                  />
+                <div className="space-y-4">
+                  <div className="relative mx-auto max-w-sm overflow-hidden rounded-3xl border-2 border-brand-400/50 bg-ink-950 shadow-2xl">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={preview}
+                      alt="The palm photo being read"
+                      className="max-h-96 w-full object-contain"
+                    />
+
+                    {/* Holographic 3D Biometric Laser Scanline & Node Simulation while Scanning */}
+                    {scanning && (
+                      <div className="absolute inset-0 bg-ink-950/70 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center">
+                        {/* Laser Scanline Beam */}
+                        <div className="laser-scanline" />
+
+                        {/* Pulsing Holographic 3D Radar Circle */}
+                        <div className="relative flex size-24 items-center justify-center rounded-full border border-cyan-400/60 bg-cyan-950/50 shadow-[0_0_30px_rgba(56,189,248,0.5)] animate-pulse">
+                          <div className="absolute size-20 rounded-full border border-emerald-400/50 border-dashed animate-spin" />
+                          <Move3d className="size-9 text-cyan-400" />
+                        </div>
+
+                        {/* Animated Step-by-Step Scan Telemetry */}
+                        <div className="mt-4 space-y-1.5 text-xs font-bold text-white">
+                          <p className="flex items-center justify-center gap-1.5 text-cyan-300">
+                            <Sparkles className="size-3.5 animate-spin text-cyan-400" />
+                            {language === "bn"
+                              ? "৩ডি বায়োমেট্রিক ল্যান্ডমার্ক ও নোড ট্র্যাকিং..."
+                              : language === "hi"
+                              ? "3D बायोमेट्रिक नोड मैपिंग जारी..."
+                              : "Tracking 21 3D Biometric Landmarks..."}
+                          </p>
+                          <p className="text-[11px] text-emerald-400">
+                            {language === "bn"
+                              ? "গ্রহ পর্বত উচ্চতা (Topography mm) পরিমাপ হচ্ছে..."
+                              : language === "hi"
+                              ? "ग्रह पर्वत ऊंचाई (mm) मापी जा रही है..."
+                              : "Computing Millimeter Mount Topography..."}
+                          </p>
+                          <p className="text-[10px] text-white/70">
+                            {language === "bn"
+                              ? "গাবর ফিল্টারে রেখার খাঁদ ও শুভ যোগ ডিটেকশন সম্পন্ন..."
+                              : "Gabor Valley Creases & Sacred Marks correlating..."}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex flex-wrap justify-center gap-2">
-                    <Button variant="outline" onClick={reset} disabled={scanning} className="gap-2">
+                    <Button variant="outline" onClick={reset} disabled={scanning} className="gap-2 font-bold">
                       <RefreshCw className="size-4" /> {t.scanningAgain}
                     </Button>
                   </div>
@@ -1368,61 +1410,18 @@ export default function PalmReadingPage() {
                       </div>
                     </div>
 
-                    {/* Visual Overlay Section */}
+                    {/* 3D Biometric Mesh & Visual Crease Section */}
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-                      <div className="lg:col-span-5">
-                        <div className="overflow-hidden rounded-3xl border border-border bg-surface p-4 shadow-sm">
-                          <div className="mb-3 flex items-center justify-between">
-                            <span className="text-xs font-bold text-foreground">
-                              {language === "bn"
-                                ? "হাতের রেখা স্ক্যান ভিউ"
-                                : language === "hi"
-                                  ? "हस्तरेखा स्कैन दृश्य"
-                                  : "Traced Crease Overlay"}
-                            </span>
-                            {result.overlay_image && preview && (
-                              <button
-                                type="button"
-                                onClick={() => setShowOverlay(!showOverlay)}
-                                className="flex items-center gap-1 text-[11px] font-bold text-brand-600 hover:text-brand-700"
-                              >
-                                <Eye className="size-3" />
-                                {showOverlay
-                                  ? language === "bn"
-                                    ? "আসল ছবি"
-                                    : language === "hi"
-                                    ? "मूल फोटो"
-                                    : "Show Original"
-                                  : language === "bn"
-                                    ? "স্ক্যান রেখা"
-                                    : language === "hi"
-                                    ? "स्कैन रेखाएं"
-                                    : "Show Overlay"}
-                              </button>
-                            )}
-                          </div>
-
-                          <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl border border-border bg-ink-950">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={showOverlay && result.overlay_image ? result.overlay_image : preview || ""}
-                              alt="Palm Analysis"
-                              className="size-full object-contain"
-                            />
-                          </div>
-
-                          <p className="mt-2.5 text-center text-[10px] text-muted-foreground">
-                            {language === "bn"
-                              ? "উচ্চ স্পষ্টতাসম্পন্ন গাবর ফিল্টার এবং ল্যান্ডমার্ক দ্বারা চিহ্নিত রেখা"
-                              : language === "hi"
-                              ? "उच्च परिशुद्धता गाबोर फिल्टर और लैंडमार्क द्वारा चिह्नित रेखाएं"
-                              : "Precision Gabor valley filters and MediaPipe landmarks"}
-                          </p>
-                        </div>
+                      <div className="lg:col-span-7">
+                        <PalmBiometricMeshViewer
+                          result={result}
+                          previewUrl={preview}
+                          language={language}
+                        />
                       </div>
 
                       {/* Crease Gauges Summary */}
-                      <div className="space-y-3 lg:col-span-7">
+                      <div className="space-y-3 lg:col-span-5">
                         <div className="rounded-3xl border border-border bg-surface p-5 shadow-sm">
                           <div className="flex items-center justify-between">
                             <h3 className="text-sm font-extrabold text-foreground">
