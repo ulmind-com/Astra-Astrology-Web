@@ -53,6 +53,9 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Palm3DViewer } from "@/components/palm-reading/Palm3DViewer";
+import { AudioGuruPlayer } from "@/components/palm-reading/AudioGuruPlayer";
+import { DualHandSynastryView } from "@/components/palm-reading/DualHandSynastryView";
+import { FingersThumbView } from "@/components/palm-reading/FingersThumbView";
 import { Button } from "@/components/ui";
 import { palmReadingApi } from "@/lib/api";
 import {
@@ -134,6 +137,106 @@ const CREASE_THEME: Record<
   },
 };
 
+function getYear1YearDetail(age: number, lang: PalmLanguage) {
+  const a = Math.min(90, Math.max(1, Math.round(age)));
+  const cycle = Math.min(13, Math.floor((a - 1) / 7) + 1);
+  const planets = [
+    { en: "Moon (Chandra)", bn: "চন্দ্র", hi: "चंद्र" },
+    { en: "Mercury (Budha)", bn: "বুধ", hi: "बुध" },
+    { en: "Venus (Shukra)", bn: "শুক্র", hi: "शुक्र" },
+    { en: "Sun (Surya)", bn: "সূর্য", hi: "सूर्य" },
+    { en: "Mars (Mangala)", bn: "মঙ্গল", hi: "मंगल" },
+    { en: "Jupiter (Brihaspati)", bn: "বৃহস্পতি", hi: "बृहस्पति" },
+    { en: "Saturn (Shani)", bn: "শনি", hi: "शनि" },
+    { en: "Uranus / Rahu", bn: "হর্ষল / রাহু", hi: "हर्षल / राहु" },
+    { en: "Neptune / Ketu", bn: "বরুণ / কেতু", hi: "वरुण / केतु" },
+    { en: "Wisdom Jupiter", bn: "মহাপ্রজ্ঞা", hi: "महाप्रज्ञा" },
+    { en: "Spiritual Moksha", bn: "মোক্ষ ও ধ্যান", hi: "मोक्ष व ध्यान" },
+    { en: "Paramayu Longevity", bn: "পরমায়ু ও সাধনা", hi: "परमायु" },
+    { en: "Brahma Radiance", bn: "ব্রহ্মজ্যোতি", hi: "ब्रह्मज्योति" },
+  ];
+  const planet = planets[cycle - 1] || planets[0];
+  const planetName = lang === "bn" ? planet.bn : lang === "hi" ? planet.hi : planet.en;
+  const vitality = Math.min(99, Math.max(48, Math.round(96 - a * 0.42 + (a % 7) * 1.8)));
+
+  let forecast = "";
+  if (lang === "bn") {
+    if (a <= 7) {
+      forecast = `বয়স ${a}: শৈশবের ভিত্তি গঠন, রোগপ্রতিরোধ ক্ষমতা সুদৃঢ়করণ এবং মাতৃস্নেহের সুরক্ষাবলয় সক্রিয়।`;
+    } else if (a <= 14) {
+      forecast = `বয়স ${a}: দ্বিতীয় চক্রের মেধা স্ফুরণ, বিদ্যার্জন ও বুদ্ধিবৃত্তিক কৌতূহলের বিশেষ শুভ সময়।`;
+    } else if (a <= 21) {
+      forecast = `বয়স ${a}: তারুণ্যের প্রারম্ভ, আবেগীয় মানসিক বিকাশ ও ভবিষ্যৎ জীবনের দিশা নির্ধারণের মাইলফলক।`;
+    } else if (a <= 28) {
+      forecast = `বয়স ${a}: কর্মজীবন প্রতিষ্ঠা, সামাজিক স্বীকৃতি অর্জন ও স্বাধীন স্বাবলম্বী রূপান্তরের সেরা সময়।`;
+    } else if (a <= 35) {
+      forecast = `বয়স ${a}: উচ্চাকাঙ্ক্ষা, বলিষ্ঠ নেতৃত্ব ও সিদ্ধান্ত গ্রহণের ক্ষমতা এবং ভাগ্যরেখার গভীর সক্রিয়তা।`;
+    } else if (a <= 42) {
+      forecast = `বয়স ${a}: আর্থিক স্থায়িত্ব, প্রজ্ঞা ও বুদ্ধিমত্তার চরম বিকাশ এবং কর্মক্ষেত্রের শীর্ষ অবস্থান।`;
+    } else if (a <= 49) {
+      forecast = `বয়স ${a}: কর্মফল সংহতকরণ, ভবিষ্যৎ প্রজন্মের নিরাপত্তা এবং পারিবারিক ও সামাজিক আধিপত্য সুসংহত।`;
+    } else if (a <= 56) {
+      forecast = `বয়স ${a}: জীবনের ইতিবাচক মোড় পরিবর্তন, পরামর্শদাতা হিসেবে প্রতিষ্ঠা ও আধ্যাত্মিক একাগ্রতা বৃদ্ধি।`;
+    } else if (a <= 63) {
+      forecast = `বয়স ${a}: দীর্ঘদিনের কর্মসাধনার স্বীকৃতি লাভ, আত্মিক প্রশান্তি এবং বংশানুক্রমিক সম্মান বজায় রাখা।`;
+    } else {
+      forecast = `বয়স ${a}: পরম প্রজ্ঞা, আধ্যাত্মিক পরিতৃপ্তি ও ধ্যানের মাধ্যমে পূর্ণাঙ্গ মোক্ষমুখীন জীবনযাপন।`;
+    }
+  } else if (lang === "hi") {
+    if (a <= 7) {
+      forecast = `आयु ${a}: शैशव की मजबूत नींव, रोग प्रतिरोधक क्षमता का विकास एवं मातृ-संरक्षण का काल।`;
+    } else if (a <= 14) {
+      forecast = `आयु ${a}: द्वितीय चक्र में विद्या अध्ययन, बौद्धिक प्रखरता व रचनात्मक क्षमताओं का प्रस्फुटन।`;
+    } else if (a <= 21) {
+      forecast = `आयु ${a}: यौवन का शुभारंभ, संवेदनात्मक परिपक्वता एवं भविष्य की दिशा तय करने का समय।`;
+    } else if (a <= 28) {
+      forecast = `आयु ${a}: आजीविका की सुदृढ़ स्थापना, सामाजिक प्रतिष्ठा एवं आत्मनिर्भरता की प्राप्ति।`;
+    } else if (a <= 35) {
+      forecast = `आयु ${a}: महत्वाकांक्षा की पराकाष्ठा, नेतृत्व की क्षमता एवं भाग्य रेखा का प्रबल प्रभाव।`;
+    } else if (a <= 42) {
+      forecast = `आयु ${a}: आर्थिक स्थायित्व, प्रज्ञा का विकास एवं कार्यक्षेत्र में सर्वोच्च अधिकार।`;
+    } else if (a <= 49) {
+      forecast = `आयु ${a}: संचित कर्मों की सुरक्षा, पारिवारिक समृद्धि एवं सामाजिक प्रतिष्ठा का विस्तार।`;
+    } else if (a <= 56) {
+      forecast = `आयु ${a}: आध्यात्मिक चेतना का उदय, मार्गदर्शक की भूमिका एवं रूपांतरणकारी अनुभव।`;
+    } else if (a <= 63) {
+      forecast = `आयु ${a}: जीवन भर की साधना का फल, मानसिक शांति एवं पारिवारिक प्रतिष्ठा का उत्कर्ष।`;
+    } else {
+      forecast = `आयु ${a}: परम प्रज्ञा, आध्यात्मिक संतोष एवं मोक्ष मार्ग पर अग्रसरता।`;
+    }
+  } else {
+    if (a <= 7) {
+      forecast = `Age ${a}: Foundational constitutional formation, cellular immunity buildup, and maternal protection.`;
+    } else if (a <= 14) {
+      forecast = `Age ${a}: Rapid cognitive growth, academic exploration, and crystallization of latent talents.`;
+    } else if (a <= 21) {
+      forecast = `Age ${a}: Emotional maturation, identity discovery, and setting the cornerstone for professional life.`;
+    } else if (a <= 28) {
+      forecast = `Age ${a}: Career acceleration, self-sovereignty, and vital social or relational milestones.`;
+    } else if (a <= 35) {
+      forecast = `Age ${a}: Executive drive, peak career productivity, and strong manifestation of the fate corridor.`;
+    } else if (a <= 42) {
+      forecast = `Age ${a}: Strategic consolidation, wealth stabilization, and commanding intellectual authority.`;
+    } else if (a <= 49) {
+      forecast = `Age ${a}: Safeguarding personal empire, philosophical grounding, and intergenerational stewardship.`;
+    } else if (a <= 56) {
+      forecast = `Age ${a}: Transformative mid-life realignment, mentorship role, and awakening of higher spiritual intuition.`;
+    } else if (a <= 63) {
+      forecast = `Age ${a}: Harvesting the fruits of life-long purushartha, emotional tranquility, and earned respect.`;
+    } else {
+      forecast = `Age ${a}: Venerable wisdom, profound spiritual inner peace, and dharmic fulfillment.`;
+    }
+  }
+
+  return {
+    age: a,
+    cycle,
+    planetName,
+    vitality,
+    forecast,
+  };
+}
+
 export default function PalmReadingPage() {
   const { isSignedIn } = useAuth();
   const { getFeature, checkAccess, walletBalance, refresh: refreshWallet } = useFeaturePricing();
@@ -149,7 +252,20 @@ export default function PalmReadingPage() {
   const [scanning, setScanning] = React.useState(false);
   const [result, setResult] = React.useState<PalmScanResponse | null>(null);
   const [activeTab, setActiveTab] = React.useState<
-    "overview" | "timeline" | "archetype" | "marriage" | "loops" | "medical" | "kundli_sync" | "sacred_marks" | "lines" | "scan3d" | "forecasts" | "details"
+    | "overview"
+    | "dual_hand"
+    | "fingers_thumb"
+    | "timeline"
+    | "archetype"
+    | "marriage"
+    | "loops"
+    | "medical"
+    | "kundli_sync"
+    | "sacred_marks"
+    | "lines"
+    | "scan3d"
+    | "forecasts"
+    | "details"
   >("overview");
   const [selectedAge, setSelectedAge] = React.useState<number>(30);
   const [showOverlay, setShowOverlay] = React.useState(true);
@@ -1073,16 +1189,21 @@ export default function PalmReadingPage() {
                   )}
                 </div>
 
+                {/* Audio Guru Voice Player */}
+                <AudioGuruPlayer result={result} language={language} className="mb-6" />
+
                 {/* Navigation Tabs */}
                 <div className="flex items-center gap-1.5 overflow-x-auto border-b border-border pb-1">
                   {[
                     { id: "overview", label: t.tabs.overview, icon: Layers },
+                    { id: "dual_hand", label: t.tabs.dual_hand, icon: Compass },
+                    { id: "fingers_thumb", label: t.tabs.fingers_thumb, icon: Hand },
+                    { id: "timeline", label: t.tabs.timeline, icon: Calendar },
                     { id: "archetype", label: t.tabs.archetype, icon: Compass },
                     { id: "marriage", label: t.tabs.marriage, icon: Heart },
                     { id: "loops", label: t.tabs.loops, icon: Waves },
                     { id: "medical", label: t.tabs.medical, icon: Activity },
                     { id: "kundli_sync", label: t.tabs.kundli_sync, icon: Sun },
-                    { id: "timeline", label: t.tabs.timeline, icon: Calendar },
                     { id: "sacred_marks", label: t.tabs.sacred_marks, icon: Sparkles },
                     { id: "lines", label: t.tabs.lines, icon: Eye },
                     { id: "scan3d", label: t.tabs.scan3d, icon: Move3d },
@@ -1457,6 +1578,22 @@ export default function PalmReadingPage() {
                       ))}
                     </div>
                   </div>
+                )}
+
+                {/* Tab: Dual Hand Synastry (দ্বি-হস্ত তুলনা বিচার: প্রারব্ধ বনাম পুরুষার্থ) */}
+                {activeTab === "dual_hand" && (
+                  <DualHandSynastryView
+                    result={result}
+                    language={language}
+                    onUpdateDualHand={(dual) => {
+                      setResult((prev) => (prev ? { ...prev, dual_hand_synastry: dual } : null));
+                    }}
+                  />
+                )}
+
+                {/* Tab: Fingers, Thumb & Lunula Health (অঙ্গুলি, বৃদ্ধাঙ্গুষ্ঠ ও নখ বিচার) */}
+                {activeTab === "fingers_thumb" && (
+                  <FingersThumbView result={result} language={language} />
                 )}
 
                 {/* Tab: Vedic Temperament Archetypes (Nature through palm.docx) */}
@@ -1972,58 +2109,102 @@ export default function PalmReadingPage() {
                             <div>
                               <span className="text-[10px] font-black uppercase tracking-wider text-brand-700">
                                 {language === "bn"
-                                  ? "ইন্টারেক্টিভ বয়স নির্দেশক"
+                                  ? "১ বছরের রেজোলিউশনে ইন্টারঅ্যাক্টিভ বয়স রুলার"
                                   : language === "hi"
-                                  ? "इंटरैक्टिव आयु चयनकर्ता"
-                                  : "Interactive Age Selector"}
+                                  ? "1-वर्षीय सूक्ष्म कालचक्र रूलर"
+                                  : "1-Year Resolution Precision Timeline Ruler"}
                               </span>
                               <h4 className="text-base font-black text-foreground">
                                 {language === "bn"
-                                  ? "বয়স নির্বাচন করুন:"
+                                  ? "নির্বাচিত বয়স:"
                                   : language === "hi"
-                                  ? "आयु का चयन करें:"
-                                  : "Select an Age Epoch:"}{" "}
+                                  ? "चयनित आयु:"
+                                  : "Selected Age:"}{" "}
                                 <span className="text-brand-600 font-extrabold">{selectedAge} {language === "bn" ? "বছর" : language === "hi" ? "वर्ष" : "Years"}</span>
                               </h4>
                             </div>
 
                             {/* Milestone Quick Buttons */}
-                            <div className="flex flex-wrap gap-2">
-                              {result.timeline.map((m) => (
+                            <div className="flex flex-wrap gap-1.5">
+                              {[7, 14, 21, 28, 35, 42, 49, 56, 63, 70].map((epochAge) => (
                                 <button
-                                  key={m.age}
+                                  key={epochAge}
                                   type="button"
-                                  onClick={() => setSelectedAge(m.age)}
+                                  onClick={() => setSelectedAge(epochAge)}
                                   className={cn(
-                                    "rounded-xl px-3 py-1.5 text-xs font-bold transition-all",
-                                    selectedAge === m.age
+                                    "rounded-xl px-2.5 py-1 text-xs font-bold transition-all",
+                                    selectedAge === epochAge
                                       ? "bg-brand-500 text-white shadow-sm scale-105"
                                       : "bg-surface-muted text-muted-foreground hover:bg-brand-50 hover:text-brand-700",
                                   )}
                                 >
-                                  {m.age} {language === "bn" ? "বছর" : language === "hi" ? "वर्ष" : "yrs"}
+                                  {epochAge} {language === "bn" ? "ব" : language === "hi" ? "व" : "y"}
                                 </button>
                               ))}
                             </div>
                           </div>
 
-                          {/* Range Slider */}
+                          {/* 1-Year Range Slider */}
                           <div className="space-y-2 pt-2">
                             <input
                               type="range"
-                              min={18}
-                              max={75}
+                              min={1}
+                              max={90}
                               value={selectedAge}
                               onChange={(e) => setSelectedAge(Number(e.target.value))}
-                              className="w-full accent-brand-500 cursor-pointer h-2 bg-brand-100 rounded-lg appearance-none"
+                              className="w-full accent-brand-500 cursor-pointer h-2.5 bg-brand-100 rounded-lg appearance-none"
                             />
                             <div className="flex justify-between text-[10px] font-bold text-muted-foreground">
-                              <span>18 {language === "bn" ? "বছর (কৈশোর)" : language === "hi" ? "वर्ष (किशोरावस्था)" : "yrs"}</span>
-                              <span>35 {language === "bn" ? "বছর (যৌবন)" : language === "hi" ? "वर्ष (युवावस्था)" : "yrs"}</span>
-                              <span>50 {language === "bn" ? "বছর (প্রৌঢ়)" : language === "hi" ? "वर्ष (प्रौढ़ावस्था)" : "yrs"}</span>
-                              <span>75+ {language === "bn" ? "বছর (বার্ধক্য)" : language === "hi" ? "वर्ष (वृद्धावस्था)" : "yrs"}</span>
+                              <span>1 {language === "bn" ? "বছর (শৈশব)" : "yr"}</span>
+                              <span>21 {language === "bn" ? "বছর (যৌবন)" : "yrs"}</span>
+                              <span>35 {language === "bn" ? "বছর (ক্যারিয়ার)" : "yrs"}</span>
+                              <span>50 {language === "bn" ? "বছর (প্রৌঢ়)" : "yrs"}</span>
+                              <span>70+ {language === "bn" ? "বছর (সাধনা)" : "yrs"}</span>
+                              <span>90 {language === "bn" ? "বছর (পরমায়ু)" : "yrs"}</span>
                             </div>
                           </div>
+
+                          {/* Live 1-Year Resolution Prediction Card */}
+                          {(() => {
+                            const yDetail = getYear1YearDetail(selectedAge, language);
+                            return (
+                              <div className="rounded-2xl border border-brand-300 bg-gradient-to-br from-brand-50/70 via-white to-amber-50/50 p-5 space-y-3 shadow-xs">
+                                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-brand-200/60 pb-3">
+                                  <div className="flex items-center gap-2">
+                                    <span className="rounded-full bg-brand-500 text-white px-3 py-1 text-xs font-black shadow-xs">
+                                      {language === "bn" ? `বয়স ${selectedAge} বছর` : language === "hi" ? `आयु ${selectedAge} वर्ष` : `Age ${selectedAge} Years`}
+                                    </span>
+                                    <span className="rounded-full bg-amber-100 text-amber-900 px-3 py-1 text-xs font-extrabold border border-amber-300">
+                                      {language === "bn"
+                                        ? `কাইরো ${yDetail.cycle}ম চক্র (${yDetail.planetName})`
+                                        : language === "hi"
+                                        ? `चक्र ${yDetail.cycle} (${yDetail.planetName})`
+                                        : `Cheiro Cycle ${yDetail.cycle} (${yDetail.planetName})`}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                                    <Activity className="size-3 text-emerald-600" />
+                                    <span>
+                                      {language === "bn" ? "জীবনীশক্তি প্রবাহ:" : "Vitality Index:"} {yDetail.vitality}%
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <p className="text-xs font-medium leading-relaxed text-foreground">
+                                  {yDetail.forecast}
+                                </p>
+
+                                <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1">
+                                  <span>
+                                    📐 {language === "bn" ? "জীবনরেখা পরিমাপ:" : "Life Corridor:"} {Math.min(100, Math.round((selectedAge / 85) * 100))}%
+                                  </span>
+                                  <span className="text-brand-700 font-bold">
+                                    ★ {language === "bn" ? "১ বছরের রেজোলিউশন পূর্বাভাস" : "1-Year Resolution Prediction"}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })()}
 
                           {/* Selected Age Milestone Details */}
                           {(() => {

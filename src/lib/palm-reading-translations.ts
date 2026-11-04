@@ -62,6 +62,8 @@ export interface PalmTranslations {
     forecasts: string;
     details: string;
     scan3d: string;
+    dual_hand: string;
+    fingers_thumb: string;
   };
 
   elements: {
@@ -144,6 +146,8 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
       forecasts: "ভবিষ্যদ্বাণী",
       details: "জ্যামিতিক পরিমাপ",
       scan3d: "ত্রিমাত্রিক ৩ডি স্ক্যান",
+      dual_hand: "দ্বি-হস্ত বিচার (কর্ম রূপান্তর)",
+      fingers_thumb: "অঙ্গুলি ও নখ বিচার",
     },
 
     elements: {
@@ -308,6 +312,8 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
       forecasts: "भविष्यवाणी",
       details: "माप और अनुपात",
       scan3d: "त्रिविमीय 3D स्कैन",
+      dual_hand: "द्वि-हस्त मिलान (कर्म रूपांतरण)",
+      fingers_thumb: "उंगली व नख विचार",
     },
 
     elements: {
@@ -472,6 +478,8 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
       forecasts: "Life Forecasts",
       details: "Measurements",
       scan3d: "3D Palm Scan",
+      dual_hand: "Dual-Hand Synastry",
+      fingers_thumb: "Fingers & Thumb",
     },
 
     elements: {

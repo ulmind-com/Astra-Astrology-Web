@@ -76,6 +76,8 @@ export const endpoints = {
     scan: "/palm-reading/scan",
     mine: "/palm-reading/mine",
     detail: (id: string) => `/palm-reading/mine/${id}`,
+    timelineAge: "/palm-reading/timeline-age",
+    dualMatch: "/palm-reading/dual-match",
   },
   faceReading: {
     availability: "/face-reading/availability",

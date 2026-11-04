@@ -387,6 +387,22 @@ export const palmReadingApi = {
   mine: () => api.get<PalmReadingRecord[]>(endpoints.palmReading.mine),
 
   detail: (id: string) => api.get<PalmReadingRecord>(endpoints.palmReading.detail(id)),
+
+  /** Classical 1-year resolution palm timeline forecast */
+  timelineAge: (age: number, gender: string = "male") =>
+    api.get<any>(endpoints.palmReading.timelineAge, {
+      query: { age, gender },
+      auth: false,
+    }),
+
+  /** Bilateral dual-hand synastry (Prarabdha vs Purushartha karma evolution) */
+  dualMatch: (payload: {
+    left_hand_image?: string;
+    right_hand_image?: string;
+    left_hand_measurements?: Record<string, any>;
+    right_hand_measurements?: Record<string, any>;
+    primary_handedness?: string;
+  }) => api.post<any>(endpoints.palmReading.dualMatch, payload),
 };
 
 export const faceReadingApi = {
