@@ -318,12 +318,41 @@ export function formatEarning(paise: number): string {
 }
 
 // ------------------------------------------------------------- appointments
-export type Appointment = S["AppointmentOut"];
+export type VedicPrescription = {
+  gemstone?: string | null;
+  rudraksha?: string | null;
+  mantra?: string | null;
+  mantra_count?: number | null;
+  daan_remedy?: string | null;
+  astrologer_notes?: string | null;
+  updated_at?: string | null;
+};
+
+export type MuhuratSlotRating = {
+  choghadiya: string;
+  quality: "super_auspicious" | "auspicious" | "neutral" | "remedial" | "normal";
+  is_rahu_kaal: boolean;
+  is_abhijit: boolean;
+  badge_bn: string;
+  badge_hi: string;
+  badge_en: string;
+};
+
+export type Appointment = Omit<S["AppointmentOut"], "peer"> & {
+  consultation_pillar?: string | null;
+  kundli_id?: string | null;
+  birth_details?: Record<string, any> | null;
+  prescription?: VedicPrescription | null;
+  muhurat_type?: string | null;
+  peer?: S["AppointmentPeer"] | null;
+};
 export type AppointmentQuote = S["AppointmentQuote"];
 export type AppointmentStatus = S["AppointmentStatus"];
 export type AppointmentCard = S["AppointmentCardOut"];
 export type AvailabilityWindow = S["WindowOut"];
-export type AppointmentDayView = S["DayView"];
+export type AppointmentDayView = S["DayView"] & {
+  muhurat_ratings?: Record<string, MuhuratSlotRating> | null;
+};
 
 /** What a booking's state is called on screen. */
 export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {

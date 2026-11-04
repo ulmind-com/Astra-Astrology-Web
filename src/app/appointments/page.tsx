@@ -48,12 +48,77 @@ import { appointmentApi, astrologerApi, reviewApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { cn, timeAgo } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
+import { useLanguage } from "@/providers/language-provider";
+import { getSlotMuhurat, type SlotMuhuratInfo } from "@/lib/muhurat-helper";
 import {
   SKILL_LABELS,
   type AstrologerPublic,
   type Review,
   type Skill,
 } from "@/types";
+
+export const CONSULTATION_PILLARS = [
+  {
+    id: "career_wealth",
+    labelEn: "Career & Wealth",
+    labelBn: "কর্মজীবন ও ধনসম্পদ",
+    labelHi: "करियर और धन",
+    icon: "💼",
+    descEn: "Job promotions, business growth, financial prosperity & timing.",
+    descBn: "চাকরির পদোন্নতি, আর্থিক সমৃদ্ধি, ব্যবসায়িক লাভ ও শুভ সময়কাল।",
+    descHi: "नौकरी पदोन्नति, वित्तीय लाभ, व्यापार वृद्धि व अनुकूल समय।",
+  },
+  {
+    id: "love_marriage",
+    labelEn: "Love & Kundali Milan",
+    labelBn: "প্রেম ও বিবাহ মিলন",
+    labelHi: "विवाह व प्रेम संबंध",
+    icon: "💍",
+    descEn: "Compatibility, marriage timing, Ashtakoot Gun Milan, Manglik remedies.",
+    descBn: "যোটক বিচার, বিবাহের শুভ মুহূর্ত, মাঙ্গলিক দোষ ও দাম্পত্য সুখ।",
+    descHi: "गुण मिलान, विवाह का समय, मांगलिक दोष निवारण व दांपत्य सुख।",
+  },
+  {
+    id: "health_longevity",
+    labelEn: "Health & Vitality",
+    labelBn: "স্বাস্থ্য ও দীর্ঘায়ু",
+    labelHi: "स्वास्थ्य व आरोग्यता",
+    icon: "🌿",
+    descEn: "Planetary affliction on physical & mental well-being, Vedic remedies.",
+    descBn: "শারীরিক ও মানসিক গ্রহদোষ, আয়ু বিচার এবং বৈদিক রোগ প্রতিকার।",
+    descHi: "ग्रह जनित स्वास्थ्य समस्या, मानसिक शांति व वैदिक उपचार।",
+  },
+  {
+    id: "dosha_graha_shanti",
+    labelEn: "Graha Shanti & Doshas",
+    labelBn: "গ্রহশান্তি ও কালসর্প দোষ",
+    labelHi: "दोष निवारण व शांति",
+    icon: "🔥",
+    descEn: "Kalsarpa, Sade Sati, Pitra Dosha, Rahu-Ketu mitigation.",
+    descBn: "কালসর্প, সাড়ে সাতি, পিতৃ দোষ এবং রাহু-কেতু শান্তির বৈদিক প্রতিবিধান।",
+    descHi: "कालसर्प, साढ़े साती, पितृ दोष व राहु-केतु निवारण।",
+  },
+  {
+    id: "business_expansion",
+    labelEn: "Business & Investments",
+    labelBn: "ব্যবসা ও বাণিজ্য বিস্তার",
+    labelHi: "व्यापार व निवेश",
+    icon: "📈",
+    descEn: "Partnership compatibility, auspicious launch dates, growth strategies.",
+    descBn: "ব্যবসায়িক অংশীদারি, নতুন উদ্যোগের শুভ দিন ও অর্থনৈতিক সমৃদ্ধি।",
+    descHi: "साझेदारी, नए कार्य का शुभारंभ व व्यावसायिक समृद्धि।",
+  },
+  {
+    id: "spiritual_guidance",
+    labelEn: "Spiritual Path & Moksha",
+    labelBn: "আধ্যাত্মিক সাধনা ও জ্ঞান",
+    labelHi: "अध्यात्म व मोक्ष मार्ग",
+    icon: "🕉️",
+    descEn: "Ishta Devata, soul purpose, mantra sadhana, karmic liberation.",
+    descBn: "ইষ্ট দেবতা নির্ণয়, আত্মার উদ্দেশ্য, সিদ্ধ মন্ত্র সাধনা ও কর্মফল শোধন।",
+    descHi: "इष्ट देवता, जीवन का उद्देश्य, मंत्र साधना व कर्म शुद्धि।",
+  },
+] as const;
 
 function rupees(paise: number): string {
   return (paise / 100).toLocaleString("en-IN", { maximumFractionDigits: 2 });
@@ -117,7 +182,8 @@ function AppointmentsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, user } = useAuth();
+  const { language } = useLanguage();
 
   // 1. Data fetching: Bookable astrologers
   const {
@@ -230,7 +296,23 @@ function AppointmentsContent() {
   const [selectedSlot, setSelectedSlot] = React.useState<Date | null>(null);
   const [minutes, setMinutes] = React.useState<number>(30);
   const [userNote, setUserNote] = React.useState("");
+  const [onlyAuspiciousSlots, setOnlyAuspiciousSlots] = React.useState(false);
+  const [selectedPillar, setSelectedPillar] = React.useState<string>("career_wealth");
+  const [birthDetails, setBirthDetails] = React.useState({
+    name: "",
+    date_of_birth: "",
+    time_of_birth: "",
+    place_of_birth: "",
+    gender: "male",
+  });
   const [isConfirmModalOpen, setIsConfirmModalOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    const defaultName = user ? (user.full_name || user.first_name || "") : "";
+    if (defaultName && !birthDetails.name) {
+      setBirthDetails((prev) => ({ ...prev, name: defaultName }));
+    }
+  }, [user, birthDetails.name]);
 
   const handleSelectDay = (key: string) => {
     setSelectedDayKey(key);
@@ -262,11 +344,25 @@ function AppointmentsContent() {
     enabled: Boolean(selectedAstrologer?.id),
   });
 
-  // Calculate available start times
-  const availableSlots = React.useMemo(() => {
+  // Calculate available start times & enrich with Vedic Muhurat
+  const rawSlots = React.useMemo(() => {
     if (!dayView) return [];
     return startsThatFit(dayView.windows, dayView.booked, minutes, dayView.slot_minutes, selectedDayKey);
   }, [dayView, minutes, selectedDayKey]);
+
+  const slotsWithMuhurat = React.useMemo(() => {
+    return rawSlots.map((slot) => {
+      const muhurat = getSlotMuhurat(slot, language);
+      return { slot, muhurat };
+    });
+  }, [rawSlots, language]);
+
+  const availableSlots = React.useMemo(() => {
+    if (!onlyAuspiciousSlots) return slotsWithMuhurat;
+    return slotsWithMuhurat.filter(
+      (item) => item.muhurat.quality === "super_auspicious" || item.muhurat.quality === "auspicious",
+    );
+  }, [slotsWithMuhurat, onlyAuspiciousSlots]);
 
   // 6. Query: Quote for booking
   const { data: quote, isLoading: loadingQuote } = useQuery({
@@ -290,14 +386,23 @@ function AppointmentsContent() {
         starts_at: selectedSlot!.toISOString(),
         minutes,
         note: userNote.trim() || null,
+        consultation_pillar: selectedPillar,
+        birth_details: birthDetails.date_of_birth ? birthDetails : undefined,
       }),
     onSuccess: (appointment) => {
       void queryClient.invalidateQueries({ queryKey: ["appointments"] });
       void queryClient.invalidateQueries({ queryKey: ["wallet"] });
       setIsConfirmModalOpen(false);
-      toast.success("Appointment slot reserved successfully!", {
-        description: `${new Date(appointment.starts_at).toLocaleString()} · ${appointment.minutes} minutes session`,
-      });
+      toast.success(
+        language === "bn"
+          ? "অ্যাপয়েন্টমেন্ট স্লট সফলভাবে সংরক্ষিত হয়েছে!"
+          : language === "hi"
+          ? "अपॉइंटमेंट स्लॉट सफलतापूर्वक बुक हो गया!"
+          : "Appointment slot reserved successfully!",
+        {
+          description: `${new Date(appointment.starts_at).toLocaleString()} · ${appointment.minutes} minutes session`,
+        },
+      );
       router.push("/account/appointments");
     },
     onError: (e: ApiError) => {
@@ -1027,10 +1132,10 @@ function AppointmentsContent() {
 
                     {/* Bottom Box: Visit Hours / Available Time Slots */}
                     <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-2xs space-y-4">
-                      <div className="flex items-center justify-between pb-3 border-b border-border/60">
+                      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-border/60">
                         <div>
                           <h3 className="font-display text-base font-bold text-foreground">
-                            Visit Hours
+                            {language === "bn" ? "উপলব্ধ সময়সূচী ও মুহূর্ত" : language === "hi" ? "उपलब्ध समय व मुहूर्त" : "Visit Hours & Muhurat"}
                           </h3>
                           <p className="text-xs text-muted-foreground">
                             {selectedDateLabel}
@@ -1044,6 +1149,38 @@ function AppointmentsContent() {
                         )}
                       </div>
 
+                      {/* Auspicious Muhurat Filter Banner */}
+                      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-surface-muted/60 p-2.5 border border-border/60 text-xs">
+                        <div className="flex items-center gap-1.5 font-medium text-foreground">
+                          <Sparkles className="size-3.5 text-amber-500" />
+                          <span className="text-[11px]">
+                            {language === "bn"
+                              ? "বৈদিক চোঘড়িয়া ও অভিজিৎ মুহূর্ত"
+                              : language === "hi"
+                              ? "वैदिक चौघड़िया व अभिजित मुहूर्त"
+                              : "Vedic Choghadiya & Abhijit Engine"}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setOnlyAuspiciousSlots((prev) => !prev)}
+                          className={cn(
+                            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all border",
+                            onlyAuspiciousSlots
+                              ? "bg-amber-500/20 text-amber-800 dark:text-amber-200 border-amber-500/60 shadow-xs"
+                              : "bg-card text-muted-foreground hover:text-foreground border-border/70 hover:border-amber-500/40",
+                          )}
+                        >
+                          <span>⭐️</span>
+                          <span>
+                            {onlyAuspiciousSlots
+                              ? (language === "bn" ? "শুধুমাত্র শুভ মুহূর্ত" : language === "hi" ? "केवल शुभ मुहूर्त" : "Auspicious Only")
+                              : (language === "bn" ? "সব স্লট দেখুন" : language === "hi" ? "सभी स्लॉट देखें" : "All Slots")}
+                          </span>
+                        </button>
+                      </div>
+
                       {/* Loading Day State */}
                       {loadingDayView ? (
                         <div className="py-8 text-center">
@@ -1053,14 +1190,24 @@ function AppointmentsContent() {
                         <div className="rounded-xl border border-border/60 bg-surface-muted/30 p-5 text-center space-y-2">
                           <Clock className="mx-auto size-7 text-muted-foreground/70 mb-1" />
                           <p className="text-xs font-semibold text-foreground">
-                            No slots available on {selectedDateLabel}
+                            {onlyAuspiciousSlots
+                              ? (language === "bn" ? "এই তারিখে কোনো শুভ মুহূর্তের খালি স্লট নেই" : "No auspicious slots found on this date")
+                              : `No slots available on ${selectedDateLabel}`}
                           </p>
                           <p className="text-[11px] text-muted-foreground max-w-xs mx-auto">
-                            {selectedDayKey === todayKey
+                            {onlyAuspiciousSlots ? (
+                              <button
+                                type="button"
+                                onClick={() => setOnlyAuspiciousSlots(false)}
+                                className="text-brand-600 font-semibold hover:underline"
+                              >
+                                {language === "bn" ? "সব সাধারণ স্লট দেখতে ক্লিক করুন" : "Click to view all standard open slots"}
+                              </button>
+                            ) : selectedDayKey === todayKey
                               ? "Today's consultation hours are closed or fully booked."
                               : "The astrologer has no open availability windows on this date. Please pick another date above."}
                           </p>
-                          {selectedDayKey === todayKey && (
+                          {selectedDayKey === todayKey && !onlyAuspiciousSlots && (
                             <div className="pt-2">
                               <Button
                                 size="sm"
@@ -1074,22 +1221,44 @@ function AppointmentsContent() {
                           )}
                         </div>
                       ) : (
-                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-56 overflow-y-auto pr-1">
-                          {availableSlots.map((slot) => {
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-64 overflow-y-auto pr-1">
+                          {availableSlots.map(({ slot, muhurat }) => {
                             const isSelected = selectedSlot?.getTime() === slot.getTime();
+                            const isAuspicious = muhurat.quality === "super_auspicious" || muhurat.quality === "auspicious";
+                            const isRahuKaal = muhurat.is_rahu_kaal;
                             return (
                               <button
                                 key={slot.toISOString()}
                                 type="button"
                                 onClick={() => setSelectedSlot(slot)}
                                 className={cn(
-                                  "rounded-xl py-2 px-1 text-xs font-semibold tabular-nums transition-all text-center border shadow-2xs",
+                                  "flex flex-col items-center justify-center rounded-xl p-2.5 text-xs font-semibold tabular-nums transition-all border shadow-2xs group relative",
                                   isSelected
-                                    ? "bg-brand-600 text-white border-brand-600 shadow-xs scale-[1.02]"
+                                    ? "bg-brand-600 text-white border-brand-600 shadow-sm scale-[1.02]"
+                                    : isAuspicious
+                                    ? "bg-amber-500/10 border-amber-500/40 text-foreground hover:border-amber-500 hover:bg-amber-500/15"
+                                    : isRahuKaal
+                                    ? "bg-surface-muted/60 text-muted-foreground border-rose-500/30 hover:border-rose-500/60"
                                     : "bg-surface-muted text-foreground border-border/70 hover:border-brand-500/50 hover:bg-surface-muted/80",
                                 )}
                               >
-                                {clock(slot)}
+                                <span className="text-xs font-bold">{clock(slot)}</span>
+                                <span
+                                  className={cn(
+                                    "mt-1 inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[9.5px] font-medium leading-none",
+                                    isSelected
+                                      ? "bg-white/20 text-white"
+                                      : isAuspicious
+                                      ? "bg-amber-500/20 text-amber-800 dark:text-amber-200"
+                                      : isRahuKaal
+                                      ? "bg-rose-500/15 text-rose-700 dark:text-rose-300"
+                                      : "bg-border/60 text-muted-foreground",
+                                  )}
+                                >
+                                  {isAuspicious && <span>⭐️</span>}
+                                  {isRahuKaal && <span>⚠️</span>}
+                                  <span>{muhurat.badge}</span>
+                                </span>
                               </button>
                             );
                           })}
@@ -1104,11 +1273,11 @@ function AppointmentsContent() {
                           onClick={() => setIsConfirmModalOpen(true)}
                           className="w-full text-xs font-bold"
                         >
-                          Book an appointment
+                          {language === "bn" ? "অ্যাপয়েন্টমেন্ট নিশ্চিত করুন" : language === "hi" ? "अपॉइंटमेंट बुक करें" : "Book an appointment"}
                         </Button>
                         {!selectedSlot && availableSlots.length > 0 && (
                           <p className="mt-2 text-center text-[11px] text-muted-foreground">
-                            Please select a time slot above to proceed.
+                            {language === "bn" ? "এগিয়ে যেতে উপরে একটি সময় স্লট নির্বাচন করুন।" : "Please select a time slot above to proceed."}
                           </p>
                         )}
                       </div>
@@ -1121,26 +1290,162 @@ function AppointmentsContent() {
         </div>
 
         {/* =========================================================================
-            BOOKING CONFIRMATION MODAL
+            BOOKING CONFIRMATION MODAL WITH VEDIC PILLARS & KUNDLI ATTACHMENT
         ========================================================================= */}
         <Modal
           open={isConfirmModalOpen}
           onClose={() => setIsConfirmModalOpen(false)}
-          title="Confirm Appointment Booking"
-          size="md"
+          title={language === "bn" ? "অ্যাপয়েন্টমেন্ট ও বৈদিক পরিকাঠামো বুকিং" : language === "hi" ? "अपॉइंटमेंट व वैदिक विवरण पुष्टि" : "Confirm Appointment Booking"}
+          size="lg"
         >
           {selectedAstrologer && selectedSlot && (
-            <div className="space-y-4 pt-2 text-xs">
+            <div className="space-y-4 pt-2 text-xs max-h-[75vh] overflow-y-auto pr-1">
               {/* Astrologer preview */}
               <div className="flex items-center gap-3 rounded-2xl bg-surface-muted p-3.5 border border-border/60">
                 <Avatar src={selectedAstrologer.profile_image_url} name={selectedAstrologer.display_name} size="md" />
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <h4 className="font-display font-bold text-sm text-foreground truncate">
                     {selectedAstrologer.display_name}
                   </h4>
                   <p className="text-[11px] text-muted-foreground">
-                    {SKILL_LABELS[selectedAstrologer.skills[0] || "vedic_astrology"]}
+                    {SKILL_LABELS[selectedAstrologer.skills[0] || "vedic_astrology"]} · {selectedAstrologer.experience_years} years experience
                   </p>
+                </div>
+              </div>
+
+              {/* Vedic Muhurat Intelligence Box */}
+              {(() => {
+                const sm = getSlotMuhurat(selectedSlot, language);
+                const isAuspicious = sm.quality === "super_auspicious" || sm.quality === "auspicious";
+                const isRahuKaal = sm.is_rahu_kaal;
+                const desc = language === "bn" ? sm.descriptionBn : language === "hi" ? sm.descriptionHi : sm.descriptionEn;
+                return (
+                  <div
+                    className={cn(
+                      "rounded-2xl p-3 border text-xs space-y-1",
+                      isAuspicious
+                        ? "bg-amber-500/10 border-amber-500/30 text-amber-950 dark:text-amber-100"
+                        : isRahuKaal
+                        ? "bg-rose-500/10 border-rose-500/30 text-rose-950 dark:text-rose-100"
+                        : "bg-surface-muted border-border/70 text-foreground",
+                    )}
+                  >
+                    <div className="flex items-center justify-between font-bold text-xs">
+                      <span className="flex items-center gap-1.5">
+                        <Sparkles className="size-3.5 text-amber-600" />
+                        <span>
+                          {sm.badge}{" "}
+                          {language === "bn" ? "চোঘড়িয়া মুহূর্ত" : language === "hi" ? "चौघड़िया मुहूर्त" : "Choghadiya Muhurat"}
+                        </span>
+                      </span>
+                      <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] uppercase font-bold text-amber-700 dark:text-amber-300">
+                        {isAuspicious
+                          ? (language === "bn" ? "⭐️ পরম শুভ সময়" : language === "hi" ? "⭐️ अत्यंत शुभ समय" : "⭐️ Auspicious")
+                          : isRahuKaal
+                          ? (language === "bn" ? "⚠️ রাহুকাল" : language === "hi" ? "⚠️ राहुकाल" : "⚠️ Rahu Kaal")
+                          : (language === "bn" ? "সাধারণ মুহূর্ত" : language === "hi" ? "सामान्य मुहूर्त" : "Neutral")}
+                      </span>
+                    </div>
+                    <p className="text-[11px] opacity-90 leading-relaxed">{desc}</p>
+                  </div>
+                );
+              })()}
+
+              {/* Consultation Focus Pillar Selector */}
+              <div>
+                <label className="block text-[11px] font-bold text-foreground mb-1.5 flex items-center justify-between">
+                  <span>
+                    {language === "bn"
+                      ? "পরামর্শের প্রধান বিষয় (Consultation Focus Pillar)"
+                      : language === "hi"
+                      ? "परामर्श का मुख्य विषय (Focus Pillar)"
+                      : "Consultation Focus Pillar"}
+                  </span>
+                  <span className="text-[10px] text-brand-600 font-semibold">*Required</span>
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {CONSULTATION_PILLARS.map((p) => {
+                    const isSelected = selectedPillar === p.id;
+                    const title = language === "bn" ? p.labelBn : language === "hi" ? p.labelHi : p.labelEn;
+                    const desc = language === "bn" ? p.descBn : language === "hi" ? p.descHi : p.descEn;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setSelectedPillar(p.id)}
+                        className={cn(
+                          "flex flex-col text-left p-2.5 rounded-xl border text-xs transition-all",
+                          isSelected
+                            ? "bg-brand-500/10 border-brand-500 text-foreground ring-1 ring-brand-500/40"
+                            : "bg-surface-muted/50 border-border/70 text-muted-foreground hover:border-brand-500/30 hover:text-foreground",
+                        )}
+                      >
+                        <div className="flex items-center gap-1.5 font-bold text-foreground">
+                          <span>{p.icon}</span>
+                          <span className="truncate">{title}</span>
+                        </div>
+                        <span className="text-[10px] line-clamp-1 mt-0.5 text-muted-foreground opacity-90">
+                          {desc}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Birth Details Snapshot for Kundli pre-reading */}
+              <div className="rounded-2xl border border-border/80 bg-surface-muted/40 p-3.5 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-foreground flex items-center gap-1.5">
+                    <Compass className="size-3.5 text-brand-600" />
+                    <span>
+                      {language === "bn"
+                        ? "জন্ম কুণ্ডলী বিবরণী (ঐচ্ছিক কিন্তু বাঞ্ছনীয়)"
+                        : language === "hi"
+                        ? "जन्म कुंडली विवरण (वैकल्पिक)"
+                        : "Birth Details for Kundli Preparation (Optional)"}
+                    </span>
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {language === "bn" ? "জ্যোতিষীর আগাম বিশ্লেষণের জন্য" : "For astrologer pre-analysis"}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <label className="text-[10px] font-medium text-muted-foreground">
+                      {language === "bn" ? "জন্ম তারিখ (Date of Birth)" : "Date of Birth"}
+                    </label>
+                    <input
+                      type="date"
+                      value={birthDetails.date_of_birth}
+                      onChange={(e) => setBirthDetails((prev) => ({ ...prev, date_of_birth: e.target.value }))}
+                      className="w-full mt-0.5 rounded-lg border border-border bg-card px-2.5 py-1 text-xs text-foreground"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-medium text-muted-foreground">
+                      {language === "bn" ? "জন্ম সময় (Time of Birth)" : "Time of Birth"}
+                    </label>
+                    <input
+                      type="time"
+                      value={birthDetails.time_of_birth}
+                      onChange={(e) => setBirthDetails((prev) => ({ ...prev, time_of_birth: e.target.value }))}
+                      className="w-full mt-0.5 rounded-lg border border-border bg-card px-2.5 py-1 text-xs text-foreground"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="text-[10px] font-medium text-muted-foreground">
+                      {language === "bn" ? "জন্মস্থান (City, State)" : "Place of Birth (City, State)"}
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Kolkata, West Bengal, India"
+                      value={birthDetails.place_of_birth}
+                      onChange={(e) => setBirthDetails((prev) => ({ ...prev, place_of_birth: e.target.value }))}
+                      className="w-full mt-0.5 rounded-lg border border-border bg-card px-2.5 py-1 text-xs text-foreground"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -1187,14 +1492,14 @@ function AppointmentsContent() {
               {/* User Note / Questions */}
               <div>
                 <label className="block text-[11px] font-semibold text-foreground mb-1">
-                  Questions or Birth Details (Optional)
+                  {language === "bn" ? "বিশেষ প্রশ্ন বা বিবরণ (ঐচ্ছিক)" : "Specific Questions / Notes (Optional)"}
                 </label>
                 <Textarea
                   rows={2}
                   maxLength={500}
                   value={userNote}
                   onChange={(e) => setUserNote(e.target.value)}
-                  placeholder="e.g. Birth date, time, place, or specific career/relationship questions..."
+                  placeholder="e.g. Specific career transition, marriage questions, or gemstone requirements..."
                   className="text-xs"
                 />
               </div>
@@ -1229,7 +1534,7 @@ function AppointmentsContent() {
                     className="w-full text-xs font-bold"
                   >
                     <CheckCircle2 className="size-4" />
-                    Confirm & Reserve Slot
+                    {language === "bn" ? "বুকিং ও স্লট নিশ্চিত করুন" : language === "hi" ? "बुकिंग व स्लॉट सुरक्षित करें" : "Confirm & Reserve Slot"}
                   </Button>
                   <p className="mt-2 text-center text-[10px] text-muted-foreground">
                     What you pay now holds the slot and confirms your booking immediately.

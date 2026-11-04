@@ -332,6 +332,9 @@ export const appointmentApi = {
     starts_at: string;
     minutes: number;
     note?: string | null;
+    consultation_pillar?: string | null;
+    kundli_id?: string | null;
+    birth_details?: Record<string, any> | null;
   }) => api.post<Appointment>(endpoints.appointments.book, body),
 
   mine: (upcoming_only = false) =>
