@@ -466,23 +466,43 @@ export function drawHandOverlay(
   }
 }
 
-/** Grab the current video frame as a JPEG, at full sensor resolution. */
-export function captureFrame(video: HTMLVideoElement): Promise<Blob> {
+/** Grab the current video frame as a JPEG, cropped to matching viewfinder aspect ratio. */
+export function captureFrame(
+  video: HTMLVideoElement,
+  targetAspectRatio: number = 3 / 4,
+): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth || 1280;
-    canvas.height = video.videoHeight || 720;
+    const vw = video.videoWidth || 1280;
+    const vh = video.videoHeight || 720;
+    const videoAspect = vw / vh;
+
+    let sx = 0;
+    let sy = 0;
+    let sw = vw;
+    let sh = vh;
+
+    // Crop symmetrically to match the camera viewfinder aspect ratio so the palm fills the frame
+    if (videoAspect > targetAspectRatio) {
+      sw = Math.round(vh * targetAspectRatio);
+      sx = Math.round((vw - sw) / 2);
+    } else if (videoAspect < targetAspectRatio) {
+      sh = Math.round(vw / targetAspectRatio);
+      sy = Math.round((vh - sh) / 2);
+    }
+
+    canvas.width = Math.max(480, sw);
+    canvas.height = Math.max(640, sh);
     const ctx = canvas.getContext("2d");
     if (!ctx) {
       reject(new Error("This browser could not capture the frame."));
       return;
     }
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
     canvas.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error("The frame could not be encoded."))),
       "image/jpeg",
-      // High quality: the creases are a few pixels wide and JPEG artefacts at a
-      // lower setting sit in the same frequency band as the lines themselves.
+      // High quality: creases are fine details, 0.95 preserves sub-pixel edges
       0.95,
     );
   });

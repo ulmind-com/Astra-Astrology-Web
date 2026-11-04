@@ -13,6 +13,8 @@ import {
   Maximize2,
   RefreshCw,
   Gem,
+  CheckCircle2,
+  AlertTriangle,
 } from "lucide-react";
 import { Palm3DViewer } from "@/components/palm-reading/Palm3DViewer";
 import { HAND_CONNECTIONS, type Pt } from "@/lib/palm-measure";
@@ -25,6 +27,7 @@ interface PalmBiometricMeshViewerProps {
   previewUrl: string | null;
   language: PalmLanguage;
   className?: string;
+  onRetake?: () => void;
 }
 
 // Full polygonal Delaunay webbing mesh connecting hand joints in 3D
@@ -68,9 +71,11 @@ export function PalmBiometricMeshViewer({
   previewUrl,
   language,
   className,
+  onRetake,
 }: PalmBiometricMeshViewerProps) {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const imgRef = React.useRef<HTMLImageElement | null>(null);
 
   // View mode switcher:
   // "mesh_overlay" -> 3D Holographic Node & Webbing Mesh over photo
@@ -84,42 +89,22 @@ export function PalmBiometricMeshViewer({
   const [showWebbing, setShowWebbing] = React.useState(true);
   const [showMountBeacons, setShowMountBeacons] = React.useState(true);
   const [showSacredMarks, setShowSacredMarks] = React.useState(true);
-  const [hoveredNode, setHoveredNode] = React.useState<number | null>(null);
 
   const imageSrc =
     viewMode === "crease_lines" && result.overlay_image
       ? result.overlay_image
       : previewUrl || result.overlay_image || "";
 
-  // Normalize 3D landmarks (0.0 - 1.0)
+  // True only if backend detected 21 real landmarks
+  const hasValidLandmarks = Boolean(
+    result.landmarks_3d && Array.isArray(result.landmarks_3d) && result.landmarks_3d.length >= 21
+  );
+
   const landmarks: number[][] = React.useMemo(() => {
     if (result.landmarks_3d && result.landmarks_3d.length >= 21) {
       return result.landmarks_3d;
     }
-    // High-fidelity anatomical fallback mapping
-    return [
-      [0.50, 0.85, 0.0],    // 0: Wrist
-      [0.36, 0.72, 0.02],   // 1: Thumb CMC
-      [0.28, 0.60, 0.03],   // 2: Thumb MCP
-      [0.22, 0.50, 0.01],   // 3: Thumb IP
-      [0.17, 0.42, 0.0],    // 4: Thumb TIP
-      [0.36, 0.40, -0.01],  // 5: Index MCP
-      [0.33, 0.28, -0.02],  // 6: Index PIP
-      [0.31, 0.18, -0.02],  // 7: Index DIP
-      [0.30, 0.09, 0.0],    // 8: Index TIP
-      [0.48, 0.38, -0.01],  // 9: Middle MCP
-      [0.48, 0.24, -0.03],  // 10: Middle PIP
-      [0.48, 0.14, -0.02],  // 11: Middle DIP
-      [0.48, 0.04, 0.0],    // 12: Middle TIP
-      [0.61, 0.40, -0.01],  // 13: Ring MCP
-      [0.62, 0.27, -0.03],  // 14: Ring PIP
-      [0.63, 0.17, -0.02],  // 15: Ring DIP
-      [0.64, 0.08, 0.0],    // 16: Ring TIP
-      [0.74, 0.45, -0.01],  // 17: Pinky MCP
-      [0.77, 0.34, -0.02],  // 18: Pinky PIP
-      [0.79, 0.25, -0.02],  // 19: Pinky DIP
-      [0.80, 0.17, 0.0],    // 20: Pinky TIP
-    ];
+    return [];
   }, [result.landmarks_3d]);
 
   // Render 3D Biometric Mesh Canvas Overlay
@@ -133,7 +118,7 @@ export function PalmBiometricMeshViewer({
     const h = canvas.height;
     ctx.clearRect(0, 0, w, h);
 
-    if (!landmarks || landmarks.length < 21) return;
+    if (!hasValidLandmarks || landmarks.length < 21) return;
 
     const toX = (nx: number) => nx * w;
     const toY = (ny: number) => ny * h;
@@ -166,7 +151,7 @@ export function PalmBiometricMeshViewer({
         ctx.lineTo(toX(p2[0]), toY(p2[1]));
         ctx.lineTo(toX(p3[0]), toY(p3[1]));
         ctx.closePath();
-        ctx.fillStyle = "rgba(56, 189, 248, 0.06)";
+        ctx.fillStyle = "rgba(56, 189, 248, 0.08)";
         ctx.fill();
         ctx.restore();
       }
@@ -178,74 +163,85 @@ export function PalmBiometricMeshViewer({
         const b = landmarks[endIdx];
         if (!a || !b) continue;
 
+        ctx.beginPath();
+        ctx.moveTo(toX(a[0]), toY(a[1]));
+        ctx.lineTo(toX(b[0]), toY(b[1]));
+        ctx.strokeStyle = "rgba(56, 189, 248, 0.40)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Draw Main Bone Skeletal Struts with Laser Glow
+      for (const [aIdx, bIdx] of HAND_CONNECTIONS) {
+        const a = landmarks[aIdx];
+        const b = landmarks[bIdx];
+        if (!a || !b) continue;
+
         const xa = toX(a[0]);
         const ya = toY(a[1]);
         const xb = toX(b[0]);
         const yb = toY(b[1]);
 
         const grad = ctx.createLinearGradient(xa, ya, xb, yb);
-        grad.addColorStop(0, "rgba(52, 211, 153, 0.85)");
-        grad.addColorStop(0.5, "rgba(56, 189, 248, 0.95)");
-        grad.addColorStop(1, "rgba(251, 191, 36, 0.85)");
+        grad.addColorStop(0, "#38bdf8");
+        grad.addColorStop(1, "#0284c7");
 
+        ctx.save();
         ctx.beginPath();
         ctx.moveTo(xa, ya);
         ctx.lineTo(xb, yb);
-        ctx.lineWidth = 1.6;
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = "round";
         ctx.strokeStyle = grad;
-        ctx.shadowColor = "rgba(56, 189, 248, 0.5)";
-        ctx.shadowBlur = 6;
+        ctx.shadowColor = "#38bdf8";
+        ctx.shadowBlur = 8;
         ctx.stroke();
+        ctx.restore();
       }
-      ctx.restore();
     }
 
-    // 2. Central Plain of Mars Hollow Depth Crosshair Radar
-    const wrist = landmarks[0];
-    const idxMcp = landmarks[5];
-    const midMcp = landmarks[9];
-    const pnkMcp = landmarks[17];
-    if (wrist && idxMcp && midMcp && pnkMcp) {
-      const mx = (toX(wrist[0]) + toX(idxMcp[0]) + toX(midMcp[0]) + toX(pnkMcp[0])) / 4;
-      const my = (toY(wrist[1]) + toY(idxMcp[1]) + toY(midMcp[1]) + toY(pnkMcp[1])) / 4;
+    // 2. Draw Plain of Mars (Concave Palm Cup Radar Center)
+    if (landmarks[0] && landmarks[9]) {
+      const mx = (toX(landmarks[0][0]) + toX(landmarks[9][0])) / 2;
+      const my = (toY(landmarks[0][1]) + toY(landmarks[9][1])) / 2;
       const cupDepth = result.palm_cup_depth_mm || 4.8;
 
       ctx.save();
-      // Concentric holographic rings
-      ctx.strokeStyle = "rgba(56, 189, 248, 0.8)";
-      ctx.lineWidth = 1.5;
+      // Glowing radar concentric rings
+      for (let r = 14; r <= 32; r += 9) {
+        ctx.beginPath();
+        ctx.arc(mx, my, r, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(56, 189, 248, 0.35)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Crosshair
       ctx.beginPath();
-      ctx.arc(mx, my, 22, 0, Math.PI * 2);
+      ctx.moveTo(mx - 18, my);
+      ctx.lineTo(mx + 18, my);
+      ctx.moveTo(mx, my - 18);
+      ctx.lineTo(mx, my + 18);
+      ctx.strokeStyle = "rgba(56, 189, 248, 0.65)";
+      ctx.lineWidth = 1.2;
       ctx.stroke();
 
-      ctx.strokeStyle = "rgba(52, 211, 153, 0.4)";
-      ctx.setLineDash([4, 4]);
-      ctx.beginPath();
-      ctx.arc(mx, my, 32, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // Crosshair lines
-      ctx.strokeStyle = "#38bdf8";
-      ctx.beginPath();
-      ctx.moveTo(mx - 14, my);
-      ctx.lineTo(mx + 14, my);
-      ctx.moveTo(mx, my - 14);
-      ctx.lineTo(mx, my + 14);
-      ctx.stroke();
-
-      // Badge
+      // Mars Badge
+      const text = `♂ Mars -${cupDepth.toFixed(1)}mm`;
+      ctx.font = "bold 9px sans-serif";
+      const tw = ctx.measureText(text).width;
       ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
-      ctx.roundRect(mx - 38, my + 26, 76, 20, 6);
+      ctx.roundRect(mx - tw / 2 - 5, my + 24, tw + 10, 16, 4);
       ctx.fill();
       ctx.strokeStyle = "#38bdf8";
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      ctx.font = "bold 9px sans-serif";
       ctx.fillStyle = "#38bdf8";
       ctx.textAlign = "center";
-      ctx.fillText(`♂ Mars -${cupDepth.toFixed(1)}mm`, mx, my + 40);
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, mx, my + 32);
       ctx.restore();
     }
 
@@ -257,9 +253,8 @@ export function PalmBiometricMeshViewer({
         const py = toY(pt[1]);
         const pz = pt[2] || 0;
 
-        // Depth perspective scaling
         const zScale = 1.0 - Math.max(-0.4, Math.min(0.4, pz)) * 0.5;
-        const r = Math.max(4, (w / 140) * zScale);
+        const r = Math.max(3.5, (w / 160) * zScale);
 
         ctx.save();
         // Pulsing outer aura ring
@@ -320,7 +315,7 @@ export function PalmBiometricMeshViewer({
         ctx.save();
         // Beacon ring
         ctx.beginPath();
-        ctx.arc(x, y - 24, 11, 0, Math.PI * 2);
+        ctx.arc(x, y - 22, 10, 0, Math.PI * 2);
         ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
         ctx.fill();
         ctx.strokeStyle = m.color;
@@ -330,19 +325,19 @@ export function PalmBiometricMeshViewer({
         ctx.stroke();
 
         // Planet Symbol
-        ctx.font = "bold 12px sans-serif";
+        ctx.font = "bold 11px sans-serif";
         ctx.fillStyle = m.color;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(m.sym, x, y - 24);
+        ctx.fillText(m.sym, x, y - 22);
 
         // Elevation Badge Tag
         const tagText = `${name} +${elev.toFixed(1)}mm`;
         ctx.font = "bold 9px sans-serif";
         const textW = ctx.measureText(tagText).width;
 
-        ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
-        ctx.roundRect(x - textW / 2 - 6, y - 46, textW + 12, 16, 4);
+        ctx.fillStyle = "rgba(15, 23, 42, 0.88)";
+        ctx.roundRect(x - textW / 2 - 5, y - 42, textW + 10, 15, 4);
         ctx.fill();
         ctx.strokeStyle = m.color;
         ctx.lineWidth = 0.8;
@@ -351,12 +346,12 @@ export function PalmBiometricMeshViewer({
         ctx.fillStyle = "#ffffff";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(tagText, x, y - 38);
+        ctx.fillText(tagText, x, y - 34);
 
         // Pointer line from beacon to joint node
         ctx.beginPath();
-        ctx.moveTo(x, y - 13);
-        ctx.lineTo(x, y - 5);
+        ctx.moveTo(x, y - 12);
+        ctx.lineTo(x, y - 4);
         ctx.strokeStyle = m.color;
         ctx.lineWidth = 1.2;
         ctx.stroke();
@@ -372,41 +367,48 @@ export function PalmBiometricMeshViewer({
         const sy = toY(sm.location_norm[1]);
         const label = language === "bn" ? sm.sanskrit_name : sm.name;
 
+        // Skip if outside canvas
+        if (sx < 10 || sx > w - 10 || sy < 10 || sy > h - 10) continue;
+
         ctx.save();
         // Radiant golden aura
         ctx.beginPath();
-        ctx.arc(sx, sy, 14, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(245, 158, 11, 0.2)";
+        ctx.arc(sx, sy, 11, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(245, 158, 11, 0.22)";
         ctx.fill();
         ctx.strokeStyle = "#fbbf24";
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 1.4;
         ctx.shadowColor = "#f59e0b";
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = 8;
         ctx.stroke();
 
         // Star glyph
-        ctx.font = "11px sans-serif";
+        ctx.font = "10px sans-serif";
         ctx.fillStyle = "#fef08a";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText("✦", sx, sy);
 
-        // Sacred Name Badge
+        // Sacred Name Micro Badge
         ctx.font = "bold 9px sans-serif";
         const wTxt = ctx.measureText(label).width;
-        ctx.fillStyle = "rgba(30, 27, 75, 0.9)";
-        ctx.roundRect(sx - wTxt / 2 - 6, sy + 16, wTxt + 12, 16, 4);
+        const tagX = Math.max(wTxt / 2 + 6, Math.min(w - wTxt / 2 - 6, sx));
+        const tagY = sy + 18 < h - 18 ? sy + 18 : sy - 18;
+
+        ctx.fillStyle = "rgba(18, 18, 28, 0.88)";
+        ctx.roundRect(tagX - wTxt / 2 - 5, tagY - 7, wTxt + 10, 15, 4);
         ctx.fill();
         ctx.strokeStyle = "#fbbf24";
         ctx.lineWidth = 0.8;
         ctx.stroke();
 
         ctx.fillStyle = "#fde047";
-        ctx.fillText(label, sx, sy + 24);
+        ctx.fillText(label, tagX, tagY);
         ctx.restore();
       }
     }
   }, [
+    hasValidLandmarks,
     landmarks,
     language,
     result.mount_elevations_3d,
@@ -516,13 +518,15 @@ export function PalmBiometricMeshViewer({
         </div>
       </div>
 
-      {/* Layer Filters (Visible in mesh overlay mode) */}
-      {viewMode === "mesh_overlay" && (
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-surface-muted/60 px-4 py-2 text-[11px] font-bold">
-          <span className="text-muted-foreground uppercase tracking-wider text-[10px]">
-            {language === "bn" ? "বায়োমেট্রিক লেয়ার ফিল্টার:" : "Biometric Layers:"}
+      {/* Layer Filters (Visible in mesh overlay mode when landmarks exist) */}
+      {viewMode === "mesh_overlay" && hasValidLandmarks && (
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-surface-muted/60 px-4 py-2 text-xs">
+          <span className="text-[11px] font-bold text-muted-foreground flex items-center gap-1.5">
+            <Layers className="size-3.5 text-brand-600" />
+            {language === "bn" ? "বায়োমেট্রিক লেয়ার ফিল্টার:" : "Biometric Layer Controls:"}
           </span>
-          <div className="flex flex-wrap items-center gap-2">
+
+          <div className="flex flex-wrap items-center gap-1.5">
             <button
               type="button"
               onClick={() => setShowNodes(!showNodes)}
@@ -531,7 +535,7 @@ export function PalmBiometricMeshViewer({
                 showNodes ? "bg-brand-500/15 border-brand-500 text-brand-900 font-extrabold" : "bg-surface border-border text-muted-foreground",
               )}
             >
-              ✓ {language === "bn" ? "২১টি ৩ডি নোড" : "21 3D Nodes"}
+              ✓ {language === "bn" ? "২১টি জয়েন্ট নোড" : "21 Landmark Nodes"}
             </button>
 
             <button
@@ -542,7 +546,7 @@ export function PalmBiometricMeshViewer({
                 showWebbing ? "bg-cyan-500/15 border-cyan-500 text-cyan-900 font-extrabold" : "bg-surface border-border text-muted-foreground",
               )}
             >
-              ✓ {language === "bn" ? "ট্রেসেল ওয়্যারফ্রেম" : "Wireframe Mesh"}
+              ✓ {language === "bn" ? "পলিগোনাল ওয়েবিং" : "Polygonal Mesh"}
             </button>
 
             <button
@@ -587,25 +591,53 @@ export function PalmBiometricMeshViewer({
             />
           </div>
         ) : (
-          /* Image Overlay Display with Dynamic HTML5 Canvas */
-          <div ref={containerRef} className="relative w-full max-w-lg mx-auto flex items-center justify-center p-2">
+          /* Image Overlay Display with Pixel-Perfect Canvas Placement */
+          <div ref={containerRef} className="relative w-full max-w-lg mx-auto flex items-center justify-center p-3">
             {imageSrc ? (
-              <>
+              <div className="relative inline-block mx-auto max-h-[540px] rounded-2xl overflow-hidden shadow-2xl">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
+                  ref={imgRef}
                   src={imageSrc}
                   alt="Palm Biometric Analysis"
                   onLoad={handleImageLoad}
-                  className="max-h-[540px] w-auto max-w-full rounded-2xl object-contain shadow-2xl"
+                  className="max-h-[540px] w-auto max-w-full block select-none rounded-2xl"
                 />
 
-                {viewMode === "mesh_overlay" && (
+                {viewMode === "mesh_overlay" && hasValidLandmarks && (
                   <canvas
                     ref={canvasRef}
-                    className="pointer-events-none absolute inset-0 size-full object-contain"
+                    className="pointer-events-none absolute inset-0 size-full rounded-2xl"
                   />
                 )}
-              </>
+
+                {/* If user selected 3D Node Mesh mode but landmarks were rejected/low-confidence */}
+                {viewMode === "mesh_overlay" && !hasValidLandmarks && (
+                  <div className="absolute inset-x-3 bottom-3 rounded-2xl border border-amber-500/40 bg-black/85 p-3.5 text-center backdrop-blur-md">
+                    <p className="text-xs font-bold text-amber-300">
+                      {language === "bn"
+                        ? "হাতের বায়োমেট্রিক ফ্রেম সম্পূর্ণ স্পষ্ট হয়নি। সঠিক ফলাফলের জন্য করতলটি আলোতে সোজা করে ধরুন।"
+                        : "Palm biometric joints not fully resolved in this wide shot. Frame your open palm closer to the camera."}
+                    </p>
+                    <div className="mt-2.5 flex items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setViewMode("model_3d")}
+                        className="rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-bold text-ink-950 shadow hover:bg-brand-400"
+                      >
+                        {language === "bn" ? "৩৬০° ৩ডি মডেল দেখুন" : "View 3D Model"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setViewMode("crease_lines")}
+                        className="rounded-lg bg-white/20 px-3 py-1.5 text-xs font-bold text-white hover:bg-white/30"
+                      >
+                        {language === "bn" ? "রেখা স্ক্যান দেখুন" : "View Creases"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="p-12 text-center text-xs text-white/70">
                 {language === "bn"
@@ -623,7 +655,9 @@ export function PalmBiometricMeshViewer({
           <span className="block text-[10px] font-bold text-muted-foreground uppercase">
             {language === "bn" ? "৩ডি নোড সংখ্যা" : "3D Landmarks"}
           </span>
-          <span className="text-xs font-black text-brand-700">21 Joint Nodes</span>
+          <span className="text-xs font-black text-brand-700">
+            {hasValidLandmarks ? "21 Joint Nodes" : "3D Model Simulated"}
+          </span>
         </div>
         <div className="rounded-xl bg-surface-muted p-2">
           <span className="block text-[10px] font-bold text-muted-foreground uppercase">
@@ -653,4 +687,3 @@ export function PalmBiometricMeshViewer({
     </div>
   );
 }
-

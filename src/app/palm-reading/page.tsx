@@ -901,30 +901,50 @@ export default function PalmReadingPage() {
                     {/* Biometric Laser Scanline */}
                     <div className="laser-scanline" />
 
-                    {/* Biometric Alignment Oval & Corner Crosshairs */}
-                    <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center p-4">
-                      <div
-                        className={cn(
-                          "relative aspect-[3/4] w-52 sm:w-64 rounded-[40px] border-2 transition-all duration-300",
-                          status?.aligned
-                            ? "border-emerald-400 shadow-[0_0_30px_rgba(52,211,153,0.65)] scale-[1.02]"
-                            : status?.found
-                              ? "border-amber-400/90 shadow-[0_0_15px_rgba(251,191,36,0.35)]"
-                              : "border-white/35 border-dashed",
-                        )}
-                      >
-                        {/* Corner crosshairs */}
-                        <span className="absolute -top-1 left-1/2 -translate-x-1/2 h-0.5 w-8 bg-white/80" />
-                        <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-8 bg-white/80" />
-                        <span className="absolute top-1/2 -left-1 -translate-y-1/2 h-8 w-0.5 bg-white/80" />
-                        <span className="absolute top-1/2 -right-1 -translate-y-1/2 h-8 w-0.5 bg-white/80" />
+                    {/* Biometric Holographic Hand Silhouette Framing Guide */}
+                    <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center p-3">
+                      <div className="relative flex flex-col items-center justify-center">
+                        <svg
+                          viewBox="0 0 220 300"
+                          className={cn(
+                            "w-60 sm:w-72 h-auto max-h-[56vh] transition-all duration-300 filter",
+                            status?.aligned
+                              ? "text-emerald-400 drop-shadow-[0_0_24px_rgba(52,211,153,0.85)] scale-[1.03]"
+                              : status?.found
+                              ? "text-amber-400 drop-shadow-[0_0_16px_rgba(251,191,36,0.6)]"
+                              : "text-cyan-400/50 drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]",
+                          )}
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          {/* Hand Contour (Wrist -> Thumb -> 4 Fingers -> Percussion) */}
+                          <path
+                            d="M 80 280 C 76 250, 64 220, 52 195 C 40 170, 22 152, 16 136 C 11 123, 20 114, 32 118 C 45 123, 60 144, 68 162 C 65 130, 63 60, 65 34 C 67 22, 82 22, 84 34 C 88 70, 89 125, 92 142 C 94 115, 96 45, 101 16 C 103 4, 119 4, 121 16 C 124 55, 124 120, 126 142 C 129 120, 134 55, 139 32 C 141 21, 156 21, 157 32 C 160 70, 158 128, 159 152 C 162 135, 171 95, 177 78 C 180 70, 194 74, 192 86 C 188 120, 182 175, 178 202 C 170 240, 154 268, 144 280"
+                            strokeDasharray={status?.aligned ? undefined : "6 4"}
+                          />
+                          {/* Planetary Mount Beacons */}
+                          <g fill="currentColor" stroke="none">
+                            <circle cx="84" cy="115" r="3.5" />
+                            <circle cx="111" cy="110" r="3.5" />
+                            <circle cx="143" cy="118" r="3.5" />
+                            <circle cx="174" cy="138" r="3.5" />
+                            <circle cx="52" cy="180" r="4" />
+                          </g>
+                          {/* Mars Hollow Crosshair */}
+                          <circle cx="115" cy="175" r="14" strokeWidth="1" strokeDasharray="3 3" />
+                          <line x1="105" y1="175" x2="125" y2="175" strokeWidth="1" />
+                          <line x1="115" y1="165" x2="115" y2="185" strokeWidth="1" />
+                        </svg>
 
-                        {/* Top Planetary Mount Targets */}
-                        <div className="absolute inset-x-2 top-2 flex justify-between px-2 text-[9px] font-black text-white/70">
-                          <span>♃ Jupiter</span>
-                          <span>♄ Saturn</span>
-                          <span>☉ Apollo</span>
-                          <span>☿ Mercury</span>
+                        {/* Top Planetary Labels Banner */}
+                        <div className="absolute top-2 inset-x-0 flex justify-between px-3 text-[9px] font-black tracking-wider text-white/80">
+                          <span>♃ JUPITER</span>
+                          <span>♄ SATURN</span>
+                          <span>☉ SUN</span>
+                          <span>☿ MERCURY</span>
                         </div>
                       </div>
 
