@@ -46,7 +46,7 @@ export function TarotSpreadLayout({
   if (spreadId === "past_present_future" || cards.length === 3) {
     return (
       <div className="relative py-6">
-        {/* Connecting golden cosmic energy beam */}
+        {/* Golden connecting celestial beam */}
         <div className="hidden md:block absolute top-[45%] left-16 right-16 h-1 bg-gradient-to-r from-transparent via-amber-400/60 to-transparent -z-0 pointer-events-none rounded-full" />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 items-center justify-items-center">
@@ -72,8 +72,8 @@ export function TarotSpreadLayout({
   // 4-card Crossroad layout (Two choices)
   if (spreadId === "two_choices" && cards.length === 4) {
     return (
-      <div className="py-6 flex flex-col items-center gap-6">
-        {/* Top: Final Resolution */}
+      <div className="py-6 flex flex-col items-center gap-8">
+        {/* Top: Final Harmonizing Guidance */}
         <div>
           <TarotCardView
             cardDetail={cards[3]}
@@ -87,8 +87,8 @@ export function TarotSpreadLayout({
           />
         </div>
 
-        {/* Middle: Choice A and Choice B */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 items-center">
+        {/* Middle: Path A and Path B */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12 items-center">
           <TarotCardView
             cardDetail={cards[1]}
             isFlipped={flippedState[1] ?? true}
@@ -111,7 +111,7 @@ export function TarotSpreadLayout({
           />
         </div>
 
-        {/* Bottom: Current Root */}
+        {/* Bottom: Current Root Situation */}
         <div>
           <TarotCardView
             cardDetail={cards[0]}
@@ -128,11 +128,11 @@ export function TarotSpreadLayout({
     );
   }
 
-  // 5-card layout (Love / Career)
+  // 5-card layout (Career / Love)
   if (cards.length === 5) {
     return (
       <div className="py-6">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 sm:gap-6 justify-items-center items-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8 justify-items-center items-start">
           {cards.map((c, idx) => (
             <TarotCardView
               key={idx}
@@ -154,7 +154,7 @@ export function TarotSpreadLayout({
   // Grand Celtic Cross (10 cards)
   return (
     <div className="py-6">
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 justify-items-center">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 justify-items-center items-start">
         {cards.map((c, idx) => (
           <TarotCardView
             key={idx}

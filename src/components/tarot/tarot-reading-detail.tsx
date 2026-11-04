@@ -16,6 +16,10 @@ import {
   Star,
   Compass,
   ArrowRight,
+  Clock,
+  CheckCircle2,
+  Calendar,
+  Palette,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui";
@@ -63,92 +67,89 @@ export function TarotReadingDetail({
     setTimeout(() => setCopiedMantra(false), 2000);
   };
 
-  const handleCopySummary = () => {
-    const text = `
-=== Astra Astrology Tarot Reading ===
-Spread: ${reading.spread_name} (${reading.category.toUpperCase()})
-Question: ${reading.question || "Universal Reflection"}
-
-Cards Drawn:
-${reading.drawn_cards
-  .map(
-    (c) =>
-      `- ${c.position_title}: ${
-        CARD_NAMES_LOCALIZED[language]?.[c.card.id] || c.card.name
-      } (${c.orientation})`
-  )
-  .join("\n")}
-
-Dominant Element: ${reading.dominant_element}
-Karmic Momentum: ${reading.astrological_resonance.karmic_momentum}
-
-Karmic Synthesis:
-${reading.karmic_synthesis}
-
-Actionable Guidance:
-${reading.actionable_guidance}
-
-Prescribed Remedy:
-${reading.prescribed_remedy}
-
-Vedic Mantra:
-${reading.vedic_mantra}
-    `.trim();
-
-    navigator.clipboard.writeText(text);
-    setCopiedSummary(true);
-    toast.success(t.copiedToast);
-    setTimeout(() => setCopiedSummary(false), 2000);
-  };
-
   const dominantElemLocalized =
     ELEMENTS_LOCALIZED[language]?.[reading.dominant_element] ||
     reading.dominant_element;
 
   return (
-    <div className="space-y-8 mt-10">
-      {/* Top Banner: Spread Name & Question */}
-      <div className="rounded-2xl border border-amber-300/80 bg-gradient-to-r from-amber-50/90 via-white to-amber-50/40 p-6 sm:p-8 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-8">
+      {/* High-Precision Prediction Cards: Timeframe & Divine Verdict */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {/* Predicted Manifestation Window */}
+        <div className="rounded-2xl border-2 border-amber-300 bg-gradient-to-br from-amber-50/90 via-white to-amber-50/50 p-5 shadow-sm flex flex-col justify-between">
           <div>
-            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-              <span className="text-xs uppercase font-bold tracking-wider text-amber-900 bg-amber-100 border border-amber-300 px-3 py-0.5 rounded-full shadow-2xs">
-                {reading.spread_name}
-              </span>
-              <span className="text-xs text-slate-600 font-semibold uppercase tracking-wide">
-                • {reading.category}
+            <div className="flex items-center gap-2 mb-2">
+              <Clock className="w-4 h-4 text-amber-600" />
+              <span className="text-xs font-bold text-amber-950 uppercase tracking-wider">
+                {t.predictedTimeframeLabel}
               </span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-display font-bold text-slate-950">
-              {reading.question || t.readingTitle}
-            </h2>
-            <p className="text-sm text-slate-600 mt-1 leading-relaxed">
-              {t.readingSubtitle}
+            <p className="text-base sm:text-lg font-display font-bold text-slate-900 leading-snug">
+              {reading.predicted_timeframe || (language === "bn" ? "আসন্ন ৩-৬ মাসের মধ্যে" : "Within 3-6 months")}
             </p>
           </div>
+          <p className="text-[11px] text-slate-500 mt-2 font-medium">
+            {language === "bn"
+              ? "তত্ত্বগত গতিপ্রবাহ ও মহাজাগতিক গোচর অনুসারে নিরূপিত"
+              : language === "hi"
+              ? "तत्व गति व ग्रह गोचर अनुसार निर्धारित"
+              : "Calculated via chrono-elemental transit harmonics"}
+          </p>
+        </div>
 
-          <div className="flex items-center gap-2.5 shrink-0">
-            <button
-              type="button"
-              onClick={handleCopySummary}
-              className="inline-flex items-center justify-center rounded-xl border border-amber-300 bg-white px-3.5 py-2 text-xs font-bold text-amber-900 hover:bg-amber-50 shadow-2xs transition-colors"
-            >
-              {copiedSummary ? (
-                <Check className="w-3.5 h-3.5 mr-1.5 text-emerald-600" />
-              ) : (
-                <Copy className="w-3.5 h-3.5 mr-1.5 text-amber-600" />
-              )}
-              {t.copySummaryBtn}
-            </button>
-            <button
-              type="button"
-              onClick={onReset}
-              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-2xs transition-colors"
-            >
-              <RotateCcw className="w-3.5 h-3.5 mr-1.5 text-slate-500" />
-              {t.newReadingBtn}
-            </button>
+        {/* Divine Oracle Likelihood */}
+        <div className="rounded-2xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50/90 via-white to-emerald-50/50 p-5 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <span className="text-xs font-bold text-emerald-950 uppercase tracking-wider">
+                {t.divineVerdictLabel}
+              </span>
+            </div>
+            <p className="text-base sm:text-lg font-display font-bold text-emerald-950 leading-snug">
+              {reading.divine_verdict || (language === "bn" ? "অত্যন্ত অনুকূল ও শুভ সংকেত" : "Strongly Favorable")}
+            </p>
           </div>
+          {reading.favorable_score && (
+            <div className="mt-2 flex items-center gap-2">
+              <div className="w-full bg-emerald-100 h-2 rounded-full overflow-hidden">
+                <div
+                  className="bg-emerald-500 h-full rounded-full transition-all duration-700"
+                  style={{ width: `${reading.favorable_score}%` }}
+                />
+              </div>
+              <span className="text-xs font-bold text-emerald-800">
+                {reading.favorable_score}%
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Auspicious Day & Color */}
+        <div className="rounded-2xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50/90 via-white to-indigo-50/50 p-5 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="w-4 h-4 text-indigo-600" />
+              <span className="text-xs font-bold text-indigo-950 uppercase tracking-wider">
+                {t.auspiciousGuideLabel}
+              </span>
+            </div>
+            <p className="text-sm sm:text-base font-display font-bold text-slate-900 leading-snug">
+              {language === "bn" ? "প্রশস্ত দিন:" : language === "hi" ? "शुभ दिन:" : "Auspicious Day:"}{" "}
+              <span className="text-indigo-900">{reading.auspicious_day || "বৃহস্পতিবার"}</span>
+            </p>
+            <p className="text-xs text-slate-600 font-semibold mt-1">
+              {language === "bn" ? "অনুকূল বর্ণ:" : language === "hi" ? "शुभ रंग:" : "Lucky Color:"}{" "}
+              <span className="text-amber-800">{reading.auspicious_color || "সোনালী হলুদ"}</span>
+            </p>
+          </div>
+          <p className="text-[11px] text-slate-500 mt-2 font-medium">
+            {language === "bn"
+              ? "সংশ্লিষ্ট শুভ দিনে গুরুত্বপূর্ণ পদক্ষেপ নিন"
+              : language === "hi"
+              ? "उक्त शुभ दिन महत्वपूर्ण कार्य आरंभ करें"
+              : "Align major actions with this planetary day"}
+          </p>
         </div>
       </div>
 

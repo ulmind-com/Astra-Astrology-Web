@@ -1347,7 +1347,7 @@ export default function PalmReadingPage() {
                           </div>
                           <div className="mt-2.5 flex items-baseline gap-2">
                             <h4 className="text-base font-black text-foreground capitalize">
-                              {(result.skin_vitality.flush_tone || "Balanced").replace(/_/g, " ")}
+                              {String(result.skin_vitality?.flush_tone || "Balanced").replace(/_/g, " ")}
                             </h4>
                             <span className="text-xs font-bold text-rose-600">
                               · {result.skin_vitality.ayurvedic_dosha || "Tridosha"}
@@ -1995,7 +1995,7 @@ export default function PalmReadingPage() {
                             {Object.entries(result.medical_constitution.nail_mineral_diagnostics || {}).map(([k, v]) => (
                               <div key={k} className="rounded-xl border border-border bg-surface-muted/40 p-3">
                                 <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                                  {(k || "").replace(/_/g, " ")}
+                                  {String(k || "").replace(/_/g, " ")}
                                 </span>
                                 <span className="mt-1 block text-xs font-semibold text-foreground">{v}</span>
                               </div>
@@ -2688,7 +2688,7 @@ export default function PalmReadingPage() {
                             className="rounded-2xl border border-border bg-surface-muted/50 p-3"
                           >
                             <span className="block text-[10px] font-bold text-muted-foreground uppercase">
-                              {(key || "").replace(/_/g, " ")}
+                              {String(key || "").replace(/_/g, " ")}
                             </span>
                             <span className="text-sm font-black text-foreground">
                               {typeof val === "number" ? val.toFixed(3) : val}

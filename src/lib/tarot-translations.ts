@@ -145,6 +145,73 @@ export const SPREADS_METADATA_I18N: Record<AstrologyLanguage, Record<string, Spr
   },
 };
 
+// Complete 78 canonical Tarot Card Names in BN, HI, and EN
+const SUIT_RANKS_BN: Record<string, string> = {
+  ace: "এইস অফ",
+  two: "টু অফ",
+  three: "থ্রি অফ",
+  four: "ফোর অফ",
+  five: "ফাইভ অফ",
+  six: "সিক্স অফ",
+  seven: "সেভেন অফ",
+  eight: "এইট অফ",
+  nine: "নাইন অফ",
+  ten: "টেন অফ",
+  page: "পেজ অফ",
+  knight: "নাইট অফ",
+  queen: "কুইন অফ",
+  king: "কিং অফ",
+};
+
+const SUIT_RANKS_HI: Record<string, string> = {
+  ace: "ऐस ऑफ",
+  two: "टू ऑफ",
+  three: "थ्री ऑफ",
+  four: "फोर ऑफ",
+  five: "फाइव ऑफ",
+  six: "सिक्स ऑफ",
+  seven: "सेवन ऑफ",
+  eight: "एट ऑफ",
+  nine: "नाइन ऑफ",
+  ten: "टेन ऑफ",
+  page: "पेज ऑफ",
+  knight: "नाइट ऑफ",
+  queen: "क्वीन ऑफ",
+  king: "किंग ऑफ",
+};
+
+const SUITS_BN: Record<string, string> = {
+  wands: "ওয়ান্ডস",
+  cups: "কাপস",
+  swords: "সোর্ডস",
+  pentacles: "পেন্টাকলস",
+};
+
+const SUITS_HI: Record<string, string> = {
+  wands: "वांड्स",
+  cups: "कप्स",
+  swords: "स्वॉर्ड्स",
+  pentacles: "पेंटाकल्स",
+};
+
+function generateMinorArcanaNames(lang: "bn" | "hi"): Record<string, string> {
+  const result: Record<string, string> = {};
+  const ranks = ["ace", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "page", "knight", "queen", "king"];
+  const suits = ["wands", "cups", "swords", "pentacles"];
+
+  for (const s of suits) {
+    for (const r of ranks) {
+      const id = `${r}_of_${s}`;
+      if (lang === "bn") {
+        result[id] = `${SUIT_RANKS_BN[r]} ${SUITS_BN[s]}`;
+      } else {
+        result[id] = `${SUIT_RANKS_HI[r]} ${SUITS_HI[s]}`;
+      }
+    }
+  }
+  return result;
+}
+
 export const CARD_NAMES_LOCALIZED: Record<AstrologyLanguage, Record<string, string>> = {
   en: {
     the_fool: "The Fool",
@@ -181,7 +248,7 @@ export const CARD_NAMES_LOCALIZED: Record<AstrologyLanguage, Record<string, stri
     the_chariot: "দ্য চ্যারিয়ট (বিজয়ী রথ)",
     strength: "স্ট্রেন্থ (আত্মিক শক্তি)",
     the_hermit: "দ্য হার্মিট (তপস্বী সাধক)",
-    wheel_of_fortune: "হুইল অফ ফরচুন (মহাজাগতিক ভাগ্যচক্র)",
+    wheel_of_fortune: "হুইল অফ ফরচুন (ভাগ্যচক্র)",
     justice: "জাস্টিস (ন্যায়দণ্ড)",
     the_hanged_man: "দ্য হ্যাংড ম্যান (সমর্পিত আত্মা)",
     death: "ডেথ (মহাজাগতিক রূপান্তর)",
@@ -193,6 +260,7 @@ export const CARD_NAMES_LOCALIZED: Record<AstrologyLanguage, Record<string, stri
     the_sun: "দ্য সান (প্রদীপ্ত সূর্য ও বিজয়)",
     judgement: "জাজমেন্ট (আত্মজাগরণ ও মুক্তি)",
     the_world: "দ্য ওয়ার্ল্ড (পূর্ণতা ও সিদ্ধি)",
+    ...generateMinorArcanaNames("bn"),
   },
   hi: {
     the_fool: "द फूल (निश्चल यात्री)",
@@ -217,6 +285,7 @@ export const CARD_NAMES_LOCALIZED: Record<AstrologyLanguage, Record<string, stri
     the_sun: "द सन (दिव्य सूर्य तेज)",
     judgement: "जजमेंट (आत्मजागरण)",
     the_world: "द वर्ल्ड (परम सिद्धि)",
+    ...generateMinorArcanaNames("hi"),
   },
 };
 
@@ -251,21 +320,18 @@ export interface TarotTranslations {
   featureDisabled: string;
   coinsDeducted: (coins: number) => string;
 
-  // Tabs / Steps
   stepChooseSpread: string;
   stepAskQuestion: string;
   stepDrawCards: string;
   stepInterpretation: string;
   tabDeckExplorer: string;
 
-  // Categories
   catGeneral: string;
   catLove: string;
   catCareer: string;
   catFinance: string;
   catSpiritual: string;
 
-  // Form
   questionLabel: string;
   questionPlaceholder: string;
   moonSignLabel: string;
@@ -281,7 +347,6 @@ export interface TarotTranslations {
   cardsReadyPrompt: string;
   revealReadingBtn: string;
 
-  // Results
   readingTitle: string;
   readingSubtitle: string;
   karmicSynthesisTitle: string;
@@ -291,6 +356,9 @@ export interface TarotTranslations {
   elementalBreakdownTitle: string;
   dominantElementLabel: string;
   karmicMomentumLabel: string;
+  predictedTimeframeLabel: string;
+  divineVerdictLabel: string;
+  auspiciousGuideLabel: string;
   uprightBadge: string;
   reversedBadge: string;
   copySummaryBtn: string;
@@ -323,7 +391,7 @@ export const TAROT_I18N: Record<AstrologyLanguage, TarotTranslations> = {
     catSpiritual: "Spiritual Path",
 
     questionLabel: "Your Question or Sacred Intention",
-    questionPlaceholder: "e.g. What energy will surround my career breakthrough in the coming months?",
+    questionPlaceholder: "e.g. When will I get a breakthrough in my career or job?",
     moonSignLabel: "Your Moon Sign (Rashi - Optional)",
     moonSignPlaceholder: "e.g. Aries, Taurus, Cancer...",
     dashaLordLabel: "Active Dasha Lord (Optional)",
@@ -346,6 +414,9 @@ export const TAROT_I18N: Record<AstrologyLanguage, TarotTranslations> = {
     elementalBreakdownTitle: "Elemental Balance & Dignities",
     dominantElementLabel: "Dominant Element",
     karmicMomentumLabel: "Karmic Destiny Momentum",
+    predictedTimeframeLabel: "Predicted Manifestation Window",
+    divineVerdictLabel: "Divine Oracle Likelihood",
+    auspiciousGuideLabel: "Auspicious Timing & Color",
     uprightBadge: "Upright",
     reversedBadge: "Reversed",
     copySummaryBtn: "Copy Reading Summary",
@@ -377,7 +448,7 @@ export const TAROT_I18N: Record<AstrologyLanguage, TarotTranslations> = {
     catSpiritual: "আধ্যাত্মিক সাধনা",
 
     questionLabel: "আপনার প্রশ্ন বা পবিত্র সংকল্প",
-    questionPlaceholder: "যেমন: আগামী ৩ মাসে আমার নতুন ব্যবসা বা চাকরির সুযোগ কেমন হবে?",
+    questionPlaceholder: "যেমন: আগামী দিনগুলিতে আমার নতুন চাকরি বা ক্যারিয়ারের সুযোগ কেমন হবে?",
     moonSignLabel: "আপনার চন্দ্র রাশি (ঐচ্ছিক)",
     moonSignPlaceholder: "যেমন: মেষ, বৃষ, মিথুন, কর্কট, সিংহ...",
     dashaLordLabel: "বর্তমান মহাদশা অধিপতি (ঐচ্ছিক)",
@@ -400,6 +471,9 @@ export const TAROT_I18N: Record<AstrologyLanguage, TarotTranslations> = {
     elementalBreakdownTitle: "পঞ্চভূত ভারসাম্য ও প্রভাব",
     dominantElementLabel: "প্রধান উপাদান (তত্ত্ব)",
     karmicMomentumLabel: "ভাগ্যের গতির তীব্রতা",
+    predictedTimeframeLabel: "প্রত্যাশিত ফলপ্রাপ্তির সময়কাল",
+    divineVerdictLabel: "ঐশ্বরিক সম্ভাব্যতা ও সিদ্ধান্ত",
+    auspiciousGuideLabel: "শুভ দিন ও প্রশস্ত বর্ণ",
     uprightBadge: "সোজা (জাগ্রত শক্তি)",
     reversedBadge: "উল্টো (অন্তর্মুখী রূপান্তর)",
     copySummaryBtn: "ফলাফল কপি করুন",
@@ -431,7 +505,7 @@ export const TAROT_I18N: Record<AstrologyLanguage, TarotTranslations> = {
     catSpiritual: "आध्यात्मिक मार्ग",
 
     questionLabel: "आपका प्रश्न या पवित्र संकल्प",
-    questionPlaceholder: "जैसे: आने वाले महीनों में मेरे करियर या व्यापार में क्या बदलाव होंगे?",
+    questionPlaceholder: "जैसे: आने वाले समय में मेरे करियर या नौकरी में सफलता कब मिलेगी?",
     moonSignLabel: "आपकी चंद्र राशि (वैकल्पिक)",
     moonSignPlaceholder: "जैसे: मेष, वृषभ, मिथुन, कर्क, सिंह...",
     dashaLordLabel: "सक्रिय दशा स्वामी (वैकल्पिक)",
@@ -454,6 +528,9 @@ export const TAROT_I18N: Record<AstrologyLanguage, TarotTranslations> = {
     elementalBreakdownTitle: "पंचतत्व संतुलन",
     dominantElementLabel: "प्रमुख तत्व",
     karmicMomentumLabel: "कार्मिक प्रभाव की तीव्रता",
+    predictedTimeframeLabel: "अपेक्षित सफलता का समय",
+    divineVerdictLabel: "ईश्वरीय संकेत व संभावना",
+    auspiciousGuideLabel: "शुभ दिन व रंग",
     uprightBadge: "सीधा (सकारात्मक ऊर्जा)",
     reversedBadge: "उल्टा (आंतरिक रूपांतरण)",
     copySummaryBtn: "फलादेश कॉपी करें",

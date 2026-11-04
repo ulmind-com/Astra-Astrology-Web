@@ -80,7 +80,8 @@ export function initials(name: string | null | undefined, fallback = "?"): strin
 }
 
 /** "vedic_astrology" -> "Vedic Astrology" */
-export function titleCase(value: string): string {
+export function titleCase(value?: string | null): string {
+  if (!value || typeof value !== "string") return "";
   return value.replace(/[_-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 

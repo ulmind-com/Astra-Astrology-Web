@@ -96,6 +96,11 @@ export interface TarotDrawResponse {
   actionable_guidance: string;
   prescribed_remedy: string;
   vedic_mantra: string;
+  predicted_timeframe?: string | null;
+  divine_verdict?: string | null;
+  favorable_score?: number | null;
+  auspicious_day?: string | null;
+  auspicious_color?: string | null;
 }
 
 export interface DailyTarotRequest {

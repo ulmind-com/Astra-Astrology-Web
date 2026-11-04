@@ -725,28 +725,48 @@ export default function TarotPage() {
             {/* STEP 4: DIVINE READING & RESULTS */}
             {step === 4 && readingResult && (
               <div className="space-y-8 animate-fadeIn">
-                {/* Interactive Spread Visualization Container */}
-                <div className="rounded-2xl border border-amber-300/80 bg-white p-6 sm:p-8 shadow-sm">
-                  <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                {/* Unified Master Spread Container */}
+                <div className="rounded-2xl border-2 border-amber-300 bg-white p-6 sm:p-8 shadow-sm">
+                  {/* Master Header with Question and Actions */}
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
                     <div>
-                      <span className="text-xs font-bold text-amber-800 uppercase tracking-wider">
-                        {readingResult.spread_name}
-                      </span>
-                      <h3 className="text-xl font-display font-bold text-slate-900">
+                      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                        <span className="text-xs uppercase font-bold tracking-wider text-amber-900 bg-amber-100 border border-amber-300 px-3 py-0.5 rounded-full shadow-2xs">
+                          {readingResult.spread_name}
+                        </span>
+                        <span className="text-xs text-slate-500 font-bold uppercase tracking-wide">
+                          • {category.toUpperCase()}
+                        </span>
+                      </div>
+                      <h2 className="text-2xl sm:text-3xl font-display font-bold text-slate-950">
                         {readingResult.question || activeSpreadMeta.name}
-                      </h3>
+                      </h2>
+                      <p className="text-xs sm:text-sm text-slate-600 mt-1">
+                        {t.readingSubtitle}
+                      </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setFlippedCards((prev) => prev.map(() => true))}
-                      className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-2xs"
-                    >
-                      <Eye className="w-3.5 h-3.5 mr-1 text-slate-500" />
-                      <span>{t.flipAllBtn}</span>
-                    </button>
+
+                    <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => setFlippedCards((prev) => prev.map(() => true))}
+                        className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-2xs transition-colors"
+                      >
+                        <Eye className="w-3.5 h-3.5 mr-1.5 text-slate-500" />
+                        <span>{t.flipAllBtn}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleReset}
+                        className="inline-flex items-center justify-center rounded-xl border border-amber-300 bg-amber-50/80 px-3.5 py-2 text-xs font-bold text-amber-900 hover:bg-amber-100 shadow-2xs transition-colors"
+                      >
+                        <RotateCw className="w-3.5 h-3.5 mr-1.5 text-amber-600" />
+                        <span>{t.newReadingBtn}</span>
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Render the Spatial Spread Layout */}
+                  {/* Render the Spatial Spread Layout with full breathing room */}
                   <TarotSpreadLayout
                     spreadId={selectedSpreadId}
                     cards={readingResult.drawn_cards}
@@ -756,7 +776,7 @@ export default function TarotPage() {
                   />
                 </div>
 
-                {/* Master Reading Detail Component */}
+                {/* Master Reading Detail Component (Predictions, Synthesis, Remedies, Mantras) */}
                 <TarotReadingDetail
                   reading={readingResult}
                   language={language}
