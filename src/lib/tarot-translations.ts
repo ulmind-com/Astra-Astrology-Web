@@ -273,3 +273,4 @@ export const TAROT_I18N: Record<AstrologyLanguage, TarotTranslations> = {
     consultNowBtn: "ज्योतिषी से लाइव बात करें",
   },
 };
+

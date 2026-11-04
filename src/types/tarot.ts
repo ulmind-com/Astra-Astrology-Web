@@ -101,3 +101,4 @@ export interface DailyTarotRequest {
   date_str?: string | null;
   moon_sign?: string | null;
 }
+
