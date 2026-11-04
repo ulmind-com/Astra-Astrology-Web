@@ -48,14 +48,14 @@ const FINGER_CHAINS: ReadonlyArray<readonly [number, number]> = [
 ];
 
 /**
- * Thresholds mirrored from the server's `PalmScanConfig`. Calibrated to be forgiving
- * on handheld mobile cameras while ensuring high-quality, readable crease frames.
+ * Thresholds calibrated for high-precision biometric scanning:
+ * Requires hand to be held close to the camera, flat, open, and centered.
  */
-const MAX_TILT_DEGREES = 32;      // server allows 36
-const MAX_ROLL_DEGREES = 42;      // server allows 45
-const MIN_FINGER_EXTENSION = 0.50; // server allows 0.50
-const MIN_PALM_AREA_RATIO = 0.038; // server allows 0.035
-const MAX_PALM_AREA_RATIO = 0.85;  // allows closer framing
+const MAX_TILT_DEGREES = 26;       // palm must face camera squarely
+const MAX_ROLL_DEGREES = 30;       // fingers pointing towards top
+const MIN_FINGER_EXTENSION = 0.52; // fingers open and uncurled
+const MIN_PALM_AREA_RATIO = 0.075; // hand close enough to resolve micro-creases
+const MAX_PALM_AREA_RATIO = 0.82;  // prevents hand clipping outside lens
 
 export type PalmCheck = {
   id: string;
@@ -148,6 +148,11 @@ export function assessPalm(
 
   const area = palmAreaRatio(pts);
 
+  // Centering check: Palm center should be positioned in central viewfinder corridor
+  const palmCenterX = (pts[WRIST].x + pts[MIDDLE_MCP].x) / 2;
+  const palmCenterY = (pts[WRIST].y + pts[MIDDLE_MCP].y) / 2;
+  const isCentered = palmCenterX >= 0.20 && palmCenterX <= 0.80 && palmCenterY >= 0.18 && palmCenterY <= 0.86;
+
   const checks: PalmCheck[] = [
     {
       id: "facing",
@@ -162,12 +167,17 @@ export function assessPalm(
     {
       id: "open",
       ok: extension >= MIN_FINGER_EXTENSION,
-      hint: "Open your fingers",
+      hint: "Open and spread your fingers",
     },
     {
       id: "distance",
       ok: area >= MIN_PALM_AREA_RATIO && area <= MAX_PALM_AREA_RATIO,
-      hint: area < MIN_PALM_AREA_RATIO ? "Bring your hand closer" : "Move your hand back a little",
+      hint: area < MIN_PALM_AREA_RATIO ? "Bring your hand closer to fill the guide" : "Move your hand back a little",
+    },
+    {
+      id: "centered",
+      ok: isCentered,
+      hint: "Center your palm inside the silhouette",
     },
   ];
 
@@ -175,7 +185,7 @@ export function assessPalm(
   return {
     checks,
     aligned: !failing,
-    guidance: failing ? failing.hint : "Hold still",
+    guidance: failing ? failing.hint : "Hold still... 100% biometric lock",
   };
 }
 
@@ -466,38 +476,83 @@ export function drawHandOverlay(
   }
 }
 
-/** Grab the current video frame as a JPEG, cropped to matching viewfinder aspect ratio. */
+/**
+ * Grab the current video frame as a JPEG.
+ *
+ * When handPoints are provided, performs high-precision intelligent auto-cropping
+ * directly to the detected hand bounding box (with safety margins for fingertips and wrist),
+ * completely isolating the palm and eliminating any surrounding face, torso, or room artifacts!
+ */
 export function captureFrame(
   video: HTMLVideoElement,
   targetAspectRatio: number = 3 / 4,
+  handPoints?: Pt[] | null,
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const canvas = document.createElement("canvas");
     const vw = video.videoWidth || 1280;
     const vh = video.videoHeight || 720;
-    const videoAspect = vw / vh;
 
     let sx = 0;
     let sy = 0;
     let sw = vw;
     let sh = vh;
 
-    // Crop symmetrically to match the camera viewfinder aspect ratio so the palm fills the frame
-    if (videoAspect > targetAspectRatio) {
-      sw = Math.round(vh * targetAspectRatio);
-      sx = Math.round((vw - sw) / 2);
-    } else if (videoAspect < targetAspectRatio) {
-      sh = Math.round(vw / targetAspectRatio);
-      sy = Math.round((vh - sh) / 2);
+    if (handPoints && Array.isArray(handPoints) && handPoints.length >= 21) {
+      // Calculate exact bounding box of the 21 anatomical landmarks
+      let minX = 1.0;
+      let maxX = 0.0;
+      let minY = 1.0;
+      let maxY = 0.0;
+
+      for (const pt of handPoints) {
+        if (pt.x < minX) minX = pt.x;
+        if (pt.x > maxX) maxX = pt.x;
+        if (pt.y < minY) minY = pt.y;
+        if (pt.y > maxY) maxY = pt.y;
+      }
+
+      const boxW = Math.max(0.2, maxX - minX);
+      const boxH = Math.max(0.25, maxY - minY);
+
+      // Ergonomic padding: 15% lateral, 10% fingertip top, 16% wrist base
+      const padX = boxW * 0.15;
+      const padTop = boxH * 0.10;
+      const padBottom = boxH * 0.16;
+
+      const normX0 = Math.max(0, minX - padX);
+      const normY0 = Math.max(0, minY - padTop);
+      const normX1 = Math.min(1.0, maxX + padX);
+      const normY1 = Math.min(1.0, maxY + padBottom);
+
+      sx = Math.round(normX0 * vw);
+      sy = Math.round(normY0 * vh);
+      sw = Math.round((normX1 - normX0) * vw);
+      sh = Math.round((normY1 - normY0) * vh);
+    } else {
+      // Crop symmetrically to match the camera viewfinder aspect ratio so the palm fills the frame
+      const videoAspect = vw / vh;
+      if (videoAspect > targetAspectRatio) {
+        sw = Math.round(vh * targetAspectRatio);
+        sx = Math.round((vw - sw) / 2);
+      } else if (videoAspect < targetAspectRatio) {
+        sh = Math.round(vw / targetAspectRatio);
+        sy = Math.round((vh - sh) / 2);
+      }
     }
 
-    canvas.width = Math.max(480, sw);
-    canvas.height = Math.max(640, sh);
+    // Ensure valid non-zero bounds
+    sw = Math.max(360, Math.min(vw - sx, sw));
+    sh = Math.max(480, Math.min(vh - sy, sh));
+
+    canvas.width = sw;
+    canvas.height = sh;
     const ctx = canvas.getContext("2d");
     if (!ctx) {
       reject(new Error("This browser could not capture the frame."));
       return;
     }
+
     ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
     canvas.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error("The frame could not be encoded."))),

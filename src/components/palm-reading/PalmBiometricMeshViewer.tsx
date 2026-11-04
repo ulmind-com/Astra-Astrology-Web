@@ -333,10 +333,26 @@ export function PalmBiometricMeshViewer({
       };
 
       for (const m of MOUNT_PINS) {
-        const pt = landmarks[m.nodeIdx];
-        if (!pt) continue;
-        const x = toX(pt[0]);
-        const y = toY(pt[1]);
+        const ptRaw = landmarks[m.nodeIdx];
+        if (!ptRaw) continue;
+
+        // Position the mount beacon within the anatomical fleshy pad of each planet
+        let nx = ptRaw[0];
+        let ny = ptRaw[1];
+        if (landmarks[0]) {
+          if (m.id === "venus") {
+            // Venus mount sits on fleshy thenar eminence between thumb base (node 2) and wrist (node 0)
+            nx = landmarks[2][0] * 0.52 + landmarks[0][0] * 0.48;
+            ny = landmarks[2][1] * 0.52 + landmarks[0][1] * 0.48;
+          } else {
+            // Upper mounts (Jupiter, Saturn, Sun, Mercury) sit 18% down from knuckle toward wrist
+            nx = ptRaw[0] * 0.82 + landmarks[0][0] * 0.18;
+            ny = ptRaw[1] * 0.82 + landmarks[0][1] * 0.18;
+          }
+        }
+
+        const x = toX(nx);
+        const y = toY(ny);
         const elev = elevations[m.id as keyof typeof elevations] || 4.0;
         const name = language === "bn" ? m.nameBn : language === "hi" ? m.nameHi : m.nameEn;
 
@@ -376,10 +392,10 @@ export function PalmBiometricMeshViewer({
         ctx.textBaseline = "middle";
         ctx.fillText(tagText, x, y - 34);
 
-        // Pointer line from beacon to joint node
+        // Pointer line from beacon to mount center
         ctx.beginPath();
         ctx.moveTo(x, y - 12);
-        ctx.lineTo(x, y - 4);
+        ctx.lineTo(x, y - 2);
         ctx.strokeStyle = m.color;
         ctx.lineWidth = 1.2;
         ctx.stroke();
@@ -389,10 +405,37 @@ export function PalmBiometricMeshViewer({
 
     // 5. Sacred Marks Holographic Glowing Pinpoints
     if (showSacredMarks && result.sacred_marks) {
+      // Hand bounding box for boundary enforcement
+      let lmMinX = 1.0;
+      let lmMaxX = 0.0;
+      let lmMinY = 1.0;
+      let lmMaxY = 0.0;
+      for (const p of landmarks) {
+        if (p[0] < lmMinX) lmMinX = p[0];
+        if (p[0] > lmMaxX) lmMaxX = p[0];
+        if (p[1] < lmMinY) lmMinY = p[1];
+        if (p[1] > lmMaxY) lmMaxY = p[1];
+      }
+      const padLmX = (lmMaxX - lmMinX) * 0.08;
+      const padLmY = (lmMaxY - lmMinY) * 0.08;
+
       const foundMarks = result.sacred_marks.filter((m) => m.found && m.location_norm);
       for (const sm of foundMarks) {
-        const sx = toX(sm.location_norm[0]);
-        const sy = toY(sm.location_norm[1]);
+        const smNormX = sm.location_norm[0];
+        const smNormY = sm.location_norm[1];
+
+        // Strict anatomical safety guard: never render sacred marks outside the hand region
+        if (
+          smNormX < lmMinX - padLmX ||
+          smNormX > lmMaxX + padLmX ||
+          smNormY < lmMinY - padLmY ||
+          smNormY > lmMaxY + padLmY
+        ) {
+          continue;
+        }
+
+        const sx = toX(smNormX);
+        const sy = toY(smNormY);
         const label = language === "bn" ? sm.sanskrit_name : sm.name;
 
         // Skip if outside canvas
@@ -452,19 +495,42 @@ export function PalmBiometricMeshViewer({
     viewMode,
   ]);
 
-  // Adjust canvas resolution dynamically to match image
-  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const img = e.currentTarget;
-    if (canvasRef.current) {
-      canvasRef.current.width = img.naturalWidth || img.clientWidth || 800;
-      canvasRef.current.height = img.naturalHeight || img.clientHeight || 1060;
-      renderMesh();
+  // Adjust canvas resolution dynamically to match image perfectly with zero distortion
+  const syncCanvasDimensions = React.useCallback(() => {
+    const img = imgRef.current;
+    const canvas = canvasRef.current;
+    if (!img || !canvas) return;
+
+    const w = img.naturalWidth || img.clientWidth || 800;
+    const h = img.naturalHeight || img.clientHeight || 1060;
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
     }
+    renderMesh();
+  }, [renderMesh]);
+
+  const handleImageLoad = () => {
+    syncCanvasDimensions();
   };
 
   React.useEffect(() => {
-    renderMesh();
-  }, [renderMesh]);
+    syncCanvasDimensions();
+    const img = imgRef.current;
+    if (!img) return;
+
+    if (img.complete && img.naturalWidth > 0) {
+      syncCanvasDimensions();
+    }
+
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver(() => {
+        syncCanvasDimensions();
+      });
+      ro.observe(img);
+      return () => ro.disconnect();
+    }
+  }, [syncCanvasDimensions, imageSrc, viewMode]);
 
   return (
     <div className={cn("overflow-hidden rounded-3xl border border-brand-300/80 bg-surface shadow-md", className)}>
