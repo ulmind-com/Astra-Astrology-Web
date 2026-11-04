@@ -1300,7 +1300,7 @@ export default function PalmReadingPage() {
                     {/* Ayurvedic Prana & Karmic Energy Matrix */}
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       {/* Karmic Hand Role */}
-                      {result.karmic_summary && (
+                      {result.karmic_summary && result.karmic_summary.role && (
                         <div className="relative overflow-hidden rounded-3xl border border-brand-200 bg-gradient-to-br from-white via-brand-50/30 to-amber-50/40 p-5 shadow-xs">
                           <div className="flex items-center justify-between">
                             <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-brand-700">
@@ -1315,21 +1315,21 @@ export default function PalmReadingPage() {
                             {result.handedness === "Left" ? t.leftHand : t.rightHand} · {result.karmic_summary.role}
                           </h4>
                           <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                            {result.karmic_summary.role_meaning}
+                            {result.karmic_summary.role_meaning || ""}
                           </p>
                           <div className="mt-3.5 rounded-2xl border border-brand-200/60 bg-white/80 p-3 text-xs">
                             <span className="font-bold text-brand-950">
                               {language === "bn" ? "কার্মিক সামঞ্জস্য:" : language === "hi" ? "कर्मिक संतुलन:" : "Karmic Balance:"}
                             </span>{" "}
                             <span className="text-muted-foreground">
-                              {result.karmic_summary.karmic_harmony}
+                              {result.karmic_summary.karmic_harmony || ""}
                             </span>
                           </div>
                         </div>
                       )}
 
                       {/* Ayurvedic Skin Flush & Prana Vitality */}
-                      {result.skin_vitality && (
+                      {result.skin_vitality && typeof result.skin_vitality.flush_tone === "string" && (
                         <div className="relative overflow-hidden rounded-3xl border border-rose-200/80 bg-gradient-to-br from-white via-rose-50/30 to-orange-50/40 p-5 shadow-xs">
                           <div className="flex items-center justify-between">
                             <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-rose-700">
@@ -1337,26 +1337,26 @@ export default function PalmReadingPage() {
                               {language === "bn" ? "আয়ুর্বেদিক ওজঃ ও কান্তি" : language === "hi" ? "आयुर्वेदिक ओज व कांति" : "Ayurvedic Prana Flush"}
                             </span>
                             <span className="rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-black text-rose-800">
-                              {result.skin_vitality.vitality_score}% {language === "bn" ? "প্রাণশক্তি" : language === "hi" ? "प्राणशक्ति" : "Vitality"}
+                              {result.skin_vitality.vitality_score || 85}% {language === "bn" ? "প্রাণশক্তি" : language === "hi" ? "प्राणशक्ति" : "Vitality"}
                             </span>
                           </div>
                           <div className="mt-2.5 flex items-baseline gap-2">
                             <h4 className="text-base font-black text-foreground capitalize">
-                              {result.skin_vitality.flush_tone.replace(/_/g, " ")}
+                              {(result.skin_vitality.flush_tone || "Balanced").replace(/_/g, " ")}
                             </h4>
                             <span className="text-xs font-bold text-rose-600">
-                              · {result.skin_vitality.ayurvedic_dosha}
+                              · {result.skin_vitality.ayurvedic_dosha || "Tridosha"}
                             </span>
                           </div>
                           <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                            {result.skin_vitality.temperament}
+                            {result.skin_vitality.temperament || ""}
                           </p>
                           <div className="mt-3.5 flex items-center justify-between rounded-2xl border border-rose-200/60 bg-white/80 p-3 text-xs">
                             <span className="font-bold text-ink-950">
                               {language === "bn" ? "রক্তসঞ্চালন ও প্রাণবায়ু:" : language === "hi" ? "रक्तसंचार व प्राणवायु:" : "Circulation Rating:"}
                             </span>
                             <span className="font-extrabold text-rose-700 capitalize">
-                              {result.skin_vitality.circulation_rating}
+                              {result.skin_vitality.circulation_rating || "Normal"}
                             </span>
                           </div>
                         </div>
@@ -1622,7 +1622,7 @@ export default function PalmReadingPage() {
                 {activeTab === "archetype" && (
                   <div className="space-y-6">
                     {/* Hero Archetype Card */}
-                    {result.temperament_archetype ? (
+                    {result.temperament_archetype && result.temperament_archetype.primary_archetype ? (
                       <div className="overflow-hidden rounded-3xl border border-brand-200 bg-gradient-to-br from-brand-950 via-ink-950 to-brand-950 p-6 text-white shadow-xl">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-400/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-brand-300">
@@ -1883,7 +1883,7 @@ export default function PalmReadingPage() {
                       </div>
                     </div>
 
-                    {result.medical_constitution && (
+                    {result.medical_constitution && result.medical_constitution.pallor_diagnosis?.state && (
                       <div className="space-y-4">
                         {/* Pallor & Agni Card */}
                         <div className="rounded-3xl border border-border bg-white p-6 shadow-xs">
@@ -1990,7 +1990,7 @@ export default function PalmReadingPage() {
                             {Object.entries(result.medical_constitution.nail_mineral_diagnostics || {}).map(([k, v]) => (
                               <div key={k} className="rounded-xl border border-border bg-surface-muted/40 p-3">
                                 <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                                  {k.replace(/_/g, " ")}
+                                  {(k || "").replace(/_/g, " ")}
                                 </span>
                                 <span className="mt-1 block text-xs font-semibold text-foreground">{v}</span>
                               </div>
@@ -2442,7 +2442,7 @@ export default function PalmReadingPage() {
 
                             <div className="mt-4 border-t border-amber-200/60 pt-3 flex items-center justify-between text-[11px]">
                               <span className="font-mono text-muted-foreground">
-                                📍 {language === "bn" ? "তালু স্থানাঙ্ক:" : language === "hi" ? "निर्देशांक:" : "Coords:"} [{mark.location_norm.map((n) => n.toFixed(2)).join(", ")}]
+                                📍 {language === "bn" ? "তালু স্থানাঙ্ক:" : language === "hi" ? "निर्देशांक:" : "Coords:"} [{((mark.location_norm || []) as number[]).map((n) => Number(n).toFixed(2)).join(", ")}]
                               </span>
                               <span className="font-bold text-amber-700">
                                 {mark.auspicious
@@ -2677,13 +2677,13 @@ export default function PalmReadingPage() {
                           : "Hand Geometry Ratios"}
                       </h3>
                       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        {Object.entries(result.measurements).map(([key, val]) => (
+                        {Object.entries(result.measurements || {}).map(([key, val]) => (
                           <div
                             key={key}
                             className="rounded-2xl border border-border bg-surface-muted/50 p-3"
                           >
                             <span className="block text-[10px] font-bold text-muted-foreground uppercase">
-                              {key.replace(/_/g, " ")}
+                              {(key || "").replace(/_/g, " ")}
                             </span>
                             <span className="text-sm font-black text-foreground">
                               {typeof val === "number" ? val.toFixed(3) : val}
