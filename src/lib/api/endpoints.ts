@@ -176,6 +176,15 @@ export const endpoints = {
     homepage: "/cms/homepage",
   },
 
+  tarot: {
+    deck: "/tarot/deck",
+    card: (id: string) => `/tarot/cards/${id}`,
+    spreads: "/tarot/spreads",
+    spread: (id: string) => `/tarot/spreads/${id}`,
+    draw: "/tarot/draw",
+    daily: "/tarot/daily",
+  },
+
   passkeys: {
     registerOptions: "/auth/passkey/register/options",
     registerVerify: "/auth/passkey/register/verify",

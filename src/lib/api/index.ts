@@ -69,6 +69,13 @@ import type {
   WalletSummary,
   WalletTransaction,
 } from "@/types";
+import type {
+  TarotCard,
+  SpreadConfig,
+  TarotDrawRequest,
+  TarotDrawResponse,
+  DailyTarotRequest,
+} from "@/types/tarot";
 
 // ------------------------------------------------------------------- auth
 export const authApi = {
@@ -742,6 +749,21 @@ export interface HomePageCMSData {
 
 export const cmsApi = {
   getHomepage: () => api.get<HomePageCMSData>(endpoints.cms.homepage, { auth: false }),
+};
+
+export const tarotApi = {
+  getDeck: (params?: { arcana?: string; suit?: string }) =>
+    api.get<TarotCard[]>(endpoints.tarot.deck, { query: params, auth: false }),
+  getCard: (id: string) =>
+    api.get<TarotCard>(endpoints.tarot.card(id), { auth: false }),
+  getSpreads: () =>
+    api.get<SpreadConfig[]>(endpoints.tarot.spreads, { auth: false }),
+  getSpread: (id: string) =>
+    api.get<SpreadConfig>(endpoints.tarot.spread(id), { auth: false }),
+  draw: (body: TarotDrawRequest) =>
+    api.post<TarotDrawResponse>(endpoints.tarot.draw, body),
+  daily: (body: DailyTarotRequest) =>
+    api.post<TarotDrawResponse>(endpoints.tarot.daily, body),
 };
 
 export interface PasskeyInfo {

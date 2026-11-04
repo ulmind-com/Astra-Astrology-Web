@@ -103,6 +103,13 @@ const SERVICES = [
     accent: "gold",
     href: "/vastu",
   },
+  {
+    icon: Compass,
+    title: "Tarot Oracle",
+    body: "78 canonical Arcana cards synchronized with planetary Dashas and Vedic remedial mantras.",
+    accent: "brand",
+    href: "/tarot",
+  },
 ];
 
 const STEPS = [
