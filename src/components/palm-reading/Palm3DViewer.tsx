@@ -178,6 +178,33 @@ const VOLUMETRIC_FACETS: ReadonlyArray<readonly [number, number, number]> = [
   [15, 18, 19],
 ];
 
+// Safe rounded rectangle for cross-browser canvas support (Safari, older WebViews)
+function safeRoundRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+) {
+  if (typeof ctx.roundRect === "function") {
+    ctx.roundRect(x, y, w, h, r);
+  } else {
+    const radius = Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + w - radius, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+    ctx.lineTo(x + w, y + h - radius);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+    ctx.lineTo(x + radius, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+  }
+}
+
 export function Palm3DViewer({
   landmarks3D,
   worldLandmarksMm,
@@ -286,10 +313,11 @@ export function Palm3DViewer({
 
   // Main 3D Render Loop
   const draw3DScene = React.useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    try {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
     const width = canvas.clientWidth;
@@ -460,7 +488,7 @@ export function Palm3DViewer({
 
       // Elevation Badge
       ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
-      ctx.roundRect(mx - 38, my + 24, 76, 18, 4);
+      safeRoundRect(ctx, mx - 38, my + 24, 76, 18, 4);
       ctx.fill();
       ctx.strokeStyle = "#38bdf8";
       ctx.stroke();
@@ -580,7 +608,7 @@ export function Palm3DViewer({
       const tw = ctx.measureText(tagTxt).width;
 
       ctx.fillStyle = isSelected ? "rgba(30, 27, 75, 0.95)" : "rgba(15, 23, 42, 0.88)";
-      ctx.roundRect(bx - tw / 2 - 6, by - 26, tw + 12, 16, 4);
+      safeRoundRect(ctx, bx - tw / 2 - 6, by - 26, tw + 12, 16, 4);
       ctx.fill();
       ctx.strokeStyle = meta.color;
       ctx.lineWidth = isSelected ? 1.5 : 0.8;
@@ -590,6 +618,9 @@ export function Palm3DViewer({
       ctx.fillText(tagTxt, bx, by - 18);
       ctx.restore();
     });
+  } catch (err) {
+    console.warn("Palm3DViewer draw3DScene error:", err);
+  }
   }, [
     activeMount,
     language,

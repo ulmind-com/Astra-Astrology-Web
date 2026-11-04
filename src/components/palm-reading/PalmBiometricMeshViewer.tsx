@@ -66,6 +66,33 @@ const MOUNT_PINS = [
   { id: "venus", sym: "♀", nameBn: "শুক্র", nameHi: "शुक्र", nameEn: "Venus", nodeIdx: 2, color: "#ec4899" },
 ];
 
+// Safe rounded rectangle for cross-browser canvas support (Safari, older WebViews)
+function safeRoundRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+) {
+  if (typeof ctx.roundRect === "function") {
+    ctx.roundRect(x, y, w, h, r);
+  } else {
+    const radius = Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + w - radius, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+    ctx.lineTo(x + w, y + h - radius);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+    ctx.lineTo(x + radius, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+  }
+}
+
 export function PalmBiometricMeshViewer({
   result,
   previewUrl,
@@ -109,19 +136,20 @@ export function PalmBiometricMeshViewer({
 
   // Render 3D Biometric Mesh Canvas Overlay
   const renderMesh = React.useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || viewMode !== "mesh_overlay") return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    try {
+      const canvas = canvasRef.current;
+      if (!canvas || viewMode !== "mesh_overlay") return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
 
-    const w = canvas.width;
-    const h = canvas.height;
-    ctx.clearRect(0, 0, w, h);
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
 
-    if (!hasValidLandmarks || landmarks.length < 21) return;
+      if (!hasValidLandmarks || landmarks.length < 21) return;
 
-    const toX = (nx: number) => nx * w;
-    const toY = (ny: number) => ny * h;
+      const toX = (nx: number) => nx * w;
+      const toY = (ny: number) => ny * h;
 
     // 1. Draw Translucent Triangular Facet Mesh (Tessellation)
     if (showWebbing) {
@@ -232,7 +260,7 @@ export function PalmBiometricMeshViewer({
       ctx.font = "bold 9px sans-serif";
       const tw = ctx.measureText(text).width;
       ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
-      ctx.roundRect(mx - tw / 2 - 5, my + 24, tw + 10, 16, 4);
+      safeRoundRect(ctx, mx - tw / 2 - 5, my + 24, tw + 10, 16, 4);
       ctx.fill();
       ctx.strokeStyle = "#38bdf8";
       ctx.lineWidth = 1;
@@ -337,7 +365,7 @@ export function PalmBiometricMeshViewer({
         const textW = ctx.measureText(tagText).width;
 
         ctx.fillStyle = "rgba(15, 23, 42, 0.88)";
-        ctx.roundRect(x - textW / 2 - 5, y - 42, textW + 10, 15, 4);
+        safeRoundRect(ctx, x - textW / 2 - 5, y - 42, textW + 10, 15, 4);
         ctx.fill();
         ctx.strokeStyle = m.color;
         ctx.lineWidth = 0.8;
@@ -396,7 +424,7 @@ export function PalmBiometricMeshViewer({
         const tagY = sy + 18 < h - 18 ? sy + 18 : sy - 18;
 
         ctx.fillStyle = "rgba(18, 18, 28, 0.88)";
-        ctx.roundRect(tagX - wTxt / 2 - 5, tagY - 7, wTxt + 10, 15, 4);
+        safeRoundRect(ctx, tagX - wTxt / 2 - 5, tagY - 7, wTxt + 10, 15, 4);
         ctx.fill();
         ctx.strokeStyle = "#fbbf24";
         ctx.lineWidth = 0.8;
@@ -407,6 +435,9 @@ export function PalmBiometricMeshViewer({
         ctx.restore();
       }
     }
+  } catch (err) {
+    console.warn("PalmBiometricMeshViewer renderMesh error:", err);
+  }
   }, [
     hasValidLandmarks,
     landmarks,

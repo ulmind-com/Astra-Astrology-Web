@@ -385,12 +385,13 @@ export default function PalmReadingPage() {
           );
           refreshWallet();
         } else {
+          const count = response.sections?.length ?? 0;
           toast.success(
             language === "bn"
-              ? `${response.sections.length}টি গভীর বিশ্লেষণ সম্পন্ন হয়েছে!`
+              ? `${count}টি গভীর বিশ্লেষণ সম্পন্ন হয়েছে!`
               : language === "hi"
-                ? `${response.sections.length} विश्लेषण सफलतापूर्वक प्राप्त हुए!`
-                : `${response.sections.length} detailed findings identified from your palm.`,
+                ? `${count} विश्लेषण सफलतापूर्वक प्राप्त हुए!`
+                : `${count} detailed findings identified from your palm.`,
           );
         }
         setTimeout(
@@ -605,9 +606,10 @@ export default function PalmReadingPage() {
 
   // Group sections by life area
   const byArea = React.useMemo(() => {
-    if (!result?.sections) return [];
+    if (!result?.sections || !Array.isArray(result.sections)) return [];
     const groups = new Map<string, typeof result.sections>();
     for (const section of result.sections) {
+      if (!section) continue;
       const area = section.area || "General";
       groups.set(area, [...(groups.get(area) ?? []), section]);
     }
@@ -616,9 +618,10 @@ export default function PalmReadingPage() {
 
   // Group sections by category for Tabs
   const categorized = React.useMemo(() => {
-    if (!result?.sections) return { lines: [], forecasts: [], proportions: [] };
-    const lines = result.sections.filter((s) =>
-      [
+    if (!result?.sections || !Array.isArray(result.sections)) return { lines: [], forecasts: [], proportions: [] };
+    const secList = result.sections || [];
+    const lines = secList.filter((s) =>
+      s && [
         "heart_line",
         "head_line",
         "life_line",
@@ -628,11 +631,12 @@ export default function PalmReadingPage() {
         "line_relationship",
       ].includes(s.feature),
     );
-    const forecasts = result.sections.filter((s) =>
-      ["career_forecast", "relationship_forecast", "health_forecast"].includes(s.feature),
+    const forecasts = secList.filter((s) =>
+      s && ["career_forecast", "relationship_forecast", "health_forecast"].includes(s.feature),
     );
-    const proportions = result.sections.filter(
+    const proportions = secList.filter(
       (s) =>
+        s &&
         ![
           "heart_line",
           "head_line",
@@ -644,9 +648,6 @@ export default function PalmReadingPage() {
           "career_forecast",
           "relationship_forecast",
           "health_forecast",
-          "hand_type",
-          "sacred_marks",
-          "skin_vitality",
         ].includes(s.feature),
     );
     return { lines, forecasts, proportions };
@@ -1143,9 +1144,9 @@ export default function PalmReadingPage() {
                   {t.notCharged}
                 </p>
 
-                {result.quality_checks.length > 0 && (
+                {(result.quality_checks?.length ?? 0) > 0 && (
                   <ul className="mt-4 space-y-1.5 border-t border-amber-200/60 pt-3">
-                    {result.quality_checks.map((check) => (
+                    {(result.quality_checks ?? []).map((check) => (
                       <li
                         key={check.name}
                         className="flex items-start gap-2 text-[11px] leading-relaxed"
@@ -1448,17 +1449,19 @@ export default function PalmReadingPage() {
                               {t.creasesTitle}
                             </h3>
                             <span className="text-[11px] font-bold text-brand-700">
-                              {result.creases.filter((c) => c.found).length +
-                                (result.secondary_lines
-                                  ? Object.values(result.secondary_lines).filter((c) => c.found).length
+                              {(Array.isArray(result.creases) ? result.creases.filter((c) => c?.found).length : 0) +
+                                (result.secondary_lines && typeof result.secondary_lines === "object"
+                                  ? Object.values(result.secondary_lines).filter((c) => c?.found).length
                                   : 0)}{" "}
                               {language === "bn" ? "টি রেখা চিহ্নিত" : language === "hi" ? "रेखाएं चिह्नित" : "Traced Lines"}
                             </span>
                           </div>
                           <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                             {[
-                              ...result.creases,
-                              ...(result.secondary_lines ? Object.values(result.secondary_lines) : []),
+                              ...(Array.isArray(result.creases) ? result.creases : []),
+                              ...(result.secondary_lines && typeof result.secondary_lines === "object"
+                                ? Object.values(result.secondary_lines)
+                                : []),
                             ].map((crease) => {
                               const theme = CREASE_THEME[crease.name] || CREASE_THEME.heart;
                               const Icon = theme.icon;
@@ -1510,7 +1513,7 @@ export default function PalmReadingPage() {
                             {language === "bn" ? "প্রধান বৈশিষ্ট্যসমূহ" : language === "hi" ? "प्रमुख लक्षण सारांश" : "Core Findings Summary"}
                           </h4>
                           <div className="mt-3 space-y-2.5">
-                            {result.sections.slice(0, 4).map((sec) => (
+                            {(result.sections || []).slice(0, 4).map((sec) => (
                               <div
                                 key={`${sec.feature}-${sec.option}`}
                                 className="flex items-start gap-3 rounded-xl border border-border/70 bg-surface-muted/40 p-3"
@@ -2485,8 +2488,8 @@ export default function PalmReadingPage() {
                     />
 
                     {/* 3D Reading Findings Sections */}
-                    {result.sections.filter((s) =>
-                      ["mounts_3d", "finger_flexibility_3d", "palm_hollow_3d"].includes(s.feature),
+                    {(result.sections || []).filter((s) =>
+                      s && ["mounts_3d", "finger_flexibility_3d", "palm_hollow_3d"].includes(s.feature),
                     ).length > 0 && (
                       <div className="space-y-4">
                         <h3 className="text-sm font-black text-foreground">
@@ -2497,9 +2500,9 @@ export default function PalmReadingPage() {
                               : "3D Metric-Derived Interpretations"}
                         </h3>
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                          {result.sections
+                          {(result.sections || [])
                             .filter((s) =>
-                              ["mounts_3d", "finger_flexibility_3d", "palm_hollow_3d"].includes(s.feature),
+                              s && ["mounts_3d", "finger_flexibility_3d", "palm_hollow_3d"].includes(s.feature),
                             )
                             .map((section, idx) => (
                               <article
@@ -2693,7 +2696,7 @@ export default function PalmReadingPage() {
                 )}
 
                 {/* Not Assessed Disclaimer */}
-                {result.skipped.length > 0 && (
+                {(result.skipped?.length ?? 0) > 0 && (
                   <section className="rounded-3xl border border-border bg-surface p-5 sm:p-7">
                     <h3 className="flex items-center gap-2 text-sm font-extrabold text-foreground">
                       <Info className="size-4 shrink-0 text-muted-foreground" />
@@ -2703,7 +2706,7 @@ export default function PalmReadingPage() {
                       {t.notAssessedSubtitle}
                     </p>
                     <ul className="mt-3 space-y-2">
-                      {result.skipped.map((item, index) => (
+                      {(result.skipped || []).map((item, index) => (
                         <li key={index} className="rounded-xl bg-surface-muted px-3.5 py-2.5">
                           <span className="text-xs font-bold text-foreground">
                             {item.feature_label}
@@ -2718,8 +2721,8 @@ export default function PalmReadingPage() {
                 )}
 
                 <div className="text-center text-[11px] text-muted-foreground">
-                  {t.scanSpeedFooter}: {Math.round(result.processing_ms)} ms
-                  {result.coins_charged > 0 && ` · ${result.coins_charged} coins`}
+                  {t.scanSpeedFooter}: {Math.round(result.processing_ms || 0)} ms
+                  {Number(result.coins_charged) > 0 && ` · ${result.coins_charged} coins`}
                 </div>
               </div>
             )}
