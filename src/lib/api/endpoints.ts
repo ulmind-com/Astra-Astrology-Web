@@ -83,6 +83,8 @@ export const endpoints = {
     scan: "/face-reading/scan",
     mine: "/face-reading/mine",
     detail: (id: string) => `/face-reading/${id}`,
+    timelineAge: "/face-reading/timeline-age",
+    coupleMatch: "/face-reading/couple-match",
     rules: "/admin/face-reading/rules",
     rule: (id: string) => `/admin/face-reading/rules/${id}`,
   },

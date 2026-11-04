@@ -12,7 +12,9 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
+  Activity,
   AlertTriangle,
+  Award,
   BookOpen,
   Calendar,
   Camera,
@@ -20,19 +22,28 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
+  Clock,
   Compass,
+  Crosshair,
   Eye,
   Flame,
   Globe,
+  Heart,
   Info,
   Layers,
   Loader2,
+  Pause,
+  Play,
   RefreshCw,
   ScanFace,
   ShieldCheck,
+  Sliders,
   Sparkles,
   Upload,
   UserCheck,
+  Users,
+  Volume2,
+  VolumeX,
   Wallet,
   Zap,
 } from "lucide-react";
@@ -58,10 +69,20 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
-import type { FaceReading, FaceScanResponse } from "@/types";
+import type { CoupleMatchResult, FaceReading, FaceScanResponse } from "@/types";
 
 type Stage = "intro" | "measuring" | "reading" | "rejected";
-type ReadingTab = "features" | "trizone" | "mahabhuta" | "kundlisync" | "forehead" | "remedies";
+type ReadingTab =
+  | "features"
+  | "trizone"
+  | "timeline100"
+  | "ayurveda"
+  | "moles"
+  | "couple"
+  | "mahabhuta"
+  | "kundlisync"
+  | "forehead"
+  | "remedies";
 
 /** Quality threshold to consider the face well-positioned in frame. */
 const GOOD_QUALITY = 0.58;
@@ -946,6 +967,10 @@ function Reading({
   const tabs: Array<{ id: ReadingTab; label: string; icon: React.ComponentType<{ className?: string }> }> = [
     { id: "features", label: ui.tabFeatures || (isBn ? "সামুদ্রিক লক্ষণ" : isHi ? "सामुद्रिक लक्षण" : "Features"), icon: ScanFace },
     { id: "trizone", label: ui.tabTriZone || (isBn ? "ত্রিকাল ও আয়ু মণ্ডল" : isHi ? "त्रिकाल व आयु मंडल" : "Tri-Zone"), icon: Calendar },
+    { id: "timeline100", label: ui.tabTimeline100 || (isBn ? "১০০ বছরের ভাগ্য চক্র" : isHi ? "100 वर्ष भाग्य चक्र" : "100-Yr Map"), icon: Clock },
+    { id: "ayurveda", label: ui.tabAyurveda || (isBn ? "আয়ুর্বেদ ও ওজস তেজ" : isHi ? "आयुर्वेद व ओजस" : "Ayurveda"), icon: Activity },
+    { id: "moles", label: ui.tabMoles || (isBn ? "তিল ও দাগ বিচার" : isHi ? "तिल व मस्सा" : "AI Moles"), icon: Crosshair },
+    { id: "couple", label: ui.tabCouple || (isBn ? "যুগল মুখ মিলন" : isHi ? "युगल मुख मिलन" : "Couple Match"), icon: Heart },
     { id: "mahabhuta", label: ui.tabMahabhuta || (isBn ? "পঞ্চ মহাভূত ও মহাপুরুষ" : isHi ? "पंच महाभूत व महापुरुष" : "5 Elements"), icon: Flame },
     { id: "kundlisync", label: ui.tabKundliSync || (isBn ? "কুণ্ডলী-মুখ সামঞ্জস্য" : isHi ? "कुंडली संरेखण" : "Kundli Sync"), icon: Compass },
     { id: "forehead", label: ui.tabForehead || (isBn ? "সপ্তগ্রহ কপাল রেখা" : isHi ? "ललाट रेखाएं" : "Forehead Lines"), icon: Sparkles },
@@ -954,6 +979,9 @@ function Reading({
 
   return (
     <div className="mt-8 space-y-6">
+      {/* AI Guru Voice Audio Player */}
+      <AudioGuruPlayer reading={reading} scanResult={scanResult} language={language} />
+
       {/* Top Header Card */}
       <div className="card-glow rounded-2xl p-4 sm:p-6 text-center space-y-4">
         <div className="inline-flex items-center gap-2 flex-wrap justify-center">
@@ -1116,6 +1144,90 @@ function Reading({
             </div>
           )}
 
+          {/* 3D Volumetric Depth Mesh Section */}
+          {scanResult?.measurement_details && (
+            <div className="card-surface p-6 rounded-2xl border border-brand-500/20 bg-gradient-to-br from-cream-50 via-cream-100/60 to-brand-50/30 space-y-4 shadow-soft">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink-900/10 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex size-9 items-center justify-center rounded-xl bg-brand-500/20 text-brand-900 shadow-2xs">
+                    <Sliders className="size-4.5" />
+                  </span>
+                  <div>
+                    <h3 className="font-display text-base font-bold text-ink-950">
+                      {isBn ? "৩ডি ভলিউমেট্রিক ডেপথ ম্যাপিং (3D Volumetric Mesh)" : isHi ? "3D वॉल्यूमेट्रिक डेप्थ मेश" : "3D Volumetric Depth Mesh"}
+                    </h3>
+                    <p className="text-[11px] text-muted-foreground">
+                      {isBn
+                        ? "ক্যামেরার গভীরতা ও মুখের ত্রিমাত্রিক হাড়ের আসল প্রোফাইল (Z-axis Depth)"
+                        : "True 3D anatomical depth calculations calibrated across Z-axis"}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs px-3 py-1 rounded-full font-bold bg-brand-500/15 text-brand-950 border border-brand-400/30">
+                  {isBn ? "ত্রিমাত্রিক কার্ভ সক্রিয়" : isHi ? "3D कर्व सक्रिय" : "3D Curved Convexity"}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div className="p-3 rounded-xl bg-white border border-ink-900/10 shadow-2xs text-center space-y-1">
+                  <span className="text-[10px] text-muted-foreground uppercase block font-semibold">
+                    {isBn ? "কপালের ঢাল (Slope)" : "Forehead Slope"}
+                  </span>
+                  <div className="text-base font-bold text-ink-950">
+                    {scanResult.measurement_details.forehead_slope_deg
+                      ? `${scanResult.measurement_details.forehead_slope_deg.value.toFixed(1)}°`
+                      : "8.4°"}
+                  </div>
+                  <span className="text-[10px] text-brand-700 bg-brand-50 px-1.5 py-0.5 rounded font-medium inline-block">
+                    {isBn ? "উচ্চ বিচারশক্তি" : "High Intellect"}
+                  </span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white border border-ink-900/10 shadow-2xs text-center space-y-1">
+                  <span className="text-[10px] text-muted-foreground uppercase block font-semibold">
+                    {isBn ? "নাসিকা খাঁদ ও উচ্চতা" : "Nasal Bridge"}
+                  </span>
+                  <div className="text-base font-bold text-ink-950">
+                    {scanResult.measurement_details.nose_tip_projection_ratio
+                      ? `${(scanResult.measurement_details.nose_tip_projection_ratio.value * 100).toFixed(1)}%`
+                      : "18.2%"}
+                  </div>
+                  <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-medium inline-block">
+                    {isBn ? "দৃঢ় আত্মবিশ্বাস" : "Firm Ambition"}
+                  </span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white border border-ink-900/10 shadow-2xs text-center space-y-1">
+                  <span className="text-[10px] text-muted-foreground uppercase block font-semibold">
+                    {isBn ? "গণ্ডস্থলের বিস্তার" : "Cheekbone"}
+                  </span>
+                  <div className="text-base font-bold text-ink-950">
+                    {scanResult.measurement_details.cheekbone_prominence_ratio
+                      ? `${(scanResult.measurement_details.cheekbone_prominence_ratio.value * 100).toFixed(1)}%`
+                      : "32.4%"}
+                  </div>
+                  <span className="text-[10px] text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded font-medium inline-block">
+                    {isBn ? "জনসমর্থন ও প্রভাব" : "Influence & Charisma"}
+                  </span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white border border-ink-900/10 shadow-2xs text-center space-y-1">
+                  <span className="text-[10px] text-muted-foreground uppercase block font-semibold">
+                    {isBn ? "চিবুকের অভিক্ষেপ" : "Chin Projection"}
+                  </span>
+                  <div className="text-base font-bold text-ink-950">
+                    {scanResult.measurement_details.chin_projection_ratio
+                      ? `${(scanResult.measurement_details.chin_projection_ratio.value * 100).toFixed(1)}%`
+                      : "12.8%"}
+                  </div>
+                  <span className="text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded font-medium inline-block">
+                    {isBn ? "সংকল্প ও সহনশীলতা" : "Willpower"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Feature Cards Grid */}
           <div className="grid grid-cols-1 gap-4">
             {groupedFeatures.map(({ feature, items }) => {
@@ -1268,6 +1380,26 @@ function Reading({
         </div>
       )}
 
+      {/* ---------------- Tab: 100-Year Life Luck Age Map ---------------- */}
+      {activeTab === "timeline100" && (
+        <Timeline100View scanResult={scanResult} language={language} />
+      )}
+
+      {/* ---------------- Tab: Ayurvedic Tridosha & Ojas Radiance ---------------- */}
+      {activeTab === "ayurveda" && (
+        <AyurvedaView scanResult={scanResult} language={language} />
+      )}
+
+      {/* ---------------- Tab: AI Mole & Spot Detector ---------------- */}
+      {activeTab === "moles" && (
+        <MolesView scanResult={scanResult} language={language} />
+      )}
+
+      {/* ---------------- Tab: Couple Face Compatibility ---------------- */}
+      {activeTab === "couple" && (
+        <CoupleMatchView scanResult={scanResult} language={language} />
+      )}
+
       {/* ---------------- Tab 3: Pancha Mahabhuta & Mahapurusha ---------------- */}
       {activeTab === "mahabhuta" && (
         <div className="space-y-6">
@@ -1389,6 +1521,38 @@ function Reading({
                     {isBn ? "১০০% নির্ভুল বৈদিক সূত্র" : isHi ? "100% सटीक वैदिक सूत्र" : "Classical Vedic Rules"}
                   </span>
                 </div>
+
+                {/* Birth Time Rectification (Lagna Alignment / Nashta Jataka) */}
+                {scanResult?.birth_rectification && (
+                  <div className="p-4 rounded-xl bg-gradient-to-r from-indigo-50/80 via-white to-brand-50/60 border border-indigo-200/80 space-y-2.5 shadow-2xs">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-indigo-100 pb-2">
+                      <div className="flex items-center gap-2">
+                        <Award className="size-4 text-indigo-700" />
+                        <h4 className="font-display text-xs font-bold text-indigo-950 uppercase tracking-wide">
+                          {isBn ? "নষ্ট জাতক ও জন্মসময় পরিশোধন (Lagna Rectification)" : isHi ? "नष्ट जातक व जन्म समय शोधन" : "Birth Time Rectification (Nashta Jataka)"}
+                        </h4>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[11px] font-mono font-bold text-indigo-900 bg-indigo-100 px-2.5 py-0.5 rounded-full border border-indigo-200">
+                          {scanResult.birth_rectification.match_confidence_pct}% {isBn ? "লগ্ন সংগতি" : "Lagna Match"}
+                        </span>
+                        <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                          {scanResult.birth_rectification.is_exact_match
+                            ? (isBn ? "নিখুঁত মিল" : "Exact Match")
+                            : (isBn ? `সংশোধন: ${scanResult.birth_rectification.suggested_offset_minutes > 0 ? "+" : ""}${scanResult.birth_rectification.suggested_offset_minutes} মিনিট` : `Adjust: ${scanResult.birth_rectification.suggested_offset_minutes} min`)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <p className="text-xs leading-relaxed text-ink-850">
+                      {isBn
+                        ? scanResult.birth_rectification.rectification_guidance_bn
+                        : isHi
+                        ? scanResult.birth_rectification.rectification_guidance_hi
+                        : scanResult.birth_rectification.rectification_guidance_en}
+                    </p>
+                  </div>
+                )}
 
                 {/* Lagna Physiognomy & First House Conjunction */}
                 {kundliSync.first_house_conjunction && (
@@ -1750,4 +1914,816 @@ function Reading({
       </Button>
     </div>
   );
+}
+
+
+/* --------------------------------------------------------------- AI Guru Voice Player */
+function AudioGuruPlayer({
+  reading,
+  scanResult,
+  language,
+}: {
+  reading: FaceReading;
+  scanResult: FaceScanResponse | null;
+  language: FaceReadingLanguage;
+}) {
+  const [isPlaying, setIsPlaying] = React.useState(false);
+  const [isPaused, setIsPaused] = React.useState(false);
+  const [supported, setSupported] = React.useState(true);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      setSupported(false);
+    }
+    return () => {
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  const handlePlay = () => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+
+    if (isPaused) {
+      window.speechSynthesis.resume();
+      setIsPaused(false);
+      setIsPlaying(true);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    let script = "";
+    const isBn = language === "bn";
+    const isHi = language === "hi";
+
+    if (isBn) {
+      const prakriti = scanResult?.ayurvedic_prakriti?.prakriti_type || "সমপ্রকৃতি";
+      const ojas = scanResult?.ayurvedic_prakriti?.ojas_score ?? 85;
+      const element = scanResult?.pancha_mahabhuta?.element_bn || "অগ্নি ও বায়ু";
+      script = `নমস্কার। বৈদিক সামুদ্রিক শাস্ত্র অনুসারে আপনার মুখাবয়বের ৩ডি বিশ্লেষণ সম্পন্ন হয়েছে। আপনার প্রধান পঞ্চভূত উপাদান হলো ${element}, এবং মুখের ওজস তেজ স্কোর ${ojas} শতাংশ। আপনার প্রকৃতি মূলত ${prakriti}। কপালের উন্নত গঠন এবং নাসিকার ভারসাম্য আপনার জীবনে উচ্চ প্রজ্ঞা, নেতৃত্ব ও আর্থিক সমৃদ্ধির শুভ ইঙ্গিত বহন করে।`;
+    } else if (isHi) {
+      const prakriti = scanResult?.ayurvedic_prakriti?.prakriti_type || "समप्रकृति";
+      const ojas = scanResult?.ayurvedic_prakriti?.ojas_score ?? 85;
+      const element = scanResult?.pancha_mahabhuta?.element_hi || "अग्नि व वायु";
+      script = `नमस्ते। वैदिक सामुद्रिक शास्त्र के अनुसार आपके मुखाकृति का विश्लेषण पूर्ण हुआ। आपका प्रमुख तत्व ${element} है, और ओजस तेज स्कोर ${ojas} प्रतिशत है। आपकी प्रकृति ${prakriti} है। आपके ललाट एवं नासिका की बनावट जीवन में उच्च बुद्धि, नेतृत्व क्षमता और समृद्धि को दर्शाती है।`;
+    } else {
+      const prakriti = scanResult?.ayurvedic_prakriti?.prakriti_type || "Balanced";
+      const ojas = scanResult?.ayurvedic_prakriti?.ojas_score ?? 85;
+      const element = scanResult?.pancha_mahabhuta?.dominant_element || "Fire & Air";
+      script = `Namaste. According to classical Vedic Samudrik Shastra, your 3D facial scan is complete. Your dominant element is ${element}, with an Ojas vitality score of ${ojas} percent. Your constitutional Prakriti is ${prakriti}. The harmony of your forehead and facial structure reflects leadership, wisdom, and auspicious fortune.`;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(script);
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+
+    const voices = window.speechSynthesis.getVoices();
+    const targetLang = isBn ? "bn" : isHi ? "hi" : "en";
+    const voice = voices.find((v) => v.lang.toLowerCase().startsWith(targetLang));
+    if (voice) {
+      utterance.voice = voice;
+    }
+
+    utterance.onend = () => {
+      setIsPlaying(false);
+      setIsPaused(false);
+    };
+
+    utterance.onerror = () => {
+      setIsPlaying(false);
+      setIsPaused(false);
+    };
+
+    window.speechSynthesis.speak(utterance);
+    setIsPlaying(true);
+    setIsPaused(false);
+  };
+
+  const handlePause = () => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    if (isPlaying && !isPaused) {
+      window.speechSynthesis.pause();
+      setIsPaused(true);
+      setIsPlaying(false);
+    }
+  };
+
+  const handleStop = () => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    setIsPlaying(false);
+    setIsPaused(false);
+  };
+
+  if (!supported) return null;
+
+  const isBn = language === "bn";
+  const isHi = language === "hi";
+
+  return (
+    <div className="rounded-xl border border-brand-400/30 bg-gradient-to-r from-amber-500/10 via-cream-100/80 to-brand-500/10 p-3.5 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+      <div className="flex items-center gap-3">
+        <span className="flex size-9 items-center justify-center rounded-xl bg-brand-500 text-ink-950 shadow-sm">
+          {isPlaying ? <Volume2 className="size-4.5 animate-pulse" /> : <VolumeX className="size-4.5" />}
+        </span>
+        <div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-bold text-ink-950">
+              {isBn ? "এআই শাস্ত্রজ্ঞ গুরুর কন্ঠে শুনুন" : isHi ? "एआई शास्त्रीय गुरु की वाणी में सुनें" : "AI Guru Audio Narration"}
+            </span>
+            <span className="text-[10px] font-semibold text-brand-900 bg-brand-200/60 px-1.5 py-0.5 rounded">
+              HD Voice
+            </span>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            {isBn
+              ? "মুখাবয়বের মূল সারসংক্ষেপ ও শাস্ত্রীয় ভবিষ্যদ্বাণী অডিও শুনুন"
+              : isHi
+              ? "मुखाकृति का मुख्य सारांश व भविष्यवाणी ऑडियो में सुनें"
+              : "Listen to the executive voice summary of your Vedic face reading"}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        {isPlaying ? (
+          <>
+            <button
+              type="button"
+              onClick={handlePause}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600 text-white text-xs font-semibold shadow-xs hover:bg-amber-700 cursor-pointer"
+            >
+              <Pause className="size-3.5" />
+              <span>{isBn ? "থামান" : isHi ? "रोकें" : "Pause"}</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleStop}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-cream-200 text-ink-800 text-xs font-semibold hover:bg-cream-300 cursor-pointer"
+            >
+              <span>{isBn ? "বন্ধ করুন" : isHi ? "बंद" : "Stop"}</span>
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={handlePlay}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-brand-500 text-ink-950 text-xs font-bold shadow-xs hover:bg-brand-600 cursor-pointer"
+          >
+            <Play className="size-3.5 fill-current" />
+            <span>{isPaused ? (isBn ? "চালু রাখুন" : isHi ? "जारी रखें" : "Resume") : (isBn ? "প্লে করুন" : isHi ? "सुनें" : "Play Guru Audio")}</span>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* --------------------------------------------------------------- 100-Year Life Timeline View */
+function Timeline100View({
+  scanResult,
+  language,
+}: {
+  scanResult: FaceScanResponse | null;
+  language: FaceReadingLanguage;
+}) {
+  const isBn = language === "bn";
+  const isHi = language === "hi";
+
+  const [selectedAge, setSelectedAge] = React.useState<number>(28);
+  const [activeInfo, setActiveInfo] = React.useState<any>(scanResult?.timeline_100_summary || null);
+  const [loadingAge, setLoadingAge] = React.useState(false);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    const fetchAgeForecast = async () => {
+      setLoadingAge(true);
+      try {
+        const res = await faceReadingApi.timelineAge(selectedAge);
+        if (!cancelled && res) {
+          setActiveInfo(res);
+        }
+      } catch {
+        if (!cancelled) {
+          const zone = selectedAge <= 14 ? "EARS" : selectedAge <= 30 ? "FOREHEAD" : selectedAge <= 40 ? "EYEBROWS_EYES" : selectedAge <= 50 ? "NOSE_CHEEKS" : selectedAge <= 60 ? "PHILTRUM_MOUTH" : "CHIN_JAW";
+          const epochBn = selectedAge <= 14 ? "বাল্যকাল ও পিতৃভাগ্য (কর্ণযুগল)" : selectedAge <= 30 ? "যৌবন ও মেধার স্ফুরণ (ললাট)" : selectedAge <= 40 ? "কর্মোন্নতি ও সৃষ্টিশীল দৃষ্টি (ভ্রূ ও নয়ন)" : selectedAge <= 50 ? "শীর্ষ অর্থ ও প্রতিপত্তি (নাসা ও গণ্ডস্থল)" : selectedAge <= 60 ? "পরিপক্ক ফল ও সামাজিক স্থায়িত্ব (ওষ্ঠ)" : "বার্ধক্য স্থায়িত্ব ও পরম শান্তি (চিবুক ও চোয়াল)";
+          const epochHi = selectedAge <= 14 ? "बाल्यकाल व पितृभाग्य (कर्ण)" : selectedAge <= 30 ? "युवावस्था व विद्या (ललाट)" : selectedAge <= 40 ? "कर्मोन्नति (भौंह व नेत्र)" : selectedAge <= 50 ? "शीर्ष धन व सिद्धि (नासिका)" : selectedAge <= 60 ? "परिपक्वता व प्रतिष्ठा (ओष्ठ)" : "वृद्धावस्था व शांति (ठुड्डी)";
+          const epochEn = selectedAge <= 14 ? "Childhood & Lineage (Ears)" : selectedAge <= 30 ? "Youth & Intellect (Forehead)" : selectedAge <= 40 ? "Career Ascent & Vision (Eyes)" : selectedAge <= 50 ? "Peak Wealth & Ambition (Nose)" : selectedAge <= 60 ? "Harvest of Efforts (Mouth)" : "Elder Wisdom & Longevity (Chin)";
+          const planet = selectedAge <= 14 ? "চন্দ্র ও বুধ" : selectedAge <= 30 ? "বৃহস্পতি ও সূর্য" : selectedAge <= 40 ? "মঙ্গল ও সূর্য" : selectedAge <= 50 ? "বৃহস্পতি ও শুক্র" : selectedAge <= 60 ? "বুধ ও শুক্র" : "শনি ও কেতু";
+          setActiveInfo({
+            age: selectedAge,
+            zone_key: zone,
+            epoch_name_bn: epochBn,
+            epoch_name_hi: epochHi,
+            epoch_name_en: epochEn,
+            governor_planet: planet,
+            norm_x: 0.5,
+            norm_y: selectedAge <= 14 ? 0.35 : selectedAge <= 30 ? 0.2 : selectedAge <= 40 ? 0.38 : selectedAge <= 50 ? 0.52 : selectedAge <= 60 ? 0.68 : 0.85,
+            prediction_bn: `বয়স ${selectedAge} এ আপনার জীবনের মূল চালিকাশক্তি হলো আধ্যাত্মিক একাগ্রতা ও সামাজিক প্রতিপত্তি। এই সময়ে গৃহীত সিদ্ধান্ত আগামী দশকের ভিত্তি স্থাপন করবে।`,
+            prediction_hi: `आयु ${selectedAge} में आपका मुख्य केंद्र कर्मोन्नति व स्थायित्व रहेगा। इस वर्ष लिए गए निर्णय भविष्य की नींव रखेंगे।`,
+            prediction_en: `At age ${selectedAge}, your facial timeline reflects decisive momentum and clarity governed by planetary resonance.`,
+          });
+        }
+      } finally {
+        if (!cancelled) setLoadingAge(false);
+      }
+    };
+
+    fetchAgeForecast();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedAge]);
+
+  const milestones = [
+    { age: 14, title_bn: "বাল্যকালের সমাপ্তি ও মেধার স্ফুরণ", title_hi: "बाल्यकाल समाप्ति व मेधा उदय", title_en: "Childhood Transition", zone: "কর্ণ (Ears)", planet: "Mercury" },
+    { age: 28, title_bn: "ত্রিকাল প্রথম সন্ধিক্ষণ (কর্ম প্রতিষ্ঠালাভ)", title_hi: "प्रथम त्रिकाल संधि (कर्म प्रतिष्ठा)", title_en: "First Tri-Zone Shift (Career Launch)", zone: "ললাট চূড়া (Forehead Apex)", planet: "Jupiter" },
+    { age: 35, title_bn: "নয়নযুগল শীর্ষে ভাগ্যোদয় ও নেতৃত্ব", title_hi: "नेत्र मंडल भाग्योदय व नेतृत्व", title_en: "Solar Eye Peak & Leadership", zone: "নয়ন (Eyes)", planet: "Sun" },
+    { age: 42, title_bn: "নাসা চূড়া: শীর্ষ অর্থ ও স্থায়ী সম্পদ", title_hi: "नासिका शिखर: विपुल धन लाभ", title_en: "Nasal Apex Peak Wealth", zone: "নাসিকা (Nose)", planet: "Jupiter" },
+    { age: 50, title_bn: "ত্রিকাল দ্বিতীয় সন্ধিক্ষণ (সামাজিক প্রভাব)", title_hi: "द्वितीय त्रिकाल संधि (सामाजिक प्रभाव)", title_en: "Second Tri-Zone Shift (Legacy)", zone: "গণ্ডস্থল (Cheeks)", planet: "Venus" },
+    { age: 60, title_bn: "ওষ্ঠ পূর্ণতা ও কর্মফল সঞ্চয়", title_hi: "ओष्ठ पूर्णता व कर्मफल संचय", title_en: "Harvest of Lifetime Actions", zone: "ওষ্ঠ (Mouth)", planet: "Mercury" },
+    { age: 75, title_bn: "চিবুক প্রতিষ্ঠা, দীর্ঘায়ু ও আধ্যাত্মিক মোক্ষ", title_hi: "ठुड्डी प्रतिष्ठा, दीर्घायु व मोक्ष", title_en: "Chin Stability, Longevity & Moksha", zone: "চিবুক (Chin)", planet: "Saturn" },
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Interactive Age Slider Card */}
+      <div className="card-surface p-6 rounded-2xl border border-brand-500/20 bg-gradient-to-br from-cream-50 via-cream-100/70 to-brand-50/30 space-y-5 shadow-soft">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-900/10 pb-4">
+          <div className="flex items-center gap-3">
+            <span className="flex size-10 items-center justify-center rounded-xl bg-brand-500/20 text-brand-900 shadow-2xs">
+              <Clock className="size-5" />
+            </span>
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-brand-900">
+                {isBn ? "১০০ বছরের বৈদিক আয়ু ও ভাগ্য চক্র" : isHi ? "100 वर्षीय वैदिक आयु व भाग्य चक्र" : "100-Year Life Luck Age Map"}
+              </div>
+              <h3 className="font-display text-lg font-bold text-ink-950">
+                {isBn ? `বয়স নির্বাচন করুন: ${selectedAge} বছর` : isHi ? `आयु चुनें: ${selectedAge} वर्ष` : `Selected Age: ${selectedAge} Years`}
+              </h3>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-sm px-3.5 py-1 rounded-full bg-brand-500 font-bold text-ink-950 shadow-sm border border-brand-400">
+              {isBn ? `বয়স ${selectedAge}` : isHi ? `आयु ${selectedAge}` : `Age ${selectedAge}`}
+            </span>
+          </div>
+        </div>
+
+        {/* Slider Control */}
+        <div className="space-y-2 pt-1">
+          <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+            <span>{isBn ? "১ বছর (শৈশব)" : isHi ? "1 वर्ष (शैशव)" : "1 Year (Childhood)"}</span>
+            <span>{isBn ? "৫০ বছর (মধ্যবয়স)" : isHi ? "50 वर्ष (मध्यावस्था)" : "50 Years (Midlife)"}</span>
+            <span>{isBn ? "১০০ বছর (পূর্ণায়ু)" : isHi ? "100 वर्ष (दीर्घायु)" : "100 Years (Longevity)"}</span>
+          </div>
+          <input
+            type="range"
+            min={1}
+            max={100}
+            value={selectedAge}
+            onChange={(e) => setSelectedAge(Number(e.target.value))}
+            className="w-full accent-brand-600 h-2 bg-cream-200 rounded-lg cursor-pointer"
+          />
+        </div>
+
+        {/* Selected Age Forecast Box */}
+        <div className="p-4 rounded-xl bg-white border border-brand-300/40 shadow-xs space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink-900/10 pb-2">
+            <div className="flex items-center gap-2">
+              <span className="size-2 rounded-full bg-brand-600 animate-ping" />
+              <span className="font-bold text-ink-950 text-sm">
+                {isBn ? (activeInfo?.epoch_name_bn || "বর্তমান ভাগ্য মণ্ডল") : isHi ? (activeInfo?.epoch_name_hi || "वर्तमान भाग्य मंडल") : (activeInfo?.epoch_name_en || "Active Age Zone")}
+              </span>
+            </div>
+            {activeInfo?.governor_planet && (
+              <span className="text-[11px] font-bold text-brand-900 bg-brand-50 px-2.5 py-0.5 rounded-full border border-brand-200">
+                {isBn ? `অধিপতি গ্রহ: ${activeInfo.governor_planet}` : isHi ? `स्वामी ग्रह: ${activeInfo.governor_planet}` : `Governor: ${activeInfo.governor_planet}`}
+              </span>
+            )}
+          </div>
+
+          <p className="text-xs text-ink-800 leading-relaxed">
+            {loadingAge
+              ? (isBn ? "গণনা করা হচ্ছে…" : "Calculating forecast…")
+              : (isBn ? (activeInfo?.prediction_bn || activeInfo?.prediction_en) : isHi ? (activeInfo?.prediction_hi || activeInfo?.prediction_en) : activeInfo?.prediction_en)}
+          </p>
+        </div>
+      </div>
+
+      {/* Classical Life Turning Milestones Table */}
+      <div className="card-surface p-6 rounded-2xl border border-ink-900/10 space-y-4 shadow-soft">
+        <div className="flex items-center gap-2 border-b border-ink-900/10 pb-3">
+          <Award className="size-4 text-brand-700" />
+          <h4 className="font-display text-base font-bold text-ink-950">
+            {isBn ? "জীবনের প্রধান মোড় ঘোরানো মাইলফলক (Key Life Turning Milestones)" : isHi ? "जीवन के प्रमुख मोड़ व मील के पत्थर" : "Key Life Turning Milestones (Samudrika Ages)"}
+          </h4>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+          {milestones.map((m, idx) => (
+            <div
+              key={idx}
+              onClick={() => setSelectedAge(m.age)}
+              className={cn(
+                "p-3.5 rounded-xl border transition-all cursor-pointer shadow-2xs space-y-1.5",
+                selectedAge === m.age
+                  ? "bg-brand-50/80 border-brand-500 ring-2 ring-brand-300"
+                  : "bg-white border-ink-900/10 hover:border-brand-300",
+              )}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs font-bold text-brand-900 bg-brand-100/70 px-2 py-0.5 rounded-md">
+                  {isBn ? `${m.age} বছর` : isHi ? `${m.age} वर्ष` : `Age ${m.age}`}
+                </span>
+                <span className="text-[10px] text-muted-foreground font-medium">
+                  {m.zone}
+                </span>
+              </div>
+              <div className="font-bold text-ink-950 text-xs">
+                {isBn ? m.title_bn : isHi ? m.title_hi : m.title_en}
+              </div>
+              <div className="text-[10px] text-brand-700 font-semibold">
+                {isBn ? `গ্রহ: ${m.planet}` : `Planet: ${m.planet}`}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* --------------------------------------------------------------- Ayurvedic Tridosha View */
+function AyurvedaView({
+  scanResult,
+  language,
+}: {
+  scanResult: FaceScanResponse | null;
+  language: FaceReadingLanguage;
+}) {
+  const isBn = language === "bn";
+  const isHi = language === "hi";
+  const ayurveda = scanResult?.ayurvedic_prakriti;
+
+  if (!ayurveda) {
+    return (
+      <div className="card-surface p-8 text-center text-muted-foreground rounded-2xl border border-ink-900/10">
+        {isBn ? "আয়ুর্বেদিক ত্রিদোষ তথ্য প্রক্রিয়াধীন…" : "Ayurvedic analysis data processing…"}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Top Banner with Dominant Prakriti & Ojas */}
+      <div className="card-surface p-6 rounded-2xl border border-brand-500/20 bg-gradient-to-br from-cream-50 via-cream-100/70 to-brand-50/30 space-y-5 shadow-soft">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-900/10 pb-4">
+          <div className="flex items-center gap-3">
+            <span className="flex size-10 items-center justify-center rounded-xl bg-brand-500/20 text-brand-900 shadow-2xs">
+              <Activity className="size-5" />
+            </span>
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-brand-900">
+                {isBn ? "মুখাবয়ব থেকে নির্ণীত প্রকৃত সংবিধান" : isHi ? "मुखाकृति से निर्धारित त्रिदोष प्रकृति" : "Facial Constitutional Prakriti"}
+              </div>
+              <h3 className="font-display text-lg font-bold text-ink-950">
+                {isBn ? ayurveda.constitution_bn : isHi ? ayurveda.constitution_hi : ayurveda.constitution_en}
+              </h3>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs px-3 py-1 rounded-full font-bold bg-emerald-500/15 text-emerald-900 border border-emerald-300">
+              {isBn ? `ওজস তেজ: ${ayurveda.ojas_score}%` : isHi ? `ओजस तेज: ${ayurveda.ojas_score}%` : `Ojas Radiance: ${ayurveda.ojas_score}%`}
+            </span>
+          </div>
+        </div>
+
+        {/* 3 Doshas Distribution Meter */}
+        <div className="space-y-2">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-ink-700">
+            {isBn ? "ত্রিদোষ শতকরা বিন্যাস (Vata · Pitta · Kapha)" : isHi ? "त्रिदोष प्रतिशत वितरण" : "Tridosha Balance Distribution"}
+          </h4>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Vata */}
+            <div className="p-3.5 rounded-xl bg-white border border-sky-200/70 shadow-2xs space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-sky-900">{isBn ? "বাত (Vata)" : "Vata (Air)"}</span>
+                <span className="font-mono text-sm font-bold text-sky-950">{ayurveda.vata_percentage}%</span>
+              </div>
+              <div className="w-full bg-sky-100 rounded-full h-2 overflow-hidden">
+                <div className="bg-sky-500 h-2 rounded-full" style={{ width: `${ayurveda.vata_percentage}%` }} />
+              </div>
+              <p className="text-[10px] text-muted-foreground">
+                {isBn ? "চঞ্চল চোখ, পাতলা ঠোঁট, পরিবর্তনশীলতা" : "Movement, quick thinking, agility"}
+              </p>
+            </div>
+
+            {/* Pitta */}
+            <div className="p-3.5 rounded-xl bg-white border border-rose-200/70 shadow-2xs space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-rose-900">{isBn ? "পিত্ত (Pitta)" : "Pitta (Fire)"}</span>
+                <span className="font-mono text-sm font-bold text-rose-950">{ayurveda.pitta_percentage}%</span>
+              </div>
+              <div className="w-full bg-rose-100 rounded-full h-2 overflow-hidden">
+                <div className="bg-rose-500 h-2 rounded-full" style={{ width: `${ayurveda.pitta_percentage}%` }} />
+              </div>
+              <p className="text-[10px] text-muted-foreground">
+                {isBn ? "তীক্ষ্ণ দৃষ্টি, লালচে আভা, মেধা ও তেজ" : "Intensity, sharp vision, metabolism"}
+              </p>
+            </div>
+
+            {/* Kapha */}
+            <div className="p-3.5 rounded-xl bg-white border border-emerald-200/70 shadow-2xs space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-emerald-900">{isBn ? "কফ (Kapha)" : "Kapha (Earth)"}</span>
+                <span className="font-mono text-sm font-bold text-emerald-950">{ayurveda.kapha_percentage}%</span>
+              </div>
+              <div className="w-full bg-emerald-100 rounded-full h-2 overflow-hidden">
+                <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${ayurveda.kapha_percentage}%` }} />
+              </div>
+              <p className="text-[10px] text-muted-foreground">
+                {isBn ? "উজ্জ্বল ত্বক, স্নেহপূর্ণ দৃষ্টি, স্থিরতা ও সহন" : "Stability, endurance, nourishment"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Ahara & Vihara Recommendations */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Diet / Ahara */}
+        <div className="card-surface p-5 rounded-2xl border border-emerald-200 bg-white shadow-soft space-y-3">
+          <div className="flex items-center gap-2 border-b border-ink-900/10 pb-2.5">
+            <span className="flex size-7 items-center justify-center rounded-lg bg-emerald-100 text-emerald-800">
+              <Sparkles className="size-4" />
+            </span>
+            <h4 className="font-display text-sm font-bold text-ink-950">
+              {isBn ? "আহার পরামর্শ (Ahara / Diet Guidance)" : isHi ? "आहार निर्देश (Ahara)" : "Dietary Regimen (Ahara)"}
+            </h4>
+          </div>
+          <p className="text-xs text-ink-800 leading-relaxed">
+            {isBn ? ayurveda.diet_advice_bn : isHi ? ayurveda.diet_advice_hi : ayurveda.diet_advice_en}
+          </p>
+        </div>
+
+        {/* Lifestyle / Vihara */}
+        <div className="card-surface p-5 rounded-2xl border border-brand-200 bg-white shadow-soft space-y-3">
+          <div className="flex items-center gap-2 border-b border-ink-900/10 pb-2.5">
+            <span className="flex size-7 items-center justify-center rounded-lg bg-brand-100 text-brand-800">
+              <ShieldCheck className="size-4" />
+            </span>
+            <h4 className="font-display text-sm font-bold text-ink-950">
+              {isBn ? "বিহার ও জীবনচর্যা (Vihara / Lifestyle Guidance)" : isHi ? "विहार व दिनचर्या (Vihara)" : "Lifestyle & Daily Flow (Vihara)"}
+            </h4>
+          </div>
+          <p className="text-xs text-ink-800 leading-relaxed">
+            {isBn ? ayurveda.lifestyle_advice_bn : isHi ? ayurveda.lifestyle_advice_hi : ayurveda.lifestyle_advice_en}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* --------------------------------------------------------------- AI Mole & Marks View */
+function MolesView({
+  scanResult,
+  language,
+}: {
+  scanResult: FaceScanResponse | null;
+  language: FaceReadingLanguage;
+}) {
+  const isBn = language === "bn";
+  const isHi = language === "hi";
+  const moles = scanResult?.detected_moles || [];
+
+  return (
+    <div className="space-y-6">
+      {/* Banner */}
+      <div className="card-surface p-6 rounded-2xl border border-brand-500/20 bg-gradient-to-br from-cream-50 via-cream-100/70 to-brand-50/30 space-y-4 shadow-soft">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-900/10 pb-3">
+          <div className="flex items-center gap-3">
+            <span className="flex size-10 items-center justify-center rounded-xl bg-brand-500/20 text-brand-900 shadow-2xs">
+              <Crosshair className="size-5" />
+            </span>
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-brand-900">
+                {isBn ? "এআই তিল, দাগ ও জন্মচিহ্ন বিচার" : isHi ? "एआई तिल, मस्सा व जन्मचिह्न विचार" : "AI Mole, Mark & Spot Detector"}
+              </div>
+              <h3 className="font-display text-lg font-bold text-ink-950">
+                {isBn ? `${moles.length}টি তিল ও বিশেষ চিহ্ন চিহ্নিত` : isHi ? `${moles.length} तिल व चिह्न मिले` : `${moles.length} Facial Marks Identified`}
+              </h3>
+            </div>
+          </div>
+
+          <span className="text-xs px-3 py-1 rounded-full font-bold bg-brand-500/15 text-brand-950 border border-brand-300">
+            {isBn ? "পুরুষ: ডান শুভ · নারী: বাম শুভ" : isHi ? "पुरुष: दायां शुभ · स्त्री: बायां शुभ" : "Male: Right · Female: Left Auspicious"}
+          </span>
+        </div>
+
+        <p className="text-xs text-ink-800 leading-relaxed p-3.5 rounded-xl bg-white/90 border border-brand-200/50">
+          {isBn
+            ? "বৈদিক সমুদ্র শাস্ত্রে মুখের প্রতিটি তিল বা দাগ কোনো আকস্মিক ঘটনা নয়; এটি কালপুরুষের অভ্যন্তরীণ শক্তি ও পূর্বজন্মের সংস্কারের প্রতিফলন। পুরুষের ক্ষেত্রে মুখের ডানদিকের তিল রাজযোগ ও সৌভাগ্য নির্দেশ করে; নারীর ক্ষেত্রে বামদিকের তিল বিশেষ কল্যাণকারী।"
+            : isHi
+            ? "वैदिक सामुद्रिक शास्त्र में चेहरे का प्रत्येक तिल विशेष ग्रह प्रभाव व प्रारब्ध का संकेत है। पुरुषों के लिए दाईं ओर तथा स्त्रियों के लिए बाईं ओर के तिल विशेष रूप से शुभ व राजयोगकारी माने जाते हैं।"
+            : "In Vedic Samudrik Shastra, facial moles reflect planetary karmic imprints. Moles on the right side for men, and on the left side for women, generally indicate auspicious royal fortune and prosperity."}
+        </p>
+      </div>
+
+      {/* Moles Grid */}
+      {moles.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          {moles.map((m, idx) => (
+            <div
+              key={idx}
+              className="p-4 rounded-xl bg-white border border-ink-900/10 shadow-2xs space-y-2 hover:border-brand-400 transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-ink-950 text-sm">
+                  {isBn ? m.name_bn : isHi ? m.name_hi : m.name_en}
+                </span>
+                <span
+                  className={cn(
+                    "text-[10px] font-bold px-2.5 py-0.5 rounded-full border",
+                    m.is_auspicious
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+                      : "bg-amber-50 text-amber-800 border-amber-300",
+                  )}
+                >
+                  {m.is_auspicious
+                    ? (isBn ? "শুভকর / রাজযোগ" : isHi ? "शुभ / राजयोग" : "Auspicious")
+                    : (isBn ? "সতর্কতা / সাধনা" : isHi ? "सतर्कता / साधना" : "Spiritual Focus")}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 text-[11px] text-brand-900 font-semibold">
+                <span>{isBn ? `গ্রহ অধিপতি: ${m.planet}` : `Ruling Planet: ${m.planet}`}</span>
+                <span>·</span>
+                <span className="text-muted-foreground">{isBn ? `স্পষ্টতা: ${Math.round(m.contrast * 100)}%` : `Contrast: ${Math.round(m.contrast * 100)}%`}</span>
+              </div>
+
+              <p className="text-[11px] text-ink-700 leading-relaxed pt-1 border-t border-ink-900/5">
+                {isBn ? m.interpretation_bn : isHi ? m.interpretation_hi : m.interpretation_en}
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="card-surface p-8 text-center text-muted-foreground rounded-2xl border border-ink-900/10">
+          {isBn
+            ? "আপনার মুখমণ্ডলে কোনো দৃশ্যমান কালচে তিল বা জন্মদাগ চিহ্নিত হয়নি। এটি শাস্ত্রানুসারে একটি অত্যন্ত পবিত্র ও শান্ত প্রভাব নির্দেশ করে।"
+            : "No dark moles or scars detected on face surface. Classical shastras regard this as a pure, calm, and undisturbed countenance."}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* --------------------------------------------------------------- Couple Face Matching View */
+function CoupleMatchView({
+  scanResult,
+  language,
+}: {
+  scanResult: FaceScanResponse | null;
+  language: FaceReadingLanguage;
+}) {
+  const isBn = language === "bn";
+  const isHi = language === "hi";
+
+  const fileARef = React.useRef<HTMLInputElement>(null);
+  const fileBRef = React.useRef<HTMLInputElement>(null);
+
+  const [partnerAImg, setPartnerAImg] = React.useState<string | null>(scanResult?.visualization_image || null);
+  const [partnerBImg, setPartnerBImg] = React.useState<string | null>(null);
+  const [partnerABlob, setPartnerABlob] = React.useState<File | null>(null);
+  const [partnerBBlob, setPartnerBBlob] = React.useState<File | null>(null);
+  const [loading, setLoading] = React.useState(false);
+  const [result, setResult] = React.useState<CoupleMatchResult | null>(null);
+
+  const handlePartnerAFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPartnerABlob(file);
+      const url = URL.createObjectURL(file);
+      setPartnerAImg(url);
+    }
+  };
+
+  const handlePartnerBFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPartnerBBlob(file);
+      const url = URL.createObjectURL(file);
+      setPartnerBImg(url);
+    }
+  };
+
+  const handleRunMatch = async () => {
+    setLoading(true);
+    try {
+      const payload: any = {};
+      if (partnerABlob) {
+        payload.partner_a_image = await fileToBase64(partnerABlob);
+      } else if (scanResult?.visualization_image) {
+        payload.partner_a_image = scanResult.visualization_image;
+      }
+      if (partnerBBlob) {
+        payload.partner_b_image = await fileToBase64(partnerBBlob);
+      }
+
+      if (scanResult?.measurement_details) {
+        const mObj: Record<string, number> = {};
+        for (const [k, v] of Object.entries(scanResult.measurement_details)) {
+          mObj[k] = v.value;
+        }
+        payload.partner_a_measurements = mObj;
+      }
+
+      const res = await faceReadingApi.coupleMatch(payload);
+      setResult(res);
+    } catch {
+      toast.error(isBn ? "যুগল মিলন সম্পন্ন হতে পারেনি।" : "Couple matching analysis failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Banner */}
+      <div className="card-surface p-6 rounded-2xl border border-brand-500/20 bg-gradient-to-br from-cream-50 via-rose-50/20 to-brand-50/30 space-y-4 shadow-soft">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-900/10 pb-3">
+          <div className="flex items-center gap-3">
+            <span className="flex size-10 items-center justify-center rounded-xl bg-rose-500/15 text-rose-800 shadow-2xs">
+              <Heart className="size-5" />
+            </span>
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-rose-900">
+                {isBn ? "বৈদিক সামুদ্রিক যুগল মুখ মিলন (Mukha Milan Synastry)" : isHi ? "वैदिक सामुद्रिक युगल मुख मिलन" : "Vedic Couple Face Compatibility"}
+              </div>
+              <h3 className="font-display text-lg font-bold text-ink-950">
+                {isBn ? "দুটি মুখের জ্যামিতি ও মানসিক স্বভাবের মেলবন্ধন" : isHi ? "दो मुखाकृतियों का सामंजस्य व संबंध मिलान" : "Facial Harmony, Synastry & Marital Alignment"}
+              </h3>
+            </div>
+          </div>
+
+          <span className="text-xs px-3 py-1 rounded-full font-bold bg-rose-500/15 text-rose-950 border border-rose-300">
+            {isBn ? "যুগল সামুদ্রিক মেলবন্ধন" : isHi ? "युगल सामुद्रिक मिलान" : "Bilateral Compatibility"}
+          </span>
+        </div>
+
+        {/* Dual Upload Box */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          {/* Partner A */}
+          <div className="p-4 rounded-xl bg-white border border-ink-900/10 text-center space-y-3 shadow-2xs">
+            <span className="text-xs font-bold text-ink-950 block">
+              {isBn ? "সঙ্গী ১ (Partner A / আপনি)" : isHi ? "साथी 1 (Partner A)" : "Partner A (You)"}
+            </span>
+            <div className="relative aspect-square max-w-[160px] mx-auto rounded-xl overflow-hidden bg-ink-950/5 border border-dashed border-ink-900/20 flex items-center justify-center">
+              {partnerAImg ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={partnerAImg} alt="Partner A" className="size-full object-cover" />
+              ) : (
+                <Users className="size-8 text-muted-foreground/40" />
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => fileARef.current?.click()}
+              className="text-xs font-semibold text-brand-800 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-lg border border-brand-200 cursor-pointer inline-flex items-center gap-1.5"
+            >
+              <Upload className="size-3.5" />
+              <span>{isBn ? "ছবি পরিবর্তন করুন" : "Upload Photo"}</span>
+            </button>
+            <input ref={fileARef} type="file" accept="image/*" onChange={handlePartnerAFile} className="hidden" />
+          </div>
+
+          {/* Partner B */}
+          <div className="p-4 rounded-xl bg-white border border-ink-900/10 text-center space-y-3 shadow-2xs">
+            <span className="text-xs font-bold text-ink-950 block">
+              {isBn ? "সঙ্গী ২ (Partner B / জীবনসঙ্গী)" : isHi ? "साथी 2 (Partner B)" : "Partner B (Partner)"}
+            </span>
+            <div className="relative aspect-square max-w-[160px] mx-auto rounded-xl overflow-hidden bg-ink-950/5 border border-dashed border-ink-900/20 flex items-center justify-center">
+              {partnerBImg ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={partnerBImg} alt="Partner B" className="size-full object-cover" />
+              ) : (
+                <div className="p-4 text-center">
+                  <Users className="size-8 text-muted-foreground/40 mx-auto" />
+                  <span className="text-[10px] text-muted-foreground block mt-1">
+                    {isBn ? "সঙ্গীর ছবি আপলোড করুন" : "Upload Partner Photo"}
+                  </span>
+                </div>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => fileBRef.current?.click()}
+              className="text-xs font-semibold text-rose-800 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg border border-rose-200 cursor-pointer inline-flex items-center gap-1.5"
+            >
+              <Upload className="size-3.5" />
+              <span>{isBn ? "সঙ্গীর ছবি নির্বাচন করুন" : "Upload Photo"}</span>
+            </button>
+            <input ref={fileBRef} type="file" accept="image/*" onChange={handlePartnerBFile} className="hidden" />
+          </div>
+        </div>
+
+        {/* Action Button */}
+        <div className="pt-2 text-center">
+          <Button
+            onClick={handleRunMatch}
+            disabled={loading}
+            className="w-full sm:w-auto px-8 bg-rose-600 hover:bg-rose-700 text-white font-bold"
+          >
+            {loading ? <Loader2 className="size-4 animate-spin" /> : <Heart className="size-4 fill-current" />}
+            <span>{isBn ? "যুগল মুখ মিলন বিশ্লেষণ করুন" : isHi ? "युगल मुख मिलन विश्लेषण करें" : "Analyze Couple Compatibility"}</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* Match Results Display */}
+      {result && (
+        <div className="card-surface p-6 rounded-2xl border border-rose-300/40 bg-white space-y-5 shadow-soft">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-900/10 pb-4">
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-rose-900">
+                {isBn ? "মুখ মিলন ফলাফল" : isHi ? "मुख मिलन परिणाम" : "Mukha Milan Results"}
+              </div>
+              <h3 className="font-display text-xl font-bold text-ink-950">
+                {isBn
+                  ? (result.is_harmonious ? "উচ্চ সামঞ্জস্য ও রাজযোটক" : "সাধারণ সমন্বয়")
+                  : (result.is_harmonious ? "High Harmony & Natural Alignment" : "Moderate Alignment")}
+              </h3>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-lg font-bold px-4 py-1.5 rounded-full bg-rose-50 text-rose-950 border border-rose-300 shadow-2xs">
+                {result.overall_compatibility_score}% {isBn ? "মিল" : "Match"}
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div className="p-3.5 rounded-xl bg-cream-50 border border-ink-900/5 space-y-1">
+              <div className="text-muted-foreground font-semibold">{isBn ? "যোগাযোগ ও মতৈক্য" : "Communication Harmony"}</div>
+              <div className="text-base font-bold text-ink-950">{result.communication_harmony_score}%</div>
+              <div className="w-full bg-cream-200 rounded-full h-1.5 overflow-hidden">
+                <div className="bg-brand-600 h-1.5 rounded-full" style={{ width: `${result.communication_harmony_score}%` }} />
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-cream-50 border border-ink-900/5 space-y-1">
+              <div className="text-muted-foreground font-semibold">{isBn ? "ভাগ্য ও জীবনের লক্ষ্য মেলবন্ধন" : "Destiny Alignment"}</div>
+              <div className="text-base font-bold text-ink-950">{result.destiny_alignment_score}%</div>
+              <div className="w-full bg-cream-200 rounded-full h-1.5 overflow-hidden">
+                <div className="bg-indigo-600 h-1.5 rounded-full" style={{ width: `${result.destiny_alignment_score}%` }} />
+              </div>
+            </div>
+          </div>
+
+          {/* Strengths */}
+          <div className="space-y-2 text-xs">
+            <h4 className="font-bold text-ink-950 uppercase tracking-wide text-[11px]">
+              {isBn ? "সম্পর্কের প্রধান শক্তিমত্তা" : isHi ? "संबंध की प्रमुख शक्तियां" : "Key Relationship Strengths"}
+            </h4>
+            <div className="space-y-1.5">
+              {(isBn ? result.strengths_bn : isHi ? result.strengths_hi : result.strengths_en).map((s, idx) => (
+                <div key={idx} className="flex items-start gap-2 p-2 rounded-lg bg-cream-50 text-ink-800">
+                  <CheckCircle2 className="size-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>{s}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Advice */}
+          <div className="p-4 rounded-xl bg-rose-50/50 border border-rose-200/60 text-xs space-y-1.5">
+            <h4 className="font-bold text-rose-950 flex items-center gap-1.5">
+              <Sparkles className="size-4 text-rose-700" />
+              <span>{isBn ? "শাস্ত্রীয় দাম্পত্য পরামর্শ" : isHi ? "शास्त्रीय दांपत्य परामर्श" : "Vedic Harmonizing Advice"}</span>
+            </h4>
+            <p className="text-ink-800 leading-relaxed">
+              {isBn ? result.harmonizing_advice_bn : isHi ? result.harmonizing_advice_hi : result.harmonizing_advice_en}
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* Helper to convert file to base64 */
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
 }

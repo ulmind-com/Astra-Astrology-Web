@@ -417,6 +417,23 @@ export const faceReadingApi = {
   mine: () => api.get<FaceReading[]>(endpoints.faceReading.mine),
 
   get: (id: string) => api.get<FaceReading>(endpoints.faceReading.detail(id)),
+
+  /** Classical 100-year timeline forecast for a specific age */
+  timelineAge: (age: number, gender: string = "male") =>
+    api.get<any>(endpoints.faceReading.timelineAge, {
+      query: { age, gender },
+      auth: false,
+    }),
+
+  /** Samudrika couple facial synastry match */
+  coupleMatch: (payload: {
+    partner_a_image?: string;
+    partner_b_image?: string;
+    partner_a_measurements?: Record<string, number>;
+    partner_b_measurements?: Record<string, number>;
+    partner_a_name?: string;
+    partner_b_name?: string;
+  }) => api.post<any>(endpoints.faceReading.coupleMatch, payload),
 };
 
 // -------------------------------------------------------------- astrology

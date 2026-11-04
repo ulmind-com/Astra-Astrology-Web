@@ -542,11 +542,84 @@ export type FaceScanResponse = {
   tri_zone_analysis?: TriZoneAnalysis | null;
   pancha_mahabhuta?: PanchaMahabhuta | null;
   kundli_sync?: KundliFaceSync | null;
+  detected_moles?: Array<{
+    zone_id: string;
+    name_en: string;
+    name_bn: string;
+    name_hi: string;
+    planet: string;
+    x: number;
+    y: number;
+    x_norm: number;
+    y_norm: number;
+    contrast: number;
+    is_auspicious: boolean;
+    interpretation_en: string;
+    interpretation_bn: string;
+    interpretation_hi: string;
+  }>;
+  ayurvedic_prakriti?: {
+    prakriti_type: string;
+    dominant_dosha: string;
+    secondary_dosha: string;
+    vata_percentage: number;
+    pitta_percentage: number;
+    kapha_percentage: number;
+    ojas_score: number;
+    constitution_en: string;
+    constitution_bn: string;
+    constitution_hi: string;
+    diet_advice_en: string;
+    diet_advice_bn: string;
+    diet_advice_hi: string;
+    lifestyle_advice_en: string;
+    lifestyle_advice_bn: string;
+    lifestyle_advice_hi: string;
+  } | null;
+  timeline_100_summary?: {
+    age: number;
+    zone_key: string;
+    epoch_name_en: string;
+    epoch_name_bn: string;
+    epoch_name_hi: string;
+    governor_planet: string;
+    norm_x: number;
+    norm_y: number;
+    focus_en: string;
+    focus_bn: string;
+    focus_hi: string;
+    prediction_en: string;
+    prediction_bn: string;
+    prediction_hi: string;
+  } | null;
+  birth_rectification?: {
+    birth_lagna: string;
+    lagna_lord: string;
+    match_confidence_pct: number;
+    is_exact_match: boolean;
+    suggested_offset_minutes: number;
+    rectification_guidance_en: string;
+    rectification_guidance_bn: string;
+    rectification_guidance_hi: string;
+  } | null;
   landmark_mapping_version: string;
   model_version: string;
   processing_duration_ms: number;
   warnings: string[];
   error_message: string | null;
+};
+
+export type CoupleMatchResult = {
+  overall_compatibility_score: number;
+  is_harmonious: boolean;
+  communication_harmony_score: number;
+  destiny_alignment_score: number;
+  strengths_en: string[];
+  strengths_bn: string[];
+  strengths_hi: string[];
+  harmonizing_advice_en: string;
+  harmonizing_advice_bn: string;
+  harmonizing_advice_hi: string;
 };
 
 export * from "./astrology";
