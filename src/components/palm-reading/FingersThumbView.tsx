@@ -301,3 +301,4 @@ export function FingersThumbView({ result, language }: FingersThumbViewProps) {
     </div>
   );
 }
+

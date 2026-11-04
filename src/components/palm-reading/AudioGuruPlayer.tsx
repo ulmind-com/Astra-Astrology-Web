@@ -358,3 +358,4 @@ export function AudioGuruPlayer({ result, language, className }: AudioGuruPlayer
     </div>
   );
 }
+
