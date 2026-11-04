@@ -291,7 +291,6 @@ export default function PalmReadingPage() {
   const streamRef = React.useRef<MediaStream | null>(null);
   const frameRef = React.useRef<number | null>(null);
   const capturingRef = React.useRef(false);
-  const alignedStreakRef = React.useRef(0);
 
   React.useEffect(() => {
     if (!isSignedIn) return;
@@ -467,28 +466,6 @@ export default function PalmReadingPage() {
             }
             drawHandOverlay(canvas, next.landmarks, next.aligned);
           }
-
-          // Intelligent auto-capture: triggers when hand is 100% aligned and held still for ~800ms
-          if (next.aligned && next.landmarks && next.landmarks.length >= 21) {
-            alignedStreakRef.current += 1;
-            if (alignedStreakRef.current >= 22 && !capturingRef.current) {
-              capturingRef.current = true;
-              alignedStreakRef.current = 0;
-              setFlashActive(true);
-              if (typeof navigator !== "undefined" && navigator.vibrate) {
-                try {
-                  navigator.vibrate([40, 50, 40]);
-                } catch {}
-              }
-              setTimeout(() => setFlashActive(false), 240);
-              const autoBlob = await captureFrame(element, 3 / 4, next.landmarks);
-              stopCamera();
-              void scanBlob(autoBlob, URL.createObjectURL(autoBlob));
-              return;
-            }
-          } else {
-            alignedStreakRef.current = 0;
-          }
         } catch {
           // Ignore dropped frames
         }
@@ -623,14 +600,14 @@ export default function PalmReadingPage() {
     setTimeout(() => setFlashActive(false), 240);
 
     try {
-      const blob = await captureFrame(element, 3 / 4, status?.landmarks);
+      const blob = await captureFrame(element);
       stopCamera();
       await scanBlob(blob, URL.createObjectURL(blob));
     } catch (error) {
       capturingRef.current = false;
       toast.error(error instanceof Error ? error.message : "Failed to capture photo.");
     }
-  }, [scanBlob, scanning, status?.landmarks, stopCamera]);
+  }, [scanBlob, scanning, stopCamera]);
 
   // Group sections by life area
   const byArea = React.useMemo(() => {

@@ -476,74 +476,36 @@ export function drawHandOverlay(
   }
 }
 
-/**
- * Grab the current video frame as a JPEG.
- *
- * When handPoints are provided, performs high-precision intelligent auto-cropping
- * directly to the detected hand bounding box (with safety margins for fingertips and wrist),
- * completely isolating the palm and eliminating any surrounding face, torso, or room artifacts!
- */
+/** Grab the current video frame as a JPEG, cropped to matching viewfinder aspect ratio. */
 export function captureFrame(
   video: HTMLVideoElement,
   targetAspectRatio: number = 3 / 4,
-  handPoints?: Pt[] | null,
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const canvas = document.createElement("canvas");
     const vw = video.videoWidth || 1280;
     const vh = video.videoHeight || 720;
+    const videoAspect = vw / vh;
 
     let sx = 0;
     let sy = 0;
     let sw = vw;
     let sh = vh;
 
-    if (handPoints && Array.isArray(handPoints) && handPoints.length >= 21) {
-      // Calculate exact bounding box of the 21 anatomical landmarks
-      let minX = 1.0;
-      let maxX = 0.0;
-      let minY = 1.0;
-      let maxY = 0.0;
-
-      for (const pt of handPoints) {
-        if (pt.x < minX) minX = pt.x;
-        if (pt.x > maxX) maxX = pt.x;
-        if (pt.y < minY) minY = pt.y;
-        if (pt.y > maxY) maxY = pt.y;
-      }
-
-      const boxW = Math.max(0.2, maxX - minX);
-      const boxH = Math.max(0.25, maxY - minY);
-
-      // Ergonomic padding: 15% lateral, 10% fingertip top, 16% wrist base
-      const padX = boxW * 0.15;
-      const padTop = boxH * 0.10;
-      const padBottom = boxH * 0.16;
-
-      const normX0 = Math.max(0, minX - padX);
-      const normY0 = Math.max(0, minY - padTop);
-      const normX1 = Math.min(1.0, maxX + padX);
-      const normY1 = Math.min(1.0, maxY + padBottom);
-
-      sx = Math.round(normX0 * vw);
-      sy = Math.round(normY0 * vh);
-      sw = Math.round((normX1 - normX0) * vw);
-      sh = Math.round((normY1 - normY0) * vh);
-    } else {
-      // Crop symmetrically to match the camera viewfinder aspect ratio so the palm fills the frame
-      const videoAspect = vw / vh;
-      if (videoAspect > targetAspectRatio) {
-        sw = Math.round(vh * targetAspectRatio);
-        sx = Math.round((vw - sw) / 2);
-      } else if (videoAspect < targetAspectRatio) {
-        sh = Math.round(vw / targetAspectRatio);
-        sy = Math.round((vh - sh) / 2);
-      }
+    // Crop symmetrically to match the camera viewfinder aspect ratio so the palm fills the frame
+    if (videoAspect > targetAspectRatio) {
+      sw = Math.round(vh * targetAspectRatio);
+      sx = Math.round((vw - sw) / 2);
+    } else if (videoAspect < targetAspectRatio) {
+      sh = Math.round(vw / targetAspectRatio);
+      sy = Math.round((vh - sh) / 2);
     }
 
-    // Ensure valid non-zero bounds
-    sw = Math.max(360, Math.min(vw - sx, sw));
-    sh = Math.max(480, Math.min(vh - sy, sh));
+    // Strict bounds clamping to prevent any IndexSizeError or blank unpainted canvas
+    sx = Math.max(0, Math.min(vw - 1, sx));
+    sy = Math.max(0, Math.min(vh - 1, sy));
+    sw = Math.max(1, Math.min(vw - sx, sw));
+    sh = Math.max(1, Math.min(vh - sy, sh));
 
     canvas.width = sw;
     canvas.height = sh;
@@ -553,7 +515,7 @@ export function captureFrame(
       return;
     }
 
-    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, sw, sh);
     canvas.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error("The frame could not be encoded."))),
       "image/jpeg",
