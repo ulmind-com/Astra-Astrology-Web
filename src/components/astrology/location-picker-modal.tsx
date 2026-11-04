@@ -76,27 +76,53 @@ export function LocationPickerModal({
     }
   };
 
-  const handleUseCurrentLocation = () => {
-    if ("geolocation" in navigator) {
-      setLoading(true);
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
-          const tz = -new Date().getTimezoneOffset() / 60;
-          setSelectedLocation({
-            place: `Current Location (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`,
-            latitude: lat,
-            longitude: lon,
-            timezone: tz,
-          });
-          setLoading(false);
-        },
-        () => {
-          setLoading(false);
-        },
-      );
+  const handleUseCurrentLocation = async () => {
+    setLoading(true);
+
+    const tryGps = (): Promise<{ lat: number; lon: number }> => {
+      return new Promise((resolve, reject) => {
+        if (typeof window === "undefined" || !("geolocation" in navigator)) {
+          return reject(new Error("unsupported"));
+        }
+        navigator.geolocation.getCurrentPosition(
+          (pos) => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+          (err) => reject(err),
+          { enableHighAccuracy: false, timeout: 4500, maximumAge: 300000 },
+        );
+      });
+    };
+
+    let lat: number | null = null;
+    let lon: number | null = null;
+    let name = "Current Location";
+
+    try {
+      const pos = await tryGps();
+      lat = pos.lat;
+      lon = pos.lon;
+    } catch {
+      try {
+        const detected = await astrologyApi.geoDetect();
+        if (detected.latitude && detected.longitude) {
+          lat = detected.latitude;
+          lon = detected.longitude;
+          name = detected.city || detected.line1 || "Current Location";
+        }
+      } catch (e) {
+        console.warn("IP detect fallback failed:", e);
+      }
     }
+
+    if (lat != null && lon != null) {
+      const tz = -new Date().getTimezoneOffset() / 60;
+      setSelectedLocation({
+        place: `${name} (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`,
+        latitude: lat,
+        longitude: lon,
+        timezone: tz,
+      });
+    }
+    setLoading(false);
   };
 
   // Convert decimal to deg/min/dir for preview
