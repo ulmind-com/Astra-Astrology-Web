@@ -138,6 +138,7 @@ export const endpoints = {
     dailyHoroscope: "/astrology/horoscope/daily",
     featuresPricing: "/astrology/features/pricing",
     geoReverse: "/astrology/geo-reverse",
+    geoDetect: "/astrology/geo-detect",
   },
 
   aiAstrologer: {

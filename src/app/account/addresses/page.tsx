@@ -26,6 +26,57 @@ import type { Address, AddressInput } from "@/types";
 
 const ADDRESSES_KEY = ["addresses"] as const;
 
+interface ResolvedLocationResult {
+  data: {
+    display_name: string;
+    line1: string;
+    line2: string;
+    landmark: string;
+    city: string;
+    state: string;
+    postal_code: string;
+    country: string;
+    latitude: number;
+    longitude: number;
+  };
+  source: "gps" | "network";
+}
+
+/**
+ * Resilient location resolver:
+ * 1. Tries device browser Geolocation first with gentle accuracy (prevents macOS CoreLocation kCLErrorLocationUnknown).
+ * 2. If browser GPS fails (or Mac has no GPS hardware / permission denied / CoreLocation failure), seamlessly falls back to IP network geolocation.
+ */
+async function resolveLocationWithFallback(): Promise<ResolvedLocationResult> {
+  const tryBrowserGps = (): Promise<GeolocationPosition> => {
+    return new Promise((resolve, reject) => {
+      if (typeof window === "undefined" || !navigator.geolocation) {
+        return reject(new Error("Geolocation unsupported"));
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve(pos),
+        (err) => reject(err),
+        {
+          enableHighAccuracy: false,
+          timeout: 4500,
+          maximumAge: 300000,
+        }
+      );
+    });
+  };
+
+  try {
+    const pos = await tryBrowserGps();
+    const { latitude, longitude } = pos.coords;
+    const res = await astrologyApi.geoReverse(latitude, longitude);
+    return { data: res, source: "gps" };
+  } catch (gpsErr) {
+    console.info("Device GPS unavailable, falling back to IP network detection:", gpsErr);
+    const ipRes = await astrologyApi.geoDetect();
+    return { data: ipRes, source: "network" };
+  }
+}
+
 /**
  * The generated `Address` has an optional `id`, because the backend gives it a
  * default. An address that has been *stored* always has one, so the list is
@@ -62,58 +113,37 @@ export default function AddressesPage() {
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ADDRESSES_KEY });
 
-  const handleQuickLiveLocation = () => {
-    if (typeof window === "undefined" || !navigator.geolocation) {
-      toast.error("Geolocation is not supported by your browser.");
-      return;
-    }
-
+  const handleQuickLiveLocation = async () => {
     setLocatingLive(true);
-    toast.loading("Detecting your current GPS location...", { id: "live-loc" });
+    toast.loading("Detecting your location...", { id: "live-loc" });
 
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const { latitude, longitude } = pos.coords;
-          toast.loading("Resolving your address details from GPS...", { id: "live-loc" });
-          const res = await astrologyApi.geoReverse(latitude, longitude);
-          toast.success("Live location fetched! Please review & save.", { id: "live-loc" });
+    try {
+      const { data: res, source } = await resolveLocationWithFallback();
+      if (source === "gps") {
+        toast.success("Live GPS location detected! Please review & save.", { id: "live-loc" });
+      } else {
+        toast.success("Location detected via network! Please review & save.", { id: "live-loc" });
+      }
 
-          setInitialPrefill({
-            label: "Current Location",
-            line1: res.line1 || "",
-            line2: res.line2 || "",
-            landmark: res.landmark || "",
-            city: res.city || "",
-            state: res.state || "",
-            postal_code: res.postal_code || "",
-            country: res.country || "India",
-          });
-          setCreating(true);
-        } catch (err) {
-          toast.dismiss("live-loc");
-          toast.error("Could not resolve address details. Opening manual address form.");
-          setInitialPrefill(null);
-          setCreating(true);
-        } finally {
-          setLocatingLive(false);
-        }
-      },
-      (err) => {
-        setLocatingLive(false);
-        toast.dismiss("live-loc");
-        if (err.code === err.PERMISSION_DENIED) {
-          toast.error("Location permission denied. Please enter address manually.");
-        } else if (err.code === err.TIMEOUT) {
-          toast.error("Location request timed out. Please enter manually.");
-        } else {
-          toast.error("Could not retrieve your location. Please enter manually.");
-        }
-        setInitialPrefill(null);
-        setCreating(true);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-    );
+      setInitialPrefill({
+        label: "Current Location",
+        line1: res.line1 || "",
+        line2: res.line2 || "",
+        landmark: res.landmark || "",
+        city: res.city || "",
+        state: res.state || "",
+        postal_code: res.postal_code || "",
+        country: res.country || "India",
+      });
+      setCreating(true);
+    } catch (err) {
+      toast.dismiss("live-loc");
+      toast.error("Could not auto-detect location. Opening manual form.");
+      setInitialPrefill(null);
+      setCreating(true);
+    } finally {
+      setLocatingLive(false);
+    }
   };
 
   const remove = useMutation({
@@ -365,55 +395,36 @@ function AddressModal({
     }
   }, [address, prefill, open, profile]);
 
-  const handleFetchModalLocation = () => {
-    if (typeof window === "undefined" || !navigator.geolocation) {
-      toast.error("Geolocation is not supported by your browser.");
-      return;
-    }
-
+  const handleFetchModalLocation = async () => {
     setLocatingModal(true);
-    toast.loading("Detecting your GPS location...", { id: "modal-loc" });
+    toast.loading("Detecting your location...", { id: "modal-loc" });
 
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const { latitude, longitude } = pos.coords;
-          toast.loading("Resolving your address details from GPS...", { id: "modal-loc" });
-          const res = await astrologyApi.geoReverse(latitude, longitude);
-          toast.success("Live location fetched! Fields auto-filled.", { id: "modal-loc" });
+    try {
+      const { data: res, source } = await resolveLocationWithFallback();
+      if (source === "gps") {
+        toast.success("Live GPS location fetched! Fields auto-filled.", { id: "modal-loc" });
+      } else {
+        toast.success("Location detected via network! Fields auto-filled.", { id: "modal-loc" });
+      }
 
-          setForm((prev) => ({
-            ...prev,
-            label: prev.label || "Current Location",
-            line1: res.line1 || prev.line1,
-            line2: res.line2 || prev.line2,
-            landmark: res.landmark || prev.landmark,
-            city: res.city || prev.city,
-            state: res.state || prev.state,
-            postal_code: res.postal_code || prev.postal_code,
-            country: res.country || prev.country || "India",
-          }));
-          setDetectedLocationName(res.display_name || `${res.city}, ${res.state}`);
-        } catch (err) {
-          toast.dismiss("modal-loc");
-          toast.error("Could not resolve address details. Please type manually.");
-        } finally {
-          setLocatingModal(false);
-        }
-      },
-      (err) => {
-        setLocatingModal(false);
-        toast.dismiss("modal-loc");
-        if (err.code === err.PERMISSION_DENIED) {
-          toast.error("Location permission denied. Please enter address manually.");
-        } else if (err.code === err.TIMEOUT) {
-          toast.error("Location request timed out. Please enter manually.");
-        } else {
-          toast.error("Could not retrieve your location. Please enter manually.");
-        }
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-    );
+      setForm((prev) => ({
+        ...prev,
+        label: prev.label || "Current Location",
+        line1: res.line1 || prev.line1,
+        line2: res.line2 || prev.line2,
+        landmark: res.landmark || prev.landmark,
+        city: res.city || prev.city,
+        state: res.state || prev.state,
+        postal_code: res.postal_code || prev.postal_code,
+        country: res.country || prev.country || "India",
+      }));
+      setDetectedLocationName(res.display_name || [res.line1, res.city, res.state].filter(Boolean).join(", "));
+    } catch (err) {
+      toast.dismiss("modal-loc");
+      toast.error("Could not auto-detect location. Please enter manually.");
+    } finally {
+      setLocatingModal(false);
+    }
   };
 
   const save = useMutation({
