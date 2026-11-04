@@ -137,6 +137,7 @@ export const endpoints = {
     clientRules: (signIndex: number) => `/astrology/client-rules/${signIndex}`,
     dailyHoroscope: "/astrology/horoscope/daily",
     featuresPricing: "/astrology/features/pricing",
+    geoReverse: "/astrology/geo-reverse",
   },
 
   aiAstrologer: {

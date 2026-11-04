@@ -458,6 +458,24 @@ export const astrologyApi = {
       auth: false,
     }),
 
+  /** Reverse geocodes GPS coordinates into a structured postal address. */
+  geoReverse: (lat: number, lon: number) =>
+    api.get<{
+      display_name: string;
+      line1: string;
+      line2: string;
+      landmark: string;
+      city: string;
+      state: string;
+      postal_code: string;
+      country: string;
+      latitude: number;
+      longitude: number;
+    }>(endpoints.astrology.geoReverse, {
+      query: { lat, lon },
+      auth: false,
+    }),
+
   /** Exact UTC offset for one coordinate at one local wall-clock instant. */
   lookupTimezone: (params: {
     latitude: number;
