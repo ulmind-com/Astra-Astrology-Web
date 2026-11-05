@@ -10,17 +10,15 @@ import {
   Phone,
   Sparkles,
   Star,
-  UserCheck,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useMemo, useRef, useState } from "react";
 
-import { Avatar } from "@/components/ui";
 import { astrologerApi } from "@/lib/api";
-import { cn, coinsPerMinute, formatNumber } from "@/lib/utils";
+import { coinsPerMinute, formatNumber } from "@/lib/utils";
 import { usePlatform } from "@/providers/realtime-provider";
-import { SKILL_LABELS, type AstrologerPublic } from "@/types";
+import { SKILL_LABELS } from "@/types";
 
 interface DisplayAstrologer {
   id: string;
@@ -36,75 +34,9 @@ interface DisplayAstrologer {
   flatDealBadge?: string;
   isOnline: boolean;
   canCall: boolean;
+  canChat: boolean;
   slug: string;
 }
-
-const FALLBACK_ASTROLOGERS: DisplayAstrologer[] = [
-  {
-    id: "astro-shifali",
-    name: "Tarot Shifali",
-    avatarUrl: "/images/astrologers/avatar-shifali.jpg",
-    rating: 4.58,
-    orders: 6344,
-    languages: ["Hindi"],
-    experienceYears: 5,
-    speciality: "Tarot Reading",
-    pricePerMin: 12,
-    originalPricePerMin: 30,
-    flatDealBadge: "FLATDEAL 12",
-    isOnline: true,
-    canCall: true,
-    slug: "tarot-shifali",
-  },
-  {
-    id: "astro-snehh",
-    name: "Tarot Snehh",
-    avatarUrl: "/images/astrologers/avatar-snehh.jpg",
-    rating: 4.91,
-    orders: 4645,
-    languages: ["English", "Hindi"],
-    experienceYears: 11,
-    speciality: "Tarot Reading, Love",
-    pricePerMin: 69,
-    originalPricePerMin: 85,
-    flatDealBadge: "SPECIAL",
-    isOnline: true,
-    canCall: true,
-    slug: "tarot-snehh",
-  },
-  {
-    id: "astro-guruyogi",
-    name: "Dr Guruyogi",
-    avatarUrl: "/images/astrologers/avatar-guruyogi.jpg",
-    rating: 4.97,
-    orders: 10203,
-    languages: ["Bangla", "English", "Hindi"],
-    experienceYears: 20,
-    speciality: "Vedic Astrology, Kundli",
-    pricePerMin: 55,
-    originalPricePerMin: 70,
-    flatDealBadge: "TOP RATED",
-    isOnline: true,
-    canCall: true,
-    slug: "dr-guruyogi",
-  },
-  {
-    id: "astro-hridesh",
-    name: "Astro Hridesh",
-    avatarUrl: "/images/experts/expert-hridesh-photo.jpg",
-    rating: 4.93,
-    orders: 7840,
-    languages: ["Hindi", "English"],
-    experienceYears: 14,
-    speciality: "Vedic Astrology, Prashna",
-    pricePerMin: 45,
-    originalPricePerMin: 60,
-    flatDealBadge: "VERIFIED",
-    isOnline: true,
-    canCall: true,
-    slug: "astro-hridesh",
-  },
-];
 
 export function TopAstrologersSection() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -118,7 +50,7 @@ export function TopAstrologersSection() {
     setFollowedIds((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["astrologers", { home: true, limit: 12 }],
     queryFn: () => astrologerApi.list({ limit: 12 }),
     staleTime: 5 * 60_000,
@@ -130,11 +62,8 @@ export function TopAstrologersSection() {
 
   const displayList = useMemo<DisplayAstrologer[]>(() => {
     const apiItems = data?.items ?? [];
-    if (apiItems.length === 0) {
-      return FALLBACK_ASTROLOGERS;
-    }
 
-    const mapped: DisplayAstrologer[] = apiItems.map((astro) => {
+    return apiItems.map((astro) => {
       const primaryMode = astro.modes_enabled.includes("chat")
         ? "chat"
         : astro.modes_enabled[0] ?? "chat";
@@ -142,37 +71,36 @@ export function TopAstrologersSection() {
         coinsPerMinute(astro.rates, primaryMode) / coinsPerRupee,
       );
       const originalPrice = Math.round(pricePerMin * 1.4);
-      const isOnline = astro.availability.is_online;
-      const skills = astro.skills.slice(0, 2).map((s) => SKILL_LABELS[s] ?? s);
+      const isOnline = Boolean(astro.availability?.is_online);
+      const skills = (astro.skills ?? []).slice(0, 2).map((s) => SKILL_LABELS[s] ?? s);
 
       return {
         id: astro.id,
         name: astro.display_name,
         avatarUrl: astro.profile_image_url,
-        rating: astro.rating.average > 0 ? Number(astro.rating.average.toFixed(2)) : 4.8,
-        orders: astro.total_consultations > 0 ? astro.total_consultations : 1250,
-        languages: astro.languages.length > 0 ? astro.languages : ["Hindi", "English"],
-        experienceYears: astro.experience_years || 6,
+        rating:
+          astro.rating.average > 0
+            ? Number(astro.rating.average.toFixed(2))
+            : 5.0,
+        orders:
+          astro.total_consultations > 0
+            ? astro.total_consultations
+            : (astro.rating.count > 0 ? astro.rating.count : 120),
+        languages:
+          astro.languages && astro.languages.length > 0
+            ? astro.languages
+            : ["Hindi", "English"],
+        experienceYears: astro.experience_years || 5,
         speciality: skills.join(", ") || "Vedic Astrology",
-        pricePerMin: pricePerMin || 25,
+        pricePerMin: pricePerMin || 10,
         originalPricePerMin: originalPrice > pricePerMin ? originalPrice : undefined,
-        flatDealBadge: pricePerMin < 20 ? `FLATDEAL ${pricePerMin}` : "POPULAR",
+        flatDealBadge: pricePerMin <= 15 ? `FLATDEAL ${pricePerMin}` : "POPULAR",
         isOnline: isOnline,
-        canCall: astro.modes_enabled.includes("call"),
+        canCall: astro.modes_enabled?.includes("call") ?? false,
+        canChat: astro.modes_enabled?.includes("chat") ?? false,
         slug: astro.slug ?? astro.id,
       };
     });
-
-    // Merge fallback items if apiItems has fewer than 4 items
-    if (mapped.length < 4) {
-      const existingNames = new Set(mapped.map((m) => m.name.toLowerCase()));
-      const extra = FALLBACK_ASTROLOGERS.filter(
-        (f) => !existingNames.has(f.name.toLowerCase()),
-      );
-      return [...mapped, ...extra];
-    }
-
-    return mapped;
   }, [data, coinsPerRupee]);
 
   const checkScroll = () => {
@@ -240,164 +168,196 @@ export function TopAstrologersSection() {
           </div>
         </div>
 
-        {/* Carousel / Cards Track */}
-        <div
-          ref={scrollRef}
-          onScroll={checkScroll}
-          className="scrollbar-none flex gap-4 overflow-x-auto pb-4 pt-1 snap-x snap-mandatory"
-        >
-          {displayList.map((astro) => {
-            const isFollowed = followedIds[astro.id];
-            const href = `/astrologers/${astro.slug}`;
-
-            return (
+        {/* Loading Skeleton */}
+        {isLoading ? (
+          <div className="scrollbar-none flex gap-4 overflow-x-auto pb-4 pt-1">
+            {[1, 2, 3, 4].map((i) => (
               <div
-                key={astro.id}
-                className="group shrink-0 snap-start w-[310px] sm:w-[340px] rounded-2xl border border-[#eadf9a] bg-white p-4.5 shadow-[0_4px_16px_-4px_rgba(26,18,8,0.05)] transition-all duration-300 hover:-translate-y-1 hover:border-brand-400 hover:shadow-[0_14px_30px_-10px_rgba(240,210,80,0.45)] flex flex-col justify-between"
+                key={i}
+                className="shrink-0 w-[310px] sm:w-[340px] rounded-2xl border border-[#eadf9a]/70 bg-white p-4.5 shadow-sm animate-pulse"
               >
-                {/* Top Row: Avatar on left, Details on right */}
-                <div>
-                  <div className="flex items-start gap-3.5">
-                    {/* Left: Circular Avatar with Online Dot & Star Rating */}
-                    <div className="flex flex-col items-center shrink-0">
-                      <Link href={href} className="relative block">
-                        <div className="relative size-16 sm:size-[70px] rounded-full overflow-hidden border-2 border-[#fff3b3] shadow-sm">
-                          {astro.avatarUrl ? (
-                            <Image
-                              src={astro.avatarUrl}
-                              alt={astro.name}
-                              fill
-                              className="object-cover"
-                              sizes="70px"
-                            />
-                          ) : (
-                            <div className="size-full bg-gradient-to-br from-brand-300 to-gold-400 flex items-center justify-center font-bold text-lg text-ink-900">
-                              {astro.name.charAt(0)}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Online Badge Dot */}
-                        {astro.isOnline && (
-                          <span
-                            className="absolute top-0 right-0 size-3.5 rounded-full bg-emerald-500 ring-2 ring-white"
-                            title="Online now"
-                          >
-                            <span className="absolute inset-0 size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                          </span>
-                        )}
-                      </Link>
-
-                      {/* Rating pill directly under avatar */}
-                      <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-[#fff9db] border border-[#f2e28a] px-2 py-0.5 text-[11px] font-bold text-[#8b5e0a]">
-                        <Star className="size-3 fill-[#e08c12] text-[#e08c12]" />
-                        <span>{astro.rating}</span>
-                        <span className="text-[#a18c64] font-normal">|</span>
-                        <span className="text-[10px] font-medium text-[#6b5f4d]">
-                          {formatNumber(astro.orders)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Right: Name + Follow Button + Details */}
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-1.5">
-                        <Link href={href} className="min-w-0">
-                          <h3 className="font-bold text-sm sm:text-base text-[#1a1208] truncate group-hover:text-[#8b5e0a] transition-colors">
-                            {astro.name}
-                          </h3>
-                        </Link>
-
-                        {/* Follow Button */}
-                        <button
-                          type="button"
-                          onClick={(e) => toggleFollow(astro.id, e)}
-                          className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-bold transition-all ${
-                            isFollowed
-                              ? "bg-emerald-50 border-emerald-300 text-emerald-700"
-                              : "border-[#e3d58f] bg-[#fffdf2] text-[#8b5e0a] hover:bg-[#fff7d1]"
-                          }`}
-                        >
-                          {isFollowed ? "Following" : "+ Follow"}
-                        </button>
-                      </div>
-
-                      {/* Languages */}
-                      <p className="mt-1.5 text-xs text-[#524436] flex items-center gap-1.5 truncate">
-                        <Languages className="size-3.5 text-[#8b5e0a] shrink-0" />
-                        <span className="truncate">{astro.languages.join(", ")}</span>
-                      </p>
-
-                      {/* Experience */}
-                      <p className="mt-1 text-xs text-[#524436] flex items-center gap-1.5 truncate">
-                        <GraduationCap className="size-3.5 text-[#8b5e0a] shrink-0" />
-                        <span>{astro.experienceYears} Years</span>
-                      </p>
-
-                      {/* Speciality */}
-                      <p className="mt-1 text-xs text-[#524436] flex items-center gap-1.5 truncate">
-                        <Sparkles className="size-3.5 text-[#8b5e0a] shrink-0" />
-                        <span className="truncate">{astro.speciality}</span>
-                      </p>
-                    </div>
+                <div className="flex items-start gap-3.5">
+                  <div className="size-16 sm:size-[70px] rounded-full bg-stone-200 shrink-0" />
+                  <div className="flex-1 space-y-2 py-1">
+                    <div className="h-4 bg-stone-200 rounded w-3/4" />
+                    <div className="h-3 bg-stone-100 rounded w-1/2" />
+                    <div className="h-3 bg-stone-100 rounded w-2/3" />
                   </div>
                 </div>
+                <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between">
+                  <div className="h-5 bg-stone-200 rounded w-16" />
+                  <div className="h-8 bg-stone-200 rounded-full w-28" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : displayList.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-[#eadf9a] bg-[#fffdf5] p-8 text-center">
+            <p className="text-sm font-semibold text-[#1a1208]">No astrologers available right now.</p>
+            <p className="text-xs text-[#6b5f4d] mt-1">Astrologers will appear once added in the admin panel.</p>
+          </div>
+        ) : (
+          /* Carousel / Cards Track */
+          <div
+            ref={scrollRef}
+            onScroll={checkScroll}
+            className="scrollbar-none flex gap-4 overflow-x-auto pb-4 pt-1 snap-x snap-mandatory"
+          >
+            {displayList.map((astro) => {
+              const isFollowed = followedIds[astro.id];
+              const href = `/astrologers/${astro.slug}`;
 
-                {/* Bottom Row: Pricing on Left + Action Buttons on Right */}
-                <div className="mt-4 pt-3 border-t border-[#f2e9b0]/80 flex items-center justify-between gap-2">
-                  {/* Price & Flatdeal badge */}
+              return (
+                <div
+                  key={astro.id}
+                  className="group shrink-0 snap-start w-[310px] sm:w-[340px] rounded-2xl border border-[#eadf9a] bg-white p-4.5 shadow-[0_4px_16px_-4px_rgba(26,18,8,0.05)] transition-all duration-300 hover:-translate-y-1 hover:border-brand-400 hover:shadow-[0_14px_30px_-10px_rgba(240,210,80,0.45)] flex flex-col justify-between"
+                >
+                  {/* Top Row: Avatar on left, Details on right */}
                   <div>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="font-extrabold text-sm sm:text-base text-[#1a1208]">
-                        ₹{astro.pricePerMin}
-                        <span className="text-xs font-normal text-[#6b5f4d]">/Min</span>
-                      </span>
-                      {astro.originalPricePerMin && (
-                        <span className="text-xs text-[#9c8e7b] line-through font-medium">
-                          ₹{astro.originalPricePerMin}/Min
+                    <div className="flex items-start gap-3.5">
+                      {/* Left: Circular Avatar with Online Dot & Star Rating */}
+                      <div className="flex flex-col items-center shrink-0">
+                        <Link href={href} className="relative block">
+                          <div className="relative size-16 sm:size-[70px] rounded-full overflow-hidden border-2 border-[#fff3b3] shadow-sm bg-gradient-to-br from-[#ffd700] to-[#ffaa00] flex items-center justify-center">
+                            {astro.avatarUrl ? (
+                              <Image
+                                src={astro.avatarUrl}
+                                alt={astro.name}
+                                fill
+                                className="object-cover"
+                                sizes="70px"
+                              />
+                            ) : (
+                              <span className="font-extrabold text-xl text-[#1a1208]">
+                                {astro.name.charAt(0).toUpperCase()}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Online Badge Dot */}
+                          {astro.isOnline && (
+                            <span
+                              className="absolute top-0 right-0 size-3.5 rounded-full bg-emerald-500 ring-2 ring-white"
+                              title="Online now"
+                            >
+                              <span className="absolute inset-0 size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                            </span>
+                          )}
+                        </Link>
+
+                        {/* Rating pill directly under avatar */}
+                        <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-[#fff9db] border border-[#f2e28a] px-2 py-0.5 text-[11px] font-bold text-[#8b5e0a]">
+                          <Star className="size-3 fill-[#e08c12] text-[#e08c12]" />
+                          <span>{astro.rating}</span>
+                          <span className="text-[#a18c64] font-normal">|</span>
+                          <span className="text-[10px] font-medium text-[#6b5f4d]">
+                            {formatNumber(astro.orders)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Right: Name + Follow Button + Details */}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-1.5">
+                          <Link href={href} className="min-w-0">
+                            <h3 className="font-bold text-sm sm:text-base text-[#1a1208] truncate group-hover:text-[#8b5e0a] transition-colors">
+                              {astro.name}
+                            </h3>
+                          </Link>
+
+                          {/* Follow Button */}
+                          <button
+                            type="button"
+                            onClick={(e) => toggleFollow(astro.id, e)}
+                            className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-bold transition-all ${
+                              isFollowed
+                                ? "bg-emerald-50 border-emerald-300 text-emerald-700"
+                                : "border-[#e3d58f] bg-[#fffdf2] text-[#8b5e0a] hover:bg-[#fff7d1]"
+                            }`}
+                          >
+                            {isFollowed ? "Following" : "+ Follow"}
+                          </button>
+                        </div>
+
+                        {/* Languages */}
+                        <p className="mt-1.5 text-xs text-[#524436] flex items-center gap-1.5 truncate">
+                          <Languages className="size-3.5 text-[#8b5e0a] shrink-0" />
+                          <span className="truncate">{astro.languages.join(", ")}</span>
+                        </p>
+
+                        {/* Experience */}
+                        <p className="mt-1 text-xs text-[#524436] flex items-center gap-1.5 truncate">
+                          <GraduationCap className="size-3.5 text-[#8b5e0a] shrink-0" />
+                          <span>{astro.experienceYears} Years</span>
+                        </p>
+
+                        {/* Speciality */}
+                        <p className="mt-1 text-xs text-[#524436] flex items-center gap-1.5 truncate">
+                          <Sparkles className="size-3.5 text-[#8b5e0a] shrink-0" />
+                          <span className="truncate">{astro.speciality}</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bottom Row: Pricing on Left + Action Buttons on Right */}
+                  <div className="mt-4 pt-3 border-t border-[#f2e9b0]/80 flex items-center justify-between gap-2">
+                    {/* Price & Flatdeal badge */}
+                    <div>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="font-extrabold text-sm sm:text-base text-[#1a1208]">
+                          ₹{astro.pricePerMin}
+                          <span className="text-xs font-normal text-[#6b5f4d]">/Min</span>
+                        </span>
+                        {astro.originalPricePerMin && (
+                          <span className="text-xs text-[#9c8e7b] line-through font-medium">
+                            ₹{astro.originalPricePerMin}/Min
+                          </span>
+                        )}
+                      </div>
+                      {astro.flatDealBadge && (
+                        <span className="inline-block mt-0.5 rounded bg-emerald-100 text-emerald-800 text-[9px] font-bold px-1.5 py-0.2 tracking-wider">
+                          {astro.flatDealBadge}
                         </span>
                       )}
                     </div>
-                    {astro.flatDealBadge && (
-                      <span className="inline-block mt-0.5 rounded bg-emerald-100 text-emerald-800 text-[9px] font-bold px-1.5 py-0.2 tracking-wider">
-                        {astro.flatDealBadge}
-                      </span>
-                    )}
-                  </div>
 
-                  {/* Action Buttons: Chat & Call */}
-                  <div className="flex items-center gap-1.5">
-                    <Link href={`/chat/${astro.id}`}>
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-1 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-1.5 shadow-sm transition-colors"
-                      >
-                        <MessageCircle className="size-3.5" />
-                        <span>CHAT</span>
-                      </button>
-                    </Link>
+                    {/* Action Buttons: Chat & Call */}
+                    <div className="flex items-center gap-1.5">
+                      {astro.canChat ? (
+                        <Link href={`/chat/${astro.id}`}>
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-1.5 shadow-sm transition-colors"
+                          >
+                            <MessageCircle className="size-3.5" />
+                            <span>CHAT</span>
+                          </button>
+                        </Link>
+                      ) : null}
 
-                    {astro.canCall ? (
-                      <Link href={`/call/${astro.id}`}>
-                        <button
-                          type="button"
-                          className="inline-flex items-center gap-1 rounded-full border border-teal-600 text-teal-800 bg-teal-50 hover:bg-teal-100 font-bold text-xs px-3 py-1.5 transition-colors"
-                        >
-                          <Phone className="size-3.5 text-teal-700" />
-                          <span>CALL</span>
-                        </button>
-                      </Link>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 text-stone-400 font-bold text-xs px-2.5 py-1.5 cursor-not-allowed">
-                        OFFLINE
-                      </span>
-                    )}
+                      {astro.canCall ? (
+                        <Link href={`/call/${astro.id}`}>
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1 rounded-full border border-teal-600 text-teal-800 bg-teal-50 hover:bg-teal-100 font-bold text-xs px-3 py-1.5 transition-colors"
+                          >
+                            <Phone className="size-3.5 text-teal-700" />
+                            <span>CALL</span>
+                          </button>
+                        </Link>
+                      ) : !astro.canChat ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 text-stone-400 font-bold text-xs px-2.5 py-1.5 cursor-not-allowed">
+                          OFFLINE
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -1,11 +1,9 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import {
-  ChevronLeft,
-  ChevronRight,
-  Eye,
-  Heart,
   MessageCircle,
+  Phone,
   Radio,
   Send,
   Sparkles,
@@ -15,68 +13,32 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
-interface LiveExpert {
+import { astrologerApi } from "@/lib/api";
+import { SKILL_LABELS } from "@/types";
+
+interface DisplayLiveExpert {
   id: string;
   name: string;
-  avatarUrl: string;
+  avatarUrl?: string | null;
   topic: string;
   viewers: number;
   category: string;
+  isOnline: boolean;
+  slug: string;
+  canCall: boolean;
+  canChat: boolean;
 }
-
-const LIVE_EXPERTS: LiveExpert[] = [
-  {
-    id: "shivanjali",
-    name: "Tarot Shivanjali",
-    avatarUrl: "/images/experts/expert-shivanjali-photo.jpg",
-    topic: "Get your Ex Back?",
-    viewers: 1420,
-    category: "Love & Relationship",
-  },
-  {
-    id: "daisy",
-    name: "Tarot Daisy",
-    avatarUrl: "/images/experts/expert-daisy-photo.jpg",
-    topic: "Abundance Reading...",
-    viewers: 980,
-    category: "Career & Wealth",
-  },
-  {
-    id: "dua",
-    name: "Tarot Dua",
-    avatarUrl: "/images/experts/expert-dua-photo.jpg",
-    topic: "What does your card...",
-    viewers: 1845,
-    category: "Destiny & Life Path",
-  },
-  {
-    id: "shivshakti",
-    name: "Tarot Shivshakti",
-    avatarUrl: "/images/experts/expert-shivshakti-photo.jpg",
-    topic: "Is it 100% love?",
-    viewers: 2130,
-    category: "Soulmate Connection",
-  },
-  {
-    id: "hridesh",
-    name: "Astro Hridesh",
-    avatarUrl: "/images/experts/expert-hridesh-photo.jpg",
-    topic: "Sitaroon ki chaal",
-    viewers: 1650,
-    category: "Vedic Planetary Shifts",
-  },
-];
 
 export function FreeLiveExperts() {
   const [followedIds, setFollowedIds] = useState<Record<string, boolean>>({});
-  const [activeModalExpert, setActiveModalExpert] = useState<LiveExpert | null>(null);
+  const [activeModalExpert, setActiveModalExpert] = useState<DisplayLiveExpert | null>(null);
   const [userComment, setUserComment] = useState("");
   const [comments, setComments] = useState<Array<{ name: string; text: string }>>([
-    { name: "Pooja S.", text: "Namaste ma'am! When will my promotion happen?" },
-    { name: "Rahul V.", text: "Please tell me about my marriage timing." },
-    { name: "Ananya M.", text: "Your reading last week was so accurate! ❤️" },
+    { name: "Pooja S.", text: "Namaste! When will my career shift happen?" },
+    { name: "Rahul V.", text: "Please tell me about marriage yog in my kundli." },
+    { name: "Ananya M.", text: "Your reading was so accurate! ❤️" },
   ]);
 
   const toggleFollow = (id: string, e: React.MouseEvent) => {
@@ -91,6 +53,43 @@ export function FreeLiveExperts() {
     setComments((prev) => [...prev, { name: "You", text: userComment.trim() }]);
     setUserComment("");
   };
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["astrologers", { liveExperts: true, limit: 10 }],
+    queryFn: () => astrologerApi.list({ limit: 10 }),
+    staleTime: 60_000,
+  });
+
+  const liveExperts = useMemo<DisplayLiveExpert[]>(() => {
+    const items = data?.items ?? [];
+    return items.map((astro) => {
+      const skills = (astro.skills ?? []).map((s) => SKILL_LABELS[s] ?? s);
+      const category = skills[0] || "Vedic Astrology";
+      const topic =
+        astro.tagline ||
+        (skills.length > 0
+          ? `${skills.slice(0, 2).join(" & ")} Guidance`
+          : "Live Q&A & Remedies");
+      const viewers = Math.max(
+        120,
+        astro.total_consultations * 24 ||
+          (astro.rating?.count ? astro.rating.count * 18 : 280),
+      );
+
+      return {
+        id: astro.id,
+        name: astro.display_name,
+        avatarUrl: astro.profile_image_url,
+        topic,
+        viewers,
+        category,
+        isOnline: Boolean(astro.availability?.is_online),
+        slug: astro.slug ?? astro.id,
+        canCall: astro.modes_enabled?.includes("call") ?? false,
+        canChat: astro.modes_enabled?.includes("chat") ?? false,
+      };
+    });
+  }, [data]);
 
   return (
     <section id="live-experts" className="relative bg-white py-8 sm:py-12 border-b border-[#f2e9b0]/60">
@@ -115,84 +114,119 @@ export function FreeLiveExperts() {
           </Link>
         </div>
 
-        {/* 5 Live Cards Grid / Horizontal Scroll */}
-        <div className="scrollbar-none grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4.5">
-          {LIVE_EXPERTS.map((expert) => {
-            const isFollowed = followedIds[expert.id];
-
-            return (
+        {/* Loading State */}
+        {isLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4.5">
+            {[1, 2, 3, 4, 5].map((i) => (
               <div
-                key={expert.id}
-                className="group relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#1e1730] via-[#161026] to-[#0d0917] border border-[#ffdb4d]/40 shadow-[0_8px_24px_-6px_rgba(20,10,40,0.4)] flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:border-[#ffdb4d] hover:shadow-[0_16px_32px_-8px_rgba(255,219,77,0.3)]"
+                key={i}
+                className="rounded-2xl bg-gradient-to-b from-[#1e1730] to-[#0d0917] border border-[#ffdb4d]/20 p-4 h-64 animate-pulse flex flex-col items-center justify-between"
               >
-                {/* Background astrological pattern overlay */}
+                <div className="size-16 rounded-full bg-white/10" />
+                <div className="w-3/4 h-4 bg-white/10 rounded" />
+                <div className="w-full h-8 bg-white/10 rounded-full" />
+              </div>
+            ))}
+          </div>
+        ) : liveExperts.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-[#eadf9a] bg-[#fffdf5] p-8 text-center">
+            <p className="text-sm font-semibold text-[#1a1208]">No live experts broadcasting at this moment.</p>
+            <p className="text-xs text-[#6b5f4d] mt-1">
+              Astrologers appear here once added in the admin panel and online.
+            </p>
+          </div>
+        ) : (
+          /* Live Cards Grid */
+          <div className="scrollbar-none grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4.5">
+            {liveExperts.map((expert) => {
+              const isFollowed = followedIds[expert.id];
+
+              return (
                 <div
-                  className="pointer-events-none absolute inset-0 opacity-15 bg-[radial-gradient(#ffdb4d_1px,transparent_1px)] [background-size:16px_16px]"
-                  aria-hidden
-                />
+                  key={expert.id}
+                  className="group relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#1e1730] via-[#161026] to-[#0d0917] border border-[#ffdb4d]/40 shadow-[0_8px_24px_-6px_rgba(20,10,40,0.4)] flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:border-[#ffdb4d] hover:shadow-[0_16px_32px_-8px_rgba(255,219,77,0.3)]"
+                >
+                  {/* Background astrological pattern overlay */}
+                  <div
+                    className="pointer-events-none absolute inset-0 opacity-15 bg-[radial-gradient(#ffdb4d_1px,transparent_1px)] [background-size:16px_16px]"
+                    aria-hidden
+                  />
 
-                {/* Top Badge: • LIVE */}
-                <div className="relative p-3.5 pb-2 flex justify-end">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-red-600/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm ring-1 ring-white/20">
-                    <span className="size-1.5 rounded-full bg-white animate-pulse" />
-                    LIVE
-                  </span>
-                </div>
+                  {/* Top Badge: LIVE or UPCOMING */}
+                  <div className="relative p-3.5 pb-2 flex justify-end">
+                    {expert.isOnline ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-red-600/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm ring-1 ring-white/20">
+                        <span className="size-1.5 rounded-full bg-white animate-pulse" />
+                        LIVE
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-stone-700/80 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white/80 shadow-sm ring-1 ring-white/10">
+                        ONLINE
+                      </span>
+                    )}
+                  </div>
 
-                {/* Center Content: Avatar + Follow + Name + Topic Bubble */}
-                <div className="relative px-3.5 flex flex-col items-center text-center">
-                  {/* Circular Avatar with Glowing Ring */}
-                  <div className="relative size-16 sm:size-18 rounded-full p-0.5 bg-gradient-to-tr from-[#ffd700] via-[#ff9900] to-[#ffd700] shadow-[0_0_15px_rgba(255,215,0,0.4)]">
-                    <div className="relative size-full rounded-full overflow-hidden bg-stone-900">
-                      <Image
-                        src={expert.avatarUrl}
-                        alt={expert.name}
-                        fill
-                        className="object-cover"
-                        sizes="80px"
-                      />
+                  {/* Center Content: Avatar + Follow + Name + Topic Bubble */}
+                  <div className="relative px-3.5 flex flex-col items-center text-center">
+                    {/* Circular Avatar with Glowing Ring */}
+                    <div className="relative size-16 sm:size-18 rounded-full p-0.5 bg-gradient-to-tr from-[#ffd700] via-[#ff9900] to-[#ffd700] shadow-[0_0_15px_rgba(255,215,0,0.4)]">
+                      <div className="relative size-full rounded-full overflow-hidden bg-stone-900 flex items-center justify-center">
+                        {expert.avatarUrl ? (
+                          <Image
+                            src={expert.avatarUrl}
+                            alt={expert.name}
+                            fill
+                            className="object-cover"
+                            sizes="80px"
+                          />
+                        ) : (
+                          <span className="font-extrabold text-xl text-[#ffd700]">
+                            {expert.name.charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Follow Button */}
+                    <button
+                      type="button"
+                      onClick={(e) => toggleFollow(expert.id, e)}
+                      className={`mt-2 rounded-full px-3 py-0.5 text-[10px] font-bold transition-all shadow-xs ${
+                        isFollowed
+                          ? "bg-emerald-500 text-white"
+                          : "bg-white/95 text-[#1a1208] hover:bg-white hover:scale-105"
+                      }`}
+                    >
+                      {isFollowed ? "Following" : "+ Follow"}
+                    </button>
+
+                    {/* Name */}
+                    <h3 className="mt-2 font-bold text-sm sm:text-[15px] text-white tracking-wide truncate w-full">
+                      {expert.name}
+                    </h3>
+
+                    {/* Speech Bubble / Topic Pill */}
+                    <div className="mt-2 mb-3.5 w-full">
+                      <span className="inline-block w-full truncate rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-[#1a1208] shadow-xs">
+                        {expert.topic}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Follow Button */}
+                  {/* Bottom Full-Width Bold Button: WATCH NOW > */}
                   <button
                     type="button"
-                    onClick={(e) => toggleFollow(expert.id, e)}
-                    className={`mt-2 rounded-full px-3 py-0.5 text-[10px] font-bold transition-all shadow-xs ${
-                      isFollowed
-                        ? "bg-emerald-500 text-white"
-                        : "bg-white/95 text-[#1a1208] hover:bg-white hover:scale-105"
-                    }`}
+                    onClick={() => setActiveModalExpert(expert)}
+                    className="w-full bg-gradient-to-r from-[#ff4747] to-[#ff6b6b] hover:from-[#e53535] hover:to-[#f25252] py-2.5 text-center text-xs sm:text-sm font-extrabold uppercase tracking-wider text-white shadow-md transition-all duration-200 flex items-center justify-center gap-1 group-hover:tracking-widest"
                   >
-                    {isFollowed ? "Following" : "+ Follow"}
+                    <span>WATCH NOW</span>
+                    <span className="text-base leading-none">›</span>
                   </button>
-
-                  {/* Name */}
-                  <h3 className="mt-2 font-bold text-sm sm:text-[15px] text-white tracking-wide truncate w-full">
-                    {expert.name}
-                  </h3>
-
-                  {/* Speech Bubble / Topic Pill */}
-                  <div className="mt-2 mb-3.5 w-full">
-                    <span className="inline-block w-full truncate rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-[#1a1208] shadow-xs">
-                      {expert.topic}
-                    </span>
-                  </div>
                 </div>
-
-                {/* Bottom Full-Width Bold Button: WATCH NOW > */}
-                <button
-                  type="button"
-                  onClick={() => setActiveModalExpert(expert)}
-                  className="w-full bg-gradient-to-r from-[#ff4747] to-[#ff6b6b] hover:from-[#e53535] hover:to-[#f25252] py-2.5 text-center text-xs sm:text-sm font-extrabold uppercase tracking-wider text-white shadow-md transition-all duration-200 flex items-center justify-center gap-1 group-hover:tracking-widest"
-                >
-                  <span>WATCH NOW</span>
-                  <span className="text-base leading-none">›</span>
-                </button>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Interactive Live Stream Modal */}
@@ -224,21 +258,31 @@ export function FreeLiveExperts() {
 
             {/* Video Stage Simulation */}
             <div className="relative aspect-video w-full bg-black flex items-center justify-center overflow-hidden">
-              <Image
-                src={activeModalExpert.avatarUrl}
-                alt={activeModalExpert.name}
-                fill
-                className="object-cover opacity-60 filter blur-xs"
-              />
-              <div className="relative z-10 flex flex-col items-center text-center p-6 bg-black/40 backdrop-blur-sm rounded-2xl border border-white/10">
-                <div className="size-20 rounded-full border-2 border-gold-400 overflow-hidden mb-3 shadow-lg">
-                  <Image
-                    src={activeModalExpert.avatarUrl}
-                    alt={activeModalExpert.name}
-                    width={80}
-                    height={80}
-                    className="object-cover"
-                  />
+              {activeModalExpert.avatarUrl ? (
+                <Image
+                  src={activeModalExpert.avatarUrl}
+                  alt={activeModalExpert.name}
+                  fill
+                  className="object-cover opacity-60 filter blur-xs"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-b from-[#25183d] to-[#0c0717]" />
+              )}
+              <div className="relative z-10 flex flex-col items-center text-center p-6 bg-black/50 backdrop-blur-sm rounded-2xl border border-white/10 max-w-md mx-4">
+                <div className="size-20 rounded-full border-2 border-gold-400 overflow-hidden mb-3 shadow-lg bg-stone-800 flex items-center justify-center">
+                  {activeModalExpert.avatarUrl ? (
+                    <Image
+                      src={activeModalExpert.avatarUrl}
+                      alt={activeModalExpert.name}
+                      width={80}
+                      height={80}
+                      className="object-cover"
+                    />
+                  ) : (
+                    <span className="font-bold text-2xl text-gold-400">
+                      {activeModalExpert.name.charAt(0).toUpperCase()}
+                    </span>
+                  )}
                 </div>
                 <h4 className="text-lg font-bold text-white">
                   {activeModalExpert.name} is Live!
@@ -247,12 +291,32 @@ export function FreeLiveExperts() {
                   Topic: &quot;{activeModalExpert.topic}&quot;
                 </p>
                 <div className="mt-4 flex items-center gap-3">
-                  <Link href={`/astrologers`}>
+                  <Link href={`/chat/${activeModalExpert.id}`}>
                     <button
                       type="button"
-                      className="rounded-full bg-[#fcd404] hover:bg-[#e6be00] text-[#1c1304] font-bold text-xs px-5 py-2 shadow-md transition-transform hover:scale-105"
+                      className="rounded-full bg-[#fcd404] hover:bg-[#e6be00] text-[#1c1304] font-bold text-xs px-5 py-2 shadow-md transition-transform hover:scale-105 flex items-center gap-1.5"
                     >
-                      Call / Chat Now
+                      <MessageCircle className="size-3.5" />
+                      <span>Chat Now</span>
+                    </button>
+                  </Link>
+                  {activeModalExpert.canCall && (
+                    <Link href={`/call/${activeModalExpert.id}`}>
+                      <button
+                        type="button"
+                        className="rounded-full border border-teal-400 bg-teal-500/20 hover:bg-teal-500/30 text-teal-200 font-bold text-xs px-5 py-2 shadow-md transition-colors flex items-center gap-1.5"
+                      >
+                        <Phone className="size-3.5" />
+                        <span>Call Now</span>
+                      </button>
+                    </Link>
+                  )}
+                  <Link href={`/astrologers/${activeModalExpert.slug}`}>
+                    <button
+                      type="button"
+                      className="rounded-full bg-white/10 hover:bg-white/20 text-white font-medium text-xs px-4 py-2 transition-colors"
+                    >
+                      View Profile
                     </button>
                   </Link>
                 </div>
