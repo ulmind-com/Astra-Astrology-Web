@@ -99,6 +99,29 @@ function SessionTimer({ startsAt }: { startsAt: string }) {
   );
 }
 
+function getGoogleCalendarUrl(a: Appointment): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const toUtcStr = (date: Date) =>
+    `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}T${pad(
+      date.getUTCHours(),
+    )}${pad(date.getUTCMinutes())}00Z`;
+
+  const start = toUtcStr(new Date(a.starts_at));
+  const end = toUtcStr(new Date(a.ends_at));
+  const astroName = a.peer?.name || "Astrologer";
+  const pillar = a.consultation_pillar ? PILLAR_LABELS[a.consultation_pillar]?.en : "Vedic Astrology";
+
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: `Sacred Astrology Consultation: ${astroName}`,
+    dates: `${start}/${end}`,
+    details: `1-on-1 Consultation on ${pillar} with ${astroName}. Sacred Chamber: https://astra-astrology-web.vercel.app/account/appointments`,
+    location: "DivinLink Sacred Chamber",
+  });
+
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
 function VedicPrescriptionCard({ prescription, language }: { prescription: VedicPrescription; language: "bn" | "hi" | "en" }) {
   const [copied, setCopied] = React.useState(false);
 
@@ -344,6 +367,18 @@ export default function MyAppointmentsPage() {
                   {/* Realtime Status / Countdown / Enter Chamber Action */}
                   <div className="flex flex-wrap items-center gap-2.5">
                     {upcoming && <SessionTimer startsAt={a.starts_at} />}
+
+                    {upcoming && (
+                      <a
+                        href={getGoogleCalendarUrl(a)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 bg-surface-muted/60 px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-surface-muted hover:border-amber-500/40 transition-all cursor-pointer shadow-2xs"
+                        title="Add to Google Calendar"
+                      >
+                        <span>📅 Add to GCal</span>
+                      </a>
+                    )}
 
                     {isLiveWindow && (
                       <Link href={`/call/${a.peer?.id || a.id}`}>
