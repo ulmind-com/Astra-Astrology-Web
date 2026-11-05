@@ -406,6 +406,11 @@ export default function MyAppointmentsPage() {
                       <span>{a.muhurat_type}</span>
                     </span>
                   )}
+
+                  <span className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-amber-500/10 to-orange-500/15 border border-amber-500/30 px-2.5 py-1 text-xs font-bold text-amber-700 dark:text-amber-300">
+                    <Sparkles className="size-3 text-amber-500" />
+                    <span>{a.cosmic_synergy_score || 88}% Cosmic Synergy</span>
+                  </span>
                 </div>
 
                 {/* Financial & Escrow Summary */}
@@ -446,6 +451,37 @@ export default function MyAppointmentsPage() {
                 {/* Post-Consultation Sacred Vedic Prescription */}
                 {a.prescription && (
                   <VedicPrescriptionCard prescription={a.prescription} language={language} />
+                )}
+
+                {/* Divya Paramarsha Official Sacred Certificate */}
+                {a.status === "completed" && (
+                  <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-orange-500/10 p-4 shadow-xs">
+                    <div className="flex items-center gap-3">
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-lg border border-amber-500/30">
+                        ॐ
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-sm text-foreground">
+                          {language === "bn" ? "দিব্য পরামর্শ পবিত্র সনদপত্র" : "Divya Paramarsha Sacred Certificate"}
+                        </h4>
+                        <p className="text-[11px] text-muted-foreground">
+                          {language === "bn"
+                            ? "অধিবেশনের অনুমোদিত বৈদিক বিধান ও রত্ন/মন্ত্রের ডিজিটাল সনদ"
+                            : "Official consecrated certificate with Vedic directives & digital seal"}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        window.open(appointmentApi.getCertificateHtmlUrl(a.id), "_blank");
+                      }}
+                      className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-sm shrink-0"
+                    >
+                      <FileText className="size-3.5 mr-1.5" />
+                      {language === "bn" ? "সনদপত্র দেখুন ও প্রিন্ট করুন" : "View & Print Certificate"}
+                    </Button>
+                  </div>
                 )}
 
                 {/* Cancellation Grace Window & Policy Trigger */}

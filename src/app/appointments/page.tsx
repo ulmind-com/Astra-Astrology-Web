@@ -413,6 +413,13 @@ function AppointmentsContent() {
     enabled: Boolean(selectedAstrologer?.id) && isSignedIn,
   });
 
+  // 6b. Query: Cosmic Resonance Compatibility Index
+  const { data: cosmicSynergy } = useQuery({
+    queryKey: ["appointments", "synergy", selectedAstrologer?.id],
+    queryFn: () => appointmentApi.synergy(selectedAstrologer!.id),
+    enabled: Boolean(selectedAstrologer?.id),
+  });
+
   // Query: Existing user appointments to enforce single active appointment rule (Rule 1)
   const { data: myAppointments } = useQuery({
     queryKey: ["appointments", "mine", "upcoming"],
@@ -1389,6 +1396,23 @@ function AppointmentsContent() {
                     {clock(selectedSlot)} – {clock(new Date(selectedSlot.getTime() + minutes * 60_000))} ({minutes} mins)
                   </span>
                 </div>
+
+                {cosmicSynergy && (
+                  <div className="rounded-xl border border-amber-300/80 bg-gradient-to-r from-amber-50 via-orange-50/50 to-amber-50 p-2.5 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-amber-900 flex items-center gap-1.5">
+                        <Sparkles className="size-3.5 text-amber-600" />
+                        <span>মহাজাগতিক সংযোগ (Cosmic Resonance)</span>
+                      </span>
+                      <span className="text-[10px] font-black text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full">
+                        {cosmicSynergy.score}% {cosmicSynergy.harmony_tier}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-amber-800/80 leading-tight">
+                      {(cosmicSynergy.resonance_factors || []).join(" • ")}
+                    </p>
+                  </div>
+                )}
 
                 {quote && (
                   <>

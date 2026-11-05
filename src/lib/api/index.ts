@@ -347,6 +347,21 @@ export const appointmentApi = {
 
   complete: (id: string) =>
     api.post<Appointment>(`/appointments/${id}/complete`, {}),
+
+  synergy: (astrologer_id: string, dob?: string | null) =>
+    api.get<Record<string, any>>(`/appointments/synergy`, {
+      query: { astrologer_id, ...(dob ? { dob } : {}) },
+      auth: false,
+    }),
+
+  getCertificate: (id: string) =>
+    api.get<Record<string, any>>(`/appointments/${id}/certificate`),
+
+  getCertificateHtmlUrl: (id: string) =>
+    `${process.env.NEXT_PUBLIC_API_URL || "https://api.divinlink.com"}/api/v1/appointments/${id}/certificate/html`,
+
+  joinStandby: (id: string) =>
+    api.post<{ position: number }>(`/appointments/${id}/standby`, {}),
 };
 
 // ----------------------------------------------------------------- reviews
