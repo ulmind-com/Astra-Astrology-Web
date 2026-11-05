@@ -11,12 +11,16 @@ import {
   FileText,
   HelpCircle,
   LifeBuoy,
+  Lock,
   Mail,
   MessageSquare,
   Phone,
+  PhoneCall,
   Send,
   ShieldCheck,
   Sparkles,
+  Wallet,
+  Zap,
 } from "lucide-react";
 import React, { useState } from "react";
 
@@ -40,12 +44,12 @@ interface SupportTicket {
 }
 
 const CATEGORIES = [
-  { id: "wallet_billing", label: "Wallet & Coin Recharge", icon: "💰" },
-  { id: "consultation", label: "Astrologer Calls & Bookings", icon: "📞" },
-  { id: "readings", label: "Tarot, Kundli & Tools", icon: "🔮" },
-  { id: "account", label: "Account, Security & Passkeys", icon: "🔐" },
-  { id: "technical", label: "Technical Issue or Bug", icon: "⚡" },
-  { id: "general", label: "General Feedback or Inquiry", icon: "✨" },
+  { id: "wallet_billing", label: "Wallet & Coins", Icon: Wallet, color: "text-amber-500", bg: "bg-amber-500/10" },
+  { id: "consultation", label: "Calls & Bookings", Icon: PhoneCall, color: "text-blue-500", bg: "bg-blue-500/10" },
+  { id: "readings", label: "Tarot & Readings", Icon: Sparkles, color: "text-purple-500", bg: "bg-purple-500/10" },
+  { id: "account", label: "Account & Passkeys", Icon: Lock, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+  { id: "technical", label: "Technical & Bugs", Icon: Zap, color: "text-rose-500", bg: "bg-rose-500/10" },
+  { id: "general", label: "General Inquiries", Icon: HelpCircle, color: "text-teal-500", bg: "bg-teal-500/10" },
 ];
 
 const FAQS = [
@@ -211,18 +215,21 @@ export default function SupportPage() {
                     <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
                       {CATEGORIES.map((cat) => {
                         const isSelected = category === cat.id;
+                        const Icon = cat.Icon;
                         return (
                           <button
                             type="button"
                             key={cat.id}
                             onClick={() => setCategory(cat.id)}
-                            className={`flex items-center gap-2 rounded-xl border p-2.5 text-left text-xs transition-all ${
+                            className={`flex items-center gap-2.5 rounded-xl border p-2.5 text-left text-xs transition-all ${
                               isSelected
                                 ? "border-amber-500 bg-amber-500/10 font-semibold text-foreground ring-1 ring-amber-500/40"
                                 : "border-border bg-background text-muted-foreground hover:border-amber-500/40 hover:text-foreground"
                             }`}
                           >
-                            <span className="text-sm">{cat.icon}</span>
+                            <span className={`flex size-6 shrink-0 items-center justify-center rounded-lg ${cat.bg} ${cat.color}`}>
+                              <Icon className="size-3.5" />
+                            </span>
                             <span className="truncate">{cat.label}</span>
                           </button>
                         );
