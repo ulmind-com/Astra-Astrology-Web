@@ -393,6 +393,9 @@ export const appointmentApi = {
 
   extensionAction: (id: string, action: "accept" | "decline") =>
     api.post<Appointment>(`/appointments/${id}/extension/action`, { action }),
+
+  sendFollowUpMessage: (id: string, text: string) =>
+    api.post<Appointment>(`/appointments/${id}/follow-up/message`, { text }),
 };
 
 // ----------------------------------------------------------------- reviews
