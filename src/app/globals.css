@@ -809,6 +809,61 @@
   z-index: 1;
 }
 
+/* --- Astra Booking Luxury Animations --- */
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.92;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes celestial-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s ease-in-out infinite;
+}
+
+.animate-float-gentle {
+  animation: float-gentle 4s ease-in-out infinite;
+}
+
+.animate-celestial-spin {
+  animation: celestial-spin 90s linear infinite;
+}
+
+.animate-shimmer-slide {
+  animation: shimmer-slide 2.5s infinite linear;
+}
+
 /* The motion switch-off goes last so it overrides everything above it. */
 @media (prefers-reduced-motion: reduce) {
   *,

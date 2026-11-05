@@ -38,6 +38,7 @@ import {
   Video,
   Wallet,
   X,
+  Zap,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -205,7 +206,6 @@ function AppointmentsContent() {
     data: astrologersData,
     isLoading: loadingAstrologers,
     error: astrologersError,
-    refetch: refetchAstrologers,
   } = useQuery({
     queryKey: ["astrologers", { appointments: true }],
     queryFn: () => astrologerApi.list({ limit: 50 }),
@@ -269,7 +269,7 @@ function AppointmentsContent() {
     [bookableAstrologers, selectedAstrologerId],
   );
 
-  // 4. BookMyShow Horizontal Date Strip State
+  // 4. BookMyShow Horizontal Date Strip State (21 Days)
   const today = React.useMemo(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -477,7 +477,7 @@ function AppointmentsContent() {
   const scrollDateStrip = (direction: "left" | "right") => {
     const el = document.getElementById("bms-date-strip");
     if (el) {
-      const amount = direction === "left" ? -280 : 280;
+      const amount = direction === "left" ? -320 : 320;
       el.scrollBy({ left: amount, behavior: "smooth" });
     }
   };
@@ -486,41 +486,85 @@ function AppointmentsContent() {
     <>
       <SiteHeader />
 
-      <main className="min-h-screen bg-[#FDFBF7] pb-32">
+      <main className="relative min-h-screen bg-[#FDFBF7] pb-36 overflow-hidden">
+        {/* =========================================================================
+            COSMIC AMBIENT AURAS & SACRED GEOMETRY (Atmospheric Background)
+        ========================================================================= */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          {/* Warm upper golden aura */}
+          <div className="absolute -top-36 left-1/2 -translate-x-1/2 w-[1000px] h-[550px] bg-gradient-to-b from-amber-200/40 via-orange-100/25 to-transparent blur-3xl opacity-80" />
+          
+          {/* Subtle rotating celestial yantra disc */}
+          <div className="absolute top-12 -right-24 w-96 h-96 opacity-[0.04] animate-celestial-spin">
+            <svg viewBox="0 0 100 100" className="w-full h-full stroke-amber-900 fill-none stroke-[0.5]">
+              <circle cx="50" cy="50" r="48" />
+              <circle cx="50" cy="50" r="36" />
+              <polygon points="50,2 93,75 7,75" />
+              <polygon points="50,98 93,25 7,25" />
+              <circle cx="50" cy="50" r="20" />
+            </svg>
+          </div>
+
+          {/* Left subtle cosmic wheel */}
+          <div className="absolute top-80 -left-24 w-80 h-80 opacity-[0.03] animate-celestial-spin" style={{ animationDirection: "reverse" }}>
+            <svg viewBox="0 0 100 100" className="w-full h-full stroke-amber-900 fill-none stroke-[0.4]">
+              <circle cx="50" cy="50" r="45" strokeDasharray="3 3" />
+              <polygon points="50,5 95,50 50,95 5,50" />
+              <circle cx="50" cy="50" r="15" />
+            </svg>
+          </div>
+        </div>
+
         {/* =========================================================================
             TOP EXPERIENCE SHOWCASE / HERO HEADER (BookMyShow / District Style)
         ========================================================================= */}
-        <section className="border-b border-amber-900/10 bg-gradient-to-b from-[#FFFDF9] via-[#FAF6EE] to-[#F5EEDD]/40 pt-6 pb-8">
+        <section className="relative border-b border-amber-900/10 bg-gradient-to-b from-[#FFFDF9]/90 via-[#FAF6EE]/80 to-[#F5EEDD]/30 pt-6 pb-8 backdrop-blur-xs">
           <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 space-y-6">
-            {/* Top Navigation & Status */}
+            
+            {/* Top Navigation & Live Radar Pulse */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-2 text-xs font-semibold text-amber-900/70">
-                <Link href="/" className="hover:text-amber-900 transition-colors">Home</Link>
-                <span>/</span>
-                <span className="text-amber-900">Vedic Consultation Chamber</span>
-                <span className="rounded-full bg-amber-500/15 text-amber-800 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
-                  Live Booking Matrix
-                </span>
+              <div className="flex items-center gap-2.5 text-xs font-semibold text-amber-950/80">
+                <Link href="/" className="hover:text-amber-700 transition-colors flex items-center gap-1.5">
+                  <Compass className="size-3.5 text-amber-600" />
+                  <span>Astra Home</span>
+                </Link>
+                <span className="text-amber-900/30">/</span>
+                <span className="text-slate-900 font-bold">Vedic Consultation Chamber</span>
+                
+                {/* Live Radar Pulse Tag */}
+                <div className="ml-2 inline-flex items-center gap-2 rounded-full bg-emerald-500/10 border border-emerald-500/25 px-3 py-1 shadow-2xs">
+                  <span className="relative flex size-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full size-2 bg-emerald-500"></span>
+                  </span>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800">
+                    {language === "bn" ? "লাইভ বুকিং ম্যাট্রিক্স" : "Live Booking Matrix"}
+                  </span>
+                </div>
               </div>
 
+              {/* My Appointments Quick Button */}
               <div className="flex items-center gap-3">
                 <Link
                   href="/account/appointments"
-                  className="inline-flex items-center gap-2 rounded-2xl border border-amber-900/15 bg-white/90 backdrop-blur-md px-4 py-2 text-xs font-bold text-slate-800 shadow-2xs hover:bg-white hover:border-amber-500/50 transition-all cursor-pointer"
+                  className="group inline-flex items-center gap-2 rounded-2xl border border-amber-900/15 bg-white/90 backdrop-blur-md px-4 py-2 text-xs font-bold text-slate-800 shadow-2xs hover:bg-white hover:border-amber-500 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
                 >
-                  <CalendarCheck className="size-4 text-amber-600" />
+                  <CalendarCheck className="size-4 text-amber-600 group-hover:scale-110 transition-transform" />
                   <span>{language === "bn" ? "আমার অ্যাপয়েন্টমেন্ট তালিকা" : "My Appointments"}</span>
                 </Link>
               </div>
             </div>
 
-            {/* Astrologer Selector Carousel / Chips (If multiple practitioners exist) */}
+            {/* Astrologer Selector Carousel / Switcher (If multiple exist) */}
             {bookableAstrologers.length > 1 && (
-              <div className="space-y-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-900/60">
-                  Select Astrologer ({bookableAstrologers.length} Masters Available)
-                </span>
-                <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none">
+              <div className="space-y-2.5 pt-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-amber-950/70 flex items-center gap-1.5">
+                    <Users className="size-3.5 text-amber-600" />
+                    <span>Select Master Astrologer ({bookableAstrologers.length} Available)</span>
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 overflow-x-auto pb-1.5 scrollbar-none">
                   {bookableAstrologers.map((astro) => {
                     const isSelected = astro.id === selectedAstrologer?.id;
                     return (
@@ -529,16 +573,29 @@ function AppointmentsContent() {
                         type="button"
                         onClick={() => setSelectedAstrologerId(astro.id)}
                         className={cn(
-                          "flex items-center gap-3 rounded-2xl px-4 py-2.5 transition-all border shrink-0 text-xs font-bold cursor-pointer shadow-2xs",
+                          "relative flex items-center gap-3 rounded-2xl px-4 py-2.5 transition-all border shrink-0 text-xs font-bold cursor-pointer group",
                           isSelected
-                            ? "bg-[#D97706] text-white border-[#B45309] shadow-md scale-[1.02]"
-                            : "bg-white text-slate-800 border-amber-900/10 hover:border-amber-400 hover:bg-amber-50/40",
+                            ? "bg-gradient-to-r from-[#D97706] to-[#EA580C] text-white border-[#B45309] shadow-[0_6px_20px_-2px_rgba(217,119,6,0.4)] scale-[1.02]"
+                            : "bg-white/95 text-slate-800 border-amber-900/15 hover:border-amber-400 hover:bg-white hover:-translate-y-0.5 shadow-2xs",
                         )}
                       >
-                        <Avatar src={astro.profile_image_url} name={astro.display_name} size="sm" />
+                        <div className="relative">
+                          <Avatar
+                            src={astro.profile_image_url}
+                            name={astro.display_name}
+                            size="sm"
+                            className={cn(
+                              "ring-2 transition-all",
+                              isSelected ? "ring-white" : "ring-amber-500/30 group-hover:ring-amber-500",
+                            )}
+                          />
+                          {astro.availability?.is_online && (
+                            <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+                          )}
+                        </div>
                         <div className="text-left">
-                          <p className="truncate max-w-[150px] font-bold">{astro.display_name}</p>
-                          <p className={cn("text-[10px]", isSelected ? "text-amber-100" : "text-amber-700")}>
+                          <p className="truncate max-w-[150px] font-bold tracking-tight">{astro.display_name}</p>
+                          <p className={cn("text-[10px] font-semibold", isSelected ? "text-amber-100" : "text-amber-700")}>
                             ₹{rupees(astro.appointment.price_paise)} / {astro.appointment.block_minutes}m
                           </p>
                         </div>
@@ -549,22 +606,25 @@ function AppointmentsContent() {
               </div>
             )}
 
-            {/* Selected Astrologer Master Experience Card */}
+            {/* Selected Astrologer Master Experience Card (District Showcase) */}
             {selectedAstrologer ? (
-              <div className="relative overflow-hidden rounded-3xl border border-amber-900/15 bg-white p-6 sm:p-8 shadow-[0_12px_36px_rgba(180,83,9,0.06)]">
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="relative overflow-hidden rounded-3xl border border-amber-900/15 bg-white/95 backdrop-blur-md p-6 sm:p-8 shadow-[0_16px_48px_rgba(180,83,9,0.08)] ring-1 ring-amber-400/20 group">
+                {/* Subtle card interior shimmer background */}
+                <div className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-gradient-to-br from-amber-200/30 via-orange-100/20 to-transparent blur-2xl" />
+
+                <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                   {/* Avatar & Core Bio */}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-                    <div className="relative">
-                      <div className="size-24 sm:size-28 rounded-3xl overflow-hidden ring-4 ring-amber-500/20 shadow-md">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
+                    <div className="relative group/avatar">
+                      <div className="size-24 sm:size-28 rounded-3xl overflow-hidden ring-4 ring-amber-400/30 group-hover/avatar:ring-amber-500 shadow-lg transition-all duration-300">
                         <Avatar
                           src={selectedAstrologer.profile_image_url}
                           name={selectedAstrologer.display_name}
                           size="xl"
-                          className="size-full object-cover"
+                          className="size-full object-cover group-hover/avatar:scale-105 transition-transform duration-500"
                         />
                       </div>
-                      <span className="absolute -bottom-2 -right-2 flex size-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-xs">
+                      <span className="absolute -bottom-2 -right-2 flex size-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md ring-2 ring-white">
                         <Check className="size-4 stroke-[3]" />
                       </span>
                     </div>
@@ -574,39 +634,44 @@ function AppointmentsContent() {
                         <h2 className="font-display text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
                           {selectedAstrologer.display_name}
                         </h2>
-                        <span className="rounded-full bg-amber-500/15 border border-amber-500/30 px-3 py-0.5 text-xs font-bold text-amber-900">
-                          {SKILL_LABELS[selectedAstrologer.skills[0] || "vedic_astrology"]}
+                        <span className="rounded-full bg-gradient-to-r from-amber-500/15 to-orange-500/15 border border-amber-500/30 px-3 py-0.5 text-xs font-bold text-amber-950 flex items-center gap-1 shadow-2xs">
+                          <Sparkles className="size-3 text-amber-600" />
+                          <span>{SKILL_LABELS[selectedAstrologer.skills[0] || "vedic_astrology"]}</span>
                         </span>
                       </div>
 
                       <p className="text-sm text-slate-600 font-medium flex flex-wrap items-center gap-x-3 gap-y-1">
-                        <span>{selectedAstrologer.experience_years}+ Years Professional Experience</span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1 font-bold text-amber-700">
+                        <span className="font-semibold text-slate-700">{selectedAstrologer.experience_years}+ Years Experience</span>
+                        <span className="text-amber-400">•</span>
+                        <span className="flex items-center gap-1 font-bold text-amber-800">
                           <Star className="size-4 fill-amber-400 text-amber-400" />
                           <span>{selectedAstrologer.rating?.average ? selectedAstrologer.rating.average.toFixed(1) : "5.0"}</span>
-                          <span className="text-slate-400 font-normal">({selectedAstrologer.rating?.count || 25} verified reviews)</span>
+                          <span className="text-slate-400 font-normal">({selectedAstrologer.rating?.count || 28} verified sessions)</span>
                         </span>
                       </p>
 
                       <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-                        <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 px-3 py-1 font-semibold text-slate-700">
+                        <span className="inline-flex items-center gap-1.5 rounded-xl bg-amber-50/70 border border-amber-200/80 px-3 py-1 font-semibold text-amber-950 shadow-2xs">
                           <GraduationCap className="size-3.5 text-amber-600" />
                           <span>{selectedAstrologer.qualifications?.[0] || "Jyotish Praveen & Research"}</span>
                         </span>
-                        <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 px-3 py-1 font-semibold text-slate-700">
+                        <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100/90 border border-slate-200 px-3 py-1 font-semibold text-slate-700 shadow-2xs">
                           <Award className="size-3.5 text-amber-600" />
-                          <span>{selectedAstrologer.specialisations?.[0] || "Vedic Astrological Council"}</span>
+                          <span>{selectedAstrologer.specialisations?.[0] || "Council of Astrological Research"}</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100/90 border border-slate-200 px-2.5 py-1 font-semibold text-slate-600">
+                          <Languages className="size-3 text-amber-600" />
+                          <span>English, বাংলা, हिन्दी</span>
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Consultation Mode & Fee Engine Summary */}
+                  {/* Consultation Mode & Fee Summary */}
                   <div className="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end justify-between gap-4 pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-100">
                     <div className="text-left lg:text-right space-y-0.5">
                       <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                        Consultation Session Fee
+                        Consultation Session Rate
                       </p>
                       <p className="font-display text-3xl font-black text-slate-900 tabular-nums">
                         ₹{rupees(selectedAstrologer.appointment.price_paise)}
@@ -614,17 +679,18 @@ function AppointmentsContent() {
                           / {selectedAstrologer.appointment.block_minutes} mins
                         </span>
                       </p>
-                      <p className="text-xs font-semibold text-emerald-700">
-                        ~₹{((selectedAstrologer.appointment.price_paise / 100) / (selectedAstrologer.appointment.block_minutes || 30)).toFixed(2)}/min · 1-on-1 Dedicated Chamber
+                      <p className="text-xs font-semibold text-emerald-700 flex items-center lg:justify-end gap-1">
+                        <Zap className="size-3 text-emerald-600" />
+                        <span>~₹{((selectedAstrologer.appointment.price_paise / 100) / (selectedAstrologer.appointment.block_minutes || 30)).toFixed(2)}/min · 1-on-1 Dedicated Chamber</span>
                       </p>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 text-xs font-bold text-amber-900">
+                      <span className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500/10 border border-amber-500/25 px-3 py-1.5 text-xs font-bold text-amber-950 shadow-2xs">
                         <Video className="size-3.5 text-amber-600" />
                         <span>Ultra-HD Video</span>
                       </span>
-                      <span className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-1.5 text-xs font-bold text-emerald-800">
+                      <span className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-1.5 text-xs font-bold text-emerald-800 shadow-2xs">
                         <Phone className="size-3.5 text-emerald-600" />
                         <span>Direct Audio</span>
                       </span>
@@ -637,7 +703,7 @@ function AppointmentsContent() {
         </section>
 
         {/* =========================================================================
-            BOOKMYSHOW / DISTRICT SIGNATURE DATE SELECTOR RIBBON
+            BOOKMYSHOW SIGNATURE 21-DAY HORIZONTAL DATE STRIP RIBBON
         ========================================================================= */}
         <section className="sticky top-0 z-30 border-b border-amber-900/10 bg-white/95 backdrop-blur-md shadow-xs">
           <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-3.5">
@@ -647,7 +713,7 @@ function AppointmentsContent() {
                 type="button"
                 onClick={() => scrollDateStrip("left")}
                 aria-label="Scroll dates left"
-                className="hidden sm:flex size-9 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition-all shadow-2xs cursor-pointer"
+                className="hidden sm:flex size-9 shrink-0 items-center justify-center rounded-2xl border border-slate-200/90 bg-white text-slate-700 hover:bg-amber-50 hover:border-amber-400 hover:text-amber-900 transition-all shadow-2xs hover:scale-105 active:scale-95 cursor-pointer"
               >
                 <ChevronLeft className="size-4" />
               </button>
@@ -665,10 +731,10 @@ function AppointmentsContent() {
                       type="button"
                       onClick={() => setSelectedDayKey(item.key)}
                       className={cn(
-                        "relative flex flex-col items-center justify-center min-w-[76px] sm:min-w-[84px] py-2.5 px-2 rounded-2xl transition-all border cursor-pointer shrink-0 shadow-2xs group",
+                        "relative flex flex-col items-center justify-center min-w-[76px] sm:min-w-[84px] py-2.5 px-2 rounded-2xl transition-all border cursor-pointer shrink-0 group select-none",
                         isSelected
-                          ? "bg-[#D97706] text-white border-[#B45309] shadow-md scale-[1.03]"
-                          : "bg-white text-slate-700 border-slate-200/90 hover:border-amber-400 hover:bg-amber-50/50",
+                          ? "bg-gradient-to-b from-[#EA580C] via-[#D97706] to-[#B45309] text-white border-[#B45309] shadow-[0_8px_20px_rgba(217,119,6,0.35)] scale-[1.04]"
+                          : "bg-white text-slate-700 border-slate-200/90 hover:border-amber-400 hover:bg-amber-50/60 hover:-translate-y-0.5 shadow-2xs",
                       )}
                     >
                       <span className={cn("text-[11px] font-black uppercase tracking-wider", isSelected ? "text-amber-100" : "text-slate-400")}>
@@ -683,8 +749,8 @@ function AppointmentsContent() {
 
                       {item.isToday && (
                         <span className={cn(
-                          "absolute -top-1.5 rounded-full px-2 py-0.2 text-[9px] font-black uppercase tracking-wider shadow-2xs",
-                          isSelected ? "bg-white text-amber-900" : "bg-amber-500 text-white"
+                          "absolute -top-2 rounded-full px-2 py-0.2 text-[9px] font-black uppercase tracking-wider shadow-xs",
+                          isSelected ? "bg-white text-amber-950 font-black" : "bg-gradient-to-r from-amber-500 to-orange-500 text-white"
                         )}>
                           TODAY
                         </span>
@@ -692,11 +758,15 @@ function AppointmentsContent() {
 
                       {item.isTomorrow && (
                         <span className={cn(
-                          "absolute -top-1.5 rounded-full px-2 py-0.2 text-[9px] font-black uppercase tracking-wider shadow-2xs",
-                          isSelected ? "bg-white text-amber-900" : "bg-sky-600 text-white"
+                          "absolute -top-2 rounded-full px-2 py-0.2 text-[9px] font-black uppercase tracking-wider shadow-xs",
+                          isSelected ? "bg-white text-amber-950 font-black" : "bg-sky-600 text-white"
                         )}>
                           TOMORROW
                         </span>
+                      )}
+
+                      {isSelected && (
+                        <span className="absolute -bottom-1 size-1.5 rounded-full bg-white shadow-xs" />
                       )}
                     </button>
                   );
@@ -708,7 +778,7 @@ function AppointmentsContent() {
                 type="button"
                 onClick={() => scrollDateStrip("right")}
                 aria-label="Scroll dates right"
-                className="hidden sm:flex size-9 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition-all shadow-2xs cursor-pointer"
+                className="hidden sm:flex size-9 shrink-0 items-center justify-center rounded-2xl border border-slate-200/90 bg-white text-slate-700 hover:bg-amber-50 hover:border-amber-400 hover:text-amber-900 transition-all shadow-2xs hover:scale-105 active:scale-95 cursor-pointer"
               >
                 <ChevronRight className="size-4" />
               </button>
@@ -720,18 +790,18 @@ function AppointmentsContent() {
             SESSION CONTROLS & TIME-OF-DAY FILTER BAR (District by Zomato Style)
         ========================================================================= */}
         <section className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 pt-8 space-y-6">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 rounded-3xl border border-amber-900/10 bg-white p-5 sm:p-6 shadow-[0_8px_24px_rgba(0,0,0,0.03)]">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 rounded-3xl border border-amber-900/10 bg-white/95 backdrop-blur-md p-5 sm:p-6 shadow-[0_10px_30px_rgba(0,0,0,0.03)] ring-1 ring-amber-400/10">
             {/* Session Duration Selector */}
             <div className="space-y-2">
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <Clock className="size-3.5 text-amber-600" />
                 <span>Select Consultation Duration</span>
               </span>
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2.5">
                 {[
                   { m: 15, label: "15 Mins", badge: "Quick Q&A" },
-                  { m: 30, label: "30 Mins", badge: "Standard (Popular)" },
-                  { m: 60, label: "60 Mins", badge: "In-depth Kundli" },
+                  { m: 30, label: "30 Mins", badge: "Standard (Popular)", highlight: true },
+                  { m: 60, label: "60 Mins", badge: "Deep Kundli" },
                 ].map((dur) => {
                   const isSelected = minutes === dur.m;
                   const price = selectedAstrologer?.appointment
@@ -743,16 +813,24 @@ function AppointmentsContent() {
                       type="button"
                       onClick={() => setMinutes(dur.m)}
                       className={cn(
-                        "rounded-2xl px-4 py-2 text-xs font-bold transition-all border cursor-pointer flex items-center gap-2 shadow-2xs",
+                        "rounded-2xl px-4 py-2.5 text-xs font-bold transition-all border cursor-pointer flex items-center gap-2 group shadow-2xs",
                         isSelected
-                          ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-                          : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100",
+                          ? "bg-slate-900 text-white border-slate-900 shadow-md scale-[1.02]"
+                          : "bg-slate-50 text-slate-700 border-slate-200/90 hover:bg-slate-100 hover:border-slate-300",
                       )}
                     >
                       <span>{dur.label}</span>
                       <span className={cn("text-[10px] font-bold", isSelected ? "text-amber-400" : "text-amber-700")}>
                         ₹{rupees(price)}
                       </span>
+                      {dur.highlight && (
+                        <span className={cn(
+                          "rounded-full px-1.5 py-0.2 text-[9px] uppercase font-black",
+                          isSelected ? "bg-amber-500 text-slate-900" : "bg-amber-100 text-amber-900",
+                        )}>
+                          Popular
+                        </span>
+                      )}
                     </button>
                   );
                 })}
@@ -763,16 +841,16 @@ function AppointmentsContent() {
             <div className="space-y-2">
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <Sparkles className="size-3.5 text-amber-600" />
-                <span>Filter By Showtimes & Muhurat</span>
+                <span>Filter By Showtimes & Vedic Muhurat</span>
               </span>
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setTimeFilter("all")}
                   className={cn(
-                    "rounded-xl px-3 py-1.5 text-xs font-bold transition-all border cursor-pointer",
+                    "rounded-xl px-3.5 py-2 text-xs font-bold transition-all border cursor-pointer shadow-2xs",
                     timeFilter === "all"
-                      ? "bg-amber-100 text-amber-900 border-amber-300"
+                      ? "bg-amber-500 text-white border-amber-600 shadow-xs"
                       : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100",
                   )}
                 >
@@ -782,52 +860,52 @@ function AppointmentsContent() {
                   type="button"
                   onClick={() => setTimeFilter("morning")}
                   className={cn(
-                    "rounded-xl px-3 py-1.5 text-xs font-bold transition-all border cursor-pointer flex items-center gap-1",
+                    "rounded-xl px-3.5 py-2 text-xs font-bold transition-all border cursor-pointer flex items-center gap-1.5 shadow-2xs",
                     timeFilter === "morning"
-                      ? "bg-amber-100 text-amber-900 border-amber-300"
+                      ? "bg-amber-500 text-white border-amber-600 shadow-xs"
                       : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100",
                   )}
                 >
-                  <Sunrise className="size-3 text-amber-600" />
+                  <Sunrise className="size-3.5 text-amber-600" />
                   <span>Morning</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setTimeFilter("afternoon")}
                   className={cn(
-                    "rounded-xl px-3 py-1.5 text-xs font-bold transition-all border cursor-pointer flex items-center gap-1",
+                    "rounded-xl px-3.5 py-2 text-xs font-bold transition-all border cursor-pointer flex items-center gap-1.5 shadow-2xs",
                     timeFilter === "afternoon"
-                      ? "bg-amber-100 text-amber-900 border-amber-300"
+                      ? "bg-amber-500 text-white border-amber-600 shadow-xs"
                       : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100",
                   )}
                 >
-                  <Sun className="size-3 text-amber-600" />
+                  <Sun className="size-3.5 text-amber-600" />
                   <span>Afternoon</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setTimeFilter("evening")}
                   className={cn(
-                    "rounded-xl px-3 py-1.5 text-xs font-bold transition-all border cursor-pointer flex items-center gap-1",
+                    "rounded-xl px-3.5 py-2 text-xs font-bold transition-all border cursor-pointer flex items-center gap-1.5 shadow-2xs",
                     timeFilter === "evening"
-                      ? "bg-amber-100 text-amber-900 border-amber-300"
+                      ? "bg-amber-500 text-white border-amber-600 shadow-xs"
                       : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100",
                   )}
                 >
-                  <Sunset className="size-3 text-amber-600" />
+                  <Sunset className="size-3.5 text-amber-600" />
                   <span>Evening</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setTimeFilter("night")}
                   className={cn(
-                    "rounded-xl px-3 py-1.5 text-xs font-bold transition-all border cursor-pointer flex items-center gap-1",
+                    "rounded-xl px-3.5 py-2 text-xs font-bold transition-all border cursor-pointer flex items-center gap-1.5 shadow-2xs",
                     timeFilter === "night"
-                      ? "bg-amber-100 text-amber-900 border-amber-300"
+                      ? "bg-amber-500 text-white border-amber-600 shadow-xs"
                       : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100",
                   )}
                 >
-                  <Moon className="size-3 text-amber-600" />
+                  <Moon className="size-3.5 text-amber-600" />
                   <span>Night</span>
                 </button>
 
@@ -835,10 +913,10 @@ function AppointmentsContent() {
                   type="button"
                   onClick={() => setOnlyAuspiciousSlots((p) => !p)}
                   className={cn(
-                    "rounded-xl px-3 py-1.5 text-xs font-bold transition-all border cursor-pointer flex items-center gap-1.5 shadow-2xs",
+                    "rounded-xl px-3.5 py-2 text-xs font-bold transition-all border cursor-pointer flex items-center gap-1.5 shadow-2xs",
                     onlyAuspiciousSlots
-                      ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white border-amber-500 shadow-xs"
-                      : "bg-white text-amber-900 border-amber-300/80 hover:bg-amber-50/70",
+                      ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white border-amber-500 shadow-md ring-2 ring-amber-400/30"
+                      : "bg-white text-amber-950 border-amber-300/80 hover:bg-amber-50/70",
                   )}
                 >
                   <span>⭐️</span>
@@ -849,14 +927,14 @@ function AppointmentsContent() {
           </div>
 
           {/* =========================================================================
-              THE SHOWTIMES MATRIX (BookMyShow Movie/Event Showtimes Matrix)
+              THE SHOWTIMES MATRIX (BookMyShow Movie/Showtimes Layout)
           ========================================================================= */}
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <h3 className="font-display text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <h3 className="font-display text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
                   <span>Available Showtimes & Consultation Slots</span>
-                  <span className="rounded-full bg-amber-500/10 text-amber-800 text-xs px-3 py-0.5 font-bold">
+                  <span className="rounded-full bg-amber-500/15 text-amber-950 text-xs px-3 py-0.5 font-bold border border-amber-500/25">
                     {filteredSlots.length} Open Slots
                   </span>
                 </h3>
@@ -867,7 +945,7 @@ function AppointmentsContent() {
             </div>
 
             {loadingDayView ? (
-              <div className="py-16 text-center rounded-3xl border border-slate-200/80 bg-white">
+              <div className="py-20 text-center rounded-3xl border border-slate-200/80 bg-white/90 shadow-sm">
                 <LoadingBlock label="Calculating Vedic slots & availability matrix…" />
               </div>
             ) : filteredSlots.length === 0 ? (
@@ -895,7 +973,6 @@ function AppointmentsContent() {
                   <Button
                     size="sm"
                     onClick={() => {
-                      // Switch to tomorrow
                       const tom = dateStrip[1]?.key;
                       if (tom) setSelectedDayKey(tom);
                     }}
@@ -908,8 +985,8 @@ function AppointmentsContent() {
               <div className="space-y-6">
                 {/* 1. Morning Showtimes */}
                 {groupedSlots.morning.length > 0 && (
-                  <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs space-y-4">
-                    <div className="flex items-center gap-2 pb-3 border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-amber-900">
+                  <div className="rounded-3xl border border-slate-200/90 bg-white/95 backdrop-blur-md p-6 shadow-xs space-y-4">
+                    <div className="flex items-center gap-2 pb-3 border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-amber-950">
                       <Sunrise className="size-4 text-amber-600" />
                       <span>Morning Sessions · সকাল (06:00 AM – 12:00 PM)</span>
                     </div>
@@ -921,8 +998,8 @@ function AppointmentsContent() {
 
                 {/* 2. Afternoon Showtimes */}
                 {groupedSlots.afternoon.length > 0 && (
-                  <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs space-y-4">
-                    <div className="flex items-center gap-2 pb-3 border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-amber-900">
+                  <div className="rounded-3xl border border-slate-200/90 bg-white/95 backdrop-blur-md p-6 shadow-xs space-y-4">
+                    <div className="flex items-center gap-2 pb-3 border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-amber-950">
                       <Sun className="size-4 text-amber-600" />
                       <span>Afternoon Sessions · দুপুর (12:00 PM – 05:00 PM)</span>
                     </div>
@@ -934,14 +1011,14 @@ function AppointmentsContent() {
 
                 {/* 3. Evening Showtimes (Peak Consulting Hours) */}
                 {groupedSlots.evening.length > 0 && (
-                  <div className="rounded-3xl border border-amber-300/80 bg-gradient-to-b from-white via-amber-50/20 to-white p-6 shadow-xs space-y-4">
+                  <div className="rounded-3xl border border-amber-300/80 bg-gradient-to-b from-white via-amber-50/25 to-white p-6 shadow-xs space-y-4">
                     <div className="flex items-center justify-between pb-3 border-b border-amber-200/60">
-                      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-900">
+                      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-950">
                         <Sunset className="size-4 text-amber-600" />
                         <span>Evening Peak Sessions · সন্ধ্যা (05:00 PM – 09:00 PM)</span>
                       </div>
-                      <span className="rounded-full bg-amber-500/15 text-amber-900 text-[10px] font-black px-2.5 py-0.5">
-                        High Demand Window
+                      <span className="rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-950 text-[10px] font-black px-2.5 py-0.5 border border-amber-400/40">
+                        High Demand Window 🔥
                       </span>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
@@ -952,7 +1029,7 @@ function AppointmentsContent() {
 
                 {/* 4. Night Showtimes */}
                 {groupedSlots.night.length > 0 && (
-                  <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs space-y-4">
+                  <div className="rounded-3xl border border-slate-200/90 bg-white/95 backdrop-blur-md p-6 shadow-xs space-y-4">
                     <div className="flex items-center gap-2 pb-3 border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-indigo-950">
                       <Moon className="size-4 text-indigo-600" />
                       <span>Night Sessions · রাত্রি (09:00 PM – 12:00 AM)</span>
@@ -970,13 +1047,13 @@ function AppointmentsContent() {
               PRACTITIONER PHILOSOPHY & REVIEWS ACCORDION (Below Matrix)
           ========================================================================= */}
           {selectedAstrologer && (
-            <div className="rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 space-y-6">
+            <div className="rounded-3xl border border-slate-200/90 bg-white/95 backdrop-blur-md p-6 sm:p-8 space-y-6 shadow-xs">
               <h4 className="font-display text-lg font-bold text-slate-900">
                 About {selectedAstrologer.display_name} & Consultations
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
-                <div className="rounded-2xl bg-slate-50 p-4 border border-slate-100 space-y-2">
-                  <p className="font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <div className="rounded-2xl bg-amber-50/40 p-4 border border-amber-100 space-y-2">
+                  <p className="font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                     <Compass className="size-4 text-amber-600" />
                     <span>Vedic Astrological Principles</span>
                   </p>
@@ -985,8 +1062,8 @@ function AppointmentsContent() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-slate-50 p-4 border border-slate-100 space-y-2">
-                  <p className="font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <div className="rounded-2xl bg-amber-50/40 p-4 border border-amber-100 space-y-2">
+                  <p className="font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                     <Video className="size-4 text-amber-600" />
                     <span>Private Video Chamber</span>
                   </p>
@@ -995,8 +1072,8 @@ function AppointmentsContent() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-slate-50 p-4 border border-slate-100 space-y-2">
-                  <p className="font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <div className="rounded-2xl bg-amber-50/40 p-4 border border-amber-100 space-y-2">
+                  <p className="font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                     <Sparkles className="size-4 text-amber-600" />
                     <span>Sacred Vedic Prescription</span>
                   </p>
@@ -1015,34 +1092,39 @@ function AppointmentsContent() {
         {selectedSlot && selectedAstrologer && (
           <aside
             aria-label="Booking summary"
-            className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-amber-300/80 shadow-[0_-12px_40px_rgba(0,0,0,0.12)] transition-all animate-in slide-in-from-bottom duration-300"
+            className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-xl border-t border-amber-300/80 shadow-[0_-16px_50px_rgba(217,119,6,0.18)] transition-all animate-in slide-in-from-bottom duration-300"
           >
             <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
               {/* Left: Selected Slot Information */}
               <div className="flex items-center gap-4 min-w-0">
-                <Avatar
-                  src={selectedAstrologer.profile_image_url}
-                  name={selectedAstrologer.display_name}
-                  size="md"
-                  className="size-12 ring-2 ring-amber-400"
-                />
+                <div className="relative">
+                  <Avatar
+                    src={selectedAstrologer.profile_image_url}
+                    name={selectedAstrologer.display_name}
+                    size="md"
+                    className="size-12 ring-2 ring-amber-400"
+                  />
+                  <span className="absolute -bottom-1 -right-1 flex size-4 items-center justify-center rounded-full bg-emerald-500 text-white ring-2 ring-white">
+                    <Check className="size-2.5 stroke-[3]" />
+                  </span>
+                </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <h4 className="font-display font-bold text-slate-900 text-sm sm:text-base truncate">
                       {selectedAstrologer.display_name}
                     </h4>
-                    <span className="rounded-full bg-amber-500/15 text-amber-900 px-2 py-0.5 text-[10px] font-black uppercase">
+                    <span className="rounded-full bg-amber-500/15 text-amber-950 px-2 py-0.5 text-[10px] font-black uppercase">
                       {minutes} mins session
                     </span>
                   </div>
                   <p className="text-xs text-slate-600 flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
                     <span className="font-bold text-slate-900">{selectedDateLabel}</span>
                     <span>•</span>
-                    <span className="font-extrabold text-amber-700 tabular-nums">{clock(selectedSlot)}</span>
+                    <span className="font-extrabold text-amber-800 tabular-nums">{clock(selectedSlot)}</span>
                     {selectedSlotMuhurat && (
                       <>
                         <span>•</span>
-                        <span className="font-bold text-amber-900 flex items-center gap-1">
+                        <span className="font-bold text-amber-950 flex items-center gap-1">
                           <span>⭐️</span>
                           <span>{selectedSlotMuhurat.badge}</span>
                         </span>
@@ -1064,7 +1146,7 @@ function AppointmentsContent() {
                 <button
                   type="button"
                   onClick={() => setIsConfirmModalOpen(true)}
-                  className="rounded-2xl px-6 sm:px-8 py-3.5 font-bold text-sm text-white bg-gradient-to-r from-[#D97706] via-[#EA580C] to-[#F59E0B] shadow-[0_8px_25px_-4px_rgba(217,119,6,0.5)] hover:shadow-[0_12px_32px_-4px_rgba(217,119,6,0.6)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer flex items-center gap-2"
+                  className="rounded-2xl px-6 sm:px-8 py-3.5 font-bold text-sm text-white bg-gradient-to-r from-[#D97706] via-[#EA580C] to-[#F59E0B] shadow-[0_8px_25px_-4px_rgba(217,119,6,0.5)] hover:shadow-[0_12px_32px_-4px_rgba(217,119,6,0.6)] hover:scale-[1.03] active:scale-[0.98] transition-all cursor-pointer flex items-center gap-2 animate-pulse-subtle"
                 >
                   <span>{language === "bn" ? "স্লট নিশ্চিত করুন ও বুক করুন" : "Confirm Slot & Book"}</span>
                   <ArrowRight className="size-4" />
@@ -1086,7 +1168,7 @@ function AppointmentsContent() {
           {selectedAstrologer && selectedSlot && (
             <div className="space-y-4 pt-2 text-xs max-h-[75vh] overflow-y-auto pr-1">
               {/* Astrologer preview */}
-              <div className="flex items-center gap-3.5 rounded-2xl bg-amber-50/50 p-4 border border-amber-200">
+              <div className="flex items-center gap-3.5 rounded-2xl bg-amber-50/70 p-4 border border-amber-200">
                 <Avatar src={selectedAstrologer.profile_image_url} name={selectedAstrologer.display_name} size="md" />
                 <div className="min-w-0 flex-1">
                   <h4 className="font-display font-bold text-sm text-slate-900 truncate">
@@ -1257,7 +1339,7 @@ function AppointmentsContent() {
 
                     <div className="flex justify-between items-center text-slate-600">
                       <span>Hold Deposit ({quote.commission_percent}%)</span>
-                      <span className="font-bold text-amber-700 tabular-nums">
+                      <span className="font-bold text-amber-800 tabular-nums">
                         ₹{rupees(quote.deposit_paise)} · {quote.deposit_coins} coins
                       </span>
                     </div>
@@ -1343,14 +1425,14 @@ function AppointmentsContent() {
         type="button"
         onClick={() => setSelectedSlot(slot)}
         className={cn(
-          "relative flex flex-col items-center justify-between rounded-2xl p-3.5 transition-all text-center border shadow-2xs cursor-pointer group",
+          "relative flex flex-col items-center justify-between rounded-2xl p-3.5 transition-all text-center border shadow-2xs cursor-pointer group select-none",
           isSelected
-            ? "bg-[#D97706] text-white border-[#B45309] shadow-md ring-4 ring-amber-500/25 scale-[1.03]"
+            ? "bg-gradient-to-b from-[#EA580C] via-[#D97706] to-[#B45309] text-white border-[#B45309] shadow-[0_8px_20px_rgba(217,119,6,0.35)] ring-4 ring-amber-500/25 scale-[1.04]"
             : isAuspicious
-            ? "bg-white hover:bg-amber-50/70 border-amber-300 hover:border-amber-500 text-slate-900 hover:scale-[1.02]"
+            ? "bg-white hover:bg-amber-50/70 border-amber-300 hover:border-amber-500 text-slate-900 hover:scale-[1.02] hover:-translate-y-0.5"
             : isRahuKaal
-            ? "bg-slate-50/70 hover:bg-rose-50/50 border-slate-200 hover:border-rose-300 text-slate-700"
-            : "bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-900",
+            ? "bg-slate-50/70 hover:bg-rose-50/50 border-slate-200 hover:border-rose-300 text-slate-700 hover:scale-[1.01]"
+            : "bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-900 hover:scale-[1.02] hover:-translate-y-0.5",
         )}
       >
         <span className="text-sm font-extrabold tabular-nums tracking-tight">
@@ -1359,11 +1441,11 @@ function AppointmentsContent() {
 
         <span
           className={cn(
-            "mt-1.5 rounded-full px-2 py-0.5 text-[9.5px] font-bold leading-none uppercase tracking-wider flex items-center gap-1",
+            "mt-1.5 rounded-full px-2 py-0.5 text-[9.5px] font-bold leading-none uppercase tracking-wider flex items-center gap-1 transition-colors",
             isSelected
               ? "bg-white/20 text-white"
               : isAuspicious
-              ? "bg-amber-100 text-amber-900 border border-amber-300/60"
+              ? "bg-amber-100 text-amber-950 border border-amber-300/60"
               : isRahuKaal
               ? "bg-rose-100 text-rose-800"
               : "bg-slate-100 text-slate-600",
@@ -1382,6 +1464,12 @@ function AppointmentsContent() {
         >
           ₹{rupees(computedPricePaise)}
         </span>
+
+        {isSelected && (
+          <span className="absolute -top-1.5 -right-1.5 flex size-5 items-center justify-center rounded-full bg-white text-amber-900 shadow-md">
+            <Check className="size-3 stroke-[3]" />
+          </span>
+        )}
       </button>
     );
   }
