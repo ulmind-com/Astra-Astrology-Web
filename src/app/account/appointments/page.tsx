@@ -18,6 +18,7 @@ import {
   Video,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import * as React from "react";
 import { toast } from "sonner";
 
@@ -236,9 +237,27 @@ Notes: ${prescription.astrologer_notes || "None"}`;
 }
 
 export default function MyAppointmentsPage() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { language } = useLanguage();
   const [cancelling, setCancelling] = React.useState<string | null>(null);
+  const [joiningChamberId, setJoiningChamberId] = React.useState<string | null>(null);
+
+  const handleEnterChamber = async (appointmentId: string) => {
+    setJoiningChamberId(appointmentId);
+    try {
+      const res = await appointmentApi.joinChamber(appointmentId);
+      if (res?.call_id) {
+        router.push(`/call/${res.call_id}`);
+      } else {
+        toast.error("Could not initialize consultation chamber.");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to enter chamber. Please try again.");
+    } finally {
+      setJoiningChamberId(null);
+    }
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: KEY,
@@ -381,12 +400,17 @@ export default function MyAppointmentsPage() {
                     )}
 
                     {isLiveWindow && (
-                      <Link href={`/call/${a.peer?.id || a.id}`}>
-                        <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md">
-                          <Video className="size-3.5 mr-1" />
-                          {language === "bn" ? "মহাজাগতিক চেম্বারে প্রবেশ করুন" : "Enter Consultation Chamber"}
-                        </Button>
-                      </Link>
+                      <Button
+                        size="sm"
+                        disabled={joiningChamberId === a.id}
+                        onClick={() => handleEnterChamber(a.id)}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md cursor-pointer"
+                      >
+                        <Video className="size-3.5 mr-1" />
+                        {joiningChamberId === a.id
+                          ? (language === "bn" ? "প্রবেশ করা হচ্ছে..." : "Connecting...")
+                          : (language === "bn" ? "মহাজাগতিক চেম্বারে প্রবেশ করুন" : "Enter Consultation Chamber")}
+                      </Button>
                     )}
                   </div>
                 </div>

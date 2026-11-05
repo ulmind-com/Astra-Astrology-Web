@@ -362,6 +362,16 @@ export const appointmentApi = {
 
   joinStandby: (id: string) =>
     api.post<{ position: number }>(`/appointments/${id}/standby`, {}),
+
+  joinChamber: (id: string) =>
+    api.post<{
+      call_id: string;
+      room_id: string;
+      token: string;
+      starts_at: string;
+      ends_at: string;
+      minutes: number;
+    }>(`/appointments/${id}/chamber`, {}),
 };
 
 // ----------------------------------------------------------------- reviews
