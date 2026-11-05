@@ -29,6 +29,7 @@ import {
   ConfirmModal,
   EmptyState,
   LoadingBlock,
+  Modal,
 } from "@/components/ui";
 import { appointmentApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
@@ -242,6 +243,54 @@ export default function MyAppointmentsPage() {
   const { language } = useLanguage();
   const [cancelling, setCancelling] = React.useState<string | null>(null);
   const [joiningChamberId, setJoiningChamberId] = React.useState<string | null>(null);
+  const [rescueModalOpen, setRescueModalOpen] = React.useState(false);
+  const [rescueAppointment, setRescueAppointment] = React.useState<Appointment | null>(null);
+  const [rescueNewTime, setRescueNewTime] = React.useState("");
+  const [rescuingId, setRescuingId] = React.useState<string | null>(null);
+
+  const handleBrahmaPauseRefund = async (appointmentId: string) => {
+    setRescuingId(appointmentId);
+    try {
+      await appointmentApi.brahmaPauseAction(appointmentId, {
+        action: "refund",
+        reason: "Seeker opted for 100% instant refund during Brahma Pause",
+      });
+      void queryClient.invalidateQueries({ queryKey: KEY });
+      toast.success(
+        language === "bn"
+          ? "১০০% অর্থ সফলভাবে আপনার ওয়ালেটে ফেরত দেওয়া হয়েছে।"
+          : "100% refund successfully credited to your wallet.",
+      );
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to process refund.");
+    } finally {
+      setRescuingId(null);
+    }
+  };
+
+  const handleBrahmaPauseReschedule = async () => {
+    if (!rescueAppointment || !rescueNewTime) return;
+    setRescuingId(rescueAppointment.id);
+    try {
+      await appointmentApi.brahmaPauseAction(rescueAppointment.id, {
+        action: "reschedule",
+        new_starts_at: new Date(rescueNewTime).toISOString(),
+        reason: "Seeker complimentary reschedule during Brahma Pause",
+      });
+      void queryClient.invalidateQueries({ queryKey: KEY });
+      setRescueModalOpen(false);
+      setRescueAppointment(null);
+      toast.success(
+        language === "bn"
+          ? "অ্যাপয়েন্টমেন্ট সফলভাবে নতুন স্লটে স্থানান্তরিত করা হয়েছে।"
+          : "Appointment rescheduled successfully at no extra fee.",
+      );
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to reschedule. Please pick a slot within astrologer's open schedule.");
+    } finally {
+      setRescuingId(null);
+    }
+  };
 
   const handleEnterChamber = async (appointmentId: string) => {
     setJoiningChamberId(appointmentId);
@@ -451,6 +500,70 @@ export default function MyAppointmentsPage() {
                   )}
                 </div>
 
+                {/* Brahma Pause Seeker Rescue Action Alert */}
+                {a.brahma_pause_affected && a.status === "booked" && (
+                  <div className="mt-3.5 rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-orange-500/15 p-4 text-xs shadow-2xs space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold text-sm">
+                          ⏸
+                        </span>
+                        <div>
+                          <h4 className="font-bold text-foreground text-sm flex items-center gap-2">
+                            <span>{language === "bn" ? "জ্যোতিষীর জরুরি ব্রহ্ম বিরতি (Brahma Pause)" : "Astrologer Emergency Brahma Pause"}</span>
+                            <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-200 border border-amber-500/40">
+                              Action Required
+                            </span>
+                          </h4>
+                          <p className="mt-0.5 text-[11px] text-muted-foreground leading-relaxed">
+                            {language === "bn"
+                              ? `জ্যোতিষী জরুরি ব্যক্তিগত বা আধ্যাত্মিক বিরতিতে আছেন${a.brahma_pause_reason ? ` ("${a.brahma_pause_reason}")` : ""}। আপনার সুবিধার্থে দুটি বিকল্প রাখা হয়েছে—কোনো অতিরিক্ত ফি ছাড়া নতুন সময় বেছে নিন অথবা তাৎক্ষণিক ১০০% সম্পূর্ণ রিফান্ড গ্রহণ করুন:`
+                              : `The astrologer has activated an emergency pause${a.brahma_pause_reason ? ` ("${a.brahma_pause_reason}")` : ""}. Please choose an option below:`}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <Button
+                        size="sm"
+                        disabled={rescuingId === a.id}
+                        onClick={() => {
+                          setRescueAppointment(a);
+                          const t = new Date(a.starts_at);
+                          t.setDate(t.getDate() + 1);
+                          const pad = (n: number) => String(n).padStart(2, "0");
+                          const localIso = `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}T${pad(t.getHours())}:${pad(t.getMinutes())}`;
+                          setRescueNewTime(localIso);
+                          setRescueModalOpen(true);
+                        }}
+                        className="bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs shadow-xs"
+                      >
+                        <CalendarDays className="size-3.5 mr-1.5" />
+                        {language === "bn" ? "বিনামূল্যে নতুন সময় বেছে নিন" : "Free Reschedule"}
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={rescuingId === a.id}
+                        onClick={() => handleBrahmaPauseRefund(a.id)}
+                        className="border-rose-500/40 text-rose-700 dark:text-rose-300 hover:bg-rose-500/10 font-semibold text-xs"
+                      >
+                        {rescuingId === a.id
+                          ? (language === "bn" ? "প্রসেস হচ্ছে..." : "Refunding...")
+                          : (language === "bn" ? "১০০% তাৎক্ষণিক সম্পূর্ণ রিফান্ড নিন" : "Instant 100% Full Refund")}
+                      </Button>
+                    </div>
+
+                    <p className="text-[10.5px] text-muted-foreground/80 italic">
+                      {language === "bn"
+                        ? "💡 কোনো বিকল্প বেছে না নিলে সেশনের ১০ মিনিট পূর্বে স্বয়ংক্রিয়ভাবে ১০০% সম্পূর্ণ রিফান্ড আপনার অ্যাকাউন্টে জমা হয়ে যাবে।"
+                        : "💡 If unresponded, an automatic 100% full refund will be processed 10 minutes prior to session time."}
+                    </p>
+                  </div>
+                )}
+
                 {/* Financial & Escrow Summary */}
                 <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1.5 rounded-xl bg-surface-muted/60 p-3.5 text-xs border border-border/50">
                   <div className="flex items-center gap-1.5">
@@ -600,6 +713,60 @@ export default function MyAppointmentsPage() {
           />
         );
       })()}
+
+      {rescueModalOpen && rescueAppointment && (
+        <Modal
+          open={rescueModalOpen}
+          onClose={() => {
+            setRescueModalOpen(false);
+            setRescueAppointment(null);
+          }}
+          title={language === "bn" ? "বিনামূল্যে নতুন সময় নির্ধারণ" : "Complimentary Reschedule"}
+        >
+          <div className="space-y-4 text-xs">
+            <p className="text-muted-foreground leading-relaxed">
+              {language === "bn"
+                ? "জ্যোতিষীর জরুরি বিরতির কারণে কোনো অতিরিক্ত ফি ছাড়াই আপনার সুবিধাজনক নতুন তারিখ ও সময় বেছে নিতে পারেন।"
+                : "Select a new available date and time with zero rescheduling fees."}
+            </p>
+
+            <div className="space-y-1.5">
+              <label className="font-semibold text-foreground">
+                {language === "bn" ? "নতুন অধিবেশনের সময়" : "New Consultation Date & Time"}
+              </label>
+              <input
+                type="datetime-local"
+                value={rescueNewTime}
+                onChange={(e) => setRescueNewTime(e.target.value)}
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setRescueModalOpen(false);
+                  setRescueAppointment(null);
+                }}
+              >
+                {language === "bn" ? "বাতিল" : "Cancel"}
+              </Button>
+              <Button
+                size="sm"
+                disabled={!rescueNewTime || Boolean(rescuingId)}
+                onClick={handleBrahmaPauseReschedule}
+                className="bg-brand-600 hover:bg-brand-700 text-white font-semibold"
+              >
+                {rescuingId === rescueAppointment.id
+                  ? (language === "bn" ? "সংরক্ষণ করা হচ্ছে..." : "Rescheduling...")
+                  : (language === "bn" ? "নতুন সময় নিশ্চিত করুন" : "Confirm New Schedule")}
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
