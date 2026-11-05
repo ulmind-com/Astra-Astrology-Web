@@ -197,7 +197,12 @@ function AppointmentsContent() {
   });
 
   const bookableAstrologers = React.useMemo(
-    () => (astrologersData?.items ?? []).filter((a) => a.appointment?.enabled && a.appointment.price_paise > 0),
+    () =>
+      (astrologersData?.items ?? []).filter((a) => {
+        const price = a.appointment?.price_paise ?? 0;
+        if (price <= 0) return false;
+        return a.appointment?.enabled !== false;
+      }),
     [astrologersData],
   );
 
