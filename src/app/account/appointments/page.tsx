@@ -237,6 +237,167 @@ Notes: ${prescription.astrologer_notes || "None"}`;
   );
 }
 
+function VedicRemedyFollowUpCard({
+  appointment,
+  language,
+  onMessageSent,
+}: {
+  appointment: Appointment;
+  language: "bn" | "hi" | "en";
+  onMessageSent: () => void;
+}) {
+  const [questionText, setQuestionText] = React.useState("");
+  const [sending, setSending] = React.useState(false);
+
+  const isExpired = appointment.follow_up_expires_at
+    ? new Date() > new Date(appointment.follow_up_expires_at)
+    : false;
+  const maxMessages = appointment.follow_up_max_messages || 3;
+  const usedMessages = appointment.follow_up_messages_used || 0;
+  const remainingQuestions = Math.max(0, maxMessages - usedMessages);
+  const isExhausted = remainingQuestions <= 0;
+
+  const handleSend = async () => {
+    if (!questionText.trim()) return;
+    setSending(true);
+    try {
+      await appointmentApi.sendFollowUpMessage(appointment.id, questionText.trim());
+      setQuestionText("");
+      toast.success(
+        language === "bn"
+          ? "পণ্ডিতজীর কাছে প্রতিকার স্পষ্টীকরণ প্রশ্ন পাঠানো হয়েছে!"
+          : "Remedy clarification question sent to Panditji!"
+      );
+      onMessageSent();
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to submit follow-up question.");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="mt-4 rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-500/5 via-indigo-500/10 to-purple-500/5 p-4 sm:p-5 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-indigo-500/20">
+        <div className="flex items-center gap-2.5">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-bold">
+            <Sparkles className="size-4" />
+          </div>
+          <div>
+            <h4 className="font-display font-bold text-sm text-foreground flex items-center gap-2">
+              <span>
+                {language === "bn"
+                  ? "সৌজন্যমূলক রেমিডি ফলো-আপ উইন্ডো"
+                  : language === "hi"
+                  ? "निःशुल्क उपाय स्पष्टीकरण पास"
+                  : "Complimentary Remedy Clarification Pass"}
+              </span>
+              <span className="rounded-md bg-indigo-500/20 px-2 py-0.5 text-[10px] font-bold text-indigo-800 dark:text-indigo-200">
+                {appointment.follow_up_window_days || 7} Days Free
+              </span>
+            </h4>
+            <p className="text-[10px] text-muted-foreground">
+              {language === "bn"
+                ? "প্রেসক্রিপশন বুঝতে সমস্যা হলে (রত্ন ধারণের দিন, মন্ত্র জপের নিয়ম ইত্যাদি) সরাসরি পণ্ডিতজীকে প্রশ্ন করুন।"
+                : "Ask Panditji quick clarification questions regarding your prescribed remedies or sacred mantras."}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {isExpired ? (
+            <span className="rounded-lg bg-rose-500/10 border border-rose-500/20 px-2.5 py-1 text-[11px] font-bold text-rose-700 dark:text-rose-300">
+              {language === "bn" ? "মেয়াদ উত্তীর্ণ (Expired)" : "Expired"}
+            </span>
+          ) : isExhausted ? (
+            <span className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 text-[11px] font-bold text-amber-800 dark:text-amber-300">
+              {language === "bn" ? "কোটা সমাপ্ত (All questions used)" : "All questions used"}
+            </span>
+          ) : (
+            <span className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+              {remainingQuestions} {language === "bn" ? "টি প্রশ্ন বাকি" : "Questions left"}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {appointment.follow_up_expires_at && !isExpired && (
+        <p className="text-[11px] text-indigo-900 dark:text-indigo-200 font-medium mt-2 flex items-center justify-between">
+          <span>{language === "bn" ? "পাস মেয়াদ:" : "Pass Expiry:"} {new Date(appointment.follow_up_expires_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
+          <span>{usedMessages}/{maxMessages} {language === "bn" ? "প্রশ্ন ব্যবহৃত" : "Used"}</span>
+        </p>
+      )}
+
+      {/* Messages Thread */}
+      {appointment.follow_up_thread && appointment.follow_up_thread.length > 0 && (
+        <div className="mt-3 space-y-2 rounded-xl bg-card/80 p-3 border border-indigo-500/20 max-h-56 overflow-y-auto">
+          {appointment.follow_up_thread.map((msg) => {
+            const isSeeker = msg.sender_role === "user";
+            return (
+              <div
+                key={msg.id}
+                className={cn(
+                  "rounded-xl p-2.5 text-xs max-w-[88%]",
+                  isSeeker
+                    ? "ml-auto bg-indigo-600 text-white"
+                    : "mr-auto bg-surface-muted text-foreground border border-border"
+                )}
+              >
+                <div className={cn(
+                  "flex items-center justify-between gap-2 text-[10px] mb-1 font-bold",
+                  isSeeker ? "text-indigo-200" : "text-muted-foreground"
+                )}>
+                  <span>{isSeeker ? (language === "bn" ? "আপনি (Seeker)" : "You") : (language === "bn" ? "পণ্ডিতজী (Panditji)" : msg.sender_name)}</span>
+                  <span>{new Date(msg.sent_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                </div>
+                <p className="whitespace-pre-line leading-relaxed">{msg.text}</p>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Question submission input */}
+      {!isExpired && !isExhausted && (
+        <div className="mt-3 space-y-1.5">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder={
+                language === "bn"
+                  ? "পণ্ডিতজীকে প্রতিকার বিষয়ে প্রশ্ন লিখুন (e.g. রত্নটি কোন আঙুলে এবং কোন দিন পরব?)..."
+                  : "Ask Panditji a clarification question about your remedies..."
+              }
+              value={questionText}
+              onChange={(e) => setQuestionText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  void handleSend();
+                }
+              }}
+              className="flex-1 rounded-xl border border-indigo-300 dark:border-indigo-700 bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+            <Button
+              size="sm"
+              disabled={sending || !questionText.trim()}
+              onClick={handleSend}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shrink-0"
+            >
+              {sending ? (language === "bn" ? "পাঠানো হচ্ছে..." : "Sending...") : (language === "bn" ? "প্রশ্ন পাঠান" : "Ask Question")}
+            </Button>
+          </div>
+          <p className="text-[10px] text-muted-foreground italic">
+            {language === "bn"
+              ? "* এটি আপনার সেশনের অন্তর্ভুক্ত সৌজন্যমূলক ফলো-আপ সুবিধা, এর জন্য কোনো কয়েন কাটা হবে না।"
+              : "* 100% complimentary follow-up — zero coins deducted from your wallet."}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function MyAppointmentsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -755,6 +916,15 @@ export default function MyAppointmentsPage() {
                       {language === "bn" ? "সনদপত্র দেখুন ও প্রিন্ট করুন" : "View & Print Certificate"}
                     </Button>
                   </div>
+                )}
+
+                {/* Complimentary Remedy Follow-up Window */}
+                {Boolean(a.follow_up_pass_enabled) && (
+                  <VedicRemedyFollowUpCard
+                    appointment={a}
+                    language={language}
+                    onMessageSent={() => void queryClient.invalidateQueries({ queryKey: KEY })}
+                  />
                 )}
 
                 {/* Missed Consultation (Client No-Show) Alert */}
