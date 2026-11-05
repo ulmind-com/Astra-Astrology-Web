@@ -31,6 +31,7 @@ const COLUMNS = [
       { href: "/account/birth-details", label: "Birth details" },
       { href: "/account/addresses", label: "Addresses" },
       { href: "/account/security", label: "Security" },
+      { href: "/support", label: "Help & Support" },
     ],
   },
 ];
