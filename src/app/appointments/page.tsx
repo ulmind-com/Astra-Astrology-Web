@@ -2,25 +2,38 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  AlertCircle,
   AlertTriangle,
   ArrowRight,
   Award,
+  Calendar as CalendarIcon,
   CalendarCheck,
   CalendarDays,
+  Check,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Clock,
   Compass,
   ExternalLink,
+  Flame,
+  Gem,
   GraduationCap,
+  Heart,
+  HelpCircle,
+  Info,
   Languages,
   MessageSquare,
+  Moon,
   Phone,
   Search,
   ShieldCheck,
   Sparkles,
   Star,
+  Sun,
+  Sunset,
+  Sunrise,
+  User,
   Users,
   Video,
   Wallet,
@@ -125,7 +138,7 @@ function rupees(paise: number): string {
 }
 
 function clock(d: Date): string {
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
 }
 
 type Range = { starts_at: string; ends_at: string };
@@ -177,6 +190,8 @@ const CATEGORIES: { label: string; skill: Skill | "all" }[] = [
   { label: "Palmistry", skill: "palmistry" },
   { label: "Face Reading", skill: "face_reading" },
 ];
+
+type TimeOfDayFilter = "all" | "morning" | "afternoon" | "evening" | "night";
 
 function AppointmentsContent() {
   const router = useRouter();
@@ -230,7 +245,6 @@ function AppointmentsContent() {
   // 3. Selected Astrologer State
   const [selectedAstrologerId, setSelectedAstrologerId] = React.useState<string | null>(null);
 
-  // Sync with URL param or default to first astrologer
   React.useEffect(() => {
     const fromUrl = searchParams.get("astrologer");
     if (fromUrl && bookableAstrologers.some((a) => a.id === fromUrl || a.slug === fromUrl)) {
@@ -241,7 +255,6 @@ function AppointmentsContent() {
     }
   }, [bookableAstrologers, searchParams, selectedAstrologerId]);
 
-  // Ensure selected astrologer remains valid when filtering
   React.useEffect(() => {
     if (filteredAstrologers.length > 0) {
       const exists = filteredAstrologers.some((a) => a.id === selectedAstrologerId);
@@ -256,53 +269,45 @@ function AppointmentsContent() {
     [bookableAstrologers, selectedAstrologerId],
   );
 
-  // 4. Date & Calendar State
+  // 4. BookMyShow Horizontal Date Strip State
   const today = React.useMemo(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
     return d;
   }, []);
 
-  const [visibleMonth, setVisibleMonth] = React.useState<Date>(() => {
-    const d = new Date();
-    d.setDate(1);
-    d.setHours(0, 0, 0, 0);
-    return d;
-  });
-
   const pad = (n: number) => String(n).padStart(2, "0");
   const todayKey = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
 
-  const tomorrow = React.useMemo(() => {
-    const d = new Date(today);
-    d.setDate(d.getDate() + 1);
-    return d;
-  }, [today]);
-  const tomorrowKey = `${tomorrow.getFullYear()}-${pad(tomorrow.getMonth() + 1)}-${pad(tomorrow.getDate())}`;
-
-  const quickDays = React.useMemo(() => {
-    const list: { key: string; label: string; date: Date; isToday: boolean; isTomorrow: boolean }[] = [];
-    for (let i = 0; i < 7; i++) {
+  const dateStrip = React.useMemo(() => {
+    const days = [];
+    for (let i = 0; i < 21; i++) {
       const d = new Date(today);
       d.setDate(d.getDate() + i);
-      const k = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-      const label =
-        i === 0
-          ? "Today"
-          : i === 1
-          ? "Tomorrow"
-          : d.toLocaleDateString("en-US", { weekday: "short", day: "numeric" });
-      list.push({ key: k, label, date: d, isToday: i === 0, isTomorrow: i === 1 });
+      const key = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+      const dayName = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+      const dayNumber = d.getDate();
+      const monthName = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+      days.push({
+        key,
+        date: d,
+        dayName,
+        dayNumber,
+        monthName,
+        isToday: i === 0,
+        isTomorrow: i === 1,
+      });
     }
-    return list;
+    return days;
   }, [today]);
 
   const [selectedDayKey, setSelectedDayKey] = React.useState<string>(todayKey);
   const [selectedSlot, setSelectedSlot] = React.useState<Date | null>(null);
   const [minutes, setMinutes] = React.useState<number>(30);
-  const [userNote, setUserNote] = React.useState("");
+  const [timeFilter, setTimeFilter] = React.useState<TimeOfDayFilter>("all");
   const [onlyAuspiciousSlots, setOnlyAuspiciousSlots] = React.useState(false);
   const [selectedPillar, setSelectedPillar] = React.useState<string>("career_wealth");
+  const [userNote, setUserNote] = React.useState("");
   const [birthDetails, setBirthDetails] = React.useState({
     name: "",
     date_of_birth: "",
@@ -319,25 +324,12 @@ function AppointmentsContent() {
     }
   }, [user, birthDetails.name]);
 
-  const handleSelectDay = (key: string) => {
-    setSelectedDayKey(key);
-    try {
-      const [y, m] = key.split("-").map(Number);
-      if (visibleMonth.getFullYear() !== y || visibleMonth.getMonth() !== m - 1) {
-        const vm = new Date(y, m - 1, 1);
-        setVisibleMonth(vm);
-      }
-    } catch {}
-  };
-
-  // Sync minutes to astrologer's default slot duration if configured
   React.useEffect(() => {
     if (selectedAstrologer?.appointment?.block_minutes) {
       setMinutes(selectedAstrologer.appointment.block_minutes);
     }
   }, [selectedAstrologer?.id, selectedAstrologer?.appointment?.block_minutes]);
 
-  // Reset selected slot when astrologer, day or minutes change
   React.useEffect(() => {
     setSelectedSlot(null);
   }, [selectedAstrologerId, selectedDayKey, minutes]);
@@ -362,24 +354,69 @@ function AppointmentsContent() {
     });
   }, [rawSlots, language]);
 
-  const availableSlots = React.useMemo(() => {
-    if (!onlyAuspiciousSlots) return slotsWithMuhurat;
-    return slotsWithMuhurat.filter(
-      (item) => item.muhurat.quality === "super_auspicious" || item.muhurat.quality === "auspicious",
-    );
-  }, [slotsWithMuhurat, onlyAuspiciousSlots]);
+  // Filter by Auspicious & Time of Day
+  const filteredSlots = React.useMemo(() => {
+    let list = slotsWithMuhurat;
+    if (onlyAuspiciousSlots) {
+      list = list.filter(
+        (item) => item.muhurat.quality === "super_auspicious" || item.muhurat.quality === "auspicious",
+      );
+    }
+    if (timeFilter !== "all") {
+      list = list.filter((item) => {
+        const hours = item.slot.getHours();
+        if (timeFilter === "morning") return hours >= 6 && hours < 12;
+        if (timeFilter === "afternoon") return hours >= 12 && hours < 17;
+        if (timeFilter === "evening") return hours >= 17 && hours < 21;
+        if (timeFilter === "night") return hours >= 21 || hours < 6;
+        return true;
+      });
+    }
+    return list;
+  }, [slotsWithMuhurat, onlyAuspiciousSlots, timeFilter]);
+
+  // Group slots into BookMyShow Time-of-Day Shows
+  const groupedSlots = React.useMemo(() => {
+    const morning: typeof slotsWithMuhurat = [];
+    const afternoon: typeof slotsWithMuhurat = [];
+    const evening: typeof slotsWithMuhurat = [];
+    const night: typeof slotsWithMuhurat = [];
+
+    for (const item of filteredSlots) {
+      const hours = item.slot.getHours();
+      if (hours >= 6 && hours < 12) {
+        morning.push(item);
+      } else if (hours >= 12 && hours < 17) {
+        afternoon.push(item);
+      } else if (hours >= 17 && hours < 21) {
+        evening.push(item);
+      } else {
+        night.push(item);
+      }
+    }
+
+    return { morning, afternoon, evening, night };
+  }, [filteredSlots]);
+
+  // Pricing calculation
+  const computedPricePaise = React.useMemo(() => {
+    if (!selectedAstrologer?.appointment) return 0;
+    const basePrice = selectedAstrologer.appointment.price_paise;
+    const baseBlock = selectedAstrologer.appointment.block_minutes || 30;
+    return Math.round((basePrice * minutes) / baseBlock);
+  }, [selectedAstrologer, minutes]);
 
   // 6. Query: Quote for booking
-  const { data: quote, isLoading: loadingQuote } = useQuery({
+  const { data: quote } = useQuery({
     queryKey: ["appointments", "quote", selectedAstrologer?.id, minutes],
     queryFn: () => appointmentApi.quote(selectedAstrologer!.id, minutes),
     enabled: Boolean(selectedAstrologer?.id) && isSignedIn,
   });
 
   // 7. Query: Astrologer Reviews
-  const { data: reviewsData, isLoading: loadingReviews } = useQuery({
+  const { data: reviewsData } = useQuery({
     queryKey: ["reviews", "astrologer", selectedAstrologer?.id],
-    queryFn: () => reviewApi.forAstrologer(selectedAstrologer!.id, { limit: 5 }),
+    queryFn: () => reviewApi.forAstrologer(selectedAstrologer!.id, { limit: 6 }),
     enabled: Boolean(selectedAstrologer?.id),
   });
 
@@ -415,78 +452,6 @@ function AppointmentsContent() {
     },
   });
 
-  // Calendar month navigation
-  const prevMonth = () => {
-    const next = new Date(visibleMonth);
-    next.setMonth(next.getMonth() - 1);
-    // Don't navigate to past months
-    if (next.getFullYear() < today.getFullYear() || (next.getFullYear() === today.getFullYear() && next.getMonth() < today.getMonth())) {
-      return;
-    }
-    setVisibleMonth(next);
-  };
-
-  const nextMonth = () => {
-    const next = new Date(visibleMonth);
-    next.setMonth(next.getMonth() + 1);
-    setVisibleMonth(next);
-  };
-
-  const monthYearLabel = visibleMonth.toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
-  });
-
-  // Generate calendar days for visibleMonth
-  const calendarDays = React.useMemo(() => {
-    const year = visibleMonth.getFullYear();
-    const month = visibleMonth.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-
-    // Monday-based day of week (0=Mon, 6=Sun)
-    const startDayOfWeek = (firstDay.getDay() + 6) % 7;
-
-    const days: { key: string; date: Date; dayNum: number; isCurrentMonth: boolean; isPast: boolean }[] = [];
-
-    // Leading padding from prev month
-    const prevMonthLastDay = new Date(year, month, 0).getDate();
-    for (let i = startDayOfWeek - 1; i >= 0; i--) {
-      const d = new Date(year, month - 1, prevMonthLastDay - i);
-      const k = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-      days.push({ key: k, date: d, dayNum: prevMonthLastDay - i, isCurrentMonth: false, isPast: d < today });
-    }
-
-    // Days of current month
-    for (let i = 1; i <= daysInMonth; i++) {
-      const d = new Date(year, month, i);
-      const k = `${year}-${pad(month + 1)}-${pad(i)}`;
-      days.push({ key: k, date: d, dayNum: i, isCurrentMonth: true, isPast: d < today });
-    }
-
-    // Trailing padding to complete grid (multiples of 7)
-    const remaining = 7 - (days.length % 7);
-    if (remaining < 7) {
-      for (let i = 1; i <= remaining; i++) {
-        const d = new Date(year, month + 1, i);
-        const k = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-        days.push({ key: k, date: d, dayNum: i, isCurrentMonth: false, isPast: d < today });
-      }
-    }
-
-    return days;
-  }, [visibleMonth, today]);
-
-  // Mobile active view tab: "astrologers" | "profile" | "calendar"
-  const [mobileTab, setMobileTab] = React.useState<"astrologers" | "profile" | "calendar">("astrologers");
-
-  const handleSelectAstrologer = (astrologer: AstrologerPublic) => {
-    setSelectedAstrologerId(astrologer.id);
-    // On mobile, auto-switch to profile/schedule view
-    setMobileTab("profile");
-  };
-
   const selectedDateObj = React.useMemo(() => {
     try {
       const parts = selectedDayKey.split("-");
@@ -497,899 +462,712 @@ function AppointmentsContent() {
   }, [selectedDayKey, today]);
 
   const selectedDateLabel = selectedDateObj.toLocaleDateString("en-US", {
-    weekday: "short",
+    weekday: "long",
     month: "short",
     day: "numeric",
     year: "numeric",
   });
 
+  const selectedSlotMuhurat = React.useMemo(() => {
+    if (!selectedSlot) return null;
+    return getSlotMuhurat(selectedSlot, language);
+  }, [selectedSlot, language]);
+
+  // Date strip horizontal scroll handler
+  const scrollDateStrip = (direction: "left" | "right") => {
+    const el = document.getElementById("bms-date-strip");
+    if (el) {
+      const amount = direction === "left" ? -280 : 280;
+      el.scrollBy({ left: amount, behavior: "smooth" });
+    }
+  };
+
   return (
     <>
       <SiteHeader />
 
-      <main className="min-h-screen bg-surface-muted/30 pb-16">
-        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 pt-8">
-          {/* =========================================================================
-              HEADER SECTION (Matching reference screenshot)
-          ========================================================================= */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6">
-            <div>
-              <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-                Book Appointment
-              </h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Find an expert astrologer and book a dedicated 1-on-1 consultation slot.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2 self-start sm:self-auto">
-              <Link
-                href="/account/appointments"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-semibold text-foreground shadow-2xs hover:bg-surface-muted hover:border-brand-500/30 press transition-all"
-              >
-                <CalendarCheck className="size-3.5 text-brand-600 dark:text-brand-400" />
-                <span>My Appointments</span>
-              </Link>
-            </div>
-          </div>
-
-          {/* =========================================================================
-              HORIZONTAL CATEGORY SELECTOR (Matching reference screenshot)
-          ========================================================================= */}
-          <div className="mb-6 overflow-x-auto pb-1 scrollbar-none">
-            <div className="flex items-center gap-2 min-w-max">
-              {CATEGORIES.map((cat) => {
-                const isActive = selectedCategory === cat.skill;
-                return (
-                  <button
-                    key={cat.skill}
-                    type="button"
-                    onClick={() => setSelectedCategory(cat.skill)}
-                    className={cn(
-                      "rounded-full px-4 py-2 text-xs font-medium transition-all shadow-2xs",
-                      isActive
-                        ? "bg-brand-600 text-white font-semibold shadow-xs"
-                        : "bg-card text-muted-foreground border border-border/80 hover:text-foreground hover:border-brand-500/40",
-                    )}
-                  >
-                    {cat.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Mobile Tab Stepper (Only on mobile/tablet screens) */}
-          <div className="lg:hidden mb-6 flex rounded-2xl border border-border bg-card p-1 text-xs font-semibold shadow-2xs">
-            <button
-              type="button"
-              onClick={() => setMobileTab("astrologers")}
-              className={cn(
-                "flex-1 rounded-xl py-2 transition-all text-center",
-                mobileTab === "astrologers"
-                  ? "bg-brand-600 text-white shadow-2xs"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              1. Astrologers ({filteredAstrologers.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setMobileTab("profile")}
-              className={cn(
-                "flex-1 rounded-xl py-2 transition-all text-center",
-                mobileTab === "profile"
-                  ? "bg-brand-600 text-white shadow-2xs"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              2. Profile
-            </button>
-            <button
-              type="button"
-              onClick={() => setMobileTab("calendar")}
-              className={cn(
-                "flex-1 rounded-xl py-2 transition-all text-center",
-                mobileTab === "calendar"
-                  ? "bg-brand-600 text-white shadow-2xs"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              3. Slots & Book
-            </button>
-          </div>
-
-          {/* =========================================================================
-              MAIN THREE-COLUMN WORKSPACE (Matching reference screenshot)
-          ========================================================================= */}
-          {loadingAstrologers ? (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              <div className="lg:col-span-3 space-y-4">
-                {[1, 2, 3].map((n) => (
-                  <div key={n} className="rounded-2xl border border-border/80 bg-card p-5 animate-pulse h-40" />
-                ))}
+      <main className="min-h-screen bg-[#FDFBF7] pb-32">
+        {/* =========================================================================
+            TOP EXPERIENCE SHOWCASE / HERO HEADER (BookMyShow / District Style)
+        ========================================================================= */}
+        <section className="border-b border-amber-900/10 bg-gradient-to-b from-[#FFFDF9] via-[#FAF6EE] to-[#F5EEDD]/40 pt-6 pb-8">
+          <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 space-y-6">
+            {/* Top Navigation & Status */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-2 text-xs font-semibold text-amber-900/70">
+                <Link href="/" className="hover:text-amber-900 transition-colors">Home</Link>
+                <span>/</span>
+                <span className="text-amber-900">Vedic Consultation Chamber</span>
+                <span className="rounded-full bg-amber-500/15 text-amber-800 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                  Live Booking Matrix
+                </span>
               </div>
-              <div className="lg:col-span-5 space-y-4">
-                <div className="rounded-2xl border border-border/80 bg-card p-6 animate-pulse h-96" />
-              </div>
-              <div className="lg:col-span-4 space-y-4">
-                <div className="rounded-2xl border border-border/80 bg-card p-6 animate-pulse h-96" />
-              </div>
-            </div>
-          ) : astrologersError ? (
-            <div className="rounded-3xl border border-red-500/20 bg-red-500/5 p-12 text-center my-8">
-              <AlertTriangle className="mx-auto size-12 text-red-500/80 mb-3" />
-              <h3 className="font-display text-lg font-bold text-foreground">Failed to load astrologers</h3>
-              <p className="mt-1 text-sm text-muted-foreground max-w-md mx-auto">
-                {(astrologersError as Error)?.message || "Something went wrong while fetching appointment availability."}
-              </p>
-              <div className="mt-5">
-                <Button size="sm" onClick={() => refetchAstrologers()}>
-                  Retry Loading
-                </Button>
-              </div>
-            </div>
-          ) : bookableAstrologers.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-border bg-card p-12 text-center my-8">
-              <CalendarDays className="mx-auto size-12 text-brand-600/70 mb-3" />
-              <h3 className="font-display text-lg font-bold">Nobody is taking appointments yet</h3>
-              <p className="mt-1 text-sm text-muted-foreground max-w-md mx-auto">
-                Astrologers open their calendars from their panel. Check back shortly or browse the live consultation directory.
-              </p>
-              <div className="mt-5">
-                <Link href="/astrologers">
-                  <Button size="sm">Explore live astrologers</Button>
+
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/account/appointments"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-amber-900/15 bg-white/90 backdrop-blur-md px-4 py-2 text-xs font-bold text-slate-800 shadow-2xs hover:bg-white hover:border-amber-500/50 transition-all cursor-pointer"
+                >
+                  <CalendarCheck className="size-4 text-amber-600" />
+                  <span>{language === "bn" ? "আমার অ্যাপয়েন্টমেন্ট তালিকা" : "My Appointments"}</span>
                 </Link>
               </div>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* ---------------------------------------------------------------------
-                  LEFT COLUMN: CHOOSE ASTROLOGER
-              --------------------------------------------------------------------- */}
-              <div
-                className={cn(
-                  "lg:col-span-3 space-y-4",
-                  mobileTab !== "astrologers" && "hidden lg:block",
-                )}
-              >
-                <div className="flex items-center justify-between pb-1">
-                  <h2 className="font-display text-base font-bold text-foreground">
-                    Choose Astrologer
-                  </h2>
-                  <span className="text-xs text-muted-foreground font-medium">
-                    {filteredAstrologers.length} available
-                  </span>
-                </div>
 
-                {/* Quick Search */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search astrologer..."
-                    className="w-full rounded-xl border border-border bg-card pl-9 pr-7 py-2 text-xs placeholder:text-muted-foreground/70 focus:outline-hidden focus:ring-1 focus:ring-brand-500 focus:border-brand-500 shadow-2xs"
-                  />
-                  {searchQuery && (
+            {/* Astrologer Selector Carousel / Chips (If multiple practitioners exist) */}
+            {bookableAstrologers.length > 1 && (
+              <div className="space-y-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-900/60">
+                  Select Astrologer ({bookableAstrologers.length} Masters Available)
+                </span>
+                <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none">
+                  {bookableAstrologers.map((astro) => {
+                    const isSelected = astro.id === selectedAstrologer?.id;
+                    return (
+                      <button
+                        key={astro.id}
+                        type="button"
+                        onClick={() => setSelectedAstrologerId(astro.id)}
+                        className={cn(
+                          "flex items-center gap-3 rounded-2xl px-4 py-2.5 transition-all border shrink-0 text-xs font-bold cursor-pointer shadow-2xs",
+                          isSelected
+                            ? "bg-[#D97706] text-white border-[#B45309] shadow-md scale-[1.02]"
+                            : "bg-white text-slate-800 border-amber-900/10 hover:border-amber-400 hover:bg-amber-50/40",
+                        )}
+                      >
+                        <Avatar src={astro.profile_image_url} name={astro.display_name} size="sm" />
+                        <div className="text-left">
+                          <p className="truncate max-w-[150px] font-bold">{astro.display_name}</p>
+                          <p className={cn("text-[10px]", isSelected ? "text-amber-100" : "text-amber-700")}>
+                            ₹{rupees(astro.appointment.price_paise)} / {astro.appointment.block_minutes}m
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Selected Astrologer Master Experience Card */}
+            {selectedAstrologer ? (
+              <div className="relative overflow-hidden rounded-3xl border border-amber-900/15 bg-white p-6 sm:p-8 shadow-[0_12px_36px_rgba(180,83,9,0.06)]">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                  {/* Avatar & Core Bio */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+                    <div className="relative">
+                      <div className="size-24 sm:size-28 rounded-3xl overflow-hidden ring-4 ring-amber-500/20 shadow-md">
+                        <Avatar
+                          src={selectedAstrologer.profile_image_url}
+                          name={selectedAstrologer.display_name}
+                          size="xl"
+                          className="size-full object-cover"
+                        />
+                      </div>
+                      <span className="absolute -bottom-2 -right-2 flex size-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-xs">
+                        <Check className="size-4 stroke-[3]" />
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <h2 className="font-display text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+                          {selectedAstrologer.display_name}
+                        </h2>
+                        <span className="rounded-full bg-amber-500/15 border border-amber-500/30 px-3 py-0.5 text-xs font-bold text-amber-900">
+                          {SKILL_LABELS[selectedAstrologer.skills[0] || "vedic_astrology"]}
+                        </span>
+                      </div>
+
+                      <p className="text-sm text-slate-600 font-medium flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <span>{selectedAstrologer.experience_years}+ Years Professional Experience</span>
+                        <span>•</span>
+                        <span className="flex items-center gap-1 font-bold text-amber-700">
+                          <Star className="size-4 fill-amber-400 text-amber-400" />
+                          <span>{selectedAstrologer.rating?.average ? selectedAstrologer.rating.average.toFixed(1) : "5.0"}</span>
+                          <span className="text-slate-400 font-normal">({selectedAstrologer.rating?.count || 25} verified reviews)</span>
+                        </span>
+                      </p>
+
+                      <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+                        <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 px-3 py-1 font-semibold text-slate-700">
+                          <GraduationCap className="size-3.5 text-amber-600" />
+                          <span>{selectedAstrologer.qualifications?.[0] || "Jyotish Praveen & Research"}</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 px-3 py-1 font-semibold text-slate-700">
+                          <Award className="size-3.5 text-amber-600" />
+                          <span>{selectedAstrologer.specialisations?.[0] || "Vedic Astrological Council"}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Consultation Mode & Fee Engine Summary */}
+                  <div className="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end justify-between gap-4 pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+                    <div className="text-left lg:text-right space-y-0.5">
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        Consultation Session Fee
+                      </p>
+                      <p className="font-display text-3xl font-black text-slate-900 tabular-nums">
+                        ₹{rupees(selectedAstrologer.appointment.price_paise)}
+                        <span className="text-xs font-normal text-slate-500 ml-1.5">
+                          / {selectedAstrologer.appointment.block_minutes} mins
+                        </span>
+                      </p>
+                      <p className="text-xs font-semibold text-emerald-700">
+                        ~₹{((selectedAstrologer.appointment.price_paise / 100) / (selectedAstrologer.appointment.block_minutes || 30)).toFixed(2)}/min · 1-on-1 Dedicated Chamber
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 text-xs font-bold text-amber-900">
+                        <Video className="size-3.5 text-amber-600" />
+                        <span>Ultra-HD Video</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-1.5 text-xs font-bold text-emerald-800">
+                        <Phone className="size-3.5 text-emerald-600" />
+                        <span>Direct Audio</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </section>
+
+        {/* =========================================================================
+            BOOKMYSHOW / DISTRICT SIGNATURE DATE SELECTOR RIBBON
+        ========================================================================= */}
+        <section className="sticky top-0 z-30 border-b border-amber-900/10 bg-white/95 backdrop-blur-md shadow-xs">
+          <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-3.5">
+            <div className="flex items-center justify-between gap-3">
+              {/* Left arrow scroll */}
+              <button
+                type="button"
+                onClick={() => scrollDateStrip("left")}
+                aria-label="Scroll dates left"
+                className="hidden sm:flex size-9 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition-all shadow-2xs cursor-pointer"
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+
+              {/* Horizontal Date Pills Scroller */}
+              <div
+                id="bms-date-strip"
+                className="flex items-center gap-2.5 overflow-x-auto scrollbar-none py-1 scroll-smooth"
+              >
+                {dateStrip.map((item) => {
+                  const isSelected = item.key === selectedDayKey;
+                  return (
                     <button
+                      key={item.key}
                       type="button"
-                      onClick={() => setSearchQuery("")}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      onClick={() => setSelectedDayKey(item.key)}
+                      className={cn(
+                        "relative flex flex-col items-center justify-center min-w-[76px] sm:min-w-[84px] py-2.5 px-2 rounded-2xl transition-all border cursor-pointer shrink-0 shadow-2xs group",
+                        isSelected
+                          ? "bg-[#D97706] text-white border-[#B45309] shadow-md scale-[1.03]"
+                          : "bg-white text-slate-700 border-slate-200/90 hover:border-amber-400 hover:bg-amber-50/50",
+                      )}
                     >
-                      <X className="size-3" />
+                      <span className={cn("text-[11px] font-black uppercase tracking-wider", isSelected ? "text-amber-100" : "text-slate-400")}>
+                        {item.dayName}
+                      </span>
+                      <span className="font-display text-xl font-black tabular-nums my-0.5">
+                        {item.dayNumber}
+                      </span>
+                      <span className={cn("text-[10px] font-bold uppercase", isSelected ? "text-amber-100" : "text-slate-500")}>
+                        {item.monthName}
+                      </span>
+
+                      {item.isToday && (
+                        <span className={cn(
+                          "absolute -top-1.5 rounded-full px-2 py-0.2 text-[9px] font-black uppercase tracking-wider shadow-2xs",
+                          isSelected ? "bg-white text-amber-900" : "bg-amber-500 text-white"
+                        )}>
+                          TODAY
+                        </span>
+                      )}
+
+                      {item.isTomorrow && (
+                        <span className={cn(
+                          "absolute -top-1.5 rounded-full px-2 py-0.2 text-[9px] font-black uppercase tracking-wider shadow-2xs",
+                          isSelected ? "bg-white text-amber-900" : "bg-sky-600 text-white"
+                        )}>
+                          TOMORROW
+                        </span>
+                      )}
                     </button>
-                  )}
-                </div>
-
-                {/* Astrologers List */}
-                <div className="space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto pr-1 scrollbar-none">
-                  {filteredAstrologers.length === 0 ? (
-                    <div className="rounded-2xl border border-border bg-card p-6 text-center text-xs text-muted-foreground">
-                      No astrologers found in this category.
-                    </div>
-                  ) : (
-                    filteredAstrologers.map((astrologer) => {
-                      const isSelected = selectedAstrologerId === astrologer.id;
-                      const primarySkill = astrologer.skills[0] || "vedic_astrology";
-                      const skillLabel = SKILL_LABELS[primarySkill] || primarySkill.replace(/_/g, " ");
-
-                      return (
-                        <div
-                          key={astrologer.id}
-                          onClick={() => handleSelectAstrologer(astrologer)}
-                          className={cn(
-                            "cursor-pointer rounded-2xl border bg-card p-4 transition-all duration-200 shadow-2xs",
-                            isSelected
-                              ? "border-brand-500 ring-2 ring-brand-500/20 bg-brand-500/[0.03]"
-                              : "border-border/80 hover:border-brand-500/40 hover:bg-surface-muted/40",
-                          )}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="relative shrink-0">
-                              <Avatar src={astrologer.profile_image_url} name={astrologer.display_name} size="md" />
-                              <span className="absolute -bottom-0.5 -right-0.5 rounded-full bg-card p-0.5 shadow-2xs">
-                                <StatusDot
-                                  online={astrologer.availability.is_online}
-                                  busy={astrologer.availability.is_busy}
-                                />
-                              </span>
-                            </div>
-
-                            <div className="min-w-0 flex-1">
-                              <h3 className="truncate font-display text-sm font-bold text-foreground">
-                                {astrologer.display_name}
-                              </h3>
-                              <p className="truncate text-[11px] text-muted-foreground">
-                                Specialist · {astrologer.experience_years} years experience
-                              </p>
-
-                              <div className="mt-1 flex items-center justify-between gap-1">
-                                <span className="inline-block rounded-md bg-surface-muted px-2 py-0.5 text-[10px] font-medium text-foreground/80 border border-border/40 truncate">
-                                  {skillLabel}
-                                </span>
-                                {astrologer.rating?.count > 0 && (
-                                  <span className="flex items-center gap-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400 shrink-0">
-                                    <Star className="size-3 fill-amber-400 text-amber-400" />
-                                    <span>{astrologer.rating.average.toFixed(1)}</span>
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="mt-3.5 flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleSelectAstrologer(astrologer);
-                              }}
-                              className={cn(
-                                "flex-1 rounded-xl py-2 text-xs font-semibold transition-all duration-200 text-center shadow-2xs",
-                                isSelected
-                                  ? "bg-brand-600 text-white shadow-xs"
-                                  : "bg-surface-muted text-foreground hover:bg-brand-600 hover:text-white border border-border/60",
-                              )}
-                            >
-                              {isSelected ? "Selected" : "Book an appointment"}
-                            </button>
-                            <Link
-                              href={`/appointments/${astrologer.slug ?? astrologer.id}`}
-                              onClick={(e) => e.stopPropagation()}
-                              title="Open dedicated booking page"
-                              className="rounded-xl p-2 text-muted-foreground hover:text-brand-600 hover:bg-surface-muted border border-border/60 press transition-all shrink-0"
-                            >
-                              <ExternalLink className="size-3.5" />
-                            </Link>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
+                  );
+                })}
               </div>
 
-              {/* ---------------------------------------------------------------------
-                  CENTER COLUMN: SELECTED ASTROLOGER PROFILE
-              --------------------------------------------------------------------- */}
-              <div
-                className={cn(
-                  "lg:col-span-5 space-y-5",
-                  mobileTab !== "profile" && "hidden lg:block",
-                )}
+              {/* Right arrow scroll */}
+              <button
+                type="button"
+                onClick={() => scrollDateStrip("right")}
+                aria-label="Scroll dates right"
+                className="hidden sm:flex size-9 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition-all shadow-2xs cursor-pointer"
               >
-                {selectedAstrologer ? (
-                  <div className="space-y-5">
-                    {/* Main Profile Header Card */}
-                    <div className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-2xs">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                          <div className="relative shrink-0">
-                            <Avatar src={selectedAstrologer.profile_image_url} name={selectedAstrologer.display_name} size="xl" />
-                            <span className="absolute -bottom-1 -right-1 rounded-full bg-card p-1 shadow-2xs">
-                              <StatusDot
-                                online={selectedAstrologer.availability.is_online}
-                                busy={selectedAstrologer.availability.is_busy}
-                              />
-                            </span>
-                          </div>
+                <ChevronRight className="size-4" />
+              </button>
+            </div>
+          </div>
+        </section>
 
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <h2 className="font-display text-lg sm:text-xl font-bold text-foreground truncate">
-                                {selectedAstrologer.display_name}
-                              </h2>
-                              <ShieldCheck className="size-4 text-amber-500 fill-amber-500/20 shrink-0" />
-                            </div>
-
-                            <p className="mt-0.5 text-xs text-muted-foreground">
-                              Specialist · {selectedAstrologer.experience_years} years experience
-                            </p>
-
-                            <div className="mt-2 flex flex-wrap items-center gap-2">
-                              <span className="inline-block rounded-md bg-brand-500/10 px-2.5 py-0.5 text-xs font-semibold text-brand-700 dark:text-brand-300 border border-brand-500/20">
-                                {SKILL_LABELS[selectedAstrologer.skills[0] || "vedic_astrology"]}
-                              </span>
-                              {selectedAstrologer.rating?.count > 0 && (
-                                <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400">
-                                  <Star className="size-3.5 fill-amber-400 text-amber-400" />
-                                  <span>{selectedAstrologer.rating.average.toFixed(1)}</span>
-                                  <span className="text-muted-foreground text-[11px]">({selectedAstrologer.rating.count})</span>
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Top-Right CTA */}
-                        <div className="shrink-0 self-end sm:self-center flex flex-col items-end gap-1.5">
-                          <Button
-                            size="sm"
-                            onClick={() => {
-                              setMobileTab("calendar");
-                              // Smooth scroll to scheduling on desktop
-                              const el = document.getElementById("scheduling-panel");
-                              if (el) el.scrollIntoView({ behavior: "smooth" });
-                            }}
-                          >
-                            Book an appointment
-                          </Button>
-                          <Link
-                            href={`/appointments/${selectedAstrologer.slug ?? selectedAstrologer.id}`}
-                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-600 dark:text-brand-400 hover:underline"
-                          >
-                            Dedicated booking page <ExternalLink className="size-3" />
-                          </Link>
-                        </div>
-                      </div>
-
-                      {/* Education & Certificates (Matching reference screenshot) */}
-                      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 pt-5 border-t border-border/60 text-xs">
-                        <div>
-                          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                            <GraduationCap className="size-3.5 text-brand-600 dark:text-brand-400" />
-                            Education / Lineage
-                          </p>
-                          <p className="mt-1 font-medium text-foreground">
-                            {selectedAstrologer.qualifications?.[0] || "Jyotish Praveen & Vedic Astrological Studies"}
-                          </p>
-                        </div>
-
-                        <div>
-                          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                            <Award className="size-3.5 text-amber-600 dark:text-amber-400" />
-                            Certifications
-                          </p>
-                          <p className="mt-1 font-medium text-foreground">
-                            {selectedAstrologer.specialisations?.[0] || "Council of Astrological Research & Practice"}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Available Consultation Modes (Matching reference screenshot) */}
-                      <div className="mt-4 pt-4 border-t border-border/60">
-                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                          Available Consultation Modes
-                        </p>
-                        <div className="flex flex-wrap gap-2 text-xs">
-                          <span className="inline-flex items-center gap-1.5 rounded-lg bg-surface-muted px-3 py-1.5 font-medium text-foreground border border-border/50">
-                            <Video className="size-3.5 text-brand-600 dark:text-brand-400" />
-                            <span>1-on-1 Online Consultation</span>
-                          </span>
-                          <span className="inline-flex items-center gap-1.5 rounded-lg bg-surface-muted px-3 py-1.5 font-medium text-foreground border border-border/50">
-                            <Phone className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-                            <span>Direct Audio Consultation</span>
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Working Hours / Rate Summary */}
-                      <div className="mt-4 pt-4 border-t border-border/60 flex items-center justify-between text-xs">
-                        <div>
-                          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                            Consultation Hours
-                          </p>
-                          <p className="mt-0.5 font-medium text-foreground">
-                            Monday – Saturday · 10:00 – 19:00
-                          </p>
-                        </div>
-
-                        <div className="text-right">
-                          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                            Session Rate
-                          </p>
-                          <p className="mt-0.5 font-bold font-display text-sm text-foreground">
-                            ₹{rupees(selectedAstrologer.appointment.price_paise)}{" "}
-                            <span className="font-normal text-muted-foreground text-xs">
-                              / {selectedAstrologer.appointment.block_minutes} min
-                            </span>
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Focus Areas & Specialties (Matching symptoms/procedures in screenshot) */}
-                      <div className="mt-4 pt-4 border-t border-border/60">
-                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                          Areas of Expertise & Consultation
-                        </p>
-                        <div className="flex flex-wrap gap-1.5 text-xs">
-                          {selectedAstrologer.skills.map((skill) => (
-                            <span
-                              key={skill}
-                              className="rounded-lg bg-surface-muted px-2.5 py-1 text-xs font-medium text-foreground/90 border border-border/40"
-                            >
-                              • {SKILL_LABELS[skill] || skill.replace(/_/g, " ")}
-                            </span>
-                          ))}
-                          <span className="rounded-lg bg-surface-muted px-2.5 py-1 text-xs font-medium text-foreground/90 border border-border/40">
-                            • Kundali Milan & Matchmaking
-                          </span>
-                          <span className="rounded-lg bg-surface-muted px-2.5 py-1 text-xs font-medium text-foreground/90 border border-border/40">
-                            • Career & Business Predictions
-                          </span>
-                          <span className="rounded-lg bg-surface-muted px-2.5 py-1 text-xs font-medium text-foreground/90 border border-border/40">
-                            • Vedic Gemstones & Remedies
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Bio */}
-                      {selectedAstrologer.bio && (
-                        <div className="mt-4 pt-4 border-t border-border/60">
-                          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                            About Practitioner
-                          </p>
-                          <p className="text-xs leading-relaxed text-muted-foreground">
-                            {selectedAstrologer.bio}
-                          </p>
-                        </div>
+        {/* =========================================================================
+            SESSION CONTROLS & TIME-OF-DAY FILTER BAR (District by Zomato Style)
+        ========================================================================= */}
+        <section className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 pt-8 space-y-6">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 rounded-3xl border border-amber-900/10 bg-white p-5 sm:p-6 shadow-[0_8px_24px_rgba(0,0,0,0.03)]">
+            {/* Session Duration Selector */}
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <Clock className="size-3.5 text-amber-600" />
+                <span>Select Consultation Duration</span>
+              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                {[
+                  { m: 15, label: "15 Mins", badge: "Quick Q&A" },
+                  { m: 30, label: "30 Mins", badge: "Standard (Popular)" },
+                  { m: 60, label: "60 Mins", badge: "In-depth Kundli" },
+                ].map((dur) => {
+                  const isSelected = minutes === dur.m;
+                  const price = selectedAstrologer?.appointment
+                    ? Math.round((selectedAstrologer.appointment.price_paise * dur.m) / (selectedAstrologer.appointment.block_minutes || 30))
+                    : 0;
+                  return (
+                    <button
+                      key={dur.m}
+                      type="button"
+                      onClick={() => setMinutes(dur.m)}
+                      className={cn(
+                        "rounded-2xl px-4 py-2 text-xs font-bold transition-all border cursor-pointer flex items-center gap-2 shadow-2xs",
+                        isSelected
+                          ? "bg-slate-900 text-white border-slate-900 shadow-sm"
+                          : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100",
                       )}
-                    </div>
+                    >
+                      <span>{dur.label}</span>
+                      <span className={cn("text-[10px] font-bold", isSelected ? "text-amber-400" : "text-amber-700")}>
+                        ₹{rupees(price)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-                    {/* Reviews Card (Matching reference screenshot) */}
-                    <div className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-2xs">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-display text-base font-bold text-foreground">
-                          Reviews
-                        </h3>
-                        {selectedAstrologer.rating?.count > 0 && (
-                          <div className="flex items-center gap-1 text-xs font-semibold text-foreground">
-                            <Star className="size-3.5 fill-amber-400 text-amber-400" />
-                            <span>{selectedAstrologer.rating.average.toFixed(1)}</span>
-                            <span className="text-muted-foreground font-normal">
-                              ({selectedAstrologer.rating.count} total reviews)
-                            </span>
-                          </div>
-                        )}
-                      </div>
+            {/* Time of Day & Auspicious Filter */}
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <Sparkles className="size-3.5 text-amber-600" />
+                <span>Filter By Showtimes & Muhurat</span>
+              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setTimeFilter("all")}
+                  className={cn(
+                    "rounded-xl px-3 py-1.5 text-xs font-bold transition-all border cursor-pointer",
+                    timeFilter === "all"
+                      ? "bg-amber-100 text-amber-900 border-amber-300"
+                      : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100",
+                  )}
+                >
+                  All Day
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTimeFilter("morning")}
+                  className={cn(
+                    "rounded-xl px-3 py-1.5 text-xs font-bold transition-all border cursor-pointer flex items-center gap-1",
+                    timeFilter === "morning"
+                      ? "bg-amber-100 text-amber-900 border-amber-300"
+                      : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100",
+                  )}
+                >
+                  <Sunrise className="size-3 text-amber-600" />
+                  <span>Morning</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTimeFilter("afternoon")}
+                  className={cn(
+                    "rounded-xl px-3 py-1.5 text-xs font-bold transition-all border cursor-pointer flex items-center gap-1",
+                    timeFilter === "afternoon"
+                      ? "bg-amber-100 text-amber-900 border-amber-300"
+                      : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100",
+                  )}
+                >
+                  <Sun className="size-3 text-amber-600" />
+                  <span>Afternoon</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTimeFilter("evening")}
+                  className={cn(
+                    "rounded-xl px-3 py-1.5 text-xs font-bold transition-all border cursor-pointer flex items-center gap-1",
+                    timeFilter === "evening"
+                      ? "bg-amber-100 text-amber-900 border-amber-300"
+                      : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100",
+                  )}
+                >
+                  <Sunset className="size-3 text-amber-600" />
+                  <span>Evening</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTimeFilter("night")}
+                  className={cn(
+                    "rounded-xl px-3 py-1.5 text-xs font-bold transition-all border cursor-pointer flex items-center gap-1",
+                    timeFilter === "night"
+                      ? "bg-amber-100 text-amber-900 border-amber-300"
+                      : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100",
+                  )}
+                >
+                  <Moon className="size-3 text-amber-600" />
+                  <span>Night</span>
+                </button>
 
-                      {loadingReviews ? (
-                        <div className="space-y-3">
-                          {[1, 2].map((n) => (
-                            <div key={n} className="rounded-xl border border-border/50 bg-surface-muted/30 p-3 animate-pulse h-20" />
-                          ))}
-                        </div>
-                      ) : reviewsData?.items && reviewsData.items.length > 0 ? (
-                        <div className="space-y-3.5">
-                          {reviewsData.items.map((review: Review) => (
-                            <div
-                              key={review.id}
-                              className="rounded-xl border border-border/50 bg-surface-muted/40 p-3.5 space-y-1.5"
-                            >
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="flex items-center gap-2">
-                                  <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-brand-500/15 font-semibold text-xs text-brand-700 dark:text-brand-300">
-                                    {(review.author_name || "User")[0].toUpperCase()}
-                                  </div>
-                                  <span className="font-semibold text-xs text-foreground">
-                                    {review.author_name || "Verified Seeker"}
-                                  </span>
-                                </div>
+                <button
+                  type="button"
+                  onClick={() => setOnlyAuspiciousSlots((p) => !p)}
+                  className={cn(
+                    "rounded-xl px-3 py-1.5 text-xs font-bold transition-all border cursor-pointer flex items-center gap-1.5 shadow-2xs",
+                    onlyAuspiciousSlots
+                      ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white border-amber-500 shadow-xs"
+                      : "bg-white text-amber-900 border-amber-300/80 hover:bg-amber-50/70",
+                  )}
+                >
+                  <span>⭐️</span>
+                  <span>{language === "bn" ? "শুধুমাত্র শুভ মুহূর্ত" : "Auspicious Slots Only"}</span>
+                </button>
+              </div>
+            </div>
+          </div>
 
-                                <div className="flex items-center gap-2">
-                                  <div className="flex items-center text-amber-400">
-                                    {[...Array(review.stars || 5)].map((_, i) => (
-                                      <Star key={i} className="size-3 fill-amber-400 text-amber-400" />
-                                    ))}
-                                  </div>
-                                  <span className="text-[10px] text-muted-foreground">
-                                    {timeAgo(review.created_at)}
-                                  </span>
-                                </div>
-                              </div>
+          {/* =========================================================================
+              THE SHOWTIMES MATRIX (BookMyShow Movie/Event Showtimes Matrix)
+          ========================================================================= */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-display text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                  <span>Available Showtimes & Consultation Slots</span>
+                  <span className="rounded-full bg-amber-500/10 text-amber-800 text-xs px-3 py-0.5 font-bold">
+                    {filteredSlots.length} Open Slots
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">
+                  {selectedDateLabel} · Vedic Choghadiya & Abhijit Muhurat Calibrated
+                </p>
+              </div>
+            </div>
 
-                              <p className="text-xs leading-relaxed text-muted-foreground">
-                                {review.text}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="rounded-xl border border-border/40 bg-surface-muted/30 p-4 text-center">
-                          <p className="text-xs text-muted-foreground">
-                            ✦ 5.0 Rating based on verified consultations · No written reviews left yet.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+            {loadingDayView ? (
+              <div className="py-16 text-center rounded-3xl border border-slate-200/80 bg-white">
+                <LoadingBlock label="Calculating Vedic slots & availability matrix…" />
+              </div>
+            ) : filteredSlots.length === 0 ? (
+              <div className="rounded-3xl border border-dashed border-amber-900/15 bg-white p-12 text-center space-y-4 shadow-sm">
+                <div className="size-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
+                  <Clock className="size-8" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="font-display text-lg font-bold text-slate-900">
+                    {onlyAuspiciousSlots
+                      ? "No auspicious slots found in this time window"
+                      : `No slots available on ${selectedDateLabel}`}
+                  </h4>
+                  <p className="text-xs text-slate-500 max-w-md mx-auto">
+                    {onlyAuspiciousSlots
+                      ? "You have filtered by auspicious muhurats only. Try viewing all open slots or pick another date."
+                      : "The astrologer has no open consultation windows for this date. Check upcoming dates in the date ribbon above."}
+                  </p>
+                </div>
+                {onlyAuspiciousSlots ? (
+                  <Button size="sm" onClick={() => setOnlyAuspiciousSlots(false)}>
+                    View All Standard Slots
+                  </Button>
                 ) : (
-                  <div className="rounded-2xl border border-border bg-card p-12 text-center text-sm text-muted-foreground">
-                    Please select an astrologer from the left panel.
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      // Switch to tomorrow
+                      const tom = dateStrip[1]?.key;
+                      if (tom) setSelectedDayKey(tom);
+                    }}
+                  >
+                    View Tomorrow&apos;s Slots →
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* 1. Morning Showtimes */}
+                {groupedSlots.morning.length > 0 && (
+                  <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs space-y-4">
+                    <div className="flex items-center gap-2 pb-3 border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-amber-900">
+                      <Sunrise className="size-4 text-amber-600" />
+                      <span>Morning Sessions · সকাল (06:00 AM – 12:00 PM)</span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                      {groupedSlots.morning.map(({ slot, muhurat }) => renderSlotButton(slot, muhurat))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. Afternoon Showtimes */}
+                {groupedSlots.afternoon.length > 0 && (
+                  <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs space-y-4">
+                    <div className="flex items-center gap-2 pb-3 border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-amber-900">
+                      <Sun className="size-4 text-amber-600" />
+                      <span>Afternoon Sessions · দুপুর (12:00 PM – 05:00 PM)</span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                      {groupedSlots.afternoon.map(({ slot, muhurat }) => renderSlotButton(slot, muhurat))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. Evening Showtimes (Peak Consulting Hours) */}
+                {groupedSlots.evening.length > 0 && (
+                  <div className="rounded-3xl border border-amber-300/80 bg-gradient-to-b from-white via-amber-50/20 to-white p-6 shadow-xs space-y-4">
+                    <div className="flex items-center justify-between pb-3 border-b border-amber-200/60">
+                      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-900">
+                        <Sunset className="size-4 text-amber-600" />
+                        <span>Evening Peak Sessions · সন্ধ্যা (05:00 PM – 09:00 PM)</span>
+                      </div>
+                      <span className="rounded-full bg-amber-500/15 text-amber-900 text-[10px] font-black px-2.5 py-0.5">
+                        High Demand Window
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                      {groupedSlots.evening.map(({ slot, muhurat }) => renderSlotButton(slot, muhurat))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. Night Showtimes */}
+                {groupedSlots.night.length > 0 && (
+                  <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs space-y-4">
+                    <div className="flex items-center gap-2 pb-3 border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-indigo-950">
+                      <Moon className="size-4 text-indigo-600" />
+                      <span>Night Sessions · রাত্রি (09:00 PM – 12:00 AM)</span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                      {groupedSlots.night.map(({ slot, muhurat }) => renderSlotButton(slot, muhurat))}
+                    </div>
                   </div>
                 )}
               </div>
+            )}
+          </div>
 
-              {/* ---------------------------------------------------------------------
-                  RIGHT COLUMN: CALENDAR AND AVAILABLE TIME SLOTS (Matching screenshot)
-              --------------------------------------------------------------------- */}
-              <div
-                id="scheduling-panel"
-                className={cn(
-                  "lg:col-span-4 space-y-5",
-                  mobileTab !== "calendar" && "hidden lg:block",
-                )}
-              >
-                {selectedAstrologer ? (
-                  <>
-                    {/* Top Box: Calendar */}
-                    <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-2xs">
-                      {/* Calendar Header with Month & Controls */}
-                      <div className="flex items-center justify-between pb-4 border-b border-border/60">
-                        <div>
-                          <h3 className="font-display text-base font-bold text-foreground">
-                            Calendar
-                          </h3>
-                          <p className="text-xs font-semibold text-muted-foreground">
-                            {monthYearLabel}
-                          </p>
-                        </div>
+          {/* =========================================================================
+              PRACTITIONER PHILOSOPHY & REVIEWS ACCORDION (Below Matrix)
+          ========================================================================= */}
+          {selectedAstrologer && (
+            <div className="rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-8 space-y-6">
+              <h4 className="font-display text-lg font-bold text-slate-900">
+                About {selectedAstrologer.display_name} & Consultations
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+                <div className="rounded-2xl bg-slate-50 p-4 border border-slate-100 space-y-2">
+                  <p className="font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <Compass className="size-4 text-amber-600" />
+                    <span>Vedic Astrological Principles</span>
+                  </p>
+                  <p className="text-slate-600 leading-relaxed">
+                    Consultations are calibrated using Lahiri Ayanamsha, KP Sub-Lord systems, and classical Parashari Muhurat to ensure maximum astrological precision.
+                  </p>
+                </div>
 
-                        <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={prevMonth}
-                            aria-label="Previous month"
-                            className="flex size-7 items-center justify-center rounded-lg border border-border hover:bg-surface-muted text-muted-foreground hover:text-foreground press transition-all"
-                          >
-                            <ChevronLeft className="size-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={nextMonth}
-                            aria-label="Next month"
-                            className="flex size-7 items-center justify-center rounded-lg border border-border hover:bg-surface-muted text-muted-foreground hover:text-foreground press transition-all"
-                          >
-                            <ChevronRight className="size-4" />
-                          </button>
-                        </div>
-                      </div>
+                <div className="rounded-2xl bg-slate-50 p-4 border border-slate-100 space-y-2">
+                  <p className="font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <Video className="size-4 text-amber-600" />
+                    <span>Private Video Chamber</span>
+                  </p>
+                  <p className="text-slate-600 leading-relaxed">
+                    End-to-end encrypted 1-on-1 audio/video sessions directly in your browser. No external third-party apps needed.
+                  </p>
+                </div>
 
-                      {/* Weekday Labels (Mon - Sun) */}
-                      <div className="mt-3 grid grid-cols-7 gap-1 text-center text-[11px] font-semibold text-muted-foreground">
-                        <div>Mon</div>
-                        <div>Tue</div>
-                        <div>Wed</div>
-                        <div>Thu</div>
-                        <div>Fri</div>
-                        <div>Sat</div>
-                        <div>Sun</div>
-                      </div>
-
-                      {/* Month Days Grid */}
-                      <div className="mt-2 grid grid-cols-7 gap-1 text-center">
-                        {calendarDays.map(({ key, date, dayNum, isCurrentMonth, isPast }) => {
-                          const isSelected = key === selectedDayKey;
-                          const isToday = key === todayKey;
-
-                          return (
-                            <button
-                              key={key}
-                              type="button"
-                              disabled={isPast || !isCurrentMonth}
-                              onClick={() => {
-                                handleSelectDay(key);
-                              }}
-                              className={cn(
-                                "relative flex size-8 sm:size-9 items-center justify-center mx-auto rounded-full text-xs font-medium transition-all",
-                                !isCurrentMonth && "text-muted-foreground/30 pointer-events-none",
-                                isPast && isCurrentMonth && "text-muted-foreground/40 cursor-not-allowed",
-                                !isPast && isCurrentMonth && !isSelected && "text-foreground hover:bg-surface-muted cursor-pointer",
-                                isToday && !isSelected && "font-bold text-brand-600 ring-1 ring-brand-500/40",
-                                isSelected && "bg-brand-600 text-white font-bold shadow-xs hover:bg-brand-700",
-                              )}
-                            >
-                              <span>{dayNum}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {/* Quick Upcoming Days Strip */}
-                      <div className="mt-4 pt-3 border-t border-border/60">
-                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                          Quick Date Select
-                        </p>
-                        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-                          {quickDays.map((qd) => {
-                            const isSelected = qd.key === selectedDayKey;
-                            return (
-                              <button
-                                key={qd.key}
-                                type="button"
-                                onClick={() => handleSelectDay(qd.key)}
-                                className={cn(
-                                  "shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-semibold transition-all border shadow-2xs",
-                                  isSelected
-                                    ? "bg-brand-600 text-white border-brand-600 shadow-xs"
-                                    : "bg-surface-muted text-muted-foreground hover:text-foreground border-border/70 hover:border-brand-500/40",
-                                )}
-                              >
-                                {qd.label}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Bottom Box: Visit Hours / Available Time Slots */}
-                    <div className="rounded-2xl border border-border/80 bg-card p-5 shadow-2xs space-y-4">
-                      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-border/60">
-                        <div>
-                          <h3 className="font-display text-base font-bold text-foreground">
-                            {language === "bn" ? "উপলব্ধ সময়সূচী ও মুহূর্ত" : language === "hi" ? "उपलब्ध समय व मुहूर्त" : "Visit Hours & Muhurat"}
-                          </h3>
-                          <p className="text-xs text-muted-foreground">
-                            {selectedDateLabel}
-                          </p>
-                        </div>
-
-                        {selectedSlot && (
-                          <span className="rounded-md bg-brand-500/10 px-2 py-0.5 text-[11px] font-semibold text-brand-700 dark:text-brand-300">
-                            {clock(selectedSlot)}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Auspicious Muhurat Filter Banner */}
-                      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-surface-muted/60 p-2.5 border border-border/60 text-xs">
-                        <div className="flex items-center gap-1.5 font-medium text-foreground">
-                          <Sparkles className="size-3.5 text-amber-500" />
-                          <span className="text-[11px]">
-                            {language === "bn"
-                              ? "বৈদিক চোঘড়িয়া ও অভিজিৎ মুহূর্ত"
-                              : language === "hi"
-                              ? "वैदिक चौघड़िया व अभिजित मुहूर्त"
-                              : "Vedic Choghadiya & Abhijit Engine"}
-                          </span>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => setOnlyAuspiciousSlots((prev) => !prev)}
-                          className={cn(
-                            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all border",
-                            onlyAuspiciousSlots
-                              ? "bg-amber-500/20 text-amber-800 dark:text-amber-200 border-amber-500/60 shadow-xs"
-                              : "bg-card text-muted-foreground hover:text-foreground border-border/70 hover:border-amber-500/40",
-                          )}
-                        >
-                          <span>⭐️</span>
-                          <span>
-                            {onlyAuspiciousSlots
-                              ? (language === "bn" ? "শুধুমাত্র শুভ মুহূর্ত" : language === "hi" ? "केवल शुभ मुहूर्त" : "Auspicious Only")
-                              : (language === "bn" ? "সব স্লট দেখুন" : language === "hi" ? "सभी स्लॉट देखें" : "All Slots")}
-                          </span>
-                        </button>
-                      </div>
-
-                      {/* Loading Day State */}
-                      {loadingDayView ? (
-                        <div className="py-8 text-center">
-                          <LoadingBlock label="Checking available slots…" />
-                        </div>
-                      ) : availableSlots.length === 0 ? (
-                        <div className="rounded-xl border border-border/60 bg-surface-muted/30 p-5 text-center space-y-2">
-                          <Clock className="mx-auto size-7 text-muted-foreground/70 mb-1" />
-                          <p className="text-xs font-semibold text-foreground">
-                            {onlyAuspiciousSlots
-                              ? (language === "bn" ? "এই তারিখে কোনো শুভ মুহূর্তের খালি স্লট নেই" : "No auspicious slots found on this date")
-                              : `No slots available on ${selectedDateLabel}`}
-                          </p>
-                          <p className="text-[11px] text-muted-foreground max-w-xs mx-auto">
-                            {onlyAuspiciousSlots ? (
-                              <button
-                                type="button"
-                                onClick={() => setOnlyAuspiciousSlots(false)}
-                                className="text-brand-600 font-semibold hover:underline"
-                              >
-                                {language === "bn" ? "সব সাধারণ স্লট দেখতে ক্লিক করুন" : "Click to view all standard open slots"}
-                              </button>
-                            ) : selectedDayKey === todayKey
-                              ? "Today's consultation hours are closed or fully booked."
-                              : "The astrologer has no open availability windows on this date. Please pick another date above."}
-                          </p>
-                          {selectedDayKey === todayKey && !onlyAuspiciousSlots && (
-                            <div className="pt-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleSelectDay(tomorrowKey)}
-                                className="text-xs font-semibold"
-                              >
-                                View Tomorrow&apos;s Slots ({tomorrow.toLocaleDateString("en-US", { month: "short", day: "numeric" })}) →
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-64 overflow-y-auto pr-1">
-                          {availableSlots.map(({ slot, muhurat }) => {
-                            const isSelected = selectedSlot?.getTime() === slot.getTime();
-                            const isAuspicious = muhurat.quality === "super_auspicious" || muhurat.quality === "auspicious";
-                            const isRahuKaal = muhurat.is_rahu_kaal;
-                            return (
-                              <button
-                                key={slot.toISOString()}
-                                type="button"
-                                onClick={() => setSelectedSlot(slot)}
-                                className={cn(
-                                  "flex flex-col items-center justify-center rounded-xl p-2.5 text-xs font-semibold tabular-nums transition-all border shadow-2xs group relative",
-                                  isSelected
-                                    ? "bg-brand-600 text-white border-brand-600 shadow-sm scale-[1.02]"
-                                    : isAuspicious
-                                    ? "bg-amber-500/10 border-amber-500/40 text-foreground hover:border-amber-500 hover:bg-amber-500/15"
-                                    : isRahuKaal
-                                    ? "bg-surface-muted/60 text-muted-foreground border-rose-500/30 hover:border-rose-500/60"
-                                    : "bg-surface-muted text-foreground border-border/70 hover:border-brand-500/50 hover:bg-surface-muted/80",
-                                )}
-                              >
-                                <span className="text-xs font-bold">{clock(slot)}</span>
-                                <span
-                                  className={cn(
-                                    "mt-1 inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[9.5px] font-medium leading-none",
-                                    isSelected
-                                      ? "bg-white/20 text-white"
-                                      : isAuspicious
-                                      ? "bg-amber-500/20 text-amber-800 dark:text-amber-200"
-                                      : isRahuKaal
-                                      ? "bg-rose-500/15 text-rose-700 dark:text-rose-300"
-                                      : "bg-border/60 text-muted-foreground",
-                                  )}
-                                >
-                                  {isAuspicious && <span>⭐️</span>}
-                                  {isRahuKaal && <span>⚠️</span>}
-                                  <span>{muhurat.badge}</span>
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-
-                      {/* Primary CTA: Book an appointment */}
-                      <div className="pt-2">
-                        <Button
-                          size="lg"
-                          disabled={!selectedSlot}
-                          onClick={() => setIsConfirmModalOpen(true)}
-                          className="w-full text-xs font-bold"
-                        >
-                          {language === "bn" ? "অ্যাপয়েন্টমেন্ট নিশ্চিত করুন" : language === "hi" ? "अपॉइंटमेंट बुक करें" : "Book an appointment"}
-                        </Button>
-                        {!selectedSlot && availableSlots.length > 0 && (
-                          <p className="mt-2 text-center text-[11px] text-muted-foreground">
-                            {language === "bn" ? "এগিয়ে যেতে উপরে একটি সময় স্লট নির্বাচন করুন।" : "Please select a time slot above to proceed."}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                ) : null}
+                <div className="rounded-2xl bg-slate-50 p-4 border border-slate-100 space-y-2">
+                  <p className="font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="size-4 text-amber-600" />
+                    <span>Sacred Vedic Prescription</span>
+                  </p>
+                  <p className="text-slate-600 leading-relaxed">
+                    Receive consecrated gemstone advice, authentic rudraksha, and powerful mantras directly into your account immediately after the session.
+                  </p>
+                </div>
               </div>
             </div>
           )}
-        </div>
+        </section>
 
         {/* =========================================================================
-            BOOKING CONFIRMATION MODAL WITH VEDIC PILLARS & KUNDLI ATTACHMENT
+            DISTRICT-STYLE STICKY BOTTOM CHECKOUT SUMMARY BAR
+        ========================================================================= */}
+        {selectedSlot && selectedAstrologer && (
+          <aside
+            aria-label="Booking summary"
+            className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-amber-300/80 shadow-[0_-12px_40px_rgba(0,0,0,0.12)] transition-all animate-in slide-in-from-bottom duration-300"
+          >
+            <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Left: Selected Slot Information */}
+              <div className="flex items-center gap-4 min-w-0">
+                <Avatar
+                  src={selectedAstrologer.profile_image_url}
+                  name={selectedAstrologer.display_name}
+                  size="md"
+                  className="size-12 ring-2 ring-amber-400"
+                />
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-display font-bold text-slate-900 text-sm sm:text-base truncate">
+                      {selectedAstrologer.display_name}
+                    </h4>
+                    <span className="rounded-full bg-amber-500/15 text-amber-900 px-2 py-0.5 text-[10px] font-black uppercase">
+                      {minutes} mins session
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
+                    <span className="font-bold text-slate-900">{selectedDateLabel}</span>
+                    <span>•</span>
+                    <span className="font-extrabold text-amber-700 tabular-nums">{clock(selectedSlot)}</span>
+                    {selectedSlotMuhurat && (
+                      <>
+                        <span>•</span>
+                        <span className="font-bold text-amber-900 flex items-center gap-1">
+                          <span>⭐️</span>
+                          <span>{selectedSlotMuhurat.badge}</span>
+                        </span>
+                      </>
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              {/* Right: Price & Grand Action Button */}
+              <div className="flex items-center gap-5 w-full sm:w-auto justify-between sm:justify-end">
+                <div className="text-left sm:text-right">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Consultation Fee</p>
+                  <p className="font-display text-xl sm:text-2xl font-black text-slate-900 tabular-nums">
+                    ₹{rupees(computedPricePaise)}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsConfirmModalOpen(true)}
+                  className="rounded-2xl px-6 sm:px-8 py-3.5 font-bold text-sm text-white bg-gradient-to-r from-[#D97706] via-[#EA580C] to-[#F59E0B] shadow-[0_8px_25px_-4px_rgba(217,119,6,0.5)] hover:shadow-[0_12px_32px_-4px_rgba(217,119,6,0.6)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer flex items-center gap-2"
+                >
+                  <span>{language === "bn" ? "স্লট নিশ্চিত করুন ও বুক করুন" : "Confirm Slot & Book"}</span>
+                  <ArrowRight className="size-4" />
+                </button>
+              </div>
+            </div>
+          </aside>
+        )}
+
+        {/* =========================================================================
+            DISTRICT-STYLE CHECKOUT MODAL (Vedic Pillars + Kundli Snapshot)
         ========================================================================= */}
         <Modal
           open={isConfirmModalOpen}
           onClose={() => setIsConfirmModalOpen(false)}
-          title={language === "bn" ? "অ্যাপয়েন্টমেন্ট ও বৈদিক পরিকাঠামো বুকিং" : language === "hi" ? "अपॉइंटमेंट व वैदिक विवरण पुष्टि" : "Confirm Appointment Booking"}
+          title={language === "bn" ? "অ্যাপয়েন্টমেন্ট ও বৈদিক পরিকাঠামো বুকিং" : "Confirm Consultation Booking"}
           size="lg"
         >
           {selectedAstrologer && selectedSlot && (
             <div className="space-y-4 pt-2 text-xs max-h-[75vh] overflow-y-auto pr-1">
               {/* Astrologer preview */}
-              <div className="flex items-center gap-3 rounded-2xl bg-surface-muted p-3.5 border border-border/60">
+              <div className="flex items-center gap-3.5 rounded-2xl bg-amber-50/50 p-4 border border-amber-200">
                 <Avatar src={selectedAstrologer.profile_image_url} name={selectedAstrologer.display_name} size="md" />
                 <div className="min-w-0 flex-1">
-                  <h4 className="font-display font-bold text-sm text-foreground truncate">
+                  <h4 className="font-display font-bold text-sm text-slate-900 truncate">
                     {selectedAstrologer.display_name}
                   </h4>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-[11px] text-slate-600">
                     {SKILL_LABELS[selectedAstrologer.skills[0] || "vedic_astrology"]} · {selectedAstrologer.experience_years} years experience
                   </p>
+                </div>
+                <div className="text-right">
+                  <p className="font-display text-base font-black text-slate-900">₹{rupees(computedPricePaise)}</p>
+                  <p className="text-[10px] text-slate-500">{minutes} minutes</p>
                 </div>
               </div>
 
               {/* Vedic Muhurat Intelligence Box */}
-              {(() => {
-                const sm = getSlotMuhurat(selectedSlot, language);
-                const isAuspicious = sm.quality === "super_auspicious" || sm.quality === "auspicious";
-                const isRahuKaal = sm.is_rahu_kaal;
-                const desc = language === "bn" ? sm.descriptionBn : language === "hi" ? sm.descriptionHi : sm.descriptionEn;
-                return (
-                  <div
-                    className={cn(
-                      "rounded-2xl p-3 border text-xs space-y-1",
-                      isAuspicious
-                        ? "bg-amber-500/10 border-amber-500/30 text-amber-950 dark:text-amber-100"
-                        : isRahuKaal
-                        ? "bg-rose-500/10 border-rose-500/30 text-rose-950 dark:text-rose-100"
-                        : "bg-surface-muted border-border/70 text-foreground",
-                    )}
-                  >
-                    <div className="flex items-center justify-between font-bold text-xs">
-                      <span className="flex items-center gap-1.5">
-                        <Sparkles className="size-3.5 text-amber-600" />
-                        <span>
-                          {sm.badge}{" "}
-                          {language === "bn" ? "চোঘড়িয়া মুহূর্ত" : language === "hi" ? "चौघड़िया मुहूर्त" : "Choghadiya Muhurat"}
-                        </span>
+              {selectedSlotMuhurat && (
+                <div
+                  className={cn(
+                    "rounded-2xl p-3.5 border text-xs space-y-1",
+                    selectedSlotMuhurat.quality === "super_auspicious" || selectedSlotMuhurat.quality === "auspicious"
+                      ? "bg-amber-50 border-amber-300 text-amber-950"
+                      : selectedSlotMuhurat.is_rahu_kaal
+                      ? "bg-rose-50 border-rose-300 text-rose-950"
+                      : "bg-slate-50 border-slate-200 text-slate-800",
+                  )}
+                >
+                  <div className="flex items-center justify-between font-bold text-xs">
+                    <span className="flex items-center gap-1.5">
+                      <Sparkles className="size-3.5 text-amber-600" />
+                      <span>
+                        {selectedSlotMuhurat.badge}{" "}
+                        {language === "bn" ? "চোঘড়িয়া মুহূর্ত" : "Choghadiya Muhurat"}
                       </span>
-                      <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] uppercase font-bold text-amber-700 dark:text-amber-300">
-                        {isAuspicious
-                          ? (language === "bn" ? "⭐️ পরম শুভ সময়" : language === "hi" ? "⭐️ अत्यंत शुभ समय" : "⭐️ Auspicious")
-                          : isRahuKaal
-                          ? (language === "bn" ? "⚠️ রাহুকাল" : language === "hi" ? "⚠️ राहुकाल" : "⚠️ Rahu Kaal")
-                          : (language === "bn" ? "সাধারণ মুহূর্ত" : language === "hi" ? "सामान्य मुहूर्त" : "Neutral")}
-                      </span>
-                    </div>
-                    <p className="text-[11px] opacity-90 leading-relaxed">{desc}</p>
+                    </span>
+                    <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] uppercase font-bold text-amber-800">
+                      {selectedSlotMuhurat.quality === "super_auspicious" || selectedSlotMuhurat.quality === "auspicious"
+                        ? "⭐️ পরম শুভ সময়"
+                        : selectedSlotMuhurat.is_rahu_kaal
+                        ? "⚠️ রাহুকাল"
+                        : "সাধারণ মুহূর্ত"}
+                    </span>
                   </div>
-                );
-              })()}
+                  <p className="text-[11px] opacity-90 leading-relaxed">
+                    {language === "bn" ? selectedSlotMuhurat.descriptionBn : selectedSlotMuhurat.descriptionEn}
+                  </p>
+                </div>
+              )}
 
               {/* Consultation Focus Pillar Selector */}
               <div>
-                <label className="block text-[11px] font-bold text-foreground mb-1.5 flex items-center justify-between">
+                <label className="block text-[11px] font-bold text-slate-900 mb-1.5 flex items-center justify-between">
                   <span>
                     {language === "bn"
                       ? "পরামর্শের প্রধান বিষয় (Consultation Focus Pillar)"
-                      : language === "hi"
-                      ? "परामर्श का मुख्य विषय (Focus Pillar)"
                       : "Consultation Focus Pillar"}
                   </span>
-                  <span className="text-[10px] text-brand-600 font-semibold">*Required</span>
+                  <span className="text-[10px] text-amber-600 font-semibold">*Required</span>
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {CONSULTATION_PILLARS.map((p) => {
                     const isSelected = selectedPillar === p.id;
-                    const title = language === "bn" ? p.labelBn : language === "hi" ? p.labelHi : p.labelEn;
-                    const desc = language === "bn" ? p.descBn : language === "hi" ? p.descHi : p.descEn;
+                    const title = language === "bn" ? p.labelBn : p.labelEn;
+                    const desc = language === "bn" ? p.descBn : p.descEn;
                     return (
                       <button
                         key={p.id}
                         type="button"
                         onClick={() => setSelectedPillar(p.id)}
                         className={cn(
-                          "flex flex-col text-left p-2.5 rounded-xl border text-xs transition-all",
+                          "flex flex-col text-left p-3 rounded-2xl border text-xs transition-all cursor-pointer",
                           isSelected
-                            ? "bg-brand-500/10 border-brand-500 text-foreground ring-1 ring-brand-500/40"
-                            : "bg-surface-muted/50 border-border/70 text-muted-foreground hover:border-brand-500/30 hover:text-foreground",
+                            ? "bg-amber-500/10 border-amber-500 text-slate-900 ring-2 ring-amber-500/30"
+                            : "bg-slate-50 border-slate-200 text-slate-600 hover:border-amber-300 hover:text-slate-900",
                         )}
                       >
-                        <div className="flex items-center gap-1.5 font-bold text-foreground">
+                        <div className="flex items-center gap-1.5 font-bold text-slate-900">
                           <span>{p.icon}</span>
                           <span className="truncate">{title}</span>
                         </div>
-                        <span className="text-[10px] line-clamp-1 mt-0.5 text-muted-foreground opacity-90">
+                        <span className="text-[10px] line-clamp-1 mt-0.5 text-slate-500">
                           {desc}
                         </span>
                       </button>
@@ -1399,48 +1177,46 @@ function AppointmentsContent() {
               </div>
 
               {/* Birth Details Snapshot for Kundli pre-reading */}
-              <div className="rounded-2xl border border-border/80 bg-surface-muted/40 p-3.5 space-y-2.5">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-3.5 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-foreground flex items-center gap-1.5">
-                    <Compass className="size-3.5 text-brand-600" />
+                  <span className="text-[11px] font-bold text-slate-900 flex items-center gap-1.5">
+                    <Compass className="size-3.5 text-amber-600" />
                     <span>
                       {language === "bn"
                         ? "জন্ম কুণ্ডলী বিবরণী (ঐচ্ছিক কিন্তু বাঞ্ছনীয়)"
-                        : language === "hi"
-                        ? "जन्म कुंडली विवरण (वैकल्पिक)"
                         : "Birth Details for Kundli Preparation (Optional)"}
                     </span>
                   </span>
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-[10px] text-slate-400">
                     {language === "bn" ? "জ্যোতিষীর আগাম বিশ্লেষণের জন্য" : "For astrologer pre-analysis"}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                   <div>
-                    <label className="text-[10px] font-medium text-muted-foreground">
+                    <label className="text-[10px] font-medium text-slate-500">
                       {language === "bn" ? "জন্ম তারিখ (Date of Birth)" : "Date of Birth"}
                     </label>
                     <input
                       type="date"
                       value={birthDetails.date_of_birth}
                       onChange={(e) => setBirthDetails((prev) => ({ ...prev, date_of_birth: e.target.value }))}
-                      className="w-full mt-0.5 rounded-lg border border-border bg-card px-2.5 py-1 text-xs text-foreground"
+                      className="w-full mt-0.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900"
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-medium text-muted-foreground">
+                    <label className="text-[10px] font-medium text-slate-500">
                       {language === "bn" ? "জন্ম সময় (Time of Birth)" : "Time of Birth"}
                     </label>
                     <input
                       type="time"
                       value={birthDetails.time_of_birth}
                       onChange={(e) => setBirthDetails((prev) => ({ ...prev, time_of_birth: e.target.value }))}
-                      className="w-full mt-0.5 rounded-lg border border-border bg-card px-2.5 py-1 text-xs text-foreground"
+                      className="w-full mt-0.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900"
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="text-[10px] font-medium text-muted-foreground">
+                    <label className="text-[10px] font-medium text-slate-500">
                       {language === "bn" ? "জন্মস্থান (City, State)" : "Place of Birth (City, State)"}
                     </label>
                     <input
@@ -1448,47 +1224,47 @@ function AppointmentsContent() {
                       placeholder="e.g. Kolkata, West Bengal, India"
                       value={birthDetails.place_of_birth}
                       onChange={(e) => setBirthDetails((prev) => ({ ...prev, place_of_birth: e.target.value }))}
-                      className="w-full mt-0.5 rounded-lg border border-border bg-card px-2.5 py-1 text-xs text-foreground"
+                      className="w-full mt-0.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Slot Details */}
-              <div className="space-y-2 rounded-2xl border border-border/80 bg-card p-4">
-                <div className="flex justify-between items-center text-muted-foreground">
+              {/* Slot Details Breakdown */}
+              <div className="space-y-2 rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="flex justify-between items-center text-slate-600">
                   <span className="flex items-center gap-1.5 font-medium">
-                    <CalendarDays className="size-3.5 text-brand-600" /> Date
+                    <CalendarDays className="size-3.5 text-amber-600" /> Date
                   </span>
-                  <span className="font-semibold text-foreground">{selectedDateLabel}</span>
+                  <span className="font-semibold text-slate-900">{selectedDateLabel}</span>
                 </div>
 
-                <div className="flex justify-between items-center text-muted-foreground">
+                <div className="flex justify-between items-center text-slate-600">
                   <span className="flex items-center gap-1.5 font-medium">
-                    <Clock className="size-3.5 text-brand-600" /> Time Slot
+                    <Clock className="size-3.5 text-amber-600" /> Time Slot
                   </span>
-                  <span className="font-semibold text-foreground tabular-nums">
+                  <span className="font-semibold text-slate-900 tabular-nums">
                     {clock(selectedSlot)} – {clock(new Date(selectedSlot.getTime() + minutes * 60_000))} ({minutes} mins)
                   </span>
                 </div>
 
                 {quote && (
                   <>
-                    <div className="flex justify-between items-center pt-2 border-t border-border/60 text-muted-foreground">
+                    <div className="flex justify-between items-center pt-2 border-t border-slate-100 text-slate-600">
                       <span>Total Consultation Fee</span>
-                      <span className="font-bold text-foreground tabular-nums">₹{rupees(quote.price_paise)}</span>
+                      <span className="font-bold text-slate-900 tabular-nums">₹{rupees(quote.price_paise)}</span>
                     </div>
 
-                    <div className="flex justify-between items-center text-muted-foreground">
+                    <div className="flex justify-between items-center text-slate-600">
                       <span>Hold Deposit ({quote.commission_percent}%)</span>
-                      <span className="font-bold text-brand-600 dark:text-brand-400 tabular-nums">
+                      <span className="font-bold text-amber-700 tabular-nums">
                         ₹{rupees(quote.deposit_paise)} · {quote.deposit_coins} coins
                       </span>
                     </div>
 
-                    <div className="flex justify-between items-center text-muted-foreground">
+                    <div className="flex justify-between items-center text-slate-600">
                       <span>Due at Appointment</span>
-                      <span className="font-medium text-foreground tabular-nums">₹{rupees(quote.balance_due_paise)}</span>
+                      <span className="font-medium text-slate-900 tabular-nums">₹{rupees(quote.balance_due_paise)}</span>
                     </div>
                   </>
                 )}
@@ -1496,7 +1272,7 @@ function AppointmentsContent() {
 
               {/* User Note / Questions */}
               <div>
-                <label className="block text-[11px] font-semibold text-foreground mb-1">
+                <label className="block text-[11px] font-semibold text-slate-800 mb-1">
                   {language === "bn" ? "বিশেষ প্রশ্ন বা বিবরণ (ঐচ্ছিক)" : "Specific Questions / Notes (Optional)"}
                 </label>
                 <Textarea
@@ -1505,7 +1281,7 @@ function AppointmentsContent() {
                   value={userNote}
                   onChange={(e) => setUserNote(e.target.value)}
                   placeholder="e.g. Specific career transition, marriage questions, or gemstone requirements..."
-                  className="text-xs"
+                  className="text-xs rounded-xl border-slate-200"
                 />
               </div>
 
@@ -1536,12 +1312,12 @@ function AppointmentsContent() {
                     size="lg"
                     loading={bookMutation.isPending}
                     onClick={() => bookMutation.mutate()}
-                    className="w-full text-xs font-bold"
+                    className="w-full text-xs font-bold bg-gradient-to-r from-[#D97706] to-[#F59E0B] text-white shadow-sm"
                   >
-                    <CheckCircle2 className="size-4" />
-                    {language === "bn" ? "বুকিং ও স্লট নিশ্চিত করুন" : language === "hi" ? "बुकिंग व स्लॉट सुरक्षित करें" : "Confirm & Reserve Slot"}
+                    <CheckCircle2 className="size-4 mr-1.5" />
+                    {language === "bn" ? "বুকিং ও স্লট নিশ্চিত করুন" : "Confirm & Reserve Slot"}
                   </Button>
-                  <p className="mt-2 text-center text-[10px] text-muted-foreground">
+                  <p className="mt-2 text-center text-[10px] text-slate-400">
                     What you pay now holds the slot and confirms your booking immediately.
                   </p>
                 </div>
@@ -1554,6 +1330,61 @@ function AppointmentsContent() {
       <SiteFooter />
     </>
   );
+
+  // Helper render function for Slot Button (BookMyShow Movie/Event Showtime pill style)
+  function renderSlotButton(slot: Date, muhurat: SlotMuhuratInfo) {
+    const isSelected = selectedSlot?.getTime() === slot.getTime();
+    const isAuspicious = muhurat.quality === "super_auspicious" || muhurat.quality === "auspicious";
+    const isRahuKaal = muhurat.is_rahu_kaal;
+
+    return (
+      <button
+        key={slot.toISOString()}
+        type="button"
+        onClick={() => setSelectedSlot(slot)}
+        className={cn(
+          "relative flex flex-col items-center justify-between rounded-2xl p-3.5 transition-all text-center border shadow-2xs cursor-pointer group",
+          isSelected
+            ? "bg-[#D97706] text-white border-[#B45309] shadow-md ring-4 ring-amber-500/25 scale-[1.03]"
+            : isAuspicious
+            ? "bg-white hover:bg-amber-50/70 border-amber-300 hover:border-amber-500 text-slate-900 hover:scale-[1.02]"
+            : isRahuKaal
+            ? "bg-slate-50/70 hover:bg-rose-50/50 border-slate-200 hover:border-rose-300 text-slate-700"
+            : "bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-900",
+        )}
+      >
+        <span className="text-sm font-extrabold tabular-nums tracking-tight">
+          {clock(slot)}
+        </span>
+
+        <span
+          className={cn(
+            "mt-1.5 rounded-full px-2 py-0.5 text-[9.5px] font-bold leading-none uppercase tracking-wider flex items-center gap-1",
+            isSelected
+              ? "bg-white/20 text-white"
+              : isAuspicious
+              ? "bg-amber-100 text-amber-900 border border-amber-300/60"
+              : isRahuKaal
+              ? "bg-rose-100 text-rose-800"
+              : "bg-slate-100 text-slate-600",
+          )}
+        >
+          {isAuspicious && <span>⭐️</span>}
+          {isRahuKaal && <span>⚠️</span>}
+          <span>{muhurat.badge}</span>
+        </span>
+
+        <span
+          className={cn(
+            "mt-2 text-[10px] font-bold tabular-nums",
+            isSelected ? "text-amber-100" : "text-amber-700",
+          )}
+        >
+          ₹{rupees(computedPricePaise)}
+        </span>
+      </button>
+    );
+  }
 }
 
 export default function AppointmentsPage() {
@@ -1562,9 +1393,9 @@ export default function AppointmentsPage() {
       fallback={
         <>
           <SiteHeader />
-          <main className="min-h-screen bg-surface-muted/30 py-16">
-            <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
-              <LoadingBlock label="Loading appointment booking..." />
+          <main className="min-h-screen bg-[#FDFBF7] py-16">
+            <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
+              <LoadingBlock label="Loading Vedic booking experience..." />
             </div>
           </main>
           <SiteFooter />
