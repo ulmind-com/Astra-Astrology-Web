@@ -292,6 +292,58 @@ export default function MyAppointmentsPage() {
     }
   };
 
+  // Birth Time Rectification (BTR) state & handler
+  const [btrAppt, setBtrAppt] = React.useState<Appointment | null>(null);
+  const [btrForm, setBtrForm] = React.useState({
+    birthDate: "",
+    birthTime: "",
+    birthPlace: "",
+    notes: "",
+  });
+  const [updatingBtr, setUpdatingBtr] = React.useState(false);
+
+  const handleOpenBtrModal = (appt: Appointment) => {
+    setBtrAppt(appt);
+    const existing = appt.birth_details || {};
+    setBtrForm({
+      birthDate: existing.date_of_birth || "",
+      birthTime: existing.time_of_birth || "",
+      birthPlace: existing.place_of_birth || "",
+      notes: existing.client_btr_notes || "",
+    });
+  };
+
+  const handleUpdateBtr = async () => {
+    if (!btrAppt || !btrForm.birthDate || !btrForm.birthTime || !btrForm.birthPlace) {
+      toast.error(
+        language === "bn"
+          ? "দয়া করে জন্ম তারিখ, সময় ও স্থান পূরণ করুন।"
+          : "Please provide birth date, exact time, and birth place.",
+      );
+      return;
+    }
+    setUpdatingBtr(true);
+    try {
+      await appointmentApi.updateBtr(btrAppt.id, {
+        birth_date: btrForm.birthDate,
+        birth_time: btrForm.birthTime,
+        birth_place: btrForm.birthPlace,
+        notes: btrForm.notes.trim() || undefined,
+      });
+      void queryClient.invalidateQueries({ queryKey: KEY });
+      setBtrAppt(null);
+      toast.success(
+        language === "bn"
+          ? "সঠিক জন্ম বিবরণ সফলভাবে আপডেট হয়েছে। জ্যোতিষীকে অবগত করা হয়েছে।"
+          : "Exact birth parameters updated successfully. Astrologer notified.",
+      );
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to update birth details.");
+    } finally {
+      setUpdatingBtr(false);
+    }
+  };
+
   const handleEnterChamber = async (appointmentId: string) => {
     setJoiningChamberId(appointmentId);
     try {
@@ -498,6 +550,20 @@ export default function MyAppointmentsPage() {
                       <span>{language === "bn" ? "অনুপস্থিত (No-Show)" : "Missed (No-Show)"}</span>
                     </span>
                   )}
+
+                  {a.btr_fulfilled && (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:text-emerald-200 border border-emerald-500/30">
+                      <Clock className="size-3 text-emerald-600" />
+                      <span>{language === "bn" ? "জন্মসময় সংশোধিত ✓" : "Birth Time Rectified ✓"}</span>
+                    </span>
+                  )}
+
+                  {a.abuse_flagged && (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-rose-500/10 px-2.5 py-1 text-xs font-bold text-rose-800 dark:text-rose-300 border border-rose-500/30">
+                      <AlertCircle className="size-3 text-rose-600" />
+                      <span>{language === "bn" ? "নীতিমালার কারণে সমাপ্ত" : "Flagged Policy Misconduct"}</span>
+                    </span>
+                  )}
                 </div>
 
                 {/* Brahma Pause Seeker Rescue Action Alert */}
@@ -560,6 +626,62 @@ export default function MyAppointmentsPage() {
                       {language === "bn"
                         ? "💡 কোনো বিকল্প বেছে না নিলে সেশনের ১০ মিনিট পূর্বে স্বয়ংক্রিয়ভাবে ১০০% সম্পূর্ণ রিফান্ড আপনার অ্যাকাউন্টে জমা হয়ে যাবে।"
                         : "💡 If unresponded, an automatic 100% full refund will be processed 10 minutes prior to session time."}
+                    </p>
+                  </div>
+                )}
+
+                {/* Birth Time Rectification (BTR) Request Alert */}
+                {a.btr_requested && !a.btr_fulfilled && a.status === "booked" && (
+                  <div className="mt-3.5 rounded-2xl border border-sky-500/40 bg-gradient-to-r from-sky-500/15 via-sky-500/10 to-indigo-500/15 p-4 text-xs shadow-2xs space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-sky-500/20 text-sky-700 dark:text-sky-300 font-bold text-sm">
+                          ⏳
+                        </span>
+                        <div>
+                          <h4 className="font-bold text-foreground text-sm flex items-center gap-2">
+                            <span>
+                              {language === "bn"
+                                ? "সঠিক জন্মসময় নিশ্চিতকরণের অনুরোধ (BTR Request)"
+                                : "Birth Time Rectification (BTR) Requested"}
+                            </span>
+                            <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-800 dark:text-sky-200 border border-sky-500/40">
+                              Action Recommended
+                            </span>
+                          </h4>
+                          <p className="mt-0.5 text-[11px] text-muted-foreground leading-relaxed">
+                            {language === "bn"
+                              ? `জ্যোতিষী আপনার কুষ্ঠি ও নবাংশ বিচারের সর্বোচ্চ নির্ভুলতার জন্য সঠিক জন্মসময় স্পষ্ট করার অনুরোধ জানিয়েছেন${a.btr_request_note ? `: "${a.btr_request_note}"` : "।"}`
+                              : `The astrologer requested precision verification of your birth time${a.btr_request_note ? `: "${a.btr_request_note}"` : "."}`}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-1">
+                      <Button
+                        size="sm"
+                        onClick={() => handleOpenBtrModal(a)}
+                        className="bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs shadow-xs"
+                      >
+                        <Clock className="size-3.5 mr-1.5" />
+                        {language === "bn" ? "সঠিক জন্ম বিবরণ আপডেট করুন" : "Update Exact Birth Details"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Abuse Flag Notice */}
+                {a.abuse_flagged && (
+                  <div className="mt-3.5 rounded-2xl border border-rose-500/40 bg-rose-500/10 p-4 text-xs space-y-1">
+                    <div className="flex items-center gap-2 font-bold text-rose-900 dark:text-rose-200">
+                      <AlertCircle className="size-4 text-rose-600" />
+                      <span>{language === "bn" ? "পরামর্শ আচরণবিধি ও নীতিমালা নোটিশ" : "Consultation Conduct Notice"}</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      {language === "bn"
+                        ? `নীতিমালা লঙ্ঘনের কারণে জ্যোতিষী কর্তৃক এই অধিবেশনটি সমাপ্ত করা হয়েছে (${a.abuse_reason || "অশোভন আচরণ"})। প্ল্যাটফর্মের সুরক্ষার স্বার্থে ঘটনাটি অডিট লগে সংরক্ষণ করা হয়েছে।`
+                        : `This session was terminated by the astrologer due to conduct violation (${a.abuse_reason || "Misconduct"}).`}
                     </p>
                   </div>
                 )}
@@ -762,6 +884,92 @@ export default function MyAppointmentsPage() {
                 {rescuingId === rescueAppointment.id
                   ? (language === "bn" ? "সংরক্ষণ করা হচ্ছে..." : "Rescheduling...")
                   : (language === "bn" ? "নতুন সময় নিশ্চিত করুন" : "Confirm New Schedule")}
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Birth Time Rectification Modal */}
+      {btrAppt && (
+        <Modal
+          open={Boolean(btrAppt)}
+          onClose={() => setBtrAppt(null)}
+          title={language === "bn" ? "সঠিক জন্ম বিবরণ আপডেট করুন (BTR)" : "Update Exact Birth Parameters"}
+        >
+          <div className="space-y-4 text-xs">
+            <p className="text-muted-foreground leading-relaxed">
+              {language === "bn"
+                ? "বৈদিক জ্যোতিষে লগ্ন প্রান্তিক ও নবাংশ ডি৯ নির্ভুলতার জন্য সঠিক জন্ম সময় ও স্থান অত্যন্ত জরুরি।"
+                : "Exact birth time ensures mathematically precise planetary degrees and divisional charts."}
+            </p>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block font-semibold text-foreground mb-1">
+                  {language === "bn" ? "জন্ম তারিখ *" : "Date of Birth *"}
+                </label>
+                <input
+                  type="date"
+                  value={btrForm.birthDate}
+                  onChange={(e) => setBtrForm((f) => ({ ...f, birthDate: e.target.value }))}
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-foreground mb-1">
+                  {language === "bn" ? "সঠিক জন্ম সময় (মিনিট সহ) *" : "Exact Birth Time (HH:MM AM/PM) *"}
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. 05:42 AM or 17:42"
+                  value={btrForm.birthTime}
+                  onChange={(e) => setBtrForm((f) => ({ ...f, birthTime: e.target.value }))}
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-foreground mb-1">
+                  {language === "bn" ? "জন্ম স্থান (শহর, জেলা, দেশ) *" : "Place of Birth *"}
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Kolkata, West Bengal, India"
+                  value={btrForm.birthPlace}
+                  onChange={(e) => setBtrForm((f) => ({ ...f, birthPlace: e.target.value }))}
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-foreground mb-1">
+                  {language === "bn" ? "যাচাই সংক্রান্ত নোট (ঐচ্ছিক)" : "Verification Notes (Optional)"}
+                </label>
+                <input
+                  type="text"
+                  placeholder={language === "bn" ? "যেমন: হাসপাতাল সার্টিফিকেট বা পরিবারের কোষ্ঠি অনুযায়ী" : "e.g. Verified from hospital discharge slip"}
+                  value={btrForm.notes}
+                  onChange={(e) => setBtrForm((f) => ({ ...f, notes: e.target.value }))}
+                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="ghost" size="sm" onClick={() => setBtrAppt(null)}>
+                {language === "bn" ? "বাতিল" : "Cancel"}
+              </Button>
+              <Button
+                size="sm"
+                disabled={updatingBtr || !btrForm.birthDate || !btrForm.birthTime || !btrForm.birthPlace}
+                onClick={handleUpdateBtr}
+                className="bg-sky-600 hover:bg-sky-700 text-white font-semibold"
+              >
+                {updatingBtr
+                  ? (language === "bn" ? "আপডেট হচ্ছে..." : "Updating...")
+                  : (language === "bn" ? "জন্ম বিবরণ সংরক্ষণ করুন" : "Save Rectified Details")}
               </Button>
             </div>
           </div>

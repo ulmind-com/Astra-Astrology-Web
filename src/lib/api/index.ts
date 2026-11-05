@@ -377,6 +377,19 @@ export const appointmentApi = {
     id: string,
     body: { action: "reschedule" | "refund"; new_starts_at?: string; reason?: string },
   ) => api.post<Appointment>(`/appointments/${id}/brahma-pause-action`, body),
+
+  updateBtr: (
+    id: string,
+    body: {
+      birth_date: string;
+      birth_time: string;
+      birth_place: string;
+      latitude?: number | null;
+      longitude?: number | null;
+      timezone_offset?: number | null;
+      notes?: string | null;
+    },
+  ) => api.post<Appointment>(`/appointments/${id}/update-btr`, body),
 };
 
 // ----------------------------------------------------------------- reviews
