@@ -383,6 +383,10 @@ export type Appointment = Omit<S["AppointmentOut"], "peer"> & {
   is_no_show?: boolean;
   no_show_marked_at?: string | null;
   no_show_wait_minutes?: number | null;
+  brahma_pause_affected?: boolean;
+  brahma_pause_reason?: string | null;
+  brahma_pause_until?: string | null;
+  rescue_deadline?: string | null;
   peer?: S["AppointmentPeer"] | null;
   held_coins?: number;
   held_status?: string;
@@ -399,10 +403,15 @@ export type AppointmentQuote = S["AppointmentQuote"] & {
 export type AppointmentStatus = S["AppointmentStatus"];
 export type AppointmentCard = S["AppointmentCardOut"] & {
   cancellation_window_minutes?: number;
+  buffer_minutes?: number;
 };
 export type AvailabilityWindow = S["WindowOut"];
 export type AppointmentDayView = S["DayView"] & {
   muhurat_ratings?: Record<string, MuhuratSlotRating> | null;
+  buffer_minutes?: number;
+  is_on_brahma_pause?: boolean;
+  brahma_pause_until?: string | null;
+  brahma_pause_reason?: string | null;
 };
 
 /** What a booking's state is called on screen. */

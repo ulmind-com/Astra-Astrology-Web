@@ -372,6 +372,11 @@ export const appointmentApi = {
       ends_at: string;
       minutes: number;
     }>(`/appointments/${id}/chamber`, {}),
+
+  brahmaPauseAction: (
+    id: string,
+    body: { action: "reschedule" | "refund"; new_starts_at?: string; reason?: string },
+  ) => api.post<Appointment>(`/appointments/${id}/brahma-pause-action`, body),
 };
 
 // ----------------------------------------------------------------- reviews
