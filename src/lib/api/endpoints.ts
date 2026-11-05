@@ -164,5 +164,9 @@ export const endpoints = {
     medical: "/vastu/medical",
     astrovastu: "/vastu/astrovastu",
   },
+
+  cms: {
+    homepage: "/cms/homepage",
+  },
 } as const;
 

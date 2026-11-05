@@ -140,7 +140,7 @@ export function SiteHeader() {
             ? "translate-y-0 opacity-100"
             : "pointer-events-none -translate-y-4 opacity-0",
         )}
-        {...(open ? {} : { inert: "" as unknown as boolean })}
+        inert={!open}
       >
         {isSignedIn && user && (
           <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-brand-500/20 bg-cream-100/90 p-3.5">

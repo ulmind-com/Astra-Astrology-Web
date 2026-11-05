@@ -60,7 +60,7 @@ export function ZodiacChakra({ className = "", speedSeconds = 60 }: ZodiacChakra
     >
       {/* 1. Dynamic Radiant Solar Aura Glow */}
       <div
-        className="absolute inset-[-6%] rounded-full bg-gradient-to-tr from-[#f6d7c2]/45 via-[#faebd9]/40 to-[#f9e5a8]/35 blur-3xl pointer-events-none transition-all duration-700 ease-out animate-celestial-pulse"
+        className="absolute inset-[-6%] rounded-full bg-gradient-to-tr from-[#fcf6ad]/45 via-[#fef7cf]/40 to-[#f7ee7a]/35 blur-3xl pointer-events-none transition-all duration-700 ease-out animate-celestial-pulse"
         style={{
           transform: isHovered ? "scale(1.08)" : "scale(1)",
           opacity: isHovered ? 0.95 : 0.75,
@@ -86,8 +86,8 @@ export function ZodiacChakra({ className = "", speedSeconds = 60 }: ZodiacChakra
         >
           <defs>
             <radialGradient id="ringGlow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#d6a17b" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#b06d4e" stopOpacity="0" />
+              <stop offset="0%" stopColor="#f3ab35" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="#bd6c0c" stopOpacity="0" />
             </radialGradient>
           </defs>
 
@@ -104,7 +104,7 @@ export function ZodiacChakra({ className = "", speedSeconds = 60 }: ZodiacChakra
               cx="441"
               cy="375"
               r="340"
-              stroke="#b06d4e"
+              stroke="#bd6c0c"
               strokeWidth="1.2"
               strokeDasharray="6 12"
               opacity="0.32"
@@ -114,7 +114,7 @@ export function ZodiacChakra({ className = "", speedSeconds = 60 }: ZodiacChakra
               cx="441"
               cy="375"
               r="348"
-              stroke="#d6a17b"
+              stroke="#f3ab35"
               strokeWidth="0.8"
               opacity="0.22"
             />
@@ -126,8 +126,8 @@ export function ZodiacChakra({ className = "", speedSeconds = 60 }: ZodiacChakra
                 const y = 375 + 340 * Math.sin(rad);
                 return (
                   <g key={deg} transform={`translate(${x}, ${y})`}>
-                    <circle r="2.2" fill="#b06d4e" opacity="0.6" />
-                    <circle r="4" stroke="#d6a17b" strokeWidth="0.6" opacity="0.35" />
+                    <circle r="2.2" fill="#bd6c0c" opacity="0.6" />
+                    <circle r="4" stroke="#f3ab35" strokeWidth="0.6" opacity="0.35" />
                   </g>
                 );
               }
@@ -147,7 +147,7 @@ export function ZodiacChakra({ className = "", speedSeconds = 60 }: ZodiacChakra
               cx="441"
               cy="375"
               r="318"
-              stroke="#b06d4e"
+              stroke="#bd6c0c"
               strokeWidth="1"
               strokeDasharray="2 8"
               opacity="0.28"
@@ -164,7 +164,7 @@ export function ZodiacChakra({ className = "", speedSeconds = 60 }: ZodiacChakra
                   y={y - 2.5}
                   width="5"
                   height="5"
-                  fill="#b06d4e"
+                  fill="#bd6c0c"
                   opacity="0.5"
                   transform={`rotate(45 ${x} ${y})`}
                 />
@@ -187,7 +187,7 @@ export function ZodiacChakra({ className = "", speedSeconds = 60 }: ZodiacChakra
                 y1={375 - 360 * Math.sin((deg * Math.PI) / 180)}
                 x2={441 + 360 * Math.cos((deg * Math.PI) / 180)}
                 y2={375 + 360 * Math.sin((deg * Math.PI) / 180)}
-                stroke="#d6a17b"
+                stroke="#f3ab35"
                 strokeWidth="0.8"
                 strokeDasharray="4 24"
                 opacity="0.18"
@@ -211,25 +211,25 @@ export function ZodiacChakra({ className = "", speedSeconds = 60 }: ZodiacChakra
 
         {/* 5. Twinkling Cosmic Sparkle Accents */}
         <span
-          className="absolute top-[8%] left-[12%] text-[#b06d4e] text-lg font-serif select-none pointer-events-none animate-celestial-twinkle-1"
+          className="absolute top-[8%] left-[12%] text-[#bd6c0c] text-lg font-serif select-none pointer-events-none animate-celestial-twinkle-1"
           aria-hidden
         >
           ✦
         </span>
         <span
-          className="absolute top-[14%] right-[10%] text-[#d6a17b] text-base font-serif select-none pointer-events-none animate-celestial-twinkle-2"
+          className="absolute top-[14%] right-[10%] text-[#f3ab35] text-base font-serif select-none pointer-events-none animate-celestial-twinkle-2"
           aria-hidden
         >
           ✧
         </span>
         <span
-          className="absolute bottom-[22%] left-[6%] text-[#b06d4e] text-sm font-serif select-none pointer-events-none animate-celestial-twinkle-3"
+          className="absolute bottom-[22%] left-[6%] text-[#bd6c0c] text-sm font-serif select-none pointer-events-none animate-celestial-twinkle-3"
           aria-hidden
         >
           ✦
         </span>
         <span
-          className="absolute bottom-[18%] right-[8%] text-[#d6a17b] text-base font-serif select-none pointer-events-none animate-celestial-twinkle-1"
+          className="absolute bottom-[18%] right-[8%] text-[#f3ab35] text-base font-serif select-none pointer-events-none animate-celestial-twinkle-1"
           aria-hidden
         >
           ✧

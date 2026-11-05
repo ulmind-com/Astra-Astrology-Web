@@ -611,4 +611,32 @@ export const vastuApi = {
     api.get<AstroVastuRule[]>(endpoints.vastu.astrovastu, { query: planet_id ? { planet_id } : undefined }),
 };
 
+export interface HeroSlide {
+  id?: string;
+  title: string;
+  subtitle: string;
+  description?: string;
+  cta_text: string;
+  cta_link: string;
+  badge_text: string;
+  badge_rating?: string;
+  image_url: string;
+  bg_gradient?: string;
+  border_color?: string;
+}
+
+export interface HomePageCMSData {
+  hero_slides: HeroSlide[];
+  hero_title_line1?: string;
+  hero_title_line2?: string;
+  hero_description?: string;
+  hero_cta_primary_text?: string;
+  hero_cta_primary_link?: string;
+}
+
+export const cmsApi = {
+  getHomepage: () => api.get<HomePageCMSData>(endpoints.cms.homepage, { auth: false }),
+};
+
+
 

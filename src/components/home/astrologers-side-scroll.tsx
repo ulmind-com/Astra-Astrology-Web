@@ -88,21 +88,21 @@ const STATUS_RANK: Record<Status, number> = { online: 0, busy: 1, offline: 2 };
 
 function AstrologerCardSkeleton() {
   return (
-    <div className="shrink-0 w-[290px] sm:w-[320px] rounded-2xl border border-[#ebd7c8] bg-[#fdfaf5] p-5">
+    <div className="shrink-0 w-[290px] sm:w-[320px] rounded-2xl border border-[#f2e9b0] bg-[#fffdf5] p-5">
       <div className="flex items-start justify-between gap-3">
-        <div className="size-14 sm:size-16 rounded-2xl bg-[#f0e2d5] animate-pulse" />
-        <div className="h-6 w-16 rounded-full bg-[#f0e2d5] animate-pulse" />
+        <div className="size-14 sm:size-16 rounded-2xl bg-[#faf3c4] animate-pulse" />
+        <div className="h-6 w-16 rounded-full bg-[#faf3c4] animate-pulse" />
       </div>
-      <div className="mt-4 h-5 w-3/4 rounded bg-[#f0e2d5] animate-pulse" />
-      <div className="mt-2 h-3.5 w-2/3 rounded bg-[#f4e9de] animate-pulse" />
+      <div className="mt-4 h-5 w-3/4 rounded bg-[#faf3c4] animate-pulse" />
+      <div className="mt-2 h-3.5 w-2/3 rounded bg-[#fdf6d0] animate-pulse" />
       <div className="mt-3.5 flex gap-1.5">
-        <div className="h-5 w-16 rounded-md bg-[#f4e9de] animate-pulse" />
-        <div className="h-5 w-20 rounded-md bg-[#f4e9de] animate-pulse" />
+        <div className="h-5 w-16 rounded-md bg-[#fdf6d0] animate-pulse" />
+        <div className="h-5 w-20 rounded-md bg-[#fdf6d0] animate-pulse" />
       </div>
-      <div className="mt-3 h-3.5 w-1/2 rounded bg-[#f4e9de] animate-pulse" />
-      <div className="mt-5 pt-3.5 border-t border-[#f0e2d5] flex items-center justify-between">
-        <div className="h-8 w-20 rounded bg-[#f0e2d5] animate-pulse" />
-        <div className="h-9 w-24 rounded bg-[#f0e2d5] animate-pulse" />
+      <div className="mt-3 h-3.5 w-1/2 rounded bg-[#fdf6d0] animate-pulse" />
+      <div className="mt-5 pt-3.5 border-t border-[#faf3c4] flex items-center justify-between">
+        <div className="h-8 w-20 rounded bg-[#faf3c4] animate-pulse" />
+        <div className="h-9 w-24 rounded bg-[#faf3c4] animate-pulse" />
       </div>
     </div>
   );
@@ -162,20 +162,20 @@ export function AstrologersSideScroll() {
   }
 
   return (
-    <section className="relative overflow-hidden py-14 sm:py-20 bg-[#fffaf5]">
+    <section className="relative overflow-hidden py-14 sm:py-20 bg-[#fffdf5]">
       <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
 
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
           <div>
-            <div className="inline-flex items-center gap-2 text-[#b06d4e] mb-2">
+            <div className="inline-flex items-center gap-2 text-[#bd6c0c] mb-2">
               <Sparkles className="size-4" />
               <span className="text-xs sm:text-sm font-serif italic tracking-wide font-medium">
                 Live Consultations
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <h2 className="font-cinzel text-2xl sm:text-4xl font-bold tracking-tight text-[#4D4664]">
+              <h2 className="font-cinzel text-2xl sm:text-4xl font-bold tracking-tight text-[#1a1208]">
                 Verified Astrologers Online Now
               </h2>
               {onlineCount > 0 && (
@@ -188,7 +188,7 @@ export function AstrologersSideScroll() {
                 </span>
               )}
             </div>
-            <p className="mt-2 text-xs sm:text-sm text-[#665e75] max-w-xl">
+            <p className="mt-2 text-xs sm:text-sm text-[#6b5f4d] max-w-xl">
               {onlineCount > 0
                 ? "Connect instantly via real-time private chat or audio call. Rigorously vetted with transparent per-minute rates."
                 : "Nobody is at their desk this minute. Browse their profiles and book a time that suits you."}
@@ -199,7 +199,7 @@ export function AstrologersSideScroll() {
           <div className="flex items-center gap-3">
             <Link
               href="/astrologers"
-              className="text-xs sm:text-sm font-semibold text-[#b06d4e] hover:underline mr-2"
+              className="text-xs sm:text-sm font-semibold text-[#bd6c0c] hover:underline mr-2"
             >
               View All Astrologers →
             </Link>
@@ -209,7 +209,7 @@ export function AstrologersSideScroll() {
               onClick={() => scroll("left")}
               disabled={!canScrollLeft}
               aria-label="Previous Astrologer"
-              className={`flex size-10 items-center justify-center rounded-full border border-[#d6b7a2] bg-[#fbf1e7] text-[#4D4664] transition-all duration-200 hover:bg-[#faebd9] hover:scale-105 active:scale-95 ${
+              className={`flex size-10 items-center justify-center rounded-full border border-[#e3d58f] bg-[#fffbe8] text-[#1a1208] transition-all duration-200 hover:bg-[#fef7cf] hover:scale-105 active:scale-95 ${
                 !canScrollLeft ? "opacity-40 cursor-not-allowed" : "shadow-sm"
               }`}
             >
@@ -220,7 +220,7 @@ export function AstrologersSideScroll() {
               onClick={() => scroll("right")}
               disabled={!canScrollRight}
               aria-label="Next Astrologer"
-              className={`flex size-10 items-center justify-center rounded-full border border-[#d6b7a2] bg-[#fbf1e7] text-[#4D4664] transition-all duration-200 hover:bg-[#faebd9] hover:scale-105 active:scale-95 ${
+              className={`flex size-10 items-center justify-center rounded-full border border-[#e3d58f] bg-[#fffbe8] text-[#1a1208] transition-all duration-200 hover:bg-[#fef7cf] hover:scale-105 active:scale-95 ${
                 !canScrollRight ? "opacity-40 cursor-not-allowed" : "shadow-sm"
               }`}
             >
@@ -253,7 +253,7 @@ export function AstrologersSideScroll() {
                 return (
                   <div
                     key={astro.id}
-                    className="group shrink-0 snap-start w-[290px] sm:w-[320px] rounded-2xl border border-[#ebd7c8] bg-[#fdfaf5] p-5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_12px_28px_-6px_rgba(176,109,78,0.2)] flex flex-col justify-between"
+                    className="group shrink-0 snap-start w-[290px] sm:w-[320px] rounded-2xl border border-[#f2e9b0] bg-[#fffdf5] p-5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_12px_28px_-6px_rgba(176,109,78,0.2)] flex flex-col justify-between"
                   >
                     <div>
                       {/* Top Row: Avatar & Status */}
@@ -320,7 +320,7 @@ export function AstrologersSideScroll() {
                       {/* Name & Title */}
                       <div className="mt-4">
                         <div className="flex items-center gap-1.5">
-                          <h3 className="font-cinzel text-base sm:text-lg font-bold text-[#4D4664] group-hover:text-[#b06d4e] transition-colors line-clamp-1">
+                          <h3 className="font-cinzel text-base sm:text-lg font-bold text-[#1a1208] group-hover:text-[#bd6c0c] transition-colors line-clamp-1">
                             {astro.display_name}
                           </h3>
                           <span title="Verified Astrologer">
@@ -328,7 +328,7 @@ export function AstrologersSideScroll() {
                           </span>
                         </div>
                         {astro.tagline && (
-                          <p className="mt-0.5 text-xs text-[#716580] line-clamp-1 font-medium">
+                          <p className="mt-0.5 text-xs text-[#6b5f4d] line-clamp-1 font-medium">
                             {astro.tagline}
                           </p>
                         )}
@@ -339,13 +339,13 @@ export function AstrologersSideScroll() {
                         {chips.map((s) => (
                           <span
                             key={s}
-                            className="rounded-md bg-[#f4e9de] px-2 py-0.5 text-[10px] font-semibold text-[#5a4c66]"
+                            className="rounded-md bg-[#fdf6d0] px-2 py-0.5 text-[10px] font-semibold text-[#6b5f4d]"
                           >
                             {s}
                           </span>
                         ))}
                         {astro.experience_years > 0 && (
-                          <span className="rounded-md bg-[#fdf3e7] border border-[#ebd7c8] px-2 py-0.5 text-[10px] font-medium text-[#7d6f85]">
+                          <span className="rounded-md bg-[#fff8d9] border border-[#f2e9b0] px-2 py-0.5 text-[10px] font-medium text-[#6b5f4d]">
                             {astro.experience_years} yrs exp
                           </span>
                         )}
@@ -353,20 +353,20 @@ export function AstrologersSideScroll() {
 
                       {/* Languages */}
                       {astro.languages.length > 0 && (
-                        <p className="mt-3 text-[11px] text-[#867b90] line-clamp-1">
-                          <span className="font-medium text-[#5c4f69]">Languages: </span>
+                        <p className="mt-3 text-[11px] text-[#6b5f4d] line-clamp-1">
+                          <span className="font-medium text-[#6b5f4d]">Languages: </span>
                           {astro.languages.join(", ")}
                         </p>
                       )}
                     </div>
 
                     {/* Bottom: Pricing & Call to Action */}
-                    <div className="mt-5 pt-3.5 border-t border-[#f0e2d5] flex items-center justify-between">
+                    <div className="mt-5 pt-3.5 border-t border-[#faf3c4] flex items-center justify-between">
                       <div>
                         <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
                           Rate
                         </span>
-                        <div className="text-sm sm:text-base font-bold text-[#b06d4e]">
+                        <div className="text-sm sm:text-base font-bold text-[#bd6c0c]">
                           ₹{formatNumber(rupeesPerMinute)}
                           <span className="text-xs font-normal text-muted-foreground">/min</span>
                         </div>
@@ -376,7 +376,7 @@ export function AstrologersSideScroll() {
                         <Link href={href}>
                           <Button
                             size="sm"
-                            className="h-9 px-3.5 text-xs font-semibold bg-[#b06d4e] hover:bg-[#97583c] text-white shadow-sm flex items-center gap-1.5"
+                            className="h-9 px-3.5 text-xs font-semibold bg-[#bd6c0c] hover:bg-[#964f0f] text-white shadow-sm flex items-center gap-1.5"
                           >
                             <MessageSquare className="size-3.5" />
                             Chat
@@ -387,9 +387,9 @@ export function AstrologersSideScroll() {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="h-9 px-3 text-xs font-semibold border-[#d6b7a2] text-[#4D4664] hover:bg-[#faebd9]"
+                              className="h-9 px-3 text-xs font-semibold border-[#e3d58f] text-[#1a1208] hover:bg-[#fef7cf]"
                             >
-                              <Phone className="size-3.5 text-[#b06d4e]" />
+                              <Phone className="size-3.5 text-[#bd6c0c]" />
                             </Button>
                           </Link>
                         )}
