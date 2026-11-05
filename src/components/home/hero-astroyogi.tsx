@@ -17,7 +17,11 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { cmsApi, type HeroSlide } from "@/lib/api";
 
-const DEFAULT_SLIDES: HeroSlide[] = [
+type ExtendedHeroSlide = HeroSlide & {
+  is_dark_bg?: boolean;
+};
+
+const DEFAULT_SLIDES: ExtendedHeroSlide[] = [
   {
     id: "slide-1",
     title: "Enjoy your relationship",
@@ -28,6 +32,7 @@ const DEFAULT_SLIDES: HeroSlide[] = [
     badge_text: "India's Best Astrology Platform",
     badge_rating: "4.9/5",
     image_url: "/images/hero/hero-1-love.jpg",
+    is_dark_bg: false,
   },
   {
     id: "slide-2",
@@ -39,6 +44,7 @@ const DEFAULT_SLIDES: HeroSlide[] = [
     badge_text: "100% Free & Accurate Kundli",
     badge_rating: "500k+ Created",
     image_url: "/images/hero/hero-2-kundli.jpg",
+    is_dark_bg: true,
   },
   {
     id: "slide-3",
@@ -50,6 +56,7 @@ const DEFAULT_SLIDES: HeroSlide[] = [
     badge_text: "Trusted Matchmaking",
     badge_rating: "36 Gunas Score",
     image_url: "/images/hero/hero-3-marriage.jpg",
+    is_dark_bg: false,
   },
   {
     id: "slide-4",
@@ -61,17 +68,19 @@ const DEFAULT_SLIDES: HeroSlide[] = [
     badge_text: "Next-Gen 3D Biometrics",
     badge_rating: "99% Precision",
     image_url: "/images/hero/hero-4-palm.jpg",
+    is_dark_bg: true,
   },
   {
     id: "slide-5",
     title: "Discover your true potential",
-    subtitle: "via 78 Arcana Tarot & Vedic guidance",
-    description: "Daily guidance, career forecasts & love spreads synchronized with planetary dasha cycles.",
+    subtitle: "via 78 Arcana Tarot guidance",
+    description: "Daily forecasts, love spreads & career clarity synchronized with planetary dasha cycles.",
     cta_text: "Get Tarot Reading",
     cta_link: "/tarot",
     badge_text: "Sacred Arcana Cards",
     badge_rating: "78 Cards",
     image_url: "/images/hero/hero-5-tarot.jpg",
+    is_dark_bg: true,
   },
   {
     id: "slide-6",
@@ -83,6 +92,7 @@ const DEFAULT_SLIDES: HeroSlide[] = [
     badge_text: "Ancient Vedic Architecture",
     badge_rating: "16 Zones",
     image_url: "/images/hero/hero-6-vastu.jpg",
+    is_dark_bg: false,
   },
 ];
 
@@ -125,9 +135,12 @@ export function HeroAstroyogi() {
     staleTime: 60_000,
   });
 
-  const slides = useMemo<HeroSlide[]>(() => {
+  const slides = useMemo<ExtendedHeroSlide[]>(() => {
     if (cmsData?.hero_slides && cmsData.hero_slides.length > 0) {
-      return cmsData.hero_slides;
+      return cmsData.hero_slides.map((s, i) => ({
+        ...s,
+        is_dark_bg: DEFAULT_SLIDES[i]?.is_dark_bg ?? false,
+      }));
     }
     return DEFAULT_SLIDES;
   }, [cmsData]);
@@ -174,19 +187,20 @@ export function HeroAstroyogi() {
   };
 
   const currentSlide = slides[currentIndex] || DEFAULT_SLIDES[0];
+  const isDark = currentSlide.is_dark_bg ?? false;
 
   return (
     <section className="relative overflow-hidden bg-white pt-4 pb-8 sm:pt-6 sm:pb-10">
       <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
-        {/* Main Hero Slider Container — Whole Card is Full-Bleed Ultra-HD Image */}
+        {/* Main Hero Slider Container — Sized exactly to 1360x400 aspect */}
         <div
-          className="relative group/slider overflow-hidden rounded-[26px] sm:rounded-3xl min-h-[380px] sm:min-h-[420px] lg:min-h-[440px] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.45)] border border-[#e3d07a]/40 bg-[#120d06]"
+          className="relative group/slider overflow-hidden rounded-[26px] sm:rounded-3xl min-h-[350px] sm:min-h-[380px] lg:h-[400px] shadow-[0_16px_40px_-16px_rgba(26,18,8,0.12)] border border-[#eadf9a]/60 bg-[#fffdf5]"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
-          {/* 1. Full-Bleed Ultra-HD Background Image covering the entire card */}
+          {/* 1. Full-Bleed 100% Brightness & Opacity Background Image (Exact Card Ratio) */}
           <div className="absolute inset-0 w-full h-full">
             <Image
               key={currentSlide.image_url}
@@ -194,73 +208,102 @@ export function HeroAstroyogi() {
               alt={currentSlide.title}
               fill
               priority
-              className="object-cover object-center sm:object-[right_center] transition-transform duration-1000 transform scale-100 group-hover/slider:scale-105"
+              className="object-cover object-right sm:object-center transition-all duration-700"
               sizes="(max-width: 1360px) 100vw, 1360px"
-              quality={92}
+              quality={95}
             />
           </div>
 
-          {/* 2. Gradient Scrim for 100% text and button readability */}
-          {/* Left-to-right solid black-amber tint behind text, fading to let the image shine on the right */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/92 via-black/75 via-45% to-black/25 pointer-events-none" />
-          {/* Subtle bottom vignette to frame the controls */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none" />
-
-          {/* 3. Overlaid Interactive Content Layer */}
-          <div className="relative z-10 flex flex-col justify-between h-full p-6 sm:p-10 lg:p-12 min-h-[380px] sm:min-h-[420px] lg:min-h-[440px]">
+          {/* 2. Overlaid Interactive Content Layer — Placed cleanly on the left */}
+          <div className="relative z-10 flex flex-col justify-between h-full p-6 sm:p-10 lg:pl-12 lg:pr-8 min-h-[350px] sm:min-h-[380px] lg:h-[400px]">
             {/* Top Bar inside Card: Pill Badge + Slide Counter */}
             <div className="flex items-center justify-between gap-4">
-              <div className="inline-flex items-center gap-2 rounded-full bg-black/40 backdrop-blur-md px-3.5 py-1.5 border border-white/20 text-white shadow-sm">
+              <div
+                className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 shadow-xs backdrop-blur-xs ${
+                  isDark
+                    ? "bg-black/50 border border-white/20 text-white"
+                    : "bg-white/85 border border-[#eadf9a] text-[#1a1208]"
+                }`}
+              >
                 <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#ffd700] to-[#e69500] text-[#1a1208] text-[10px] font-black">
                   #1
                 </div>
-                <span className="text-xs sm:text-sm font-semibold tracking-wide text-white/95">
+                <span className="text-xs sm:text-sm font-bold tracking-wide">
                   {currentSlide.badge_text}
                 </span>
                 {currentSlide.badge_rating && (
-                  <div className="flex items-center gap-1 border-l border-white/25 pl-2 ml-1">
-                    <Star className="size-3 fill-[#ffd700] text-[#ffd700]" />
-                    <span className="text-xs font-bold text-[#ffd700]">
+                  <div
+                    className={`flex items-center gap-1 border-l pl-2 ml-1 ${
+                      isDark ? "border-white/25" : "border-[#ebd881]"
+                    }`}
+                  >
+                    <Star className="size-3 fill-[#e08c12] text-[#e08c12]" />
+                    <span
+                      className={`text-xs font-bold ${
+                        isDark ? "text-[#ffd700]" : "text-[#8b5e0a]"
+                      }`}
+                    >
                       {currentSlide.badge_rating}
                     </span>
                   </div>
                 )}
               </div>
 
-              <div className="hidden sm:flex items-center gap-2 text-xs font-bold tracking-wider text-white/70 bg-black/35 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
-                <span className="text-[#fcd404]">0{currentIndex + 1}</span>
-                <span className="text-white/40">/</span>
-                <span className="text-white/60">0{slides.length}</span>
+              {/* Slide Counter */}
+              <div
+                className={`hidden sm:flex items-center gap-1.5 text-xs font-extrabold tracking-wider px-3 py-1 rounded-full backdrop-blur-xs ${
+                  isDark
+                    ? "bg-black/40 text-white/80 border border-white/15"
+                    : "bg-white/85 text-[#1a1208]/80 border border-[#eadf9a]"
+                }`}
+              >
+                <span className="text-[#e08c12]">0{currentIndex + 1}</span>
+                <span className="opacity-40">/</span>
+                <span className="opacity-60">0{slides.length}</span>
               </div>
             </div>
 
             {/* Middle: Headline, Subtitle, Description & Action Button */}
-            <div className="my-auto py-3 sm:py-5 max-w-xl lg:max-w-2xl">
+            <div className="my-auto py-2 sm:py-4 max-w-xl lg:max-w-2xl">
               <Link href={currentSlide.cta_link} className="block group/link">
-                <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-[44px] font-black tracking-tight text-white leading-[1.12] drop-shadow-md">
+                <h1
+                  className={`font-sans text-3xl sm:text-4xl md:text-5xl lg:text-[42px] font-black tracking-tight leading-[1.12] ${
+                    isDark ? "text-white drop-shadow-md" : "text-[#1a1208]"
+                  }`}
+                >
                   {currentSlide.title}
-                  <span className="block mt-1.5 font-bold text-[#ffd700] text-2xl sm:text-3xl md:text-4xl drop-shadow">
+                  <span
+                    className={`block mt-1 font-bold text-2xl sm:text-3xl md:text-4xl ${
+                      isDark
+                        ? "text-[#ffd700] drop-shadow"
+                        : "text-[#4a3b2c]"
+                    }`}
+                  >
                     {currentSlide.subtitle}
                   </span>
                 </h1>
               </Link>
 
               {currentSlide.description && (
-                <p className="mt-3 text-xs sm:text-sm md:text-base text-white/85 leading-relaxed drop-shadow line-clamp-2 max-w-lg">
+                <p
+                  className={`mt-2.5 sm:mt-3 text-xs sm:text-sm md:text-base leading-relaxed line-clamp-2 max-w-lg ${
+                    isDark ? "text-stone-200 drop-shadow" : "text-[#5a4c3c]"
+                  }`}
+                >
                   {currentSlide.description}
                 </p>
               )}
 
-              {/* Action Button */}
-              <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-4">
+              {/* Action Row */}
+              <div className="mt-5 sm:mt-7 flex flex-wrap items-center gap-4">
                 <Link href={currentSlide.cta_link}>
                   <button
                     type="button"
-                    className="group/btn relative inline-flex items-center gap-3 rounded-full bg-[#fcd404] hover:bg-[#ffe144] px-8 sm:px-10 py-3.5 sm:py-4 text-base sm:text-lg font-extrabold text-[#1a1208] shadow-[0_12px_32px_rgba(252,212,4,0.45)] transition-all duration-300 hover:scale-[1.03] active:scale-[0.97]"
+                    className="group/btn relative inline-flex items-center gap-3 rounded-full bg-[#fcd404] hover:bg-[#f5c700] px-7 sm:px-9 py-3.5 sm:py-4 text-base sm:text-lg font-extrabold text-[#1c1304] shadow-[0_10px_28px_-6px_rgba(245,199,0,0.7)] transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] border border-[#e2b600]"
                   >
                     <span>{currentSlide.cta_text}</span>
-                    <span className="flex size-7 items-center justify-center rounded-full bg-[#1a1208] text-[#fcd404] transition-transform duration-300 group-hover/btn:translate-x-1">
-                      <ArrowRight className="size-4" strokeWidth={3} />
+                    <span className="flex size-7 items-center justify-center rounded-full bg-[#1c1304] text-[#fcd404] transition-transform duration-300 group-hover/btn:translate-x-1">
+                      <ArrowRight className="size-4" strokeWidth={2.5} />
                     </span>
                   </button>
                 </Link>
@@ -268,7 +311,7 @@ export function HeroAstroyogi() {
             </div>
 
             {/* Bottom Bar: Slide Dots & Arrow Navigation */}
-            <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center justify-between pt-1">
               {/* Slide Indicators */}
               <div className="flex items-center gap-2">
                 {slides.map((_, idx) => (
@@ -279,8 +322,10 @@ export function HeroAstroyogi() {
                     aria-label={`Go to slide ${idx + 1}`}
                     className={`transition-all duration-300 rounded-full ${
                       currentIndex === idx
-                        ? "w-8 sm:w-10 h-2 bg-[#fcd404] shadow-[0_0_12px_rgba(252,212,4,0.85)]"
-                        : "w-2 sm:w-2.5 h-2 bg-white/40 hover:bg-white/70"
+                        ? "w-8 sm:w-10 h-2 bg-[#fcd404] shadow-[0_0_10px_rgba(252,212,4,0.8)]"
+                        : isDark
+                        ? "w-2 sm:w-2.5 h-2 bg-white/40 hover:bg-white/70"
+                        : "w-2 sm:w-2.5 h-2 bg-[#1a1208]/25 hover:bg-[#1a1208]/50"
                     }`}
                   />
                 ))}
@@ -292,7 +337,11 @@ export function HeroAstroyogi() {
                   type="button"
                   onClick={prevSlide}
                   aria-label="Previous slide"
-                  className="flex size-9 sm:size-10 items-center justify-center rounded-full bg-white/15 hover:bg-white/30 backdrop-blur-md text-white border border-white/25 transition-all duration-200 hover:scale-105 active:scale-95"
+                  className={`flex size-9 sm:size-10 items-center justify-center rounded-full transition-all duration-200 hover:scale-105 active:scale-95 ${
+                    isDark
+                      ? "bg-black/40 hover:bg-black/60 text-white border border-white/20 backdrop-blur-xs"
+                      : "bg-white/90 hover:bg-white text-[#1a1208] border border-[#eadf9a] shadow-xs"
+                  }`}
                 >
                   <ChevronLeft className="size-5" />
                 </button>
@@ -300,7 +349,11 @@ export function HeroAstroyogi() {
                   type="button"
                   onClick={nextSlide}
                   aria-label="Next slide"
-                  className="flex size-9 sm:size-10 items-center justify-center rounded-full bg-white/15 hover:bg-white/30 backdrop-blur-md text-white border border-white/25 transition-all duration-200 hover:scale-105 active:scale-95"
+                  className={`flex size-9 sm:size-10 items-center justify-center rounded-full transition-all duration-200 hover:scale-105 active:scale-95 ${
+                    isDark
+                      ? "bg-black/40 hover:bg-black/60 text-white border border-white/20 backdrop-blur-xs"
+                      : "bg-white/90 hover:bg-white text-[#1a1208] border border-[#eadf9a] shadow-xs"
+                  }`}
                 >
                   <ChevronRight className="size-5" />
                 </button>
