@@ -411,6 +411,20 @@ export default function MyAppointmentsPage() {
                     <Sparkles className="size-3 text-amber-500" />
                     <span>{a.cosmic_synergy_score || 88}% Cosmic Synergy</span>
                   </span>
+
+                  {Boolean(a.rescheduled_count && a.rescheduled_count > 0) && (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-sky-500/10 px-2.5 py-1 text-xs font-semibold text-sky-800 dark:text-sky-200 border border-sky-500/30">
+                      <CalendarDays className="size-3 text-sky-600" />
+                      <span>{language === "bn" ? "সৌজন্যমূলক রি-শিডিউল" : "Courtesy Rescheduled"}</span>
+                    </span>
+                  )}
+
+                  {a.is_no_show && (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-rose-500/10 px-2.5 py-1 text-xs font-bold text-rose-800 dark:text-rose-300 border border-rose-500/30">
+                      <AlertCircle className="size-3 text-rose-600" />
+                      <span>{language === "bn" ? "অনুপস্থিত (No-Show)" : "Missed (No-Show)"}</span>
+                    </span>
+                  )}
                 </div>
 
                 {/* Financial & Escrow Summary */}
@@ -481,6 +495,21 @@ export default function MyAppointmentsPage() {
                       <FileText className="size-3.5 mr-1.5" />
                       {language === "bn" ? "সনদপত্র দেখুন ও প্রিন্ট করুন" : "View & Print Certificate"}
                     </Button>
+                  </div>
+                )}
+
+                {/* Missed Consultation (Client No-Show) Alert */}
+                {a.is_no_show && (
+                  <div className="mt-4 rounded-2xl border border-rose-500/30 bg-rose-500/5 p-4 text-xs space-y-1">
+                    <div className="flex items-center gap-2 font-bold text-rose-900 dark:text-rose-200">
+                      <AlertCircle className="size-4 text-rose-600" />
+                      <span>{language === "bn" ? "অধিবেশনে অনুপস্থিতি সংক্রান্ত নোটিশ (Missed Session)" : "Missed Consultation Notice (No-Show)"}</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      {language === "bn"
+                        ? `জ্যোতিষী মহাজাগতিক চেম্বারে প্রবেশ করে ${a.no_show_wait_minutes || 15} মিনিট অপেক্ষা করেছিলেন। অ্যাপয়েন্টমেন্টের নীতি অনুসারে অধিবেশনটি সমাপ্ত করা হয়েছে এবং নির্ধারিত ফি নিষ্পন্ন করা হয়েছে।`
+                        : `The consulting astrologer waited in the chamber for ${a.no_show_wait_minutes || 15} minutes. As per consultation policy, the session was closed.`}
+                    </p>
                   </div>
                 )}
 
