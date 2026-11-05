@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  AlertCircle,
   CalendarDays,
   Clock,
   Compass,
@@ -10,7 +11,9 @@ import {
   FileText,
   Flame,
   Gem,
+  Lock,
   MessageSquare,
+  ShieldCheck,
   Sparkles,
   Video,
 } from "lucide-react";
@@ -370,24 +373,37 @@ export default function MyAppointmentsPage() {
                   )}
                 </div>
 
-                {/* Financial Summary */}
-                <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 rounded-xl bg-surface-muted/50 p-3 text-xs border border-border/40">
-                  <div className="flex gap-1.5">
+                {/* Financial & Escrow Summary */}
+                <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1.5 rounded-xl bg-surface-muted/60 p-3.5 text-xs border border-border/50">
+                  <div className="flex items-center gap-1.5">
                     <dt className="text-muted-foreground">Total Fee:</dt>
                     <dd className="font-bold tabular-nums text-foreground">₹{rupees(a.price_paise)}</dd>
                   </div>
-                  <div className="flex gap-1.5">
-                    <dt className="text-muted-foreground">Paid Deposit:</dt>
+                  <div className="flex items-center gap-1.5">
+                    <dt className="text-muted-foreground">Upfront Deposit:</dt>
                     <dd className="font-semibold tabular-nums text-brand-600 dark:text-brand-400">
                       ₹{rupees(a.deposit_paise)} ({a.deposit_coins} coins)
                     </dd>
                   </div>
-                  <div className="flex gap-1.5">
-                    <dt className="text-muted-foreground">
-                      {a.status === "cancelled" ? "Cancelled" : "Due at Session:"}
-                    </dt>
-                    <dd className="font-bold tabular-nums text-foreground">
-                      ₹{rupees(a.balance_due_paise)}
+                  <div className="flex items-center gap-1.5">
+                    <dt className="text-muted-foreground">Escrow Reserved:</dt>
+                    <dd className="font-bold tabular-nums text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
+                      <span>{a.held_coins ?? 0} coins</span>
+                      {a.held_status === "held" && (
+                        <span className="text-[9.5px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-700 border border-indigo-500/20">
+                          Locked
+                        </span>
+                      )}
+                      {a.held_status === "captured" && (
+                        <span className="text-[9.5px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
+                          Paid
+                        </span>
+                      )}
+                      {a.held_status === "released" && (
+                        <span className="text-[9.5px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-500/10 text-slate-700 border border-slate-500/20">
+                          Refunded
+                        </span>
+                      )}
                     </dd>
                   </div>
                 </dl>
@@ -397,17 +413,43 @@ export default function MyAppointmentsPage() {
                   <VedicPrescriptionCard prescription={a.prescription} language={language} />
                 )}
 
-                {/* Cancellation trigger */}
+                {/* Cancellation Grace Window & Policy Trigger */}
                 {upcoming && (
-                  <div className="mt-3 flex justify-end">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs text-danger hover:bg-danger/10"
-                      onClick={() => setCancelling(a.id)}
-                    >
-                      {language === "bn" ? "স্লট বাতিল করুন" : "Cancel Appointment"}
-                    </Button>
+                  <div className="mt-3.5 pt-3 border-t border-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+                      {a.can_cancel ? (
+                        <>
+                          <Clock className="size-3.5 text-amber-600 shrink-0" />
+                          <span>
+                            {language === "bn"
+                              ? `বাতিলের সময়সীমা: ${a.cancel_deadline ? new Date(a.cancel_deadline).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : `${a.cancellation_window_minutes ?? 30} মিনিট`} পর্যন্ত বাতিল করলে এসক্রো কয়েন ফেরত পাবেন।`
+                              : `Grace Window: Can cancel until ${a.cancel_deadline ? new Date(a.cancel_deadline).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : `${a.cancellation_window_minutes ?? 30}m`}. Held coins are refunded.`}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="size-3.5 text-slate-400 shrink-0" />
+                          <span className="text-slate-500">
+                            {language === "bn"
+                              ? `বাতিলের অনুমোদিত সময় (${a.cancellation_window_minutes ?? 30} মিনিট) উত্তীর্ণ হয়েছে। স্লটটি এখন নিশ্চিত ও সংরক্ষিত।`
+                              : `Cancellation grace window (${a.cancellation_window_minutes ?? 30} mins) has passed. Slot is firmly locked.`}
+                          </span>
+                        </>
+                      )}
+                    </div>
+
+                    {a.can_cancel && (
+                      <div className="shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs text-danger hover:bg-danger/10"
+                          onClick={() => setCancelling(a.id)}
+                        >
+                          {language === "bn" ? "স্লট বাতিল করুন" : "Cancel Appointment"}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </li>
@@ -416,19 +458,24 @@ export default function MyAppointmentsPage() {
         </ul>
       )}
 
-      <ConfirmModal
-        open={Boolean(cancelling)}
-        onClose={() => setCancelling(null)}
-        onConfirm={() => cancelling && cancel.mutate(cancelling)}
-        title={language === "bn" ? "অ্যাপয়েন্টমেন্ট বাতিল করবেন?" : "Cancel this appointment?"}
-        description={
-          language === "bn"
-            ? "স্লট নিশ্চিত করার জন্য জমা দেওয়া অগ্রিম কয়েন ফেরতযোগ্য নয়।"
-            : "The amount you paid to hold the slot is not refunded."
-        }
-        confirmLabel={language === "bn" ? "হ্যাঁ, বাতিল করুন" : "Cancel it"}
-        loading={cancel.isPending}
-      />
+      {(() => {
+        const cancellingAppt = data?.find((x: Appointment) => x.id === cancelling);
+        return (
+          <ConfirmModal
+            open={Boolean(cancelling)}
+            onClose={() => setCancelling(null)}
+            onConfirm={() => cancelling && cancel.mutate(cancelling)}
+            title={language === "bn" ? "অ্যাপয়েন্টমেন্ট বাতিল করবেন?" : "Cancel this appointment?"}
+            description={
+              language === "bn"
+                ? `আপনি কি নিশ্চিত? এই অ্যাপয়েন্টমেন্ট বাতিল করলে আপনার ব্লক করা ${cancellingAppt?.held_coins ?? 0} কয়েন সাথে সাথে মূল ওয়ালেটে ফেরত (আনব্লক) দেওয়া হবে। তবে স্লট সংরক্ষণের অগ্রিম ${cancellingAppt?.deposit_coins ?? 0} কয়েন আমানত ফেরতযোগ্য নয়।`
+                : `Are you sure? Cancelling will immediately release and refund your ${cancellingAppt?.held_coins ?? 0} escrow-held coins back to your spendable wallet. The upfront deposit of ${cancellingAppt?.deposit_coins ?? 0} coins is non-refundable.`
+            }
+            confirmLabel={language === "bn" ? "হ্যাঁ, বাতিল করুন" : "Yes, cancel slot"}
+            loading={cancel.isPending}
+          />
+        );
+      })()}
     </div>
   );
 }

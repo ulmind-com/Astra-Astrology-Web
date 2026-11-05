@@ -413,6 +413,19 @@ function AppointmentsContent() {
     enabled: Boolean(selectedAstrologer?.id) && isSignedIn,
   });
 
+  // Query: Existing user appointments to enforce single active appointment rule (Rule 1)
+  const { data: myAppointments } = useQuery({
+    queryKey: ["appointments", "mine", "upcoming"],
+    queryFn: () => appointmentApi.mine(true),
+    enabled: isSignedIn,
+  });
+
+  const activeAppointment = React.useMemo(() => {
+    return (myAppointments ?? []).find(
+      (a) => a.status === "booked" && new Date(a.ends_at).getTime() >= Date.now(),
+    );
+  }, [myAppointments]);
+
   // 7. Query: Astrologer Reviews
   const { data: reviewsData } = useQuery({
     queryKey: ["reviews", "astrologer", selectedAstrologer?.id],
@@ -602,6 +615,43 @@ function AppointmentsContent() {
                       </button>
                     );
                   })}
+                </div>
+              </div>
+            )}
+
+            {/* Active Appointment Notice (Rule 1: Limit 1 active appointment at a time) */}
+            {activeAppointment && (
+              <div className="relative overflow-hidden rounded-3xl border-2 border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/5 p-4 sm:p-5 backdrop-blur-md shadow-[0_8px_30px_rgba(217,119,6,0.12)]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-start gap-3.5">
+                    <div className="p-2.5 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-md shrink-0">
+                      <CalendarCheck className="size-5" />
+                    </div>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-display font-bold text-sm sm:text-base text-amber-950">
+                          {language === "bn"
+                            ? "আপনার একটি সক্রিয় অ্যাপয়েন্টমেন্ট ইতোমধ্যে সংরক্ষিত রয়েছে"
+                            : "You Have an Active Appointment Scheduled"}
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-950 border border-amber-500/40">
+                          {language === "bn" ? "নীতিমালা: ১টি সক্রিয় সেশন সীমা" : "Policy: Max 1 Active Booking"}
+                        </span>
+                      </div>
+                      <p className="text-xs text-amber-950/80 mt-1 leading-relaxed max-w-3xl">
+                        {language === "bn"
+                          ? `আপনি ${new Date(activeAppointment.starts_at).toLocaleDateString("bn-BD", { weekday: "long", year: "numeric", month: "long", day: "numeric" })} তারিখে ${new Date(activeAppointment.starts_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} সময়ে জ্যোতিষীর সাথে একটি সেশন নিশ্চিত করেছেন। বৈদিক পরামর্শের পূর্ণ মনোযোগ বজায় রাখতে একই সাথে ১টির বেশি অ্যাপয়েন্টমেন্ট সক্রিয় রাখা যাবে না।`
+                          : `You have an active confirmed consultation booked for ${new Date(activeAppointment.starts_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}. To ensure undivided spiritual attention, users may hold only 1 active appointment at a time.`}
+                      </p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/account/appointments"
+                    className="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold text-xs shadow-md hover:shadow-lg transition-all"
+                  >
+                    <span>{language === "bn" ? "সক্রিয় অ্যাপয়েন্টমেন্ট দেখুন" : "View Active Appointment"}</span>
+                    <ArrowRight className="size-3.5" />
+                  </Link>
                 </div>
               </div>
             )}
@@ -1143,14 +1193,24 @@ function AppointmentsContent() {
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setIsConfirmModalOpen(true)}
-                  className="rounded-2xl px-6 sm:px-8 py-3.5 font-bold text-sm text-white bg-gradient-to-r from-[#D97706] via-[#EA580C] to-[#F59E0B] shadow-[0_8px_25px_-4px_rgba(217,119,6,0.5)] hover:shadow-[0_12px_32px_-4px_rgba(217,119,6,0.6)] hover:scale-[1.03] active:scale-[0.98] transition-all cursor-pointer flex items-center gap-2 animate-pulse-subtle"
-                >
-                  <span>{language === "bn" ? "স্লট নিশ্চিত করুন ও বুক করুন" : "Confirm Slot & Book"}</span>
-                  <ArrowRight className="size-4" />
-                </button>
+                {activeAppointment ? (
+                  <Link
+                    href="/account/appointments"
+                    className="rounded-2xl px-6 sm:px-8 py-3.5 font-bold text-xs sm:text-sm text-amber-950 bg-amber-100/90 border border-amber-300 shadow-xs hover:bg-amber-200 transition-all flex items-center gap-2 cursor-pointer"
+                  >
+                    <CalendarCheck className="size-4 text-amber-700" />
+                    <span>{language === "bn" ? "সক্রিয় অ্যাপয়েন্টমেন্ট রয়েছে (১টি সীমা)" : "Active Booking Exists (Limit 1)"}</span>
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setIsConfirmModalOpen(true)}
+                    className="rounded-2xl px-6 sm:px-8 py-3.5 font-bold text-sm text-white bg-gradient-to-r from-[#D97706] via-[#EA580C] to-[#F59E0B] shadow-[0_8px_25px_-4px_rgba(217,119,6,0.5)] hover:shadow-[0_12px_32px_-4px_rgba(217,119,6,0.6)] hover:scale-[1.03] active:scale-[0.98] transition-all cursor-pointer flex items-center gap-2 animate-pulse-subtle"
+                  >
+                    <span>{language === "bn" ? "স্লট নিশ্চিত করুন ও বুক করুন" : "Confirm Slot & Book"}</span>
+                    <ArrowRight className="size-4" />
+                  </button>
+                )}
               </div>
             </div>
           </aside>
@@ -1332,21 +1392,58 @@ function AppointmentsContent() {
 
                 {quote && (
                   <>
-                    <div className="flex justify-between items-center pt-2 border-t border-slate-100 text-slate-600">
-                      <span>Total Consultation Fee</span>
-                      <span className="font-bold text-slate-900 tabular-nums">₹{rupees(quote.price_paise)}</span>
+                    <div className="flex justify-between items-center pt-2.5 border-t border-slate-100 text-slate-600">
+                      <span className="font-medium">Total Consultation Fee</span>
+                      <span className="font-bold text-slate-900 tabular-nums">
+                        ₹{rupees(quote.price_paise)} ({quote.total_coins || Math.round(quote.price_paise / 100)} coins)
+                      </span>
                     </div>
 
                     <div className="flex justify-between items-center text-slate-600">
-                      <span>Hold Deposit ({quote.commission_percent}%)</span>
+                      <span className="flex items-center gap-1.5">
+                        <span>Upfront Slot Deposit ({quote.commission_percent}%)</span>
+                        <span className="text-[10px] text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded font-semibold border border-amber-200/50">Debited now</span>
+                      </span>
                       <span className="font-bold text-amber-800 tabular-nums">
                         ₹{rupees(quote.deposit_paise)} · {quote.deposit_coins} coins
                       </span>
                     </div>
 
                     <div className="flex justify-between items-center text-slate-600">
-                      <span>Due at Appointment</span>
-                      <span className="font-medium text-slate-900 tabular-nums">₹{rupees(quote.balance_due_paise)}</span>
+                      <span className="flex items-center gap-1.5">
+                        <span>Escrow Held Balance</span>
+                        <span className="text-[10px] text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded font-semibold border border-indigo-200/50">Blocked in escrow</span>
+                      </span>
+                      <span className="font-bold text-indigo-900 tabular-nums">
+                        ₹{rupees(quote.balance_due_paise)} · {quote.balance_due_coins ?? Math.max(0, (quote.total_coins || Math.round(quote.price_paise / 100)) - quote.deposit_coins)} coins
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center pt-2 border-t border-dashed border-slate-200 text-xs">
+                      <span className="text-slate-500 font-medium">Your Spendable Balance</span>
+                      <span className="font-extrabold text-emerald-700 tabular-nums">
+                        {quote.available_coins ?? quote.balance_coins} coins
+                      </span>
+                    </div>
+
+                    {/* Escrow & Grace Window Explanation Card */}
+                    <div className="mt-2.5 rounded-xl bg-amber-50/70 border border-amber-200/80 p-3 text-[11px] space-y-1.5 text-amber-950">
+                      <div className="flex items-center justify-between font-bold text-amber-900">
+                        <span className="flex items-center gap-1">
+                          <Clock className="size-3 text-amber-700" />
+                          <span>
+                            {language === "bn" ? "বাতিল ও রিফান্ড নীতিমালা" : "Cancellation & Escrow Policy"}
+                          </span>
+                        </span>
+                        <span className="text-[10px] bg-amber-200/70 px-2 py-0.5 rounded-full font-bold">
+                          {selectedAstrologer?.appointment?.cancellation_window_minutes ?? 30} mins grace window
+                        </span>
+                      </div>
+                      <p className="text-[10.5px] leading-relaxed text-amber-900/85">
+                        {language === "bn"
+                          ? `বুকিংয়ের পর ${selectedAstrologer?.appointment?.cancellation_window_minutes ?? 30} মিনিটের মধ্যে আপনি নিজে বাতিল করলে ব্লক করা ব্যালেন্স কয়েন তৎক্ষণাৎ ফেরত পাবেন (আমানত কয়েন ফেরতযোগ্য নয়)। জ্যোতিষী বাতিল করলে সম্পূর্ণ ১০০% কয়েন রিফান্ড পাবেন। সেশন সম্পন্ন হলে ব্লক করা ব্যালেন্স রিলিজ হবে।`
+                          : `The session balance is locked safely in escrow. If you cancel within ${selectedAstrologer?.appointment?.cancellation_window_minutes ?? 30} minutes after booking, your held coins are released back. If the astrologer cancels, 100% full refund is issued.`}
+                      </p>
                     </div>
                   </>
                 )}
@@ -1376,15 +1473,31 @@ function AppointmentsContent() {
                     </Button>
                   </Link>
                 </div>
+              ) : activeAppointment ? (
+                <div className="space-y-3 pt-2">
+                  <Alert tone="warning">
+                    <CalendarCheck className="mr-1.5 inline size-4" />
+                    {language === "bn"
+                      ? "আপনার একটি সক্রিয় অ্যাপয়েন্টমেন্ট ইতোমধ্যে রয়েছে। নতুন বুকিং করার আগে পূর্বের সেশনটি সমাপ্ত করুন।"
+                      : "You already have an active appointment. Astra policy permits only 1 active booking at a time."}
+                  </Alert>
+                  <Link href="/account/appointments" className="block w-full">
+                    <Button size="lg" variant="secondary" className="w-full text-xs font-bold">
+                      {language === "bn" ? "আমার অ্যাপয়েন্টমেন্ট দেখুন" : "View My Appointments"}
+                    </Button>
+                  </Link>
+                </div>
               ) : quote && !quote.can_afford ? (
                 <div className="space-y-3 pt-2">
                   <Alert tone="warning">
                     <Wallet className="mr-1.5 inline size-4" />
-                    You have {quote.balance_coins} coins. You need {quote.deposit_coins} coins to reserve this slot.
+                    {language === "bn"
+                      ? `আপনার খরচযোগ্য ব্যালেন্স আছে ${quote.available_coins ?? quote.balance_coins} কয়েন। এই অ্যাপয়েন্টমেন্টের মোট ফি ${quote.total_coins || Math.round(quote.price_paise / 100)} কয়েন (আমানত + সেশন ব্যালেন্স)। বুক করতে পর্যাপ্ত ব্যালেন্স প্রয়োজন।`
+                      : `You have ${quote.available_coins ?? quote.balance_coins} spendable coins. You need ${quote.total_coins || Math.round(quote.price_paise / 100)} total coins (deposit + session escrow hold) to confirm this slot.`}
                   </Alert>
                   <Link href="/account/wallet" className="block w-full">
                     <Button size="lg" variant="secondary" className="w-full text-xs font-bold">
-                      Add coins to wallet
+                      {language === "bn" ? "ওয়ালেটে কয়েন রিচার্জ করুন" : "Add coins to wallet"}
                     </Button>
                   </Link>
                 </div>
@@ -1400,7 +1513,7 @@ function AppointmentsContent() {
                     {language === "bn" ? "বুকিং ও স্লট নিশ্চিত করুন" : "Confirm & Reserve Slot"}
                   </Button>
                   <p className="mt-2 text-center text-[10px] text-slate-400">
-                    What you pay now holds the slot and confirms your booking immediately.
+                    Deposit is debited immediately and session balance is held safely in escrow.
                   </p>
                 </div>
               )}

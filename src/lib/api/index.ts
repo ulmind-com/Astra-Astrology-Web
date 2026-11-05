@@ -344,6 +344,9 @@ export const appointmentApi = {
 
   cancel: (id: string, reason?: string) =>
     api.post<Appointment>(endpoints.appointments.cancel(id), { reason: reason ?? null }),
+
+  complete: (id: string) =>
+    api.post<Appointment>(`/appointments/${id}/complete`, {}),
 };
 
 // ----------------------------------------------------------------- reviews

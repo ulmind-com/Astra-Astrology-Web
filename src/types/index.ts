@@ -66,13 +66,15 @@ export interface ServiceDurationStats {
   formatted_total?: string;
 }
 
-export type AstrologerPublic = S["AstrologerPublic"] & {
+export type AstrologerPublic = Omit<S["AstrologerPublic"], "appointment"> & {
   banner_image_url?: string | null;
   service_duration?: ServiceDurationStats | null;
+  appointment: AppointmentCard;
 };
-export type AstrologerProfile = S["AstrologerProfile"] & {
+export type AstrologerProfile = Omit<S["AstrologerProfile"], "appointment"> & {
   banner_image_url?: string | null;
   service_duration?: ServiceDurationStats | null;
+  appointment: AppointmentCard;
 };
 export type AstrologerCreate = S["AstrologerCreate"];
 export type AstrologerCreated = S["AstrologerCreated"];
@@ -90,7 +92,9 @@ export type Skill = S["Skill"];
 export type ConsultationMode = S["ConsultationMode"];
 
 /** `Paginated[AstrologerPublic]`, which openapi-typescript names awkwardly. */
-export type PaginatedAstrologers = S["Paginated_AstrologerPublic_"];
+export type PaginatedAstrologers = Omit<S["Paginated_AstrologerPublic_"], "items"> & {
+  items: AstrologerPublic[];
+};
 
 // ------------------------------------------------------------------ health
 export type HealthStatus = S["HealthStatus"];
@@ -172,8 +176,24 @@ export interface ConsultationMetadata {
   duration_seconds?: number | null;
 }
 
-export type WalletBalance = S["WalletBalance"];
-export type WalletSummary = S["WalletSummary"];
+export type ActiveConsultationHold = {
+  appointment_id: string;
+  astrologer_name: string;
+  starts_at: string;
+  ends_at: string;
+  minutes: number;
+  held_coins: number;
+  deposit_coins: number;
+};
+
+export type WalletBalance = S["WalletBalance"] & {
+  blocked_coins?: number;
+  available_coins?: number;
+  active_holds?: ActiveConsultationHold[];
+};
+export type WalletSummary = Omit<S["WalletSummary"], "wallet"> & {
+  wallet: WalletBalance;
+};
 export type WalletTransaction = S["TransactionOut"] & {
   astrologer_id?: string | null;
   astrologer_name?: string | null;
@@ -183,7 +203,12 @@ export type WalletTransaction = S["TransactionOut"] & {
   consultation?: ConsultationMetadata | null;
 };
 export type TransactionDirection = S["TransactionDirection"];
-export type TransactionReason = S["TransactionReason"] | "feature_usage";
+export type TransactionReason =
+  | S["TransactionReason"]
+  | "appointment_hold"
+  | "appointment_release"
+  | "appointment_balance"
+  | "feature_usage";
 export type RechargeOptions = S["RechargeOptions"];
 export type RechargePack = S["RechargePack"];
 export type CreateOrderResponse = S["CreateOrderResponse"];
@@ -203,7 +228,10 @@ export const TRANSACTION_REASON_LABELS: Record<TransactionReason, string> = {
   bonus: "Bonus",
   payout: "Payout",
   reversal: "Reversal",
-  appointment_deposit: "Appointment booking",
+  appointment_deposit: "Appointment booking deposit",
+  appointment_hold: "Appointment escrow hold",
+  appointment_release: "Appointment escrow released",
+  appointment_balance: "Appointment session completed",
   feature_usage: "Feature usage",
 };
 
@@ -345,10 +373,22 @@ export type Appointment = Omit<S["AppointmentOut"], "peer"> & {
   prescription?: VedicPrescription | null;
   muhurat_type?: string | null;
   peer?: S["AppointmentPeer"] | null;
+  held_coins?: number;
+  held_status?: string;
+  cancellation_window_minutes?: number;
+  cancel_deadline?: string | null;
+  can_cancel?: boolean;
+  completed_at?: string | null;
 };
-export type AppointmentQuote = S["AppointmentQuote"];
+export type AppointmentQuote = S["AppointmentQuote"] & {
+  balance_due_coins?: number;
+  total_coins?: number;
+  available_coins?: number;
+};
 export type AppointmentStatus = S["AppointmentStatus"];
-export type AppointmentCard = S["AppointmentCardOut"];
+export type AppointmentCard = S["AppointmentCardOut"] & {
+  cancellation_window_minutes?: number;
+};
 export type AvailabilityWindow = S["WindowOut"];
 export type AppointmentDayView = S["DayView"] & {
   muhurat_ratings?: Record<string, MuhuratSlotRating> | null;
