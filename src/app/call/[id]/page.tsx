@@ -1,14 +1,19 @@
 "use client";
 
-import { Phone, PhoneOff, Video } from "lucide-react";
+import { Clock, Coins, Phone, PhoneOff, Sparkles, Video } from "lucide-react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import * as React from "react";
+import { toast } from "sonner";
 
 import { CallRoom } from "@/components/call/call-room";
 import { OutOfCoins, SessionMeter } from "@/components/consult/session-meter";
-import { Alert, Avatar, Button, LoadingBlock } from "@/components/ui";
+import { Alert, Avatar, Button, LoadingBlock, Modal } from "@/components/ui";
 import { useCall, useCallActions, useCallHeartbeat, useCallTimer } from "@/hooks/use-call";
+import { useWallet } from "@/hooks/use-wallet";
+import { appointmentApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
+import { cn } from "@/lib/utils";
 import { useRequireAuth } from "@/providers/auth-provider";
 import { CALL_STATUS_LABELS, formatDuration, isCallLive } from "@/types";
 import { useLoopingSound } from "@/hooks/use-sound";
@@ -28,6 +33,21 @@ export default function CallPage() {
 
   useCallHeartbeat(id, live);
   const seconds = useCallTimer(call?.started_at);
+
+  const { data: walletData } = useWallet(Boolean(ready));
+  const [extensionActionLoading, setExtensionActionLoading] = React.useState(false);
+  const [extensionDismissed, setExtensionDismissed] = React.useState(false);
+
+  const extensionOffer = call?.extension_offer;
+  const isExtensionPending = Boolean(
+    call?.appointment_id &&
+    extensionOffer?.status === "pending" &&
+    !extensionDismissed
+  );
+
+  const balanceCoins = walletData?.wallet?.available_coins ?? call?.billing?.balance_coins ?? 0;
+  const neededCoins = extensionOffer?.cost_coins ?? 0;
+  const canAfford = balanceCoins >= neededCoins;
 
   // The caller hears the same tone while they wait, so "ringing…" on screen is
   // backed by something audible. It stops the moment the astrologer answers.
@@ -167,6 +187,101 @@ export default function CallPage() {
             )
           )}
         </div>
+      )}
+
+      {/* In-Chamber Consultation Extension Offer Modal */}
+      {isExtensionPending && extensionOffer && (
+        <Modal
+          open={isExtensionPending}
+          onClose={() => setExtensionDismissed(true)}
+          title="সেশন বৃদ্ধির প্রস্তাব (Consultation Extension)"
+          description={`${call.peer?.name || "জ্যোতিষী"} আলোচনার গভীরতার জন্য সেশনটি আরও ${extensionOffer.extra_minutes || 10} মিনিট বৃদ্ধি করতে চান।`}
+          footer={
+            <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 w-full">
+              <Button
+                variant="secondary"
+                disabled={extensionActionLoading}
+                onClick={async () => {
+                  setExtensionActionLoading(true);
+                  try {
+                    await appointmentApi.extensionAction(call.appointment_id!, "decline");
+                    setExtensionDismissed(true);
+                    toast.info("এক্সটেনশন প্রস্তাব বাতিল করা হয়েছে। বর্তমান সময়েই শেষ হবে।");
+                    refetch();
+                  } catch (err: any) {
+                    toast.error(err?.message || "Failed to decline extension.");
+                  } finally {
+                    setExtensionActionLoading(false);
+                  }
+                }}
+                className="w-full sm:w-auto"
+              >
+                না, বর্তমান সময়েই শেষ হোক
+              </Button>
+
+              {canAfford ? (
+                <Button
+                  variant="primary"
+                  disabled={extensionActionLoading}
+                  onClick={async () => {
+                    setExtensionActionLoading(true);
+                    try {
+                      await appointmentApi.extensionAction(call.appointment_id!, "accept");
+                      toast.success(`সেশনটি সফলভাবে +${extensionOffer.extra_minutes || 10} মিনিট বৃদ্ধি করা হয়েছে!`);
+                      refetch();
+                    } catch (err: any) {
+                      toast.error(err?.message || "এক্সটেনশন নিশ্চিত করা যায়নি।");
+                    } finally {
+                      setExtensionActionLoading(false);
+                    }
+                  }}
+                  className="w-full sm:w-auto font-bold bg-amber-500 hover:bg-amber-400 text-slate-950"
+                >
+                  <Sparkles className="size-3.5 mr-1 text-slate-950" />
+                  {extensionActionLoading ? "যুক্ত হচ্ছে..." : `একমত ও +${extensionOffer.extra_minutes || 10} মি. বৃদ্ধি করুন`}
+                </Button>
+              ) : (
+                <Link
+                  href="/account/wallet"
+                  target="_blank"
+                  className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-amber-500 px-4 py-2 text-xs font-bold text-slate-950 hover:bg-amber-400"
+                >
+                  <Coins className="size-3.5 mr-1" />
+                  ওয়ালেট রিচার্জ করুন ({neededCoins} Coins)
+                </Link>
+              )}
+            </div>
+          }
+        >
+          <div className="space-y-3.5 py-2 text-xs text-slate-800">
+            <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-3.5">
+              <div className="flex items-center justify-between text-xs pb-2 border-b border-amber-200/60">
+                <span className="text-slate-600">অতিরিক্ত সময় (Extra Time):</span>
+                <span className="font-extrabold text-amber-950 text-sm">+{extensionOffer.extra_minutes || 10} Minutes</span>
+              </div>
+              <div className="flex items-center justify-between text-xs py-2 border-b border-amber-200/60">
+                <span className="text-slate-600">ফি (Extension Fee):</span>
+                <span className="font-extrabold text-amber-950">{extensionOffer.cost_coins} Coins (₹{Math.round(extensionOffer.cost_paise / 100)})</span>
+              </div>
+              <div className="flex items-center justify-between text-xs pt-2">
+                <span className="text-slate-600">আপনার উপলব্ধ ব্যালেন্স:</span>
+                <span className={cn("font-bold", canAfford ? "text-emerald-700" : "text-rose-600")}>
+                  {balanceCoins} Coins {canAfford ? "✓ পর্যাপ্ত" : "✗ অপর্যাপ্ত"}
+                </span>
+              </div>
+            </div>
+
+            {!canAfford && (
+              <Alert tone="warning">
+                আপনার ওয়ালেটে পর্যাপ্ত কয়েন নেই। নতুন ট্যাবে ওয়ালেট রিচার্জ করে এসে "একমত" বাটনে ক্লিক করুন অথবা বর্তমান সময়েই শেষ করতে ডিক্লাইন করুন।
+              </Alert>
+            )}
+
+            <p className="text-[11px] text-slate-500 italic">
+              * সম্মতি দিলে কলটি কোনো বিরতি ছাড়া চলমান থাকবে এবং স্বয়ংক্রিয়ভাবে ঘড়িতে অতিরিক্ত সময় যুক্ত হবে।
+            </p>
+          </div>
+        </Modal>
       )}
     </div>
   );

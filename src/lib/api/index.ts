@@ -390,6 +390,9 @@ export const appointmentApi = {
       notes?: string | null;
     },
   ) => api.post<Appointment>(`/appointments/${id}/update-btr`, body),
+
+  extensionAction: (id: string, action: "accept" | "decline") =>
+    api.post<Appointment>(`/appointments/${id}/extension/action`, { action }),
 };
 
 // ----------------------------------------------------------------- reviews
