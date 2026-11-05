@@ -435,6 +435,7 @@
   .animate-pulse-ring {
     animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
+
 }
 
 /* --------------------------------------------------------------------------
@@ -592,6 +593,12 @@
   }
 }
 
+@media (max-width: 767px) {
+  body:has([data-full-viewport]) {
+    padding-bottom: 0 !important;
+  }
+}
+
 /* --------------------------------------------------------------------------
    Biometric Laser Scanline for 3D Face & Palm Scanning
    -------------------------------------------------------------------------- */
@@ -622,6 +629,242 @@
   pointer-events: none;
 }
 
+
+
+/* --------------------------------------------------------------------------
+   The motion layer lives at the top level, after every @layer.
+   -------------------------------------------------------------------------- */
+
+/* ------------------------------------------------------------------------
+   The motion layer.
+
+   One entrance animation, one press, one lift, one focus ring — reused
+   everywhere instead of each page inventing its own. Everything here moves
+   only `transform` and `opacity`, so it is composited on the GPU and cannot
+   cause a reflow mid-scroll on a mid-range phone. Nothing here changes
+   layout, so none of it can shift the page or break a measurement.
+
+   The reduced-motion block at the bottom of this file neutralises all of it
+   in one place; `.reveal` additionally needs its end state forced, since an
+   element that never animates must not stay invisible.
+   --------------------------------------------------------------------- */
+
+/* Entrance. Deliberately small: 14px and a hair of scale reads as the
+   content settling into place rather than flying in from off-screen. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Pre-animation state. The <Reveal> component adds `.reveal-in` when the
+   element first crosses into view, which runs the keyframes above and
+   leaves the final frame in place (`forwards`). */
+.reveal {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.reveal-in {
+  animation: rise-in 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* A group whose children rise in one after another. The wrapper itself stays
+   put and fully opaque — only the children animate — so a grid can keep its
+   own layout classes and still get a staggered entrance.
+
+   Delays are written out rather than computed from an inline `--i`, which
+   keeps the markup free of per-item style attributes. Past the twelfth child
+   they all share the last delay; a list longer than that is scrolled anyway,
+   and a visibly growing delay would leave the tail sitting blank. */
+.stagger-group > * {
+  opacity: 0;
+}
+
+/* `.reveal-cascade` is the same cascade without the observer, for content that
+   appears because the reader asked for it rather than because they scrolled to
+   it — a set of results after a calculation. It animates the moment it mounts.
+   `:is()` lets both share one set of delays. */
+:is(.stagger-group.reveal-in, .reveal-cascade) > * {
+  animation: rise-in 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(1) { animation-delay: 0ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(2) { animation-delay: 60ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(3) { animation-delay: 120ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(4) { animation-delay: 180ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(5) { animation-delay: 230ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(6) { animation-delay: 280ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(7) { animation-delay: 320ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(8) { animation-delay: 360ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(9) { animation-delay: 390ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(10) { animation-delay: 420ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(11) { animation-delay: 450ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(n + 12) { animation-delay: 480ms; }
+
+/* A single panel appearing in place: a tab's contents, a disclosure opening,
+   an overlay. Quicker than a scroll reveal, because the reader has just acted
+   and is waiting for the result. */
+.fade-in {
+  animation: rise-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* A dialog should feel like it comes forward rather than up. */
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.pop-in {
+  animation: pop-in 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Tactile feedback on anything pressable. `active:` fires on touch, so a
+   tap feels acknowledged before the network does anything. */
+.press {
+  transition:
+    transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.press:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* A card that responds to the cursor. Hover only — a phone has no hover,
+   and on a touch screen this would stick after the tap. */
+@media (hover: hover) {
+  .lift {
+    transition:
+      transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 260ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 260ms ease;
+  }
+
+  .lift:hover {
+    transform: translate3d(0, -3px, 0);
+    box-shadow: var(--shadow-lift);
+    border-color: rgb(221 205 33 / 0.45);
+  }
+}
+
+/* Keyboard focus, one shape for the whole app. `focus-visible` keeps it off
+   the screen for mouse users and present for everyone navigating by Tab. */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+  border-radius: inherit;
+}
+
+/* …and the same ring on every control by default, so a page does not have to
+   opt in to being keyboard-navigable. `focus-visible` means a mouse user never
+   sees it. Anything that wants a different ring sets its own `outline` and
+   wins on specificity; the `:where()` keeps this rule at zero specificity so
+   that is always true. */
+:where(button, a[href], [role="button"], summary, select, input, textarea):focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+}
+
+/* A single sweep of light across a surface, for a result that has just
+   arrived. Runs once, then the pseudo-element is done. */
+@keyframes sheen {
+  from { transform: translate3d(-120%, 0, 0); }
+  to { transform: translate3d(220%, 0, 0); }
+}
+
+.sheen {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+
+.sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 55%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    rgb(255 255 255 / 0.55),
+    transparent
+  );
+  animation: sheen 1100ms cubic-bezier(0.16, 1, 0.3, 1) 180ms both;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* --- Astra Booking Luxury Animations --- */
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.92;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes celestial-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s ease-in-out infinite;
+}
+
+.animate-float-gentle {
+  animation: float-gentle 4s ease-in-out infinite;
+}
+
+.animate-celestial-spin {
+  animation: celestial-spin 90s linear infinite;
+}
+
+.animate-shimmer-slide {
+  animation: shimmer-slide 2.5s infinite linear;
+}
+
+/* The motion switch-off goes last so it overrides everything above it. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -630,5 +873,27 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-}
 
+  /* Without this the reveal would simply never become visible. */
+  .reveal,
+  .reveal-in,
+  .fade-in,
+  .pop-in,
+  .stagger-group > *,
+  .reveal-cascade > * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .lift:hover {
+    transform: none !important;
+  }
+
+  .press:active:not(:disabled) {
+    transform: none !important;
+  }
+
+  .sheen::after {
+    display: none;
+  }
+}

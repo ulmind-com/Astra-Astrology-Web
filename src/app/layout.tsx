@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Cinzel, Cinzel_Decorative, Geist_Mono, Poppins } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "sonner";
 
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
@@ -47,6 +49,13 @@ export const metadata: Metadata = {
     description: "Consult verified astrologers for kundli, numerology and vastu guidance.",
     type: "website",
   },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -72,6 +81,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     closeButton
                     toastOptions={{ className: "font-sans" }}
                   />
+                  <Analytics />
+                  <SpeedInsights />
                 </LanguageProvider>
               </AuthProvider>
             </RealtimeProvider>

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui";
 import { numerologyApi } from "@/lib/api";
 import type { MobileCompareResponse, MobileComparisonItem } from "@/types/numerology";
 import type { AstrologyLanguage } from "@/types";
+import { MOBILE_COMPARE_I18N } from "@/lib/numerology-translations";
 
 interface MobileComparisonProps {
   mulank?: number;
@@ -21,6 +22,7 @@ export function MobileComparisonSection({
   birthDate = "",
   language = "bn",
 }: MobileComparisonProps) {
+  const t = MOBILE_COMPARE_I18N[language] || MOBILE_COMPARE_I18N.en;
   const [numbers, setNumbers] = React.useState<string[]>(["9876543210", "9830124567"]);
   const [profession, setProfession] = React.useState<string>("business");
   const [loading, setLoading] = React.useState(false);
@@ -28,7 +30,7 @@ export function MobileComparisonSection({
 
   const handleAddNumber = () => {
     if (numbers.length >= 6) {
-      toast.error(language === "bn" ? "সর্বোচ্চ ৬টি সিম নম্বর একসাথে তুলনা করা সম্ভব" : "Maximum 6 numbers can be compared");
+      toast.error(t.maxLimit);
       return;
     }
     setNumbers([...numbers, ""]);
@@ -36,7 +38,7 @@ export function MobileComparisonSection({
 
   const handleRemoveNumber = (index: number) => {
     if (numbers.length <= 2) {
-      toast.error(language === "bn" ? "তুলনার জন্য অন্তত ২টি নম্বর আবশ্যক" : "At least 2 numbers required for comparison");
+      toast.error(t.minLimit);
       return;
     }
     setNumbers(numbers.filter((_, i) => i !== index));
@@ -52,7 +54,7 @@ export function MobileComparisonSection({
     e.preventDefault();
     const cleanList = numbers.map((n) => n.trim()).filter((n) => n.length >= 10);
     if (cleanList.length < 2) {
-      toast.error(language === "bn" ? "অনুগ্রহ করে অন্তত ২টি সঠিক ১০-সংখ্যার মোবাইল নম্বর দিন" : "Please provide at least 2 valid 10-digit mobile numbers");
+      toast.error(t.validMobileError);
       return;
     }
 
@@ -67,11 +69,7 @@ export function MobileComparisonSection({
       });
       if (res) {
         setResult(res);
-        toast.success(
-          language === "bn"
-            ? "মোবাইল সিম নম্বরের ৬০%/৪০% তুলনা সফলভাবে সম্পন্ন হয়েছে!"
-            : "Mobile SIM numbers compared successfully!"
-        );
+        toast.success(t.successToast);
       }
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Failed to compare mobile numbers.");
@@ -88,21 +86,17 @@ export function MobileComparisonSection({
           <div>
             <h3 className="text-base sm:text-lg font-display font-bold text-foreground flex items-center gap-2">
               <Phone className="size-5 text-brand-600 dark:text-brand-400" />
-              {language === "bn"
-                ? "মোবাইল সিম তুলনা স্যুট (Mobile SIM Comparison Suite)"
-                : "Mobile SIM Comparison Suite"}
+              {t.title}
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {language === "bn"
-                ? "ক্লায়েন্ট রিসার্চ (Mobile Number Numerology 01, 02, 03.pdf) অনুযায়ী ৬০%/৪০% প্রভাব সূত্রে সিমের সঠিক মূল্যায়ন"
-                : "Compare 2-6 SIM numbers using King number harmony and the 60%/40% pair dominance law."}
+              {t.subtitle}
             </p>
           </div>
 
           <div className="flex items-center gap-2 text-xs font-mono bg-surface-muted/60 px-3 py-1.5 rounded-lg border border-border/60">
-            <span className="text-muted-foreground">কিং সংখ্যা (মূল):</span>
+            <span className="text-muted-foreground">{t.kingNumber}</span>
             <span className="font-bold text-brand-600">{mulank}</span>
-            <span className="text-muted-foreground ml-2">ভাগ্যাঙ্ক:</span>
+            <span className="text-muted-foreground ml-2">{t.bhagyank}</span>
             <span className="font-bold text-brand-600">{bhagyank}</span>
           </div>
         </div>
@@ -146,7 +140,7 @@ export function MobileComparisonSection({
                   className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline px-2 py-1"
                 >
                   <Plus className="size-4" />
-                  {language === "bn" ? "আরও একটি নম্বর যোগ করুন" : "Add Another SIM"}
+                  {t.addAnother}
                 </button>
               )}
 
@@ -157,12 +151,12 @@ export function MobileComparisonSection({
                   onChange={(e) => setProfession(e.target.value)}
                   className="h-9 px-3 rounded-xl border border-border/80 bg-surface-muted/30 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/30"
                 >
-                  <option value="business">ব্যবসা ও বাণিজ্য (Business/Finance)</option>
-                  <option value="it">আইটি ও প্রযুক্তি (IT/Tech/Software)</option>
-                  <option value="medicine">চিকিৎসা ও স্বাস্থ্য (Health/Medicine)</option>
-                  <option value="luxury">মিডিয়া ও ফ্যাশন (Luxury/Fashion/Media)</option>
-                  <option value="real_estate">রিয়েল এস্টেট (Real Estate/Law)</option>
-                  <option value="education">শিক্ষা ও পরামর্শ (Education/Consulting)</option>
+                  <option value="business">{t.sectorBusiness}</option>
+                  <option value="it">{t.sectorIt}</option>
+                  <option value="medicine">{t.sectorMedicine}</option>
+                  <option value="luxury">{t.sectorLuxury}</option>
+                  <option value="real_estate">{t.sectorRealEstate}</option>
+                  <option value="education">{t.sectorEducation}</option>
                 </select>
               </div>
             </div>
@@ -173,9 +167,7 @@ export function MobileComparisonSection({
               className="h-10 px-6 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs shadow-xs"
             >
               <Zap className="size-4 mr-1.5" />
-              {loading
-                ? language === "bn" ? "তুলনা হচ্ছে..." : "Comparing..."
-                : language === "bn" ? "সিম তুলনা সম্পন্ন করুন" : "Compare SIMs"}
+              {loading ? t.comparing : t.compareBtn}
             </Button>
           </div>
         </form>
@@ -193,7 +185,7 @@ export function MobileComparisonSection({
                 </div>
                 <div>
                   <span className="text-[11px] font-bold text-brand-700 dark:text-brand-300 uppercase tracking-wider">
-                    {language === "bn" ? "চূড়ান্ত বিজয়ী নম্বর (Top Recommended SIM)" : "Winner Recommended SIM"}
+                    {t.winnerTitle}
                   </span>
                   <div className="text-xl sm:text-2xl font-mono font-black text-foreground">
                     {result.best_number}
@@ -206,7 +198,7 @@ export function MobileComparisonSection({
                   {result.items[0]?.grade}
                 </span>
                 <span className="px-3 py-1.5 rounded-xl bg-brand-500/15 border border-brand-500/30 text-brand-950 dark:text-brand-200 text-xs font-mono font-bold">
-                  স্কোর: {result.items[0]?.compatibility_score}/১০০
+                  {t.scoreLabel(result.items[0]?.compatibility_score || 0)}
                 </span>
               </div>
             </div>
@@ -251,7 +243,7 @@ export function MobileComparisonSection({
                         {item.single_digit}
                       </div>
                       <span className="text-[10px] font-mono text-muted-foreground">
-                        যোগফল: {item.compound_number}
+                        {t.totalSum} {item.compound_number}
                       </span>
                     </div>
                   </div>
@@ -259,7 +251,7 @@ export function MobileComparisonSection({
                   {/* Score Progress */}
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs font-semibold">
-                      <span>সামঞ্জস্য স্কোর</span>
+                      <span>{t.compatibilityScore}</span>
                       <span className="text-brand-600">{item.compatibility_score}%</span>
                     </div>
                     <div className="h-2 w-full bg-surface-muted rounded-full overflow-hidden">
@@ -280,19 +272,19 @@ export function MobileComparisonSection({
                   <div className="space-y-1.5 text-xs border-t border-border/60 pt-2.5">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-emerald-700 dark:text-emerald-300 font-semibold flex items-center gap-1">
-                        <CheckCircle2 className="size-3" /> শুভ জোড়া ({item.positive_pairs.length}):
+                        <CheckCircle2 className="size-3" /> {t.positivePairs(item.positive_pairs.length)}
                       </span>
                       <span className="font-mono font-bold text-emerald-600">
-                        {item.positive_pairs.slice(0, 4).join(", ") || "নেই"}
+                        {item.positive_pairs.slice(0, 4).join(", ") || t.noneText}
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-rose-700 dark:text-rose-300 font-semibold flex items-center gap-1">
-                        <ShieldAlert className="size-3" /> প্রতিকূল জোড়া ({item.negative_pairs.length}):
+                        <ShieldAlert className="size-3" /> {t.negativePairs(item.negative_pairs.length)}
                       </span>
                       <span className="font-mono font-bold text-rose-600">
-                        {item.negative_pairs.slice(0, 4).join(", ") || "নেই"}
+                        {item.negative_pairs.slice(0, 4).join(", ") || t.noneText}
                       </span>
                     </div>
                   </div>
@@ -309,9 +301,7 @@ export function MobileComparisonSection({
           <div className="p-4 sm:p-5 rounded-2xl bg-surface-muted/60 border border-border/80 text-xs space-y-2">
             <h5 className="font-bold text-foreground flex items-center gap-2">
               <Sparkles className="size-4 text-brand-600" />
-              {language === "bn"
-                ? "ক্লায়েন্ট নির্দেশিকা — ৬০%/৪০% জোড়া আধিপত্য নীতি"
-                : "Authoritative 60%/40% Pair Dominance Law"}
+              {t.guidanceTitle}
             </h5>
             <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
               {result.recommendations_bn.map((rec, i) => (

@@ -136,6 +136,9 @@ export interface PalmScanResponse {
   temperament_archetype?: TemperamentArchetype;
   medical_constitution?: MedicalConstitution;
   kundli_palm_sync?: KundliPalmSync;
+  fingers_thumb_analysis?: FingersThumbAnalysis;
+  timeline_1year_summary?: Timeline1YearAge;
+  dual_hand_synastry?: DualHandMatchResult;
 
   overlay_image: string | null;
   response_image: string | null;
@@ -283,11 +286,81 @@ export interface PalmReadingRecord {
   temperament_archetype?: TemperamentArchetype;
   medical_constitution?: MedicalConstitution;
   kundli_palm_sync?: KundliPalmSync;
+  fingers_thumb_analysis?: FingersThumbAnalysis;
+  timeline_1year_summary?: Timeline1YearAge;
+  dual_hand_synastry?: DualHandMatchResult;
 
   overlay_image: string | null;
   coins_charged: number;
   quality_score: number;
   warnings: string[];
   created_at: string;
+}
+
+export interface FingersThumbAnalysis {
+  digit_ratio_2d_4d: number;
+  digit_ratio_type_en: string;
+  digit_ratio_type_bn: string;
+  digit_ratio_type_hi: string;
+  digit_ratio_desc_en: string;
+  digit_ratio_desc_bn: string;
+  digit_ratio_desc_hi: string;
+  thumb_length_ratio: number;
+  thumb_class_en: string;
+  thumb_class_bn: string;
+  thumb_class_hi: string;
+  thumb_meaning_en: string;
+  thumb_meaning_bn: string;
+  thumb_meaning_hi: string;
+  willpower_pct: number;
+  logic_reasoning_pct: number;
+  flexibility_en: string;
+  flexibility_bn: string;
+  flexibility_hi: string;
+  spread_stance_en: string;
+  spread_stance_bn: string;
+  spread_stance_hi: string;
+  lunula_score: number;
+  nail_health_en: string;
+  nail_health_bn: string;
+  nail_health_hi: string;
+}
+
+export interface Timeline1YearAge {
+  age: number;
+  epoch_key: string;
+  epoch_name_en: string;
+  epoch_name_bn: string;
+  epoch_name_hi: string;
+  governing_mount: string;
+  active_line: string;
+  focus_en: string;
+  focus_bn: string;
+  focus_hi: string;
+  prediction_en: string;
+  prediction_bn: string;
+  prediction_hi: string;
+  norm_coord: number[];
+  vitality_index: number;
+}
+
+export interface DualHandMatchResult {
+  is_harmonious: boolean;
+  karma_evolution_score: number;
+  prarabdha_score: number;
+  purushartha_score: number;
+  dominant_hand: string;
+  prarabdha_summary_en: string;
+  prarabdha_summary_bn: string;
+  prarabdha_summary_hi: string;
+  purushartha_summary_en: string;
+  purushartha_summary_bn: string;
+  purushartha_summary_hi: string;
+  transformation_strengths_en: string[];
+  transformation_strengths_bn: string[];
+  transformation_strengths_hi: string[];
+  karma_advice_en: string;
+  karma_advice_bn: string;
+  karma_advice_hi: string;
 }
 

@@ -5,7 +5,7 @@ import { MessageSquareQuote } from "lucide-react";
 import * as React from "react";
 
 import { Stars } from "@/components/reviews/stars";
-import { Button, EmptyState, LoadingBlock } from "@/components/ui";
+import { Avatar, Button, EmptyState, LoadingBlock } from "@/components/ui";
 import { reviewApi } from "@/lib/api";
 import { REVIEW_KIND_LABELS } from "@/types";
 
@@ -86,20 +86,30 @@ export function ReviewList({ astrologerId }: { astrologerId: string }) {
       <ul className="divide-y divide-border">
         {items.map((review) => (
           <li key={review.id} className="py-5">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <Stars value={review.stars} size="sm" />
-              <span className="text-sm font-semibold">
-                {review.author_name ?? "Someone"}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {REVIEW_KIND_LABELS[review.kind]} · {when(review.created_at)}
-              </span>
+            <div className="flex items-start gap-3">
+              <Avatar
+                src={review.author_avatar || review.author_avatar_url}
+                name={review.author_name ?? "Client"}
+                size="sm"
+                className="size-8 sm:size-9 shrink-0 mt-0.5"
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <Stars value={review.stars} size="sm" />
+                  <span className="text-sm font-semibold">
+                    {review.author_name ?? "Someone"}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {REVIEW_KIND_LABELS[review.kind]} · {when(review.created_at)}
+                  </span>
+                </div>
+                {review.text && (
+                  <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+                    {review.text}
+                  </p>
+                )}
+              </div>
             </div>
-            {review.text && (
-              <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
-                {review.text}
-              </p>
-            )}
           </li>
         ))}
       </ul>

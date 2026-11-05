@@ -399,7 +399,7 @@ function LanguagePreferenceCard() {
                 key={item.code}
                 type="button"
                 onClick={() => void setLanguage(item.code)}
-                className={`relative flex flex-col items-start p-4 rounded-xl border text-left transition-all duration-200 cursor-pointer ${
+                className={`relative flex flex-col items-start p-4 rounded-xl border text-left press transition-all duration-200 cursor-pointer ${
                   isSelected
                     ? "border-primary bg-primary/5 ring-2 ring-primary/25 shadow-sm"
                     : "border-border/60 hover:border-primary/40 hover:bg-muted/30"

@@ -54,6 +54,12 @@ import { CalculationDetails } from "@/components/astrology/calculation-details";
 import { NakshatraWheel } from "@/components/astrology/nakshatra-wheel";
 import { KundaliChart } from "@/components/astrology/kundali-chart";
 import { NAKSHATRA_UI_TEXTS } from "@/lib/nakshatra-translations";
+import {
+  toLocalizedDigits,
+  translatePlanetName,
+  translateRashiName,
+  translateNakshatraName,
+} from "@/lib/kundli-translations";
 import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
 import { useProfile } from "@/hooks/use-profile";
@@ -138,6 +144,28 @@ export default function NakshatraCalculatorPage() {
 
   const resultsRef = React.useRef<HTMLDivElement>(null);
   const hasAutoFilled = React.useRef(false);
+  const lastPayloadRef = React.useRef<NakshatraCalculatePayload | null>(null);
+
+  // Automatically reload results when language preference changes
+  React.useEffect(() => {
+    if (!result || !lastPayloadRef.current) return;
+    if (lastPayloadRef.current.language === language) return;
+
+    const updatedPayload: NakshatraCalculatePayload = {
+      ...lastPayloadRef.current,
+      language,
+    };
+    lastPayloadRef.current = updatedPayload;
+
+    astrologyApi
+      .calculateNakshatra(updatedPayload)
+      .then((resp) => {
+        setResult(resp);
+      })
+      .catch((err) => {
+        console.error("Failed to re-fetch Nakshatra calculation in new language:", err);
+      });
+  }, [language, result]);
 
   // Focus navigation refs
   const dayRef = React.useRef<HTMLInputElement>(null);
@@ -434,6 +462,7 @@ export default function NakshatraCalculatorPage() {
       return;
     }
 
+    lastPayloadRef.current = payload;
     setLoading(true);
     try {
       const resp = await astrologyApi.calculateNakshatra(payload);
@@ -566,7 +595,7 @@ export default function NakshatraCalculatorPage() {
                   key={lang.code}
                   type="button"
                   onClick={() => handleLanguageSwitch(lang.code)}
-                  className={`px-3 py-1 text-xs rounded-full font-semibold transition-all duration-200 ${
+                  className={`inline-flex min-h-9 items-center justify-center px-3 py-2 text-xs rounded-full font-semibold press transition-all duration-200 ${
                     language === lang.code
                       ? "bg-brand-500 text-white shadow-soft scale-102"
                       : "text-muted-foreground hover:text-foreground hover:bg-surface-elevated/80"
@@ -623,7 +652,7 @@ export default function NakshatraCalculatorPage() {
                 <button
                   type="button"
                   onClick={handleReloadFromProfile}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-brand-500/20 hover:bg-brand-500/30 text-brand-900 font-semibold transition-colors"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-brand-500/20 hover:bg-brand-500/30 text-brand-900 font-semibold press transition-colors"
                 >
                   <RefreshCw className="size-3" />
                   <span>{ui.syncProfileBtn}</span>
@@ -666,7 +695,7 @@ export default function NakshatraCalculatorPage() {
                         key={g.id}
                         type="button"
                         onClick={() => setGender(g.id)}
-                        className={`py-2.5 px-2 rounded-xl text-xs font-semibold border transition-all ${
+                        className={`py-2.5 px-2 rounded-xl text-xs font-semibold border press transition-all ${
                           gender === g.id
                             ? "border-brand-500 bg-brand-500/15 text-brand-900 shadow-2xs"
                             : "border-border bg-surface-muted/30 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
@@ -776,7 +805,7 @@ export default function NakshatraCalculatorPage() {
                     <button
                       type="button"
                       onClick={() => setPeriod(period === "AM" ? "PM" : "AM")}
-                      className="py-2.5 px-2 rounded-xl border border-border bg-surface-muted/70 text-foreground font-bold text-xs hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-brand-500/40 transition-all"
+                      className="py-2.5 px-2 rounded-xl border border-border bg-surface-muted/70 text-foreground font-bold text-xs hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-brand-500/40 press transition-all"
                     >
                       {period}
                     </button>
@@ -811,7 +840,7 @@ export default function NakshatraCalculatorPage() {
                 <button
                   type="button"
                   onClick={() => setShowAdvance(!showAdvance)}
-                  className="w-full px-4 py-2.5 flex items-center justify-between text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-surface-muted/40 transition-all"
+                  className="w-full px-4 py-2.5 flex items-center justify-between text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-surface-muted/40 press transition-all"
                 >
                   <span className="flex items-center gap-2">
                     <Sliders className="size-3.5 text-brand-500" />
@@ -938,7 +967,7 @@ export default function NakshatraCalculatorPage() {
         {/* Results Dashboard Section (5-Tab Cosmic UI) */}
         {/* =================================================================== */}
         {result && (
-          <section ref={resultsRef} className="max-w-5xl mx-auto px-4 mt-14 space-y-8 animate-fade-in">
+          <section ref={resultsRef} className="max-w-5xl mx-auto px-4 mt-14 space-y-8 reveal-cascade">
             {/* Grand Header Card */}
             <div className="relative overflow-hidden rounded-3xl border border-amber-500/40 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 p-6 sm:p-10 shadow-2xl text-white">
               <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -956,7 +985,7 @@ export default function NakshatraCalculatorPage() {
                   <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight">
                     {activeStarName}
                     <span className="text-amber-400 ml-2 font-normal text-xl sm:text-2xl">
-                      ({ui.padaLabel} {result.pada})
+                      ({ui.padaLabel} {toLocalizedDigits(result.pada, language)})
                     </span>
                   </h2>
 
@@ -1027,7 +1056,9 @@ export default function NakshatraCalculatorPage() {
                     <Star className="size-4 text-amber-400 fill-amber-400" />
                     <div>
                       <div className="text-[10px] text-slate-400 uppercase font-semibold">{ui.starLordLabel}</div>
-                      <div className="text-sm font-bold text-amber-300">{result.star_lord}</div>
+                      <div className="text-sm font-bold text-amber-300">
+                        {translatePlanetName(result.star_lord, language)}
+                      </div>
                     </div>
                   </div>
 
@@ -1035,7 +1066,9 @@ export default function NakshatraCalculatorPage() {
                     <Compass className="size-4 text-indigo-400" />
                     <div>
                       <div className="text-[10px] text-slate-400 uppercase font-semibold">{ui.kpSubLordLabel}</div>
-                      <div className="text-sm font-bold text-indigo-200">{result.kp_sub_lord}</div>
+                      <div className="text-sm font-bold text-indigo-200">
+                        {translatePlanetName(result.kp_sub_lord, language)}
+                      </div>
                     </div>
                   </div>
 
@@ -1043,7 +1076,9 @@ export default function NakshatraCalculatorPage() {
                     <Sparkles className="size-4 text-emerald-400" />
                     <div>
                       <div className="text-[10px] text-slate-400 uppercase font-semibold">{ui.elapsedLabel}</div>
-                      <div className="text-sm font-bold text-emerald-300">{result.nakshatra_elapsed_percentage}%</div>
+                      <div className="text-sm font-bold text-emerald-300">
+                        {toLocalizedDigits(result.nakshatra_elapsed_percentage, language)}%
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1083,7 +1118,7 @@ export default function NakshatraCalculatorPage() {
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-bold transition-all ${
+                    className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-bold press transition-all ${
                       isActive
                         ? "bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-amber-950 shadow-md font-black scale-102"
                         : "text-muted-foreground hover:text-foreground hover:bg-surface-muted/60"
@@ -1102,7 +1137,7 @@ export default function NakshatraCalculatorPage() {
             {/* TAB 1: CORE STAR & CONSTELLATIONS WHEEL */}
             {/* =================================================================== */}
             {activeTab === "core" && (
-              <div className="space-y-8 animate-fade-in">
+              <div className="space-y-8 fade-in">
                 {/* Sacred Identity Cards Grid */}
                 <div>
                   <h3 className="font-display text-xl font-bold text-foreground mb-4 flex items-center gap-2">
@@ -1257,7 +1292,7 @@ export default function NakshatraCalculatorPage() {
             {/* TAB 2: PANCHANG & AVAKAHADA CHAKRA */}
             {/* =================================================================== */}
             {activeTab === "panchang" && (
-              <div className="space-y-8 animate-fade-in">
+              <div className="space-y-8 fade-in">
                 {/* Panchang Strip */}
                 {result.panchang && (
                   <PanchangStrip
@@ -1359,7 +1394,7 @@ export default function NakshatraCalculatorPage() {
                             key={style}
                             type="button"
                             onClick={() => setChartStyle(style)}
-                            className={`rounded-lg px-2.5 py-1 transition-all ${
+                            className={`rounded-lg px-2.5 py-1 press transition-all ${
                               chartStyle === style
                                 ? "bg-amber-500 text-amber-950 font-black shadow-2xs"
                                 : "text-muted-foreground hover:text-foreground"
@@ -1388,7 +1423,7 @@ export default function NakshatraCalculatorPage() {
             {/* TAB 3: GANDANTA, PUSHKARA & DASHA BALANCE */}
             {/* =================================================================== */}
             {activeTab === "gandanta_dasha" && (
-              <div className="space-y-8 animate-fade-in">
+              <div className="space-y-8 fade-in">
                 {/* 1. Gandanta Dosha Analysis */}
                 <div
                   className={`rounded-3xl border p-6 sm:p-8 shadow-sm transition-all ${
@@ -1607,7 +1642,7 @@ export default function NakshatraCalculatorPage() {
             {/* TAB 4: NAVATARA & TODAY'S LIVE TRANSIT TARA BALA */}
             {/* =================================================================== */}
             {activeTab === "tarabala" && (
-              <div className="space-y-8 animate-fade-in">
+              <div className="space-y-8 fade-in">
                 {/* 1. Real-Time Daily Tara Bala Live Card */}
                 {result.daily_tara_bala && (
                   <div
@@ -1728,7 +1763,7 @@ export default function NakshatraCalculatorPage() {
             {/* TAB 5: TRAITS, CAREER & VEDIC REMEDIES */}
             {/* =================================================================== */}
             {activeTab === "traits" && (
-              <div className="space-y-8 animate-fade-in">
+              <div className="space-y-8 fade-in">
                 {/* 1. Nakshatra Disposition & Totem Matrix */}
                 {result.disposition && (
                   <div className="rounded-3xl border border-border/80 bg-surface-elevated p-6 sm:p-8 shadow-sm">
@@ -1746,38 +1781,52 @@ export default function NakshatraCalculatorPage() {
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                       <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
                         <div className="text-xs font-semibold text-muted-foreground uppercase mb-1">
-                          {language === "bn" ? "স্বভাব শ্রেণি" : "Disposition"}
+                          {language === "bn" ? "স্বভাব শ্রেণি" : language === "hi" ? "स्वभाव श्रेणी" : "Disposition"}
                         </div>
                         <div className="text-sm font-bold text-foreground">
-                          {language === "bn" ? result.disposition.disposition_bn : result.disposition.disposition_en}
+                          {language === "bn"
+                            ? result.disposition.disposition_bn
+                            : language === "hi"
+                            ? (result.disposition.disposition_hi || result.disposition.disposition_en)
+                            : result.disposition.disposition_en}
                         </div>
                       </div>
 
                       <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
                         <div className="text-xs font-semibold text-muted-foreground uppercase mb-1">
-                          {language === "bn" ? "গুণ বিভাজন" : "Gunas"}
+                          {language === "bn" ? "গুণ বিভাজন" : language === "hi" ? "गुण विभाजन" : "Gunas"}
                         </div>
                         <div className="text-sm font-bold text-foreground">
-                          {language === "bn" ? result.disposition.gunas_bn : result.disposition.gunas_en}
+                          {language === "bn"
+                            ? result.disposition.gunas_bn
+                            : language === "hi"
+                            ? (result.disposition.gunas_hi || result.disposition.gunas_en)
+                            : result.disposition.gunas_en}
                         </div>
                       </div>
 
                       <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
                         <div className="text-xs font-semibold text-muted-foreground uppercase mb-1">
-                          {language === "bn" ? "পবিত্র পক্ষী" : "Sacred Bird"}
+                          {language === "bn" ? "পবিত্র পক্ষী" : language === "hi" ? "पवित्र पक्षी" : "Sacred Bird"}
                         </div>
                         <div className="text-sm font-bold text-foreground">
-                          {language === "bn" ? result.disposition.sacred_bird_bn : result.disposition.sacred_bird_en}
+                          {language === "bn"
+                            ? result.disposition.sacred_bird_bn
+                            : language === "hi"
+                            ? (result.disposition.sacred_bird_hi || result.disposition.sacred_bird_en)
+                            : result.disposition.sacred_bird_en}
                         </div>
                       </div>
 
                       <div className="p-4 rounded-2xl bg-surface-muted/40 border border-border/60">
                         <div className="text-xs font-semibold text-muted-foreground uppercase mb-1">
-                          {language === "bn" ? "দিক ও বর্ণ" : "Direction & Varna"}
+                          {language === "bn" ? "দিক ও বর্ণ" : language === "hi" ? "दिशा व वर्ण" : "Direction & Varna"}
                         </div>
                         <div className="text-sm font-bold text-foreground">
                           {language === "bn"
                             ? `${result.disposition.direction_bn} • ${result.disposition.caste_varna_bn}`
+                            : language === "hi"
+                            ? `${result.disposition.direction_hi || result.disposition.direction_en} • ${result.disposition.caste_varna_hi || result.disposition.caste_varna_en}`
                             : `${result.disposition.direction_en} • ${result.disposition.caste_varna_en}`}
                         </div>
                       </div>
@@ -1786,13 +1835,13 @@ export default function NakshatraCalculatorPage() {
                     {result.disposition.suitable_activities_bn.length > 0 && (
                       <div className="pt-4 border-t border-border/60">
                         <div className="text-xs font-bold text-muted-foreground uppercase mb-2">
-                          {language === "bn" ? "এই নক্ষত্রে কোন কোন কাজ পরম শুভ ও সফলদায়ক:" : "Classical Auspicious Activities:"}
+                          {language === "bn" ? "এই নক্ষত্রে কোন কোন কাজ পরম শুভ ও সফলদায়ক:" : language === "hi" ? "इस नक्षत्र में शुभ व कल्याणकारी कार्य:" : "Classical Auspicious Activities:"}
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {(language === "bn"
                             ? result.disposition.suitable_activities_bn
                             : language === "hi"
-                            ? result.disposition.suitable_activities_hi
+                            ? (result.disposition.suitable_activities_hi?.length ? result.disposition.suitable_activities_hi : result.disposition.suitable_activities_en)
                             : result.disposition.suitable_activities_en
                           ).map((act, idx) => (
                             <span

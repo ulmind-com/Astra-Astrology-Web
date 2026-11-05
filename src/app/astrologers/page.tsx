@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Users } from "lucide-react";
+import { Heart, Users } from "lucide-react";
+import Link from "next/link";
 import * as React from "react";
 
 import {
@@ -16,10 +17,12 @@ import {
 } from "@/components/astrologers/directory-filters";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
-import { Alert, Button, EmptyState, Pagination } from "@/components/ui";
+import { Alert, Button, EmptyState, Pagination, Reveal } from "@/components/ui";
 import { astrologerApi, type DirectoryFilters as ApiFilters } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import type { ConsultationMode, Skill } from "@/types";
+import { useLanguage } from "@/providers/language-provider";
+import { ASTROLOGERS_I18N } from "@/lib/astrologers-translations";
 
 /** Form state is all strings; the API wants numbers and omitted keys. */
 function toQuery(filters: Filters, page: number): ApiFilters {
@@ -38,6 +41,8 @@ function toQuery(filters: Filters, page: number): ApiFilters {
 }
 
 function DirectoryInner() {
+  const { language } = useLanguage();
+  const t = ASTROLOGERS_I18N[language] || ASTROLOGERS_I18N.en;
   const [filters, setFilters] = React.useState<Filters>(EMPTY_FILTERS);
   const [page, setPage] = React.useState(1);
 
@@ -69,14 +74,23 @@ function DirectoryInner() {
       <SiteHeader />
 
       <main className="mx-auto max-w-6xl px-4 py-10">
-        <header className="mb-10">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-500/30 bg-brand-100 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-700 mb-4">
-            ✦ Live directory
-          </span>
-          <h1 className="font-display text-4xl font-bold tracking-tight">Astrologers</h1>
-          <p className="mt-2 max-w-lg text-muted-foreground leading-relaxed">
-            Verified practitioners, ready when you are. Whoever is online shows first.
-          </p>
+        <header className="mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-500/30 bg-brand-100 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-700 mb-4">
+              {t.liveDirectoryBadge}
+            </span>
+            <h1 className="font-display text-4xl font-bold tracking-tight">{t.heading}</h1>
+            <p className="mt-2 max-w-lg text-muted-foreground leading-relaxed">
+              {t.subtitle}
+            </p>
+          </div>
+          <Link
+            href="/account/favorites"
+            className="inline-flex items-center gap-2 self-start sm:self-auto rounded-full border border-rose-300/70 bg-rose-50/80 px-4 py-2 text-xs sm:text-sm font-semibold text-rose-700 shadow-2xs hover:bg-rose-100/90 transition-colors"
+          >
+            <Heart className="size-4 fill-rose-500 text-rose-500" />
+            <span>My Favorites</span>
+          </Link>
         </header>
 
         <div className="space-y-4">
@@ -90,11 +104,11 @@ function DirectoryInner() {
 
         <div className="mt-8">
           {apiError ? (
-            <Alert tone="error" title="Could not load astrologers">
+            <Alert tone="error" title={t.errorTitle}>
               {apiError.message}
               <div className="mt-3">
                 <Button size="sm" variant="secondary" onClick={() => refetch()}>
-                  Try again
+                  {t.tryAgainBtn}
                 </Button>
               </div>
             </Alert>
@@ -107,17 +121,20 @@ function DirectoryInner() {
           ) : !data || data.items.length === 0 ? (
             <EmptyState
               icon={Users}
-              title="No astrologers match that"
-              description="Try removing a filter, or search for something broader."
+              title={t.noMatchTitle}
+              description={t.noMatchDesc}
               action={
                 <Button variant="secondary" onClick={() => applyFilters(EMPTY_FILTERS)}>
-                  Clear filters
+                  {t.clearFiltersBtn}
                 </Button>
               }
             />
           ) : (
             <>
-              <div
+              {/* The wrapper stays mounted across pages, so the cards of the
+                  next page animate in the same way the first page's did. */}
+              <Reveal
+                stagger
                 className={`grid gap-5 transition-opacity duration-300 sm:grid-cols-2 lg:grid-cols-3 ${
                   isFetching ? "opacity-50" : "opacity-100"
                 }`}
@@ -125,7 +142,7 @@ function DirectoryInner() {
                 {data.items.map((astrologer) => (
                   <AstrologerCard key={astrologer.id} astrologer={astrologer} />
                 ))}
-              </div>
+              </Reveal>
 
               <div className="mt-8">
                 <Pagination meta={data.meta} onPage={setPage} />

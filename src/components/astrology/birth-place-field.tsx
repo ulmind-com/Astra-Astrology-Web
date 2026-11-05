@@ -256,54 +256,83 @@ export function BirthPlaceField({
     }
   };
 
-  const useCurrentLocation = () => {
-    if (!("geolocation" in navigator)) {
-      setError(copy.locationUnsupported);
-      return;
-    }
+  const useCurrentLocation = async () => {
     setLocating(true);
     setError(null);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        try {
-          const tz = await astrologyApi.lookupTimezone({
-            latitude,
-            longitude,
-            year: birthDate.year || new Date().getFullYear(),
-            month: birthDate.month || 1,
-            day: birthDate.day || 1,
-            hour: 12,
-          });
-          const label = `${copy.currentLocation} (${formatCoordinate(
-            latitude,
-            true,
-          )}, ${formatCoordinate(longitude, false)})`;
-          onChange({
-            place: label,
-            displayName: label,
-            latitude,
-            longitude,
-            timezoneName: tz?.timezone_name ?? null,
-            timezoneOffset: tz?.timezone ?? null,
-            timezoneLabel: tz?.timezone_label ?? null,
-            timezoneAbbreviation: tz?.timezone_abbreviation ?? null,
-            isDst: Boolean(tz?.is_dst),
-          });
-          setQuery(label);
-          setOpen(false);
-        } catch {
-          setError(copy.tzUnknown);
-        } finally {
-          setLocating(false);
+
+    const tryGps = (): Promise<{ latitude: number; longitude: number }> => {
+      return new Promise((resolve, reject) => {
+        if (typeof window === "undefined" || !("geolocation" in navigator)) {
+          return reject(new Error("unsupported"));
         }
-      },
-      () => {
-        setLocating(false);
-        setError(copy.locationDenied);
-      },
-      { timeout: 10_000 },
-    );
+        navigator.geolocation.getCurrentPosition(
+          (pos) =>
+            resolve({
+              latitude: pos.coords.latitude,
+              longitude: pos.coords.longitude,
+            }),
+          (err) => reject(err),
+          { enableHighAccuracy: false, timeout: 4500, maximumAge: 300000 },
+        );
+      });
+    };
+
+    let coords: { latitude: number; longitude: number } | null = null;
+    let placeName: string | null = null;
+
+    try {
+      coords = await tryGps();
+    } catch {
+      // Browser GPS unavailable or denied -> Fallback seamlessly to IP network detection
+      try {
+        const detected = await astrologyApi.geoDetect();
+        if (detected.latitude && detected.longitude) {
+          coords = { latitude: detected.latitude, longitude: detected.longitude };
+          placeName = detected.city || detected.line1 || detected.display_name?.split(",")[0];
+        }
+      } catch (e) {
+        console.warn("IP location fallback failed:", e);
+      }
+    }
+
+    if (!coords) {
+      setLocating(false);
+      setError(copy.locationDenied);
+      return;
+    }
+
+    try {
+      const tz = await astrologyApi.lookupTimezone({
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        year: birthDate.year || new Date().getFullYear(),
+        month: birthDate.month || 1,
+        day: birthDate.day || 1,
+        hour: 12,
+      });
+
+      const label = placeName
+        ? `${placeName} (${formatCoordinate(coords.latitude, true)}, ${formatCoordinate(coords.longitude, false)})`
+        : `${copy.currentLocation} (${formatCoordinate(coords.latitude, true)}, ${formatCoordinate(coords.longitude, false)})`;
+
+      onChange({
+        place: placeName || label,
+        displayName: label,
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        timezoneName: tz?.timezone_name ?? null,
+        timezoneOffset: tz?.timezone ?? null,
+        timezoneLabel: tz?.timezone_label ?? null,
+        timezoneAbbreviation: tz?.timezone_abbreviation ?? null,
+        isDst: Boolean(tz?.is_dst),
+      });
+      setQuery(placeName || label);
+      setOpen(false);
+    } catch {
+      setError(copy.tzUnknown);
+    } finally {
+      setLocating(false);
+    }
   };
 
   const showEmptyState =
@@ -437,7 +466,9 @@ export function BirthPlaceField({
           type="button"
           onClick={useCurrentLocation}
           disabled={locating}
-          className="inline-flex items-center gap-1.5 rounded-lg px-1.5 py-0.5 text-[11px] font-semibold text-brand-800 transition-colors hover:bg-brand-100 disabled:opacity-60"
+          // "Use my current location" was 19px tall — and it is the control
+          // that spares someone typing their birth place by hand.
+          className="inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2 py-1.5 text-[11px] font-semibold text-brand-800 transition-colors hover:bg-brand-100 disabled:opacity-60"
         >
           {locating ? (
             <Loader2 className="size-3 animate-spin" />

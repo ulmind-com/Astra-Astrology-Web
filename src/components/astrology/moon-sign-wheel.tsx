@@ -2,11 +2,14 @@
 
 import * as React from "react";
 import { Sparkles } from "lucide-react";
+import type { AstrologyLanguage } from "@/types";
+import { translatePlanetName, translateRashiName } from "@/lib/kundli-translations";
 
 interface MoonSignWheelProps {
   activeRashiIndex?: number | null;
   activeNakshatraIndex?: number | null;
   onSelectRashi?: (index: number) => void;
+  language?: AstrologyLanguage;
 }
 
 const ZODIAC_SIGNS = [
@@ -36,6 +39,7 @@ export function MoonSignWheel({
   activeRashiIndex = null,
   activeNakshatraIndex = null,
   onSelectRashi,
+  language = "en",
 }: MoonSignWheelProps) {
   const [hoveredRashi, setHoveredRashi] = React.useState<number | null>(null);
 
@@ -325,10 +329,21 @@ export function MoonSignWheel({
           <div className="absolute left-1/2 -bottom-4 -translate-x-1/2 rounded-full border border-brand-500/40 bg-card/95 backdrop-blur-md px-4 py-1.5 shadow-md flex items-center gap-2 text-xs">
             <span className="text-amber-500 font-bold">{currentSign.symbol}</span>
             <span className="font-bold text-foreground">
-              {currentSign.name} ({currentSign.hindi})
+              {language === "bn"
+                ? `${translateRashiName(currentSign.name, "bn")} (${currentSign.name})`
+                : language === "hi"
+                ? `${translateRashiName(currentSign.name, "hi")} (${currentSign.name})`
+                : `${currentSign.name} (${currentSign.hindi})`}
             </span>
             <span className="text-muted-foreground text-[11px]">
-              · Lord: <strong className="text-foreground">{currentSign.lord}</strong> · {currentSign.element}
+              · {language === "bn" ? "অধিপতি:" : language === "hi" ? "स्वामी:" : "Lord:"}{" "}
+              <strong className="text-foreground">
+                {language === "bn"
+                  ? translatePlanetName(currentSign.lord, "bn")
+                  : language === "hi"
+                  ? translatePlanetName(currentSign.lord, "hi")
+                  : currentSign.lord}
+              </strong>
             </span>
           </div>
         )}
@@ -336,7 +351,11 @@ export function MoonSignWheel({
 
       <p className="mt-6 text-center text-xs text-muted-foreground max-w-sm">
         <Sparkles className="inline-block size-3.5 text-amber-500 mr-1" />
-        Interactive Vedic Zodiac Wheel showing the 12 Rashis (Moon Signs) and 27 Nakshatras.
+        {language === "bn"
+          ? "১২ রাশি ও ২৭ নক্ষত্রের মহাজাগতিক বৈদিক চক্র।"
+          : language === "hi"
+          ? "१२ राशि एवं २७ नक्षत्रों का खगोलीय वैदिक चक्र।"
+          : "Interactive Vedic Zodiac Wheel showing the 12 Rashis (Moon Signs) and 27 Nakshatras."}
       </p>
     </div>
   );

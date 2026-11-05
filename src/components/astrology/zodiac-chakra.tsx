@@ -6,6 +6,8 @@ import Image from "next/image";
 interface ZodiacChakraProps {
   className?: string;
   speedSeconds?: number;
+  imageUrl?: string;
+  enabled?: boolean;
 }
 
 /**
@@ -20,7 +22,12 @@ interface ZodiacChakraProps {
  * 4. 3D GYROSCOPIC TILT: Interactive mouse parallax tilting in real-time.
  * 5. RADIANT AURA & SPARKLES: Warm golden solar pulse and twinkling constellation stars.
  */
-export function ZodiacChakra({ className = "", speedSeconds = 60 }: ZodiacChakraProps) {
+export function ZodiacChakra({
+  className = "",
+  speedSeconds = 60,
+  imageUrl = "/zodiac-chakra.png",
+  enabled = true,
+}: ZodiacChakraProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
@@ -96,7 +103,10 @@ export function ZodiacChakra({ className = "", speedSeconds = 60 }: ZodiacChakra
             className="animate-celestial-spin"
             style={{
               transformOrigin: "441px 375px",
-              animationDuration: isHovered ? "35s" : "65s",
+              animationDuration: isHovered
+                ? `${Math.max(10, Math.round(speedSeconds * 0.55))}s`
+                : `${speedSeconds}s`,
+              animationPlayState: enabled ? "running" : "paused",
             }}
           >
             {/* Outer Astrological Dashed Orbit */}
@@ -139,7 +149,10 @@ export function ZodiacChakra({ className = "", speedSeconds = 60 }: ZodiacChakra
             className="animate-celestial-spin-reverse"
             style={{
               transformOrigin: "441px 375px",
-              animationDuration: isHovered ? "45s" : "85s",
+              animationDuration: isHovered
+                ? `${Math.max(15, Math.round(speedSeconds * 0.7))}s`
+                : `${Math.round(speedSeconds * 1.35)}s`,
+              animationPlayState: enabled ? "running" : "paused",
             }}
           >
             {/* Inner Precision Dotted Track */}
@@ -177,7 +190,8 @@ export function ZodiacChakra({ className = "", speedSeconds = 60 }: ZodiacChakra
             className="animate-celestial-spin"
             style={{
               transformOrigin: "441px 375px",
-              animationDuration: "140s",
+              animationDuration: `${Math.round(speedSeconds * 2.2)}s`,
+              animationPlayState: enabled ? "running" : "paused",
             }}
           >
             {[0, 45, 90, 135].map((deg) => (
@@ -199,7 +213,7 @@ export function ZodiacChakra({ className = "", speedSeconds = 60 }: ZodiacChakra
         {/* 4. The 100% Uncut, Pristine Sacred Chakra Illustration */}
         <div className="relative z-10 w-full h-full">
           <Image
-            src="/zodiac-chakra.png"
+            src={imageUrl || "/zodiac-chakra.png"}
             alt="Exact Celestial Zodiac Chakra showing all 12 signs, constellations, radiant sun, wings and lunar phases"
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 820px"

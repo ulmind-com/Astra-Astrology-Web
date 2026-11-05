@@ -1,12 +1,14 @@
 "use client";
 
-import { Bookmark, Star } from "lucide-react";
+import { Bookmark, MessageSquare, Phone, Star, Video } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
 import { toast } from "sonner";
 
 import { Avatar, StatusDot } from "@/components/ui";
+import { useLanguage } from "@/providers/language-provider";
+import { ASTROLOGERS_I18N } from "@/lib/astrologers-translations";
 import { cn, coinsPerMinute, formatNumber } from "@/lib/utils";
 import {
   SKILL_LABELS,
@@ -30,6 +32,8 @@ export function getAstrologerBanner(id: string): string {
 }
 
 export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic }) {
+  const { language } = useLanguage();
+  const t = ASTROLOGERS_I18N[language] || ASTROLOGERS_I18N.en;
   const { availability, rates, rating } = astrologer;
   const href = `/astrologers/${astrologer.slug ?? astrologer.id}`;
 
@@ -64,11 +68,11 @@ export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic })
       if (bookmarked) {
         ids = ids.filter((id) => id !== astrologer.id);
         setBookmarked(false);
-        toast.success("Removed from saved astrologers.");
+        toast.success(t.bookmarkRemoved);
       } else {
         ids.push(astrologer.id);
         setBookmarked(true);
-        toast.success("Saved to favorites.");
+        toast.success(t.bookmarkSaved);
       }
       localStorage.setItem("astra_saved_astrologers", JSON.stringify(ids));
     } catch {
@@ -87,7 +91,7 @@ export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic })
       className={cn(
         "group relative flex flex-col justify-between overflow-hidden rounded-[28px] sm:rounded-[30px]",
         "bg-white border border-black/[0.08] shadow-[0_10px_30px_-15px_rgba(26,18,8,0.08)]",
-        "transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-15px_rgba(26,18,8,0.16)]",
+        "press focus-ring hover:-translate-y-1.5 hover:shadow-[0_20px_40px_-15px_rgba(26,18,8,0.16)]",
       )}
     >
       {/* 3D Top Banner */}
@@ -106,7 +110,7 @@ export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic })
         {astrologer.is_featured && (
           <div className="absolute left-3.5 top-3.5 z-10">
             <span className="inline-flex items-center gap-1 rounded-full bg-black/40 backdrop-blur-md px-2.5 py-1 text-[11px] font-medium text-white border border-white/20 shadow-xs">
-              ✦ Featured
+              {t.featuredBadge}
             </span>
           </div>
         )}
@@ -188,20 +192,20 @@ export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic })
               <Star className="size-3.5 fill-gold-500 text-gold-500 shrink-0" />
               <span>{rating.count > 0 ? rating.average.toFixed(1) : "5.0"}</span>
             </div>
-            <span className="mt-0.5 text-[11px] text-muted-foreground font-normal">rating</span>
+            <span className="mt-0.5 text-[11px] text-muted-foreground font-normal">{t.ratingLabel}</span>
           </div>
 
           {/* Experience / Consultations */}
           <div className="flex flex-col items-center justify-center px-1">
             <span className="font-bold text-sm text-ink-950 tabular-nums">
               {astrologer.experience_years > 0
-                ? `${astrologer.experience_years}+ yrs`
+                ? `${astrologer.experience_years}${t.yearsSuffix}`
                 : astrologer.total_consultations > 0
                   ? `${formatNumber(astrologer.total_consultations)}+`
                   : "Expert"}
             </span>
             <span className="mt-0.5 text-[11px] text-muted-foreground font-normal">
-              {astrologer.experience_years > 0 ? "exp" : "consults"}
+              {astrologer.experience_years > 0 ? t.expLabel : t.consultsLabel}
             </span>
           </div>
 
@@ -209,16 +213,43 @@ export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic })
           <div className="flex flex-col items-center justify-center px-1">
             <div className="flex items-baseline justify-center gap-0.5 font-bold text-sm text-ink-950 tabular-nums">
               <span>{formatCoins(price)}</span>
-              <span className="text-[11px] font-normal text-muted-foreground">/min</span>
+              <span className="text-[11px] font-normal text-muted-foreground">{t.perMinute}</span>
             </div>
-            <span className="mt-0.5 text-[11px] text-muted-foreground font-normal">rate</span>
+            <span className="mt-0.5 text-[11px] text-muted-foreground font-normal">{t.rateLabel}</span>
           </div>
         </div>
+
+        {/* Dynamic Realtime Service Duration Breakdown */}
+        {(() => {
+          const sd = astrologer.service_duration;
+          const videoMinutes = sd?.video_minutes ?? (sd?.video_hours ? Math.round(sd.video_hours * 60) : 0);
+          const chatMinutes = sd?.chat_minutes ?? (sd?.chat_hours ? Math.round(sd.chat_hours * 60) : 0);
+          const callMinutes = sd?.call_minutes ?? (sd?.call_hours ? Math.round(sd.call_hours * 60) : 0);
+
+          return (
+            <div className="mb-3.5 flex items-center justify-between gap-1 rounded-xl bg-gradient-to-r from-purple-50/70 via-amber-50/70 to-emerald-50/70 border border-black/[0.06] px-2.5 py-1.5 text-[10px] sm:text-[11px] font-semibold text-ink-950 shadow-2xs">
+              <span className="flex items-center gap-1 text-purple-900" title="Video Call">
+                <Video className="size-3 text-purple-600 shrink-0" />
+                <span className="tabular-nums">{t.videoCallDuration(videoMinutes)}</span>
+              </span>
+              <span className="text-black/20">·</span>
+              <span className="flex items-center gap-1 text-amber-900" title="Chat Session">
+                <MessageSquare className="size-3 text-amber-600 shrink-0" />
+                <span className="tabular-nums">{t.chatDuration(chatMinutes)}</span>
+              </span>
+              <span className="text-black/20">·</span>
+              <span className="flex items-center gap-1 text-emerald-900" title="Voice Call">
+                <Phone className="size-3 text-emerald-600 shrink-0" />
+                <span className="tabular-nums">{t.callDuration(callMinutes)}</span>
+              </span>
+            </div>
+          );
+        })()}
 
         {/* Action Button: Get In Touch */}
         <div className="mt-auto pt-1">
           <div className="flex items-center justify-center w-full rounded-full bg-ink-950 group-hover:bg-black text-white py-3 px-5 text-sm font-semibold tracking-wide shadow-xs transition-all duration-200 active:scale-[0.98]">
-            Get In Touch
+            {t.getInTouch}
           </div>
         </div>
       </div>

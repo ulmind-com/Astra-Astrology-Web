@@ -51,11 +51,30 @@ export type Gender = S["Gender"];
 export type MaritalStatus = S["MaritalStatus"];
 
 // -------------------------------------------------------------- astrologer
-export type AstrologerPublic = S["AstrologerPublic"] & {
+export interface ServiceDurationStats {
+  chat_minutes: number;
+  call_minutes: number;
+  video_minutes: number;
+  total_minutes?: number;
+  chat_hours: number;
+  call_hours: number;
+  video_hours: number;
+  total_hours: number;
+  formatted_chat?: string;
+  formatted_call?: string;
+  formatted_video?: string;
+  formatted_total?: string;
+}
+
+export type AstrologerPublic = Omit<S["AstrologerPublic"], "appointment"> & {
   banner_image_url?: string | null;
+  service_duration?: ServiceDurationStats | null;
+  appointment: AppointmentCard;
 };
-export type AstrologerProfile = S["AstrologerProfile"] & {
+export type AstrologerProfile = Omit<S["AstrologerProfile"], "appointment"> & {
   banner_image_url?: string | null;
+  service_duration?: ServiceDurationStats | null;
+  appointment: AppointmentCard;
 };
 export type AstrologerCreate = S["AstrologerCreate"];
 export type AstrologerCreated = S["AstrologerCreated"];
@@ -73,7 +92,9 @@ export type Skill = S["Skill"];
 export type ConsultationMode = S["ConsultationMode"];
 
 /** `Paginated[AstrologerPublic]`, which openapi-typescript names awkwardly. */
-export type PaginatedAstrologers = S["Paginated_AstrologerPublic_"];
+export type PaginatedAstrologers = Omit<S["Paginated_AstrologerPublic_"], "items"> & {
+  items: AstrologerPublic[];
+};
 
 // ------------------------------------------------------------------ health
 export type HealthStatus = S["HealthStatus"];
@@ -146,11 +167,48 @@ export const COMMON_LANGUAGES = [
 ];
 
 // ------------------------------------------------------------------ wallet
-export type WalletBalance = S["WalletBalance"];
-export type WalletSummary = S["WalletSummary"];
-export type WalletTransaction = S["TransactionOut"];
+export interface ConsultationMetadata {
+  session_id?: string | null;
+  astrologer_id?: string | null;
+  astrologer_name?: string | null;
+  astrologer_avatar?: string | null;
+  mode?: "chat" | "call" | "video" | "appointment" | string | null;
+  duration_seconds?: number | null;
+}
+
+export type ActiveConsultationHold = {
+  appointment_id: string;
+  astrologer_name: string;
+  starts_at: string;
+  ends_at: string;
+  minutes: number;
+  held_coins: number;
+  deposit_coins: number;
+};
+
+export type WalletBalance = S["WalletBalance"] & {
+  blocked_coins?: number;
+  available_coins?: number;
+  active_holds?: ActiveConsultationHold[];
+};
+export type WalletSummary = Omit<S["WalletSummary"], "wallet"> & {
+  wallet: WalletBalance;
+};
+export type WalletTransaction = S["TransactionOut"] & {
+  astrologer_id?: string | null;
+  astrologer_name?: string | null;
+  astrologer_image_url?: string | null;
+  astrologer_avatar?: string | null;
+  consultation_mode?: string | null;
+  consultation?: ConsultationMetadata | null;
+};
 export type TransactionDirection = S["TransactionDirection"];
-export type TransactionReason = S["TransactionReason"] | "feature_usage";
+export type TransactionReason =
+  | S["TransactionReason"]
+  | "appointment_hold"
+  | "appointment_release"
+  | "appointment_balance"
+  | "feature_usage";
 export type RechargeOptions = S["RechargeOptions"];
 export type RechargePack = S["RechargePack"];
 export type CreateOrderResponse = S["CreateOrderResponse"];
@@ -170,7 +228,10 @@ export const TRANSACTION_REASON_LABELS: Record<TransactionReason, string> = {
   bonus: "Bonus",
   payout: "Payout",
   reversal: "Reversal",
-  appointment_deposit: "Appointment booking",
+  appointment_deposit: "Appointment booking deposit",
+  appointment_hold: "Appointment escrow hold",
+  appointment_release: "Appointment escrow released",
+  appointment_balance: "Appointment session completed",
   feature_usage: "Feature usage",
 };
 
@@ -285,12 +346,64 @@ export function formatEarning(paise: number): string {
 }
 
 // ------------------------------------------------------------- appointments
-export type Appointment = S["AppointmentOut"];
-export type AppointmentQuote = S["AppointmentQuote"];
+export type VedicPrescription = {
+  gemstone?: string | null;
+  rudraksha?: string | null;
+  mantra?: string | null;
+  mantra_count?: number | null;
+  daan_remedy?: string | null;
+  astrologer_notes?: string | null;
+  updated_at?: string | null;
+};
+
+export type MuhuratSlotRating = {
+  choghadiya: string;
+  quality: "super_auspicious" | "auspicious" | "neutral" | "remedial" | "normal";
+  is_rahu_kaal: boolean;
+  is_abhijit: boolean;
+  badge_bn: string;
+  badge_hi: string;
+  badge_en: string;
+};
+
+export type Appointment = Omit<S["AppointmentOut"], "peer"> & {
+  consultation_pillar?: string | null;
+  kundli_id?: string | null;
+  birth_details?: Record<string, any> | null;
+  prescription?: VedicPrescription | null;
+  muhurat_type?: string | null;
+  preflight_dossier?: Record<string, any> | null;
+  cosmic_synergy_score?: number | null;
+  certificate_data?: Record<string, any> | null;
+  standby_queue?: Array<Record<string, any>> | null;
+  rescheduled_count?: number;
+  rescheduled_at?: string | null;
+  previous_starts_at?: string | null;
+  reschedule_reason?: string | null;
+  is_no_show?: boolean;
+  no_show_marked_at?: string | null;
+  no_show_wait_minutes?: number | null;
+  peer?: S["AppointmentPeer"] | null;
+  held_coins?: number;
+  held_status?: string;
+  cancellation_window_minutes?: number;
+  cancel_deadline?: string | null;
+  can_cancel?: boolean;
+  completed_at?: string | null;
+};
+export type AppointmentQuote = S["AppointmentQuote"] & {
+  balance_due_coins?: number;
+  total_coins?: number;
+  available_coins?: number;
+};
 export type AppointmentStatus = S["AppointmentStatus"];
-export type AppointmentCard = S["AppointmentCardOut"];
+export type AppointmentCard = S["AppointmentCardOut"] & {
+  cancellation_window_minutes?: number;
+};
 export type AvailabilityWindow = S["WindowOut"];
-export type AppointmentDayView = S["DayView"];
+export type AppointmentDayView = S["DayView"] & {
+  muhurat_ratings?: Record<string, MuhuratSlotRating> | null;
+};
 
 /** What a booking's state is called on screen. */
 export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {
@@ -301,8 +414,14 @@ export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {
 };
 
 // ----------------------------------------------------------------- reviews
-export type Review = S["ReviewOut"];
-export type ReviewPage = S["ReviewPage"];
+export type Review = S["ReviewOut"] & {
+  author_avatar?: string | null;
+  author_avatar_url?: string | null;
+  session_id?: string | null;
+};
+export type ReviewPage = Omit<S["ReviewPage"], "items"> & {
+  items: Review[];
+};
 export type ReviewSummary = S["ReviewSummary"];
 export type PendingReview = S["PendingReview"];
 export type ReviewKind = S["ReviewKind"];
@@ -418,8 +537,10 @@ export type HouseZoneCorrelation = {
   planets_occupying?: string;
   significance_en: string;
   significance_bn?: string;
+  significance_hi?: string;
   status_note_en?: string;
   status_note_bn?: string;
+  status_note_hi?: string;
 };
 
 export type KundliFaceSync = {
@@ -444,22 +565,28 @@ export type KundliFaceSync = {
     lord: string;
     body_part_en: string;
     body_part_bn?: string;
+    body_part_hi?: string;
     explanation_en: string;
     explanation_bn?: string;
+    explanation_hi?: string;
   } | null;
   til_masaka: Array<{
     planet: string;
     type_en: string;
     type_bn?: string;
+    type_hi?: string;
     zone_en: string;
     zone_bn?: string;
+    zone_hi?: string;
     body_correlation_en: string;
     body_correlation_bn?: string;
+    body_correlation_hi?: string;
   }>;
   remedies: Array<{
     category: string;
     upaya_en: string;
     upaya_bn?: string;
+    upaya_hi?: string;
     gemstone?: string;
   }>;
 };
@@ -495,11 +622,84 @@ export type FaceScanResponse = {
   tri_zone_analysis?: TriZoneAnalysis | null;
   pancha_mahabhuta?: PanchaMahabhuta | null;
   kundli_sync?: KundliFaceSync | null;
+  detected_moles?: Array<{
+    zone_id: string;
+    name_en: string;
+    name_bn: string;
+    name_hi: string;
+    planet: string;
+    x: number;
+    y: number;
+    x_norm: number;
+    y_norm: number;
+    contrast: number;
+    is_auspicious: boolean;
+    interpretation_en: string;
+    interpretation_bn: string;
+    interpretation_hi: string;
+  }>;
+  ayurvedic_prakriti?: {
+    prakriti_type: string;
+    dominant_dosha: string;
+    secondary_dosha: string;
+    vata_percentage: number;
+    pitta_percentage: number;
+    kapha_percentage: number;
+    ojas_score: number;
+    constitution_en: string;
+    constitution_bn: string;
+    constitution_hi: string;
+    diet_advice_en: string;
+    diet_advice_bn: string;
+    diet_advice_hi: string;
+    lifestyle_advice_en: string;
+    lifestyle_advice_bn: string;
+    lifestyle_advice_hi: string;
+  } | null;
+  timeline_100_summary?: {
+    age: number;
+    zone_key: string;
+    epoch_name_en: string;
+    epoch_name_bn: string;
+    epoch_name_hi: string;
+    governor_planet: string;
+    norm_x: number;
+    norm_y: number;
+    focus_en: string;
+    focus_bn: string;
+    focus_hi: string;
+    prediction_en: string;
+    prediction_bn: string;
+    prediction_hi: string;
+  } | null;
+  birth_rectification?: {
+    birth_lagna: string;
+    lagna_lord: string;
+    match_confidence_pct: number;
+    is_exact_match: boolean;
+    suggested_offset_minutes: number;
+    rectification_guidance_en: string;
+    rectification_guidance_bn: string;
+    rectification_guidance_hi: string;
+  } | null;
   landmark_mapping_version: string;
   model_version: string;
   processing_duration_ms: number;
   warnings: string[];
   error_message: string | null;
+};
+
+export type CoupleMatchResult = {
+  overall_compatibility_score: number;
+  is_harmonious: boolean;
+  communication_harmony_score: number;
+  destiny_alignment_score: number;
+  strengths_en: string[];
+  strengths_bn: string[];
+  strengths_hi: string[];
+  harmonizing_advice_en: string;
+  harmonizing_advice_bn: string;
+  harmonizing_advice_hi: string;
 };
 
 export * from "./astrology";

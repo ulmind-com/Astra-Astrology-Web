@@ -16,7 +16,8 @@ import type { ApiEnvelope, ApiErrorBody, ValidationDetail } from "@/types";
  * Pydantic prefixes a custom validator's message with "Value error, ". Useful
  * in a stack trace, noise next to a form field.
  */
-function tidyMessage(message: string): string {
+function tidyMessage(message?: string): string {
+  if (!message || typeof message !== "string") return "Validation error";
   const cleaned = message.replace(/^Value error,\s*/i, "");
   return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
 }
@@ -59,7 +60,10 @@ export class ApiError extends Error {
   get fieldErrors(): Record<string, string> {
     if (!Array.isArray(this.details)) return {};
     return Object.fromEntries(
-      (this.details as ValidationDetail[]).map((d) => [d.field, tidyMessage(d.message)]),
+      (this.details as any[]).map((d) => [
+        d.field || (Array.isArray(d.loc) ? d.loc.slice(-1)[0] : "error"),
+        tidyMessage(d.message || d.msg),
+      ]),
     );
   }
 

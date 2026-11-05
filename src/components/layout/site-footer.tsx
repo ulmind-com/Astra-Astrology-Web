@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { Year } from "@/components/ui";
 import { UlmindCredit } from "@/components/ulmind-credit";
@@ -9,6 +9,7 @@ const COLUMNS = [
     links: [
       { href: "/numerology", label: "Numerology & Lo Shu" },
       { href: "/vastu", label: "Vastu 16-Zone Compass" },
+      { href: "/tarot", label: "Tarot Card Reading" },
       { href: "/kundli", label: "Kundli Calculator" },
       { href: "/kundli-matching", label: "Kundli Matching" },
       { href: "/daily-horoscope", label: "Daily Horoscope" },
@@ -30,6 +31,7 @@ const COLUMNS = [
       { href: "/account/birth-details", label: "Birth details" },
       { href: "/account/addresses", label: "Addresses" },
       { href: "/account/security", label: "Security" },
+      { href: "/support", label: "Help & Support" },
     ],
   },
 ];
@@ -42,8 +44,14 @@ export function SiteFooter() {
         <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-4">
           <div className="md:col-span-2">
             <div className="flex items-center gap-2 font-semibold">
-              <span className="medallion flex size-9 items-center justify-center rounded-xl text-ink-900">
-                <Sparkles className="size-4" />
+              <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl">
+                <Image
+                  src="/logo.png"
+                  alt="DivinLink"
+                  width={36}
+                  height={36}
+                  className="size-full object-contain"
+                />
               </span>
               <span className="font-display tracking-wide">DivinLink</span>
             </div>
@@ -61,7 +69,10 @@ export function SiteFooter() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      // 20px tall with no padding: two of these stacked are
+                      // almost impossible to tap apart on a phone. The block
+                      // display and vertical padding give each its own row.
+                      className="inline-flex min-h-9 items-center text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {link.label}
                     </Link>

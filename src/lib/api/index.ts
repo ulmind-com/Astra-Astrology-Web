@@ -69,6 +69,13 @@ import type {
   WalletSummary,
   WalletTransaction,
 } from "@/types";
+import type {
+  TarotCard,
+  SpreadConfig,
+  TarotDrawRequest,
+  TarotDrawResponse,
+  DailyTarotRequest,
+} from "@/types/tarot";
 
 // ------------------------------------------------------------------- auth
 export const authApi = {
@@ -198,6 +205,20 @@ export const astrologerApi = {
 
   removeGalleryImage: (publicId: string) =>
     api.delete<null>(endpoints.astrologers.galleryImage(publicId)),
+
+  toggleFavorite: (slugOrId: string) =>
+    api.post<{ is_favorite: boolean; favorites_count: number; message: string }>(
+      endpoints.astrologers.favorite(slugOrId),
+      {},
+    ),
+
+  favoriteStatus: (slugOrId: string) =>
+    api.get<{ is_favorite: boolean; favorites_count: number }>(
+      endpoints.astrologers.favorite(slugOrId),
+    ),
+
+  myFavorites: () =>
+    api.get<AstrologerPublic[]>(endpoints.astrologers.myFavorites),
 };
 
 // ------------------------------------------------------------------ admin
@@ -311,6 +332,9 @@ export const appointmentApi = {
     starts_at: string;
     minutes: number;
     note?: string | null;
+    consultation_pillar?: string | null;
+    kundli_id?: string | null;
+    birth_details?: Record<string, any> | null;
   }) => api.post<Appointment>(endpoints.appointments.book, body),
 
   mine: (upcoming_only = false) =>
@@ -320,6 +344,34 @@ export const appointmentApi = {
 
   cancel: (id: string, reason?: string) =>
     api.post<Appointment>(endpoints.appointments.cancel(id), { reason: reason ?? null }),
+
+  complete: (id: string) =>
+    api.post<Appointment>(`/appointments/${id}/complete`, {}),
+
+  synergy: (astrologer_id: string, dob?: string | null) =>
+    api.get<Record<string, any>>(`/appointments/synergy`, {
+      query: { astrologer_id, ...(dob ? { dob } : {}) },
+      auth: false,
+    }),
+
+  getCertificate: (id: string) =>
+    api.get<Record<string, any>>(`/appointments/${id}/certificate`),
+
+  getCertificateHtmlUrl: (id: string) =>
+    `${process.env.NEXT_PUBLIC_API_URL || "https://api.divinlink.com"}/api/v1/appointments/${id}/certificate/html`,
+
+  joinStandby: (id: string) =>
+    api.post<{ position: number }>(`/appointments/${id}/standby`, {}),
+
+  joinChamber: (id: string) =>
+    api.post<{
+      call_id: string;
+      room_id: string;
+      token: string;
+      starts_at: string;
+      ends_at: string;
+      minutes: number;
+    }>(`/appointments/${id}/chamber`, {}),
 };
 
 // ----------------------------------------------------------------- reviews
@@ -373,6 +425,22 @@ export const palmReadingApi = {
   mine: () => api.get<PalmReadingRecord[]>(endpoints.palmReading.mine),
 
   detail: (id: string) => api.get<PalmReadingRecord>(endpoints.palmReading.detail(id)),
+
+  /** Classical 1-year resolution palm timeline forecast */
+  timelineAge: (age: number, gender: string = "male") =>
+    api.get<any>(endpoints.palmReading.timelineAge, {
+      query: { age, gender },
+      auth: false,
+    }),
+
+  /** Bilateral dual-hand synastry (Prarabdha vs Purushartha karma evolution) */
+  dualMatch: (payload: {
+    left_hand_image?: string;
+    right_hand_image?: string;
+    left_hand_measurements?: Record<string, any>;
+    right_hand_measurements?: Record<string, any>;
+    primary_handedness?: string;
+  }) => api.post<any>(endpoints.palmReading.dualMatch, payload),
 };
 
 export const faceReadingApi = {
@@ -403,6 +471,23 @@ export const faceReadingApi = {
   mine: () => api.get<FaceReading[]>(endpoints.faceReading.mine),
 
   get: (id: string) => api.get<FaceReading>(endpoints.faceReading.detail(id)),
+
+  /** Classical 100-year timeline forecast for a specific age */
+  timelineAge: (age: number, gender: string = "male") =>
+    api.get<any>(endpoints.faceReading.timelineAge, {
+      query: { age, gender },
+      auth: false,
+    }),
+
+  /** Samudrika couple facial synastry match */
+  coupleMatch: (payload: {
+    partner_a_image?: string;
+    partner_b_image?: string;
+    partner_a_measurements?: Record<string, number>;
+    partner_b_measurements?: Record<string, number>;
+    partner_a_name?: string;
+    partner_b_name?: string;
+  }) => api.post<any>(endpoints.faceReading.coupleMatch, payload),
 };
 
 // -------------------------------------------------------------- astrology
@@ -441,6 +526,41 @@ export const astrologyApi = {
         ...(birthDate?.month ? { month: birthDate.month } : {}),
         ...(birthDate?.day ? { day: birthDate.day } : {}),
       },
+      auth: false,
+    }),
+
+  /** Reverse geocodes GPS coordinates into a structured postal address. */
+  geoReverse: (lat: number, lon: number) =>
+    api.get<{
+      display_name: string;
+      line1: string;
+      line2: string;
+      landmark: string;
+      city: string;
+      state: string;
+      postal_code: string;
+      country: string;
+      latitude: number;
+      longitude: number;
+    }>(endpoints.astrology.geoReverse, {
+      query: { lat, lon },
+      auth: false,
+    }),
+
+  /** Automatically detects postal location via client network IP address. */
+  geoDetect: () =>
+    api.get<{
+      display_name: string;
+      line1: string;
+      line2: string;
+      landmark: string;
+      city: string;
+      state: string;
+      postal_code: string;
+      country: string;
+      latitude: number;
+      longitude: number;
+    }>(endpoints.astrology.geoDetect, {
       auth: false,
     }),
 
@@ -625,18 +745,92 @@ export interface HeroSlide {
   border_color?: string;
 }
 
+export interface HeroCardConfig {
+  title: string;
+  subtitle: string;
+  link: string;
+  icon: string;
+}
+
+export interface TrustStatConfig {
+  value: string;
+  label: string;
+}
+
 export interface HomePageCMSData {
-  hero_slides: HeroSlide[];
+  hero_slides?: HeroSlide[];
+  hero_eyebrow?: string;
   hero_title_line1?: string;
   hero_title_line2?: string;
+  hero_title_highlight?: string;
   hero_description?: string;
   hero_cta_primary_text?: string;
   hero_cta_primary_link?: string;
+  hero_cta_secondary_text?: string;
+  hero_cta_secondary_link?: string;
+  hero_chakra_image_url?: string;
+  hero_chakra_speed_seconds?: number;
+  hero_chakra_enabled?: boolean;
+  hero_cards?: HeroCardConfig[];
+  trust_stats?: TrustStatConfig[];
+  services_eyebrow?: string;
+  services_title?: string;
+  services_description?: string;
+  how_it_works_badge?: string;
+  how_it_works_title?: string;
+  step1_title?: string;
+  step1_body?: string;
+  step2_title?: string;
+  step2_body?: string;
+  step3_title?: string;
+  step3_body?: string;
+  cta_badge?: string;
+  cta_title?: string;
+  cta_description?: string;
+  cta_primary_text?: string;
+  cta_primary_link?: string;
+  cta_secondary_text?: string;
+  cta_secondary_link?: string;
 }
 
 export const cmsApi = {
   getHomepage: () => api.get<HomePageCMSData>(endpoints.cms.homepage, { auth: false }),
 };
 
+export const tarotApi = {
+  getDeck: (params?: { arcana?: string; suit?: string }) =>
+    api.get<TarotCard[]>(endpoints.tarot.deck, { query: params, auth: false }),
+  getCard: (id: string) =>
+    api.get<TarotCard>(endpoints.tarot.card(id), { auth: false }),
+  getSpreads: () =>
+    api.get<SpreadConfig[]>(endpoints.tarot.spreads, { auth: false }),
+  getSpread: (id: string) =>
+    api.get<SpreadConfig>(endpoints.tarot.spread(id), { auth: false }),
+  draw: (body: TarotDrawRequest) =>
+    api.post<TarotDrawResponse>(endpoints.tarot.draw, body),
+  daily: (body: DailyTarotRequest) =>
+    api.post<TarotDrawResponse>(endpoints.tarot.daily, body),
+};
+
+export interface PasskeyInfo {
+  id: string;
+  credential_id: string;
+  device_name: string;
+  transports: string[];
+  created_at: string;
+  last_used_at: string | null;
+}
+
+export const passkeyApi = {
+  getRegisterOptions: () => api.post<any>(endpoints.passkeys.registerOptions),
+  verifyRegistration: (body: { credential: any; device_name?: string }) =>
+    api.post<PasskeyInfo>(endpoints.passkeys.registerVerify, body),
+  listMine: () => api.get<PasskeyInfo[]>(endpoints.passkeys.mine),
+  delete: (id: string) => api.delete<{ deleted: boolean }>(endpoints.passkeys.delete(id)),
+  getLoginOptions: (body?: { email?: string }) =>
+    api.post<any>(endpoints.passkeys.loginOptions, body || {}, { auth: false }),
+  verifyLogin: (body: { credential: any }) =>
+    api.post<AuthResult>(endpoints.passkeys.loginVerify, body, { auth: false }),
+};
 
 

@@ -219,7 +219,7 @@ export function ZodiacSideScroll() {
                   key={elem}
                   type="button"
                   onClick={() => setSelectedElement(elem)}
-                  className={`px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200 ${
+                  className={`inline-flex min-h-9 items-center justify-center px-3 py-2 text-xs font-semibold rounded-full press transition-all duration-200 ${
                     selectedElement === elem
                       ? "bg-[#bd6c0c] text-white shadow-sm"
                       : "text-[#6b5f4d] hover:text-[#bd6c0c]"

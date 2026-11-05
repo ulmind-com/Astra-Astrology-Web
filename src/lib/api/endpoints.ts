@@ -34,6 +34,8 @@ export const endpoints = {
     image: "/astrologers/me/image",
     gallery: "/astrologers/me/gallery",
     galleryImage: (publicId: string) => `/astrologers/me/gallery/${publicId}`,
+    favorite: (slugOrId: string) => `/astrologers/${slugOrId}/favorite`,
+    myFavorites: "/astrologers/favorites/my",
   },
 
   wallet: {
@@ -74,6 +76,8 @@ export const endpoints = {
     scan: "/palm-reading/scan",
     mine: "/palm-reading/mine",
     detail: (id: string) => `/palm-reading/mine/${id}`,
+    timelineAge: "/palm-reading/timeline-age",
+    dualMatch: "/palm-reading/dual-match",
   },
   faceReading: {
     availability: "/face-reading/availability",
@@ -81,6 +85,8 @@ export const endpoints = {
     scan: "/face-reading/scan",
     mine: "/face-reading/mine",
     detail: (id: string) => `/face-reading/${id}`,
+    timelineAge: "/face-reading/timeline-age",
+    coupleMatch: "/face-reading/couple-match",
     rules: "/admin/face-reading/rules",
     rule: (id: string) => `/admin/face-reading/rules/${id}`,
   },
@@ -135,6 +141,8 @@ export const endpoints = {
     clientRules: (signIndex: number) => `/astrology/client-rules/${signIndex}`,
     dailyHoroscope: "/astrology/horoscope/daily",
     featuresPricing: "/astrology/features/pricing",
+    geoReverse: "/astrology/geo-reverse",
+    geoDetect: "/astrology/geo-detect",
   },
 
   aiAstrologer: {
@@ -164,9 +172,30 @@ export const endpoints = {
     medical: "/vastu/medical",
     astrovastu: "/vastu/astrovastu",
   },
-
   cms: {
     homepage: "/cms/homepage",
+  },
+
+  tarot: {
+    deck: "/tarot/deck",
+    card: (id: string) => `/tarot/cards/${id}`,
+    spreads: "/tarot/spreads",
+    spread: (id: string) => `/tarot/spreads/${id}`,
+    draw: "/tarot/draw",
+    daily: "/tarot/daily",
+  },
+
+  passkeys: {
+    registerOptions: "/auth/passkey/register/options",
+    registerVerify: "/auth/passkey/register/verify",
+    mine: "/auth/passkey/mine",
+    delete: (id: string) => `/auth/passkey/${id}`,
+    loginOptions: "/auth/passkey/login/options",
+    loginVerify: "/auth/passkey/login/verify",
+  },
+  support: {
+    contact: "/support/contact",
+    mine: "/support/mine",
   },
 } as const;
 
