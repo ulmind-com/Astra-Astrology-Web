@@ -193,5 +193,9 @@ export const endpoints = {
     loginOptions: "/auth/passkey/login/options",
     loginVerify: "/auth/passkey/login/verify",
   },
+  support: {
+    contact: "/support/contact",
+    mine: "/support/mine",
+  },
 } as const;
 
