@@ -387,6 +387,14 @@ export type Appointment = Omit<S["AppointmentOut"], "peer"> & {
   brahma_pause_reason?: string | null;
   brahma_pause_until?: string | null;
   rescue_deadline?: string | null;
+  abuse_flagged?: boolean;
+  abuse_reason?: string | null;
+  abuse_flagged_at?: string | null;
+  btr_requested?: boolean;
+  btr_request_note?: string | null;
+  btr_requested_at?: string | null;
+  btr_fulfilled?: boolean;
+  btr_updated_at?: string | null;
   peer?: S["AppointmentPeer"] | null;
   held_coins?: number;
   held_status?: string;
