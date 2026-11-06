@@ -20,6 +20,7 @@ import { AstrologyPredictionZodiac } from "@/components/home/astrology-predictio
 import { AstroyogiHeader } from "@/components/home/astroyogi-header";
 import { CelebrityVideosSection } from "@/components/home/celebrity-videos-section";
 import { ConsultRightAstrologer } from "@/components/home/consult-right-astrologer";
+import { FirstChatFreeModal } from "@/components/home/first-chat-free-modal";
 import { FreeAstrologyReadings } from "@/components/home/free-astrology-readings";
 import { FreeLiveExperts } from "@/components/home/free-live-experts";
 import { HeroAstroyogi } from "@/components/home/hero-astroyogi";
@@ -284,6 +285,9 @@ export default function HomePage() {
           isOpen={isChineseModalOpen}
           onClose={() => setIsChineseModalOpen(false)}
         />
+
+        {/* First Chat Free Welcome Pop-up */}
+        <FirstChatFreeModal />
       </main>
 
       <SiteFooter />
