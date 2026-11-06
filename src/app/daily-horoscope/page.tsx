@@ -55,18 +55,18 @@ import type {
 
 // 12 Zodiac signs metadata
 const ZODIAC_LIST = [
-  { id: "aries", index: 0, en: "Aries", bn: "মেষ", hi: "मेष", sa: "Mesha", symbol: "♈", element: "Fire", ruler: "Mars" },
-  { id: "taurus", index: 1, en: "Taurus", bn: "বৃষ", hi: "वृष", sa: "Vrishabha", symbol: "♉", element: "Earth", ruler: "Venus" },
-  { id: "gemini", index: 2, en: "Gemini", bn: "মিথুন", hi: "मिथुन", sa: "Mithuna", symbol: "♊", element: "Air", ruler: "Mercury" },
-  { id: "cancer", index: 3, en: "Cancer", bn: "কর্কট", hi: "कर्क", sa: "Karka", symbol: "♋", element: "Water", ruler: "Moon" },
-  { id: "leo", index: 4, en: "Leo", bn: "সিংহ", hi: "सिंह", sa: "Simha", symbol: "♌", element: "Fire", ruler: "Sun" },
-  { id: "virgo", index: 5, en: "Virgo", bn: "কন্যা", hi: "कन्या", sa: "Kanya", symbol: "♍", element: "Earth", ruler: "Mercury" },
-  { id: "libra", index: 6, en: "Libra", bn: "তুলা", hi: "तुला", sa: "Tula", symbol: "♎", element: "Air", ruler: "Venus" },
-  { id: "scorpio", index: 7, en: "Scorpio", bn: "বৃশ্চিক", hi: "वृश्चिक", sa: "Vrishchika", symbol: "♏", element: "Water", ruler: "Mars" },
-  { id: "sagittarius", index: 8, en: "Sagittarius", bn: "ধনু", hi: "धनु", sa: "Dhanu", symbol: "♐", element: "Fire", ruler: "Jupiter" },
-  { id: "capricorn", index: 9, en: "Capricorn", bn: "মকর", hi: "मकर", sa: "Makara", symbol: "♑", element: "Earth", ruler: "Saturn" },
-  { id: "aquarius", index: 10, en: "Aquarius", bn: "কুম্ভ", hi: "कुम्भ", sa: "Kumbha", symbol: "♒", element: "Air", ruler: "Saturn" },
-  { id: "pisces", index: 11, en: "Pisces", bn: "মীন", hi: "मीन", sa: "Meena", symbol: "♓", element: "Water", ruler: "Jupiter" },
+  { id: "aries", index: 0, en: "Aries", bn: "মেষ", hi: "मेष", sa: "Mesha", symbol: "♈", element: "Fire", ruler: "Mars", icon: "/images/zodiac/vedic/mesha.svg" },
+  { id: "taurus", index: 1, en: "Taurus", bn: "বৃষ", hi: "वृष", sa: "Vrishabha", symbol: "♉", element: "Earth", ruler: "Venus", icon: "/images/zodiac/vedic/rishabha.svg" },
+  { id: "gemini", index: 2, en: "Gemini", bn: "মিথুন", hi: "मिथुन", sa: "Mithuna", symbol: "♊", element: "Air", ruler: "Mercury", icon: "/images/zodiac/vedic/mithuna.svg" },
+  { id: "cancer", index: 3, en: "Cancer", bn: "কর্কট", hi: "कर्क", sa: "Karka", symbol: "♋", element: "Water", ruler: "Moon", icon: "/images/zodiac/vedic/kataka.svg" },
+  { id: "leo", index: 4, en: "Leo", bn: "সিংহ", hi: "सिंह", sa: "Simha", symbol: "♌", element: "Fire", ruler: "Sun", icon: "/images/zodiac/vedic/simha.svg" },
+  { id: "virgo", index: 5, en: "Virgo", bn: "কন্যা", hi: "कन्या", sa: "Kanya", symbol: "♍", element: "Earth", ruler: "Mercury", icon: "/images/zodiac/vedic/kanya.svg" },
+  { id: "libra", index: 6, en: "Libra", bn: "তুলা", hi: "तुला", sa: "Tula", symbol: "♎", element: "Air", ruler: "Venus", icon: "/images/zodiac/vedic/thula.svg" },
+  { id: "scorpio", index: 7, en: "Scorpio", bn: "বৃশ্চিক", hi: "वृश्चिक", sa: "Vrishchika", symbol: "♏", element: "Water", ruler: "Mars", icon: "/images/zodiac/vedic/vrischika.svg" },
+  { id: "sagittarius", index: 8, en: "Sagittarius", bn: "ধনু", hi: "धनु", sa: "Dhanu", symbol: "♐", element: "Fire", ruler: "Jupiter", icon: "/images/zodiac/vedic/dhanus.svg" },
+  { id: "capricorn", index: 9, en: "Capricorn", bn: "মকর", hi: "मकर", sa: "Makara", symbol: "♑", element: "Earth", ruler: "Saturn", icon: "/images/zodiac/vedic/makara.svg" },
+  { id: "aquarius", index: 10, en: "Aquarius", bn: "কুম্ভ", hi: "कुम्भ", sa: "Kumbha", symbol: "♒", element: "Air", ruler: "Saturn", icon: "/images/zodiac/vedic/kumbha.svg" },
+  { id: "pisces", index: 11, en: "Pisces", bn: "মীন", hi: "मीन", sa: "Meena", symbol: "♓", element: "Water", ruler: "Jupiter", icon: "/images/zodiac/vedic/meena.svg" },
 ];
 
 // 27 Nakshatras list for quick personalization
@@ -1505,8 +1505,9 @@ function HoroscopeContent() {
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className={`text-2xl font-serif ${isSelected ? "scale-110 text-[#b06d4e]" : "text-[#5e5369]"} transition-transform`}>
-                        {sign.symbol}
+                      <span className={`flex size-10 items-center justify-center rounded-xl ring-1 ring-[#d9b64a] bg-gradient-to-br from-[#fdf6da] to-[#f3e3a0] shadow-sm transition-transform ${isSelected ? "scale-110 ring-[#b06d4e]" : ""}`}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={sign.icon} alt={sign.en} width={28} height={28} className="size-7 object-contain" />
                       </span>
                       {signHoroscope && (
                         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
@@ -1602,8 +1603,15 @@ function HoroscopeContent() {
                   
                   {/* Left: Sign Identity */}
                   <div className="flex items-center gap-4 sm:gap-5">
-                    <div className="flex size-16 sm:size-20 shrink-0 items-center justify-center rounded-2xl border border-[#d6b7a2] bg-[#fbf0e4] text-4xl sm:text-5xl font-serif text-[#b06d4e] shadow-sm">
-                      {activeSignData.symbol}
+                    <div className="flex size-16 sm:size-20 shrink-0 items-center justify-center rounded-2xl border border-[#d9b64a] bg-gradient-to-br from-[#fdf6da] to-[#f3e3a0] shadow-sm">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={ZODIAC_LIST[activeSignIndex]?.icon ?? "/images/zodiac/vedic/mesha.svg"}
+                        alt={activeSignData.sign_name}
+                        width={56}
+                        height={56}
+                        className="size-10 sm:size-12 object-contain"
+                      />
                     </div>
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
