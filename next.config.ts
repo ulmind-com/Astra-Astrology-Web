@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   experimental: {
     agentUpgrade: "security",
   },
+  // Hide the Next.js dev indicator (bottom-left "N" overlay).
+  devIndicators: false,
   // `cacheComponents` (on by default in the scaffold) refuses to prerender any
   // route that reads request-time state. This app is signed-in and
   // client-rendered — `useSearchParams`, `useParams` and the auth context are
