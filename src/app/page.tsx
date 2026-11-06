@@ -17,12 +17,12 @@ import * as React from "react";
 
 import { ChineseZodiacModal } from "@/components/astrology/chinese-zodiac-modal";
 import { AstrologyPredictionZodiac } from "@/components/home/astrology-prediction-zodiac";
+import { AppDownloadSection } from "@/components/home/app-download-section";
 import { AstroyogiHeader } from "@/components/home/astroyogi-header";
 import { CelebrityVideosSection } from "@/components/home/celebrity-videos-section";
 import { ConsultRightAstrologer } from "@/components/home/consult-right-astrologer";
 import { FirstChatFreeModal } from "@/components/home/first-chat-free-modal";
 import { FreeAstrologyReadings } from "@/components/home/free-astrology-readings";
-import { FreeLiveExperts } from "@/components/home/free-live-experts";
 import { HeroAstroyogi } from "@/components/home/hero-astroyogi";
 import { TopAstrologersSection } from "@/components/home/top-astrologers-section";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -98,15 +98,12 @@ export default function HomePage() {
       {/* Main Astroyogi Top Header & Category Navigation */}
       <AstroyogiHeader />
 
-      <main className="min-h-screen bg-white">
+      <main className="min-h-screen bg-[linear-gradient(160deg,#fffdf8_0%,#fffae6_45%,#fdf3c4_100%)]">
         {/* 1. HERO BANNER & QUICK ACTION TILES */}
         <HeroAstroyogi />
 
         {/* 2. TOP ONLINE ASTROLOGERS */}
         <TopAstrologersSection />
-
-        {/* 3. FREE LIVE EXPERTS */}
-        <FreeLiveExperts />
 
         {/* 4. TODAY'S ASTROLOGY PREDICTION (12 ZODIAC SIGNS) */}
         <AstrologyPredictionZodiac />
@@ -121,7 +118,7 @@ export default function HomePage() {
         <CelebrityVideosSection />
 
         {/* 8. HOW IT WORKS: 3 STEPS TO CLARITY */}
-        <section className="bg-[#fffdf5] py-12 sm:py-16 border-b border-[#f2e9b0]/60">
+        <section className="bg-transparent py-12 sm:py-16 border-b border-[#f2e9b0]/60">
           <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-10">
               <span className="inline-block rounded-full bg-brand-200/80 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#8b5e0a] border border-brand-400/40 mb-3">
@@ -173,7 +170,7 @@ export default function HomePage() {
         </section>
 
         {/* 9. WHY TRUST DIVINLINK */}
-        <section className="bg-white py-12 sm:py-16 border-b border-[#f2e9b0]/60">
+        <section className="bg-transparent py-12 sm:py-16 border-b border-[#f2e9b0]/60">
           <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-10">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1a1208] tracking-tight">
@@ -216,8 +213,11 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* 9b. DOWNLOAD THE DIVINLINK APP */}
+        <AppDownloadSection />
+
         {/* 10. BOTTOM CALL TO ACTION BANNER */}
-        <section className="bg-[#fffdf7] py-12 sm:py-16">
+        <section className="bg-transparent py-12 sm:py-16">
           <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
             <div className="relative overflow-hidden rounded-3xl border border-[#ebd881] bg-gradient-to-r from-[#fff9e6] via-[#fff3cc] to-[#ffecaa] p-8 sm:p-12 text-center shadow-[0_16px_40px_-16px_rgba(240,210,80,0.6)]">
               <div className="relative z-10 max-w-2xl mx-auto">

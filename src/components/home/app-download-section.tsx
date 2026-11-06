@@ -1,0 +1,248 @@
+"use client";
+
+import React from "react";
+import { MessageCircle, ShieldCheck, Check, Phone, ChevronLeft, Send } from "lucide-react";
+
+// Chat bubbles that animate in one by one (same as the video).
+type ChatMsg = {
+  from: "user" | "astrologer";
+  text: string;
+  time?: string;
+};
+
+const CHAT_SCRIPT: ChatMsg[] = [
+  { from: "user", text: "Heena ji, when will I get married? My family is asking." },
+  { from: "astrologer", text: "Hi Priya ji, Share your date of birth & time first." },
+  { from: "user", text: "14 March 1998, 4:25 AM, Lucknow" },
+];
+
+const REVEAL_MS = 1400;
+
+function AppStoreBadge() {
+  return (
+    <a
+      href="#"
+      aria-label="Download on the App Store"
+      className="inline-flex items-center gap-2.5 rounded-xl bg-black px-4 py-2.5 text-white shadow-sm transition-transform hover:scale-[1.03]"
+    >
+      <svg viewBox="0 0 384 512" className="size-7 fill-white" aria-hidden="true">
+        <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C32.3 141.2-8.4 184.8 0 273.5c8.4 88.7 48.5 139.3 92.3 139.1 21.3-.1 36.4-14.6 64.1-14.6 26.9 0 40.9 14.6 64.4 14.6 44.2-.7 80.6-54.1 88.5-142.9-56.4-26.6-54.1-104.5-.6-112.9zM255.9 44.8C286.1 8.9 283.4 .3 282.4 0c-26.8 1.1-58 17.9-75.7 38.8-19.5 22.4-30.9 50.2-28.5 81 29 .2 55.4-15.4 77.7-75z" />
+      </svg>
+      <span className="flex flex-col leading-none text-left">
+        <span className="text-[10px] font-medium">Download on the</span>
+        <span className="text-base font-semibold -mt-0.5">App Store</span>
+      </span>
+    </a>
+  );
+}
+
+function GooglePlayBadge() {
+  return (
+    <a
+      href="#"
+      aria-label="Get it on Google Play"
+      className="inline-flex items-center gap-2.5 rounded-xl bg-black px-4 py-2.5 text-white shadow-sm transition-transform hover:scale-[1.03]"
+    >
+      <svg viewBox="0 0 512 512" className="size-6" aria-hidden="true">
+        <path fill="#00d4ff" d="M47 24.6C40.6 29 36.8 36.2 36.8 46.2v419.6c0 10 3.8 17.2 10.2 21.6l238.8-231.4L47 24.6z" />
+        <path fill="#ffce00" d="M401 231.6l-66.3-38.4-70.6 68.4 70.6 68.4L401 291.6c19.6-11.3 19.6-48.7 0-60z" />
+        <path fill="#00f076" d="M47 24.6l238.8 231.4 48.9-47.4-240-138.9C77.3 60 59 55.8 47 24.6z" transform="translate(0 0)" />
+        <path fill="#ff3333" d="M47 487.4c12 31.2 30.3 27 87.7-14.1l200-116.1-48.9-47.4L47 487.4z" />
+      </svg>
+      <span className="flex flex-col leading-none text-left">
+        <span className="text-[10px] font-medium">GET IT ON</span>
+        <span className="text-base font-semibold -mt-0.5">Google Play</span>
+      </span>
+    </a>
+  );
+}
+
+export function AppDownloadSection() {
+  const [visible, setVisible] = React.useState<number>(0);
+  const [typing, setTyping] = React.useState<boolean>(false);
+
+  // Reveal chat bubbles one by one, with a typing pause, then loop.
+  React.useEffect(() => {
+    let active = true;
+    const timers: number[] = [];
+
+    const run = () => {
+      if (!active) return;
+      setVisible(0);
+      CHAT_SCRIPT.forEach((_, i) => {
+        timers.push(
+          window.setTimeout(() => {
+            if (!active) return;
+            setTyping(true);
+            timers.push(
+              window.setTimeout(() => {
+                if (!active) return;
+                setTyping(false);
+                setVisible(i + 1);
+              }, 500)
+            );
+          }, i * REVEAL_MS)
+        );
+      });
+      // typing indicator after last message, then restart
+      timers.push(
+        window.setTimeout(() => {
+          if (!active) return;
+          setTyping(true);
+        }, CHAT_SCRIPT.length * REVEAL_MS)
+      );
+      timers.push(
+        window.setTimeout(() => {
+          if (!active) return;
+          setTyping(false);
+          run();
+        }, CHAT_SCRIPT.length * REVEAL_MS + 2200)
+      );
+    };
+
+    run();
+    return () => {
+      active = false;
+      timers.forEach((t) => window.clearTimeout(t));
+    };
+  }, []);
+
+  return (
+    <section className="relative overflow-hidden bg-gradient-to-b from-[#fdf4b8] to-[#fbeea0] py-14 sm:py-20 border-b border-[#f2e9b0]/60">
+      <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
+        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+          {/* LEFT: copy + features + store badges */}
+          <div>
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#c2410c]">
+              The DivinLink App
+            </span>
+            <h2 className="mt-3 text-4xl font-bold leading-[1.08] tracking-tight text-[#1a1208] sm:text-5xl">
+              Astrology made simpler,
+              <br />
+              and available to you{" "}
+              <span className="text-[#e2561f]">24×7</span>.
+            </h2>
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-[#5f5640] sm:text-base">
+              Connect with an astrologer anytime, and find the solutions to all your love,
+              marriage, career, and finance related problems instantly.
+            </p>
+
+            <ul className="mt-7 space-y-4">
+              <li className="flex items-center gap-3">
+                <span className="flex size-9 items-center justify-center rounded-xl bg-white text-[#c2410c] shadow-xs">
+                  <MessageCircle className="size-[18px]" />
+                </span>
+                <span className="text-sm font-medium text-[#3b3425] sm:text-base">
+                  Instant chats, notifications, and alerts
+                </span>
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="flex size-9 items-center justify-center rounded-xl bg-white text-[#15803d] shadow-xs">
+                  <ShieldCheck className="size-[18px]" />
+                </span>
+                <span className="text-sm font-medium text-[#3b3425] sm:text-base">
+                  Secure payments, UPI, cards &amp; wallet, all encrypted
+                </span>
+              </li>
+            </ul>
+
+            <div className="mt-8 flex flex-wrap items-center gap-3.5">
+              <AppStoreBadge />
+              <GooglePlayBadge />
+            </div>
+          </div>
+
+          {/* RIGHT: phone chat mockup */}
+          <div className="flex justify-center lg:justify-end">
+            <div className="relative w-[300px] rounded-[2.75rem] border-[10px] border-[#1c1c1e] bg-[#1c1c1e] shadow-[0_30px_70px_-30px_rgba(60,40,0,0.55)] sm:w-[330px]">
+              {/* notch */}
+              <div className="absolute left-1/2 top-0 z-10 h-6 w-32 -translate-x-1/2 rounded-b-2xl bg-[#1c1c1e]" />
+              {/* screen */}
+              <div className="flex h-[560px] flex-col overflow-hidden rounded-[2.1rem] bg-[#f4f3f2] sm:h-[600px]">
+                {/* status bar */}
+                <div className="flex items-center justify-between px-5 pt-3 text-[11px] font-semibold text-[#1a1208]">
+                  <span>9:41</span>
+                  <span className="flex items-center gap-1">
+                    <span className="inline-block h-2.5 w-3.5 rounded-sm bg-[#1a1208]/80" />
+                    <span className="inline-block h-2.5 w-2 rounded-sm bg-[#1a1208]/60" />
+                  </span>
+                </div>
+
+                {/* chat header */}
+                <div className="flex items-center gap-2.5 border-b border-black/5 bg-white px-4 py-2.5">
+                  <ChevronLeft className="size-5 text-[#6b5f4d]" />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/images/astrologers/avatar-shifali.jpg"
+                    alt="Astro Heena"
+                    className="size-9 rounded-full object-cover"
+                  />
+                  <div className="flex-1 leading-tight">
+                    <div className="flex items-center gap-1 text-sm font-bold text-[#1a1208]">
+                      Astro Heena
+                      <Check className="size-3.5 rounded-full bg-[#1d9bf0] p-0.5 text-white" />
+                    </div>
+                    <div className="text-[11px] font-medium text-[#8b7d63]">
+                      <span className="text-[#15803d]">online</span> · ₹18/min
+                    </div>
+                  </div>
+                  <span className="flex size-8 items-center justify-center rounded-full bg-[#fcd404] text-[#1c1304]">
+                    <Phone className="size-4" />
+                  </span>
+                </div>
+
+                {/* messages */}
+                <div className="flex flex-1 flex-col gap-2.5 overflow-hidden bg-[#f4f3f2] px-3.5 py-4">
+                  <div className="mx-auto rounded-full bg-black/5 px-2.5 py-0.5 text-[10px] font-medium text-[#8b7d63]">
+                    Today · 9:38 AM
+                  </div>
+
+                  {CHAT_SCRIPT.map((m, i) => {
+                    if (i >= visible) return null;
+                    const isUser = m.from === "user";
+                    return (
+                      <div
+                        key={i}
+                        className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+                      >
+                        <div
+                          className={`max-w-[78%] rounded-2xl px-3 py-2 text-[12.5px] leading-snug shadow-xs ${
+                            isUser
+                              ? "rounded-br-sm bg-[#fdf3a6] text-[#3b3425]"
+                              : "rounded-bl-sm bg-white text-[#3b3425]"
+                          }`}
+                        >
+                          {m.text}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {typing && (
+                    <div className="flex justify-start">
+                      <div className="flex items-center gap-1 rounded-2xl rounded-bl-sm bg-white px-3 py-2.5 shadow-xs">
+                        <span className="size-1.5 animate-bounce rounded-full bg-[#b8ab8f] [animation-delay:-0.2s]" />
+                        <span className="size-1.5 animate-bounce rounded-full bg-[#b8ab8f] [animation-delay:-0.1s]" />
+                        <span className="size-1.5 animate-bounce rounded-full bg-[#b8ab8f]" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* input bar */}
+                <div className="flex items-center gap-2 border-t border-black/5 bg-white px-3 py-2.5">
+                  <div className="flex-1 rounded-full bg-[#f0efed] px-3.5 py-2 text-[12px] text-[#9a8f78]">
+                    Type a message…
+                  </div>
+                  <span className="flex size-9 items-center justify-center rounded-full bg-[#fcd404] text-[#1c1304]">
+                    <Send className="size-4" />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

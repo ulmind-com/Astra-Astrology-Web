@@ -201,8 +201,18 @@ export function HeroAstroyogi() {
   const currentSlide = slides[currentIndex] || DEFAULT_SLIDES[0];
 
   return (
-    <section className="relative overflow-hidden bg-white pt-4 pb-8 sm:pt-6 sm:pb-10">
-      <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
+    <section className="relative overflow-hidden bg-transparent pt-4 pb-8 sm:pt-6 sm:pb-10">
+      {/* Faint rotating zodiac wheel — background decoration on the right */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/zodiac-wheel.png"
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute right-[-80px] bottom-[-110px] z-0 size-[420px] animate-[spin_55s_linear_infinite] select-none opacity-[0.12] lg:size-[520px] [will-change:transform] motion-reduce:animate-none"
+        draggable={false}
+      />
+
+      <div className="relative z-10 mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
         {/* Main Hero Slider Container — Full card 3:1 aspect ratio with user's custom images */}
         <div
           className="relative group/slider overflow-hidden rounded-[26px] sm:rounded-3xl min-h-[350px] sm:min-h-[380px] lg:h-[400px] shadow-[0_16px_40px_-16px_rgba(26,18,8,0.12)] border border-[#eadf9a]/60 bg-[#fffdf5]"
