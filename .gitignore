@@ -43,3 +43,7 @@ next-env.d.ts
 
 # IDE
 .claude/
+
+# local screen recordings
+*.mov
+_vid/

@@ -65,7 +65,7 @@ export function ConsultRightAstrologer() {
   const t = CONSULT_CATEGORIES_TRANSLATIONS[language] || CONSULT_CATEGORIES_TRANSLATIONS.en;
 
   return (
-    <section className="relative bg-white py-8 sm:py-12 border-b border-[#f2e9b0]/60">
+    <section className="relative bg-transparent py-8 sm:py-12 border-b border-[#f2e9b0]/60">
       <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mb-6 sm:mb-8">
