@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
+import { useLanguage } from "@/providers/language-provider";
 
 interface CelebrityVideo {
   id: string;
@@ -50,6 +51,7 @@ const CELEBRITY_VIDEOS: CelebrityVideo[] = [
 ];
 
 export function CelebrityVideosSection() {
+  const { language } = useLanguage();
   const [activeVideo, setActiveVideo] = useState<CelebrityVideo | null>(null);
 
   return (
@@ -59,13 +61,27 @@ export function CelebrityVideosSection() {
         <div className="mb-6 sm:mb-8">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-brand-100 border border-brand-300 px-3 py-1 text-xs font-bold text-[#8b5e0a] mb-2">
             <Sparkles className="size-3.5" />
-            <span>Trusted by Celebrities</span>
+            <span>
+              {language === "bn"
+                ? "তারকাদের দ্বারা বিশ্বস্ত"
+                : language === "hi"
+                ? "सेलिब्रिटीज का भरोसा"
+                : "Trusted by Celebrities"}
+            </span>
           </div>
           <h2 className="text-xl sm:text-2xl lg:text-[1.75rem] font-bold tracking-tight text-[#1a1208]">
-            Celebrity Videos
+            {language === "bn"
+              ? "সেলিব্রিটিদের অভিজ্ঞতা"
+              : language === "hi"
+              ? "सेलिब्रिटी अनुभव"
+              : "Celebrity Videos"}
           </h2>
           <p className="mt-1 text-xs sm:text-sm text-[#6b5f4d]">
-            Watch India&apos;s celebrated personalities talk about their life-changing consultations.
+            {language === "bn"
+              ? "দেখুন ভারতের বিশিষ্ট ব্যক্তিবর্গ কীভাবে জ্যোতিষীয় পরামর্শে জীবনে সঠিক পথ খুঁজে পেয়েছেন।"
+              : language === "hi"
+              ? "देखें भारत के जाने-माने व्यक्तित्वों ने कैसे पाया ज्योतिष से सही मार्गदर्शन।"
+              : "Watch India's celebrated personalities talk about their life-changing consultations."}
           </p>
         </div>
 

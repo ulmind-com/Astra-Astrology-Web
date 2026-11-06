@@ -16,6 +16,7 @@ import Link from "next/link";
 import React, { useMemo, useState } from "react";
 
 import { astrologerApi } from "@/lib/api";
+import { useLanguage } from "@/providers/language-provider";
 import { SKILL_LABELS } from "@/types";
 
 interface DisplayLiveExpert {
@@ -32,6 +33,7 @@ interface DisplayLiveExpert {
 }
 
 export function FreeLiveExperts() {
+  const { language } = useLanguage();
   const [followedIds, setFollowedIds] = useState<Record<string, boolean>>({});
   const [activeModalExpert, setActiveModalExpert] = useState<DisplayLiveExpert | null>(null);
   const [userComment, setUserComment] = useState("");
@@ -98,7 +100,7 @@ export function FreeLiveExperts() {
         <div className="flex items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-2.5">
             <h2 className="text-xl sm:text-2xl lg:text-[1.75rem] font-bold tracking-tight text-[#1a1208]">
-              Free Live Experts
+              {language === "bn" ? "অ্যাস্ট্রা লাইভ বিশেষজ্ঞ" : language === "hi" ? "एस्ट्रा लाइव विशेषज्ञ" : "Free Live Experts"}
             </h2>
             <span className="relative flex size-2.5">
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-red-400 opacity-75" />
@@ -110,7 +112,7 @@ export function FreeLiveExperts() {
             href="/astrologers"
             className="rounded-full border border-[#eadf9a] bg-[#fffdf5] px-4 py-1.5 text-xs sm:text-sm font-bold text-[#8b5e0a] hover:bg-[#fff7d1] hover:border-brand-400 transition-colors shadow-2xs"
           >
-            View All
+            {language === "bn" ? "সব দেখুন" : language === "hi" ? "सभी देखें" : "View All"}
           </Link>
         </div>
 
@@ -130,9 +132,19 @@ export function FreeLiveExperts() {
           </div>
         ) : liveExperts.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-[#eadf9a] bg-[#fffdf5] p-8 text-center">
-            <p className="text-sm font-semibold text-[#1a1208]">No live experts broadcasting at this moment.</p>
+            <p className="text-sm font-semibold text-[#1a1208]">
+              {language === "bn"
+                ? "এই মুহূর্তে কোনো বিশেষজ্ঞ সরাসরি সম্প্রচার করছেন না।"
+                : language === "hi"
+                ? "इस समय कोई विशेषज्ञ लाइव नहीं हैं।"
+                : "No live experts broadcasting at this moment."}
+            </p>
             <p className="text-xs text-[#6b5f4d] mt-1">
-              Astrologers appear here once added in the admin panel and online.
+              {language === "bn"
+                ? "জ্যোতিষীরা অনলাইনে এলে এখানে স্বয়ংক্রিয়ভাবে প্রদর্শিত হবেন।"
+                : language === "hi"
+                ? "ऑनलाइन आने पर ज्योतिषी यहां दिखाई देंगे।"
+                : "Astrologers appear here once added in the admin panel and online."}
             </p>
           </div>
         ) : (
@@ -219,7 +231,9 @@ export function FreeLiveExperts() {
                     onClick={() => setActiveModalExpert(expert)}
                     className="w-full bg-gradient-to-r from-[#ff4747] to-[#ff6b6b] hover:from-[#e53535] hover:to-[#f25252] py-2.5 text-center text-xs sm:text-sm font-extrabold uppercase tracking-wider text-white shadow-md transition-all duration-200 flex items-center justify-center gap-1 group-hover:tracking-widest"
                   >
-                    <span>WATCH NOW</span>
+                    <span>
+                      {language === "bn" ? "এখনই দেখুন" : language === "hi" ? "अभी देखें" : "WATCH NOW"}
+                    </span>
                     <span className="text-base leading-none">›</span>
                   </button>
                 </div>
