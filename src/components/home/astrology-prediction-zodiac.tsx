@@ -31,9 +31,6 @@ const ZODIAC_SIGNS: ZodiacSignItem[] = [
   { id: "pisces", index: 11, name: "Pisces", sanskrit: "Meen", dates: "Feb 19 – Mar 20", icon: "meena" },
 ];
 
-// Auto-advance through the signs one by one.
-const AUTO_CYCLE_MS = 3200;
-
 // Renders a rashi logo from the @arivedha/astro-icons web component (<astro-rashi>).
 function RashiIcon({ icon, size, color }: { icon: string; size: number; color: string }) {
   return React.createElement("astro-rashi", {
@@ -133,21 +130,10 @@ export function AstrologyPredictionZodiac() {
   const [activeIndex, setActiveIndex] = React.useState<number>(11); // Pisces, like the video
   const [data, setData] = React.useState<DailyHoroscopeResult | null>(null);
   const [loading, setLoading] = React.useState<boolean>(true);
-  const [paused, setPaused] = React.useState<boolean>(false);
-
   // Register the <astro-rashi> web component on the client only.
   React.useEffect(() => {
     import("@arivedha/astro-icons").catch((e) => console.error("astro-icons load failed:", e));
   }, []);
-
-  // Auto-advance the selected sign one by one; pause on hover/touch.
-  React.useEffect(() => {
-    if (paused) return;
-    const id = window.setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % ZODIAC_SIGNS.length);
-    }, AUTO_CYCLE_MS);
-    return () => window.clearInterval(id);
-  }, [paused]);
 
   const selectedDate = React.useMemo(() => {
     const t = RANGE_TABS.find((r) => r.id === tab) ?? RANGE_TABS[0];
@@ -252,12 +238,8 @@ export function AstrologyPredictionZodiac() {
           </div>
         </div>
 
-        {/* Zodiac picker row (auto-cycles one by one; pauses on hover) */}
-        <div
-          className="mt-8 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-        >
+        {/* Zodiac picker row */}
+        <div className="mt-8 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
           {ZODIAC_SIGNS.map((sign) => {
             const selected = sign.index === activeIndex;
             return (
@@ -296,11 +278,7 @@ export function AstrologyPredictionZodiac() {
         </div>
 
         {/* Selected sign card */}
-        <div
-          className="mt-6 rounded-3xl border border-[#eadf9a] bg-white/90 p-5 shadow-[0_18px_44px_-24px_rgba(201,154,20,0.45)] backdrop-blur-sm sm:p-7"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-        >
+        <div className="mt-6 rounded-3xl border border-[#eadf9a] bg-white/90 p-5 shadow-[0_18px_44px_-24px_rgba(201,154,20,0.45)] backdrop-blur-sm sm:p-7">
           {/* top row: identity + date pill */}
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-center gap-3.5">
