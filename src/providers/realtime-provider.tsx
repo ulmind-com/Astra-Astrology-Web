@@ -47,6 +47,12 @@ export type ChatEvent =
 
 type ChatListener = (event: ChatEvent) => void;
 
+export type WhiteboardEvent =
+  | { type: "whiteboard_event"; data: Record<string, any> }
+  | { type: "whiteboard_live"; data: Record<string, any> };
+
+type WhiteboardListener = (event: WhiteboardEvent) => void;
+
 import type { FeaturePricingItem } from "@/types";
 
 type RealtimeValue = {
@@ -56,6 +62,10 @@ type RealtimeValue = {
   connected: boolean;
   /** Subscribe to chat traffic. Returns the unsubscribe function. */
   onChat: (listener: ChatListener) => () => void;
+  /** Subscribe to cosmic whiteboard events & live frame streaming. */
+  onWhiteboard: (listener: WhiteboardListener) => () => void;
+  /** Broadcast a payload over WebSocket. */
+  sendLive: (data: string | object) => boolean;
 };
 
 const RealtimeContext = React.createContext<RealtimeValue>({
@@ -64,6 +74,8 @@ const RealtimeContext = React.createContext<RealtimeValue>({
   featurePricing: null,
   connected: false,
   onChat: () => () => {},
+  onWhiteboard: () => () => {},
+  sendLive: () => false,
 });
 
 /** The shape of whatever a REST astrologer looks like, as far as patching cares. */
@@ -217,6 +229,19 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  const whiteboardListeners = React.useRef<Set<WhiteboardListener>>(new Set());
+  const onWhiteboard = React.useCallback((listener: WhiteboardListener) => {
+    whiteboardListeners.current.add(listener);
+    return () => {
+      whiteboardListeners.current.delete(listener);
+    };
+  }, []);
+
+  const liveConnRef = React.useRef<LiveConnection | null>(null);
+  const sendLive = React.useCallback((data: string | object) => {
+    return liveConnRef.current?.send(data) ?? false;
+  }, []);
+
   // Reopened whenever the session changes. The token is sent when the socket
   // is opened, so a socket opened as a visitor stays a visitor — signing in
   // would otherwise leave the new user with no wallet updates until they
@@ -282,13 +307,21 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
           chatListeners.current.forEach((listener) => listener(message as ChatEvent));
           break;
 
+        case "whiteboard_event":
+        case "whiteboard_live":
+          whiteboardListeners.current.forEach((listener) => listener(message as WhiteboardEvent));
+          break;
+
         default:
           break;
       }
     });
 
+    liveConnRef.current = live;
+
     return () => {
       live?.close();
+      liveConnRef.current = null;
       setConnected(false);
     };
   }, [queryClient, sessionEpoch]);
@@ -304,8 +337,8 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
   }, [queryClient]);
 
   const value = React.useMemo(
-    () => ({ astrologers, platform, featurePricing, connected, onChat }),
-    [astrologers, platform, featurePricing, connected, onChat],
+    () => ({ astrologers, platform, featurePricing, connected, onChat, onWhiteboard, sendLive }),
+    [astrologers, platform, featurePricing, connected, onChat, onWhiteboard, sendLive],
   );
 
   return <RealtimeContext.Provider value={value}>{children}</RealtimeContext.Provider>;
@@ -343,4 +376,14 @@ export function useChatEvents(listener: (event: ChatEvent) => void): void {
   }, [listener]);
 
   React.useEffect(() => onChat((event) => ref.current(event)), [onChat]);
+}
+
+/** Subscribe to cosmic whiteboard events & live streaming frames. */
+export function useWhiteboardEvents(listener: (event: WhiteboardEvent) => void): void {
+  const { onWhiteboard } = useRealtime();
+  const ref = React.useRef(listener);
+  React.useEffect(() => {
+    ref.current = listener;
+  }, [listener]);
+  React.useEffect(() => onWhiteboard((event) => ref.current(event)), [onWhiteboard]);
 }
