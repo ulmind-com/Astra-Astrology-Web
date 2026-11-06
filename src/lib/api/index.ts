@@ -38,6 +38,8 @@ import type {
   Appointment,
   PrivateInviteLink,
   ValidatePrivateInviteResponse,
+  WhiteboardData,
+  WhiteboardStroke,
   AddressInput,
   AddressUpdate,
   AstrologerAdminUpdate,
@@ -291,6 +293,45 @@ export const callApi = {
 
   history: (params: { page?: number; limit?: number } = {}) =>
     api.get<{ items: Call[]; meta: PageMeta }>(endpoints.calls.history, { query: params }),
+};
+
+// -------------------------------------------------------------- whiteboard
+export const whiteboardApi = {
+  get: (callId: string) =>
+    api.get<WhiteboardData>(`/calls/${callId}/whiteboard`),
+
+  sync: (
+    callId: string,
+    payload: {
+      is_open?: boolean;
+      chart_style?: string;
+      active_tab?: string;
+      drishti?: any;
+      highlighted_houses?: number[];
+      strokes?: WhiteboardStroke[];
+      append_stroke?: WhiteboardStroke;
+      clear_strokes?: boolean;
+    },
+  ) => api.post<WhiteboardData>(`/calls/${callId}/whiteboard/sync`, payload),
+
+  clear: (callId: string) =>
+    api.post<WhiteboardData>(`/calls/${callId}/whiteboard/clear`, {}),
+
+  toggle: (callId: string) =>
+    api.post<WhiteboardData>(`/calls/${callId}/whiteboard/toggle`, {}),
+
+  loadChart: (
+    callId: string,
+    payload: {
+      name?: string;
+      date: string;
+      time: string;
+      place?: string;
+      latitude?: number;
+      longitude?: number;
+      timezone_offset?: number;
+    },
+  ) => api.post<WhiteboardData>(`/calls/${callId}/whiteboard/load-chart`, payload),
 };
 
 // -------------------------------------------------------------------- chat

@@ -7,16 +7,18 @@ import * as React from "react";
 import { toast } from "sonner";
 
 import { CallRoom } from "@/components/call/call-room";
+import { CosmicWhiteboard } from "@/components/call/cosmic-whiteboard";
 import { OutOfCoins, SessionMeter } from "@/components/consult/session-meter";
 import { Alert, Avatar, Button, LoadingBlock, Modal } from "@/components/ui";
 import { useCall, useCallActions, useCallHeartbeat, useCallTimer } from "@/hooks/use-call";
+import { useLoopingSound } from "@/hooks/use-sound";
 import { useWallet } from "@/hooks/use-wallet";
-import { appointmentApi } from "@/lib/api";
+import { appointmentApi, whiteboardApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 import { useRequireAuth } from "@/providers/auth-provider";
+import { useWhiteboardEvents } from "@/providers/realtime-provider";
 import { CALL_STATUS_LABELS, formatDuration, isCallLive } from "@/types";
-import { useLoopingSound } from "@/hooks/use-sound";
 
 export default function CallPage() {
   const { id } = useParams<{ id: string }>();
@@ -48,6 +50,25 @@ export default function CallPage() {
   const balanceCoins = walletData?.wallet?.available_coins ?? call?.billing?.balance_coins ?? 0;
   const neededCoins = extensionOffer?.cost_coins ?? 0;
   const canAfford = balanceCoins >= neededCoins;
+
+  const [whiteboardOpen, setWhiteboardOpen] = React.useState(false);
+
+  useWhiteboardEvents(
+    React.useCallback(
+      (event) => {
+        if (event.type === "whiteboard_event") {
+          const payload = event.data;
+          if (payload.call_id === id && typeof payload.is_open === "boolean") {
+            setWhiteboardOpen(payload.is_open);
+            if (payload.is_open) {
+              toast.info("Astrologer opened the Cosmic Whiteboard ✨");
+            }
+          }
+        }
+      },
+      [id],
+    ),
+  );
 
   // The caller hears the same tone while they wait, so "ringing…" on screen is
   // backed by something audible. It stops the moment the astrologer answers.
@@ -90,6 +111,16 @@ export default function CallPage() {
         <div className="absolute inset-0 bg-cosmos" />
       )}
 
+      {connected && (
+        <CosmicWhiteboard
+          callId={id}
+          peerUserId={call.astrologer_user_id}
+          role="seeker"
+          isOpen={whiteboardOpen}
+          onClose={() => setWhiteboardOpen(false)}
+        />
+      )}
+
       {/* ------------------------------------------------- connected chrome */}
       {connected && call.billing && (
         <div className="pointer-events-auto absolute inset-x-0 top-16 z-10 px-3">
@@ -113,15 +144,31 @@ export default function CallPage() {
               {formatDuration(seconds)}
             </p>
           </div>
-          <Button
-            size="sm"
-            onClick={hangUp}
-            disabled={end.isPending}
-            className="pointer-events-auto bg-rose-600 text-white hover:bg-rose-500"
-          >
-            <PhoneOff className="size-4" />
-            End
-          </Button>
+          <div className="pointer-events-auto flex items-center gap-2">
+            <Button
+              size="sm"
+              onClick={() => setWhiteboardOpen((v) => !v)}
+              className={cn(
+                "text-xs font-bold transition-all shadow-sm",
+                whiteboardOpen
+                  ? "bg-amber-400 text-slate-950 border border-amber-300 ring-2 ring-amber-400/50"
+                  : "bg-amber-950/70 hover:bg-amber-900 text-amber-200 border border-amber-500/40",
+              )}
+              title="Open interactive Kundali cosmic whiteboard"
+            >
+              <Sparkles className="size-3.5 mr-1 text-amber-300" />
+              Cosmic Whiteboard
+            </Button>
+            <Button
+              size="sm"
+              onClick={hangUp}
+              disabled={end.isPending}
+              className="bg-rose-600 text-white hover:bg-rose-500"
+            >
+              <PhoneOff className="size-4" />
+              End
+            </Button>
+          </div>
         </header>
       ) : (
         /* ------------------------------------------ ringing / finished */
