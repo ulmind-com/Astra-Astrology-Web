@@ -26,6 +26,8 @@ import { HeroAstroyogi } from "@/components/home/hero-astroyogi";
 import { TopAstrologersSection } from "@/components/home/top-astrologers-section";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Button } from "@/components/ui";
+import { HOME_STEPS_AND_TRUST_TRANSLATIONS } from "@/lib/home-translations";
+import { useLanguage } from "@/providers/language-provider";
 
 const STEPS = [
   {
@@ -69,7 +71,26 @@ const TRUST_FEATURES = [
 ];
 
 export default function HomePage() {
+  const { language } = useLanguage();
   const [isChineseModalOpen, setIsChineseModalOpen] = React.useState(false);
+  const t = HOME_STEPS_AND_TRUST_TRANSLATIONS[language] || HOME_STEPS_AND_TRUST_TRANSLATIONS.en;
+
+  const steps = React.useMemo(() => {
+    return t.steps.map((st, i) => ({
+      num: st.num,
+      title: st.title,
+      body: st.body,
+    }));
+  }, [t]);
+
+  const trustFeatures = React.useMemo(() => {
+    const icons = [Shield, Lock, Zap, Star];
+    return t.trust.map((item, i) => ({
+      icon: icons[i] || Shield,
+      title: item.title,
+      body: item.body,
+    }));
+  }, [t]);
 
   return (
     <>
@@ -103,18 +124,26 @@ export default function HomePage() {
           <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-10">
               <span className="inline-block rounded-full bg-brand-200/80 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#8b5e0a] border border-brand-400/40 mb-3">
-                Simple & Seamless
+                {language === "bn" ? "সহজ ও নির্ভরযোগ্য" : language === "hi" ? "सरल एवं सहज" : "Simple & Seamless"}
               </span>
               <h2 className="text-2xl sm:text-4xl font-extrabold text-[#1a1208] tracking-tight">
-                Three Steps to Clarity
+                {language === "bn"
+                  ? "স্পষ্টতা ও দিকনির্দেশনার ৩টি সহজ ধাপ"
+                  : language === "hi"
+                  ? "मार्गदर्शन के 3 सरल चरण"
+                  : "Three Steps to Clarity"}
               </h2>
               <p className="mt-2 text-xs sm:text-sm text-[#6b5f4d]">
-                Get instant guidance on your life, love, and destiny in under 2 minutes.
+                {language === "bn"
+                  ? "মাত্র ২ মিনিটে জীবন, প্রেম এবং ভবিষ্যতের নির্ভুল দিকনির্দেশনা পান।"
+                  : language === "hi"
+                  ? "मात्र 2 मिनट में अपने जीवन, प्रेम एवं भविष्य का मार्गदर्शन प्राप्त करें।"
+                  : "Get instant guidance on your life, love, and destiny in under 2 minutes."}
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-              {STEPS.map((step, idx) => (
+              {steps.map((step, idx) => (
                 <div
                   key={step.num}
                   className="relative rounded-2xl border border-[#eadf9a] bg-white p-6 sm:p-7 shadow-[0_4px_16px_-4px_rgba(26,18,8,0.04)] flex flex-col justify-between"
@@ -125,7 +154,7 @@ export default function HomePage() {
                         {step.num}
                       </span>
                       <span className="text-xs font-bold text-[#8b5e0a] uppercase tracking-wider">
-                        Step {idx + 1}
+                        {language === "bn" ? `ধাপ ${idx + 1}` : language === "hi" ? `चरण ${idx + 1}` : `Step ${idx + 1}`}
                       </span>
                     </div>
 
@@ -147,15 +176,23 @@ export default function HomePage() {
           <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-10">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1a1208] tracking-tight">
-                Why Millions Trust DivinLink
+                {language === "bn"
+                  ? "কেন লক্ষ লক্ষ মানুষ ডিভিনলিংক-এ আস্থা রাখেন"
+                  : language === "hi"
+                  ? "लाखों लोग डिविनलिंक पर क्यों भरोसा करते हैं"
+                  : "Why Millions Trust DivinLink"}
               </h2>
               <p className="mt-2 text-xs sm:text-sm text-[#6b5f4d]">
-                Rigorously vetted Vedic scholars, transparent pricing, and complete privacy guaranteed.
+                {language === "bn"
+                  ? "শাস্ত্রজ্ঞ বৈদিক পন্ডিত, স্বচ্ছ মূল্য এবং ১০০% নির্ভরযোগ্য গোপনীয়তা।"
+                  : language === "hi"
+                  ? "सत्यापित वैदिक विद्वान, पारदर्शी शुल्क और पूर्ण गोपनीयता की गारंटी।"
+                  : "Rigorously vetted Vedic scholars, transparent pricing, and complete privacy guaranteed."}
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {TRUST_FEATURES.map((item) => {
+              {trustFeatures.map((item) => {
                 const Icon = item.icon;
                 return (
                   <div
@@ -184,14 +221,27 @@ export default function HomePage() {
             <div className="relative overflow-hidden rounded-3xl border border-[#ebd881] bg-gradient-to-r from-[#fff9e6] via-[#fff3cc] to-[#ffecaa] p-8 sm:p-12 text-center shadow-[0_16px_40px_-16px_rgba(240,210,80,0.6)]">
               <div className="relative z-10 max-w-2xl mx-auto">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#8b5e0a] shadow-xs mb-4">
-                  <Sparkles className="size-3.5" /> Start With Confidence
+                  <Sparkles className="size-3.5" />{" "}
+                  {language === "bn"
+                    ? "আত্মবিশ্বাসের সাথে শুরু করুন"
+                    : language === "hi"
+                    ? "विश्वास के साथ शुरुआत करें"
+                    : "Start With Confidence"}
                 </span>
 
                 <h2 className="text-2xl sm:text-4xl font-extrabold text-[#1a1208] tracking-tight">
-                  Ready to Consult with an Expert?
+                  {language === "bn"
+                    ? "অভিজ্ঞ জ্যোতিষীর সাথে পরামর্শ করতে প্রস্তুত?"
+                    : language === "hi"
+                    ? "विशेषज्ञ से परामर्श के लिए तैयार हैं?"
+                    : "Ready to Consult with an Expert?"}
                 </h2>
                 <p className="mt-3 text-sm sm:text-base text-[#524436] leading-relaxed">
-                  Join over 500,000 seekers who found clarity in love, career, marriage, and health. First consultation starts at just ₹12/Min.
+                  {language === "bn"
+                    ? "৫ লাখেরও বেশি মানুষের সাথে যুক্ত হন যারা প্রেম, ক্যারিয়ার, বিয়ে ও স্বাস্থ্যে স্পষ্টতা পেয়েছেন। মাত্র ₹১২/মিনিট থেকে শুরু।"
+                    : language === "hi"
+                    ? "5 लाख से अधिक लोगों से जुड़ें जिन्होंने प्रेम, करियर और विवाह में मार्गदर्शन पाया। मात्र ₹12/मिनट से शुरू।"
+                    : "Join over 500,000 seekers who found clarity in love, career, marriage, and health. First consultation starts at just ₹12/Min."}
                 </p>
 
                 <div className="mt-7 flex flex-wrap items-center justify-center gap-3.5">
@@ -200,7 +250,13 @@ export default function HomePage() {
                       type="button"
                       className="rounded-full bg-[#fcd404] hover:bg-[#e6be00] text-[#1c1304] font-extrabold text-sm sm:text-base px-8 py-3.5 shadow-md transition-transform hover:scale-105 flex items-center gap-2 border border-[#d9af00]"
                     >
-                      <span>Consult for FREE</span>
+                      <span>
+                        {language === "bn"
+                          ? "ফ্রি পরামর্শ নিন"
+                          : language === "hi"
+                          ? "मुफ़्त परामर्श लें"
+                          : "Consult for FREE"}
+                      </span>
                       <ArrowRight className="size-4" />
                     </button>
                   </Link>
@@ -210,7 +266,11 @@ export default function HomePage() {
                       type="button"
                       className="rounded-full bg-white/90 hover:bg-white text-[#1a1208] font-bold text-sm sm:text-base px-7 py-3.5 border border-[#eadf9a] shadow-xs transition-colors"
                     >
-                      Generate Free Kundli
+                      {language === "bn"
+                        ? "ফ্রি কুণ্ডলী তৈরি করুন"
+                        : language === "hi"
+                        ? "मुफ़्त कुंडली बनाएं"
+                        : "Generate Free Kundli"}
                     </button>
                   </Link>
                 </div>

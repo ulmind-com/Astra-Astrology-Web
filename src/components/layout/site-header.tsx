@@ -21,6 +21,7 @@ import * as React from "react";
 
 import { Avatar, Button } from "@/components/ui";
 import { RAIL_LINKS, SiteRail } from "@/components/layout/site-rail";
+import { RAIL_LINK_TRANSLATIONS } from "@/lib/home-translations";
 import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
 import { useWallet } from "@/hooks/use-wallet";
@@ -201,7 +202,9 @@ export function SiteHeader() {
                     active ? "stroke-[2.3] text-brand-900" : "stroke-[1.9] text-ink-500",
                   )}
                 />
-                <span className="leading-tight">{link.label}</span>
+                <span className="leading-tight">
+                  {RAIL_LINK_TRANSLATIONS[language]?.[link.href] || link.label}
+                </span>
               </Link>
             );
           })}
@@ -211,7 +214,7 @@ export function SiteHeader() {
         <div className="mt-3 flex items-center justify-between rounded-2xl border border-border/70 bg-surface-muted/50 p-2.5">
           <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
             <Globe className="size-4 text-brand-700" />
-            <span>Language / ভাষা</span>
+            <span>{language === "bn" ? "ভাষা পরিবর্তন" : language === "hi" ? "भाषा बदलें" : "Language"}</span>
           </div>
           <div className="inline-flex items-center gap-1 rounded-xl bg-background/80 p-0.5 border border-border/60">
             {(
@@ -225,8 +228,6 @@ export function SiteHeader() {
                 key={l.code}
                 type="button"
                 onClick={() => void setLanguage(l.code)}
-                // 24px tall was below the 44px both Apple and Google ask for,
-                // and this toggle sits in the header of every page.
                 className={`inline-flex min-h-9 items-center justify-center rounded-lg px-3 py-2 text-xs font-bold transition-all ${
                   language === l.code
                     ? "bg-brand-500 text-white shadow-2xs"
@@ -246,14 +247,16 @@ export function SiteHeader() {
                 href="/account"
                 className="flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm font-semibold text-ink-800 transition-colors hover:bg-surface-muted"
               >
-                <User className="size-4 text-brand-700" /> My Account &amp; Settings
+                <User className="size-4 text-brand-700" />{" "}
+                {RAIL_LINK_TRANSLATIONS[language]?.myAccount || "My Account & Settings"}
               </Link>
               <Link
                 href="/account/wallet"
                 className="flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-ink-800 transition-colors hover:bg-surface-muted"
               >
                 <span className="flex items-center gap-2.5">
-                  <Wallet className="size-4 text-brand-700" /> Wallet &amp; Recharge
+                  <Wallet className="size-4 text-brand-700" />{" "}
+                  {RAIL_LINK_TRANSLATIONS[language]?.wallet || "Wallet & Recharge"}
                 </span>
                 <span className="rounded-full bg-brand-200/80 px-2.5 py-0.5 text-xs font-bold tabular-nums text-brand-900">
                   {coinsBalance !== undefined ? `${formatCoins(coinsBalance)} coins` : "Recharge"}
@@ -267,19 +270,19 @@ export function SiteHeader() {
                 }}
                 className="flex w-full items-center gap-2.5 rounded-xl px-4 py-3 text-left text-sm font-semibold text-danger transition-colors hover:bg-danger/10"
               >
-                <LogOut className="size-4" /> Sign out
+                <LogOut className="size-4" /> {RAIL_LINK_TRANSLATIONS[language]?.signOut || "Sign out"}
               </button>
             </div>
           ) : (
             <div className="flex gap-2.5">
               <Link href="/login" className="flex-1">
                 <Button variant="secondary" className="h-11 w-full text-sm font-semibold">
-                  Sign in
+                  {RAIL_LINK_TRANSLATIONS[language]?.signIn || "Sign in"}
                 </Button>
               </Link>
               <Link href="/register" className="flex-1">
                 <Button className="h-11 w-full text-sm font-semibold shadow-glow">
-                  Get started
+                  {RAIL_LINK_TRANSLATIONS[language]?.getStarted || "Get started"}
                 </Button>
               </Link>
             </div>

@@ -17,6 +17,7 @@ import React, { useMemo, useRef, useState } from "react";
 
 import { astrologerApi } from "@/lib/api";
 import { coinsPerMinute, formatNumber } from "@/lib/utils";
+import { useLanguage } from "@/providers/language-provider";
 import { usePlatform } from "@/providers/realtime-provider";
 import { SKILL_LABELS } from "@/types";
 
@@ -39,6 +40,7 @@ interface DisplayAstrologer {
 }
 
 export function TopAstrologersSection() {
+  const { language } = useLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -126,10 +128,18 @@ export function TopAstrologersSection() {
         <div className="flex items-center justify-between gap-4 mb-6">
           <div>
             <h2 className="text-xl sm:text-2xl lg:text-[1.75rem] font-bold tracking-tight text-[#1a1208]">
-              Top Online Astrologers
+              {language === "bn"
+                ? "সেরা অনলাইন জ্যোতিষীগণ"
+                : language === "hi"
+                ? "शीर्ष ऑनलाइन ज्योतिषी"
+                : "Top Online Astrologers"}
             </h2>
             <p className="mt-1 text-xs sm:text-sm text-[#6b5f4d]">
-              Connect instantly via private chat or call with India&apos;s most verified astrologers.
+              {language === "bn"
+                ? "ভারতের সবচেয়ে বিশ্বস্ত ও ভেরিফাইড জ্যোতিষীদের সাথে সরাসরি কল বা চ্যাটে যুক্ত হন।"
+                : language === "hi"
+                ? "भारत के सर्वाधिक सत्यापित ज्योतिषियों से सीधे चैट या कॉल पर जुड़ें।"
+                : "Connect instantly via private chat or call with India's most verified astrologers."}
             </p>
           </div>
 
@@ -138,7 +148,7 @@ export function TopAstrologersSection() {
               href="/astrologers"
               className="rounded-full border border-[#eadf9a] bg-[#fffdf5] px-4 py-1.5 text-xs sm:text-sm font-bold text-[#8b5e0a] hover:bg-[#fff7d1] hover:border-brand-400 transition-colors shadow-2xs"
             >
-              View All
+              {language === "bn" ? "সব দেখুন" : language === "hi" ? "सभी देखें" : "View All"}
             </Link>
 
             <div className="hidden sm:flex items-center gap-1.5">
@@ -288,7 +298,9 @@ export function TopAstrologersSection() {
                         {/* Experience */}
                         <p className="mt-1 text-xs text-[#524436] flex items-center gap-1.5 truncate">
                           <GraduationCap className="size-3.5 text-[#8b5e0a] shrink-0" />
-                          <span>{astro.experienceYears} Years</span>
+                          <span>
+                            {astro.experienceYears} {language === "bn" ? "বছর অভিজ্ঞতা" : language === "hi" ? "वर्ष अनुभव" : "Years"}
+                          </span>
                         </p>
 
                         {/* Speciality */}
@@ -307,11 +319,14 @@ export function TopAstrologersSection() {
                       <div className="flex items-baseline gap-1.5">
                         <span className="font-extrabold text-sm sm:text-base text-[#1a1208]">
                           ₹{astro.pricePerMin}
-                          <span className="text-xs font-normal text-[#6b5f4d]">/Min</span>
+                          <span className="text-xs font-normal text-[#6b5f4d]">
+                            {language === "bn" ? "/মিনিট" : language === "hi" ? "/मिनट" : "/Min"}
+                          </span>
                         </span>
                         {astro.originalPricePerMin && (
                           <span className="text-xs text-[#9c8e7b] line-through font-medium">
-                            ₹{astro.originalPricePerMin}/Min
+                            ₹{astro.originalPricePerMin}
+                            {language === "bn" ? "/মিনিট" : language === "hi" ? "/मिनट" : "/Min"}
                           </span>
                         )}
                       </div>
@@ -331,7 +346,7 @@ export function TopAstrologersSection() {
                             className="inline-flex items-center gap-1 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-1.5 shadow-sm transition-colors"
                           >
                             <MessageCircle className="size-3.5" />
-                            <span>CHAT</span>
+                            <span>{language === "bn" ? "চ্যাট" : language === "hi" ? "चैट" : "CHAT"}</span>
                           </button>
                         </Link>
                       ) : null}
@@ -343,12 +358,12 @@ export function TopAstrologersSection() {
                             className="inline-flex items-center gap-1 rounded-full border border-teal-600 text-teal-800 bg-teal-50 hover:bg-teal-100 font-bold text-xs px-3 py-1.5 transition-colors"
                           >
                             <Phone className="size-3.5 text-teal-700" />
-                            <span>CALL</span>
+                            <span>{language === "bn" ? "কল" : language === "hi" ? "कॉल" : "CALL"}</span>
                           </button>
                         </Link>
                       ) : !astro.canChat ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 text-stone-400 font-bold text-xs px-2.5 py-1.5 cursor-not-allowed">
-                          OFFLINE
+                          {language === "bn" ? "অফলাইন" : language === "hi" ? "ऑफलाइन" : "OFFLINE"}
                         </span>
                       ) : null}
                     </div>

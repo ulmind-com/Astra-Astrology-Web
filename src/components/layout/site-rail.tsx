@@ -47,6 +47,7 @@ import * as React from "react";
 
 import { Avatar } from "@/components/ui";
 import { useWallet } from "@/hooks/use-wallet";
+import { RAIL_LINK_TRANSLATIONS } from "@/lib/home-translations";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
@@ -87,7 +88,7 @@ function isLinkActive(pathname: string, href: string) {
 export function SiteRail() {
   const pathname = usePathname();
   const { user, isSignedIn, signOut } = useAuth();
-  const { language } = useLanguage();
+  const { language, setLanguage } = useLanguage();
   const { data: walletData } = useWallet(Boolean(isSignedIn));
   const coinsBalance = walletData?.wallet?.balance_coins;
 
@@ -203,7 +204,7 @@ export function SiteRail() {
                         : "pointer-events-none -translate-x-2 opacity-0",
                     )}
                   >
-                    {link.label}
+                    {RAIL_LINK_TRANSLATIONS[language]?.[link.href] || link.label}
                   </span>
                 </Link>
               </li>
@@ -214,6 +215,36 @@ export function SiteRail() {
 
       {/* Account */}
       <div className="mx-3 shrink-0 space-y-1 border-t border-border/70 pt-3">
+        {/* Quick Language Toggle */}
+        <button
+          type="button"
+          onClick={() => {
+            const nextMap: Record<string, "bn" | "en" | "hi"> = { bn: "en", en: "hi", hi: "bn" };
+            void setLanguage(nextMap[language] || "bn");
+          }}
+          title={expanded ? undefined : `ভাষা / Language: ${language.toUpperCase()}`}
+          className="group flex h-10 w-full items-center gap-3 rounded-2xl px-2.5 outline-none transition-colors hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-brand-600"
+        >
+          <span className="flex size-[22px] shrink-0 items-center justify-center">
+            <Globe className="size-[19px] text-brand-700 group-hover:scale-110 transition-transform" />
+          </span>
+          <span
+            className={cn(
+              "flex min-w-0 flex-1 items-center justify-between gap-2 whitespace-nowrap transition-all duration-300",
+              expanded
+                ? "translate-x-0 opacity-100"
+                : "pointer-events-none -translate-x-2 opacity-0",
+            )}
+          >
+            <span className="text-[13px] font-medium text-muted-foreground">
+              {RAIL_LINK_TRANSLATIONS[language]?.language || "Language"}
+            </span>
+            <span className="rounded-full bg-brand-200/90 border border-brand-400/50 px-2 py-0.5 text-[11px] font-bold text-ink-950">
+              {language === "bn" ? "বাংলা" : language === "hi" ? "हिन्दी" : "ENG"}
+            </span>
+          </span>
+        </button>
+
         {isSignedIn ? (
           <>
             <Link
@@ -232,32 +263,11 @@ export function SiteRail() {
                     : "pointer-events-none -translate-x-2 opacity-0",
                 )}
               >
-                <span className="text-[13px] font-medium text-muted-foreground">Wallet</span>
+                <span className="text-[13px] font-medium text-muted-foreground">
+                  {RAIL_LINK_TRANSLATIONS[language]?.wallet || "Wallet"}
+                </span>
                 <span className="rounded-full bg-brand-200/80 px-2 py-0.5 text-[11px] font-bold tabular-nums text-brand-950">
                   {coinsBalance !== undefined ? formatCoins(coinsBalance) : "—"}
-                </span>
-              </span>
-            </Link>
-
-            <Link
-              href="/account"
-              title={expanded ? undefined : `Language: ${language.toUpperCase()}`}
-              className="group flex h-10 items-center gap-3 rounded-2xl px-2.5 outline-none transition-colors hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-brand-600"
-            >
-              <span className="flex size-[22px] shrink-0 items-center justify-center">
-                <Globe className="size-[19px] text-muted-foreground group-hover:text-brand-600 transition-colors" />
-              </span>
-              <span
-                className={cn(
-                  "flex min-w-0 flex-1 items-center justify-between gap-2 whitespace-nowrap transition-all duration-300",
-                  expanded
-                    ? "translate-x-0 opacity-100"
-                    : "pointer-events-none -translate-x-2 opacity-0",
-                )}
-              >
-                <span className="text-[13px] font-medium text-muted-foreground">Language</span>
-                <span className="rounded-full bg-surface-muted border border-border/80 px-2 py-0.5 text-[10px] font-bold uppercase text-foreground">
-                  {language}
                 </span>
               </span>
             </Link>
@@ -283,7 +293,7 @@ export function SiteRail() {
                     : "pointer-events-none -translate-x-2 opacity-0",
                 )}
               >
-                {user?.full_name || "My account"}
+                {user?.full_name || (RAIL_LINK_TRANSLATIONS[language]?.myAccount || "My account")}
               </span>
             </Link>
 
@@ -304,7 +314,7 @@ export function SiteRail() {
                     : "pointer-events-none -translate-x-2 opacity-0",
                 )}
               >
-                Sign out
+                {RAIL_LINK_TRANSLATIONS[language]?.signOut || "Sign out"}
               </span>
             </button>
           </>
@@ -326,7 +336,7 @@ export function SiteRail() {
                     : "pointer-events-none -translate-x-2 opacity-0",
                 )}
               >
-                Sign in
+                {RAIL_LINK_TRANSLATIONS[language]?.signIn || "Sign in"}
               </span>
             </Link>
 
@@ -349,7 +359,7 @@ export function SiteRail() {
                     : "pointer-events-none -translate-x-2 opacity-0",
                 )}
               >
-                Get started
+                {RAIL_LINK_TRANSLATIONS[language]?.getStarted || "Get started"}
               </span>
             </Link>
           </>

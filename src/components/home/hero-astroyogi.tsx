@@ -16,6 +16,8 @@ import Link from "next/link";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { cmsApi, type HeroSlide } from "@/lib/api";
+import { HERO_SLIDES_TRANSLATIONS } from "@/lib/home-translations";
+import { useLanguage } from "@/providers/language-provider";
 
 const DEFAULT_SLIDES: HeroSlide[] = [
   {
@@ -114,6 +116,7 @@ const QUICK_ACTIONS = [
 ];
 
 export function HeroAstroyogi() {
+  const { language } = useLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const touchStartX = useRef<number | null>(null);
@@ -126,11 +129,33 @@ export function HeroAstroyogi() {
   });
 
   const slides = useMemo<HeroSlide[]>(() => {
-    if (cmsData?.hero_slides && cmsData.hero_slides.length > 0) {
-      return cmsData.hero_slides;
-    }
-    return DEFAULT_SLIDES;
-  }, [cmsData]);
+    const loc = HERO_SLIDES_TRANSLATIONS[language] || HERO_SLIDES_TRANSLATIONS.en;
+    return DEFAULT_SLIDES.map((slide, idx) => {
+      const trans = loc.slides[idx];
+      if (!trans) return slide;
+      return {
+        ...slide,
+        title: trans.title,
+        subtitle: trans.subtitle,
+        description: trans.description,
+        cta_text: trans.cta_text,
+        badge_text: trans.badge_text,
+        badge_rating: trans.badge_rating,
+      };
+    });
+  }, [language]);
+
+  const quickActions = useMemo(() => {
+    const loc = HERO_SLIDES_TRANSLATIONS[language] || HERO_SLIDES_TRANSLATIONS.en;
+    return QUICK_ACTIONS.map((action, idx) => {
+      const trans = loc.quickActions[idx];
+      return {
+        ...action,
+        title: trans?.title || action.title,
+        subtitle: trans?.subtitle || action.subtitle,
+      };
+    });
+  }, [language]);
 
   // Autoplay timer — slides every 5 seconds
   useEffect(() => {
@@ -306,7 +331,7 @@ export function HeroAstroyogi() {
 
         {/* 4 Quick Action Cards (Astroyogi Signature Bar) */}
         <div className="mt-5 sm:mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {QUICK_ACTIONS.map((action) => {
+          {quickActions.map((action) => {
             const Icon = action.icon;
             return (
               <Link
