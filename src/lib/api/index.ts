@@ -36,6 +36,8 @@ import type {
   AppointmentQuote,
   AppointmentDayView,
   Appointment,
+  PrivateInviteLink,
+  ValidatePrivateInviteResponse,
   AddressInput,
   AddressUpdate,
   AstrologerAdminUpdate,
@@ -318,14 +320,19 @@ export const chatApi = {
 // ------------------------------------------------------------ appointments
 export const appointmentApi = {
   /** What is open and what is taken on one day, for the chooser. */
-  day: (astrologerId: string, on: string) =>
+  day: (astrologerId: string, on: string, invite_code?: string) =>
     api.get<AppointmentDayView>(endpoints.appointments.day(astrologerId), {
-      query: { on },
+      query: { on, ...(invite_code ? { invite_code } : {}) },
       auth: false,
     }),
 
-  quote: (astrologer_id: string, minutes: number) =>
-    api.post<AppointmentQuote>(endpoints.appointments.quote, { astrologer_id, minutes }),
+  quote: (astrologer_id: string, minutes: number, invite_code?: string, starts_at?: string) =>
+    api.post<AppointmentQuote>(endpoints.appointments.quote, {
+      astrologer_id,
+      minutes,
+      ...(invite_code ? { invite_code } : {}),
+      ...(starts_at ? { starts_at } : {}),
+    }),
 
   book: (body: {
     astrologer_id: string;
@@ -335,6 +342,8 @@ export const appointmentApi = {
     consultation_pillar?: string | null;
     kundli_id?: string | null;
     birth_details?: Record<string, any> | null;
+    invite_code?: string | null;
+    invite_passcode?: string | null;
   }) => api.post<Appointment>(endpoints.appointments.book, body),
 
   mine: (upcoming_only = false) =>
@@ -347,6 +356,18 @@ export const appointmentApi = {
 
   complete: (id: string) =>
     api.post<Appointment>(`/appointments/${id}/complete`, {}),
+
+  validatePrivateInvite: (inviteCode: string) =>
+    api.get<ValidatePrivateInviteResponse>(`/appointments/private-links/${inviteCode}/validate`, {
+      auth: false,
+    }),
+
+  verifyPrivatePasscode: (inviteCode: string, passcode: string) =>
+    api.post<{ valid: boolean; astrologer_id: string; message: string }>(
+      `/appointments/private-links/${inviteCode}/verify-passcode`,
+      { passcode },
+      { auth: false }
+    ),
 
   synergy: (astrologer_id: string, dob?: string | null) =>
     api.get<Record<string, any>>(`/appointments/synergy`, {

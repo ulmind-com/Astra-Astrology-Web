@@ -438,11 +438,23 @@ export type Appointment = Omit<S["AppointmentOut"], "peer"> & {
   cancel_deadline?: string | null;
   can_cancel?: boolean;
   completed_at?: string | null;
+  is_tatkal?: boolean;
+  tatkal_multiplier?: number | null;
+  tatkal_premium_paise?: number;
+  tatkal_premium_coins?: number;
+  is_private?: boolean;
+  invite_code?: string | null;
 };
 export type AppointmentQuote = S["AppointmentQuote"] & {
   balance_due_coins?: number;
   total_coins?: number;
   available_coins?: number;
+  is_tatkal?: boolean;
+  tatkal_premium_paise?: number;
+  tatkal_multiplier?: number;
+  is_private?: boolean;
+  original_price_paise?: number;
+  discount_percent?: number | null;
 };
 export type AppointmentStatus = S["AppointmentStatus"];
 export type AppointmentCard = S["AppointmentCardOut"] & {
@@ -451,15 +463,79 @@ export type AppointmentCard = S["AppointmentCardOut"] & {
   follow_up_enabled?: boolean;
   follow_up_window_days?: number;
   follow_up_max_messages?: number;
+  tatkal_enabled?: boolean;
+  tatkal_default_multiplier?: number;
 };
-export type AvailabilityWindow = S["WindowOut"];
-export type AppointmentDayView = S["DayView"] & {
+export type AvailabilityWindow = S["WindowOut"] & {
+  is_tatkal?: boolean;
+  tatkal_multiplier?: number;
+  tatkal_fixed_paise?: number | null;
+  custom_title?: string | null;
+  is_private?: boolean;
+};
+export type Range = {
+  starts_at: string;
+  ends_at: string;
+  is_tatkal?: boolean;
+  tatkal_multiplier?: number;
+  tatkal_fixed_paise?: number | null;
+  custom_title?: string | null;
+  is_private?: boolean;
+};
+export type AppointmentDayView = Omit<S["DayView"], "windows"> & {
+  windows: Range[];
   muhurat_ratings?: Record<string, MuhuratSlotRating> | null;
   buffer_minutes?: number;
   is_on_brahma_pause?: boolean;
   brahma_pause_until?: string | null;
   brahma_pause_reason?: string | null;
+  tatkal_windows?: Array<{
+    starts_at: string;
+    ends_at: string;
+    is_tatkal: boolean;
+    tatkal_multiplier?: number;
+    tatkal_fixed_paise?: number | null;
+    custom_title?: string | null;
+    is_private?: boolean;
+  }>;
 };
+
+export interface PrivateInviteLink {
+  id: string;
+  astrologer_id: string;
+  invite_code: string;
+  title: string;
+  client_name?: string | null;
+  client_email?: string | null;
+  has_passcode: boolean;
+  custom_price_paise?: number | null;
+  discount_percent?: number | null;
+  is_tatkal: boolean;
+  max_uses: number;
+  uses_count: number;
+  expires_at?: string | null;
+  is_active: boolean;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ValidatePrivateInviteResponse {
+  valid: boolean;
+  invite_code: string;
+  astrologer_id: string;
+  astrologer_name?: string;
+  astrologer_avatar?: string | null;
+  astrologer_experience_years?: number;
+  title: string;
+  client_name?: string | null;
+  has_passcode: boolean;
+  is_tatkal: boolean;
+  custom_price_paise?: number | null;
+  discount_percent?: number | null;
+  expires_at?: string | null;
+  uses_remaining: number;
+}
 
 /** What a booking's state is called on screen. */
 export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {
