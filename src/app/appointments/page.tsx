@@ -408,8 +408,14 @@ function AppointmentsContent() {
 
   // 6. Query: Quote for booking
   const { data: quote } = useQuery({
-    queryKey: ["appointments", "quote", selectedAstrologer?.id, minutes],
-    queryFn: () => appointmentApi.quote(selectedAstrologer!.id, minutes),
+    queryKey: ["appointments", "quote", selectedAstrologer?.id, minutes, selectedSlot?.toISOString()],
+    queryFn: () =>
+      appointmentApi.quote(
+        selectedAstrologer!.id,
+        minutes,
+        undefined,
+        selectedSlot?.toISOString()
+      ),
     enabled: Boolean(selectedAstrologer?.id) && isSignedIn,
   });
 
@@ -1246,10 +1252,29 @@ function AppointmentsContent() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-display text-base font-black text-slate-900">₹{rupees(computedPricePaise)}</p>
+                  <p className="font-display text-base font-black text-slate-900">
+                    ₹{rupees(quote?.price_paise ?? computedPricePaise)}
+                  </p>
                   <p className="text-[10px] text-slate-500">{minutes} minutes</p>
                 </div>
               </div>
+
+              {/* VIP Tatkal Notice if applicable */}
+              {quote?.is_tatkal && (
+                <div className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-500/10 via-yellow-500/15 to-amber-500/10 p-3 flex items-center justify-between gap-3 text-amber-950">
+                  <div className="flex items-center gap-2 text-xs font-bold">
+                    <Zap className="size-4 fill-amber-600 text-amber-600 shrink-0" />
+                    <span>
+                      {language === "bn"
+                        ? "তাত্ক্ষণিক জরুরি স্লট (VIP Tatkal Window)"
+                        : "Instant Priority Tatkal Window"}
+                    </span>
+                  </div>
+                  <span className="rounded-full bg-amber-200/90 border border-amber-400 px-2 py-0.5 text-[10px] font-black uppercase text-amber-950">
+                    {quote.tatkal_multiplier ? `${quote.tatkal_multiplier}x Rate` : "VIP"}
+                  </span>
+                </div>
+              )}
 
               {/* Vedic Muhurat Intelligence Box */}
               {selectedSlotMuhurat && (
@@ -1556,6 +1581,18 @@ function AppointmentsContent() {
     const isAuspicious = muhurat.quality === "super_auspicious" || muhurat.quality === "auspicious";
     const isRahuKaal = muhurat.is_rahu_kaal;
 
+    const matchingTatkalWindow = dayView?.windows?.find((w: any) => {
+      if (!w.is_tatkal) return false;
+      const ws = new Date(w.starts_at).getTime();
+      const we = new Date(w.ends_at).getTime();
+      const st = slot.getTime();
+      const en = st + minutes * 60_000;
+      return ws <= st && en <= we;
+    });
+    const isTatkal = Boolean(matchingTatkalWindow);
+    const tatkalMultiplier = matchingTatkalWindow?.tatkal_multiplier ?? 1.5;
+    const slotPrice = matchingTatkalWindow?.tatkal_fixed_paise ?? Math.round(computedPricePaise * (isTatkal ? tatkalMultiplier : 1));
+
     return (
       <button
         key={slot.toISOString()}
@@ -1565,6 +1602,8 @@ function AppointmentsContent() {
           "relative flex flex-col items-center justify-between rounded-2xl p-3.5 transition-all text-center border shadow-2xs cursor-pointer group select-none",
           isSelected
             ? "bg-gradient-to-b from-[#EA580C] via-[#D97706] to-[#B45309] text-white border-[#B45309] shadow-[0_8px_20px_rgba(217,119,6,0.35)] ring-4 ring-amber-500/25 scale-[1.04]"
+            : isTatkal
+            ? "bg-gradient-to-b from-amber-50/80 via-yellow-50/50 to-white hover:bg-amber-100/60 border-amber-400 hover:border-amber-500 text-amber-950 shadow-[0_4px_12px_rgba(217,119,6,0.15)] ring-1 ring-amber-400/30 hover:scale-[1.02] hover:-translate-y-0.5"
             : isAuspicious
             ? "bg-white hover:bg-amber-50/70 border-amber-300 hover:border-amber-500 text-slate-900 hover:scale-[1.02] hover:-translate-y-0.5"
             : isRahuKaal
@@ -1572,6 +1611,13 @@ function AppointmentsContent() {
             : "bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-300 text-slate-900 hover:scale-[1.02] hover:-translate-y-0.5",
         )}
       >
+        {isTatkal && (
+          <span className="absolute -top-2.5 inset-x-2 flex items-center justify-center gap-1 rounded-full bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 px-2 py-0.5 text-[9px] font-black uppercase text-white shadow-xs tracking-wider">
+            <Zap className="size-2.5 fill-white" />
+            <span>VIP Tatkal</span>
+          </span>
+        )}
+
         <span className="text-sm font-extrabold tabular-nums tracking-tight">
           {clock(slot)}
         </span>
@@ -1581,6 +1627,8 @@ function AppointmentsContent() {
             "mt-1.5 rounded-full px-2 py-0.5 text-[9.5px] font-bold leading-none uppercase tracking-wider flex items-center gap-1 transition-colors",
             isSelected
               ? "bg-white/20 text-white"
+              : isTatkal
+              ? "bg-amber-200/80 text-amber-950 font-black"
               : isAuspicious
               ? "bg-amber-100 text-amber-950 border border-amber-300/60"
               : isRahuKaal
@@ -1596,10 +1644,14 @@ function AppointmentsContent() {
         <span
           className={cn(
             "mt-2 text-[10px] font-bold tabular-nums",
-            isSelected ? "text-amber-100" : "text-amber-700",
+            isSelected
+              ? "text-amber-100"
+              : isTatkal
+              ? "text-amber-900 font-black"
+              : "text-amber-700",
           )}
         >
-          ₹{rupees(computedPricePaise)}
+          ₹{rupees(slotPrice)}
         </span>
 
         {isSelected && (
