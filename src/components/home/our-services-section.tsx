@@ -55,7 +55,7 @@ const SERVICES: ServiceItem[] = [
   },
   {
     icon: Sun,
-    href: "/horoscope",
+    href: "/daily-horoscope",
     tile: "from-[#ffd34d] to-[#f5a300]",
     glow: "rgba(245,163,0,0.34)",
     title: { en: "Daily Horoscope", bn: "দৈনিক রাশিফল", hi: "दैनिक राशिफल" },
