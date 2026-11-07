@@ -478,6 +478,9 @@ export const appointmentApi = {
   getCertificate: (id: string) =>
     api.get<Record<string, any>>(`/appointments/${id}/certificate`),
 
+  getKarmicVault: (id: string) =>
+    api.get<Record<string, any>>(`/appointments/${id}/karmic-vault`),
+
   getCertificateHtmlUrl: (id: string) =>
     `${process.env.NEXT_PUBLIC_API_URL || "https://api.divinlink.com"}/api/v1/appointments/${id}/certificate/html`,
 
