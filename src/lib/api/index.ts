@@ -481,6 +481,38 @@ export const appointmentApi = {
   getCertificateHtmlUrl: (id: string) =>
     `${process.env.NEXT_PUBLIC_API_URL || "https://api.divinlink.com"}/api/v1/appointments/${id}/certificate/html`,
 
+  verifyCertificate: (id: string) =>
+    api.get<{
+      valid: boolean;
+      status: string;
+      appointment_id: string;
+      certificate_id: string;
+      issued_at: string;
+      consultation_pillar: string;
+      session_duration_minutes: number;
+      astrologer: { name: string; title: string; avatar_url?: string };
+      client: { name: string };
+      sacred_prescription: {
+        consecrated_gemstone: string;
+        sacred_rudraksha: string;
+        vedic_mantra: string;
+        japa_count: number;
+        daan_charity_ritual: string;
+        sankalpa?: string;
+        astrologer_guidance: string;
+      };
+      vedic_shlokas?: Array<{ sanskrit: string; transliteration?: string; meaning: string }>;
+      verification_url: string;
+      qr_code_url?: string;
+      digital_seal: {
+        verification_hash: string;
+        seal_title: string;
+        seal_motto: string;
+        status: string;
+        signature?: string;
+      };
+    }>(`/appointments/prescription/${id}/verify`, { auth: false }),
+
   joinStandby: (id: string) =>
     api.post<{ position: number }>(`/appointments/${id}/standby`, {}),
 
