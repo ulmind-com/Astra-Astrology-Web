@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Compass,
   Heart,
+  MessageSquare,
   Phone,
   Sparkles,
   Star,
@@ -90,28 +91,32 @@ const DEFAULT_SLIDES: HeroSlide[] = [
 
 const QUICK_ACTIONS = [
   {
+    key: "talk",
     title: "Talk",
     subtitle: "Instant Consultation",
     href: "/astrologers",
     icon: Phone,
   },
   {
+    key: "love",
     title: "Love",
     subtitle: "Relationship Clarity",
     href: "/kundli-matching",
     icon: Heart,
   },
   {
-    title: "Horoscope",
-    subtitle: "Daily & Yearly 2026",
-    href: "/daily-horoscope",
-    icon: Sparkles,
+    key: "chat",
+    title: "Chat",
+    subtitle: "Private Messaging",
+    href: "/astrologers",
+    icon: MessageSquare,
   },
   {
-    title: "Kundli",
-    subtitle: "Free Birth Chart",
-    href: "/kundli",
-    icon: Compass,
+    key: "horoscope",
+    title: "Horoscope",
+    subtitle: "Today's Prediction",
+    href: "/daily-horoscope",
+    icon: Sparkles,
   },
 ];
 
@@ -147,8 +152,17 @@ export function HeroAstroyogi() {
 
   const quickActions = useMemo(() => {
     const loc = HERO_SLIDES_TRANSLATIONS[language] || HERO_SLIDES_TRANSLATIONS.en;
+    const keyMap: Record<string, { title: string; subtitle: string } | undefined> = {
+      talk: loc.quickActions[0],
+      love: loc.quickActions[1],
+      chat: loc.quickActions[2],
+      horoscope: loc.quickActions[3],
+      kundli: loc.quickActions[4],
+      ai: loc.quickActions[5],
+    };
+
     return QUICK_ACTIONS.map((action, idx) => {
-      const trans = loc.quickActions[idx];
+      const trans = keyMap[action.key] || loc.quickActions[idx];
       return {
         ...action,
         title: trans?.title || action.title,
