@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, Coins, Phone, PhoneOff, Sparkles, Video } from "lucide-react";
+import { Clock, Coins, Moon, Phone, PhoneOff, Sparkles, Sun, Video } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import * as React from "react";
@@ -53,6 +53,26 @@ export default function CallPage() {
 
   const [whiteboardOpen, setWhiteboardOpen] = React.useState(false);
 
+  // Theme State (Supports Ultra Pro Light & Dark)
+  const [theme, setTheme] = React.useState<"light" | "dark">(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("astra_call_theme");
+      if (saved === "light" || saved === "dark") return saved;
+    }
+    return "light";
+  });
+
+  const toggleTheme = React.useCallback(() => {
+    setTheme((prev) => {
+      const next = prev === "dark" ? "light" : "dark";
+      if (typeof window !== "undefined") {
+        localStorage.setItem("astra_call_theme", next);
+        localStorage.setItem("astra_whiteboard_theme", next);
+      }
+      return next;
+    });
+  }, []);
+
   useWhiteboardEvents(
     React.useCallback(
       (event) => {
@@ -98,7 +118,14 @@ export default function CallPage() {
   const Icon = isVideo ? Video : Phone;
 
   return (
-    <div className="relative flex h-dvh flex-col bg-night-950 text-white">
+    <div
+      className={cn(
+        "relative flex h-dvh flex-col transition-colors duration-300",
+        theme === "dark"
+          ? "bg-night-950 text-white"
+          : "bg-gradient-to-br from-[#fcf9f2] via-[#f7f2e4] to-[#ede3cf] text-[#1a1208]",
+      )}
+    >
       {/* The SDK fills the frame once connected; everything else floats over. */}
       {connected && data?.credentials ? (
         <CallRoom
@@ -108,7 +135,14 @@ export default function CallPage() {
           audioOnly={!isVideo}
         />
       ) : (
-        <div className="absolute inset-0 bg-cosmos" />
+        <div
+          className={cn(
+            "absolute inset-0 transition-opacity",
+            theme === "dark"
+              ? "bg-cosmos"
+              : "bg-[radial-gradient(ellipse_at_center,rgba(250,204,21,0.18)_0%,rgba(245,235,215,0.85)_60%,rgba(237,227,207,1)_100%)]",
+          )}
+        />
       )}
 
       {connected && (
@@ -118,6 +152,8 @@ export default function CallPage() {
           role="seeker"
           isOpen={whiteboardOpen}
           onClose={() => setWhiteboardOpen(false)}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
       )}
 
@@ -129,22 +165,61 @@ export default function CallPage() {
             kind="call"
             billing={call.billing}
             elapsedSeconds={seconds}
-            onDark
+            onDark={theme === "dark"}
             onExtended={() => refetch()}
           />
         </div>
       )}
 
       {connected ? (
-        <header className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center gap-3 bg-gradient-to-b from-black/70 to-transparent px-4 py-3">
+        <header
+          className={cn(
+            "pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center gap-3 px-4 py-3 transition-colors",
+            theme === "dark"
+              ? "bg-gradient-to-b from-black/80 via-black/40 to-transparent text-white"
+              : "bg-white/85 border-b border-[#ebdca5] text-[#1a1208] shadow-xs backdrop-blur-md",
+          )}
+        >
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold">{call.peer?.name}</p>
-            <p className="flex items-center gap-1.5 text-xs text-white/70">
-              <span className="size-1.5 rounded-full bg-success" />
+            <p className={cn("truncate text-sm font-bold", theme === "dark" ? "text-white" : "text-[#1a1208]")}>
+              {call.peer?.name}
+            </p>
+            <p
+              className={cn(
+                "flex items-center gap-1.5 text-xs font-semibold",
+                theme === "dark" ? "text-white/70" : "text-[#766545]",
+              )}
+            >
+              <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
               {formatDuration(seconds)}
             </p>
           </div>
           <div className="pointer-events-auto flex items-center gap-2">
+            {/* Theme Toggle (Light / Dark) */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className={cn(
+                "flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold transition-all border shadow-xs pointer-events-auto",
+                theme === "dark"
+                  ? "bg-night-900/90 border-white/20 text-amber-300 hover:bg-night-800"
+                  : "bg-white/95 border-[#ecd57c] text-amber-900 hover:bg-[#fff7d6]",
+              )}
+              title={theme === "dark" ? "Switch to Sacred Light Mode" : "Switch to Celestial Dark Mode"}
+            >
+              {theme === "dark" ? (
+                <>
+                  <Sun className="size-3.5 text-amber-400" />
+                  <span className="hidden sm:inline">Light Mode</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="size-3.5 text-indigo-600" />
+                  <span className="hidden sm:inline">Dark Mode</span>
+                </>
+              )}
+            </button>
+
             <Button
               size="sm"
               onClick={() => setWhiteboardOpen((v) => !v)}
@@ -152,20 +227,22 @@ export default function CallPage() {
                 "text-xs font-bold transition-all shadow-sm",
                 whiteboardOpen
                   ? "bg-amber-400 text-slate-950 border border-amber-300 ring-2 ring-amber-400/50"
-                  : "bg-amber-950/70 hover:bg-amber-900 text-amber-200 border border-amber-500/40",
+                  : theme === "dark"
+                    ? "bg-amber-950/70 hover:bg-amber-900 text-amber-200 border border-amber-500/40"
+                    : "bg-white/95 hover:bg-[#fff7d6] text-amber-900 border border-[#ecd57c] shadow-xs",
               )}
               title="Open interactive Kundali cosmic whiteboard"
             >
-              <Sparkles className="size-3.5 mr-1 text-amber-300" />
+              <Sparkles className="size-3.5 mr-1 text-amber-400" />
               Cosmic Whiteboard
             </Button>
             <Button
               size="sm"
               onClick={hangUp}
               disabled={end.isPending}
-              className="bg-rose-600 text-white hover:bg-rose-500"
+              className="bg-rose-600 text-white hover:bg-rose-500 shadow-sm font-bold"
             >
-              <PhoneOff className="size-4" />
+              <PhoneOff className="size-4 mr-1" />
               End
             </Button>
           </div>
@@ -176,59 +253,120 @@ export default function CallPage() {
           {live ? (
             <>
               <span className="relative flex size-32 items-center justify-center">
-                <span className="absolute inset-0 animate-ping rounded-full bg-white/10" />
+                <span
+                  className={cn(
+                    "absolute inset-0 animate-ping rounded-full",
+                    theme === "dark" ? "bg-white/10" : "bg-amber-400/25",
+                  )}
+                />
                 <Avatar
                   src={call.peer?.avatar_url}
                   name={call.peer?.name}
                   size="xl"
-                  className="relative"
+                  className={cn(
+                    "relative",
+                    theme === "light" && "ring-4 ring-amber-400/40 shadow-xl",
+                  )}
                 />
               </span>
 
               <div>
-                <p className="text-xl font-semibold">{call.peer?.name}</p>
-                <p className="mt-1.5 flex items-center justify-center gap-2 text-sm text-white/60">
+                <p className={cn("text-xl font-bold", theme === "dark" ? "text-white" : "text-[#1a1208]")}>
+                  {call.peer?.name}
+                </p>
+                <p
+                  className={cn(
+                    "mt-1.5 flex items-center justify-center gap-2 text-sm font-semibold",
+                    theme === "dark" ? "text-white/60" : "text-[#8b5e0a]",
+                  )}
+                >
                   <Icon className="size-4" />
                   {isVideo ? "Video call" : "Voice call"} · ringing…
                 </p>
               </div>
 
-              <p className="max-w-xs text-xs text-white/40">
+              <p className={cn("max-w-xs text-xs", theme === "dark" ? "text-white/40" : "text-[#766545] font-medium")}>
                 We will connect you the moment they answer. Keep this screen open.
               </p>
 
-              <Button
-                onClick={hangUp}
-                disabled={end.isPending}
-                className="mt-2 bg-rose-600 text-white hover:bg-rose-500"
-              >
-                <PhoneOff className="size-4" />
-                Cancel
-              </Button>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all border shadow-xs",
+                    theme === "dark"
+                      ? "bg-night-900/90 border-white/20 text-amber-300 hover:bg-night-800"
+                      : "bg-white/95 border-[#ecd57c] text-amber-900 hover:bg-[#fff7d6]",
+                  )}
+                >
+                  {theme === "dark" ? (
+                    <>
+                      <Sun className="size-3.5 text-amber-400" />
+                      <span>Light Mode</span>
+                    </>
+                  ) : (
+                    <>
+                      <Moon className="size-3.5 text-indigo-600" />
+                      <span>Dark Mode</span>
+                    </>
+                  )}
+                </button>
+
+                <Button
+                  onClick={hangUp}
+                  disabled={end.isPending}
+                  className="bg-rose-600 text-white hover:bg-rose-500 shadow-sm font-bold"
+                >
+                  <PhoneOff className="size-4 mr-1" />
+                  Cancel
+                </Button>
+              </div>
             </>
           ) : (
             call.end_reason === "Ran out of coins" ? (
-              <div className="rounded-2xl bg-white/5 p-6">
+              <div className={cn("rounded-2xl p-6", theme === "dark" ? "bg-white/5" : "bg-white/90 border border-[#e2d5a3] shadow-md")}>
                 <OutOfCoins onBack={() => router.replace("/astrologers")} />
               </div>
             ) : (
             <>
-              <span className="flex size-20 items-center justify-center rounded-full bg-white/10">
-                <PhoneOff className="size-8" />
+              <span
+                className={cn(
+                  "flex size-20 items-center justify-center rounded-full",
+                  theme === "dark" ? "bg-white/10 text-white" : "bg-amber-100 text-amber-900 border border-amber-300/60 shadow-md",
+                )}
+              >
+                <PhoneOff className="size-8 text-rose-500" />
               </span>
               <div>
-                <p className="text-xl font-semibold">{CALL_STATUS_LABELS[call.status]}</p>
+                <p className={cn("text-xl font-bold", theme === "dark" ? "text-white" : "text-[#1a1208]")}>
+                  {CALL_STATUS_LABELS[call.status]}
+                </p>
                 {call.duration_seconds > 0 && (
-                  <p className="mt-1 text-sm text-white/60">
+                  <p
+                    className={cn(
+                      "mt-1 text-sm font-semibold",
+                      theme === "dark" ? "text-white/60" : "text-[#766545]",
+                    )}
+                  >
                     {formatDuration(call.duration_seconds)}
                   </p>
                 )}
                 {call.end_reason && (
-                  <p className="mt-1 text-xs text-white/40">{call.end_reason}</p>
+                  <p className={cn("mt-1 text-xs", theme === "dark" ? "text-white/40" : "text-[#8b6a1a]")}>
+                    {call.end_reason}
+                  </p>
                 )}
               </div>
-              <Button variant="secondary" onClick={() => router.replace("/astrologers")}>
-                Back to astrologers
+              <Button
+                variant="secondary"
+                onClick={() => router.replace("/astrologers")}
+                className={cn(
+                  "font-bold shadow-xs",
+                  theme === "light" && "bg-white border-[#ecd57c] text-amber-950 hover:bg-[#fff7d6]",
+                )}
+              >
+                Back to Astrologers
               </Button>
             </>
             )
