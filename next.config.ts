@@ -30,6 +30,11 @@ const nextConfig: NextConfig = {
         destination: "/account/wallet",
         permanent: true,
       },
+      {
+        source: "/horoscope",
+        destination: "/daily-horoscope",
+        permanent: true,
+      },
     ];
   },
 };
