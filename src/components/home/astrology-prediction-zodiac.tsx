@@ -190,10 +190,10 @@ export function AstrologyPredictionZodiac() {
       {/* faint rotating zodiac wheel — left side background */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/zodiac-wheel.png"
+        src="/zodiac-wheel-yellow.webp"
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute left-[-90px] top-[90px] z-0 size-[360px] animate-[spin_55s_linear_infinite] select-none opacity-[0.05] lg:size-[460px] [will-change:transform] motion-reduce:animate-none"
+        className="pointer-events-none absolute left-[-90px] top-[90px] z-0 size-[360px] animate-[spin_55s_linear_infinite] select-none opacity-[0.18] lg:size-[460px] [will-change:transform] motion-reduce:animate-none"
         draggable={false}
       />
 

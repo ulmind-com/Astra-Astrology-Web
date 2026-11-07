@@ -20,10 +20,10 @@ import { AstrologyPredictionZodiac } from "@/components/home/astrology-predictio
 import { AppDownloadSection } from "@/components/home/app-download-section";
 import { AstroyogiHeader } from "@/components/home/astroyogi-header";
 import { CelebrityVideosSection } from "@/components/home/celebrity-videos-section";
-import { ConsultRightAstrologer } from "@/components/home/consult-right-astrologer";
 import { FirstChatFreeModal } from "@/components/home/first-chat-free-modal";
 import { FreeAstrologyReadings } from "@/components/home/free-astrology-readings";
 import { HeroAstroyogi } from "@/components/home/hero-astroyogi";
+import { OurServicesSection } from "@/components/home/our-services-section";
 import { TopAstrologersSection } from "@/components/home/top-astrologers-section";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Button } from "@/components/ui";
@@ -111,15 +111,24 @@ export default function HomePage() {
         {/* 5. FREE ASTROLOGY READINGS (12 RICH 3D TILES) */}
         <FreeAstrologyReadings />
 
-        {/* 6. CONSULT THE RIGHT ASTROLOGER FOR YOU */}
-        <ConsultRightAstrologer />
+        {/* 5b. OUR SERVICES (horizontal premium rail) */}
+        <OurServicesSection />
 
         {/* 7. CELEBRITY VIDEOS */}
         <CelebrityVideosSection />
 
         {/* 8. HOW IT WORKS: 3 STEPS TO CLARITY */}
-        <section className="bg-transparent py-12 sm:py-16 border-b border-[#f2e9b0]/60">
-          <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
+        <section className="relative overflow-hidden bg-transparent py-12 sm:py-16 border-b border-[#f2e9b0]/60">
+          {/* Slowly rotating yellow celestial ring above the section */}
+          <div className="pointer-events-none absolute left-1/2 -top-20 sm:-top-24 -translate-x-1/2 z-0">
+            <div className="animate-celestial-spin size-48 sm:size-64 rounded-full border-2 border-dashed border-[#facc15]/35">
+              <div className="absolute inset-4 rounded-full border border-[#facc15]/25" />
+              <span className="absolute left-1/2 top-0 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#facc15] shadow-[0_0_12px_4px_rgba(250,204,21,0.6)]" />
+              <span className="absolute left-1/2 bottom-0 size-1.5 -translate-x-1/2 translate-y-1/2 rounded-full bg-[#fde047] shadow-[0_0_8px_3px_rgba(253,224,71,0.5)]" />
+            </div>
+          </div>
+
+          <div className="relative z-10 mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-10">
               <span className="inline-block rounded-full bg-brand-200/80 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#8b5e0a] border border-brand-400/40 mb-3">
                 {language === "bn" ? "সহজ ও নির্ভরযোগ্য" : language === "hi" ? "सरल एवं सहज" : "Simple & Seamless"}
@@ -140,30 +149,47 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            <div className="flex flex-col md:flex-row md:items-stretch gap-3 md:gap-0">
               {steps.map((step, idx) => (
-                <div
-                  key={step.num}
-                  className="relative rounded-2xl border border-[#eadf9a] bg-white p-6 sm:p-7 shadow-[0_4px_16px_-4px_rgba(26,18,8,0.04)] flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="flex size-11 items-center justify-center rounded-xl bg-brand-300 font-cinzel text-lg font-black text-ink-900 shadow-sm">
-                        {step.num}
-                      </span>
-                      <span className="text-xs font-bold text-[#8b5e0a] uppercase tracking-wider">
-                        {language === "bn" ? `ধাপ ${idx + 1}` : language === "hi" ? `चरण ${idx + 1}` : `Step ${idx + 1}`}
-                      </span>
-                    </div>
+                <React.Fragment key={step.num}>
+                  <div className="group relative flex flex-1 flex-col overflow-hidden rounded-[26px] border border-[#ece0ac] bg-gradient-to-b from-white to-[#fffdf2] p-6 sm:p-7 shadow-[0_8px_26px_-14px_rgba(26,18,8,0.2)] transition-all duration-300 hover:-translate-y-2 hover:border-[#f2cf5e] hover:shadow-[0_22px_44px_-18px_rgba(250,204,21,0.55)]">
+                    {/* Giant watermark number */}
+                    <span className="pointer-events-none absolute -right-2 -top-4 font-cinzel text-[96px] font-black leading-none text-[#fcef9a]/40 select-none">
+                      {step.num}
+                    </span>
 
-                    <h3 className="text-base sm:text-lg font-bold text-[#1a1208]">
-                      {step.title}
-                    </h3>
-                    <p className="mt-2 text-xs sm:text-sm text-[#6b5f4d] leading-relaxed">
-                      {step.body}
-                    </p>
+                    <div className="relative">
+                      <div className="flex items-center justify-between mb-5">
+                        {/* Dark number badge with neon ring */}
+                        <span className="relative flex size-12 items-center justify-center rounded-2xl bg-[#1a1412] font-cinzel text-lg font-black text-[#fde047] ring-1 ring-[#facc15]/60 shadow-[0_0_18px_-2px_rgba(250,204,21,0.7)]">
+                          {step.num}
+                        </span>
+                        <span className="text-[11px] font-bold text-[#a07a16] uppercase tracking-[0.15em]">
+                          {language === "bn" ? `ধাপ ${idx + 1}` : language === "hi" ? `चरण ${idx + 1}` : `Step ${idx + 1}`}
+                        </span>
+                      </div>
+
+                      <h3 className="text-base sm:text-lg font-extrabold tracking-tight text-[#1a1208]">
+                        {step.title}
+                      </h3>
+                      <p className="mt-2 text-xs sm:text-sm text-[#6b5f4d] leading-relaxed">
+                        {step.body}
+                      </p>
+                    </div>
                   </div>
-                </div>
+
+                  {/* Neon yellow connector arrow between cards */}
+                  {idx < steps.length - 1 && (
+                    <div className="flex shrink-0 items-center justify-center md:px-3 lg:px-4 py-1 md:py-0">
+                      <ArrowRight
+                        className={`size-7 sm:size-8 text-[#facc15] rotate-90 md:rotate-0 ${
+                          idx === 0 ? "animate-neon-arrow" : "animate-neon-arrow-2"
+                        }`}
+                        strokeWidth={2.6}
+                      />
+                    </div>
+                  )}
+                </React.Fragment>
               ))}
             </div>
           </div>
