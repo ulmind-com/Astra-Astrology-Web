@@ -25,11 +25,19 @@ export interface TarotCard {
   element: string;
   astrology: string;
   vedic_graha: string;
+  image_slug: string;
+  numerology?: string | null;
+  timing_window?: string | null;
+  timing_season?: string | null;
+  timing_speed?: string | null;
+  yes_no?: string | null;
+  one_liner?: string | null;
+  symbols?: string[];
+  professions?: string[];
   upright: CardAspectInterpretation;
   reversed: CardAspectInterpretation;
   remedy: string;
   affirmation: string;
-  image_slug: string;
 }
 
 export interface SpreadPosition {
@@ -60,6 +68,14 @@ export interface DrawnCardDetail {
   keywords: string[];
   advice: string;
   elemental_harmony?: string | null;
+  numerology?: string | null;
+  timing_window?: string | null;
+  timing_season?: string | null;
+  timing_speed?: string | null;
+  yes_no?: string | null;
+  one_liner?: string | null;
+  symbols?: string[];
+  professions?: string[];
 }
 
 export interface TarotDrawRequest {
@@ -98,6 +114,14 @@ export interface TarotDrawResponse {
   vedic_mantra: string;
   predicted_timeframe?: string | null;
   divine_verdict?: string | null;
+  timing_breakdown?: {
+    speed?: string;
+    season?: string;
+    window?: string;
+    verdict_card?: string;
+    orientation?: string;
+    card_yes_no?: string;
+  } | null;
   favorable_score?: number | null;
   auspicious_day?: string | null;
   auspicious_color?: string | null;
