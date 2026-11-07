@@ -304,18 +304,37 @@ export function CosmicWhiteboard({
 
           setData((prev) => {
             if (!prev) return prev;
+            let nextStrokes = prev.strokes;
+            if (payload.clear_strokes) {
+              nextStrokes = [];
+            } else if (payload.strokes) {
+              nextStrokes = payload.strokes;
+            } else if (payload.append_stroke) {
+              if (!prev.strokes.some((s) => s.id && s.id === payload.append_stroke.id)) {
+                nextStrokes = [...prev.strokes, payload.append_stroke];
+              }
+            }
             return {
               ...prev,
               version: payload.version ?? prev.version,
-              strokes: payload.strokes ?? prev.strokes,
+              strokes: nextStrokes,
               drishti: payload.drishti !== undefined ? payload.drishti : prev.drishti,
               highlighted_houses: payload.highlighted_houses ?? prev.highlighted_houses,
               active_tab: payload.active_tab ?? prev.active_tab,
               is_open: payload.is_open ?? prev.is_open,
+              chart_style: payload.chart_style ?? prev.chart_style,
+              planets: payload.planets ?? prev.planets,
+              transit_planets: payload.transit_planets ?? prev.transit_planets,
+              asc_sign_num: payload.asc_sign_num ?? prev.asc_sign_num,
+              client_name: payload.client_name ?? prev.client_name,
+              birth_date: payload.birth_date ?? prev.birth_date,
+              birth_time: payload.birth_time ?? prev.birth_time,
+              birth_place: payload.birth_place ?? prev.birth_place,
             };
           });
 
           if (payload.active_tab) setActiveTab(payload.active_tab);
+          if (payload.chart_style) setChartStyle(payload.chart_style === "south" ? "south" : "north");
           if (payload.drishti !== undefined) setActiveDrishti(payload.drishti);
         } else if (event.type === "whiteboard_live") {
           const frame = event.data;
@@ -323,6 +342,17 @@ export function CosmicWhiteboard({
 
           if (frame.laser) {
             setLaserPoint(frame.laser);
+          } else if (frame.stroke) {
+            // A completed stroke or stamp received via live stream!
+            setData((prev) => {
+              if (!prev) return prev;
+              if (prev.strokes.some((s) => s.id && s.id === frame.stroke.id)) return prev;
+              return { ...prev, strokes: [...prev.strokes, frame.stroke] };
+            });
+          } else if (frame.strokes) {
+            setData((prev) => (prev ? { ...prev, strokes: frame.strokes } : prev));
+          } else if (frame.clear_strokes) {
+            setData((prev) => (prev ? { ...prev, strokes: [] } : prev));
           } else if (frame.live_stroke) {
             // Draw temporary live stroke segment on canvas
             const ctx = canvasRef.current?.getContext("2d");
@@ -367,6 +397,16 @@ export function CosmicWhiteboard({
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(s.stamp_icon || "🕉️", s.points[0].x, s.points[0].y);
+        ctx.restore();
+        continue;
+      }
+
+      if (s.points.length === 1) {
+        ctx.save();
+        ctx.fillStyle = s.color;
+        ctx.beginPath();
+        ctx.arc(s.points[0].x, s.points[0].y, (s.tool === "highlighter" ? 14 : s.width) / 2, 0, Math.PI * 2);
+        ctx.fill();
         ctx.restore();
         continue;
       }
