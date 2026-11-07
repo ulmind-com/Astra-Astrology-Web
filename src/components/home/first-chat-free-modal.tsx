@@ -1,7 +1,6 @@
 "use client";
 
-import { ArrowRight, CheckCircle2, Lock, Sparkles, X } from "lucide-react";
-import Image from "next/image";
+import { ArrowRight, CheckCircle2, Lock, Sparkles, User, X } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { useLanguage } from "@/providers/language-provider";
@@ -52,7 +51,7 @@ const MODAL_DATA: Record<AstrologyLanguage, ModalTranslation> = {
     topics: {
       career: {
         id: "career",
-        label: "💼 Career & Growth",
+        label: "💼 Career",
         userQuery: "Will my upcoming job switch bring growth and promotion?",
         userTime: "11:24 AM",
         astroReply1: "Yes, Jupiter transiting your 10th house creates an exceptional breakthrough.",
@@ -62,7 +61,7 @@ const MODAL_DATA: Record<AstrologyLanguage, ModalTranslation> = {
       },
       love: {
         id: "love",
-        label: "❤️ Love & Marriage",
+        label: "❤️ Love",
         userQuery: "When will I meet my compatible life partner?",
         userTime: "11:24 AM",
         astroReply1: "Venus aligns in your 7th house—indicating an auspicious soul connection.",
@@ -72,7 +71,7 @@ const MODAL_DATA: Record<AstrologyLanguage, ModalTranslation> = {
       },
       wealth: {
         id: "wealth",
-        label: "✨ Wealth & Fortune",
+        label: "✨ Wealth",
         userQuery: "Will my financial stability and new investments prosper?",
         userTime: "11:24 AM",
         astroReply1: "Dhan Yoga activates in your 2nd house with strong planetary backing.",
@@ -95,7 +94,7 @@ const MODAL_DATA: Record<AstrologyLanguage, ModalTranslation> = {
     topics: {
       career: {
         id: "career",
-        label: "💼 চাকরি ও ক্যারিয়ার",
+        label: "💼 ক্যারিয়ার",
         userQuery: "আসন্ন চাকরির পরিবর্তন কি আমার জন্য শুভ ও পদোন্নতি আনবে?",
         userTime: "১১:২৪ AM",
         astroReply1: "হ্যাঁ, দশম ভাবে বৃহস্পতির শুভ গোচরে আগামী মাস থেকেই দারুণ অগ্রগতির যোগ।",
@@ -105,7 +104,7 @@ const MODAL_DATA: Record<AstrologyLanguage, ModalTranslation> = {
       },
       love: {
         id: "love",
-        label: "❤️ প্রেম ও বিবাহ",
+        label: "❤️ প্রেম",
         userQuery: "আমার শুভ বিবাহ ও মনের মতো জীবনসঙ্গী পাওয়ার সময় কখন?",
         userTime: "১১:২৪ AM",
         astroReply1: "সপ্তম ভাবে শুক্রের শুভ অবস্থানে শীঘ্রই মনের মতো সম্পর্কের সূচনা হবে।",
@@ -115,7 +114,7 @@ const MODAL_DATA: Record<AstrologyLanguage, ModalTranslation> = {
       },
       wealth: {
         id: "wealth",
-        label: "✨ ভাগ্য ও অর্থ",
+        label: "✨ অর্থ",
         userQuery: "আমার আর্থিক অবস্থা এবং নতুন বিনিয়োগে কি উন্নতি হবে?",
         userTime: "১১:২৪ AM",
         astroReply1: "আপনার জন্মছকে শক্তিশালী ধনযোগ জাগ্রত হচ্ছে, আর্থিক লাভ নিশ্চিত।",
@@ -138,7 +137,7 @@ const MODAL_DATA: Record<AstrologyLanguage, ModalTranslation> = {
     topics: {
       career: {
         id: "career",
-        label: "💼 करियर व पदोन्नति",
+        label: "💼 करियर",
         userQuery: "क्या आगामी नौकरी परिवर्तन मेरे लिए पदोन्नति और वृद्धि लाएगा?",
         userTime: "11:24 AM",
         astroReply1: "हाँ, दशम भाव में गुरु का गोचर अत्यंत फलदायी राजयोग बना रहा है।",
@@ -148,7 +147,7 @@ const MODAL_DATA: Record<AstrologyLanguage, ModalTranslation> = {
       },
       love: {
         id: "love",
-        label: "❤️ प्रेम व विवाह",
+        label: "❤️ प्रेम",
         userQuery: "मेरा विवाह कब तक होगा और जीवनसाथी कैसा मिलेगा?",
         userTime: "11:24 AM",
         astroReply1: "सप्तम भाव में शुक्र की स्थिति शीघ्र ही अनुकूल जीवनसाथी मिलने का संकेत देती है।",
@@ -158,7 +157,7 @@ const MODAL_DATA: Record<AstrologyLanguage, ModalTranslation> = {
       },
       wealth: {
         id: "wealth",
-        label: "✨ धन व व्यापार",
+        label: "✨ धन",
         userQuery: "क्या मेरी आर्थिक स्थिति सुधरेगी और नया निवेश लाभकारी रहेगा?",
         userTime: "11:24 AM",
         astroReply1: "द्वितीय भाव में प्रबल धनयोग सक्रिय हो रहा है, उत्तम वित्तीय लाभ होगा।",
@@ -320,9 +319,9 @@ export function FirstChatFreeModal({
           </div>
 
           {/* Right Column: Astrological Radar Chart & Interactive Floating Chat */}
-          <div className="md:col-span-6 relative flex flex-col items-end justify-center min-h-[260px] sm:min-h-[290px] overflow-visible">
+          <div className="md:col-span-6 relative flex flex-col items-center justify-center min-h-[260px] sm:min-h-[290px] overflow-visible">
             {/* 1. Astrological Circular Chart / Radar Background */}
-            <div className="pointer-events-none absolute right-1/2 translate-x-1/2 md:translate-x-0 md:-right-6 top-1/2 -translate-y-1/2 size-64 sm:size-80 opacity-60">
+            <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 size-64 sm:size-80 opacity-40">
               {/* Outer circle */}
               <div className="absolute inset-0 rounded-full border border-[#e3cb78]/60" />
               {/* Middle circle 1 */}
@@ -346,7 +345,7 @@ export function FirstChatFreeModal({
             </div>
 
             {/* 2. Interactive Topic Selector Pills */}
-            <div className="relative flex flex-wrap items-center justify-end gap-1.5 sm:gap-2 mb-3 z-10 w-full pr-1">
+            <div className="relative flex flex-nowrap items-center justify-center gap-1.5 mb-4 z-10 w-full rounded-full bg-[#fffaed]/70 p-1 border border-[#efe0ad]/70 shadow-inner backdrop-blur-sm">
               {topicList.map((key) => {
                 const topic = t.topics[key];
                 const isActive = activeTopic === key;
@@ -355,10 +354,10 @@ export function FirstChatFreeModal({
                     key={key}
                     type="button"
                     onClick={() => setActiveTopic(key)}
-                    className={`cursor-pointer px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all duration-200 border ${
+                    className={`cursor-pointer flex-1 whitespace-nowrap px-2 py-1.5 rounded-full text-[11px] sm:text-[11.5px] font-semibold transition-all duration-200 ${
                       isActive
-                        ? "bg-[#1c1304] text-[#ffd700] border-[#1c1304] shadow-xs scale-102"
-                        : "bg-[#fff8e7]/90 hover:bg-[#faeed1] text-[#6e592f] border-[#ecd89f]"
+                        ? "bg-gradient-to-b from-[#ffd700] to-[#f2c200] text-[#1c1304] shadow-[0_3px_8px_-2px_rgba(240,194,0,0.7)] ring-1 ring-[#e6be00]"
+                        : "text-[#8a7340] hover:text-[#5f4d22]"
                     }`}
                   >
                     {topic.label}
@@ -368,62 +367,66 @@ export function FirstChatFreeModal({
             </div>
 
             {/* 3. Floating Chat Simulation */}
-            <div className="relative w-full flex flex-col items-end gap-3 z-10 pr-1 sm:pr-2 transition-all duration-300">
-              {/* Bubble 1: User Question (Dark sleek pill + avatar) */}
-              <div className="flex items-center gap-2.5 max-w-[270px] self-end">
-                {/* User Avatar */}
-                <div className="relative size-7 sm:size-8 shrink-0 rounded-full overflow-hidden border-2 border-white shadow-xs">
-                  <Image
-                    src="/images/astrologers/avatar-shifali.jpg"
-                    alt="User"
-                    fill
-                    className="object-cover"
-                    sizes="32px"
-                  />
-                </div>
-
+            <div className="relative w-full flex flex-col items-stretch gap-3 z-10 transition-all duration-300">
+              {/* Bubble 1: User Question — aligned RIGHT (sent by user) */}
+              <div className="flex items-end justify-end gap-2 max-w-full">
                 {/* Dark Bubble */}
-                <div className="relative rounded-2xl rounded-tr-xs bg-[#1a1412] px-3.5 py-2 shadow-lg text-left">
-                  <p className="text-xs sm:text-[12.5px] font-bold text-white tracking-wide leading-tight">
+                <div className="relative max-w-[210px] rounded-2xl rounded-tr-xs bg-[#1a1412] px-3.5 py-2 shadow-lg text-left">
+                  {/* Tail pointing right toward avatar */}
+                  <span className="absolute -right-1 top-2 size-2.5 rotate-45 rounded-[2px] bg-[#1a1412]" />
+                  <p className="relative text-xs sm:text-[12.5px] font-bold text-white tracking-wide leading-tight">
                     {currentTopic.userQuery}
                   </p>
-                  <p className="text-[9px] font-medium text-stone-400 text-right mt-1 leading-none">
+                  <p className="relative text-[9px] font-medium text-stone-400 text-right mt-1 leading-none">
                     {currentTopic.userTime}
                   </p>
                 </div>
+
+                {/* User Avatar */}
+                <div className="relative size-8 sm:size-9 shrink-0">
+                  <div className="flex size-full items-center justify-center rounded-full bg-gradient-to-br from-[#4a3f6b] via-[#6b5a8f] to-[#8f7bb0] text-white shadow-[0_3px_10px_-2px_rgba(74,63,107,0.55)] ring-2 ring-white">
+                    <User className="size-4 sm:size-4.5 stroke-[2.2]" />
+                  </div>
+                  {/* Online status dot */}
+                  <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-[#22c55e] ring-2 ring-white" />
+                </div>
               </div>
 
-              {/* Bubble 2: Astrologer Reply 1 (Warm Gold Bubble + Medallion icon) */}
-              <div className="flex items-start gap-2.5 max-w-[285px] self-end mr-1 sm:mr-2">
+              {/* Bubble 2: Astrologer Reply 1 — aligned LEFT */}
+              <div className="flex items-start justify-start gap-2 max-w-full">
                 {/* Astrology Logo Badge Icon */}
                 <div className="relative size-6 sm:size-7 shrink-0 mt-0.5 rounded-full bg-gradient-to-br from-[#ffd700] via-[#f7d028] to-[#e6be00] flex items-center justify-center text-[#1c1304] shadow-xs ring-1 ring-[#d4ab00]">
                   <Sparkles className="size-3 sm:size-3.5 fill-current" />
                 </div>
 
                 {/* Yellow Bubble 1 */}
-                <div className="relative rounded-2xl rounded-tl-xs bg-[#fef2a8] border border-[#f5dd69] px-3.5 py-2 shadow-[0_4px_16px_-4px_rgba(240,200,30,0.35)] text-left">
-                  <p className="text-xs sm:text-[12px] font-semibold text-[#291d06] leading-snug">
+                <div className="relative max-w-[215px] rounded-2xl rounded-tl-xs bg-gradient-to-br from-[#fff4b0] to-[#fbe577] border border-[#f3d85f] px-3.5 py-2 shadow-[0_4px_16px_-4px_rgba(240,200,30,0.4)] text-left">
+                  {/* Tail pointing left toward badge */}
+                  <span className="absolute -left-1 top-2 size-2.5 rotate-45 rounded-[2px] bg-[#fff4b0] border-l border-b border-[#f3d85f]" />
+                  <p className="relative text-xs sm:text-[12px] font-semibold text-[#291d06] leading-snug">
                     {currentTopic.astroReply1}
                   </p>
-                  <p className="text-[9px] font-bold text-[#8a681d] text-right mt-1 leading-none">
+                  <p className="relative text-[9px] font-bold text-[#8a681d] text-right mt-1 leading-none">
                     {currentTopic.astroReply1Time}
                   </p>
                 </div>
               </div>
 
-              {/* Bubble 3: Astrologer Reply 2 (Warm Gold Bubble) */}
-              <div className="flex items-start gap-2.5 max-w-[260px] self-end mr-5 sm:mr-7">
+              {/* Bubble 3: Astrologer Reply 2 — aligned LEFT */}
+              <div className="flex items-start justify-start gap-2 max-w-full">
                 {/* Astrology Logo Badge Icon */}
                 <div className="relative size-6 sm:size-7 shrink-0 mt-0.5 rounded-full bg-gradient-to-br from-[#ffd700] via-[#f7d028] to-[#e6be00] flex items-center justify-center text-[#1c1304] shadow-xs ring-1 ring-[#d4ab00]">
                   <Sparkles className="size-3 sm:size-3.5 fill-current" />
                 </div>
 
                 {/* Yellow Bubble 2 */}
-                <div className="relative rounded-2xl rounded-tl-xs bg-[#fef2a8] border border-[#f5dd69] px-3.5 py-1.5 shadow-[0_4px_14px_-4px_rgba(240,200,30,0.35)] text-left">
-                  <p className="text-xs sm:text-[12px] font-semibold text-[#291d06] leading-tight">
+                <div className="relative max-w-[215px] rounded-2xl rounded-tl-xs bg-gradient-to-br from-[#fff4b0] to-[#fbe577] border border-[#f3d85f] px-3.5 py-1.5 shadow-[0_4px_14px_-4px_rgba(240,200,30,0.4)] text-left">
+                  {/* Tail pointing left toward badge */}
+                  <span className="absolute -left-1 top-2 size-2.5 rotate-45 rounded-[2px] bg-[#fff4b0] border-l border-b border-[#f3d85f]" />
+                  <p className="relative text-xs sm:text-[12px] font-semibold text-[#291d06] leading-tight">
                     {currentTopic.astroReply2}
                   </p>
-                  <p className="text-[9px] font-bold text-[#8a681d] text-right mt-0.5 leading-none">
+                  <p className="relative text-[9px] font-bold text-[#8a681d] text-right mt-0.5 leading-none">
                     {currentTopic.astroReply2Time}
                   </p>
                 </div>
