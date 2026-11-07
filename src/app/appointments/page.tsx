@@ -150,6 +150,7 @@ function startsThatFit(
   minutes: number,
   slotMinutes: number,
   dayKey: string,
+  bufferMinutes: number = 0,
 ): Date[] {
   const starts: Date[] = [];
   const now = Date.now();
@@ -163,8 +164,9 @@ function startsThatFit(
     const windowEnd = new Date(w.ends_at).getTime();
     const step = slotMinutes * 60_000;
     const length = minutes * 60_000;
+    const buffer = bufferMinutes * 60_000;
 
-    for (let t = windowStart; t + length <= windowEnd; t += step) {
+    for (let t = windowStart; t + length + buffer <= windowEnd; t += step) {
       if (t <= now) continue;
 
       const asDate = new Date(t);
@@ -344,7 +346,14 @@ function AppointmentsContent() {
   // Calculate available start times & enrich with Vedic Muhurat
   const rawSlots = React.useMemo(() => {
     if (!dayView) return [];
-    return startsThatFit(dayView.windows, dayView.booked, minutes, dayView.slot_minutes, selectedDayKey);
+    return startsThatFit(
+      dayView.windows,
+      dayView.booked,
+      minutes,
+      dayView.slot_minutes,
+      selectedDayKey,
+      dayView.buffer_minutes || 0,
+    );
   }, [dayView, minutes, selectedDayKey]);
 
   const slotsWithMuhurat = React.useMemo(() => {

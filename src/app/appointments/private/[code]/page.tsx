@@ -53,6 +53,7 @@ function startsThatFit(
   minutes: number,
   slotMinutes: number,
   dayKey: string,
+  bufferMinutes: number = 0,
 ): Date[] {
   const starts: Date[] = [];
   const now = Date.now();
@@ -66,8 +67,9 @@ function startsThatFit(
     const windowEnd = new Date(w.ends_at).getTime();
     const step = slotMinutes * 60_000;
     const length = minutes * 60_000;
+    const buffer = bufferMinutes * 60_000;
 
-    for (let t = windowStart; t + length <= windowEnd; t += step) {
+    for (let t = windowStart; t + length + buffer <= windowEnd; t += step) {
       if (t <= now) continue;
 
       const asDate = new Date(t);
@@ -196,6 +198,7 @@ function PrivateBookingContent() {
       minutes,
       dayView.slot_minutes || 30,
       selectedDayKey,
+      dayView.buffer_minutes || 0,
     );
   }, [dayView, minutes, selectedDayKey]);
 
