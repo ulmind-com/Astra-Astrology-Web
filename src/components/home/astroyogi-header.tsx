@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowRight,
   Bell,
   Bot,
   CalendarDays,
@@ -9,10 +10,7 @@ import {
   Compass,
   Globe,
   Hand,
-  Hash,
-  Heart,
   HeartHandshake,
-  Home,
   Hourglass,
   Layers,
   Menu,
@@ -27,16 +25,14 @@ import {
   Star,
   Sun,
   User,
-  Users,
   X,
-  Zap,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 
-import { Avatar, Button } from "@/components/ui";
+import { Avatar } from "@/components/ui";
 import { useWallet } from "@/hooks/use-wallet";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
@@ -80,35 +76,34 @@ export function AstroyogiHeader() {
   const navCategories = React.useMemo<NavCategory[]>(() => {
     if (language === "bn") {
       return [
-        { label: "হোম", href: "/" },
         {
-          label: "পরামর্শ নিন",
+          label: "পরামর্শ",
           href: "/astrologers",
           dropdown: [
             {
-              label: "জ্যোতিষীর সাথে কথা বলুন",
+              label: "জ্যোতিষীর সাথে কল",
               href: "/astrologers",
-              description: "৫০০+ অভিজ্ঞ ও ভেরিফাইড জ্যোতিষীর সাথে কল বা চ্যাটে সরাসরি যুক্ত হন",
+              description: "৫০০+ ভেরিফাইড জ্যোতিষীর সাথে সরাসরি ভয়েস কলে কথা বলুন",
               icon: Phone,
               badge: "তাৎক্ষণিক",
             },
             {
-              label: "অ্যাপয়েন্টমেন্ট বুক করুন",
+              label: "জ্যোতিষীর সাথে চ্যাট",
+              href: "/astrologers",
+              description: "গোপনীয় ও ব্যক্তিগত তাৎক্ষণিক চ্যাট মেসেজিং",
+              icon: MessageCircle,
+              badge: "জনপ্রিয়",
+            },
+            {
+              label: "ভিডিও অ্যাপয়েন্টমেন্ট",
               href: "/appointments",
-              description: "ব্যক্তিগত ভিডিও কলে বিস্তারিত আলোচনার জন্য সময় নির্ধারণ করুন",
+              description: "ব্যক্তিগত ১-অন-১ লাইভ ভিডিও সেশন বুক করুন",
               icon: CalendarDays,
             },
             {
-              label: "অ্যাস্ট্রা লাইভ সেশন",
-              href: "/#live-experts",
-              description: "শীর্ষ জ্যোতিষীদের সাথে ফ্রি লাইভ প্রশ্নোত্তর পর্ব",
-              icon: Radio,
-              badge: "লাইভ",
-            },
-            {
-              label: "এআই জ্যোতিষী ২৪/৭",
+              label: "২৪/৭ এআই জ্যোতিষী",
               href: "/ai-astrologer",
-              description: "রিয়েল-টাইম এআই বৈদিক বুদ্ধিমত্তা দ্বারা তাৎক্ষণিক সমাধান",
+              description: "বৈদিক এআই বুদ্ধিমত্তা দ্বারা তাৎক্ষণিক সঠিক উত্তর",
               icon: Bot,
               badge: "ফ্রি",
             },
@@ -121,7 +116,7 @@ export function AstroyogiHeader() {
             {
               label: "আজকের রাশিফল",
               href: "/daily-horoscope",
-              description: "১২টি রাশির জন্য দৈনিক নির্ভুল ব্যক্তিগত রাশিফল",
+              description: "১২টি রাশির জন্য দৈনিক নির্ভুল ব্যক্তিগত ভাগ্যফল",
               icon: Sparkles,
             },
             {
@@ -133,138 +128,127 @@ export function AstroyogiHeader() {
             {
               label: "রাশি ক্যালকুলেটর",
               href: "/rashi-calculator",
-              description: "আপনার সঠিক বৈদিক চন্দ্র রাশি ও সূর্য রাশি গণনা করুন",
+              description: "আপনার বৈদিক চন্দ্র রাশি ও সূর্য রাশি জানুন",
               icon: Moon,
             },
           ],
         },
         {
-          label: "কুণ্ডলী ও মিলন",
+          label: "কুন্ডলী",
           href: "/kundli",
           dropdown: [
             {
-              label: "ফ্রি জন্ম কুণ্ডলী",
+              label: "ফ্রি জন্ম কুন্ডলী",
               href: "/kundli",
-              description: "বিস্তারিত জন্মছক, গ্রহের অবস্থান ও দোষ বিশ্লেষণ",
+              description: "নির্ভুল লগ্ন ছক, গ্রহের অবস্থান ও দোষ বিশ্লেষণ",
               icon: ScrollText,
-              badge: "জনপ্রিয়",
+              badge: "১০০% ফ্রি",
             },
             {
-              label: "যোটক বিচার (৩৬ গুণ)",
+              label: "কুন্ডলী মিলন (৩৬ গুণ)",
               href: "/kundli-matching",
-              description: "অষ্টকূট মিলন, ৩৬ পয়েন্ট বিবাহ সামঞ্জস্য ও মাঙ্গলিক বিচার",
+              description: "অষ্টকূটের ৩৬ গুণ মিলন ও মাঙ্গলিক বিচার",
               icon: HeartHandshake,
+            },
+            {
+              label: "বিংশোত্তরী দশা",
+              href: "/dasha-calculator",
+              description: "মহাদশা ও অন্তর্দশা সময়সীমা বিশ্লেষণ",
+              icon: Hourglass,
             },
             {
               label: "কেপি জ্যোতিষ",
               href: "/kp-calculator",
-              description: "কৃষ্ণমূর্তি পদ্ধতি, ভাব মধ্য এবং সাব-লর্ড ভিত্তিক বিশ্লেষণ",
+              description: "কৃষ্ণমূর্তি পদ্ধতি সাব-লর্ড ও কাস্প হিসাব",
               icon: Orbit,
-            },
-            {
-              label: "দশা ক্যালকুলেটর",
-              href: "/dasha-calculator",
-              description: "বিংশোত্তরী মহাদশা, অন্তর্দশা ও প্রত্যন্তর্দশা সময়সীমা",
-              icon: Hourglass,
             },
           ],
         },
         {
-          label: "এআই ও বায়োমেট্রিক্স",
-          href: "/ai-astrologer",
+          label: "এআই রিডিং",
+          href: "/palm-reading",
           dropdown: [
             {
-              label: "হস্তরেখা বিচার (৩ডি)",
+              label: "হস্তরেখা বিচার (৩ডি এআই)",
               href: "/palm-reading",
-              description: "আয়ুরেখা, হৃদয়রেখা ও মস্তিস্করেখার ৩ডি ভিজ্যুয়াল স্ক্যান",
+              description: "৩ডি ক্যামেরা স্ক্যানে হৃদয়, শিরো ও জীবন রেখার বিশ্লেষণ",
               icon: Hand,
               badge: "৩ডি",
             },
             {
               label: "মুখমণ্ডল বিচার (সামুদ্রিক)",
               href: "/face-reading",
-              description: "এআই ক্যামেরা ফেস স্ক্যান দ্বারা ব্যক্তিত্ব ও ভাগ্য বিশ্লেষণ",
+              description: "এআই ফেসিয়াল স্ক্যানে ব্যক্তিত্ব ও ভাগ্য বিচার",
               icon: ScanFace,
               badge: "এআই স্ক্যান",
             },
-            {
-              label: "এআই জ্যোতিষী",
-              href: "/ai-astrologer",
-              description: "শাস্ত্রীয় বৈদিক গ্রন্থে প্রশিক্ষিত বুদ্ধিমান এআই-এর সাথে চ্যাট করুন",
-              icon: Bot,
-            },
           ],
         },
-        { label: "পঞ্চাঙ্গ", href: "/nakshatra-calculator" },
-        { label: "সংখ্যাতত্ত্ব", href: "/numerology" },
-        { label: "বাস্তু", href: "/vastu" },
-        { label: "ট্যারোট", href: "/astrologers" },
         {
-          label: "ক্যালকুলেটরসমূহ",
-          href: "/kp-calculator",
+          label: "ক্যালকুলেটর",
+          href: "/panchang",
           dropdown: [
             {
-              label: "কেপি ক্যালকুলেটর",
-              href: "/kp-calculator",
-              description: "নির্ভুল ভাব আরম্ভ এবং গ্রহের নক্ষত্র-উপপতি নির্ণয়",
-              icon: Orbit,
+              label: "বৈদিক পঞ্জিকা ও মুহূর্ত",
+              href: "/panchang",
+              description: "তিথি, নক্ষত্র, রাহু কাল ও শুভ মুহূর্তের হিসাব",
+              icon: Compass,
             },
             {
-              label: "দশা ক্যালকুলেটর",
-              href: "/dasha-calculator",
-              description: "বর্তমান সক্রিয় দশা ও ভবিষ্যৎ সময়চক্রের হিসাব",
-              icon: Hourglass,
+              label: "সংখ্যাতত্ত্ব (নিউমেরোলজি)",
+              href: "/numerology",
+              description: "মূলাঙ্ক, ভাগ্যাঙ্ক ও শুভ সংখ্যার বিশদ বিশ্লেষণ",
+              icon: Sparkles,
+            },
+            {
+              label: "বাস্তু কম্পাস ও টিপস",
+              href: "/vastu",
+              description: "১৬-জোনের শক্তি ভারসাম্য ও গৃহশান্তির প্রতিকার",
+              icon: Layers,
             },
             {
               label: "নক্ষত্র ক্যালকুলেটর",
               href: "/nakshatra-calculator",
-              description: "জন্ম নক্ষত্র, পাদ, ইষ্টদেবতা ও বৃক্ষ নিরূপণ",
+              description: "জন্ম নক্ষত্র, চরণ, আরাধ্য দেবতা ও শুভ বৃক্ষ",
               icon: Star,
-            },
-            {
-              label: "রাশি ক্যালকুলেটর",
-              href: "/rashi-calculator",
-              description: "চন্দ্র রাশি ও সূর্য রাশি এক ক্লিকেই গণনা করুন",
-              icon: Moon,
             },
           ],
         },
-        { label: "ফ্রি গণনা", href: "/#readings" },
-        { label: "অ্যাস্ট্রা লাইভ", href: "/#live-experts", isLive: true },
+        { label: "ফ্রি ভাগ্যফল", href: "/#readings" },
+        { label: "লাইভ", href: "/#live-experts", isLive: true },
       ];
     }
 
     if (language === "hi") {
       return [
-        { label: "होम", href: "/" },
         {
-          label: "परामर्श लें",
+          label: "परामर्श",
           href: "/astrologers",
           dropdown: [
             {
-              label: "ज्योतिषी से बात करें",
+              label: "ज्योतिषी से कॉल करें",
               href: "/astrologers",
-              description: "500+ सत्यापित ज्योतिषियों से कॉल या चैट पर तुरंत जुड़ें",
+              description: "500+ सत्यापित ज्योतिषाचार्यों से सीधे फोन पर बात करें",
               icon: Phone,
-              badge: "त्वरित",
+              badge: "तुरंत",
             },
             {
-              label: "अपॉइंटमेंट बुक करें",
+              label: "ज्योतिषी से चैट",
+              href: "/astrologers",
+              description: "सुरक्षित और निजी ऑनलाइन चैट परामर्श",
+              icon: MessageCircle,
+              badge: "लोकप्रिय",
+            },
+            {
+              label: "वीडियो अपॉइंटमेंट",
               href: "/appointments",
-              description: "निजी वीडियो परामर्श के लिए समय निर्धारित करें",
+              description: "विस्तृत मार्गदर्शन के लिए 1-on-1 वीडियो सत्र बुक करें",
               icon: CalendarDays,
             },
             {
-              label: "एस्ट्रा लाइव स्ट्रीम",
-              href: "/#live-experts",
-              description: "शीर्ष विशेषज्ञों के साथ निःशुल्क लाइव प्रश्नोत्तरी",
-              icon: Radio,
-              badge: "लाइव",
-            },
-            {
-              label: "एआई ज्योतिषी 24/7",
+              label: "24/7 एआई ज्योतिषी",
               href: "/ai-astrologer",
-              description: "वैदिक एआई द्वारा त्वरित जीवन प्रश्नों का समाधान",
+              description: "वैदिक एआई ज्ञान से तुरंत अपनी समस्याओं का समाधान पाएं",
               icon: Bot,
               badge: "मुफ़्त",
             },
@@ -277,7 +261,7 @@ export function AstroyogiHeader() {
             {
               label: "आज का राशिफल",
               href: "/daily-horoscope",
-              description: "सभी 12 राशियों के लिए दैनिक व्यक्तिगत राशिफल",
+              description: "सभी 12 राशियों के लिए सटीक दैनिक भविष्यवाणी",
               icon: Sparkles,
             },
             {
@@ -289,87 +273,83 @@ export function AstroyogiHeader() {
             {
               label: "राशि कैलकुलेटर",
               href: "/rashi-calculator",
-              description: "अपनी चंद्र राशि एवं सूर्य राशि तुरंत जानें",
+              description: "अपनी सटीक चंद्र एवं सूर्य राशि जानें",
               icon: Moon,
             },
           ],
         },
         {
-          label: "कुंडली एवं मिलान",
+          label: "कुंडली",
           href: "/kundli",
           dropdown: [
             {
               label: "मुफ़्त जन्म कुंडली",
               href: "/kundli",
-              description: "विस्तृत जन्म पत्रिका, ग्रह स्थिति एवं दोष विश्लेषण",
+              description: "लग्न चार्ट, नवमांश, ग्रह स्थिति व दोष विश्लेषण",
               icon: ScrollText,
-              badge: "लोकप्रिय",
+              badge: "100% फ्री",
             },
             {
-              label: "कुंडली मिलान (गुण मिलान)",
+              label: "कुंडली मिलान (36 गुण)",
               href: "/kundli-matching",
-              description: "अष्टकूट मिलान, 36 गुण एवं मांगलिक दोष विश्लेषण",
+              description: "अष्टकूट मिलान व वैवाहिक अनुकूलता परीक्षण",
               icon: HeartHandshake,
+            },
+            {
+              label: "विंशोत्तरी महादशा",
+              href: "/dasha-calculator",
+              description: "महादशा, अंतर्दशा व वर्तमान ग्रह काल समयरेखा",
+              icon: Hourglass,
             },
             {
               label: "केपी ज्योतिष",
               href: "/kp-calculator",
-              description: "कृष्णमूर्ति पद्धति कस्प एवं उप-स्वामी गणनाएं",
+              description: "कृष्णमूर्ति पद्धति कस्प व सब-लॉर्ड गणना",
               icon: Orbit,
-            },
-            {
-              label: "दशा कैलकुलेटर",
-              href: "/dasha-calculator",
-              description: "विंशोत्तरी महादशा, अंतर्दशा एवं प्रत्यंतर्दशा समयरेखा",
-              icon: Hourglass,
             },
           ],
         },
         {
-          label: "एआई एवं बायोमेट्रिक्स",
-          href: "/ai-astrologer",
+          label: "एआई रीडिंग",
+          href: "/palm-reading",
           dropdown: [
             {
-              label: "हस्तरेखा विश्लेषण (3D)",
+              label: "हस्तरेखा परीक्षण (3D AI)",
               href: "/palm-reading",
-              description: "जीवन, हृदय एवं मस्तिष्क रेखाओं का 3D विज़ुअल विश्लेषण",
+              description: "3D हैंड स्कैन द्वारा रेखाओं का विश्लेषण",
               icon: Hand,
-              badge: "3D",
+              badge: "3D AI",
             },
             {
-              label: "सामुद्रिक मुख लक्षण",
+              label: "सामुद्रिक मुख परीक्षण",
               href: "/face-reading",
-              description: "एआई कैमरा फेस स्कैन द्वारा व्यक्तित्व व भाग्य फलादेश",
+              description: "एआई कैमरा स्कैन से चेहरे के लक्षण व भाग्य जानें",
               icon: ScanFace,
-              badge: "एआई स्कैन",
-            },
-            {
-              label: "एआई ज्योतिषी",
-              href: "/ai-astrologer",
-              description: "वैदिक शास्त्रों पर प्रशिक्षित एआई से सीधे संवाद करें",
-              icon: Bot,
+              badge: "AI स्कैन",
             },
           ],
         },
-        { label: "पंचांग", href: "/nakshatra-calculator" },
-        { label: "अंकशास्त्र", href: "/numerology" },
-        { label: "वास्तु", href: "/vastu" },
-        { label: "टैरो", href: "/astrologers" },
         {
           label: "कैलकुलेटर",
-          href: "/kp-calculator",
+          href: "/panchang",
           dropdown: [
             {
-              label: "केपी कैलकुलेटर",
-              href: "/kp-calculator",
-              description: "सटीक भाव आरंभ एवं नक्षत्र उप-स्वामी",
-              icon: Orbit,
+              label: "वैदिक पंचांग व मुहूर्त",
+              href: "/panchang",
+              description: "तिथि, नक्षत्र, राहुकाल व चौघड़िया मुहूर्त",
+              icon: Compass,
             },
             {
-              label: "दशा कैलकुलेटर",
-              href: "/dasha-calculator",
-              description: "सक्रिय दशा व भविष्य कालचक्र की गणना",
-              icon: Hourglass,
+              label: "अंकशास्त्र (न्यूमरोलॉजी)",
+              href: "/numerology",
+              description: "मूलांक, भाग्यांक व भाग्यशाली अंकों का रहस्य",
+              icon: Sparkles,
+            },
+            {
+              label: "वास्तु शास्त्र",
+              href: "/vastu",
+              description: "16-दिशाओं का वास्तु दोष निवारण व उपाय",
+              icon: Layers,
             },
             {
               label: "नक्षत्र कैलकुलेटर",
@@ -377,49 +357,43 @@ export function AstroyogiHeader() {
               description: "जन्म नक्षत्र, चरण, आराध्य देव व वृक्ष जानें",
               icon: Star,
             },
-            {
-              label: "राशि कैलकुलेटर",
-              href: "/rashi-calculator",
-              description: "चंद्र राशि एवं सूर्य राशि तुरंत जानें",
-              icon: Moon,
-            },
           ],
         },
         { label: "मुफ़्त फलादेश", href: "/#readings" },
-        { label: "एस्ट्रा लाइव", href: "/#live-experts", isLive: true },
+        { label: "लाइव", href: "/#live-experts", isLive: true },
       ];
     }
 
+    // Default English (Clean, Concise, Astrotalk-style single-word labels)
     return [
-      { label: "Home", href: "/" },
       {
-        label: "Consult Now",
+        label: "Consultations",
         href: "/astrologers",
         dropdown: [
           {
-            label: "Talk to Astrologers",
+            label: "Talk to Astrologer",
             href: "/astrologers",
-            description: "Connect instantly via call or chat with 500+ vetted astrologers",
+            description: "Instant voice consultation with 500+ verified Vedic experts",
             icon: Phone,
             badge: "Instant",
           },
           {
-            label: "Book Appointment",
+            label: "Chat with Astrologer",
+            href: "/astrologers",
+            description: "Private end-to-end encrypted instant messaging",
+            icon: MessageCircle,
+            badge: "Popular",
+          },
+          {
+            label: "Video Appointments",
             href: "/appointments",
-            description: "Schedule deep-dive 1-on-1 private video consultations",
+            description: "Schedule deep-dive 1-on-1 private video chamber consultations",
             icon: CalendarDays,
           },
           {
-            label: "Astra Live Streams",
-            href: "/#live-experts",
-            description: "Free live interactive Q&A sessions with top experts",
-            icon: Radio,
-            badge: "Live",
-          },
-          {
-            label: "AI Astrologer 24/7",
+            label: "24/7 AI Astrologer",
             href: "/ai-astrologer",
-            description: "Real-time AI Vedic intelligence for instant life answers",
+            description: "Instant Vedic planetary intelligence trained on sacred texts",
             icon: Bot,
             badge: "Free",
           },
@@ -432,13 +406,13 @@ export function AstroyogiHeader() {
           {
             label: "Today's Horoscope",
             href: "/daily-horoscope",
-            description: "Daily personalized forecast for all 12 zodiac signs",
+            description: "Daily personalized planetary transit forecast for all 12 signs",
             icon: Sparkles,
           },
           {
             label: "Year 2026 Predictions",
             href: "/daily-horoscope",
-            description: "Annual outlook on love, career, finance & wellness",
+            description: "Annual roadmap for love, career, wealth & wellness",
             icon: Sun,
           },
           {
@@ -450,81 +424,77 @@ export function AstroyogiHeader() {
         ],
       },
       {
-        label: "Kundli & Matching",
+        label: "Kundli",
         href: "/kundli",
         dropdown: [
           {
             label: "Free Janam Kundli",
             href: "/kundli",
-            description: "Detailed birth chart, planetary degrees & dosha analysis",
+            description: "Detailed Lagna (D1), Navamsha (D9) & planetary dosha analysis",
             icon: ScrollText,
-            badge: "Popular",
+            badge: "100% Free",
           },
           {
-            label: "Kundli Matching (Gun Milan)",
+            label: "Kundli Matching (36 Gunas)",
             href: "/kundli-matching",
-            description: "Ashtakoot Milan & 36-point marriage compatibility check",
+            description: "Ashtakoot Milan & comprehensive marriage compatibility score",
             icon: HeartHandshake,
+          },
+          {
+            label: "Vimshottari Dasha",
+            href: "/dasha-calculator",
+            description: "Mahadasha, Antardasha & sub-period timeline breakdown",
+            icon: Hourglass,
           },
           {
             label: "KP Astrology",
             href: "/kp-calculator",
-            description: "Krishnamurti Paddhati sub-lord & cusp calculations",
+            description: "Krishnamurti Paddhati sub-lords & planetary cusps",
             icon: Orbit,
-          },
-          {
-            label: "Dasha Calculator",
-            href: "/dasha-calculator",
-            description: "Vimshottari Dasha, Antardasha & Mahadasha timelines",
-            icon: Hourglass,
           },
         ],
       },
       {
-        label: "AI & Biometrics",
-        href: "/ai-astrologer",
+        label: "AI Reading",
+        href: "/palm-reading",
         dropdown: [
           {
-            label: "Palm Reading (Hastarekha)",
+            label: "Palm Reading (3D AI)",
             href: "/palm-reading",
-            description: "3D interactive palm analysis for life, heart & head lines",
+            description: "3D camera scan of heart, head & life lines with depth estimation",
             icon: Hand,
-            badge: "3D",
+            badge: "3D AI",
           },
           {
             label: "Face Reading (Samudrika)",
             href: "/face-reading",
-            description: "AI camera face scan for personality, wealth & fortune",
+            description: "AI facial features & planetary marks for fortune analysis",
             icon: ScanFace,
             badge: "AI Scan",
           },
-          {
-            label: "AI Astrologer",
-            href: "/ai-astrologer",
-            description: "Chat with an intelligent Vedic AI trained on classical texts",
-            icon: Bot,
-          },
         ],
       },
-      { label: "Panchang", href: "/nakshatra-calculator" },
-      { label: "Numerology", href: "/numerology" },
-      { label: "Vastu", href: "/vastu" },
-      { label: "Tarot", href: "/astrologers" },
       {
         label: "Calculators",
-        href: "/kp-calculator",
+        href: "/panchang",
         dropdown: [
           {
-            label: "KP Calculator",
-            href: "/kp-calculator",
-            description: "Accurate planetary cusps & stellar sub-lords",
-            icon: Orbit,
+            label: "Vedic Panchang & Muhurat",
+            href: "/panchang",
+            description: "Daily Tithi, Nakshatra, Rahu Kaal & auspicious timings",
+            icon: Compass,
           },
           {
-            label: "Dasha Calculator",
-            href: "/dasha-calculator",
-            description: "Planetary period breakdown & current active dasha",
-            icon: Hourglass,
+            label: "Numerology Report",
+            href: "/numerology",
+            description: "Mulank, Bhagyank, destiny numbers & name correction",
+            icon: Sparkles,
+          },
+          {
+            label: "16-Zone Vastu Guide",
+            href: "/vastu",
+            description: "Directional energy balance & remedies for home & office",
+            icon: Layers,
           },
           {
             label: "Nakshatra Calculator",
@@ -532,153 +502,63 @@ export function AstroyogiHeader() {
             description: "Determine your birth star, deity & ruling planet",
             icon: Star,
           },
-          {
-            label: "Rashi Calculator",
-            href: "/rashi-calculator",
-            description: "Calculate Moon sign and Sun sign instantly",
-            icon: Moon,
-          },
         ],
       },
       { label: "Free Readings", href: "/#readings" },
-      { label: "Astra Live", href: "/#live-experts", isLive: true },
+      { label: "Live", href: "/#live-experts", isLive: true },
     ];
   }, [language]);
 
+  const ctaPart1 =
+    language === "bn"
+      ? "পরামর্শ নিন"
+      : language === "hi"
+      ? "बात करें"
+      : "Talk now";
+
+  const ctaPart2 =
+    language === "bn"
+      ? "ফ্রি কুন্ডলী"
+      : language === "hi"
+      ? "मुफ़्त कुंडली"
+      : "Free Kundli";
+
   return (
-    <header className="relative z-40 w-full bg-white border-b border-[#f0e8b8]/80 shadow-[0_2px_12px_-4px_rgba(26,18,8,0.04)]">
-      {/* Top brand & user account bar */}
-      <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 sm:h-[72px] items-center justify-between gap-4">
-          {/* Left: Mobile hamburger + Brand Logo */}
-          <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-40 w-full bg-white/95 dark:bg-[#140f0c]/95 backdrop-blur-md border-b border-[#f0e8b8]/80 shadow-[0_2px_15px_-4px_rgba(26,18,8,0.06)]">
+      {/* Astrotalk-Style Unified Single Row Navigation Bar */}
+      <div className="mx-auto max-w-[1440px] px-3 sm:px-6 lg:px-8">
+        <div className="flex h-16 sm:h-[68px] items-center justify-between gap-2 xl:gap-4 overflow-visible">
+          {/* ================= LEFT: Brand Logo + Name ================= */}
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 whitespace-nowrap">
+            {/* Mobile Hamburger Toggle */}
             <button
               type="button"
               onClick={() => setMobileMenuOpen((v) => !v)}
-              className="lg:hidden flex size-9 items-center justify-center rounded-xl border border-[#eadf9a] text-ink-900 hover:bg-[#fffdf2]"
+              className="lg:hidden flex size-9 items-center justify-center rounded-xl border border-[#eadf9a] text-stone-900 hover:bg-[#fffdf2] transition-colors"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
             </button>
 
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative flex size-10 sm:size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-300 via-brand-400 to-gold-400 shadow-[0_8px_20px_-6px_rgba(242,229,74,0.9)] transition-transform duration-300 group-hover:scale-105">
-                <Sparkles className="size-5 sm:size-6 text-ink-900" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-cinzel text-lg sm:text-2xl font-bold tracking-tight text-ink-900 group-hover:text-gold-700 transition-colors">
-                  DIVINLINK
-                </span>
-                <span className="text-[9px] sm:text-[10px] font-bold tracking-widest text-[#8b5e0a] uppercase -mt-0.5 sm:-mt-1">
-                  25 Years of Timeless Trust
-                </span>
-              </div>
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <span className="relative flex size-9 sm:size-9.5 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-soft transition-transform duration-300 group-hover:scale-105">
+                <Image
+                  src="/logo.png"
+                  alt="DivinLink"
+                  width={38}
+                  height={38}
+                  className="size-full object-contain"
+                  priority
+                />
+              </span>
+              <span className="font-display whitespace-nowrap text-[17px] sm:text-[18px] font-bold tracking-wide text-foreground group-hover:text-amber-700 transition-colors">
+                DivinLink
+              </span>
             </Link>
           </div>
 
-          {/* Right: Controls & Profile */}
-          <div className="flex items-center gap-2.5 sm:gap-3.5">
-            {/* Language Dropdown Selector */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setLangDropdownOpen((v) => !v)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-[#eadf9a] bg-[#fffdf5] px-3 py-1.5 text-xs font-bold text-ink-900 transition-colors hover:bg-brand-100 hover:border-brand-400"
-                title="Change language / ভাষা পরিবর্তন"
-                aria-expanded={langDropdownOpen}
-              >
-                <Globe className="size-3.5 text-gold-600" />
-                <span>{language === "bn" ? "বাংলা" : language === "hi" ? "हिन्दी" : "Eng"}</span>
-                <ChevronDown className={cn("size-3 text-ink-600 transition-transform duration-200", langDropdownOpen && "rotate-180")} />
-              </button>
-
-              {langDropdownOpen && (
-                <>
-                  <div className="fixed inset-0 z-30" onClick={() => setLangDropdownOpen(false)} />
-                  <div className="absolute right-0 top-full mt-2 z-40 w-44 rounded-2xl border border-[#eadf9a] bg-white p-1.5 shadow-2xl">
-                    {[
-                      { code: "bn", label: "বাংলা", badge: "Bengali", flag: "🇧🇩" },
-                      { code: "en", label: "English", badge: "ENG", flag: "🌐" },
-                      { code: "hi", label: "हिन्दी", badge: "Hindi", flag: "🇮🇳" },
-                    ].map((opt) => (
-                      <button
-                        key={opt.code}
-                        type="button"
-                        onClick={() => {
-                          void setLanguage(opt.code as any);
-                          setLangDropdownOpen(false);
-                        }}
-                        className={cn(
-                          "flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs transition-colors",
-                          language === opt.code
-                            ? "bg-brand-200/90 text-ink-950 font-bold"
-                            : "text-ink-700 hover:bg-stone-50",
-                        )}
-                      >
-                        <span className="flex items-center gap-2">
-                          <span>{opt.flag}</span>
-                          <span className="font-semibold">{opt.label}</span>
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">{opt.badge}</span>
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Notification Bell */}
-            <button
-              type="button"
-              className="relative flex size-9 items-center justify-center rounded-full border border-[#eadf9a] bg-[#fffdf5] text-ink-700 transition-colors hover:bg-brand-100"
-              title="Notifications"
-            >
-              <Bell className="size-4" />
-              <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-red-500 ring-2 ring-white" />
-            </button>
-
-            {/* User status / Sign in */}
-            {isSignedIn ? (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/account/wallet"
-                  className="flex items-center gap-1.5 rounded-full border border-brand-400/60 bg-brand-200/60 px-3 py-1.5 text-xs font-bold text-ink-900 hover:bg-brand-300 transition-colors"
-                >
-                  <Coins className="size-3.5 text-gold-700" />
-                  <span className="tabular-nums">
-                    {coinsBalance !== undefined ? formatCoins(coinsBalance) : "—"}
-                  </span>
-                </Link>
-                <Link
-                  href="/account"
-                  className="flex size-9 items-center justify-center rounded-full border border-brand-400/70 overflow-hidden"
-                >
-                  <Avatar
-                    src={user?.avatar_url}
-                    name={user?.full_name || user?.first_name || "User"}
-                    size="sm"
-                    className="size-full"
-                  />
-                </Link>
-              </div>
-            ) : (
-              <Link href="/login">
-                <Button
-                  size="sm"
-                  className="h-9 px-5 rounded-full font-bold text-xs sm:text-sm bg-[#ffd700] hover:bg-[#f5cc00] text-ink-900 shadow-[0_6px_18px_-4px_rgba(255,215,0,0.8)] border border-[#e6be00]"
-                >
-                  {language === "bn" ? "সাইন ইন" : language === "hi" ? "लॉग इन" : "Sign In"}
-                </Button>
-              </Link>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Secondary Category Navigation Strip with Rich Dropdowns */}
-      <div className="border-t border-[#f2e9b0]/60 bg-[#fffdf7]">
-        <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
-          <nav className="scrollbar-none hidden lg:flex items-center justify-between gap-1 py-1 text-[13px] font-semibold text-ink-700">
+          {/* ================= CENTER: Single-Row Luxury Navigation Links ================= */}
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-2 whitespace-nowrap shrink-0 overflow-visible">
             {navCategories.map((cat) => {
               const isActive = cat.href === pathname || (cat.label === "Home" && pathname === "/");
               const hasDropdown = Boolean(cat.dropdown && cat.dropdown.length > 0);
@@ -687,46 +567,47 @@ export function AstroyogiHeader() {
               return (
                 <div
                   key={cat.label}
-                  className="relative group py-2"
+                  className="relative group shrink-0 py-1"
                   onMouseEnter={() => setHoveredCategory(cat.label)}
                   onMouseLeave={() => setHoveredCategory(null)}
                 >
                   <Link
                     href={cat.href}
-                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl transition-all duration-200 ${
+                    className={`whitespace-nowrap shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-[14px] font-semibold tracking-normal transition-all duration-150 select-none ${
                       isActive
-                        ? "text-gold-700 font-bold bg-[#fff8d4]"
-                        : "text-ink-800 hover:text-gold-700 hover:bg-[#fff9db]"
+                        ? "text-amber-950 font-bold bg-amber-100/90 shadow-2xs"
+                        : "text-stone-700 hover:text-stone-950 hover:bg-stone-100/80"
                     }`}
                   >
                     {cat.isLive && (
-                      <span className="relative flex size-2 mr-0.5">
+                      <span className="relative flex size-2 shrink-0 mr-0.5">
                         <span className="absolute inline-flex size-full animate-ping rounded-full bg-red-400 opacity-75" />
                         <span className="relative inline-flex size-2 rounded-full bg-red-500" />
                       </span>
                     )}
 
-                    <span>{cat.label}</span>
+                    <span className="whitespace-nowrap leading-normal">{cat.label}</span>
 
                     {cat.isLive && (
-                      <span className="ml-1 rounded bg-red-500 px-1.5 py-0.2 text-[9px] font-extrabold text-white uppercase tracking-wider">
-                        Watch
+                      <span className="ml-0.5 rounded-full bg-red-500 px-1.5 py-0.5 text-[8.5px] font-extrabold text-white uppercase tracking-wider shrink-0 leading-none">
+                        Live
                       </span>
                     )}
 
                     {hasDropdown && (
                       <ChevronDown
-                        className={`size-3 text-ink-500 opacity-70 transition-transform duration-200 ${
-                          isHovered ? "rotate-180" : ""
-                        }`}
+                        className={cn(
+                          "size-3.5 text-stone-400 transition-transform duration-200 shrink-0",
+                          isHovered && "rotate-180 text-amber-700"
+                        )}
                       />
                     )}
                   </Link>
 
                   {/* Dropdown Menu Popup */}
                   {hasDropdown && isHovered && (
-                    <div className="absolute left-0 top-full pt-1 z-50 w-80 animate-in fade-in slide-in-from-top-2 duration-150">
-                      <div className="overflow-hidden rounded-2xl border border-[#ebd881] bg-white p-2 shadow-[0_16px_40px_-10px_rgba(26,18,8,0.15)] ring-1 ring-black/5">
+                    <div className="absolute left-0 top-full pt-1.5 z-50 w-80 animate-in fade-in slide-in-from-top-2 duration-150">
+                      <div className="overflow-hidden rounded-2xl border border-amber-200/90 bg-white p-2 shadow-[0_18px_45px_-10px_rgba(26,18,8,0.18)] ring-1 ring-black/5">
                         <div className="space-y-1">
                           {cat.dropdown?.map((item) => {
                             const Icon = item.icon;
@@ -734,23 +615,23 @@ export function AstroyogiHeader() {
                               <Link
                                 key={item.label}
                                 href={item.href}
-                                className="group/item flex items-start gap-3 rounded-xl p-2.5 transition-colors hover:bg-[#fffbe8]"
+                                className="group/item flex items-start gap-3 rounded-xl p-2.5 transition-colors hover:bg-amber-50/80"
                               >
-                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-200/80 text-[#8b5e0a] group-hover/item:bg-brand-300 transition-colors">
+                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-800 group-hover/item:bg-amber-200 transition-colors">
                                   <Icon className="size-4.5" />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-bold text-xs text-[#1a1208] group-hover/item:text-gold-700">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-bold text-xs text-stone-900 group-hover/item:text-amber-800">
                                       {item.label}
                                     </span>
                                     {item.badge && (
-                                      <span className="rounded-full bg-gold-100 text-gold-800 text-[9px] font-bold px-1.5 py-0.2">
+                                      <span className="rounded-full bg-amber-100 text-amber-900 text-[9px] font-bold px-1.5 py-0.2 border border-amber-300/60">
                                         {item.badge}
                                       </span>
                                     )}
                                   </div>
-                                  <p className="mt-0.5 text-[11px] text-[#6b5f4d] leading-snug line-clamp-2">
+                                  <p className="mt-0.5 text-[11px] text-stone-500 leading-snug line-clamp-2">
                                     {item.description}
                                   </p>
                                 </div>
@@ -766,147 +647,201 @@ export function AstroyogiHeader() {
             })}
           </nav>
 
-          {/* Mobile Horizontal Quick Nav Strip */}
-          <nav className="lg:hidden scrollbar-none flex items-center gap-4 overflow-x-auto py-2.5 text-xs font-semibold text-ink-700">
-            {navCategories.map((cat) => (
-              <Link
-                key={cat.label}
-                href={cat.href}
-                className="shrink-0 flex items-center gap-1 text-ink-800 hover:text-gold-700"
+          {/* ================= RIGHT: Language, Profile & Astrotalk-Style CTA Button ================= */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 whitespace-nowrap">
+            {/* Language Selector Dropdown */}
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setLangDropdownOpen((v) => !v)}
+                className="inline-flex items-center gap-1 rounded-full border border-stone-200 hover:border-amber-400 bg-white px-2.5 py-1.5 text-xs font-bold text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer whitespace-nowrap"
+                title="Change language / ভাষা পরিবর্তন"
+                aria-expanded={langDropdownOpen}
               >
-                {cat.isLive && (
-                  <span className="relative flex size-2 mr-0.5">
-                    <span className="absolute inline-flex size-full animate-ping rounded-full bg-red-400 opacity-75" />
-                    <span className="relative inline-flex size-2 rounded-full bg-red-500" />
+                <Globe className="size-3.5 text-amber-600 shrink-0" />
+                <span>{language === "bn" ? "বাং" : language === "hi" ? "हिन्दी" : "EN"}</span>
+                <ChevronDown
+                  className={cn(
+                    "size-3 text-stone-400 transition-transform duration-200 shrink-0",
+                    langDropdownOpen && "rotate-180"
+                  )}
+                />
+              </button>
+
+              {langDropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-30" onClick={() => setLangDropdownOpen(false)} />
+                  <div className="absolute right-0 top-full mt-2 z-40 w-40 rounded-2xl border border-amber-200 bg-white p-1.5 shadow-2xl animate-in fade-in duration-150">
+                    {[
+                      { code: "bn", label: "বাংলা", badge: "বাং" },
+                      { code: "hi", label: "हिन्दी", badge: "हिन्दी" },
+                      { code: "en", label: "English", badge: "EN" },
+                    ].map((l) => (
+                      <button
+                        key={l.code}
+                        type="button"
+                        onClick={() => {
+                          setLanguage(l.code as AstrologyLanguage);
+                          setLangDropdownOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-colors cursor-pointer ${
+                          language === l.code
+                            ? "bg-amber-100 text-amber-900 font-bold"
+                            : "text-stone-700 hover:bg-stone-100"
+                        }`}
+                      >
+                        <span>{l.label}</span>
+                        <span className="text-[10px] text-stone-400 font-bold">{l.badge}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* User Profile / Wallet or Sign In */}
+            {isSignedIn ? (
+              <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+                <Link
+                  href="/account/wallet"
+                  className="flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-950 hover:bg-amber-100 transition-colors shrink-0"
+                >
+                  <Coins className="size-3.5 text-amber-600 shrink-0" />
+                  <span className="tabular-nums">
+                    {coinsBalance !== undefined ? formatCoins(coinsBalance) : "—"}
                   </span>
-                )}
-                <span>{cat.label}</span>
-                {cat.isLive && (
-                  <span className="rounded bg-red-500 px-1 text-[8px] font-bold text-white uppercase">
-                    Live
-                  </span>
-                )}
+                </Link>
+                <Link
+                  href="/account"
+                  className="flex size-8 sm:size-9 items-center justify-center rounded-full border border-amber-400/80 overflow-hidden shrink-0"
+                >
+                  <Avatar
+                    src={user?.avatar_url}
+                    name={user?.full_name || user?.first_name || "User"}
+                    size="sm"
+                    className="size-full"
+                  />
+                </Link>
+              </div>
+            ) : (
+              <Link href="/login" className="hidden sm:inline-flex shrink-0">
+                <button
+                  type="button"
+                  className="rounded-full px-3.5 py-1.5 text-xs font-bold text-stone-700 hover:text-stone-950 hover:bg-stone-100 border border-stone-200 transition-colors cursor-pointer whitespace-nowrap"
+                >
+                  {language === "bn" ? "সাইন ইন" : language === "hi" ? "लॉग इन" : "Sign In"}
+                </button>
               </Link>
-            ))}
-          </nav>
+            )}
+
+            {/* Astrotalk-Style Signature Golden Pill Button */}
+            <Link href="/astrologers" className="shrink-0 group">
+              <button
+                type="button"
+                className="group relative inline-flex h-9 sm:h-[38px] items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 px-4 text-stone-950 font-semibold text-xs sm:text-[13px] tracking-tight shadow-[0_4px_14px_-2px_rgba(245,158,11,0.55)] hover:shadow-[0_6px_18px_-2px_rgba(245,158,11,0.75)] transition-all hover:scale-[1.02] active:scale-[0.98] border border-amber-300 whitespace-nowrap cursor-pointer leading-normal"
+              >
+                <span className="leading-normal">{ctaPart1}</span>
+                <span className="opacity-40 font-light leading-normal">|</span>
+                <span className="leading-normal">{ctaPart2}</span>
+                <ArrowRight className="size-3.5 stroke-[2] text-stone-900 transition-transform duration-200 group-hover:translate-x-0.5 shrink-0" />
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* Mobile Drawer (When hamburger is clicked) */}
+      {/* ================= Mobile Navigation Drawer ================= */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-300"
             onClick={() => setMobileMenuOpen(false)}
           />
 
-          {/* Drawer content */}
-          <div className="fixed inset-y-0 left-0 w-full max-w-sm bg-white shadow-2xl flex flex-col justify-between overflow-y-auto">
+          <div className="fixed inset-y-0 left-0 w-full max-w-xs bg-white shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-left duration-200">
             <div>
               {/* Drawer Header */}
-              <div className="flex items-center justify-between p-4 border-b border-[#f2e9b0]">
+              <div className="flex items-center justify-between p-4 border-b border-stone-100">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex size-8 items-center justify-center rounded-xl bg-brand-300 text-ink-900">
-                    <Sparkles className="size-4" />
-                  </div>
-                  <span className="font-cinzel text-lg font-bold text-ink-900">
-                    DIVINLINK
+                  <span className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg">
+                    <Image
+                      src="/logo.png"
+                      alt="DivinLink"
+                      width={32}
+                      height={32}
+                      className="size-full object-contain"
+                    />
+                  </span>
+                  <span className="font-display text-[16px] font-bold tracking-wide text-foreground">
+                    DivinLink
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-xl p-2 text-ink-700 hover:bg-stone-100"
+                  className="rounded-xl p-2 text-stone-500 hover:bg-stone-100"
                 >
                   <X className="size-5" />
                 </button>
               </div>
 
-              {/* Language Selector Bar inside Drawer */}
-              <div className="px-4 py-2.5 bg-[#fffdf5] border-b border-[#f2e9b0] flex items-center justify-between gap-2">
-                <span className="text-xs font-bold text-ink-800 flex items-center gap-1.5">
-                  <Globe className="size-3.5 text-gold-600" />
-                  <span>{language === "bn" ? "ভাষা:" : language === "hi" ? "भाषा:" : "Language:"}</span>
-                </span>
-                <div className="inline-flex rounded-xl bg-white p-0.5 border border-[#eadf9a] shadow-2xs">
-                  {[
-                    { code: "bn", label: "বাংলা" },
-                    { code: "en", label: "ENG" },
-                    { code: "hi", label: "हिन्दी" },
-                  ].map((l) => (
-                    <button
-                      key={l.code}
-                      type="button"
-                      onClick={() => void setLanguage(l.code as any)}
-                      className={cn(
-                        "rounded-lg px-2.5 py-1 text-xs font-bold transition-all",
-                        language === l.code
-                          ? "bg-brand-400 text-ink-950 shadow-2xs"
-                          : "text-stone-600 hover:text-stone-900",
-                      )}
-                    >
-                      {l.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Drawer Links */}
-              <div className="p-4 space-y-2">
+              {/* Navigation Items */}
+              <div className="p-3 space-y-1">
                 {navCategories.map((cat) => {
                   const hasDropdown = Boolean(cat.dropdown && cat.dropdown.length > 0);
                   const isExpanded = mobileExpandedSection === cat.label;
 
                   return (
-                    <div key={cat.label} className="border-b border-stone-100 pb-2">
-                      <div className="flex items-center justify-between">
-                        <Link
-                          href={cat.href}
-                          onClick={() => !hasDropdown && setMobileMenuOpen(false)}
-                          className="flex items-center gap-2 py-2 text-sm font-bold text-ink-900"
-                        >
-                          {cat.isLive && (
-                            <span className="size-2 rounded-full bg-red-500 animate-pulse" />
-                          )}
-                          <span>{cat.label}</span>
-                        </Link>
-
-                        {hasDropdown && (
+                    <div key={cat.label} className="border-b border-stone-100 pb-1">
+                      {hasDropdown ? (
+                        <div>
                           <button
                             type="button"
                             onClick={() =>
                               setMobileExpandedSection(isExpanded ? null : cat.label)
                             }
-                            className="p-2 text-ink-600"
+                            className="w-full flex items-center justify-between py-2.5 px-3 rounded-xl text-sm font-bold text-stone-800 hover:bg-stone-50"
                           >
+                            <span>{cat.label}</span>
                             <ChevronDown
-                              className={`size-4 transition-transform ${
-                                isExpanded ? "rotate-180" : ""
-                              }`}
+                              className={cn(
+                                "size-4 text-stone-400 transition-transform duration-200",
+                                isExpanded && "rotate-180"
+                              )}
                             />
                           </button>
-                        )}
-                      </div>
-
-                      {/* Expanded Sub-items */}
-                      {hasDropdown && isExpanded && (
-                        <div className="mt-1 pl-3 space-y-2 pb-2">
-                          {cat.dropdown?.map((sub) => {
-                            const Icon = sub.icon;
-                            return (
-                              <Link
-                                key={sub.label}
-                                href={sub.href}
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="flex items-center gap-2.5 py-1.5 text-xs text-ink-700 hover:text-gold-700"
-                              >
-                                <Icon className="size-4 text-gold-600" />
-                                <span className="font-medium">{sub.label}</span>
-                              </Link>
-                            );
-                          })}
+                          {isExpanded && (
+                            <div className="pl-3 pr-1 py-1 space-y-1">
+                              {cat.dropdown?.map((sub) => {
+                                const Icon = sub.icon;
+                                return (
+                                  <Link
+                                    key={sub.label}
+                                    href={sub.href}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="flex items-center gap-2.5 py-2 px-2.5 rounded-lg text-xs font-semibold text-stone-700 hover:bg-amber-50"
+                                  >
+                                    <Icon className="size-4 text-amber-600" />
+                                    <span>{sub.label}</span>
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
+                      ) : (
+                        <Link
+                          href={cat.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center justify-between py-2.5 px-3 rounded-xl text-sm font-bold text-stone-800 hover:bg-stone-50"
+                        >
+                          <span>{cat.label}</span>
+                          {cat.isLive && (
+                            <span className="rounded-full bg-red-500 px-2 py-0.5 text-[9px] font-extrabold text-white uppercase">
+                              Live
+                            </span>
+                          )}
+                        </Link>
                       )}
                     </div>
                   );
@@ -914,21 +849,29 @@ export function AstroyogiHeader() {
               </div>
             </div>
 
-            {/* Bottom account / appointments */}
-            <div className="p-4 border-t border-[#f2e9b0] bg-[#fffdf5]">
-              <Link
-                href="/astrologers"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#fcd404] py-3 text-sm font-bold text-[#1c1304] shadow-sm"
-              >
-                <span>
-                  {language === "bn"
-                    ? "এখনই জ্যোতিষীর পরামর্শ নিন"
-                    : language === "hi"
-                    ? "अभी ज्योतिषी से परामर्श करें"
-                    : "Consult Astrologer Now"}
-                </span>
+            {/* Drawer Bottom Actions */}
+            <div className="p-4 border-t border-stone-100 bg-stone-50 space-y-3">
+              <Link href="/astrologers" onClick={() => setMobileMenuOpen(false)}>
+                <button
+                  type="button"
+                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-yellow-400 text-stone-950 font-semibold text-sm py-2.5 shadow-sm"
+                >
+                  <span>{ctaPart1}</span>
+                  <span className="opacity-35 font-light">|</span>
+                  <span>{ctaPart2}</span>
+                  <ArrowRight className="size-4 stroke-[2.5]" />
+                </button>
               </Link>
+              {!isSignedIn && (
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                  <button
+                    type="button"
+                    className="w-full mt-2 rounded-full border border-stone-300 bg-white text-stone-800 font-bold text-sm py-2 hover:bg-stone-50"
+                  >
+                    {language === "bn" ? "সাইন ইন" : language === "hi" ? "लॉग इन" : "Sign In"}
+                  </button>
+                </Link>
+              )}
             </div>
           </div>
         </div>

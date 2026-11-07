@@ -99,7 +99,7 @@ export function TopAstrologersSection() {
   };
 
   return (
-    <section className="relative bg-transparent py-10 sm:py-14 border-b border-[#f2e9b0]/60">
+    <section className="relative bg-transparent pt-14 sm:pt-20 pb-12 sm:pb-16 border-b border-[#f2e9b0]/60">
       <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -158,16 +158,19 @@ export function TopAstrologersSection() {
 
         {/* Cards grid */}
         {isLoading ? (
-          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="animate-pulse rounded-2xl border border-[#eadf9a]/70 bg-white p-5 shadow-sm"
+                className="animate-pulse rounded-[22px] border border-[#eadf9a]/70 bg-white p-4 shadow-xs"
               >
-                <div className="mx-auto size-[72px] rounded-full bg-stone-200" />
-                <div className="mt-4 h-4 w-1/2 rounded bg-stone-200" />
-                <div className="mt-3 h-3 w-2/3 rounded bg-stone-100" />
-                <div className="mt-4 h-9 rounded-lg bg-stone-100" />
+                <div className="flex items-start justify-between">
+                  <div className="size-14 rounded-full bg-stone-200" />
+                  <div className="h-5 w-16 rounded-full bg-stone-200" />
+                </div>
+                <div className="mt-3 h-4 w-1/2 rounded bg-stone-200" />
+                <div className="mt-2 h-3 w-3/4 rounded bg-stone-100" />
+                <div className="mt-3 h-8 rounded-full bg-stone-100" />
               </div>
             ))}
           </div>
@@ -176,100 +179,106 @@ export function TopAstrologersSection() {
             <p className="text-sm font-semibold text-[#1a1208]">No astrologers available right now.</p>
           </div>
         ) : (
-          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {cards.map((a) => {
               const href = `/astrologers/${a.slug}`;
               const badge = badgeFor(a);
               return (
                 <div
                   key={a.id}
-                  className="flex flex-col rounded-2xl border border-[#eadf9a] bg-white p-5 shadow-[0_6px_20px_-10px_rgba(26,18,8,0.12)] transition-all duration-300 hover:-translate-y-1 hover:border-brand-400 hover:shadow-[0_18px_36px_-14px_rgba(240,210,80,0.5)]"
+                  className="flex flex-col justify-between rounded-[22px] border border-[#ebd89e] bg-white p-3.5 sm:p-4 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-400 hover:shadow-md"
                 >
-                  {/* avatar + badge */}
-                  <div className="flex items-start justify-between">
-                    <Link href={href} className="relative block">
-                      <span className="block size-[72px] overflow-hidden rounded-full ring-2 ring-emerald-400/70">
-                        {a.avatarUrl ? (
-                          <Image
-                            src={a.avatarUrl}
-                            alt={a.name}
-                            width={72}
-                            height={72}
-                            className="size-full object-cover"
-                          />
-                        ) : (
-                          <span className="flex size-full items-center justify-center bg-gradient-to-br from-[#ffd700] to-[#ffaa00] text-xl font-extrabold text-[#1a1208]">
-                            {a.name.charAt(0).toUpperCase()}
-                          </span>
+                  <div>
+                    {/* Top Row: Avatar with Online Indicator + Badge */}
+                    <div className="flex items-start justify-between">
+                      <Link href={href} className="relative block">
+                        <span className="block size-14 sm:size-[58px] overflow-hidden rounded-full ring-2 ring-emerald-500/80 ring-offset-2 ring-offset-white">
+                          {a.avatarUrl ? (
+                            <Image
+                              src={a.avatarUrl}
+                              alt={a.name}
+                              width={58}
+                              height={58}
+                              className="size-full object-cover"
+                            />
+                          ) : (
+                            <span className="flex size-full items-center justify-center bg-gradient-to-br from-[#ffd700] to-[#ffaa00] text-lg font-extrabold text-[#1a1208]">
+                              {a.name.charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                        </span>
+                        {a.isOnline && (
+                          <span className="absolute bottom-0 right-0 size-3 rounded-full bg-emerald-500 ring-2 ring-white" />
                         )}
+                      </Link>
+
+                      <span
+                        className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${badge.cls}`}
+                      >
+                        {badge.label}
                       </span>
-                      {a.isOnline && (
-                        <span className="absolute bottom-0.5 right-0.5 size-3.5 rounded-full bg-emerald-500 ring-2 ring-white" />
-                      )}
+                    </div>
+
+                    {/* Name + Verified Check */}
+                    <Link href={href} className="mt-2.5 flex items-center gap-1.5 group">
+                      <h3 className="text-[15px] font-bold text-[#1a1208] group-hover:text-[#b8860b] transition-colors truncate">
+                        {a.name}
+                      </h3>
+                      <BadgeCheck className="size-3.5 fill-emerald-500 text-white shrink-0" />
                     </Link>
 
-                    <span
-                      className={`rounded-full border px-2.5 py-1 text-[11px] font-bold ${badge.cls}`}
-                    >
-                      {badge.label}
-                    </span>
-                  </div>
+                    {/* Tags (Skills) */}
+                    <div className="mt-1.5 flex flex-wrap gap-1">
+                      {a.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded-md border border-[#eee1b1] bg-[#fffdf7] px-1.5 py-0.5 text-[10px] font-medium text-[#6b5f4d]"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
 
-                  {/* name + verified */}
-                  <Link href={href} className="mt-3 flex items-center gap-1.5">
-                    <h3 className="text-lg font-bold text-[#1a1208]">{a.name}</h3>
-                    <BadgeCheck className="size-4 fill-emerald-500 text-white" />
-                  </Link>
-
-                  {/* tags */}
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {a.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-full border border-[#eadf9a] bg-[#fffdf5] px-2.5 py-0.5 text-[11px] font-semibold text-[#6b5f4d]"
-                      >
-                        {tag}
+                    {/* Languages & Experience */}
+                    <div className="mt-2 flex items-center justify-between text-[11px] text-[#6b5f4d]">
+                      <span className="truncate max-w-[130px] font-medium">
+                        {a.languages.join(", ")}
                       </span>
-                    ))}
-                  </div>
-
-                  {/* languages + exp */}
-                  <p className="mt-3 text-xs font-medium text-[#524436]">
-                    {a.languages.join(" · ")}
-                  </p>
-                  <p className="text-xs text-[#8b7d63]">
-                    {a.experienceYears} {t.yrs}
-                  </p>
-
-                  {/* rating + price */}
-                  <div className="mt-3 flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1 text-sm font-bold text-[#1a1208]">
-                      <Star className="size-4 fill-[#e08c12] text-[#e08c12]" />
-                      {a.rating}
-                      <span className="ml-1 text-xs font-medium text-[#8b7d63]">
-                        · {formatNumber(a.orders)}+
+                      <span className="shrink-0 text-[#8b7d63] font-medium">
+                        {a.experienceYears} {t.yrs}
                       </span>
-                    </span>
-                    <span className="text-sm font-extrabold text-[#1a1208]">
-                      ₹{a.pricePerMin}
-                      <span className="text-xs font-normal text-[#6b5f4d]">{t.min}</span>
-                    </span>
+                    </div>
+
+                    {/* Rating + Price Row */}
+                    <div className="mt-2.5 pt-2 border-t border-stone-100 flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1a1208]">
+                        <Star className="size-3.5 fill-[#e08c12] text-[#e08c12]" />
+                        {a.rating}
+                        <span className="text-[10px] font-normal text-[#8b7d63]">
+                          · {formatNumber(a.orders)}+
+                        </span>
+                      </span>
+                      <span className="text-xs font-extrabold text-[#1a1208]">
+                        ₹{a.pricePerMin}
+                        <span className="text-[10px] font-normal text-[#6b5f4d]">{t.min}</span>
+                      </span>
+                    </div>
                   </div>
 
-                  {/* actions */}
-                  <div className="mt-4 grid grid-cols-2 gap-2.5">
+                  {/* Astrotalk-style Actions: Rounded Compact Buttons */}
+                  <div className="mt-3 grid grid-cols-2 gap-2">
                     <Link
                       href={`/chat/${a.id}`}
-                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#d9b64a] bg-[#fffdf5] py-2.5 text-sm font-bold text-[#8b5e0a] transition-colors hover:bg-[#fff3c4]"
+                      className="inline-flex items-center justify-center gap-1 rounded-full border border-stone-200 bg-white hover:bg-stone-50 hover:border-[#d9b64a] py-1.5 text-xs font-bold text-[#3b2e1b] transition-colors shadow-2xs"
                     >
-                      <MessageCircle className="size-4" />
+                      <MessageCircle className="size-3.5" />
                       {t.chat}
                     </Link>
                     <Link
                       href={`/call/${a.id}`}
-                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500 bg-emerald-50 py-2.5 text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-100"
+                      className="inline-flex items-center justify-center gap-1 rounded-full border border-emerald-500/80 bg-white hover:bg-emerald-50 py-1.5 text-xs font-bold text-emerald-700 transition-colors shadow-2xs"
                     >
-                      <Phone className="size-4" />
+                      <Phone className="size-3.5" />
                       {t.call}
                     </Link>
                   </div>

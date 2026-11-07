@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { MessageCircle, ShieldCheck, Check, Phone, ChevronLeft, Send } from "lucide-react";
 
 // Chat bubbles that animate in one by one (same as the video).
@@ -11,7 +12,7 @@ type ChatMsg = {
 };
 
 const CHAT_SCRIPT: ChatMsg[] = [
-  { from: "user", text: "Heena ji, when will I get married? My family is asking." },
+  { from: "user", text: "Aryan ji, when will I get married? My family is asking." },
   { from: "astrologer", text: "Hi Priya ji, Share your date of birth & time first." },
   { from: "user", text: "14 March 1998, 4:25 AM, Lucknow" },
 ];
@@ -23,14 +24,18 @@ function AppStoreBadge() {
     <a
       href="#"
       aria-label="Download on the App Store"
-      className="inline-flex items-center gap-2.5 rounded-xl bg-black px-4 py-2.5 text-white shadow-sm transition-transform hover:scale-[1.03]"
+      className="inline-flex items-center gap-3 rounded-xl bg-black px-4.5 py-2 text-white shadow-md hover:bg-zinc-900 transition-all duration-200 hover:scale-[1.02] border border-white/15"
     >
-      <svg viewBox="0 0 384 512" className="size-7 fill-white" aria-hidden="true">
-        <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C32.3 141.2-8.4 184.8 0 273.5c8.4 88.7 48.5 139.3 92.3 139.1 21.3-.1 36.4-14.6 64.1-14.6 26.9 0 40.9 14.6 64.4 14.6 44.2-.7 80.6-54.1 88.5-142.9-56.4-26.6-54.1-104.5-.6-112.9zM255.9 44.8C286.1 8.9 283.4 .3 282.4 0c-26.8 1.1-58 17.9-75.7 38.8-19.5 22.4-30.9 50.2-28.5 81 29 .2 55.4-15.4 77.7-75z" />
-      </svg>
-      <span className="flex flex-col leading-none text-left">
-        <span className="text-[10px] font-medium">Download on the</span>
-        <span className="text-base font-semibold -mt-0.5">App Store</span>
+      <Image
+        src="/images/badges/apple-store-icon-white.png"
+        alt="Apple App Store"
+        width={28}
+        height={28}
+        className="size-7 shrink-0 object-contain"
+      />
+      <span className="flex flex-col text-left">
+        <span className="text-[10px] font-medium tracking-tight text-zinc-300 leading-tight">Download on the</span>
+        <span className="text-[16px] font-bold tracking-tight text-white leading-snug">App Store</span>
       </span>
     </a>
   );
@@ -41,17 +46,18 @@ function GooglePlayBadge() {
     <a
       href="#"
       aria-label="Get it on Google Play"
-      className="inline-flex items-center gap-2.5 rounded-xl bg-black px-4 py-2.5 text-white shadow-sm transition-transform hover:scale-[1.03]"
+      className="inline-flex items-center gap-3 rounded-xl bg-black px-4.5 py-2 text-white shadow-md hover:bg-zinc-900 transition-all duration-200 hover:scale-[1.02] border border-white/15"
     >
-      <svg viewBox="0 0 512 512" className="size-6" aria-hidden="true">
-        <path fill="#00d4ff" d="M47 24.6C40.6 29 36.8 36.2 36.8 46.2v419.6c0 10 3.8 17.2 10.2 21.6l238.8-231.4L47 24.6z" />
-        <path fill="#ffce00" d="M401 231.6l-66.3-38.4-70.6 68.4 70.6 68.4L401 291.6c19.6-11.3 19.6-48.7 0-60z" />
-        <path fill="#00f076" d="M47 24.6l238.8 231.4 48.9-47.4-240-138.9C77.3 60 59 55.8 47 24.6z" transform="translate(0 0)" />
-        <path fill="#ff3333" d="M47 487.4c12 31.2 30.3 27 87.7-14.1l200-116.1-48.9-47.4L47 487.4z" />
-      </svg>
-      <span className="flex flex-col leading-none text-left">
-        <span className="text-[10px] font-medium">GET IT ON</span>
-        <span className="text-base font-semibold -mt-0.5">Google Play</span>
+      <Image
+        src="/images/badges/google-play-icon.png"
+        alt="Google Play"
+        width={26}
+        height={26}
+        className="size-[26px] shrink-0 object-contain"
+      />
+      <span className="flex flex-col text-left">
+        <span className="text-[10px] font-medium tracking-tight text-zinc-300 leading-tight">GET IT ON</span>
+        <span className="text-[16px] font-bold tracking-tight text-white leading-snug">Google Play</span>
       </span>
     </a>
   );
@@ -171,15 +177,17 @@ export function AppDownloadSection() {
                 {/* chat header */}
                 <div className="flex items-center gap-2.5 border-b border-black/5 bg-white px-4 py-2.5">
                   <ChevronLeft className="size-5 text-[#6b5f4d]" />
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/images/astrologers/avatar-shifali.jpg"
-                    alt="Astro Heena"
+                  <Image
+                    src="/images/astrologers/avatar-chat.png"
+                    alt="Astro Aryan"
+                    width={36}
+                    height={36}
                     className="size-9 rounded-full object-cover"
+                    priority
                   />
                   <div className="flex-1 leading-tight">
                     <div className="flex items-center gap-1 text-sm font-bold text-[#1a1208]">
-                      Astro Heena
+                      Astro Aryan
                       <Check className="size-3.5 rounded-full bg-[#1d9bf0] p-0.5 text-white" />
                     </div>
                     <div className="text-[11px] font-medium text-[#8b7d63]">

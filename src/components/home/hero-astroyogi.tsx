@@ -3,8 +3,6 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
-  ChevronLeft,
-  ChevronRight,
   Compass,
   Heart,
   MessageSquare,
@@ -215,145 +213,197 @@ export function HeroAstroyogi() {
   const currentSlide = slides[currentIndex] || DEFAULT_SLIDES[0];
 
   return (
-    <section className="relative overflow-hidden bg-transparent pt-4 pb-8 sm:pt-6 sm:pb-10">
-      {/* Faint rotating zodiac wheel — background decoration on the right */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/zodiac-wheel.png"
-        alt=""
-        aria-hidden="true"
-        className="pointer-events-none absolute right-[-80px] bottom-[-110px] z-0 size-[420px] animate-[spin_55s_linear_infinite] select-none opacity-[0.12] lg:size-[520px] [will-change:transform] motion-reduce:animate-none"
-        draggable={false}
-      />
+    <section className="relative overflow-hidden bg-[#0c0a08] pt-6 pb-8 sm:pt-8 sm:pb-12 border-b border-amber-900/35 shadow-[0_16px_40px_-10px_rgba(0,0,0,0.7)]">
+      {/* Background radial cosmic glows */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(245,158,11,0.08)_0%,transparent_60%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_50%,rgba(217,119,6,0.08)_0%,transparent_50%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_88%_50%,rgba(245,158,11,0.07)_0%,transparent_50%)]" />
+
+      {/* LEFT CELESTIAL: Rotating Golden Zodiac Wheel (InstaAstro-Style) */}
+      <div className="pointer-events-none absolute -left-20 sm:-left-16 top-1/2 -translate-y-1/2 z-0 size-[380px] sm:size-[480px] lg:size-[560px] opacity-25 select-none">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/zodiac-wheel-yellow.webp"
+          alt=""
+          aria-hidden="true"
+          className="size-full animate-[spin_110s_linear_infinite] [will-change:transform] motion-reduce:animate-none drop-shadow-[0_0_35px_rgba(245,158,11,0.2)]"
+          draggable={false}
+        />
+      </div>
+
+      {/* RIGHT CELESTIAL: Radiant Golden Sun Mandala & Celestial Rings */}
+      <div className="pointer-events-none absolute -right-20 sm:-right-12 top-1/2 -translate-y-1/2 z-0 size-[360px] sm:size-[450px] lg:size-[540px] opacity-25 select-none">
+        <svg
+          viewBox="0 0 200 200"
+          className="size-full animate-[spin_150s_linear_infinite] motion-reduce:animate-none drop-shadow-[0_0_30px_rgba(245,158,11,0.25)]"
+          fill="none"
+          stroke="#f59e0b"
+          strokeWidth="1"
+        >
+          {/* Concentric astrological rings */}
+          <circle cx="100" cy="100" r="92" strokeDasharray="3 3" opacity="0.6" />
+          <circle cx="100" cy="100" r="76" opacity="0.45" />
+          <circle cx="100" cy="100" r="58" strokeDasharray="6 3" opacity="0.75" />
+          <circle cx="100" cy="100" r="38" opacity="0.85" fill="rgba(245,158,11,0.06)" />
+          {/* 16 Radiant Sun Rays */}
+          {Array.from({ length: 16 }).map((_, i) => (
+            <line
+              key={i}
+              x1="100"
+              y1="40"
+              x2="100"
+              y2="12"
+              transform={`rotate(${i * 22.5} 100 100)`}
+              stroke="#fbbf24"
+              strokeWidth={i % 2 === 0 ? "1.6" : "0.9"}
+              opacity="0.85"
+            />
+          ))}
+          {/* Central Vedic Sun face motif */}
+          <circle cx="92" cy="96" r="2.8" fill="#fbbf24" opacity="0.8" />
+          <circle cx="108" cy="96" r="2.8" fill="#fbbf24" opacity="0.8" />
+          <path
+            d="M 93 107 Q 100 113 107 107"
+            stroke="#fbbf24"
+            strokeWidth="1.3"
+            strokeLinecap="round"
+            opacity="0.8"
+          />
+        </svg>
+      </div>
+
+      {/* Floating Constellation Stars */}
+      <div className="pointer-events-none absolute inset-0 z-0">
+        <span className="absolute top-[16%] left-[26%] text-amber-300/40 text-xs animate-pulse">✦</span>
+        <span className="absolute top-[76%] left-[20%] text-amber-300/35 text-[11px] animate-pulse [animation-delay:1s]">⋆</span>
+        <span className="absolute top-[20%] right-[28%] text-amber-400/45 text-sm animate-pulse [animation-delay:1.5s]">✦</span>
+        <span className="absolute top-[70%] right-[22%] text-amber-300/35 text-xs animate-pulse [animation-delay:0.5s]">✧</span>
+        <span className="absolute top-[12%] right-[14%] text-amber-200/50 text-[11px] animate-pulse [animation-delay:2s]">⋆</span>
+        <span className="absolute top-[82%] left-[42%] text-amber-400/30 text-xs animate-pulse [animation-delay:1.2s]">✦</span>
+      </div>
 
       <div className="relative z-10 mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
-        {/* Main Hero Slider Container — Full card 3:1 aspect ratio with user's custom images */}
+        {/* Main Hero Slider Container with Continuous Horizontal Sliding Track */}
         <div
-          className="relative group/slider overflow-hidden rounded-[26px] sm:rounded-3xl min-h-[350px] sm:min-h-[380px] lg:h-[400px] shadow-[0_16px_40px_-16px_rgba(26,18,8,0.12)] border border-[#eadf9a]/60 bg-[#fffdf5]"
+          className="relative group/slider overflow-hidden rounded-[26px] sm:rounded-3xl shadow-[0_24px_65px_-15px_rgba(0,0,0,0.85)] border border-amber-400/25 bg-[#fffdf5]"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
-          {/* 1. Full-Bleed 100% Brightness & Opacity Background Image (Exact Card Ratio) */}
-          <div className="absolute inset-0 w-full h-full pointer-events-none">
-            <Image
-              key={currentSlide.image_url}
-              src={currentSlide.image_url}
-              alt={currentSlide.title}
-              fill
-              priority
-              className="object-cover object-right sm:object-center transition-all duration-700"
-              sizes="(max-width: 1360px) 100vw, 1360px"
-              quality={95}
-            />
-          </div>
-
-          {/* 2. Overlaid Interactive Content Layer — Placed cleanly on the left */}
-          <div className="relative z-10 flex flex-col justify-between h-full p-6 sm:p-10 lg:pl-12 lg:pr-8 min-h-[350px] sm:min-h-[380px] lg:h-[400px]">
-            {/* Top Bar inside Card: Pill Badge + Slide Counter */}
-            <div className="flex items-center justify-between gap-4">
-              <div className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 shadow-xs bg-white/85 border border-[#eadf9a] text-[#1a1208] backdrop-blur-xs">
-                <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#ffd700] to-[#e69500] text-[#1a1208] text-[10px] font-black">
-                  #1
-                </div>
-                <span className="text-xs sm:text-sm font-bold tracking-wide">
-                  {currentSlide.badge_text}
-                </span>
-                {currentSlide.badge_rating && (
-                  <div className="flex items-center gap-1 border-l border-[#ebd881] pl-2 ml-1">
-                    <Star className="size-3 fill-[#e08c12] text-[#e08c12]" />
-                    <span className="text-xs font-bold text-[#8b5e0a]">
-                      {currentSlide.badge_rating}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Slide Counter */}
-              <div className="hidden sm:flex items-center gap-1.5 text-xs font-extrabold tracking-wider px-3 py-1 rounded-full bg-white/85 text-[#1a1208]/80 border border-[#eadf9a] backdrop-blur-xs">
-                <span className="text-[#e08c12]">0{currentIndex + 1}</span>
-                <span className="opacity-40">/</span>
-                <span className="opacity-60">0{slides.length}</span>
-              </div>
-            </div>
-
-            {/* Middle: Headline, Subtitle, Description & Action Button */}
-            <div className="my-auto py-2 sm:py-4 max-w-xl lg:max-w-2xl">
-              <Link href={currentSlide.cta_link} className="block group/link">
-                <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-[42px] font-black tracking-tight leading-[1.12] text-[#1a1208]">
-                  {currentSlide.title}
-                  <span className="block mt-1 font-bold text-2xl sm:text-3xl md:text-4xl text-[#4a3b2c]">
-                    {currentSlide.subtitle}
-                  </span>
-                </h1>
-              </Link>
-
-              {currentSlide.description && (
-                <p className="mt-2.5 sm:mt-3 text-xs sm:text-sm md:text-base leading-relaxed line-clamp-2 max-w-lg text-[#5a4c3c]">
-                  {currentSlide.description}
-                </p>
-              )}
-
-              {/* Action Row */}
-              <div className="mt-5 sm:mt-7 flex flex-wrap items-center gap-4">
-                <Link href={currentSlide.cta_link}>
-                  <button
-                    type="button"
-                    className="group/btn relative inline-flex items-center gap-3 rounded-full bg-[#fcd404] hover:bg-[#f5c700] px-7 sm:px-9 py-3.5 sm:py-4 text-base sm:text-lg font-extrabold text-[#1c1304] shadow-[0_10px_28px_-6px_rgba(245,199,0,0.7)] transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] border border-[#e2b600]"
-                  >
-                    <span>{currentSlide.cta_text}</span>
-                    <span className="flex size-7 items-center justify-center rounded-full bg-[#1c1304] text-[#fcd404] transition-transform duration-300 group-hover/btn:translate-x-1">
-                      <ArrowRight className="size-4" strokeWidth={2.5} />
-                    </span>
-                  </button>
-                </Link>
-              </div>
-            </div>
-
-            {/* Bottom Bar: Slide Dots & Arrow Navigation */}
-            <div className="flex items-center justify-between pt-1">
-              {/* Slide Indicators */}
-              <div className="flex items-center gap-2">
-                {slides.map((_, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => goToSlide(idx)}
-                    aria-label={`Go to slide ${idx + 1}`}
-                    className={`transition-all duration-300 rounded-full ${
-                      currentIndex === idx
-                        ? "w-8 sm:w-10 h-2 bg-[#fcd404] shadow-[0_0_10px_rgba(252,212,4,0.8)]"
-                        : "w-2 sm:w-2.5 h-2 bg-[#1a1208]/25 hover:bg-[#1a1208]/50"
-                    }`}
+          {/* Continuous Sliding Horizontal Track */}
+          <div
+            className="flex w-full transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]"
+            style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+          >
+            {slides.map((slide, idx) => (
+              <div
+                key={slide.id}
+                className="relative w-full shrink-0 min-h-[350px] sm:min-h-[380px] lg:h-[400px] overflow-hidden"
+              >
+                {/* 1. Full-Bleed 100% Brightness Background Image */}
+                <div className="absolute inset-0 w-full h-full pointer-events-none">
+                  <Image
+                    src={slide.image_url}
+                    alt={slide.title}
+                    fill
+                    priority={idx === 0}
+                    className="object-cover object-right sm:object-center"
+                    sizes="(max-width: 1360px) 100vw, 1360px"
+                    quality={90}
                   />
-                ))}
-              </div>
+                </div>
 
-              {/* Prev / Next Arrows */}
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={prevSlide}
-                  aria-label="Previous slide"
-                  className="flex size-9 sm:size-10 items-center justify-center rounded-full bg-white/90 hover:bg-white text-[#1a1208] border border-[#eadf9a] shadow-xs transition-all duration-200 hover:scale-105 active:scale-95"
-                >
-                  <ChevronLeft className="size-5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={nextSlide}
-                  aria-label="Next slide"
-                  className="flex size-9 sm:size-10 items-center justify-center rounded-full bg-white/90 hover:bg-white text-[#1a1208] border border-[#eadf9a] shadow-xs transition-all duration-200 hover:scale-105 active:scale-95"
-                >
-                  <ChevronRight className="size-5" />
-                </button>
+                {/* 2. Overlaid Interactive Content Layer */}
+                <div className="relative z-10 flex flex-col justify-between h-full p-6 sm:p-10 lg:pl-12 lg:pr-8 min-h-[350px] sm:min-h-[380px] lg:h-[400px]">
+                  {/* Top Bar inside Card: Pill Badge + Slide Counter */}
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 shadow-xs bg-white/90 border border-[#eadf9a] text-[#1a1208] backdrop-blur-xs">
+                      <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#ffd700] to-[#e69500] text-[#1a1208] text-[10px] font-black">
+                        #1
+                      </div>
+                      <span className="text-xs sm:text-sm font-bold tracking-wide">
+                        {slide.badge_text}
+                      </span>
+                      {slide.badge_rating && (
+                        <div className="flex items-center gap-1 border-l border-[#ebd881] pl-2 ml-1">
+                          <Star className="size-3 fill-[#e08c12] text-[#e08c12]" />
+                          <span className="text-xs font-bold text-[#8b5e0a]">
+                            {slide.badge_rating}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Slide Counter */}
+                    <div className="hidden sm:flex items-center gap-1.5 text-xs font-extrabold tracking-wider px-3 py-1 rounded-full bg-white/90 text-[#1a1208]/80 border border-[#eadf9a] backdrop-blur-xs">
+                      <span className="text-[#e08c12]">0{idx + 1}</span>
+                      <span className="opacity-40">/</span>
+                      <span className="opacity-60">0{slides.length}</span>
+                    </div>
+                  </div>
+
+                  {/* Middle: Headline, Subtitle, Description & Action Button */}
+                  <div className="my-auto py-2 sm:py-4 max-w-xl lg:max-w-2xl">
+                    <Link href={slide.cta_link} className="block group/link">
+                      <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-[42px] font-black tracking-tight leading-[1.12] text-[#1a1208]">
+                        {slide.title}
+                        <span className="block mt-1 font-bold text-2xl sm:text-3xl md:text-4xl text-[#4a3b2c]">
+                          {slide.subtitle}
+                        </span>
+                      </h1>
+                    </Link>
+
+                    {slide.description && (
+                      <p className="mt-2.5 sm:mt-3 text-xs sm:text-sm md:text-base leading-relaxed line-clamp-2 max-w-lg text-[#5a4c3c]">
+                        {slide.description}
+                      </p>
+                    )}
+
+                    {/* Action Row */}
+                    <div className="mt-5 sm:mt-7 flex flex-wrap items-center gap-4">
+                      <Link href={slide.cta_link}>
+                        <button
+                          type="button"
+                          className="group/btn relative inline-flex items-center gap-3 rounded-full bg-[#fcd404] hover:bg-[#f5c700] px-7 sm:px-9 py-3.5 sm:py-4 text-base sm:text-lg font-extrabold text-[#1c1304] shadow-[0_10px_28px_-6px_rgba(245,199,0,0.7)] transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] border border-[#e2b600] cursor-pointer"
+                        >
+                          <span>{slide.cta_text}</span>
+                          <span className="flex size-7 items-center justify-center rounded-full bg-[#1c1304] text-[#fcd404] transition-transform duration-300 group-hover/btn:translate-x-1">
+                            <ArrowRight className="size-4" strokeWidth={2.5} />
+                          </span>
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Bottom Bar: Slide Indicators */}
+                  <div className="flex items-center justify-between pt-1">
+                    <div className="flex items-center gap-2">
+                      {slides.map((_, dotIdx) => (
+                        <button
+                          key={dotIdx}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            goToSlide(dotIdx);
+                          }}
+                          aria-label={`Go to slide ${dotIdx + 1}`}
+                          className={`transition-all duration-300 rounded-full cursor-pointer ${
+                            currentIndex === dotIdx
+                              ? "w-8 sm:w-10 h-2 bg-[#fcd404] shadow-[0_0_10px_rgba(252,212,4,0.8)]"
+                              : "w-2 sm:w-2.5 h-2 bg-[#1a1208]/25 hover:bg-[#1a1208]/50"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* 4 Quick Action Cards (Astroyogi Signature Bar) */}
+        {/* 4 Quick Action Cards (Elevated Floating Tiles) */}
         <div className="mt-5 sm:mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {quickActions.map((action) => {
             const Icon = action.icon;
@@ -361,7 +411,7 @@ export function HeroAstroyogi() {
               <Link
                 key={action.title}
                 href={action.href}
-                className="group flex items-center justify-between rounded-2xl border border-[#eadf9a] bg-white px-4 sm:px-6 py-4 sm:py-4.5 shadow-[0_4px_16px_-4px_rgba(26,18,8,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#fcd404] hover:shadow-[0_12px_28px_-10px_rgba(245,199,0,0.6)]"
+                className="group flex items-center justify-between rounded-2xl border border-amber-400/35 bg-white/95 px-4 sm:px-6 py-4 sm:py-4.5 shadow-[0_8px_25px_-6px_rgba(0,0,0,0.65)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-[#fcd404] hover:shadow-[0_12px_28px_-10px_rgba(245,199,0,0.6)]"
               >
                 <div className="flex items-center gap-3.5 min-w-0">
                   <div className="flex size-11 sm:size-12 shrink-0 items-center justify-center rounded-full bg-[#ffea75]/60 text-[#8b5e0a] border border-[#f5d947]/70 shadow-sm transition-transform duration-300 group-hover:scale-105 group-hover:bg-[#ffea75]">
