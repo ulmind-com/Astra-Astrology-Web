@@ -36,6 +36,7 @@ import {
   Modal,
   StatusDot,
 } from "@/components/ui";
+import { MilanLauncher } from "@/components/call/milan-launcher";
 import { astrologerApi, callApi, chatApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { cn, coinsPerMinute, formatNumber } from "@/lib/utils";
@@ -587,6 +588,10 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
           </button>
         );
       })}
+
+      {/* A family consultation is its own thing, not a fourth "mode": it is
+          booked with the guests named up front. */}
+      <MilanLauncher astrologer={astrologer} />
 
       {!user && (
         <p className="pt-1 text-center text-xs text-muted-foreground">

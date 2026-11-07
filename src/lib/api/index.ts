@@ -74,6 +74,11 @@ import type {
   WalletTransaction,
 } from "@/types";
 import type {
+  CreateMilanRoomInput,
+  MilanRoom,
+  MilanRoomSession,
+} from "@/types/milan";
+import type {
   TarotCard,
   SpreadConfig,
   TarotDrawRequest,
@@ -294,6 +299,60 @@ export const callApi = {
   history: (params: { page?: number; limit?: number } = {}) =>
     api.get<{ items: Call[]; meta: PageMeta }>(endpoints.calls.history, { query: params }),
 };
+
+// ------------------------------------------------------------------ milan
+/**
+ * The multi-party Vedic chamber.
+ *
+ * The guest calls deliberately pass `auth: false`. A bride's father on an
+ * invitation link has no account, and sending a stale token from a browser
+ * that happens to be signed in as someone else would only confuse the
+ * server about who is taking the seat.
+ */
+export const milanApi = {
+  create: (input: CreateMilanRoomInput) =>
+    api.post<MilanRoomSession>(endpoints.milan.create, input),
+
+  active: () => api.get<MilanRoomSession | null>(endpoints.milan.active),
+
+  get: (id: string) => api.get<MilanRoomSession>(endpoints.milan.detail(id)),
+
+  addSeat: (id: string, label: string) =>
+    api.post<MilanRoom>(endpoints.milan.seats(id), { label }),
+
+  revokeSeat: (id: string, seatId: string) =>
+    api.delete<MilanRoom>(endpoints.milan.seat(id, seatId)),
+
+  extend: (id: string, extra_minutes: number) =>
+    api.post<MilanRoom>(endpoints.milan.extend(id), null, {
+      query: { extra_minutes },
+    }),
+
+  heartbeat: (id: string) => api.post<MilanRoom>(endpoints.milan.heartbeat(id), {}),
+
+  end: (id: string, reason?: string) =>
+    api.post<MilanRoom>(endpoints.milan.end(id), null, {
+      query: reason ? { reason } : undefined,
+    }),
+
+  guestJoin: (join_code: string, display_name?: string) =>
+    api.post<MilanRoomSession>(
+      endpoints.milan.guestJoin,
+      { join_code, display_name },
+      { auth: false },
+    ),
+
+  guestHeartbeat: (join_code: string) =>
+    api.post<MilanRoom>(endpoints.milan.guestHeartbeat, { join_code }, { auth: false }),
+
+  guestLeave: (join_code: string) =>
+    api.post<{ message: string }>(
+      endpoints.milan.guestLeave,
+      { join_code },
+      { auth: false },
+    ),
+};
+
 
 // -------------------------------------------------------------- whiteboard
 export const whiteboardApi = {

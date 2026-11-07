@@ -58,6 +58,22 @@ export const endpoints = {
     heartbeat: (id: string) => `/calls/${id}/heartbeat`,
   },
 
+  milan: {
+    create: "/milan",
+    active: "/milan/active",
+    detail: (id: string) => `/milan/${id}`,
+    seats: (id: string) => `/milan/${id}/seats`,
+    seat: (id: string, seatId: string) => `/milan/${id}/seats/${seatId}`,
+    extend: (id: string) => `/milan/${id}/extend`,
+    accept: (id: string) => `/milan/${id}/accept`,
+    heartbeat: (id: string) => `/milan/${id}/heartbeat`,
+    end: (id: string) => `/milan/${id}/end`,
+    // Guests arrive with a code and no account, so these take no token.
+    guestJoin: "/milan/guest/join",
+    guestHeartbeat: "/milan/guest/heartbeat",
+    guestLeave: "/milan/guest/leave",
+  },
+
   appointments: {
     book: "/appointments",
     mine: "/appointments/mine",
