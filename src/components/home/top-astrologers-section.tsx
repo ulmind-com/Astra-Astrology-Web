@@ -158,7 +158,7 @@ export function TopAstrologersSection() {
 
         {/* Cards grid */}
         {isLoading ? (
-          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
@@ -179,20 +179,20 @@ export function TopAstrologersSection() {
             <p className="text-sm font-semibold text-[#1a1208]">No astrologers available right now.</p>
           </div>
         ) : (
-          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             {cards.map((a) => {
               const href = `/astrologers/${a.slug}`;
               const badge = badgeFor(a);
               return (
                 <div
                   key={a.id}
-                  className="flex flex-col justify-between rounded-[22px] border border-[#ebd89e] bg-white p-3.5 sm:p-4 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-400 hover:shadow-md"
+                  className="flex flex-col justify-between rounded-[18px] sm:rounded-[22px] border border-[#ebd89e] bg-white p-2.5 sm:p-4 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-400 hover:shadow-md"
                 >
                   <div>
                     {/* Top Row: Avatar with Online Indicator + Badge */}
                     <div className="flex items-start justify-between">
                       <Link href={href} className="relative block">
-                        <span className="block size-14 sm:size-[58px] overflow-hidden rounded-full ring-2 ring-emerald-500/80 ring-offset-2 ring-offset-white">
+                        <span className="block size-11 sm:size-[58px] overflow-hidden rounded-full ring-2 ring-emerald-500/80 ring-offset-1 sm:ring-offset-2 ring-offset-white">
                           {a.avatarUrl ? (
                             <Image
                               src={a.avatarUrl}
@@ -213,26 +213,26 @@ export function TopAstrologersSection() {
                       </Link>
 
                       <span
-                        className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${badge.cls}`}
+                        className={`shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] sm:text-[10px] font-bold ${badge.cls}`}
                       >
                         {badge.label}
                       </span>
                     </div>
 
                     {/* Name + Verified Check */}
-                    <Link href={href} className="mt-2.5 flex items-center gap-1.5 group">
-                      <h3 className="text-[15px] font-bold text-[#1a1208] group-hover:text-[#b8860b] transition-colors truncate">
+                    <Link href={href} className="mt-2 flex items-center gap-1 group">
+                      <h3 className="text-[13px] sm:text-[15px] font-bold text-[#1a1208] group-hover:text-[#b8860b] transition-colors truncate">
                         {a.name}
                       </h3>
                       <BadgeCheck className="size-3.5 fill-emerald-500 text-white shrink-0" />
                     </Link>
 
-                    {/* Tags (Skills) */}
-                    <div className="mt-1.5 flex flex-wrap gap-1">
+                    {/* Tags (Skills) — capped to ~2 rows on mobile to keep the tile tight */}
+                    <div className="mt-1.5 flex max-h-[42px] flex-wrap gap-1 overflow-hidden sm:max-h-none">
                       {a.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="rounded-md border border-[#eee1b1] bg-[#fffdf7] px-1.5 py-0.5 text-[10px] font-medium text-[#6b5f4d]"
+                          className="rounded-md border border-[#eee1b1] bg-[#fffdf7] px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium text-[#6b5f4d]"
                         >
                           {tag}
                         </span>
@@ -240,8 +240,8 @@ export function TopAstrologersSection() {
                     </div>
 
                     {/* Languages & Experience */}
-                    <div className="mt-2 flex items-center justify-between text-[11px] text-[#6b5f4d]">
-                      <span className="truncate max-w-[130px] font-medium">
+                    <div className="mt-2 flex flex-col gap-0.5 text-[10px] sm:text-[11px] text-[#6b5f4d] sm:flex-row sm:items-center sm:justify-between">
+                      <span className="truncate font-medium sm:max-w-[130px]">
                         {a.languages.join(", ")}
                       </span>
                       <span className="shrink-0 text-[#8b7d63] font-medium">
@@ -250,8 +250,8 @@ export function TopAstrologersSection() {
                     </div>
 
                     {/* Rating + Price Row */}
-                    <div className="mt-2.5 pt-2 border-t border-stone-100 flex items-center justify-between">
-                      <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1a1208]">
+                    <div className="mt-2 pt-1.5 border-t border-stone-100 flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-[#1a1208]">
                         <Star className="size-3.5 fill-[#e08c12] text-[#e08c12]" />
                         {a.rating}
                         <span className="text-[10px] font-normal text-[#8b7d63]">
@@ -266,17 +266,17 @@ export function TopAstrologersSection() {
                   </div>
 
                   {/* Astrotalk-style Actions: Rounded Compact Buttons */}
-                  <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="mt-2.5 grid grid-cols-2 gap-1.5 sm:gap-2">
                     <Link
                       href={`/chat/${a.id}`}
-                      className="inline-flex items-center justify-center gap-1 rounded-full border border-stone-200 bg-white hover:bg-stone-50 hover:border-[#d9b64a] py-1.5 text-xs font-bold text-[#3b2e1b] transition-colors shadow-2xs"
+                      className="inline-flex items-center justify-center gap-1 rounded-full border border-stone-200 bg-white hover:bg-stone-50 hover:border-[#d9b64a] py-1.5 text-[11px] sm:text-xs font-bold text-[#3b2e1b] transition-colors shadow-2xs"
                     >
                       <MessageCircle className="size-3.5" />
                       {t.chat}
                     </Link>
                     <Link
                       href={`/call/${a.id}`}
-                      className="inline-flex items-center justify-center gap-1 rounded-full border border-emerald-500/80 bg-white hover:bg-emerald-50 py-1.5 text-xs font-bold text-emerald-700 transition-colors shadow-2xs"
+                      className="inline-flex items-center justify-center gap-1 rounded-full border border-emerald-500/80 bg-white hover:bg-emerald-50 py-1.5 text-[11px] sm:text-xs font-bold text-emerald-700 transition-colors shadow-2xs"
                     >
                       <Phone className="size-3.5" />
                       {t.call}

@@ -4,18 +4,97 @@ import React from "react";
 import Image from "next/image";
 import { MessageCircle, ShieldCheck, Check, Phone, ChevronLeft, Send } from "lucide-react";
 
+import { useLanguage } from "@/providers/language-provider";
+import type { AstrologyLanguage } from "@/types";
+
 // Chat bubbles that animate in one by one (same as the video).
 type ChatMsg = {
   from: "user" | "astrologer";
   text: string;
-  time?: string;
 };
 
-const CHAT_SCRIPT: ChatMsg[] = [
-  { from: "user", text: "Aryan ji, when will I get married? My family is asking." },
-  { from: "astrologer", text: "Hi Priya ji, Share your date of birth & time first." },
-  { from: "user", text: "14 March 1998, 4:25 AM, Lucknow" },
-];
+interface AppSectionTranslation {
+  eyebrow: string;
+  headingLine1: string;
+  headingLine2: string;
+  headingNum: string;
+  headingEnd: string;
+  description: string;
+  featureChat: string;
+  featurePayments: string;
+  name: string;
+  online: string;
+  rate: string;
+  today: string;
+  placeholder: string;
+  chat: ChatMsg[];
+}
+
+const APP_SECTION_DATA: Record<AstrologyLanguage, AppSectionTranslation> = {
+  en: {
+    eyebrow: "The DivinLink App",
+    headingLine1: "Astrology made simpler,",
+    headingLine2: "and available to you ",
+    headingNum: "24×7",
+    headingEnd: ".",
+    description:
+      "Connect with an astrologer anytime, and find the solutions to all your love, marriage, career, and finance related problems instantly.",
+    featureChat: "Instant chats, notifications, and alerts",
+    featurePayments: "Secure payments, UPI, cards & wallet, all encrypted",
+    name: "Astro Aryan",
+    online: "online",
+    rate: "₹18/min",
+    today: "Today · 9:38 AM",
+    placeholder: "Type a message…",
+    chat: [
+      { from: "user", text: "Aryan ji, when will I get married? My family is asking." },
+      { from: "astrologer", text: "Hi Priya ji, Share your date of birth & time first." },
+      { from: "user", text: "14 March 1998, 4:25 AM, Lucknow" },
+    ],
+  },
+  bn: {
+    eyebrow: "ডিভিনলিংক অ্যাপ",
+    headingLine1: "জ্যোতিষ এখন আরও সহজ,",
+    headingLine2: "আর আপনি পাবেন ",
+    headingNum: "২৪×৭",
+    headingEnd: "।",
+    description:
+      "যেকোনো সময় জ্যোতিষীর সাথে কথা বলুন এবং আপনার প্রেম, বিবাহ, ক্যারিয়ার ও অর্থ সংক্রান্ত সব সমস্যার সমাধান তাৎক্ষণিক পান।",
+    featureChat: "তাৎক্ষণিক চ্যাট, নোটিফিকেশন ও অ্যালার্ট",
+    featurePayments: "সুরক্ষিত পেমেন্ট — ইউপিআই, কার্ড ও ওয়ালেট, সবই এনক্রিপ্টেড",
+    name: "অ্যাস্ট্রো আরিয়ান",
+    online: "অনলাইন",
+    rate: "₹১৮/মিনিট",
+    today: "আজ · সকাল ৯:৩৮",
+    placeholder: "একটি মেসেজ লিখুন…",
+    chat: [
+      { from: "user", text: "আরিয়ান জি, আমার বিয়ে কবে হবে? বাড়ির লোকজন জিজ্ঞেস করছে।" },
+      { from: "astrologer", text: "নমস্কার প্রিয়া জি, প্রথমে আপনার জন্ম তারিখ ও সময় দিন।" },
+      { from: "user", text: "১৪ মার্চ ১৯৯৮, ভোর ৪:২৫, লখনউ" },
+    ],
+  },
+  hi: {
+    eyebrow: "डिविनलिंक ऐप",
+    headingLine1: "ज्योतिष अब और भी आसान,",
+    headingLine2: "और आपके लिए उपलब्ध ",
+    headingNum: "24×7",
+    headingEnd: "।",
+    description:
+      "किसी भी समय ज्योतिषी से बात करें और अपने प्रेम, विवाह, करियर व धन संबंधी सभी समस्याओं का समाधान तुरंत पाएं।",
+    featureChat: "तुरंत चैट, नोटिफिकेशन और अलर्ट",
+    featurePayments: "सुरक्षित भुगतान — UPI, कार्ड व वॉलेट, सब एन्क्रिप्टेड",
+    name: "एस्ट्रो आर्यन",
+    online: "ऑनलाइन",
+    rate: "₹18/मिनट",
+    today: "आज · सुबह 9:38",
+    placeholder: "संदेश लिखें…",
+    chat: [
+      { from: "user", text: "आर्यन जी, मेरी शादी कब होगी? घरवाले पूछ रहे हैं।" },
+      { from: "astrologer", text: "नमस्ते प्रिया जी, पहले अपनी जन्म तिथि व समय बताएं।" },
+      { from: "user", text: "14 मार्च 1998, सुबह 4:25, लखनऊ" },
+    ],
+  },
+};
 
 const REVEAL_MS = 1400;
 
@@ -64,10 +143,15 @@ function GooglePlayBadge() {
 }
 
 export function AppDownloadSection() {
+  const { language } = useLanguage();
+  const t = APP_SECTION_DATA[language] || APP_SECTION_DATA.en;
+  const chat = t.chat;
+
   const [visible, setVisible] = React.useState<number>(0);
   const [typing, setTyping] = React.useState<boolean>(false);
 
   // Reveal chat bubbles one by one, with a typing pause, then loop.
+  // Re-runs when the language (and therefore the script) changes.
   React.useEffect(() => {
     let active = true;
     const timers: number[] = [];
@@ -75,7 +159,7 @@ export function AppDownloadSection() {
     const run = () => {
       if (!active) return;
       setVisible(0);
-      CHAT_SCRIPT.forEach((_, i) => {
+      chat.forEach((_, i) => {
         timers.push(
           window.setTimeout(() => {
             if (!active) return;
@@ -95,14 +179,14 @@ export function AppDownloadSection() {
         window.setTimeout(() => {
           if (!active) return;
           setTyping(true);
-        }, CHAT_SCRIPT.length * REVEAL_MS)
+        }, chat.length * REVEAL_MS)
       );
       timers.push(
         window.setTimeout(() => {
           if (!active) return;
           setTyping(false);
           run();
-        }, CHAT_SCRIPT.length * REVEAL_MS + 2200)
+        }, chat.length * REVEAL_MS + 2200)
       );
     };
 
@@ -111,7 +195,7 @@ export function AppDownloadSection() {
       active = false;
       timers.forEach((t) => window.clearTimeout(t));
     };
-  }, []);
+  }, [chat]);
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-[#fdf4b8] to-[#fbeea0] py-14 sm:py-20 border-b border-[#f2e9b0]/60">
@@ -120,17 +204,17 @@ export function AppDownloadSection() {
           {/* LEFT: copy + features + store badges */}
           <div>
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#c2410c]">
-              The DivinLink App
+              {t.eyebrow}
             </span>
             <h2 className="mt-3 text-4xl font-bold leading-[1.08] tracking-tight text-[#1a1208] sm:text-5xl">
-              Astrology made simpler,
+              {t.headingLine1}
               <br />
-              and available to you{" "}
-              <span className="text-[#e2561f]">24×7</span>.
+              {t.headingLine2}
+              <span className="text-[#e2561f]">{t.headingNum}</span>
+              {t.headingEnd}
             </h2>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-[#5f5640] sm:text-base">
-              Connect with an astrologer anytime, and find the solutions to all your love,
-              marriage, career, and finance related problems instantly.
+              {t.description}
             </p>
 
             <ul className="mt-7 space-y-4">
@@ -139,7 +223,7 @@ export function AppDownloadSection() {
                   <MessageCircle className="size-[18px]" />
                 </span>
                 <span className="text-sm font-medium text-[#3b3425] sm:text-base">
-                  Instant chats, notifications, and alerts
+                  {t.featureChat}
                 </span>
               </li>
               <li className="flex items-center gap-3">
@@ -147,7 +231,7 @@ export function AppDownloadSection() {
                   <ShieldCheck className="size-[18px]" />
                 </span>
                 <span className="text-sm font-medium text-[#3b3425] sm:text-base">
-                  Secure payments, UPI, cards &amp; wallet, all encrypted
+                  {t.featurePayments}
                 </span>
               </li>
             </ul>
@@ -179,7 +263,7 @@ export function AppDownloadSection() {
                   <ChevronLeft className="size-5 text-[#6b5f4d]" />
                   <Image
                     src="/images/astrologers/avatar-chat.png"
-                    alt="Astro Aryan"
+                    alt={t.name}
                     width={36}
                     height={36}
                     className="size-9 rounded-full object-cover"
@@ -187,11 +271,11 @@ export function AppDownloadSection() {
                   />
                   <div className="flex-1 leading-tight">
                     <div className="flex items-center gap-1 text-sm font-bold text-[#1a1208]">
-                      Astro Aryan
+                      {t.name}
                       <Check className="size-3.5 rounded-full bg-[#1d9bf0] p-0.5 text-white" />
                     </div>
                     <div className="text-[11px] font-medium text-[#8b7d63]">
-                      <span className="text-[#15803d]">online</span> · ₹18/min
+                      <span className="text-[#15803d]">{t.online}</span> · {t.rate}
                     </div>
                   </div>
                   <span className="flex size-8 items-center justify-center rounded-full bg-[#fcd404] text-[#1c1304]">
@@ -202,10 +286,10 @@ export function AppDownloadSection() {
                 {/* messages */}
                 <div className="flex flex-1 flex-col gap-2.5 overflow-hidden bg-[#f4f3f2] px-3.5 py-4">
                   <div className="mx-auto rounded-full bg-black/5 px-2.5 py-0.5 text-[10px] font-medium text-[#8b7d63]">
-                    Today · 9:38 AM
+                    {t.today}
                   </div>
 
-                  {CHAT_SCRIPT.map((m, i) => {
+                  {chat.map((m, i) => {
                     if (i >= visible) return null;
                     const isUser = m.from === "user";
                     return (
@@ -240,7 +324,7 @@ export function AppDownloadSection() {
                 {/* input bar */}
                 <div className="flex items-center gap-2 border-t border-black/5 bg-white px-3 py-2.5">
                   <div className="flex-1 rounded-full bg-[#f0efed] px-3.5 py-2 text-[12px] text-[#9a8f78]">
-                    Type a message…
+                    {t.placeholder}
                   </div>
                   <span className="flex size-9 items-center justify-center rounded-full bg-[#fcd404] text-[#1c1304]">
                     <Send className="size-4" />
