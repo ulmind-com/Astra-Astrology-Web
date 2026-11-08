@@ -316,7 +316,7 @@ export function HeroAstroyogi() {
                 <div className="absolute inset-0 w-full h-full pointer-events-none">
                   {/* Mobile: portrait card art (scene bottom, cream top for text). */}
                   <Image
-                    src={MOBILE_HERO_IMAGES[slide.id] ?? slide.image_url}
+                    src={MOBILE_HERO_IMAGES[slide.id ?? ""] ?? slide.image_url}
                     alt={slide.title}
                     fill
                     priority={idx === 0}
