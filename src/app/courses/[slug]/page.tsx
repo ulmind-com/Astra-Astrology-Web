@@ -159,10 +159,11 @@ export default function CourseDetailPage() {
         currency: order.currency || "INR",
         name: "Astra Cosmic Gurukul",
         description: course.title,
-        image: "/favicon.ico",
+        image: "/icon.png",
         prefill: {
           name: user?.full_name || "",
           email: user?.email || "",
+          contact: (user as any)?.phone || "",
         },
         theme: {
           color: "#7c3aed",
