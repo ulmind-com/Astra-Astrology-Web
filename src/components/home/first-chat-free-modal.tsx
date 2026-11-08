@@ -189,7 +189,7 @@ export function FirstChatFreeModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 md:p-6"
+      className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto overscroll-contain p-3 py-6 sm:items-center sm:p-5 md:p-6"
       role="dialog"
       aria-modal="true"
     >
@@ -201,7 +201,7 @@ export function FirstChatFreeModal({
       />
 
       {/* 2. Main Modal Card */}
-      <div className="relative w-full max-w-[840px] overflow-hidden rounded-[26px] sm:rounded-[32px] border border-amber-300/80 dark:border-amber-500/35 bg-gradient-to-br from-[#fffdf7] via-[#fffcee] to-[#fff5d8] dark:from-[#17110c] dark:via-[#1c1611] dark:to-[#120d09] shadow-[0_25px_70px_-15px_rgba(26,18,8,0.35),0_0_50px_rgba(245,158,11,0.22)] p-5 sm:p-7 md:p-8 z-10 animate-in zoom-in-95 duration-200 text-stone-900 dark:text-amber-50">
+      <div className="relative my-auto w-full max-w-[840px] overflow-hidden rounded-[26px] sm:rounded-[32px] border border-amber-300/80 dark:border-amber-500/35 bg-gradient-to-br from-[#fffdf7] via-[#fffcee] to-[#fff5d8] dark:from-[#17110c] dark:via-[#1c1611] dark:to-[#120d09] shadow-[0_25px_70px_-15px_rgba(26,18,8,0.35),0_0_50px_rgba(245,158,11,0.22)] p-4 pt-11 sm:p-7 sm:pt-7 md:p-8 z-10 animate-in zoom-in-95 duration-200 text-stone-900 dark:text-amber-50">
         {/* Glow orb accents */}
         <div className="pointer-events-none absolute -top-24 -left-24 size-72 rounded-full bg-radial from-amber-300/40 dark:from-amber-500/20 via-transparent to-transparent blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -right-24 size-72 rounded-full bg-radial from-yellow-400/35 dark:from-amber-600/15 via-transparent to-transparent blur-3xl" />
@@ -217,7 +217,7 @@ export function FirstChatFreeModal({
         </button>
 
         {/* Grid Container */}
-        <div className="relative grid grid-cols-1 md:grid-cols-12 gap-5 sm:gap-6 md:gap-7 items-center">
+        <div className="relative grid grid-cols-1 md:grid-cols-12 gap-3.5 sm:gap-6 md:gap-7 items-center">
           {/* ================= LEFT COLUMN: Value Proposition & Action ================= */}
           <div className="md:col-span-6 flex flex-col items-start text-left z-10">
             {/* Brand + Vedic Pill */}
@@ -240,18 +240,18 @@ export function FirstChatFreeModal({
 
             {/* Giant Gold Badge: 100% FREE */}
             <div className="flex items-baseline gap-2 mt-1 sm:mt-1.5">
-              <h2 className="text-4xl sm:text-5xl md:text-[3.4rem] font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 dark:from-amber-300 dark:via-yellow-300 dark:to-amber-400 leading-none font-sans drop-shadow-xs">
+              <h2 className="text-2xl sm:text-5xl md:text-[3.4rem] font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 dark:from-amber-300 dark:via-yellow-300 dark:to-amber-400 leading-[1.3] pb-1 font-sans drop-shadow-xs">
                 {t.freeBadge}
               </h2>
             </div>
 
             {/* Description */}
-            <p className="mt-2.5 sm:mt-3 text-xs sm:text-[13px] text-stone-700 dark:text-stone-300 leading-relaxed max-w-[340px]">
+            <p className="mt-2.5 sm:mt-3 hidden sm:block text-xs sm:text-[13px] text-stone-700 dark:text-stone-300 leading-relaxed max-w-[340px]">
               {t.description}
             </p>
 
             {/* Highlights List */}
-            <div className="mt-3.5 space-y-1.5 sm:space-y-2 w-full max-w-[340px]">
+            <div className="mt-2.5 space-y-1 sm:space-y-2 w-full max-w-[340px]">
               {t.highlights.map((item, idx) => (
                 <div
                   key={idx}
@@ -266,7 +266,7 @@ export function FirstChatFreeModal({
             </div>
 
             {/* Action CTA */}
-            <div className="mt-4 sm:mt-5 flex flex-col items-start gap-1.5 w-full sm:w-auto">
+            <div className="mt-3 sm:mt-5 flex flex-col items-start gap-1.5 w-full sm:w-auto">
               <Link
                 href="/kundli"
                 onClick={handleClose}
@@ -274,7 +274,7 @@ export function FirstChatFreeModal({
               >
                 <button
                   type="button"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-stone-950 font-extrabold text-sm sm:text-[15px] px-6 sm:px-8 py-3 shadow-[0_8px_22px_-6px_rgba(245,158,11,0.75)] hover:shadow-[0_10px_26px_-4px_rgba(245,158,11,0.9)] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-amber-300 cursor-pointer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-stone-950 font-extrabold text-sm sm:text-[15px] px-6 sm:px-8 py-2.5 sm:py-3 shadow-[0_8px_22px_-6px_rgba(245,158,11,0.75)] hover:shadow-[0_10px_26px_-4px_rgba(245,158,11,0.9)] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-amber-300 cursor-pointer"
                 >
                   <Sparkles className="size-4 fill-stone-950" />
                   <span>{t.cta}</span>
@@ -301,9 +301,9 @@ export function FirstChatFreeModal({
           </div>
 
           {/* ================= RIGHT COLUMN: Interactive Kundli Preview ================= */}
-          <div className="md:col-span-6 relative flex flex-col items-center justify-center min-h-[290px] sm:min-h-[320px]">
+          <div className="md:col-span-6 relative flex flex-col items-center justify-center min-h-0 md:min-h-[320px]">
             {/* Tab Switchers */}
-            <div className="flex items-center justify-center gap-1 w-full rounded-xl bg-amber-100/70 dark:bg-stone-900/80 p-1 border border-amber-200/80 dark:border-amber-500/30 mb-2.5 z-10 shadow-xs">
+            <div className="flex items-center justify-center gap-1 w-full rounded-xl bg-amber-100/70 dark:bg-stone-900/80 p-1 border border-amber-200/80 dark:border-amber-500/30 mb-2 z-10 shadow-xs">
               <button
                 type="button"
                 onClick={() => setActiveTab("lagna")}
@@ -340,7 +340,7 @@ export function FirstChatFreeModal({
             </div>
 
             {/* Interactive Preview Container */}
-            <div className="relative w-full rounded-2xl border border-amber-300/80 dark:border-amber-500/35 bg-[#fffef9]/90 dark:bg-[#15100c]/90 p-3 sm:p-4 shadow-[inset_0_2px_8px_rgba(245,158,11,0.06)] flex flex-col items-center justify-center">
+            <div className="relative w-full rounded-2xl border border-amber-300/80 dark:border-amber-500/35 bg-[#fffef9]/90 dark:bg-[#15100c]/90 p-2.5 sm:p-4 shadow-[inset_0_2px_8px_rgba(245,158,11,0.06)] flex flex-col items-center justify-center">
               {activeTab === "lagna" && (
                 <div className="w-full flex flex-col items-center animate-in fade-in duration-200">
                   {/* Chart Title Header */}
@@ -355,7 +355,7 @@ export function FirstChatFreeModal({
                   </div>
 
                   {/* North Indian Diamond Chart SVG (Exact Geometry) */}
-                  <div className="relative size-[210px] sm:size-[230px] my-1">
+                  <div className="relative size-[122px] sm:size-[230px] my-0.5 sm:my-1">
                     <svg
                       viewBox="0 0 300 300"
                       className="size-full stroke-amber-600 dark:stroke-amber-400/80 drop-shadow-xs"

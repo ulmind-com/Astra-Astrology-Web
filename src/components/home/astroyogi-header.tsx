@@ -31,6 +31,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
+import { createPortal } from "react-dom";
 
 import { Avatar } from "@/components/ui";
 import { useWallet } from "@/hooks/use-wallet";
@@ -65,6 +66,21 @@ export function AstroyogiHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [mobileExpandedSection, setMobileExpandedSection] = React.useState<string | null>(null);
   const [langDropdownOpen, setLangDropdownOpen] = React.useState(false);
+
+  // The drawer is portalled to <body>, so it must only render after mount
+  // (document is unavailable during SSR).
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
+
+  // Lock the page behind the open drawer, and restore on close.
+  React.useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [mobileMenuOpen]);
 
   // Close menus on path change
   React.useEffect(() => {
@@ -551,7 +567,7 @@ export function AstroyogiHeader() {
                   priority
                 />
               </span>
-              <span className="font-display whitespace-nowrap text-[17px] sm:text-[18px] font-bold tracking-wide text-foreground group-hover:text-amber-700 transition-colors">
+              <span className="font-display hidden sm:inline whitespace-nowrap text-[17px] sm:text-[18px] font-bold tracking-wide text-foreground group-hover:text-amber-700 transition-colors">
                 DivinLink
               </span>
             </Link>
@@ -738,11 +754,11 @@ export function AstroyogiHeader() {
             <Link href="/astrologers" className="shrink-0 group">
               <button
                 type="button"
-                className="group relative inline-flex h-9 sm:h-[38px] items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 px-4 text-stone-950 font-semibold text-xs sm:text-[13px] tracking-tight shadow-[0_4px_14px_-2px_rgba(245,158,11,0.55)] hover:shadow-[0_6px_18px_-2px_rgba(245,158,11,0.75)] transition-all hover:scale-[1.02] active:scale-[0.98] border border-amber-300 whitespace-nowrap cursor-pointer leading-normal"
+                className="group relative inline-flex h-9 sm:h-[38px] items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 px-3 sm:px-4 text-stone-950 font-semibold text-xs sm:text-[13px] tracking-tight shadow-[0_4px_14px_-2px_rgba(245,158,11,0.55)] hover:shadow-[0_6px_18px_-2px_rgba(245,158,11,0.75)] transition-all hover:scale-[1.02] active:scale-[0.98] border border-amber-300 whitespace-nowrap cursor-pointer leading-normal"
               >
                 <span className="leading-normal">{ctaPart1}</span>
-                <span className="opacity-40 font-light leading-normal">|</span>
-                <span className="leading-normal">{ctaPart2}</span>
+                <span className="hidden sm:inline opacity-40 font-light leading-normal">|</span>
+                <span className="hidden sm:inline leading-normal">{ctaPart2}</span>
                 <ArrowRight className="size-3.5 stroke-[2] text-stone-900 transition-transform duration-200 group-hover:translate-x-0.5 shrink-0" />
               </button>
             </Link>
@@ -751,8 +767,12 @@ export function AstroyogiHeader() {
       </div>
 
       {/* ================= Mobile Navigation Drawer ================= */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+      {/* Portalled to <body>: the header's backdrop-filter would otherwise make
+          it the containing block and trap this fixed overlay inside the 64px bar. */}
+      {mounted &&
+        mobileMenuOpen &&
+        createPortal(
+          <div className="fixed inset-0 z-[60] lg:hidden">
           <div
             className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-300"
             onClick={() => setMobileMenuOpen(false)}
@@ -874,8 +894,9 @@ export function AstroyogiHeader() {
               )}
             </div>
           </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </header>
   );
 }
