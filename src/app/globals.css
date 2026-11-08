@@ -936,10 +936,18 @@
    Hides the rest of the web app so only the pure certificate prints.
    ========================================================================== */
 @media print {
+  body:has(#annual-dossier-printable-content) {
+    background: #fffdf9 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
   body:has(#annual-dossier-printable-content) > *:not(:has(#annual-dossier-printable-content)),
+  body:has(#annual-dossier-printable-content) main > *:not(:has(#annual-dossier-printable-content)),
   body:has(#annual-dossier-printable-content) header,
   body:has(#annual-dossier-printable-content) footer,
-  body:has(#annual-dossier-printable-content) nav {
+  body:has(#annual-dossier-printable-content) nav,
+  body:has(#annual-dossier-printable-content) aside {
     display: none !important;
   }
 

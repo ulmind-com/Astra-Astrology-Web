@@ -62,7 +62,7 @@ export function AnnualHoroscopeHeroBanner({
     return null;
   }
 
-  const t = {
+  const bannerTranslations = {
     bn: {
       tag: "বিশুদ্ধ লাল কিতাব সংহিতা • বার্ষিক বর্ষফল ও মহাপ্রতিকার",
       title: "১ বছরের বার্ষিক রাশিফল ও লাল কিতাব মহাপ্রতিকার সনদ",
@@ -93,7 +93,8 @@ export function AnnualHoroscopeHeroBanner({
       coinsTag: `Costs ${cost} Coins`,
       balance: `Your Balance: ${walletBalance} Coins`,
     },
-  }[language in ["bn", "hi", "en"] ? language : "en"];
+  };
+  const t = bannerTranslations[language as "bn" | "hi" | "en"] || bannerTranslations.en;
 
   return (
     <div className="relative overflow-hidden rounded-3xl border-2 border-amber-500/40 bg-gradient-to-br from-[#2a1b12] via-[#3a2519] to-[#1f1510] p-6 sm:p-8 text-white shadow-2xl mb-10">
@@ -548,11 +549,13 @@ export function AnnualHoroscopeDossierModal({
       // Create dedicated hidden iframe for pristine, isolated PDF printing
       const iframe = document.createElement("iframe");
       iframe.style.position = "fixed";
-      iframe.style.right = "0";
-      iframe.style.bottom = "0";
-      iframe.style.width = "0";
-      iframe.style.height = "0";
+      iframe.style.left = "-9999px";
+      iframe.style.top = "-9999px";
+      iframe.style.width = "1024px";
+      iframe.style.height = "768px";
       iframe.style.border = "0";
+      iframe.style.opacity = "0";
+      iframe.style.pointerEvents = "none";
       iframe.setAttribute("aria-hidden", "true");
       document.body.appendChild(iframe);
 
@@ -620,7 +623,7 @@ export function AnnualHoroscopeDossierModal({
           </head>
           <body>
             <div class="print-container">
-              ${clone.innerHTML}
+              ${clone.outerHTML}
             </div>
           </body>
         </html>
@@ -638,9 +641,9 @@ export function AnnualHoroscopeDossierModal({
             if (document.body.contains(iframe)) {
               document.body.removeChild(iframe);
             }
-          }, 2000);
+          }, 3000);
         }
-      }, 350);
+      }, 500);
     } catch {
       window.print();
     }
