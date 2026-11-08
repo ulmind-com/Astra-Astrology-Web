@@ -930,3 +930,41 @@
     display: none;
   }
 }
+
+/* ==========================================================================
+   Print Isolation for Annual Horoscope Dossier Certificate
+   Hides the rest of the web app so only the pure certificate prints.
+   ========================================================================== */
+@media print {
+  body:has(#annual-dossier-printable-content) > *:not(:has(#annual-dossier-printable-content)),
+  body:has(#annual-dossier-printable-content) header,
+  body:has(#annual-dossier-printable-content) footer,
+  body:has(#annual-dossier-printable-content) nav {
+    display: none !important;
+  }
+
+  .dossier-modal-backdrop {
+    position: static !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  #annual-dossier-printable-content {
+    max-height: none !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border: 3px double #b45309 !important;
+    border-radius: 0 !important;
+    padding: 24px !important;
+    margin: 0 auto !important;
+    background: #fffdf9 !important;
+  }
+
+  .dossier-no-print {
+    display: none !important;
+  }
+}

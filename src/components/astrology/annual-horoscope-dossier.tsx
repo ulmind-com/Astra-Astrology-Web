@@ -536,7 +536,112 @@ export function AnnualHoroscopeDossierModal({
   if (!report) return null;
 
   const handlePrint = () => {
-    if (typeof window !== "undefined") {
+    if (typeof window === "undefined") return;
+
+    const printableElement = document.getElementById("annual-dossier-printable-content");
+    if (!printableElement) {
+      window.print();
+      return;
+    }
+
+    try {
+      // Create dedicated hidden iframe for pristine, isolated PDF printing
+      const iframe = document.createElement("iframe");
+      iframe.style.position = "fixed";
+      iframe.style.right = "0";
+      iframe.style.bottom = "0";
+      iframe.style.width = "0";
+      iframe.style.height = "0";
+      iframe.style.border = "0";
+      iframe.setAttribute("aria-hidden", "true");
+      document.body.appendChild(iframe);
+
+      const doc = iframe.contentWindow?.document;
+      if (!doc) {
+        window.print();
+        return;
+      }
+
+      // Collect CSS styles
+      const styleTags = Array.from(document.querySelectorAll("link[rel='stylesheet'], style"))
+        .map((tag) => tag.outerHTML)
+        .join("\n");
+
+      const pageTitle = `${report.digital_seal.seal_title} - ${report.report_id}`;
+
+      // Clone content and remove any no-print control bars
+      const clone = printableElement.cloneNode(true) as HTMLElement;
+      clone.querySelectorAll(".dossier-no-print").forEach((el) => el.remove());
+
+      doc.open();
+      doc.write(`
+        <!DOCTYPE html>
+        <html lang="${lang}">
+          <head>
+            <title>${pageTitle}</title>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+            ${styleTags}
+            <style>
+              @page {
+                size: A4 portrait;
+                margin: 10mm 10mm 10mm 10mm;
+              }
+              * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+              html, body {
+                background-color: #fffdfa !important;
+                color: #332c39 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                font-family: 'Poppins', 'Noto Sans Bengali', 'Noto Sans Devanagari', system-ui, sans-serif !important;
+              }
+              .print-container {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 auto !important;
+                padding: 16px !important;
+                box-sizing: border-box !important;
+                background-color: #fffdfa !important;
+              }
+              .dossier-no-print {
+                display: none !important;
+              }
+              .page-avoid {
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="print-container">
+              ${clone.innerHTML}
+            </div>
+          </body>
+        </html>
+      `);
+      doc.close();
+
+      setTimeout(() => {
+        try {
+          iframe.contentWindow?.focus();
+          iframe.contentWindow?.print();
+        } catch {
+          window.print();
+        } finally {
+          setTimeout(() => {
+            if (document.body.contains(iframe)) {
+              document.body.removeChild(iframe);
+            }
+          }, 2000);
+        }
+      }, 350);
+    } catch {
       window.print();
     }
   };
@@ -555,11 +660,14 @@ export function AnnualHoroscopeDossierModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md overflow-y-auto animate-in fade-in print:p-0 print:bg-white print:static print:inset-auto">
-      <div className="relative w-full max-w-4xl my-auto rounded-3xl border-4 border-double border-amber-600/70 bg-gradient-to-b from-[#faf4eb] via-[#fffdf9] to-[#faf4eb] p-6 sm:p-10 text-[#332c39] shadow-2xl max-h-[95vh] overflow-y-auto print:max-h-none print:shadow-none print:border-amber-700 print:rounded-none print:p-6 print:m-0">
+    <div className="dossier-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md overflow-y-auto animate-in fade-in print:p-0 print:bg-white print:static print:inset-auto">
+      <div
+        id="annual-dossier-printable-content"
+        className="relative w-full max-w-4xl my-auto rounded-3xl border-4 border-double border-amber-600/70 bg-gradient-to-b from-[#faf4eb] via-[#fffdf9] to-[#faf4eb] p-6 sm:p-10 text-[#332c39] shadow-2xl max-h-[95vh] overflow-y-auto print:max-h-none print:shadow-none print:border-amber-700 print:rounded-none print:p-6 print:m-0"
+      >
         
         {/* Floating Top Action Bar (Hidden in Print) */}
-        <div className="flex items-center justify-between pb-4 mb-6 border-b-2 border-amber-400/50 print:hidden">
+        <div className="dossier-no-print flex items-center justify-between pb-4 mb-6 border-b-2 border-amber-400/50 print:hidden">
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-900 bg-amber-200/80 px-3 py-1 rounded-full border border-amber-400">
               <ShieldCheck className="size-3.5 text-amber-800" />
@@ -901,7 +1009,7 @@ export function AnnualHoroscopeDossierModal({
                 {rem.dos_and_donts.length > 0 && (
                   <div>
                     <h5 className="text-[11px] font-bold text-amber-900 uppercase tracking-wider mb-1">
-                      ⚠️ {lang === "bn" ? "সাৰধানতা ও অনুশাসন (Do's & Don'ts):" : lang === "hi" ? "सावधानियां (Do's & Don'ts):" : "Precautions (Do's & Don'ts):"}
+                      ⚠️ {lang === "bn" ? "সাবধানতা ও অনুশাসন (Do's & Don'ts):" : lang === "hi" ? "सावधानियां (Do's & Don'ts):" : "Precautions (Do's & Don'ts):"}
                     </h5>
                     <ul className="list-disc list-inside text-xs text-stone-700 space-y-1">
                       {rem.dos_and_donts.map((d, dIdx) => (
