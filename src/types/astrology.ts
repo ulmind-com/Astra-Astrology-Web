@@ -1688,6 +1688,122 @@ export interface FeaturePricingItem {
 
 export type FeaturePricingMap = Record<string, FeaturePricingItem>;
 
+export interface AnnualHoroscopeRequest {
+  date_of_birth: string;
+  time_of_birth: string;
+  latitude?: number;
+  longitude?: number;
+  timezone?: number;
+  city_name?: string;
+  client_name?: string;
+  target_year?: number;
+  language?: "en" | "bn" | "hi";
+  primary_focus?: "general" | "career" | "finance" | "health" | "love" | "family" | "debt";
+}
+
+export interface AnnualPillarForecast {
+  id: "career" | "finance" | "health" | "love" | "family" | "luck";
+  score: number;
+  status: string;
+  title: string;
+  icon: string;
+  analysis: string;
+  precautions: string;
+  key_months: string;
+}
+
+export interface AnnualQuarterForecast {
+  quarter: string;
+  title: string;
+  dates: string;
+  theme: string;
+  favorable_dates: string;
+  caution_dates: string;
+  guidance: string;
+}
+
+export interface VarshphalPlanet {
+  planet_id: string;
+  name: string;
+  symbol: string;
+  house: number;
+  sign: string;
+  sign_num: number;
+  degree: number;
+  nature: "shubh" | "ashubh" | "mixed";
+  title: string;
+  precautions: string[];
+  remedies: string[];
+}
+
+export interface LalKitabRemedyItem {
+  planet_name: string;
+  symbol: string;
+  house: number;
+  title: string;
+  dos_and_donts: string[];
+  upay_list: string[];
+}
+
+export interface SpecialMahaupay {
+  key: string;
+  title: string;
+  icon: string;
+  items: string[];
+}
+
+export interface GomtiChakraRemedyItem {
+  problem: string;
+  remedy: string;
+}
+
+export interface DigitalSealInfo {
+  report_id: string;
+  consecration_date: string;
+  seal_title: string;
+  seal_motto: string;
+  chief_astrologer: string;
+  authenticity_hash: string;
+  verification_url: string;
+}
+
+export interface AnnualHoroscopeResponse {
+  report_id: string;
+  consecration_date: string;
+  target_year: number;
+  language: "en" | "bn" | "hi";
+  personal_details: {
+    name: string;
+    date_of_birth: string;
+    time_of_birth: string;
+    city_name: string;
+    latitude: number;
+    longitude: number;
+    timezone: number;
+    natal_lagna: string;
+    moon_rashi: string;
+    nakshatra: string;
+    pada: number;
+    varshphal_lagna: string;
+  };
+  overall_score: number;
+  annual_summary: string;
+  pillars: AnnualPillarForecast[];
+  quarters: AnnualQuarterForecast[];
+  shubh_phal: string[];
+  ashubh_phal: string[];
+  varshphal_planets: VarshphalPlanet[];
+  lal_kitab_remedies: LalKitabRemedyItem[];
+  primary_mahaupay: SpecialMahaupay;
+  all_special_mahaupay: SpecialMahaupay[];
+  gomti_chakra_remedies: GomtiChakraRemedyItem[];
+  general_precautions: string[];
+  digital_seal: DigitalSealInfo;
+  coins_spent: number;
+  wallet_balance?: number | null;
+}
+
+
 
 
 

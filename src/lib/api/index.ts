@@ -28,6 +28,8 @@ import type {
   KundliMatchingResult,
   DailyHoroscopePayload,
   DailyHoroscopeResult,
+  AnnualHoroscopeRequest,
+  AnnualHoroscopeResponse,
   FeaturePricingItem,
 
   ReviewKind,
@@ -771,6 +773,13 @@ export const astrologyApi = {
     api.post<DailyHoroscopeResult>(
       endpoints.astrology.dailyHoroscope,
       payload || {},
+    ),
+
+  /** 1-Year Annual Horoscope & Lal Kitab Varshphal Prediction Report. */
+  annualHoroscope: (payload: AnnualHoroscopeRequest) =>
+    api.post<AnnualHoroscopeResponse>(
+      endpoints.astrology.annualHoroscope,
+      payload,
     ),
 
   /** Get current feature pricing and availability for all astrology tools. */
