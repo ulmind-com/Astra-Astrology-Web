@@ -111,7 +111,7 @@ export function SiteRail() {
         }
       }}
       className={cn(
-        "fixed inset-y-0 left-0 z-50 hidden md:flex",
+        "fixed inset-y-0 left-0 z-50 hidden md:flex print:hidden",
         "flex-col gap-2 border-r border-border/70 bg-surface/90 py-4 backdrop-blur-xl",
         "shadow-[8px_0_32px_-24px_rgb(26_18_8_/_0.4)]",
         "transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",

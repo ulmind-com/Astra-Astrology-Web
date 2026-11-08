@@ -48,10 +48,13 @@ interface AnnualHoroscopeDossierProps {
 
 export function AnnualHoroscopeHeroBanner({
   onGenerateClick,
+  language: propLanguage,
 }: {
   onGenerateClick: () => void;
+  language?: AstrologyLanguage;
 }) {
-  const { language } = useLanguage();
+  const { language: contextLanguage } = useLanguage();
+  const language = propLanguage || contextLanguage;
   const { getFeature, walletBalance } = useFeaturePricing();
   const feature = getFeature("annual_horoscope");
   const cost = feature?.coins ?? 50;
@@ -534,119 +537,21 @@ export function AnnualHoroscopeDossierModal({
     }
   }, [report?.digital_seal?.verification_url]);
 
+  // Activate isolated print mode on body while dossier modal is open
+  React.useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.body.classList.add("annual-dossier-printing-mode");
+      return () => {
+        document.body.classList.remove("annual-dossier-printing-mode");
+      };
+    }
+  }, []);
+
   if (!report) return null;
 
   const handlePrint = () => {
     if (typeof window === "undefined") return;
-
-    const printableElement = document.getElementById("annual-dossier-printable-content");
-    if (!printableElement) {
-      window.print();
-      return;
-    }
-
-    try {
-      // Create dedicated hidden iframe for pristine, isolated PDF printing
-      const iframe = document.createElement("iframe");
-      iframe.style.position = "fixed";
-      iframe.style.left = "-9999px";
-      iframe.style.top = "-9999px";
-      iframe.style.width = "1024px";
-      iframe.style.height = "768px";
-      iframe.style.border = "0";
-      iframe.style.opacity = "0";
-      iframe.style.pointerEvents = "none";
-      iframe.setAttribute("aria-hidden", "true");
-      document.body.appendChild(iframe);
-
-      const doc = iframe.contentWindow?.document;
-      if (!doc) {
-        window.print();
-        return;
-      }
-
-      // Collect CSS styles
-      const styleTags = Array.from(document.querySelectorAll("link[rel='stylesheet'], style"))
-        .map((tag) => tag.outerHTML)
-        .join("\n");
-
-      const pageTitle = `${report.digital_seal.seal_title} - ${report.report_id}`;
-
-      // Clone content and remove any no-print control bars
-      const clone = printableElement.cloneNode(true) as HTMLElement;
-      clone.querySelectorAll(".dossier-no-print").forEach((el) => el.remove());
-
-      doc.open();
-      doc.write(`
-        <!DOCTYPE html>
-        <html lang="${lang}">
-          <head>
-            <title>${pageTitle}</title>
-            <meta charset="utf-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <link rel="preconnect" href="https://fonts.googleapis.com">
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-            ${styleTags}
-            <style>
-              @page {
-                size: A4 portrait;
-                margin: 10mm 10mm 10mm 10mm;
-              }
-              * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-              }
-              html, body {
-                background-color: #fffdfa !important;
-                color: #332c39 !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                font-family: 'Poppins', 'Noto Sans Bengali', 'Noto Sans Devanagari', system-ui, sans-serif !important;
-              }
-              .print-container {
-                width: 100% !important;
-                max-width: 100% !important;
-                margin: 0 auto !important;
-                padding: 16px !important;
-                box-sizing: border-box !important;
-                background-color: #fffdfa !important;
-              }
-              .dossier-no-print {
-                display: none !important;
-              }
-              .page-avoid {
-                break-inside: avoid !important;
-                page-break-inside: avoid !important;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="print-container">
-              ${clone.outerHTML}
-            </div>
-          </body>
-        </html>
-      `);
-      doc.close();
-
-      setTimeout(() => {
-        try {
-          iframe.contentWindow?.focus();
-          iframe.contentWindow?.print();
-        } catch {
-          window.print();
-        } finally {
-          setTimeout(() => {
-            if (document.body.contains(iframe)) {
-              document.body.removeChild(iframe);
-            }
-          }, 3000);
-        }
-      }, 500);
-    } catch {
-      window.print();
-    }
+    window.print();
   };
 
   const handleCopyLink = () => {
@@ -803,7 +708,7 @@ export function AnnualHoroscopeDossierModal({
             {report.pillars.map((pillar) => (
               <div
                 key={pillar.id}
-                className="rounded-2xl border border-stone-200 bg-white/90 p-4 shadow-xs space-y-2 hover:border-amber-400 transition-colors"
+                className="rounded-2xl border border-stone-200 bg-white/90 p-4 shadow-xs space-y-2 hover:border-amber-400 transition-colors page-avoid"
               >
                 <div className="flex items-center justify-between">
                   <h4 className="font-bold text-xs sm:text-sm text-stone-900 flex items-center gap-2">
@@ -852,7 +757,7 @@ export function AnnualHoroscopeDossierModal({
             {report.quarters.map((q) => (
               <div
                 key={q.quarter}
-                className="rounded-2xl border border-amber-200 bg-amber-50/50 p-3.5 space-y-1.5 text-xs"
+                className="rounded-2xl border border-amber-200 bg-amber-50/50 p-3.5 space-y-1.5 text-xs page-avoid"
               >
                 <div className="flex items-center justify-between font-bold text-amber-950">
                   <span className="bg-amber-600 text-white px-2 py-0.5 rounded-md text-[10px]">
@@ -874,7 +779,7 @@ export function AnnualHoroscopeDossierModal({
         {/* Shubh Phal & Ashubh Phal Split Grid */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Shubh Phal */}
-          <div className="rounded-2xl border-2 border-emerald-300/80 bg-emerald-50/60 p-4 sm:p-5 space-y-3">
+          <div className="rounded-2xl border-2 border-emerald-300/80 bg-emerald-50/60 p-4 sm:p-5 space-y-3 page-avoid">
             <h3 className="font-cinzel text-sm sm:text-base font-bold text-emerald-950 flex items-center gap-2">
               <CheckCircle2 className="size-4 text-emerald-700" />
               <span>
@@ -892,7 +797,7 @@ export function AnnualHoroscopeDossierModal({
           </div>
 
           {/* Ashubh Phal / Graha Peeda */}
-          <div className="rounded-2xl border-2 border-amber-400/80 bg-amber-50/70 p-4 sm:p-5 space-y-3">
+          <div className="rounded-2xl border-2 border-amber-400/80 bg-amber-50/70 p-4 sm:p-5 space-y-3 page-avoid">
             <h3 className="font-cinzel text-sm sm:text-base font-bold text-amber-950 flex items-center gap-2">
               <AlertTriangle className="size-4 text-amber-700" />
               <span>
@@ -996,7 +901,7 @@ export function AnnualHoroscopeDossierModal({
             {report.lal_kitab_remedies.map((rem, i) => (
               <div
                 key={i}
-                className="rounded-2xl border-2 border-amber-300 bg-white/95 p-4 sm:p-5 shadow-xs space-y-3"
+                className="rounded-2xl border-2 border-amber-300 bg-white/95 p-4 sm:p-5 shadow-xs space-y-3 page-avoid"
               >
                 <div className="flex items-center justify-between border-b border-amber-200 pb-2">
                   <h4 className="font-bold text-sm text-amber-950 flex items-center gap-2">
@@ -1042,7 +947,7 @@ export function AnnualHoroscopeDossierModal({
 
         {/* High-Impact Special Problem Mahaupay */}
         {report.primary_mahaupay && (
-          <div className="mt-8 rounded-2xl border-2 border-amber-500 bg-gradient-to-r from-amber-100/60 via-amber-50 to-amber-100/60 p-5 space-y-3">
+          <div className="mt-8 rounded-2xl border-2 border-amber-500 bg-gradient-to-r from-amber-100/60 via-amber-50 to-amber-100/60 p-5 space-y-3 page-avoid">
             <div className="flex items-center gap-2 border-b border-amber-300 pb-2">
               <Award className="size-5 text-amber-800" />
               <h3 className="font-cinzel text-base sm:text-lg font-bold text-amber-950">
@@ -1079,7 +984,7 @@ export function AnnualHoroscopeDossierModal({
             {report.gomti_chakra_remedies.map((item, idx) => (
               <div
                 key={idx}
-                className="rounded-2xl border border-amber-200 bg-white/90 p-3.5 text-xs space-y-1 shadow-2xs"
+                className="rounded-2xl border border-amber-200 bg-white/90 p-3.5 text-xs space-y-1 shadow-2xs page-avoid"
               >
                 <div className="font-bold text-amber-900 flex items-center gap-1.5">
                   <span className="size-5 rounded-full bg-amber-200 text-amber-900 flex items-center justify-center text-[10px] shrink-0 font-bold">
@@ -1094,7 +999,7 @@ export function AnnualHoroscopeDossierModal({
         </div>
 
         {/* Universal Lal Kitab Moral Ethics */}
-        <div className="mt-8 rounded-2xl border border-stone-300 bg-stone-50/70 p-4 space-y-2">
+        <div className="mt-8 rounded-2xl border border-stone-300 bg-stone-50/70 p-4 space-y-2 page-avoid">
           <h4 className="font-cinzel text-xs font-bold text-stone-900 uppercase tracking-wider flex items-center gap-1.5">
             <Info className="size-3.5 text-amber-700" />
             <span>
@@ -1113,7 +1018,7 @@ export function AnnualHoroscopeDossierModal({
         </div>
 
         {/* -------------------- ROYAL SEAL & SIGNATURE FOOTER -------------------- */}
-        <div className="mt-10 pt-6 border-t-2 border-amber-400 grid grid-cols-1 sm:grid-cols-3 gap-6 items-center">
+        <div className="mt-10 pt-6 border-t-2 border-amber-400 grid grid-cols-1 sm:grid-cols-3 gap-6 items-center page-avoid">
           {/* QR Code */}
           <div className="flex flex-col items-center sm:items-start text-center sm:text-left space-y-1">
             <div className="p-1.5 bg-white rounded-xl border border-amber-300 shadow-xs inline-block">

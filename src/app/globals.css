@@ -936,43 +936,84 @@
    Hides the rest of the web app so only the pure certificate prints.
    ========================================================================== */
 @media print {
-  body:has(#annual-dossier-printable-content) {
-    background: #fffdf9 !important;
+  @page {
+    size: A4 portrait;
+    margin: 8mm 10mm;
+  }
+
+  /* Universal print hygiene: hide chrome, navbars, sidebars, footers */
+  header,
+  footer,
+  nav,
+  aside,
+  [data-site-rail],
+  .mobile-bottom-nav,
+  .dossier-no-print {
+    display: none !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* When the Annual Dossier Modal is open or printable content exists */
+  body:has(#annual-dossier-printable-content),
+  body.annual-dossier-printing-mode {
+    background: #fffdfa !important;
+    color: #1a1208 !important;
     padding: 0 !important;
     margin: 0 !important;
   }
 
+  /* Hide the underlying main content completely */
+  body:has(#annual-dossier-printable-content) main,
+  body.annual-dossier-printing-mode main {
+    display: none !important;
+  }
+
   body:has(#annual-dossier-printable-content) > *:not(:has(#annual-dossier-printable-content)),
-  body:has(#annual-dossier-printable-content) main > *:not(:has(#annual-dossier-printable-content)),
-  body:has(#annual-dossier-printable-content) header,
-  body:has(#annual-dossier-printable-content) footer,
-  body:has(#annual-dossier-printable-content) nav,
-  body:has(#annual-dossier-printable-content) aside {
+  body.annual-dossier-printing-mode > *:not(:has(#annual-dossier-printable-content)) {
     display: none !important;
   }
 
   .dossier-modal-backdrop {
     position: static !important;
+    inset: auto !important;
     background: transparent !important;
     backdrop-filter: none !important;
     padding: 0 !important;
     margin: 0 !important;
-    overflow: visible !important;
     display: block !important;
+    overflow: visible !important;
+    width: 100% !important;
+    max-height: none !important;
+    z-index: auto !important;
   }
 
   #annual-dossier-printable-content {
-    max-height: none !important;
-    overflow: visible !important;
-    box-shadow: none !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 10mm !important;
+    box-sizing: border-box !important;
     border: 3px double #b45309 !important;
     border-radius: 0 !important;
-    padding: 24px !important;
-    margin: 0 auto !important;
-    background: #fffdf9 !important;
+    box-shadow: none !important;
+    background: #fffdfa !important;
+    overflow: visible !important;
+    max-height: none !important;
   }
 
-  .dossier-no-print {
-    display: none !important;
+  /* Section page break rules to prevent awkward slicing */
+  .page-avoid,
+  .dossier-page-avoid,
+  #annual-dossier-printable-content table,
+  #annual-dossier-printable-content tr,
+  #annual-dossier-printable-content .page-avoid,
+  #annual-dossier-printable-content .break-inside-avoid {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 }

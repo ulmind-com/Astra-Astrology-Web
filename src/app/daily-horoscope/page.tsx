@@ -762,6 +762,7 @@ function HoroscopeContent() {
           {/* 1-Year Annual Horoscope & Lal Kitab Varshphal Banner */}
           <AnnualHoroscopeHeroBanner
             onGenerateClick={() => setAnnualGenModalOpen(true)}
+            language={language}
           />
 
           {/* Toolbar: Language Switcher + Date Navigation */}

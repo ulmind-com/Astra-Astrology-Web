@@ -81,7 +81,7 @@ export function MobileBottomNav() {
   return (
     <div
       aria-hidden={false}
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-50 md:hidden"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-50 md:hidden print:hidden"
       style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0.75rem))" }}
     >
       <nav
