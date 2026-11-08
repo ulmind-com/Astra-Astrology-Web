@@ -44,6 +44,11 @@ import {
   FeatureDisabledAlert,
   FeatureCoinModal,
 } from "@/components/astrology/feature-pricing-banner";
+import {
+  AnnualHoroscopeHeroBanner,
+  AnnualHoroscopeGeneratorModal,
+  AnnualHoroscopeDossierModal,
+} from "@/components/astrology/annual-horoscope-dossier";
 import type {
   AstrologyLanguage,
   DailyHoroscopeResult,
@@ -51,6 +56,7 @@ import type {
   HoraItem,
   ChoghadiyaItem,
   BiorhythmHour,
+  AnnualHoroscopeResponse,
 } from "@/types";
 
 // 12 Zodiac signs metadata
@@ -158,6 +164,10 @@ function HoroscopeContent() {
   const horoscopeFeature = getFeature("daily_horoscope");
   const [coinModalOpen, setCoinModalOpen] = React.useState(false);
   const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
+
+  // 1-Year Annual Horoscope & Lal Kitab Varshphal Dossier State
+  const [annualGenModalOpen, setAnnualGenModalOpen] = React.useState<boolean>(false);
+  const [annualReportData, setAnnualReportData] = React.useState<AnnualHoroscopeResponse | null>(null);
 
   // Centralized Language & State
   const { language, setLanguage } = useLanguage();
@@ -748,6 +758,12 @@ function HoroscopeContent() {
               />
             </div>
           )}
+
+          {/* 1-Year Annual Horoscope & Lal Kitab Varshphal Banner */}
+          <AnnualHoroscopeHeroBanner
+            onGenerateClick={() => setAnnualGenModalOpen(true)}
+            language={language}
+          />
 
           {/* Toolbar: Language Switcher + Date Navigation */}
           <div className="mb-8 flex flex-col md:flex-row items-center justify-between gap-4 rounded-2xl border border-[#ebd7c8] bg-[#fbf5ee]/90 p-3 sm:p-4 shadow-sm backdrop-blur-xs">
@@ -2191,6 +2207,21 @@ function HoroscopeContent() {
         walletBalance={walletBalance}
         reason={coinModalReason}
         language={language}
+      />
+
+      <AnnualHoroscopeGeneratorModal
+        open={annualGenModalOpen}
+        onClose={() => setAnnualGenModalOpen(false)}
+        onReportGenerated={(report) => setAnnualReportData(report)}
+        onOpenWalletRecharge={() => {
+          setCoinModalReason("insufficient_coins");
+          setCoinModalOpen(true);
+        }}
+      />
+
+      <AnnualHoroscopeDossierModal
+        report={annualReportData}
+        onClose={() => setAnnualReportData(null)}
       />
 
       <SiteFooter />

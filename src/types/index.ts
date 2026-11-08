@@ -482,6 +482,28 @@ export type Range = {
   custom_title?: string | null;
   is_private?: boolean;
 };
+export interface AuspiciousEventItem {
+  type: string;
+  title: string;
+  description: string;
+  demand_multiplier: number;
+  remedy_focus: string;
+}
+
+export interface AuspiciousTransitInfo {
+  date: string;
+  is_auspicious_transit_day: boolean;
+  primary_event?: string | null;
+  demand_multiplier_hint: number;
+  remedial_demand_surge?: string | null;
+  recommended_remedies: string[];
+  auspicious_events: AuspiciousEventItem[];
+  is_tatkal_surge_active: boolean;
+  active_tatkal_multiplier?: number | null;
+  active_tatkal_windows_count: number;
+  badge_label?: string | null;
+}
+
 export type AppointmentDayView = Omit<S["DayView"], "windows"> & {
   windows: Range[];
   muhurat_ratings?: Record<string, MuhuratSlotRating> | null;
@@ -489,6 +511,7 @@ export type AppointmentDayView = Omit<S["DayView"], "windows"> & {
   is_on_brahma_pause?: boolean;
   brahma_pause_until?: string | null;
   brahma_pause_reason?: string | null;
+  auspicious_transit?: AuspiciousTransitInfo | null;
   tatkal_windows?: Array<{
     starts_at: string;
     ends_at: string;
@@ -896,3 +919,4 @@ export type CoupleMatchResult = {
 
 export * from "./astrology";
 export * from "./palm-reading";
+export * from "./course";

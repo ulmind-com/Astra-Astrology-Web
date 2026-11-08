@@ -69,7 +69,7 @@ export function SiteHeader() {
       <SiteRail />
 
       {/* Mobile top bar */}
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-xl md:hidden">
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-xl md:hidden print:hidden">
         <div className="flex h-14 items-center justify-between gap-3 px-4">
           <Link href="/" className="group flex shrink-0 items-center gap-2.5">
             <span className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-soft transition-transform duration-300 group-active:scale-95">

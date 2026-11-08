@@ -150,6 +150,7 @@ function startsThatFit(
   minutes: number,
   slotMinutes: number,
   dayKey: string,
+  bufferMinutes: number = 0,
 ): Date[] {
   const starts: Date[] = [];
   const now = Date.now();
@@ -163,8 +164,9 @@ function startsThatFit(
     const windowEnd = new Date(w.ends_at).getTime();
     const step = slotMinutes * 60_000;
     const length = minutes * 60_000;
+    const buffer = bufferMinutes * 60_000;
 
-    for (let t = windowStart; t + length <= windowEnd; t += step) {
+    for (let t = windowStart; t + length + buffer <= windowEnd; t += step) {
       if (t <= now) continue;
 
       const asDate = new Date(t);
@@ -344,7 +346,14 @@ function AppointmentsContent() {
   // Calculate available start times & enrich with Vedic Muhurat
   const rawSlots = React.useMemo(() => {
     if (!dayView) return [];
-    return startsThatFit(dayView.windows, dayView.booked, minutes, dayView.slot_minutes, selectedDayKey);
+    return startsThatFit(
+      dayView.windows,
+      dayView.booked,
+      minutes,
+      dayView.slot_minutes,
+      selectedDayKey,
+      dayView.buffer_minutes || 0,
+    );
   }, [dayView, minutes, selectedDayKey]);
 
   const slotsWithMuhurat = React.useMemo(() => {
@@ -1046,6 +1055,48 @@ function AppointmentsContent() {
               </div>
             ) : (
               <div className="space-y-6">
+                {/* Auspicious Vedic Transit Day Alert for Clients */}
+                {dayView?.auspicious_transit?.is_auspicious_transit_day && (
+                  <div className="rounded-3xl border border-amber-300 bg-gradient-to-r from-amber-500/15 via-yellow-500/10 to-amber-500/15 p-5 shadow-xs space-y-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-600 px-3 py-1 text-xs font-black text-white uppercase shadow-xs">
+                          <Flame className="size-3.5 fill-yellow-200 text-yellow-200" />
+                          <span>{dayView.auspicious_transit.badge_label || "শুভ তিথি ট্রানজিট"}</span>
+                        </span>
+                        <span className="font-extrabold text-amber-950 text-sm">
+                          {dayView.auspicious_transit.primary_event}
+                        </span>
+                      </div>
+                      <span className="rounded-full bg-amber-200/90 border border-amber-400 px-2.5 py-0.5 text-[11px] font-black text-amber-950">
+                        🔥 {dayView.auspicious_transit.remedial_demand_surge || "১০x প্রতিকার চাহিদা"}
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-amber-900 leading-relaxed font-medium">
+                      {language === "bn"
+                        ? "আজ বিশেষ তিথি উপলক্ষে আধ্যাত্মিক ও গ্রহীয় শান্তির শুভ মুহূর্ত। এই দিনে গৃহীত প্রতিকার ও পরামর্শ বহুগুণ ফলদায়ী হয় বিধায় উচ্চ চাহিদার কারণে তৎকাল উইন্ডো উন্মুক্ত রয়েছে।"
+                        : "Today is a sacred Vedic spiritual transit with exceptionally high planetary remedy efficacy. VIP Tatkal priority booking is open."}
+                    </p>
+
+                    {dayView.auspicious_transit.recommended_remedies && dayView.auspicious_transit.recommended_remedies.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                        <span className="text-[11px] font-bold text-amber-950 mr-1">
+                          {language === "bn" ? "অনুকূল প্রতিকার:" : "Remedy Focus:"}
+                        </span>
+                        {dayView.auspicious_transit.recommended_remedies.map((remedy: string, idx: number) => (
+                          <span
+                            key={idx}
+                            className="rounded-full bg-white/90 border border-amber-300 px-2.5 py-0.5 text-[10.5px] font-bold text-amber-900 shadow-2xs"
+                          >
+                            ✨ {remedy}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* 1. Morning Showtimes */}
                 {groupedSlots.morning.length > 0 && (
                   <div className="rounded-3xl border border-slate-200/90 bg-white/95 backdrop-blur-md p-6 shadow-xs space-y-4">
@@ -1261,18 +1312,27 @@ function AppointmentsContent() {
 
               {/* VIP Tatkal Notice if applicable */}
               {quote?.is_tatkal && (
-                <div className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-500/10 via-yellow-500/15 to-amber-500/10 p-3 flex items-center justify-between gap-3 text-amber-950">
-                  <div className="flex items-center gap-2 text-xs font-bold">
-                    <Zap className="size-4 fill-amber-600 text-amber-600 shrink-0" />
-                    <span>
-                      {language === "bn"
-                        ? "তাত্ক্ষণিক জরুরি স্লট (VIP Tatkal Window)"
-                        : "Instant Priority Tatkal Window"}
+                <div className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-500/10 via-yellow-500/15 to-amber-500/10 p-3.5 space-y-1.5 text-amber-950">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-xs font-bold">
+                      <Zap className="size-4 fill-amber-600 text-amber-600 shrink-0" />
+                      <span>
+                        {dayView?.auspicious_transit?.badge_label
+                          ? `${dayView.auspicious_transit.badge_label} (${quote.tatkal_multiplier || 1.5}x)`
+                          : language === "bn"
+                          ? "তাত্ক্ষণিক জরুরি স্লট (VIP Tatkal Window)"
+                          : "Instant Priority Tatkal Window"}
+                      </span>
+                    </div>
+                    <span className="rounded-full bg-amber-200/90 border border-amber-400 px-2 py-0.5 text-[10px] font-black uppercase text-amber-950">
+                      {quote.tatkal_multiplier ? `${quote.tatkal_multiplier}x Rate` : "VIP"}
                     </span>
                   </div>
-                  <span className="rounded-full bg-amber-200/90 border border-amber-400 px-2 py-0.5 text-[10px] font-black uppercase text-amber-950">
-                    {quote.tatkal_multiplier ? `${quote.tatkal_multiplier}x Rate` : "VIP"}
-                  </span>
+                  {dayView?.auspicious_transit?.is_auspicious_transit_day && (
+                    <p className="text-[11px] text-amber-800 leading-tight">
+                      👑 {dayView.auspicious_transit.primary_event} উপলক্ষে উচ্চ চাহিদার দিন। ১০x গ্রহীয় ফলদায়ক প্রতিকারের জন্য এই ভিআইপি স্লট প্রযোজ্য।
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -1612,9 +1672,13 @@ function AppointmentsContent() {
         )}
       >
         {isTatkal && (
-          <span className="absolute -top-2.5 inset-x-2 flex items-center justify-center gap-1 rounded-full bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 px-2 py-0.5 text-[9px] font-black uppercase text-white shadow-xs tracking-wider">
-            <Zap className="size-2.5 fill-white" />
-            <span>VIP Tatkal</span>
+          <span className="absolute -top-2.5 inset-x-1 flex items-center justify-center gap-1 rounded-full bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 px-1.5 py-0.5 text-[8.5px] font-black uppercase text-white shadow-xs tracking-wider truncate">
+            <Zap className="size-2.5 fill-white shrink-0" />
+            <span className="truncate">
+              {dayView?.auspicious_transit?.badge_label
+                ? `${dayView.auspicious_transit.badge_label} (${tatkalMultiplier}x)`
+                : `${tatkalMultiplier}x VIP Tatkal`}
+            </span>
           </span>
         )}
 

@@ -156,6 +156,7 @@ export const endpoints = {
     timezone: "/astrology/timezone",
     clientRules: (signIndex: number) => `/astrology/client-rules/${signIndex}`,
     dailyHoroscope: "/astrology/horoscope/daily",
+    annualHoroscope: "/astrology/horoscope/annual-lal-kitab",
     featuresPricing: "/astrology/features/pricing",
     geoReverse: "/astrology/geo-reverse",
     geoDetect: "/astrology/geo-detect",
@@ -212,6 +213,24 @@ export const endpoints = {
   support: {
     contact: "/support/contact",
     mine: "/support/mine",
+  },
+  shop: {
+    categories: "/shop/categories",
+    products: "/shop/products",
+    product: (idOrSlug: string) => `/shop/products/${idOrSlug}`,
+    banners: "/shop/banners",
+    recommendations: "/shop/recommendations",
+    reserveStock: "/shop/reserve-stock",
+    releaseStock: "/shop/release-stock",
+  },
+  courses: {
+    list: "/courses",
+    detail: (slug: string) => `/courses/detail/${slug}`,
+    createOrder: (courseId: string) => `/courses/${courseId}/order`,
+    verifyPayment: (courseId: string) => `/courses/${courseId}/verify-payment`,
+    myEnrolled: "/courses/my/enrolled",
+    lessonStream: (courseId: string, lessonId: string) => `/courses/${courseId}/lessons/${lessonId}/stream`,
+    lessonProgress: (courseId: string, lessonId: string) => `/courses/${courseId}/lessons/${lessonId}/progress`,
   },
 } as const;
 

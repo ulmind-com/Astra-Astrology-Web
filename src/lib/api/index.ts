@@ -28,6 +28,8 @@ import type {
   KundliMatchingResult,
   DailyHoroscopePayload,
   DailyHoroscopeResult,
+  AnnualHoroscopeRequest,
+  AnnualHoroscopeResponse,
   FeaturePricingItem,
 
   ReviewKind,
@@ -72,6 +74,12 @@ import type {
   VerifyPaymentResponse,
   WalletSummary,
   WalletTransaction,
+  CourseListItem,
+  CourseDetail,
+  CourseEnrollment,
+  LessonStreamData,
+  CourseOrderCreateResponse,
+  CoursePaymentVerifyRequest,
 } from "@/types";
 import type {
   CreateMilanRoomInput,
@@ -478,8 +486,43 @@ export const appointmentApi = {
   getCertificate: (id: string) =>
     api.get<Record<string, any>>(`/appointments/${id}/certificate`),
 
+  getKarmicVault: (id: string) =>
+    api.get<Record<string, any>>(`/appointments/${id}/karmic-vault`),
+
   getCertificateHtmlUrl: (id: string) =>
     `${process.env.NEXT_PUBLIC_API_URL || "https://api.divinlink.com"}/api/v1/appointments/${id}/certificate/html`,
+
+  verifyCertificate: (id: string) =>
+    api.get<{
+      valid: boolean;
+      status: string;
+      appointment_id: string;
+      certificate_id: string;
+      issued_at: string;
+      consultation_pillar: string;
+      session_duration_minutes: number;
+      astrologer: { name: string; title: string; avatar_url?: string };
+      client: { name: string };
+      sacred_prescription: {
+        consecrated_gemstone: string;
+        sacred_rudraksha: string;
+        vedic_mantra: string;
+        japa_count: number;
+        daan_charity_ritual: string;
+        sankalpa?: string;
+        astrologer_guidance: string;
+      };
+      vedic_shlokas?: Array<{ sanskrit: string; transliteration?: string; meaning: string }>;
+      verification_url: string;
+      qr_code_url?: string;
+      digital_seal: {
+        verification_hash: string;
+        seal_title: string;
+        seal_motto: string;
+        status: string;
+        signature?: string;
+      };
+    }>(`/appointments/prescription/${id}/verify`, { auth: false }),
 
   joinStandby: (id: string) =>
     api.post<{ position: number }>(`/appointments/${id}/standby`, {}),
@@ -738,6 +781,13 @@ export const astrologyApi = {
       payload || {},
     ),
 
+  /** 1-Year Annual Horoscope & Lal Kitab Varshphal Prediction Report. */
+  annualHoroscope: (payload: AnnualHoroscopeRequest) =>
+    api.post<AnnualHoroscopeResponse>(
+      endpoints.astrology.annualHoroscope,
+      payload,
+    ),
+
   /** Get current feature pricing and availability for all astrology tools. */
   featuresPricing: () =>
     api.get<Record<string, FeaturePricingItem>>(endpoints.astrology.featuresPricing, { auth: false }),
@@ -977,5 +1027,154 @@ export const passkeyApi = {
   verifyLogin: (body: { credential: any }) =>
     api.post<AuthResult>(endpoints.passkeys.loginVerify, body, { auth: false }),
 };
+
+// ------------------------------------------------------------ Astra AstroStore Public API
+export interface ShopProductCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  icon_url?: string | null;
+  banner_url?: string | null;
+  category_type: string;
+  product_count: number;
+}
+
+export interface ShopProduct {
+  id: string;
+  title: string;
+  slug: string;
+  sku: string;
+  short_description: string;
+  detailed_description: string;
+  category_id: string;
+  category_slug: string;
+  category_type: string;
+  ruling_planet?: string | null;
+  deity?: string | null;
+  benefits: string[];
+  life_pillars: string[];
+  mrp: number;
+  sale_price: number;
+  discount_percent: number;
+  stock_quantity: number;
+  in_stock: boolean;
+  featured_image: string;
+  images: string[];
+  is_active: boolean;
+  is_featured: boolean;
+  is_energized: boolean;
+  average_rating: number;
+  review_count: number;
+}
+
+export interface ShopProductListResponse {
+  items: ShopProduct[];
+  total: number;
+  page: number;
+  limit: number;
+  has_more: boolean;
+}
+
+export interface StockReservationResponse {
+  success: boolean;
+  reserved: boolean;
+  product_id: string;
+  quantity: number;
+  message: string;
+}
+
+export const shopApi = {
+  getCategories: () =>
+    api.get<ShopProductCategory[]>(endpoints.shop.categories, { auth: false }),
+
+  getProducts: (params?: {
+    search?: string;
+    category_id?: string;
+    ruling_planet?: string;
+    in_stock_only?: boolean;
+    is_featured?: boolean;
+    page?: number;
+    limit?: number;
+    sort_by?: string;
+  }) =>
+    api.get<ShopProductListResponse>(endpoints.shop.products, {
+      query: params,
+      auth: false,
+    }),
+
+  getProductDetail: (idOrSlug: string) =>
+    api.get<ShopProduct>(endpoints.shop.product(idOrSlug), { auth: false }),
+
+  getRecommendations: (params?: {
+    planet?: string;
+    dosha?: string;
+    rashi?: string;
+    life_pillar?: string;
+    lang?: string;
+    limit?: number;
+  }) =>
+    api.get<any[]>(endpoints.shop.recommendations, {
+      query: params,
+      auth: false,
+    }),
+
+  reserveStock: (productId: string, quantity = 1) =>
+    api.post<StockReservationResponse>(endpoints.shop.reserveStock, {
+      product_id: productId,
+      quantity,
+    }),
+
+  releaseStock: (productId: string, quantity = 1) =>
+    api.post<StockReservationResponse>(endpoints.shop.releaseStock, {
+      product_id: productId,
+      quantity,
+    }),
+};
+
+export const courseApi = {
+  getCourses: (params?: {
+    category?: string;
+    level?: string;
+    search?: string;
+    limit?: number;
+    skip?: number;
+  }) =>
+    api.get<CourseListItem[]>(endpoints.courses.list, {
+      query: params,
+      auth: false,
+    }),
+
+  getCourseDetail: (slug: string) =>
+    api.get<CourseDetail>(endpoints.courses.detail(slug), {
+      auth: false,
+    }),
+
+  getMyEnrolledCourses: () =>
+    api.get<CourseEnrollment[]>(endpoints.courses.myEnrolled),
+
+  createOrder: (courseId: string) =>
+    api.post<CourseOrderCreateResponse>(endpoints.courses.createOrder(courseId)),
+
+  verifyPayment: (courseId: string, payload: CoursePaymentVerifyRequest) =>
+    api.post<{ success: boolean; enrollment_id: string; course_id: string; course_slug: string }>(
+      endpoints.courses.verifyPayment(courseId),
+      payload
+    ),
+
+  getLessonStream: (courseId: string, lessonId: string) =>
+    api.get<LessonStreamData>(endpoints.courses.lessonStream(courseId, lessonId)),
+
+  updateProgress: (
+    courseId: string,
+    lessonId: string,
+    payload: { watched_seconds: number; total_seconds: number; mark_completed?: boolean }
+  ) =>
+    api.post<{ progress_percent: number; is_lesson_completed: boolean; certificate_issued: boolean; certificate_id?: string }>(
+      endpoints.courses.lessonProgress(courseId, lessonId),
+      payload
+    ),
+};
+
 
 

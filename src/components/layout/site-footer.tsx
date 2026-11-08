@@ -115,7 +115,7 @@ export function SiteFooter() {
   const columns = getFooterColumns(language);
 
   return (
-    <footer className="relative mt-20 bg-surface">
+    <footer className="relative mt-20 bg-surface print:hidden">
       <div className="hairline absolute inset-x-0 top-0 h-px" aria-hidden />
       <div className="mx-auto max-w-6xl px-4 py-12">
         <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-4">
