@@ -109,3 +109,36 @@ export interface CoursePaymentVerifyRequest {
   razorpay_payment_id: string;
   razorpay_signature: string;
 }
+
+export interface CourseQuestionAnswer {
+  id: string;
+  user_id: string;
+  user_name: string;
+  user_role: string;
+  user_avatar?: string | null;
+  is_official: boolean;
+  content: string;
+  created_at: string;
+}
+
+export interface CourseQuestion {
+  id: string;
+  course_id: string;
+  section_id: string;
+  lesson_id: string;
+  user_id: string;
+  user_name: string;
+  user_avatar?: string | null;
+  timestamp_seconds: number;
+  timestamp_formatted: string;
+  title: string;
+  content: string;
+  upvote_count: number;
+  is_upvoted_by_me: boolean;
+  answer_count: number;
+  is_resolved: boolean;
+  has_official_answer: boolean;
+  is_pinned: boolean;
+  answers: CourseQuestionAnswer[];
+  created_at: string;
+}

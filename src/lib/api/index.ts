@@ -80,6 +80,8 @@ import type {
   LessonStreamData,
   CourseOrderCreateResponse,
   CoursePaymentVerifyRequest,
+  CourseQuestion,
+  CourseQuestionAnswer,
 } from "@/types";
 import type {
   CreateMilanRoomInput,
@@ -1174,6 +1176,31 @@ export const courseApi = {
       endpoints.courses.lessonProgress(courseId, lessonId),
       payload
     ),
+
+  getQuestions: (
+    courseId: string,
+    lessonId: string,
+    params?: { sort?: "newest" | "timestamp" | "upvotes"; limit?: number; skip?: number }
+  ) =>
+    api.get<CourseQuestion[]>(endpoints.courses.questions(courseId, lessonId), {
+      query: params,
+      auth: false,
+    }),
+
+  askQuestion: (
+    courseId: string,
+    lessonId: string,
+    payload: { title: string; content: string; timestamp_seconds?: number }
+  ) =>
+    api.post<CourseQuestion>(endpoints.courses.questions(courseId, lessonId), payload),
+
+  upvoteQuestion: (questionId: string) =>
+    api.post<{ question_id: string; upvote_count: number; is_upvoted_by_me: boolean }>(
+      endpoints.courses.upvoteQuestion(questionId)
+    ),
+
+  answerQuestion: (questionId: string, content: string) =>
+    api.post<CourseQuestionAnswer>(endpoints.courses.answerQuestion(questionId), { content }),
 };
 
 
