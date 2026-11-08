@@ -1153,7 +1153,7 @@ export function AnnualHoroscopeDossierModal({
           <div className="flex flex-col items-center sm:items-end text-center sm:text-right space-y-1">
             <div className="border-b border-dashed border-amber-800 pb-1 w-44 text-center sm:text-right">
               <span className="font-serif italic font-bold text-base text-amber-950 tracking-wider">
-                Acharya Radhakant
+                Acharya Rahul Sharma
               </span>
             </div>
             <p className="text-[11px] font-black text-slate-800">
