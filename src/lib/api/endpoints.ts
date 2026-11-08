@@ -231,6 +231,9 @@ export const endpoints = {
     myEnrolled: "/courses/my/enrolled",
     lessonStream: (courseId: string, lessonId: string) => `/courses/${courseId}/lessons/${lessonId}/stream`,
     lessonProgress: (courseId: string, lessonId: string) => `/courses/${courseId}/lessons/${lessonId}/progress`,
+    questions: (courseId: string, lessonId: string) => `/courses/${courseId}/lessons/${lessonId}/questions`,
+    upvoteQuestion: (questionId: string) => `/courses/questions/${questionId}/upvote`,
+    answerQuestion: (questionId: string) => `/courses/questions/${questionId}/answers`,
   },
 } as const;
 

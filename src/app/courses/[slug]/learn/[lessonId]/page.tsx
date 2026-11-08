@@ -11,17 +11,24 @@ import {
   ChevronLeft,
   ChevronRight,
   Circle,
+  Clock,
   Download,
   ExternalLink,
   FileText,
   GraduationCap,
+  HelpCircle,
   ListVideo,
   Lock,
   Menu,
+  MessageSquare,
+  MessageSquareQuote,
   PartyPopper,
   PlayCircle,
+  Send,
   Share2,
   ShieldCheck,
+  ThumbsUp,
+  UserCheck,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -29,11 +36,11 @@ import { useParams, useRouter } from "next/navigation";
 import * as React from "react";
 import { toast } from "sonner";
 
-import { Alert, Badge, Button, EmptyState, LoadingBlock, Modal } from "@/components/ui";
+import { Alert, Avatar, Badge, Button, EmptyState, LoadingBlock, Modal } from "@/components/ui";
 import { courseApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/providers/auth-provider";
-import type { CourseDetail, CourseLesson, CourseSection, LessonStreamData } from "@/types";
+import type { CourseDetail, CourseLesson, CourseQuestion, CourseQuestionAnswer, CourseSection, LessonStreamData } from "@/types";
 
 export default function LessonClassroomPage() {
   const params = useParams();
@@ -44,7 +51,16 @@ export default function LessonClassroomPage() {
   const slug = String(params.slug);
   const lessonId = String(params.lessonId);
 
-  const [activeTab, setActiveTab] = React.useState<"notes" | "resources">("notes");
+  const [activeTab, setActiveTab] = React.useState<"notes" | "resources" | "jigyasa">("notes");
+  const [qaSort, setQaSort] = React.useState<"newest" | "timestamp" | "upvotes">("newest");
+  const [isAskingQuestion, setIsAskingQuestion] = React.useState(false);
+  const [qTitle, setQTitle] = React.useState("");
+  const [qContent, setQContent] = React.useState("");
+  const [qUseTimestamp, setQUseTimestamp] = React.useState(true);
+  const [qMinutes, setQMinutes] = React.useState(0);
+  const [qSeconds, setQSeconds] = React.useState(0);
+  const [replyingToQId, setReplyingToQId] = React.useState<string | null>(null);
+  const [replyContent, setReplyContent] = React.useState("");
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const [expandedSections, setExpandedSections] = React.useState<Record<string, boolean>>({});
   const [watermarkPos, setWatermarkPos] = React.useState<{ top: string; left: string }>({
@@ -78,6 +94,72 @@ export default function LessonClassroomPage() {
       return courseApi.getLessonStream(course.id, lessonId);
     },
     enabled: Boolean(course?.id && lessonId),
+  });
+
+  // 3. Fetch Lesson Questions (Gurukul Jigyasa Forum)
+  const {
+    data: questions = [],
+    isLoading: isQuestionsLoading,
+    refetch: refetchQuestions,
+  } = useQuery({
+    queryKey: ["lesson-questions", course?.id, lessonId, qaSort],
+    queryFn: () => {
+      if (!course?.id) return [];
+      return courseApi.getQuestions(course.id, lessonId, { sort: qaSort });
+    },
+    enabled: Boolean(course?.id && lessonId),
+  });
+
+  // Q&A Mutations
+  const askQuestionMutation = useMutation({
+    mutationFn: async () => {
+      if (!course?.id) throw new Error("Course not loaded");
+      if (!qTitle.trim()) throw new Error("Please enter a question title");
+      if (!qContent.trim()) throw new Error("Please describe your question");
+
+      const totalSecs = qUseTimestamp ? Math.max(0, qMinutes * 60 + qSeconds) : 0;
+      return courseApi.askQuestion(course.id, lessonId, {
+        title: qTitle.trim(),
+        content: qContent.trim(),
+        timestamp_seconds: totalSecs,
+      });
+    },
+    onSuccess: () => {
+      toast.success("Question posted to Gurukul Jigyasa!");
+      setQTitle("");
+      setQContent("");
+      setIsAskingQuestion(false);
+      queryClient.invalidateQueries({ queryKey: ["lesson-questions", course?.id, lessonId] });
+    },
+    onError: (err: any) => {
+      toast.error(err instanceof ApiError ? err.message : "Failed to post question.");
+    },
+  });
+
+  const upvoteMutation = useMutation({
+    mutationFn: async (questionId: string) => courseApi.upvoteQuestion(questionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["lesson-questions", course?.id, lessonId] });
+    },
+    onError: (err: any) => {
+      toast.error(err instanceof ApiError ? err.message : "Failed to upvote.");
+    },
+  });
+
+  const answerMutation = useMutation({
+    mutationFn: async (questionId: string) => {
+      if (!replyContent.trim()) throw new Error("Please write a reply before posting");
+      return courseApi.answerQuestion(questionId, replyContent.trim());
+    },
+    onSuccess: () => {
+      toast.success("Reply submitted to discussion thread!");
+      setReplyContent("");
+      setReplyingToQId(null);
+      queryClient.invalidateQueries({ queryKey: ["lesson-questions", course?.id, lessonId] });
+    },
+    onError: (err: any) => {
+      toast.error(err instanceof ApiError ? err.message : "Failed to post reply.");
+    },
   });
 
   // Expand all sections initially
@@ -345,6 +427,19 @@ export default function LessonClassroomPage() {
                 <Download className="size-4" />
                 <span>Study Resources ({streamData?.resources?.length ?? 0})</span>
               </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("jigyasa")}
+                className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider pb-1 transition-colors ${
+                  activeTab === "jigyasa"
+                    ? "border-b-2 border-brand-600 text-brand-600"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <MessageSquareQuote className="size-4" />
+                <span>গুরুকুল জিজ্ঞাসা ({questions.length})</span>
+              </button>
             </div>
 
             <div className="mt-5">
@@ -360,7 +455,7 @@ export default function LessonClassroomPage() {
                     </p>
                   )}
                 </div>
-              ) : (
+              ) : activeTab === "resources" ? (
                 <div>
                   {!streamData?.resources || streamData.resources.length === 0 ? (
                     <p className="text-xs text-muted-foreground italic">
@@ -387,6 +482,356 @@ export default function LessonClassroomPage() {
                           </div>
                           <Download className="size-4 text-muted-foreground" />
                         </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* GURUKUL JIGYASA (Q&A FORUM) TAB */
+                <div className="space-y-6">
+                  {/* Top Bar: Title, Sort & Ask Button */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/50 pb-4">
+                    <div>
+                      <h3 className="font-serif text-base font-bold text-foreground flex items-center gap-2">
+                        <MessageSquareQuote className="size-5 text-amber-600" />
+                        গুরুকুল জিজ্ঞাসা (Lesson Q&A Forum)
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        ভিডিওর নির্দিষ্ট মিনিট/সেকেন্ডে বুঝতে অসুবিধা হলে প্রশ্ন করুন, আচার্য ও জ্যোতিষীরা সরাসরি উত্তর দেবেন।
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2.5">
+                      {/* Sort Selector */}
+                      <select
+                        value={qaSort}
+                        onChange={(e) => setQaSort(e.target.value as any)}
+                        className="rounded-xl border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-foreground outline-none focus:border-brand-500"
+                      >
+                        <option value="newest">সর্বশেষ প্রশ্ন (Newest)</option>
+                        <option value="timestamp">ভিডিও টাইমস্ট্যাম্প অনুযায়ী (By Video Time)</option>
+                        <option value="upvotes">জনপ্রিয় প্রশ্ন (Most Upvoted)</option>
+                      </select>
+
+                      <Button
+                        size="sm"
+                        onClick={() => setIsAskingQuestion(!isAskingQuestion)}
+                        className="gap-1.5 text-xs shadow-soft"
+                      >
+                        <HelpCircle className="size-3.5" />
+                        <span>{isAskingQuestion ? "বাতিল করুন" : "প্রশ্ন করুন"}</span>
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Ask Question Collapsible Card */}
+                  {isAskingQuestion && (
+                    <div className="rounded-2xl border-2 border-brand-500/30 bg-brand-500/5 p-5 space-y-4 shadow-sm animate-in fade-in-50 duration-200">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
+                          <HelpCircle className="size-4 text-brand-600" />
+                          আপনার জিজ্ঞাসা ও সংশয় লিখুন
+                        </h4>
+                        <span className="text-[11px] text-muted-foreground font-medium">
+                          সহপাঠী ও গুরুকুল আচার্যরা আলোচনা করবেন
+                        </span>
+                      </div>
+
+                      {/* Question Title */}
+                      <div>
+                        <label className="block text-xs font-bold text-foreground mb-1">
+                          প্রশ্নের মূল বিষয় / শিরোনাম *
+                        </label>
+                        <input
+                          type="text"
+                          value={qTitle}
+                          onChange={(e) => setQTitle(e.target.value)}
+                          placeholder="e.g. ৭ম ভাবে রাহু ও বৃহস্পতির দৃষ্টি থাকলে বৈবাহিক জীবনে কী প্রভাব পড়বে?"
+                          className="w-full rounded-xl border border-border bg-surface px-3.5 py-2 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-brand-500"
+                        />
+                      </div>
+
+                      {/* Question Description */}
+                      <div>
+                        <label className="block text-xs font-bold text-foreground mb-1">
+                          বিস্তারিত ব্যাখ্যা / আপনার জিজ্ঞাসা *
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={qContent}
+                          onChange={(e) => setQContent(e.target.value)}
+                          placeholder="ভিডিওর কোন বিষয়টি আপনার বুঝতে অস্পষ্ট লেগেছে তা সংক্ষেপে বিস্তারিত লিখুন..."
+                          className="w-full rounded-xl border border-border bg-surface px-3.5 py-2 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-brand-500 resize-y"
+                        />
+                      </div>
+
+                      {/* Video Timestamp Binding */}
+                      <div className="rounded-xl border border-border/80 bg-surface/80 p-3.5">
+                        <div className="flex items-center justify-between">
+                          <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-foreground">
+                            <input
+                              type="checkbox"
+                              checked={qUseTimestamp}
+                              onChange={(e) => setQUseTimestamp(e.target.checked)}
+                              className="rounded border-border text-brand-600 focus:ring-brand-500"
+                            />
+                            <span>ভিডিওর নির্দিষ্ট মিনিট/সেকেন্ডের সাথে যুক্ত করুন (Timestamped)</span>
+                          </label>
+                        </div>
+
+                        {qUseTimestamp && (
+                          <div className="mt-3 flex items-center gap-3 pt-2 border-t border-border/50 text-xs">
+                            <div className="flex items-center gap-1.5">
+                              <input
+                                type="number"
+                                min={0}
+                                max={300}
+                                value={qMinutes}
+                                onChange={(e) => setQMinutes(Math.max(0, parseInt(e.target.value) || 0))}
+                                className="w-16 rounded-lg border border-border bg-surface px-2 py-1 text-xs text-center font-mono font-bold"
+                              />
+                              <span className="text-muted-foreground font-medium">মিনিট</span>
+                            </div>
+                            <span className="font-bold text-muted-foreground">:</span>
+                            <div className="flex items-center gap-1.5">
+                              <input
+                                type="number"
+                                min={0}
+                                max={59}
+                                value={qSeconds}
+                                onChange={(e) => setQSeconds(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
+                                className="w-16 rounded-lg border border-border bg-surface px-2 py-1 text-xs text-center font-mono font-bold"
+                              />
+                              <span className="text-muted-foreground font-medium">সেকেন্ড</span>
+                            </div>
+
+                            <span className="text-muted-foreground text-[11px] ml-auto">
+                              ট্যাগ: ⏱️ {String(qMinutes).padStart(2, "0")}:{String(qSeconds).padStart(2, "0")}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex justify-end gap-2 pt-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsAskingQuestion(false)}
+                          disabled={askQuestionMutation.isPending}
+                        >
+                          বাতিল
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => askQuestionMutation.mutate()}
+                          disabled={askQuestionMutation.isPending || !qTitle.trim() || !qContent.trim()}
+                          className="bg-brand-600 hover:bg-brand-700 text-white gap-1.5"
+                        >
+                          <Send className="size-3.5" />
+                          <span>{askQuestionMutation.isPending ? "জমা হচ্ছে..." : "প্রশ্ন জমা দিন"}</span>
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Question Feed */}
+                  {isQuestionsLoading ? (
+                    <LoadingBlock label="লোড হচ্ছে গুরুকুল জিজ্ঞাসা..." />
+                  ) : questions.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-border/80 p-8 text-center bg-surface/40">
+                      <MessageSquareQuote className="size-10 text-muted-foreground/40 mx-auto mb-2" />
+                      <h4 className="text-sm font-bold text-foreground">এই ভিডিও লেসনে এখনো কোনো প্রশ্ন করা হয়নি</h4>
+                      <p className="text-xs text-muted-foreground max-w-md mx-auto mt-1">
+                        ভিডিওর কোনো গণনা বা শ্লোক বুঝতে অসুবিধা হলে উপরের "প্রশ্ন করুন" বোতামে ক্লিক করে প্রথম প্রশ্নটি আপনিই জিজ্ঞাসা করুন।
+                      </p>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setIsAskingQuestion(true)}
+                        className="mt-4 gap-1.5 text-xs text-brand-600"
+                      >
+                        <HelpCircle className="size-3.5" />
+                        <span>প্রথম প্রশ্ন জিজ্ঞাসা করুন</span>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {questions.map((q: CourseQuestion) => (
+                        <div
+                          key={q.id}
+                          className="rounded-2xl border border-border/80 bg-surface p-5 shadow-soft transition-all duration-200 hover:border-brand-500/40"
+                        >
+                          {/* Header: Timestamp Tag, Badges & Author */}
+                          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/40 pb-3">
+                            <div className="flex flex-wrap items-center gap-2">
+                              {q.timestamp_seconds > 0 ? (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-mono font-bold text-amber-600 border border-amber-500/20">
+                                  <Clock className="size-3" />
+                                  <span>{q.timestamp_formatted}</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-muted/60 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                  সাধারণ জিজ্ঞাসা
+                                </span>
+                              )}
+
+                              {q.has_official_answer && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-600 border border-emerald-500/20">
+                                  <ShieldCheck className="size-3.5 text-emerald-600" />
+                                  <span>আচার্য উত্তর প্রদান করেছেন</span>
+                                </span>
+                              )}
+
+                              {q.is_resolved && (
+                                <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-600">
+                                  ✓ সমাধান হয়েছে
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Author & Date */}
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Avatar
+                                src={q.user_avatar}
+                                name={q.user_name}
+                                className="size-5 text-[10px]"
+                              />
+                              <span className="font-semibold text-foreground">{q.user_name}</span>
+                              <span>•</span>
+                              <span className="text-[11px]">
+                                {new Date(q.created_at).toLocaleDateString("bn-IN", {
+                                  month: "short",
+                                  day: "numeric",
+                                })}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Question Body */}
+                          <div className="py-3 space-y-1.5">
+                            <h4 className="text-sm font-bold text-foreground leading-snug">
+                              {q.title}
+                            </h4>
+                            <p className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed">
+                              {q.content}
+                            </p>
+                          </div>
+
+                          {/* Footer Action Bar: Upvote, Reply Toggle, Answer Count */}
+                          <div className="flex items-center justify-between pt-2 border-t border-border/40 text-xs">
+                            <div className="flex items-center gap-3">
+                              {/* Upvote Button */}
+                              <button
+                                type="button"
+                                onClick={() => upvoteMutation.mutate(q.id)}
+                                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+                                  q.is_upvoted_by_me
+                                    ? "bg-brand-600 text-white"
+                                    : "bg-surface-muted text-muted-foreground hover:text-foreground"
+                                }`}
+                              >
+                                <ThumbsUp className="size-3.5" />
+                                <span>{q.upvote_count}</span>
+                              </button>
+
+                              {/* Reply Button */}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setReplyingToQId(replyingToQId === q.id ? null : q.id)
+                                }
+                                className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-brand-600 transition-colors"
+                              >
+                                <MessageSquare className="size-3.5" />
+                                <span>উত্তর দিন ({q.answers?.length || 0})</span>
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Discussion Answers Thread */}
+                          {q.answers && q.answers.length > 0 && (
+                            <div className="mt-4 pt-4 border-t border-border/60 space-y-3 pl-2 sm:pl-4">
+                              {q.answers.map((ans: CourseQuestionAnswer) => (
+                                <div
+                                  key={ans.id}
+                                  className={`rounded-xl p-3.5 transition-colors ${
+                                    ans.is_official
+                                      ? "border-2 border-emerald-500/30 bg-emerald-500/5 shadow-sm"
+                                      : "border border-border/60 bg-surface-muted/40"
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between gap-2 mb-2">
+                                    <div className="flex items-center gap-2">
+                                      <Avatar
+                                        src={ans.user_avatar}
+                                        name={ans.user_name}
+                                        className="size-5 text-[10px]"
+                                      />
+                                      <span className="text-xs font-bold text-foreground">
+                                        {ans.user_name}
+                                      </span>
+                                      {ans.is_official ? (
+                                        <span className="inline-flex items-center gap-1 rounded bg-emerald-600 px-1.5 py-0.5 text-[9px] font-bold uppercase text-white tracking-wider">
+                                          <ShieldCheck className="size-2.5" />
+                                          আচার্য গুরু উত্তর
+                                        </span>
+                                      ) : (
+                                        <span className="rounded bg-muted px-1.5 py-0.2 text-[9px] font-medium text-muted-foreground">
+                                          সহপাঠী
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="text-[10px] text-muted-foreground">
+                                      {new Date(ans.created_at).toLocaleDateString("bn-IN", {
+                                        month: "short",
+                                        day: "numeric",
+                                      })}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-foreground whitespace-pre-line leading-relaxed">
+                                    {ans.content}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Reply Input Box */}
+                          {replyingToQId === q.id && (
+                            <div className="mt-4 pt-3 border-t border-border/60 space-y-2 animate-in fade-in-50">
+                              <textarea
+                                rows={2}
+                                value={replyContent}
+                                onChange={(e) => setReplyContent(e.target.value)}
+                                placeholder="এই প্রশ্নের আপনার উত্তর বা মতামত লিখুন..."
+                                className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-brand-500 resize-y"
+                              />
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    setReplyingToQId(null);
+                                    setReplyContent("");
+                                  }}
+                                  className="text-xs"
+                                >
+                                  বাতিল
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={() => answerMutation.mutate(q.id)}
+                                  disabled={answerMutation.isPending || !replyContent.trim()}
+                                  className="bg-brand-600 hover:bg-brand-700 text-white text-xs gap-1"
+                                >
+                                  <Send className="size-3" />
+                                  <span>{answerMutation.isPending ? "পোস্ট হচ্ছে..." : "উত্তর জমা দিন"}</span>
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       ))}
                     </div>
                   )}
