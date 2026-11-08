@@ -360,3 +360,4 @@ function CourseCard({ course }: { course: CourseListItem }) {
     </Reveal>
   );
 }
+
