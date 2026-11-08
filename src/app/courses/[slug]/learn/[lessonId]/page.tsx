@@ -68,6 +68,7 @@ export default function LessonClassroomPage() {
     left: "15%",
   });
   const [showCertificateModal, setShowCertificateModal] = React.useState(false);
+  const [issuedCertId, setIssuedCertId] = React.useState<string | null>(null);
   const [isUpdatingProgress, setIsUpdatingProgress] = React.useState(false);
 
   // 1. Fetch Course Detail for curriculum syllabus
@@ -237,6 +238,9 @@ export default function LessonClassroomPage() {
       await queryClient.invalidateQueries({ queryKey: ["course-detail", slug] });
 
       if (res.certificate_issued) {
+        if (res.certificate_id) {
+          setIssuedCertId(res.certificate_id);
+        }
         setShowCertificateModal(true);
       } else if (nextLesson) {
         router.push(`/courses/${slug}/learn/${nextLesson.id}`);
@@ -973,31 +977,46 @@ export default function LessonClassroomPage() {
           title="Congratulations, Vedic Scholar!"
         >
           <div className="space-y-4 py-3 text-center">
-            <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 ring-8 ring-emerald-500/5">
-              <Award className="size-8" />
+            <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500/20 via-yellow-500/30 to-amber-600/20 text-amber-600 ring-8 ring-amber-500/10 shadow-lg">
+              <Award className="size-10 animate-pulse text-amber-500" />
             </div>
 
-            <h3 className="font-serif text-xl font-bold text-foreground">
-              You Have Mastered the Entire Course!
-            </h3>
+            <div className="space-y-1">
+              <span className="inline-block rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                Astra Gurukul Consecrated Award
+              </span>
+              <h3 className="font-serif text-2xl font-bold text-foreground">
+                You Have Mastered the Entire Course!
+              </h3>
+            </div>
 
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground leading-relaxed max-w-md mx-auto">
               You have completed 100% of the lessons in{" "}
-              <span className="font-semibold text-foreground">{course.title}</span>. Your official
-              degree certificate has been issued.
+              <strong className="text-foreground">{course.title}</strong>. Your official
+              degree certificate has been consecrated and issued with verified cryptographic seal.
             </p>
 
-            <div className="flex justify-center gap-3 pt-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowCertificateModal(false)}
+            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2 justify-center">
+              <span className="text-base">✉️</span>
+              <span>
+                আপনার রেজিস্টার্ড ইমেলে শংসাপত্র ও ভেরিফিকেশন লিঙ্ক পাঠিয়ে দেওয়া হয়েছে।
+              </span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row justify-center gap-2 pt-2">
+              <Link
+                href={`/verify/certificate/${issuedCertId || course.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                Close
-              </Button>
-              <Link href="/account/courses">
-                <Button className="gap-2">
+                <Button className="w-full sm:w-auto gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-md">
                   <Award className="size-4" />
-                  <span>View in My Certificates</span>
+                  <span>View & Print Certificate</span>
+                </Button>
+              </Link>
+              <Link href="/account/courses">
+                <Button variant="outline" className="w-full sm:w-auto gap-2">
+                  <span>My Enrolled Courses</span>
                 </Button>
               </Link>
             </div>

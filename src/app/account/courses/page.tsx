@@ -168,16 +168,19 @@ export default function MyCoursesPage() {
                         <span>{isCompleted ? "Review Masterclass" : "Continue Learning"}</span>
                       </Link>
 
-                      {item.certificate_issued && item.certificate_url && (
-                        <a
-                          href={item.certificate_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-2 text-xs font-semibold text-emerald-600 hover:bg-emerald-500/20"
+                      {isCompleted && (
+                        <Link
+                          href={
+                            item.certificate_url ||
+                            (item.certificate_id
+                              ? `/verify/certificate/${item.certificate_id}`
+                              : `/courses/${item.course_slug || item.course_id}`)
+                          }
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 px-3.5 py-2 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:from-amber-500/20 hover:to-yellow-500/20 shadow-xs transition-all"
                         >
-                          <Award className="size-4" />
-                          <span>Download Certificate</span>
-                        </a>
+                          <Award className="size-4 text-amber-600 dark:text-amber-400" />
+                          <span>View Gurukul Certificate</span>
+                        </Link>
                       )}
                     </div>
                   </div>

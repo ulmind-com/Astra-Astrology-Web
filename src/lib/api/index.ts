@@ -82,6 +82,7 @@ import type {
   CoursePaymentVerifyRequest,
   CourseQuestion,
   CourseQuestionAnswer,
+  CourseCertificate,
 } from "@/types";
 import type {
   CreateMilanRoomInput,
@@ -1198,6 +1199,18 @@ export const courseApi = {
 
   answerQuestion: (questionId: string, content: string) =>
     api.post<CourseQuestionAnswer>(endpoints.courses.answerQuestion(questionId), { content }),
+
+  getCertificate: (courseId: string) =>
+    api.get<CourseCertificate>(endpoints.courses.certificate(courseId)),
+
+  verifyCertificate: (certificateId: string) =>
+    api.get<CourseCertificate>(endpoints.courses.verifyCertificate(certificateId), { auth: false }),
+
+  getCertificateHtmlUrl: (courseId: string) =>
+    `${process.env.NEXT_PUBLIC_API_URL || "https://astra-astrology-backend.onrender.com/api/v1"}${endpoints.courses.certificateHtml(courseId)}`,
+
+  getVerifyCertificateHtmlUrl: (certificateId: string) =>
+    `${process.env.NEXT_PUBLIC_API_URL || "https://astra-astrology-backend.onrender.com/api/v1"}${endpoints.courses.verifyCertificateHtml(certificateId)}`,
 };
 
 

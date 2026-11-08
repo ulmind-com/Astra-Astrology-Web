@@ -75,6 +75,7 @@ export interface CourseEnrollment {
   progress_percent: number;
   completed_lesson_ids: string[];
   certificate_issued: boolean;
+  certificate_id?: string | null;
   certificate_url?: string | null;
 }
 
@@ -141,4 +142,32 @@ export interface CourseQuestion {
   is_pinned: boolean;
   answers: CourseQuestionAnswer[];
   created_at: string;
+}
+
+export interface CourseCertificate {
+  certificate_id: string;
+  is_valid: boolean;
+  student_name: string;
+  student_email?: string | null;
+  course_id: string;
+  course_title: string;
+  course_slug: string;
+  instructor_name: string;
+  instructor_title: string;
+  instructor_avatar?: string | null;
+  issued_at: string;
+  issued_at_formatted: string;
+  total_lessons_completed: number;
+  distinction: string;
+  verification_url: string;
+  certificate_html_url: string;
+  digital_seal: {
+    seal_type?: string;
+    consecrated_by?: string;
+    status?: string;
+    verification_hash?: string;
+    mantra?: string;
+    signature?: string;
+    [key: string]: any;
+  };
 }

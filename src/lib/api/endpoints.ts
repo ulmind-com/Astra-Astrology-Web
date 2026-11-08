@@ -234,6 +234,10 @@ export const endpoints = {
     questions: (courseId: string, lessonId: string) => `/courses/${courseId}/lessons/${lessonId}/questions`,
     upvoteQuestion: (questionId: string) => `/courses/questions/${questionId}/upvote`,
     answerQuestion: (questionId: string) => `/courses/questions/${questionId}/answers`,
+    certificate: (courseId: string) => `/courses/${courseId}/certificate`,
+    verifyCertificate: (certificateId: string) => `/courses/certificate/verify/${certificateId}`,
+    certificateHtml: (courseId: string) => `/courses/${courseId}/certificate/html`,
+    verifyCertificateHtml: (certificateId: string) => `/courses/certificate/verify/${certificateId}/html`,
   },
 } as const;
 
