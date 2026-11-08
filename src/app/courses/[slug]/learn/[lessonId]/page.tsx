@@ -207,7 +207,7 @@ export default function LessonClassroomPage() {
     setExpandedSections((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const handleMarkComplete = async () => {
+  const handleMarkComplete = React.useCallback(async () => {
     if (!course || isUpdatingProgress) return;
     try {
       setIsUpdatingProgress(true);
@@ -215,6 +215,22 @@ export default function LessonClassroomPage() {
         watched_seconds: 3600,
         total_seconds: 3600,
         mark_completed: true,
+      });
+
+      // Optimistically update React Query cache so progress bar & lesson checkmarks jump immediately
+      queryClient.setQueryData(["course-detail", slug], (old: any) => {
+        if (!old) return old;
+        const newSections = old.sections?.map((sec: any) => ({
+          ...sec,
+          lessons: sec.lessons?.map((les: any) =>
+            les.id === lessonId ? { ...les, is_completed: true } : les
+          ),
+        }));
+        return {
+          ...old,
+          user_progress_percent: res.progress_percent ?? old.user_progress_percent,
+          sections: newSections,
+        };
       });
 
       toast.success("Lesson completed!");
@@ -230,7 +246,25 @@ export default function LessonClassroomPage() {
     } finally {
       setIsUpdatingProgress(false);
     }
-  };
+  }, [course, isUpdatingProgress, lessonId, nextLesson, queryClient, router, slug]);
+
+  // Listen for Bunny Stream player 'ended' events to automatically mark lesson complete
+  React.useEffect(() => {
+    const handleBunnyMessage = (event: MessageEvent) => {
+      try {
+        const data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+        if (data?.event === "ended" || data?.type === "ended" || data?.name === "ended") {
+          if (currentLesson && !currentLesson.is_completed) {
+            handleMarkComplete();
+          }
+        }
+      } catch {
+        // Ignore non-JSON postMessages
+      }
+    };
+    window.addEventListener("message", handleBunnyMessage);
+    return () => window.removeEventListener("message", handleBunnyMessage);
+  }, [currentLesson, handleMarkComplete]);
 
   if (isCourseLoading) {
     return (
@@ -257,7 +291,16 @@ export default function LessonClassroomPage() {
     );
   }
 
-  const overallProgress = Math.round(course.user_progress_percent);
+  const totalLessonsCount = flattenedLessons.length;
+  const completedLessonsCount = flattenedLessons.filter((l) => l.is_completed).length;
+  const computedProgressPercent =
+    totalLessonsCount > 0
+      ? Math.round((completedLessonsCount / totalLessonsCount) * 100)
+      : 0;
+  const overallProgress = Math.min(
+    100,
+    Math.max(Math.round(course.user_progress_percent || 0), computedProgressPercent)
+  );
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">

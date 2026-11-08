@@ -1148,9 +1148,7 @@ export const courseApi = {
     }),
 
   getCourseDetail: (slug: string) =>
-    api.get<CourseDetail>(endpoints.courses.detail(slug), {
-      auth: false,
-    }),
+    api.get<CourseDetail>(endpoints.courses.detail(slug)),
 
   getMyEnrolledCourses: () =>
     api.get<CourseEnrollment[]>(endpoints.courses.myEnrolled),
@@ -1184,7 +1182,6 @@ export const courseApi = {
   ) =>
     api.get<CourseQuestion[]>(endpoints.courses.questions(courseId, lessonId), {
       query: params,
-      auth: false,
     }),
 
   askQuestion: (
