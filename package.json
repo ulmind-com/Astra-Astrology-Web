@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:mobile": "node scripts/dev-mobile.mjs",
+    "qr": "node scripts/dev-mobile.mjs --qr-only",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -43,6 +45,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
+    "qrcode-terminal": "^0.12.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

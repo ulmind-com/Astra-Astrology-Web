@@ -87,6 +87,17 @@ const DEFAULT_SLIDES: HeroSlide[] = [
   },
 ];
 
+// Portrait hero art for mobile (couple/scene at the bottom, cream space up top
+// for the overlaid headline). Keyed by slide id; falls back to the landscape art.
+const MOBILE_HERO_IMAGES: Record<string, string> = {
+  "slide-1": "/images/hero/mobile/hero-couple-exploring.png",
+  "slide-2": "/images/hero/mobile/hero-parchment-kundli.png",
+  "slide-3": "/images/hero/mobile/hero-indian-wedding.png",
+  "slide-4": "/images/hero/mobile/hero-mint-mandala.png",
+  "slide-5": "/images/hero/mobile/hero-mystical-tarot.png",
+  "slide-6": "/images/hero/mobile/hero-golden-compass.png",
+};
+
 const QUICK_ACTIONS = [
   {
     key: "talk",
@@ -299,23 +310,39 @@ export function HeroAstroyogi() {
             {slides.map((slide, idx) => (
               <div
                 key={slide.id}
-                className="relative w-full shrink-0 min-h-[350px] sm:min-h-[380px] lg:h-[400px] overflow-hidden"
+                className="relative w-full shrink-0 aspect-[941/1672] sm:aspect-auto sm:min-h-[380px] lg:h-[400px] overflow-hidden"
               >
                 {/* 1. Full-Bleed 100% Brightness Background Image */}
                 <div className="absolute inset-0 w-full h-full pointer-events-none">
+                  {/* Mobile: portrait card art (scene bottom, cream top for text). */}
+                  <Image
+                    src={MOBILE_HERO_IMAGES[slide.id ?? ""] ?? slide.image_url}
+                    alt={slide.title}
+                    fill
+                    priority={idx === 0}
+                    className="object-cover object-top sm:hidden"
+                    sizes="100vw"
+                    quality={85}
+                  />
+                  {/* Desktop: landscape banner. */}
                   <Image
                     src={slide.image_url}
                     alt={slide.title}
                     fill
                     priority={idx === 0}
-                    className="object-cover object-right sm:object-center"
+                    className="hidden object-cover object-center sm:block"
                     sizes="(max-width: 1360px) 100vw, 1360px"
                     quality={90}
                   />
                 </div>
 
+                {/* Desktop legibility scrim: cream wash on the left behind the text,
+                    fading to transparent so the banner stays visible on the right.
+                    Mobile skips it — the portrait art already has a cream top. */}
+                <div className="pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-[#fffdf5] via-[#fffdf5]/70 to-transparent sm:block" />
+
                 {/* 2. Overlaid Interactive Content Layer */}
-                <div className="relative z-10 flex flex-col justify-between h-full p-6 sm:p-10 lg:pl-12 lg:pr-8 min-h-[350px] sm:min-h-[380px] lg:h-[400px]">
+                <div className="relative z-10 flex flex-col justify-start sm:justify-between h-full p-5 sm:p-10 lg:pl-12 lg:pr-8 sm:min-h-[380px] lg:h-[400px]">
                   {/* Top Bar inside Card: Pill Badge + Slide Counter */}
                   <div className="flex items-center justify-between gap-4">
                     <div className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 shadow-xs bg-white/90 border border-[#eadf9a] text-[#1a1208] backdrop-blur-xs">
@@ -344,7 +371,7 @@ export function HeroAstroyogi() {
                   </div>
 
                   {/* Middle: Headline, Subtitle, Description & Action Button */}
-                  <div className="my-auto py-2 sm:py-4 max-w-xl lg:max-w-2xl">
+                  <div className="mt-2 sm:my-auto py-1 sm:py-4 max-w-xl lg:max-w-2xl">
                     <Link href={slide.cta_link} className="block group/link">
                       <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-[42px] font-black tracking-tight leading-[1.12] text-[#1a1208]">
                         {slide.title}
@@ -377,7 +404,7 @@ export function HeroAstroyogi() {
                   </div>
 
                   {/* Bottom Bar: Slide Indicators */}
-                  <div className="flex items-center justify-between pt-1">
+                  <div className="mt-auto flex items-center justify-between pt-1">
                     <div className="flex items-center gap-2">
                       {slides.map((_, dotIdx) => (
                         <button

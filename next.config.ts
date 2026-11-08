@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   experimental: {
     agentUpgrade: "security",
   },
+  // Allow the dev server to be opened from a phone on the LAN (QR workflow).
+  allowedDevOrigins: ["192.168.31.41"],
   // Hide the Next.js dev indicator (bottom-left "N" overlay).
   devIndicators: false,
   // `cacheComponents` (on by default in the scaffold) refuses to prerender any
