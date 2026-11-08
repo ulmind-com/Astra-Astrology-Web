@@ -1801,7 +1801,24 @@ export interface AnnualHoroscopeResponse {
   digital_seal: DigitalSealInfo;
   coins_spent: number;
   wallet_balance?: number | null;
+  store_recommendations?: StoreRemedyRecommendation[];
 }
+
+export interface StoreRemedyRecommendation {
+  id: string;
+  title: string;
+  category: string;
+  ruling_planet: string;
+  planet_symbol: string;
+  sacred_reason: string;
+  mrp: number;
+  sale_price: number;
+  discount_percent: number;
+  badge: string;
+  image: string;
+  store_url: string;
+}
+
 
 
 

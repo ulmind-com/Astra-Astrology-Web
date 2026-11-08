@@ -214,5 +214,14 @@ export const endpoints = {
     contact: "/support/contact",
     mine: "/support/mine",
   },
+  shop: {
+    categories: "/shop/categories",
+    products: "/shop/products",
+    product: (idOrSlug: string) => `/shop/products/${idOrSlug}`,
+    banners: "/shop/banners",
+    recommendations: "/shop/recommendations",
+    reserveStock: "/shop/reserve-stock",
+    releaseStock: "/shop/release-stock",
+  },
 } as const;
 

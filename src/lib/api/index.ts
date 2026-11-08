@@ -1022,4 +1022,109 @@ export const passkeyApi = {
     api.post<AuthResult>(endpoints.passkeys.loginVerify, body, { auth: false }),
 };
 
+// ------------------------------------------------------------ Astra AstroStore Public API
+export interface ShopProductCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  icon_url?: string | null;
+  banner_url?: string | null;
+  category_type: string;
+  product_count: number;
+}
+
+export interface ShopProduct {
+  id: string;
+  title: string;
+  slug: string;
+  sku: string;
+  short_description: string;
+  detailed_description: string;
+  category_id: string;
+  category_slug: string;
+  category_type: string;
+  ruling_planet?: string | null;
+  deity?: string | null;
+  benefits: string[];
+  life_pillars: string[];
+  mrp: number;
+  sale_price: number;
+  discount_percent: number;
+  stock_quantity: number;
+  in_stock: boolean;
+  featured_image: string;
+  images: string[];
+  is_active: boolean;
+  is_featured: boolean;
+  is_energized: boolean;
+  average_rating: number;
+  review_count: number;
+}
+
+export interface ShopProductListResponse {
+  items: ShopProduct[];
+  total: number;
+  page: number;
+  limit: number;
+  has_more: boolean;
+}
+
+export interface StockReservationResponse {
+  success: boolean;
+  reserved: boolean;
+  product_id: string;
+  quantity: number;
+  message: string;
+}
+
+export const shopApi = {
+  getCategories: () =>
+    api.get<ShopProductCategory[]>(endpoints.shop.categories, { auth: false }),
+
+  getProducts: (params?: {
+    search?: string;
+    category_id?: string;
+    ruling_planet?: string;
+    in_stock_only?: boolean;
+    is_featured?: boolean;
+    page?: number;
+    limit?: number;
+    sort_by?: string;
+  }) =>
+    api.get<ShopProductListResponse>(endpoints.shop.products, {
+      query: params,
+      auth: false,
+    }),
+
+  getProductDetail: (idOrSlug: string) =>
+    api.get<ShopProduct>(endpoints.shop.product(idOrSlug), { auth: false }),
+
+  getRecommendations: (params?: {
+    planet?: string;
+    dosha?: string;
+    rashi?: string;
+    life_pillar?: string;
+    lang?: string;
+    limit?: number;
+  }) =>
+    api.get<any[]>(endpoints.shop.recommendations, {
+      query: params,
+      auth: false,
+    }),
+
+  reserveStock: (productId: string, quantity = 1) =>
+    api.post<StockReservationResponse>(endpoints.shop.reserveStock, {
+      product_id: productId,
+      quantity,
+    }),
+
+  releaseStock: (productId: string, quantity = 1) =>
+    api.post<StockReservationResponse>(endpoints.shop.releaseStock, {
+      product_id: productId,
+      quantity,
+    }),
+};
+
+
 

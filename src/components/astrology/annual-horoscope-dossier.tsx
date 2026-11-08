@@ -940,6 +940,38 @@ export function AnnualHoroscopeDossierModal({
                     </ul>
                   </div>
                 )}
+
+                {/* Direct Consecrated Store Remedy Link */}
+                {(rem as any).store_remedy_query && (
+                  <div className="pt-2 border-t border-amber-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <span className="text-[11px] text-amber-900 font-medium flex items-center gap-1.5">
+                      <Sparkles className="size-3 text-amber-600 shrink-0" />
+                      <span>
+                        {(rem as any).store_remedy_query.sacred_intent ||
+                          (lang === "bn"
+                            ? "শাস্ত্রমত প্রাণ-প্রতিষ্ঠিত প্রতিকার ও পবিত্র রত্ন"
+                            : lang === "hi"
+                            ? "शास्त्रसम्मत प्राण-प्रतिष्ठित उपाय व रत्न"
+                            : "Consecrated Vedic Remedy")}
+                      </span>
+                    </span>
+                    <a
+                      href={(rem as any).store_remedy_query.explore_url || "/shop"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-lg bg-gradient-to-r from-amber-600 to-amber-500 text-white text-[10px] font-bold hover:from-amber-700 hover:to-amber-600 transition-all shadow-2xs shrink-0 cursor-pointer"
+                    >
+                      <span>
+                        {lang === "bn"
+                          ? "আসল প্রতিকার দেখুন"
+                          : lang === "hi"
+                          ? "सिद्ध उपाय देखें"
+                          : "Explore Remedy"}
+                      </span>
+                      <ChevronRight className="size-3" />
+                    </a>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -997,6 +1029,97 @@ export function AnnualHoroscopeDossierModal({
             ))}
           </div>
         </div>
+
+        {/* Dynamic Astrological Upsell: Consecrated AstroStore Remedy Showcase */}
+        {report.store_recommendations && report.store_recommendations.length > 0 && (
+          <div className="mt-8 space-y-4 page-avoid">
+            <div className="border-b-2 border-amber-500/60 pb-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h2 className="font-cinzel text-lg sm:text-xl font-bold text-amber-950 flex items-center gap-2">
+                  <Sparkles className="size-5 text-amber-700 animate-pulse" />
+                  <span>
+                    {lang === "bn"
+                      ? "শাস্ত্রীয় প্রাণ-প্রতিষ্ঠিত মহাপ্রতিকার ও পবিত্র রত্ন সংহিতা"
+                      : lang === "hi"
+                      ? "प्रामाणिक प्राण-प्रतिष्ठित महा-उपाय एवं रत्न संग्रह"
+                      : "Authentic Consecrated Vedic AstroStore Remedies"}
+                  </span>
+                </h2>
+                <p className="text-xs text-amber-800/80">
+                  {lang === "bn"
+                    ? "আপনার বর্ষফল ও অশুভ গোচর নিবারণে বিশেষভাবে নির্ধারিত ল্যাব সার্টিফাইড ও গঙ্গাজল-মন্ত্রপূত সামগ্রী।"
+                    : lang === "hi"
+                    ? "आपकी कुंडली व ग्रह पीड़ा शांति हेतु विशेष रूप से अभिमंत्रित प्रामाणिक सामग्री।"
+                    : "Strictly energized and consecrated to neutralize the planetary challenges diagnosed in this report."}
+                </p>
+              </div>
+              <a
+                href="/shop"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-900 bg-amber-200/80 hover:bg-amber-300 px-3 py-1.5 rounded-xl border border-amber-400 transition-colors shrink-0"
+              >
+                <span>{lang === "bn" ? "সম্পূর্ণ শপ ভিজিট করুন" : lang === "hi" ? "पूरा स्टोर देखें" : "Explore AstroStore"}</span>
+                <ExternalLink className="size-3.5" />
+              </a>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {report.store_recommendations.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-2xl border-2 border-amber-300/90 bg-white/95 p-4 shadow-xs hover:border-amber-500 hover:shadow-md transition-all flex flex-col justify-between space-y-3 page-avoid"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-900 bg-amber-100/90 px-2 py-0.5 rounded-md border border-amber-300">
+                        <span>{item.planet_symbol}</span>
+                        <span>{item.ruling_planet}</span>
+                      </div>
+                      <span className="text-[9px] font-black uppercase text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300">
+                        {item.badge}
+                      </span>
+                    </div>
+
+                    <h4 className="font-bold text-sm text-stone-900 leading-snug">
+                      {item.title}
+                    </h4>
+
+                    <p className="text-xs text-stone-600 leading-relaxed font-medium">
+                      {item.sacred_reason}
+                    </p>
+                  </div>
+
+                  <div className="pt-2 border-t border-amber-100 flex items-center justify-between">
+                    <div>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="font-extrabold text-stone-900 text-base">
+                          ₹{item.sale_price.toLocaleString("en-IN")}
+                        </span>
+                        <span className="text-xs text-stone-400 line-through">
+                          ₹{item.mrp.toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-bold text-emerald-700">
+                        {item.discount_percent}% {lang === "bn" ? "ছাড়" : lang === "hi" ? "छूट" : "OFF"}
+                      </span>
+                    </div>
+
+                    <a
+                      href={item.store_url || "/shop"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-white font-bold text-xs hover:from-amber-700 hover:to-amber-600 transition-all shadow-xs cursor-pointer"
+                    >
+                      <span>{lang === "bn" ? "সংগ্রহ করুন" : lang === "hi" ? "ऑर्डर करें" : "Order Consecrated"}</span>
+                      <ChevronRight className="size-3.5" />
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Universal Lal Kitab Moral Ethics */}
         <div className="mt-8 rounded-2xl border border-stone-300 bg-stone-50/70 p-4 space-y-2 page-avoid">
