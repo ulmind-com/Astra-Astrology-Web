@@ -3,6 +3,7 @@
 import {
   CalendarDays,
   CalendarHeart,
+  GraduationCap,
   Heart,
   MapPin,
   ShieldCheck,
@@ -20,6 +21,7 @@ import { useRequireAuth } from "@/providers/auth-provider";
 
 const NAV = [
   { href: "/account", label: "Profile", icon: UserRound },
+  { href: "/account/courses", label: "My Courses", icon: GraduationCap },
   { href: "/account/favorites", label: "Favorite Astrologers", icon: Heart },
   { href: "/account/birth-details", label: "Birth details", icon: CalendarHeart },
   { href: "/account/wallet", label: "Wallet", icon: Wallet },

@@ -74,6 +74,12 @@ import type {
   VerifyPaymentResponse,
   WalletSummary,
   WalletTransaction,
+  CourseListItem,
+  CourseDetail,
+  CourseEnrollment,
+  LessonStreamData,
+  CourseOrderCreateResponse,
+  CoursePaymentVerifyRequest,
 } from "@/types";
 import type {
   CreateMilanRoomInput,
@@ -1124,6 +1130,50 @@ export const shopApi = {
       product_id: productId,
       quantity,
     }),
+};
+
+export const courseApi = {
+  getCourses: (params?: {
+    category?: string;
+    level?: string;
+    search?: string;
+    limit?: number;
+    skip?: number;
+  }) =>
+    api.get<CourseListItem[]>(endpoints.courses.list, {
+      query: params,
+      auth: false,
+    }),
+
+  getCourseDetail: (slug: string) =>
+    api.get<CourseDetail>(endpoints.courses.detail(slug), {
+      auth: false,
+    }),
+
+  getMyEnrolledCourses: () =>
+    api.get<CourseEnrollment[]>(endpoints.courses.myEnrolled),
+
+  createOrder: (courseId: string) =>
+    api.post<CourseOrderCreateResponse>(endpoints.courses.createOrder(courseId)),
+
+  verifyPayment: (courseId: string, payload: CoursePaymentVerifyRequest) =>
+    api.post<{ success: boolean; enrollment_id: string; course_id: string; course_slug: string }>(
+      endpoints.courses.verifyPayment(courseId),
+      payload
+    ),
+
+  getLessonStream: (courseId: string, lessonId: string) =>
+    api.get<LessonStreamData>(endpoints.courses.lessonStream(courseId, lessonId)),
+
+  updateProgress: (
+    courseId: string,
+    lessonId: string,
+    payload: { watched_seconds: number; total_seconds: number; mark_completed?: boolean }
+  ) =>
+    api.post<{ progress_percent: number; is_lesson_completed: boolean; certificate_issued: boolean; certificate_id?: string }>(
+      endpoints.courses.lessonProgress(courseId, lessonId),
+      payload
+    ),
 };
 
 

@@ -919,3 +919,4 @@ export type CoupleMatchResult = {
 
 export * from "./astrology";
 export * from "./palm-reading";
+export * from "./course";
