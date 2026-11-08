@@ -296,9 +296,7 @@ export function CosmicWhiteboard({
   useWhiteboardEvents(
     React.useCallback(
       (event) => {
-        if (!isOpen) return;
-
-        if (event.type === "whiteboard_event") {
+        if (event.type === "whiteboard_event" || event.type === "whiteboard_sync") {
           const payload = event.data;
           if (payload.call_id && payload.call_id !== callId) return;
 
@@ -336,6 +334,24 @@ export function CosmicWhiteboard({
           if (payload.active_tab) setActiveTab(payload.active_tab);
           if (payload.chart_style) setChartStyle(payload.chart_style === "south" ? "south" : "north");
           if (payload.drishti !== undefined) setActiveDrishti(payload.drishti);
+        } else if (event.type === "whiteboard_chart_reloaded") {
+          const payload = event.data;
+          if (payload.call_id && payload.call_id !== callId) return;
+          setData((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  client_name: payload.client_name ?? prev.client_name,
+                  asc_sign_num: payload.asc_sign_num ?? prev.asc_sign_num,
+                  planets: payload.planets ?? prev.planets,
+                  transit_planets: payload.transit_planets ?? prev.transit_planets,
+                  version: payload.version ?? prev.version,
+                  strokes: [],
+                  drishti: null,
+                  highlighted_houses: [],
+                }
+              : prev,
+          );
         } else if (event.type === "whiteboard_live") {
           const frame = event.data;
           if (frame.call_id && frame.call_id !== callId) return;
@@ -372,11 +388,25 @@ export function CosmicWhiteboard({
               ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
               ctx.stroke();
               ctx.restore();
+            } else if (ctx && frame.live_stroke.points?.length === 1) {
+              const pt = frame.live_stroke.points[0];
+              ctx.save();
+              ctx.fillStyle = frame.live_stroke.color;
+              ctx.beginPath();
+              ctx.arc(
+                pt.x,
+                pt.y,
+                (frame.live_stroke.tool === "highlighter" ? 14 : frame.live_stroke.width) / 2,
+                0,
+                Math.PI * 2,
+              );
+              ctx.fill();
+              ctx.restore();
             }
           }
         }
       },
-      [isOpen, callId],
+      [callId],
     ),
   );
 
@@ -396,7 +426,7 @@ export function CosmicWhiteboard({
         ctx.font = "28px sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(s.stamp_icon || "🕉️", s.points[0].x, s.points[0].y);
+        ctx.fillText(s.stamp_icon || (s as any).stamp || s.symbol || "🕉️", s.points[0].x, s.points[0].y);
         ctx.restore();
         continue;
       }

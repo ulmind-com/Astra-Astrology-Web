@@ -99,7 +99,7 @@ export function TopAstrologersSection() {
   };
 
   return (
-    <section className="relative bg-transparent pt-14 sm:pt-20 pb-12 sm:pb-16 border-b border-[#f2e9b0]/60">
+    <section className="relative bg-transparent pt-14 sm:pt-20 pb-12 sm:pb-16 border-b border-stone-200/80">
       <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -149,7 +149,7 @@ export function TopAstrologersSection() {
 
           <Link
             href="/astrologers"
-            className="inline-flex shrink-0 items-center gap-2 self-start rounded-full border border-[#eadf9a] bg-white px-5 py-2.5 text-sm font-bold text-[#8b5e0a] shadow-2xs transition-colors hover:bg-[#fff7d1] hover:border-brand-400 lg:self-end"
+            className="inline-flex shrink-0 items-center gap-2 self-start rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm font-bold text-[#8b5e0a] shadow-2xs transition-colors hover:bg-stone-50 hover:border-brand-400 lg:self-end"
           >
             {t.viewAll}
             <ArrowRight className="size-4" />
@@ -175,7 +175,7 @@ export function TopAstrologersSection() {
             ))}
           </div>
         ) : cards.length === 0 ? (
-          <div className="mt-8 rounded-2xl border border-dashed border-[#eadf9a] bg-white/60 p-8 text-center">
+          <div className="mt-8 rounded-2xl border border-dashed border-stone-200 bg-white p-8 text-center">
             <p className="text-sm font-semibold text-[#1a1208]">No astrologers available right now.</p>
           </div>
         ) : (
@@ -186,7 +186,7 @@ export function TopAstrologersSection() {
               return (
                 <div
                   key={a.id}
-                  className="flex flex-col justify-between rounded-[18px] sm:rounded-[22px] border border-[#ebd89e] bg-white p-2.5 sm:p-4 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-400 hover:shadow-md"
+                  className="flex flex-col justify-between rounded-[18px] sm:rounded-[22px] border border-stone-200 bg-white p-2.5 sm:p-4 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-400 hover:shadow-md"
                 >
                   <div>
                     {/* Top Row: Avatar with Online Indicator + Badge */}
@@ -232,7 +232,7 @@ export function TopAstrologersSection() {
                       {a.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="rounded-md border border-[#eee1b1] bg-[#fffdf7] px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium text-[#6b5f4d]"
+                          className="rounded-md border border-stone-200 bg-stone-50 px-1.5 py-0.5 text-[9px] sm:text-[10px] font-medium text-[#6b5f4d]"
                         >
                           {tag}
                         </span>

@@ -98,23 +98,24 @@ const APP_SECTION_DATA: Record<AstrologyLanguage, AppSectionTranslation> = {
 
 const REVEAL_MS = 1400;
 
+// Shared premium badge shell: compact, near-black gradient with a soft ring and
+// highlight so the two sit side by side and read as "pro".
+const badgeClass =
+  "group inline-flex items-center gap-2 rounded-[13px] bg-gradient-to-b from-zinc-800 to-black px-3 py-1.5 text-white shadow-[0_6px_18px_-8px_rgba(0,0,0,0.6)] ring-1 ring-white/10 transition-all duration-200 hover:from-zinc-700 hover:scale-[1.03] hover:ring-white/20";
+
 function AppStoreBadge() {
   return (
-    <a
-      href="#"
-      aria-label="Download on the App Store"
-      className="inline-flex items-center gap-3 rounded-xl bg-black px-4.5 py-2 text-white shadow-md hover:bg-zinc-900 transition-all duration-200 hover:scale-[1.02] border border-white/15"
-    >
+    <a href="#" aria-label="Download on the App Store" className={badgeClass}>
       <Image
         src="/images/badges/apple-store-icon-white.png"
         alt="Apple App Store"
-        width={28}
-        height={28}
-        className="size-7 shrink-0 object-contain"
+        width={22}
+        height={22}
+        className="size-[22px] shrink-0 object-contain"
       />
       <span className="flex flex-col text-left">
-        <span className="text-[10px] font-medium tracking-tight text-zinc-300 leading-tight">Download on the</span>
-        <span className="text-[16px] font-bold tracking-tight text-white leading-snug">App Store</span>
+        <span className="text-[8px] font-medium uppercase tracking-wide text-zinc-400 leading-tight">Download on the</span>
+        <span className="text-[13px] font-bold tracking-tight text-white leading-snug">App Store</span>
       </span>
     </a>
   );
@@ -122,21 +123,17 @@ function AppStoreBadge() {
 
 function GooglePlayBadge() {
   return (
-    <a
-      href="#"
-      aria-label="Get it on Google Play"
-      className="inline-flex items-center gap-3 rounded-xl bg-black px-4.5 py-2 text-white shadow-md hover:bg-zinc-900 transition-all duration-200 hover:scale-[1.02] border border-white/15"
-    >
+    <a href="#" aria-label="Get it on Google Play" className={badgeClass}>
       <Image
         src="/images/badges/google-play-icon.png"
         alt="Google Play"
-        width={26}
-        height={26}
-        className="size-[26px] shrink-0 object-contain"
+        width={20}
+        height={20}
+        className="size-5 shrink-0 object-contain"
       />
       <span className="flex flex-col text-left">
-        <span className="text-[10px] font-medium tracking-tight text-zinc-300 leading-tight">GET IT ON</span>
-        <span className="text-[16px] font-bold tracking-tight text-white leading-snug">Google Play</span>
+        <span className="text-[8px] font-medium uppercase tracking-wide text-zinc-400 leading-tight">Get it on</span>
+        <span className="text-[13px] font-bold tracking-tight text-white leading-snug">Google Play</span>
       </span>
     </a>
   );
@@ -198,7 +195,7 @@ export function AppDownloadSection() {
   }, [chat]);
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-[#fdf4b8] to-[#fbeea0] py-14 sm:py-20 border-b border-[#f2e9b0]/60">
+    <section className="relative overflow-hidden bg-white py-14 sm:py-20 border-b border-stone-200/80">
       <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
           {/* LEFT: copy + features + store badges */}
@@ -219,7 +216,7 @@ export function AppDownloadSection() {
 
             <ul className="mt-7 space-y-4">
               <li className="flex items-center gap-3">
-                <span className="flex size-9 items-center justify-center rounded-xl bg-white text-[#c2410c] shadow-xs">
+                <span className="flex size-9 items-center justify-center rounded-xl bg-stone-50 border border-stone-200 text-[#c2410c] shadow-xs">
                   <MessageCircle className="size-[18px]" />
                 </span>
                 <span className="text-sm font-medium text-[#3b3425] sm:text-base">
@@ -227,7 +224,7 @@ export function AppDownloadSection() {
                 </span>
               </li>
               <li className="flex items-center gap-3">
-                <span className="flex size-9 items-center justify-center rounded-xl bg-white text-[#15803d] shadow-xs">
+                <span className="flex size-9 items-center justify-center rounded-xl bg-stone-50 border border-stone-200 text-[#15803d] shadow-xs">
                   <ShieldCheck className="size-[18px]" />
                 </span>
                 <span className="text-sm font-medium text-[#3b3425] sm:text-base">
@@ -236,7 +233,7 @@ export function AppDownloadSection() {
               </li>
             </ul>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3.5">
+            <div className="mt-8 flex flex-nowrap items-center gap-2.5">
               <AppStoreBadge />
               <GooglePlayBadge />
             </div>

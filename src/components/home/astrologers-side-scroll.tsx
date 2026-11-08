@@ -88,7 +88,7 @@ const STATUS_RANK: Record<Status, number> = { online: 0, busy: 1, offline: 2 };
 
 function AstrologerCardSkeleton() {
   return (
-    <div className="shrink-0 w-[290px] sm:w-[320px] rounded-2xl border border-[#f2e9b0] bg-[#fffdf5] p-5">
+    <div className="shrink-0 w-[290px] sm:w-[320px] rounded-2xl border border-stone-200 bg-white p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="size-14 sm:size-16 rounded-2xl bg-[#faf3c4] animate-pulse" />
         <div className="h-6 w-16 rounded-full bg-[#faf3c4] animate-pulse" />
@@ -162,7 +162,7 @@ export function AstrologersSideScroll() {
   }
 
   return (
-    <section className="relative overflow-hidden py-14 sm:py-20 bg-[#fffdf5]">
+    <section className="relative overflow-hidden py-14 sm:py-20 bg-white">
       <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
 
         {/* Section Header */}
@@ -209,7 +209,7 @@ export function AstrologersSideScroll() {
               onClick={() => scroll("left")}
               disabled={!canScrollLeft}
               aria-label="Previous Astrologer"
-              className={`flex size-10 items-center justify-center rounded-full border border-[#e3d58f] bg-[#fffbe8] text-[#1a1208] transition-all duration-200 hover:bg-[#fef7cf] hover:scale-105 active:scale-95 ${
+              className={`flex size-10 items-center justify-center rounded-full border border-stone-200 bg-white text-[#1a1208] transition-all duration-200 hover:bg-stone-50 hover:scale-105 active:scale-95 ${
                 !canScrollLeft ? "opacity-40 cursor-not-allowed" : "shadow-sm"
               }`}
             >
@@ -220,7 +220,7 @@ export function AstrologersSideScroll() {
               onClick={() => scroll("right")}
               disabled={!canScrollRight}
               aria-label="Next Astrologer"
-              className={`flex size-10 items-center justify-center rounded-full border border-[#e3d58f] bg-[#fffbe8] text-[#1a1208] transition-all duration-200 hover:bg-[#fef7cf] hover:scale-105 active:scale-95 ${
+              className={`flex size-10 items-center justify-center rounded-full border border-stone-200 bg-white text-[#1a1208] transition-all duration-200 hover:bg-stone-50 hover:scale-105 active:scale-95 ${
                 !canScrollRight ? "opacity-40 cursor-not-allowed" : "shadow-sm"
               }`}
             >
@@ -253,7 +253,7 @@ export function AstrologersSideScroll() {
                 return (
                   <div
                     key={astro.id}
-                    className="group shrink-0 snap-start w-[290px] sm:w-[320px] rounded-2xl border border-[#f2e9b0] bg-[#fffdf5] p-5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_12px_28px_-6px_rgba(176,109,78,0.2)] flex flex-col justify-between"
+                    className="group shrink-0 snap-start w-[290px] sm:w-[320px] rounded-2xl border border-stone-200 bg-white p-5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg flex flex-col justify-between"
                   >
                     <div>
                       {/* Top Row: Avatar & Status */}
@@ -345,7 +345,7 @@ export function AstrologersSideScroll() {
                           </span>
                         ))}
                         {astro.experience_years > 0 && (
-                          <span className="rounded-md bg-[#fff8d9] border border-[#f2e9b0] px-2 py-0.5 text-[10px] font-medium text-[#6b5f4d]">
+                          <span className="rounded-md bg-stone-100 border border-stone-200 px-2 py-0.5 text-[10px] font-medium text-[#6b5f4d]">
                             {astro.experience_years} yrs exp
                           </span>
                         )}

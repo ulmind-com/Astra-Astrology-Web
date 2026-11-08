@@ -98,7 +98,7 @@ export default function HomePage() {
       {/* Main Astroyogi Top Header & Category Navigation */}
       <AstroyogiHeader />
 
-      <main className="min-h-screen bg-[linear-gradient(160deg,#fffdf8_0%,#fffae6_45%,#fdf3c4_100%)]">
+      <main className="min-h-screen bg-white">
         {/* 1. HERO BANNER & QUICK ACTION TILES */}
         <HeroAstroyogi />
 
@@ -118,7 +118,7 @@ export default function HomePage() {
         <CelebrityVideosSection />
 
         {/* 8. HOW IT WORKS: 3 STEPS TO CLARITY */}
-        <section className="relative overflow-hidden bg-transparent py-12 sm:py-16 border-b border-[#f2e9b0]/60">
+        <section className="relative overflow-hidden bg-transparent py-12 sm:py-16 border-b border-stone-200/80">
           {/* Slowly rotating yellow celestial ring above the section */}
           <div className="pointer-events-none absolute left-1/2 -top-20 sm:-top-24 -translate-x-1/2 z-0">
             <div className="animate-celestial-spin size-48 sm:size-64 rounded-full border-2 border-dashed border-[#facc15]/35">
@@ -152,27 +152,27 @@ export default function HomePage() {
             <div className="flex flex-col md:flex-row md:items-stretch gap-3 md:gap-0">
               {steps.map((step, idx) => (
                 <React.Fragment key={step.num}>
-                  <div className="group relative flex flex-1 flex-col overflow-hidden rounded-[26px] border border-[#ece0ac] bg-gradient-to-b from-white to-[#fffdf2] p-6 sm:p-7 shadow-[0_8px_26px_-14px_rgba(26,18,8,0.2)] transition-all duration-300 hover:-translate-y-2 hover:border-[#f2cf5e] hover:shadow-[0_22px_44px_-18px_rgba(250,204,21,0.55)]">
+                  <div className="group relative flex flex-1 flex-col overflow-hidden rounded-[18px] sm:rounded-[26px] border border-stone-200 bg-white p-4 sm:p-7 shadow-[0_8px_26px_-14px_rgba(26,18,8,0.1)] transition-all duration-300 hover:-translate-y-2 hover:border-brand-400 hover:shadow-lg">
                     {/* Giant watermark number */}
-                    <span className="pointer-events-none absolute -right-2 -top-4 font-cinzel text-[96px] font-black leading-none text-[#fcef9a]/40 select-none">
+                    <span className="pointer-events-none absolute -right-1 -top-3 sm:-right-2 sm:-top-4 font-cinzel text-[64px] sm:text-[96px] font-black leading-none text-[#fcef9a]/40 select-none">
                       {step.num}
                     </span>
 
                     <div className="relative">
-                      <div className="flex items-center justify-between mb-5">
+                      <div className="flex items-center justify-between mb-3 sm:mb-5">
                         {/* Dark number badge with neon ring */}
-                        <span className="relative flex size-12 items-center justify-center rounded-2xl bg-[#1a1412] font-cinzel text-lg font-black text-[#fde047] ring-1 ring-[#facc15]/60 shadow-[0_0_18px_-2px_rgba(250,204,21,0.7)]">
+                        <span className="relative flex size-10 sm:size-12 items-center justify-center rounded-xl sm:rounded-2xl bg-[#1a1412] font-cinzel text-base sm:text-lg font-black text-[#fde047] ring-1 ring-[#facc15]/60 shadow-[0_0_18px_-2px_rgba(250,204,21,0.7)]">
                           {step.num}
                         </span>
-                        <span className="text-[11px] font-bold text-[#a07a16] uppercase tracking-[0.15em]">
+                        <span className="text-[10px] sm:text-[11px] font-bold text-[#a07a16] uppercase tracking-[0.15em]">
                           {language === "bn" ? `ধাপ ${idx + 1}` : language === "hi" ? `चरण ${idx + 1}` : `Step ${idx + 1}`}
                         </span>
                       </div>
 
-                      <h3 className="text-base sm:text-lg font-extrabold tracking-tight text-[#1a1208]">
+                      <h3 className="text-[15px] sm:text-lg font-extrabold tracking-tight text-[#1a1208]">
                         {step.title}
                       </h3>
-                      <p className="mt-2 text-xs sm:text-sm text-[#6b5f4d] leading-relaxed">
+                      <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-[#6b5f4d] leading-relaxed">
                         {step.body}
                       </p>
                     </div>
@@ -196,7 +196,7 @@ export default function HomePage() {
         </section>
 
         {/* 9. WHY TRUST DIVINLINK */}
-        <section className="bg-transparent py-12 sm:py-16 border-b border-[#f2e9b0]/60">
+        <section className="bg-transparent py-12 sm:py-16 border-b border-stone-200/80">
           <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-10">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1a1208] tracking-tight">
@@ -221,7 +221,7 @@ export default function HomePage() {
                 return (
                   <div
                     key={item.title}
-                    className="rounded-2xl border border-[#eadf9a] bg-[#fffdf5] p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brand-400 hover:shadow-md"
+                    className="rounded-2xl border border-stone-200 bg-white p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brand-400 hover:shadow-md"
                   >
                     <div className="flex size-12 items-center justify-center rounded-2xl bg-brand-300 text-ink-900 shadow-sm mb-4">
                       <Icon className="size-6 text-[#8b5e0a]" />
@@ -245,7 +245,7 @@ export default function HomePage() {
         {/* 10. BOTTOM CALL TO ACTION BANNER */}
         <section className="bg-transparent py-12 sm:py-16">
           <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
-            <div className="relative overflow-hidden rounded-3xl border border-[#ebd881] bg-gradient-to-r from-[#fff9e6] via-[#fff3cc] to-[#ffecaa] p-8 sm:p-12 text-center shadow-[0_16px_40px_-16px_rgba(240,210,80,0.6)]">
+            <div className="relative overflow-hidden rounded-3xl border border-stone-200 bg-gradient-to-br from-stone-50 via-white to-amber-50/40 p-8 sm:p-12 text-center shadow-lg">
               <div className="relative z-10 max-w-2xl mx-auto">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#8b5e0a] shadow-xs mb-4">
                   <Sparkles className="size-3.5" />{" "}

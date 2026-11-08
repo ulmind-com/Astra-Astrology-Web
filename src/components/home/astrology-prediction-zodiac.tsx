@@ -180,11 +180,10 @@ export function AstrologyPredictionZodiac() {
   }, [tab, selectedDate]);
 
   return (
-    <section className="relative overflow-hidden border-b border-[#f2e9b0]/60 bg-gradient-to-br from-white via-[#fffdf3] to-[#fef7cf] py-10 sm:py-14">
+    <section className="relative overflow-hidden border-b border-stone-200/80 bg-white py-10 sm:py-14">
       {/* soft celestial glow */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-24 right-0 size-[520px] rounded-full bg-[#fdeeb0]/40 blur-3xl" />
-        <div className="absolute top-1/2 -left-40 size-[420px] rounded-full bg-[#ffe9d6]/40 blur-3xl" />
+        <div className="absolute top-1/2 -left-40 size-[420px] rounded-full bg-stone-100/60 blur-3xl" />
       </div>
 
       {/* faint rotating zodiac wheel — left side background */}
@@ -193,7 +192,7 @@ export function AstrologyPredictionZodiac() {
         src="/zodiac-wheel-yellow.webp"
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute left-[-90px] top-[90px] z-0 size-[360px] animate-[spin_55s_linear_infinite] select-none opacity-[0.18] lg:size-[460px] [will-change:transform] motion-reduce:animate-none"
+        className="pointer-events-none absolute left-[-90px] top-[90px] z-0 size-[360px] animate-[spin_55s_linear_infinite] select-none opacity-[0.14] lg:size-[460px] [will-change:transform] motion-reduce:animate-none"
         draggable={false}
       />
 
@@ -217,7 +216,7 @@ export function AstrologyPredictionZodiac() {
             </p>
           </div>
 
-          <div className="inline-flex shrink-0 items-center gap-1 self-start rounded-full border border-[#eadf9a] bg-white/80 p-1 shadow-xs backdrop-blur-sm lg:self-end">
+          <div className="inline-flex shrink-0 items-center gap-1 self-start rounded-full border border-stone-200 bg-white p-1 shadow-xs backdrop-blur-sm lg:self-end">
             {RANGE_TABS.map((r) => {
               const active = r.id === tab;
               return (
@@ -278,11 +277,11 @@ export function AstrologyPredictionZodiac() {
         </div>
 
         {/* Selected sign card */}
-        <div className="mt-6 rounded-3xl border border-[#eadf9a] bg-white/90 p-5 shadow-[0_18px_44px_-24px_rgba(201,154,20,0.45)] backdrop-blur-sm sm:p-7">
+        <div className="mt-6 rounded-3xl border border-stone-200 bg-white p-5 shadow-[0_18px_44px_-24px_rgba(0,0,0,0.08)] backdrop-blur-sm sm:p-7">
           {/* top row: identity + date pill */}
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-center gap-3.5">
-              <span className="flex size-14 items-center justify-center overflow-hidden rounded-full ring-1 ring-[#e7dcae] sm:size-16">
+              <span className="flex size-14 items-center justify-center overflow-hidden rounded-full ring-1 ring-stone-200 sm:size-16">
                 <RashiIcon icon={activeMeta.icon} size={54} color="#c99a14" />
               </span>
               <div>
@@ -294,7 +293,7 @@ export function AstrologyPredictionZodiac() {
               </div>
             </div>
 
-            <span className="rounded-full border border-[#eadf9a] bg-[#fffdf5] px-3.5 py-1.5 text-xs font-bold text-[#8b5e0a] shadow-2xs">
+            <span className="rounded-full border border-stone-200 bg-stone-50 px-3.5 py-1.5 text-xs font-bold text-[#8b5e0a] shadow-2xs">
               {datePill}
             </span>
           </div>
@@ -340,7 +339,7 @@ export function AstrologyPredictionZodiac() {
                 </Link>
                 <Link
                   href="/astrologers"
-                  className="rounded-full border border-[#eadf9a] bg-white px-5 py-2.5 text-sm font-bold text-[#1a1208] shadow-2xs transition-colors hover:bg-[#fffdf5]"
+                  className="rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm font-bold text-[#1a1208] shadow-2xs transition-colors hover:bg-stone-50"
                 >
                   Talk to a specialist
                 </Link>
@@ -348,7 +347,7 @@ export function AstrologyPredictionZodiac() {
             </div>
 
             {/* right: meters */}
-            <div className="flex flex-col justify-center gap-4 rounded-2xl bg-[#fffdf5]/60 p-4 sm:p-5">
+            <div className="flex flex-col justify-center gap-4 rounded-2xl bg-stone-50 p-4 sm:p-5">
               {METERS.map((m) => {
                 const score = Math.max(0, Math.min(100, (activeSign?.[m.key] as number) ?? 0));
                 return (

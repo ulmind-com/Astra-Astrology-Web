@@ -144,7 +144,7 @@ export function OurServicesSection() {
   };
 
   return (
-    <section className="bg-transparent py-12 sm:py-16 border-b border-[#f2e9b0]/60">
+    <section className="bg-transparent py-12 sm:py-16 border-b border-stone-200/80">
       <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
         {/* Header row */}
         <div className="flex items-end justify-between gap-4 mb-8">
@@ -167,7 +167,7 @@ export function OurServicesSection() {
               type="button"
               onClick={() => scrollBy(-1)}
               aria-label="Scroll left"
-              className="flex size-10 items-center justify-center rounded-full border border-[#eadf9a] bg-white/80 text-[#8b6a1a] hover:bg-[#fcd404] hover:text-[#1c1304] hover:border-[#d9af00] transition-all cursor-pointer shadow-xs"
+              className="flex size-10 items-center justify-center rounded-full border border-stone-200 bg-white text-[#8b6a1a] hover:bg-[#fcd404] hover:text-[#1c1304] hover:border-[#d9af00] transition-all cursor-pointer shadow-xs"
             >
               <ChevronLeft className="size-5" />
             </button>
@@ -175,7 +175,7 @@ export function OurServicesSection() {
               type="button"
               onClick={() => scrollBy(1)}
               aria-label="Scroll right"
-              className="flex size-10 items-center justify-center rounded-full border border-[#eadf9a] bg-white/80 text-[#8b6a1a] hover:bg-[#fcd404] hover:text-[#1c1304] hover:border-[#d9af00] transition-all cursor-pointer shadow-xs"
+              className="flex size-10 items-center justify-center rounded-full border border-stone-200 bg-white text-[#8b6a1a] hover:bg-[#fcd404] hover:text-[#1c1304] hover:border-[#d9af00] transition-all cursor-pointer shadow-xs"
             >
               <ChevronRight className="size-5" />
             </button>
@@ -193,7 +193,7 @@ export function OurServicesSection() {
               <Link
                 key={svc.title.en}
                 href={svc.href}
-                className="group relative snap-start shrink-0 w-[230px] sm:w-[250px] overflow-hidden rounded-[22px] border border-[#ece0ac] bg-gradient-to-b from-white to-[#fffdf3] p-5 shadow-[0_6px_22px_-12px_rgba(26,18,8,0.18)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#f0cf6a] hover:shadow-[0_18px_38px_-14px_rgba(240,200,50,0.5)]"
+                className="group relative snap-start shrink-0 w-[158px] sm:w-[250px] overflow-hidden rounded-[18px] sm:rounded-[22px] border border-stone-200 bg-white p-3.5 sm:p-5 shadow-[0_6px_22px_-12px_rgba(26,18,8,0.1)] transition-all duration-300 hover:-translate-y-1.5 hover:border-brand-400 hover:shadow-lg"
               >
                 {/* Decorative corner glow */}
                 <div
@@ -203,25 +203,25 @@ export function OurServicesSection() {
 
                 {/* Icon tile */}
                 <div
-                  className={`relative flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br ${svc.tile} text-white shadow-lg transition-transform duration-300 group-hover:scale-105`}
+                  className={`relative flex size-11 sm:size-14 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br ${svc.tile} text-white shadow-lg transition-transform duration-300 group-hover:scale-105`}
                   style={{ boxShadow: `0 8px 18px -6px ${svc.glow}` }}
                 >
-                  <Icon className="size-7 stroke-[2]" />
+                  <Icon className="size-5 sm:size-7 stroke-[2]" />
                 </div>
 
                 {/* Text */}
-                <h3 className="relative mt-5 text-[15px] font-extrabold tracking-tight text-[#1a1208]">
+                <h3 className="relative mt-3 sm:mt-5 text-[13px] sm:text-[15px] font-extrabold tracking-tight text-[#1a1208]">
                   {svc.title[lang]}
                 </h3>
-                <p className="relative mt-1 text-[11.5px] leading-snug text-[#766545] min-h-[32px]">
+                <p className="relative mt-1 text-[10.5px] sm:text-[11.5px] leading-snug text-[#766545] min-h-[28px] sm:min-h-[32px]">
                   {svc.subtitle[lang]}
                 </p>
 
                 {/* Arrow */}
-                <div className="relative mt-4 flex items-center justify-between">
+                <div className="relative mt-2.5 sm:mt-4 flex items-center justify-between">
                   <span className="h-px flex-1 bg-gradient-to-r from-[#efe3b0] to-transparent" />
-                  <span className="ml-3 flex size-8 items-center justify-center rounded-full bg-[#fef6d8] text-[#9a7414] transition-all duration-300 group-hover:bg-[#fcd404] group-hover:text-[#1c1304]">
-                    <ArrowUpRight className="size-4 stroke-[2.4]" />
+                  <span className="ml-3 flex size-7 sm:size-8 items-center justify-center rounded-full bg-[#fef6d8] text-[#9a7414] transition-all duration-300 group-hover:bg-[#fcd404] group-hover:text-[#1c1304]">
+                    <ArrowUpRight className="size-3.5 sm:size-4 stroke-[2.4]" />
                   </span>
                 </div>
               </Link>

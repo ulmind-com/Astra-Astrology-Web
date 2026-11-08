@@ -72,6 +72,39 @@ export function AstroyogiHeader() {
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
 
+  // Hide the header on scroll down, reveal it on scroll up.
+  const [headerHidden, setHeaderHidden] = React.useState(false);
+  React.useEffect(() => {
+    let last = window.scrollY;
+    let ticking = false;
+
+    const update = () => {
+      const y = window.scrollY;
+      const delta = y - last;
+      // Ignore tiny jitters; always show near the very top.
+      if (Math.abs(delta) > 6) {
+        setHeaderHidden(delta > 0 && y > 80);
+        last = y;
+      } else if (y <= 80) {
+        setHeaderHidden(false);
+      }
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        window.requestAnimationFrame(update);
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Keep the header visible whenever a menu is open, so it never hides mid-use.
+  const anyMenuOpen = mobileMenuOpen || langDropdownOpen || Boolean(hoveredCategory);
+
   // Lock the page behind the open drawer, and restore on close.
   React.useEffect(() => {
     if (!mobileMenuOpen) return;
@@ -540,7 +573,13 @@ export function AstroyogiHeader() {
       : "Free Kundli";
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/95 dark:bg-[#140f0c]/95 backdrop-blur-md border-b border-[#f0e8b8]/80 shadow-[0_2px_15px_-4px_rgba(26,18,8,0.06)]">
+    <header
+      className={cn(
+        "sticky top-0 z-40 w-full bg-white/95 dark:bg-[#140f0c]/95 backdrop-blur-md border-b border-stone-200/80 shadow-[0_2px_15px_-4px_rgba(26,18,8,0.06)]",
+        "transition-transform duration-300 ease-out will-change-transform",
+        headerHidden && !anyMenuOpen ? "-translate-y-full" : "translate-y-0",
+      )}
+    >
       {/* Astrotalk-Style Unified Single Row Navigation Bar */}
       <div className="mx-auto max-w-[1440px] px-3 sm:px-6 lg:px-8">
         <div className="flex h-16 sm:h-[68px] items-center justify-between gap-2 xl:gap-4 overflow-visible">
@@ -550,7 +589,7 @@ export function AstroyogiHeader() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen((v) => !v)}
-              className="lg:hidden flex size-9 items-center justify-center rounded-xl border border-[#eadf9a] text-stone-900 hover:bg-[#fffdf2] transition-colors"
+              className="xl:hidden flex size-9 items-center justify-center rounded-xl border border-stone-200 text-stone-900 hover:bg-stone-50 transition-colors"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
@@ -574,7 +613,7 @@ export function AstroyogiHeader() {
           </div>
 
           {/* ================= CENTER: Single-Row Luxury Navigation Links ================= */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-2 whitespace-nowrap shrink-0 overflow-visible">
+          <nav className="hidden xl:flex items-center gap-1 2xl:gap-2 whitespace-nowrap shrink-0 overflow-visible">
             {navCategories.map((cat) => {
               const isActive = cat.href === pathname || (cat.label === "Home" && pathname === "/");
               const hasDropdown = Boolean(cat.dropdown && cat.dropdown.length > 0);
@@ -757,8 +796,8 @@ export function AstroyogiHeader() {
                 className="group relative inline-flex h-9 sm:h-[38px] items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 px-3 sm:px-4 text-stone-950 font-semibold text-xs sm:text-[13px] tracking-tight shadow-[0_4px_14px_-2px_rgba(245,158,11,0.55)] hover:shadow-[0_6px_18px_-2px_rgba(245,158,11,0.75)] transition-all hover:scale-[1.02] active:scale-[0.98] border border-amber-300 whitespace-nowrap cursor-pointer leading-normal"
               >
                 <span className="leading-normal">{ctaPart1}</span>
-                <span className="hidden sm:inline opacity-40 font-light leading-normal">|</span>
-                <span className="hidden sm:inline leading-normal">{ctaPart2}</span>
+                <span className="hidden 2xl:inline opacity-40 font-light leading-normal">|</span>
+                <span className="hidden 2xl:inline leading-normal">{ctaPart2}</span>
                 <ArrowRight className="size-3.5 stroke-[2] text-stone-900 transition-transform duration-200 group-hover:translate-x-0.5 shrink-0" />
               </button>
             </Link>

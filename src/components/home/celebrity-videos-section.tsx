@@ -55,7 +55,7 @@ export function CelebrityVideosSection() {
   const [activeVideo, setActiveVideo] = useState<CelebrityVideo | null>(null);
 
   return (
-    <section className="relative bg-transparent py-8 sm:py-12 border-b border-[#f2e9b0]/60">
+    <section className="relative bg-transparent py-8 sm:py-12 border-b border-stone-200/80">
       <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mb-6 sm:mb-8">
@@ -127,7 +127,7 @@ export function CelebrityVideosSection() {
               </div>
 
               {/* Title & Description under video */}
-              <div className="p-4 bg-white border-t border-[#f2e9b0]/60">
+              <div className="p-4 bg-white border-t border-stone-200/80">
                 <span className="text-[11px] font-bold text-[#8b5e0a] uppercase tracking-wider block">
                   {video.role}
                 </span>

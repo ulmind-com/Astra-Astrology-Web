@@ -57,7 +57,7 @@ export function FreeAstrologyReadings() {
       : t.subtitle;
 
   return (
-    <section id="readings" className="relative bg-transparent py-10 sm:py-14 border-b border-[#f2e9b0]/60">
+    <section id="readings" className="relative bg-transparent py-10 sm:py-14 border-b border-stone-200/80">
       <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
@@ -73,7 +73,7 @@ export function FreeAstrologyReadings() {
 
           <Link
             href="/astrologers"
-            className="inline-flex shrink-0 items-center gap-2 self-start rounded-full border border-[#eadf9a] bg-white px-5 py-2.5 text-sm font-bold text-[#8b5e0a] shadow-2xs transition-colors hover:bg-[#fff7d1] hover:border-brand-400 sm:self-end"
+            className="inline-flex shrink-0 items-center gap-2 self-start rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm font-bold text-[#8b5e0a] shadow-2xs transition-colors hover:bg-stone-50 hover:border-brand-400 sm:self-end"
           >
             {language === "bn" ? "সব দেখুন" : language === "hi" ? "सभी देखें" : "View all tools"}
             <ArrowRight className="size-4" />
@@ -89,10 +89,10 @@ export function FreeAstrologyReadings() {
               <Link
                 key={r.label}
                 href={r.href}
-                className="group flex flex-col rounded-2xl border border-[#eadf9a] bg-white p-2.5 shadow-[0_4px_16px_-6px_rgba(26,18,8,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-brand-400 hover:shadow-[0_16px_32px_-12px_rgba(240,210,80,0.55)]"
+                className="group flex flex-col rounded-2xl border border-stone-200 bg-white p-2.5 shadow-[0_4px_16px_-6px_rgba(26,18,8,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-brand-400 hover:shadow-md"
               >
                 {/* inner tinted panel with decorations + centered icon */}
-                <div className="relative flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-[#fdfaf2] to-[#f7f0e2] py-7">
+                <div className="relative flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-stone-50 to-stone-100/70 py-7">
                   {/* faint celestial decorations */}
                   <Sparkles className="pointer-events-none absolute left-3 top-3 size-4 text-[#cdbb8a] opacity-30" />
                   <Sun className="pointer-events-none absolute left-4 bottom-3 size-5 text-[#cdbb8a] opacity-25" />

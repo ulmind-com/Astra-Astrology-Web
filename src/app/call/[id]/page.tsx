@@ -76,7 +76,7 @@ export default function CallPage() {
   useWhiteboardEvents(
     React.useCallback(
       (event) => {
-        if (event.type === "whiteboard_event") {
+        if (event.type === "whiteboard_event" || event.type === "whiteboard_sync") {
           const payload = event.data;
           if (payload.call_id === id && typeof payload.is_open === "boolean") {
             setWhiteboardOpen(payload.is_open);
