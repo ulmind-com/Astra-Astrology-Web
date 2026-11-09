@@ -98,7 +98,30 @@ export default function LessonClassroomPage() {
     enabled: Boolean(slug),
   });
 
-  // 2. Fetch Lesson Stream with signed token & dynamic watermark
+  // Compute Flattened Lessons for Navigation & Enrollment Gate
+  const flattenedLessons = React.useMemo(() => {
+    if (!course?.sections) return [];
+    const list: (CourseLesson & { sectionTitle: string })[] = [];
+    course.sections.forEach((sec) => {
+      sec.lessons?.forEach((les) => {
+        list.push({ ...les, sectionTitle: sec.title });
+      });
+    });
+    return list;
+  }, [course]);
+
+  const currentIndex = flattenedLessons.findIndex((l) => l.id === lessonId);
+  const currentLesson = flattenedLessons[currentIndex];
+  const prevLesson = currentIndex > 0 ? flattenedLessons[currentIndex - 1] : null;
+  const nextLesson =
+    currentIndex >= 0 && currentIndex < flattenedLessons.length - 1
+      ? flattenedLessons[currentIndex + 1]
+      : null;
+
+  const isFreePreview = Boolean(currentLesson?.is_free_preview);
+  const hasAccess = Boolean(course?.is_enrolled || isFreePreview);
+
+  // 2. Fetch Lesson Stream with signed token & dynamic watermark (only if enrolled or free preview)
   const {
     data: streamData,
     isLoading: isStreamLoading,
@@ -110,7 +133,7 @@ export default function LessonClassroomPage() {
       if (!course) throw new Error("Course not loaded");
       return courseApi.getLessonStream(course.id, lessonId);
     },
-    enabled: Boolean(course?.id && lessonId),
+    enabled: Boolean(course?.id && lessonId && hasAccess),
   });
 
   // Load personal notes for this lesson from localStorage
@@ -211,6 +234,9 @@ export default function LessonClassroomPage() {
   const askQuestionMutation = useMutation({
     mutationFn: async () => {
       if (!course?.id) throw new Error("Course not loaded");
+      if (!course.is_enrolled) {
+        throw new Error("Please enroll in this course to participate in Gurukul Jigyasa Q&A.");
+      }
       if (!qTitle.trim()) throw new Error("Please enter a question title");
       if (!qContent.trim()) throw new Error("Please describe your question");
 
@@ -280,32 +306,12 @@ export default function LessonClassroomPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Compute Flattened Lessons for Prev / Next
-  const flattenedLessons = React.useMemo(() => {
-    if (!course?.sections) return [];
-    const list: (CourseLesson & { sectionTitle: string })[] = [];
-    course.sections.forEach((sec) => {
-      sec.lessons.forEach((les) => {
-        list.push({ ...les, sectionTitle: sec.title });
-      });
-    });
-    return list;
-  }, [course]);
-
-  const currentIndex = flattenedLessons.findIndex((l) => l.id === lessonId);
-  const currentLesson = flattenedLessons[currentIndex];
-  const prevLesson = currentIndex > 0 ? flattenedLessons[currentIndex - 1] : null;
-  const nextLesson =
-    currentIndex >= 0 && currentIndex < flattenedLessons.length - 1
-      ? flattenedLessons[currentIndex + 1]
-      : null;
-
   const toggleSection = (id: string) => {
     setExpandedSections((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const handleMarkComplete = React.useCallback(async () => {
-    if (!course || isUpdatingProgress) return;
+    if (!course || !course.is_enrolled || isUpdatingProgress) return;
     try {
       setIsUpdatingProgress(true);
       const res = await courseApi.updateProgress(course.id, lessonId, {
@@ -381,6 +387,7 @@ export default function LessonClassroomPage() {
     const syncInterval = setInterval(() => {
       if (
         course?.id &&
+        course?.is_enrolled &&
         lessonId &&
         currentPlayheadRef.current > 5 &&
         Math.abs(currentPlayheadRef.current - lastReportedTimeRef.current) >= 15
@@ -388,13 +395,13 @@ export default function LessonClassroomPage() {
         lastReportedTimeRef.current = currentPlayheadRef.current;
         courseApi.updateProgress(course.id, lessonId, {
           watched_seconds: currentPlayheadRef.current,
-          total_seconds: 3600,
+          total_seconds: (currentLesson?.duration_minutes || 0) * 60 || 3600,
           mark_completed: false,
         }).catch(() => {});
       }
     }, 25000);
     return () => clearInterval(syncInterval);
-  }, [course?.id, lessonId]);
+  }, [course?.id, course?.is_enrolled, currentLesson?.duration_minutes, lessonId]);
 
   // User notification when video resumes from prior session
   React.useEffect(() => {
@@ -439,6 +446,56 @@ export default function LessonClassroomPage() {
     );
   }
 
+  // Graceful Enrollment Gate: If student is not enrolled and this is not a free preview, guide them cleanly to enroll
+  if (course && !course.is_enrolled && !isFreePreview) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12 selection:bg-brand-500/20">
+        <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-brand-500/30 bg-surface p-8 text-center shadow-elevation">
+          <div className="pointer-events-none absolute -right-12 -top-12 size-40 rounded-full bg-brand-500/10 blur-2xl" />
+          <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-brand-500/10 text-brand-600 ring-8 ring-brand-500/5">
+            <Lock className="size-8" />
+          </div>
+
+          <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-0.5 text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+            <span>Enrolled Students Only</span>
+          </div>
+
+          <h2 className="mt-3 font-serif text-2xl font-bold tracking-tight text-foreground">
+            Enrollment Required
+          </h2>
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+            This masterclass session in <strong className="text-foreground">{course.title}</strong> is exclusive to enrolled scholars. Enroll now to unlock all video lessons, sacred notes, Q&amp;A mentorship, and your official certification.
+          </p>
+
+          <div className="mt-6 rounded-xl border border-border/80 bg-surface-muted/50 p-4">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">Masterclass Investment</span>
+              <span className="text-lg font-bold text-foreground">
+                {course.price === 0 ? "Free Access" : `₹${course.price.toLocaleString("en-IN")}`}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-6 flex flex-col gap-2.5">
+            <Link
+              href={`/courses/${slug}`}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 py-3 text-sm font-bold text-white shadow-soft transition-all hover:bg-brand-700"
+            >
+              <Sparkles className="size-4" />
+              <span>Enroll Now to Unlock Masterclass</span>
+            </Link>
+            <Link
+              href="/courses"
+              className="inline-flex w-full items-center justify-center rounded-xl border border-border bg-surface py-2.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground"
+            >
+              <span>Explore Gurukul Catalog</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const totalLessonsCount = flattenedLessons.length;
   const completedLessonsCount = flattenedLessons.filter((l) => l.is_completed).length;
   const computedProgressPercent =
@@ -452,6 +509,24 @@ export default function LessonClassroomPage() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
+      {/* Free Preview Banner for Un-enrolled viewers */}
+      {isFreePreview && !course.is_enrolled && (
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-amber-500/30 bg-amber-500/10 px-4 py-2 text-xs">
+          <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300">
+            <Sparkles className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+            <span>
+              You are viewing a <strong>Free Preview Lesson</strong>. Enroll now to unlock all {totalLessonsCount} masterclass lessons, notes &amp; official certificate.
+            </span>
+          </div>
+          <Link
+            href={`/courses/${slug}`}
+            className="shrink-0 rounded-lg bg-brand-600 px-3 py-1 font-bold text-white shadow-2xs transition-colors hover:bg-brand-700"
+          >
+            Enroll in Course
+          </Link>
+        </div>
+      )}
+
       {/* Top Classroom Bar */}
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-border/70 bg-surface px-4 sm:px-6">
         <div className="flex items-center gap-3 min-w-0">
