@@ -91,6 +91,8 @@ export interface LessonStreamData {
   watermark_text?: string | null;
   notes_markdown?: string | null;
   resources: LessonResource[];
+  last_watched_seconds?: number;
+  is_completed?: boolean;
 }
 
 export interface CourseOrderCreateResponse {

@@ -13,6 +13,7 @@ import {
   Circle,
   Clock,
   Download,
+  Edit3,
   ExternalLink,
   FileText,
   GraduationCap,
@@ -24,10 +25,13 @@ import {
   MessageSquareQuote,
   PartyPopper,
   PlayCircle,
+  Save,
   Send,
   Share2,
   ShieldCheck,
+  Sparkles,
   ThumbsUp,
+  Trash2,
   UserCheck,
   X,
 } from "lucide-react";
@@ -64,12 +68,24 @@ export default function LessonClassroomPage() {
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const [expandedSections, setExpandedSections] = React.useState<Record<string, boolean>>({});
   const [watermarkPos, setWatermarkPos] = React.useState<{ top: string; left: string }>({
-    top: "15%",
-    left: "15%",
+    top: "18%",
+    left: "12%",
   });
   const [showCertificateModal, setShowCertificateModal] = React.useState(false);
   const [issuedCertId, setIssuedCertId] = React.useState<string | null>(null);
   const [isUpdatingProgress, setIsUpdatingProgress] = React.useState(false);
+
+  // Video Player & Interactive Seek References
+  const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
+  const playerContainerRef = React.useRef<HTMLDivElement | null>(null);
+  const currentPlayheadRef = React.useRef<number>(0);
+  const lastReportedTimeRef = React.useRef<number>(0);
+  const hasNotifiedResume = React.useRef<boolean>(false);
+
+  // Student Personal Study Notebook States
+  const [notesSubTab, setNotesSubTab] = React.useState<"master" | "personal">("master");
+  const [personalNotes, setPersonalNotes] = React.useState<string>("");
+  const [notesSavedStatus, setNotesSavedStatus] = React.useState<string>("");
 
   // 1. Fetch Course Detail for curriculum syllabus
   const {
@@ -96,6 +112,86 @@ export default function LessonClassroomPage() {
     },
     enabled: Boolean(course?.id && lessonId),
   });
+
+  // Load personal notes for this lesson from localStorage
+  const personalStorageKey = `divinlink_notes_${course?.id || ""}_${lessonId}`;
+  React.useEffect(() => {
+    if (typeof window !== "undefined" && course?.id && lessonId) {
+      const saved = localStorage.getItem(`divinlink_notes_${course.id}_${lessonId}`);
+      setPersonalNotes(saved || "");
+    }
+  }, [course?.id, lessonId]);
+
+  // Save personal notes
+  const handleSavePersonalNotes = (content: string) => {
+    setPersonalNotes(content);
+    if (typeof window !== "undefined" && course?.id && lessonId) {
+      localStorage.setItem(personalStorageKey, content);
+      setNotesSavedStatus("Auto-saved ✓");
+      setTimeout(() => setNotesSavedStatus(""), 2000);
+    }
+  };
+
+  // Insert current playback timestamp into personal study notes
+  const handleInsertTimestampToNotes = () => {
+    const curSecs = currentPlayheadRef.current || 0;
+    const m = String(Math.floor(curSecs / 60)).padStart(2, "0");
+    const s = String(curSecs % 60).padStart(2, "0");
+    const tag = `\n[⏱️ ${m}:${s}] - `;
+    const updated = personalNotes ? `${personalNotes}${tag}` : tag;
+    handleSavePersonalNotes(updated);
+    toast.success(`নোটের ভেতর [${m}:${s}] টাইমস্ট্যাম্প যুক্ত হয়েছে!`);
+  };
+
+  // Download personal notes as a study text file
+  const handleDownloadNotes = () => {
+    if (!personalNotes.trim()) {
+      toast.error("আপনার নোটবুক ফাঁকা রয়েছে!");
+      return;
+    }
+    const header = `DIVINLINK GURUKUL — SACRED STUDY NOTEBOOK\nMasterclass: ${course?.title || ""}\nLesson ID: ${lessonId}\nDate: ${new Date().toLocaleDateString("en-IN")}\n\n----------------------------------------\n\n`;
+    const blob = new Blob([header + personalNotes], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `DivinLink_Notes_${lessonId.slice(-6)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("নোটবুক ডাউনলোড সম্পন্ন হয়েছে!");
+  };
+
+  // Interactive Video Seek to specified seconds (Player.js API & Bunny postMessage)
+  const handleSeekTo = (seconds: number, formattedTime?: string) => {
+    if (iframeRef.current?.contentWindow) {
+      // 1. Standard Player.js command supported by Bunny Stream
+      iframeRef.current.contentWindow.postMessage(
+        JSON.stringify({ event: "command", method: "setCurrentTime", value: seconds }),
+        "*"
+      );
+      // 2. Play command to ensure video starts immediately
+      iframeRef.current.contentWindow.postMessage(
+        JSON.stringify({ event: "command", method: "play", value: null }),
+        "*"
+      );
+      // 3. Fallback seek command
+      iframeRef.current.contentWindow.postMessage(
+        JSON.stringify({ event: "seek", value: seconds }),
+        "*"
+      );
+
+      const displayTime =
+        formattedTime ||
+        `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+
+      toast.info(`ভিডিও ${displayTime}-এ জাম্প করা হয়েছে ⏱️`, {
+        id: "seek-toast",
+        duration: 2500,
+      });
+
+      // Smoothly scroll video player into view on mobile or long page
+      playerContainerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  };
 
   // 3. Fetch Lesson Questions (Gurukul Jigyasa Forum)
   const {
@@ -174,11 +270,11 @@ export default function LessonClassroomPage() {
     }
   }, [course]);
 
-  // Anti-Piracy Watermark Movement (Subtle floating reposition every 12 seconds)
+  // Anti-Piracy Watermark Movement (Constrained safely so it never clips off mobile screens)
   React.useEffect(() => {
     const timer = setInterval(() => {
-      const randomTop = Math.floor(Math.random() * 65) + 15; // 15% to 80%
-      const randomLeft = Math.floor(Math.random() * 65) + 10; // 10% to 75%
+      const randomTop = Math.floor(Math.random() * 55) + 15; // 15% to 70%
+      const randomLeft = Math.floor(Math.random() * 32) + 8; // 8% to 40% (Guaranteed 100% visible on mobile!)
       setWatermarkPos({ top: `${randomTop}%`, left: `${randomLeft}%` });
     }, 12000);
     return () => clearInterval(timer);
@@ -252,14 +348,24 @@ export default function LessonClassroomPage() {
     }
   }, [course, isUpdatingProgress, lessonId, nextLesson, queryClient, router, slug]);
 
-  // Listen for Bunny Stream player 'ended' events to automatically mark lesson complete
+  // Listen for Bunny Stream player messages ('ended' for completion & 'timeupdate' for watch progress)
   React.useEffect(() => {
     const handleBunnyMessage = (event: MessageEvent) => {
       try {
         const data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+        // 1. Video finished
         if (data?.event === "ended" || data?.type === "ended" || data?.name === "ended") {
           if (currentLesson && !currentLesson.is_completed) {
             handleMarkComplete();
+          }
+        }
+        // 2. Playback progress update
+        if (data?.event === "timeupdate" || data?.type === "timeupdate") {
+          const secs = Math.floor(
+            data?.value?.seconds || data?.value?.currentTime || data?.data?.currentTime || 0
+          );
+          if (secs > 0) {
+            currentPlayheadRef.current = secs;
           }
         }
       } catch {
@@ -269,6 +375,44 @@ export default function LessonClassroomPage() {
     window.addEventListener("message", handleBunnyMessage);
     return () => window.removeEventListener("message", handleBunnyMessage);
   }, [currentLesson, handleMarkComplete]);
+
+  // Periodic watch progress sync every 25 seconds
+  React.useEffect(() => {
+    const syncInterval = setInterval(() => {
+      if (
+        course?.id &&
+        lessonId &&
+        currentPlayheadRef.current > 5 &&
+        Math.abs(currentPlayheadRef.current - lastReportedTimeRef.current) >= 15
+      ) {
+        lastReportedTimeRef.current = currentPlayheadRef.current;
+        courseApi.updateProgress(course.id, lessonId, {
+          watched_seconds: currentPlayheadRef.current,
+          total_seconds: 3600,
+          mark_completed: false,
+        }).catch(() => {});
+      }
+    }, 25000);
+    return () => clearInterval(syncInterval);
+  }, [course?.id, lessonId]);
+
+  // User notification when video resumes from prior session
+  React.useEffect(() => {
+    if (
+      streamData?.last_watched_seconds &&
+      streamData.last_watched_seconds > 5 &&
+      !streamData.is_completed &&
+      !hasNotifiedResume.current
+    ) {
+      hasNotifiedResume.current = true;
+      const m = Math.floor(streamData.last_watched_seconds / 60);
+      const s = streamData.last_watched_seconds % 60;
+      toast.info(`পূর্ববর্তী সময় (${m}m ${s}s) থেকে ভিডিও রিজিউম হয়েছে ⏱️`, {
+        duration: 3500,
+        id: "resume-toast",
+      });
+    }
+  }, [streamData]);
 
   if (isCourseLoading) {
     return (
@@ -356,7 +500,7 @@ export default function LessonClassroomPage() {
         {/* Left Column: Video Player & Study Tabs */}
         <div className="flex flex-1 flex-col overflow-y-auto">
           {/* Player Container */}
-          <div className="relative aspect-video w-full max-h-[68vh] bg-black">
+          <div ref={playerContainerRef} className="relative aspect-video w-full max-h-[68vh] bg-black">
             {isStreamLoading ? (
               <div className="flex h-full w-full items-center justify-center">
                 <LoadingBlock label="Preparing secure video stream…" />
@@ -378,6 +522,7 @@ export default function LessonClassroomPage() {
               <div className="relative h-full w-full overflow-hidden">
                 {/* Bunny Stream Secure Iframe Player */}
                 <iframe
+                  ref={iframeRef}
                   src={streamData.embed_url}
                   loading="eager"
                   className="h-full w-full border-0 select-none"
@@ -385,10 +530,10 @@ export default function LessonClassroomPage() {
                   allowFullScreen
                 />
 
-                {/* Dynamic Anti-Piracy Watermark */}
+                {/* Dynamic Anti-Piracy Watermark (Safe on mobile screens) */}
                 {streamData.watermark_text && (
                   <div
-                    className="pointer-events-none absolute select-none text-[11px] font-mono font-bold tracking-wider text-white/35 backdrop-blur-[0.5px] transition-all duration-1000"
+                    className="pointer-events-none absolute select-none max-w-[72%] sm:max-w-[48%] truncate whitespace-nowrap text-[9px] sm:text-[11px] font-mono font-bold tracking-wider text-white/45 bg-black/35 px-2.5 py-0.5 rounded-full border border-white/10 backdrop-blur-[1px] transition-all duration-1000"
                     style={{
                       top: watermarkPos.top,
                       left: watermarkPos.left,
@@ -491,15 +636,129 @@ export default function LessonClassroomPage() {
 
             <div className="mt-5">
               {activeTab === "notes" ? (
-                <div>
-                  {streamData?.notes_markdown ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-line text-muted-foreground leading-relaxed">
-                      {streamData.notes_markdown}
+                <div className="space-y-4">
+                  {/* Notes Sub-Navigation: Master Notes vs Personal Notebook */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/50 pb-3">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setNotesSubTab("master")}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                          notesSubTab === "master"
+                            ? "bg-brand-500/15 text-brand-600 border border-brand-500/30 shadow-2xs"
+                            : "text-muted-foreground hover:text-foreground hover:bg-surface-muted"
+                        }`}
+                      >
+                        <BookOpen className="size-3.5" />
+                        <span>আচার্যের পাঠ নোট (Lecture Notes)</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setNotesSubTab("personal")}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                          notesSubTab === "personal"
+                            ? "bg-amber-500/15 text-amber-600 border border-amber-500/30 shadow-2xs"
+                            : "text-muted-foreground hover:text-foreground hover:bg-surface-muted"
+                        }`}
+                      >
+                        <Edit3 className="size-3.5" />
+                        <span>আমার ব্যক্তিগত খাতা (My Notebook)</span>
+                        {personalNotes.trim() && (
+                          <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
+                        )}
+                      </button>
+                    </div>
+
+                    {notesSubTab === "personal" && (
+                      <div className="flex items-center gap-2">
+                        {notesSavedStatus && (
+                          <span className="text-[10px] font-mono text-emerald-600 font-semibold animate-in fade-in">
+                            {notesSavedStatus}
+                          </span>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleInsertTimestampToNotes}
+                          className="gap-1 text-[11px] h-8 px-2.5 text-amber-600 border-amber-500/30 hover:bg-amber-500/10"
+                          title="ভিডিওর বর্তমান মিনিট ও সেকেন্ড নোটে যুক্ত করুন"
+                        >
+                          <Clock className="size-3" />
+                          <span>+ টাইম ট্যাগ</span>
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleDownloadNotes}
+                          className="gap-1 text-[11px] h-8 px-2.5"
+                          title="নোটবুক ডাউনলোড করুন"
+                        >
+                          <Download className="size-3" />
+                          <span>ডাউনলোড</span>
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  {notesSubTab === "master" ? (
+                    <div>
+                      {streamData?.notes_markdown ? (
+                        <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-line text-muted-foreground leading-relaxed p-4 rounded-2xl bg-surface border border-border/70 shadow-2xs">
+                          {streamData.notes_markdown}
+                        </div>
+                      ) : (
+                        <div className="rounded-2xl border border-dashed border-border/80 p-8 text-center bg-surface/40">
+                          <BookOpen className="size-10 text-muted-foreground/30 mx-auto mb-2" />
+                          <p className="text-xs text-muted-foreground italic">
+                            এই লেসনে আচার্য কর্তৃক কোনো অফিশিয়াল পাঠ নোট যুক্ত করা হয়নি। ভিডিও লেকচারটি মনোযোগ দিয়ে দেখুন।
+                          </p>
+                        </div>
+                      )}
                     </div>
                   ) : (
-                    <p className="text-xs text-muted-foreground italic">
-                      No custom study notes posted for this lesson yet. Follow along with the video instruction.
-                    </p>
+                    /* Personal Study Notebook */
+                    <div className="space-y-3 animate-in fade-in-50 duration-200">
+                      <div className="rounded-2xl border border-border/80 bg-surface p-4 shadow-soft space-y-3">
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span className="font-semibold text-foreground flex items-center gap-1.5">
+                            <Sparkles className="size-3.5 text-amber-500" />
+                            ব্যক্তিগত স্টাডি ভল্ট (Private Notebook)
+                          </span>
+                          <span className="text-[11px] font-mono">
+                            {personalNotes.length} অক্ষর • অটো-সেভড
+                          </span>
+                        </div>
+
+                        <textarea
+                          rows={8}
+                          value={personalNotes}
+                          onChange={(e) => handleSavePersonalNotes(e.target.value)}
+                          placeholder="এই লেসনের গুরুত্বপূর্ণ জ্যোতিষ সূত্র, শ্লোক বা আপনার নিজস্ব উপলব্ধি এখানে লিখে রাখুন... (যেমন: [⏱️ 02:15] ৭ম ভাবে শনি থাকলে যা যা খেয়াল রাখতে হবে...)"
+                          className="w-full rounded-xl border border-border bg-background/60 p-3.5 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/10 resize-y leading-relaxed font-sans"
+                        />
+
+                        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px] text-muted-foreground border-t border-border/40">
+                          <span className="italic">
+                            💡 টিপ: ভিডিও চলাকালীন "+ টাইম ট্যাগ" বাটনে ক্লিক করলে বর্তমান সেকেন্ড সরাসরি নোটে বসে যাবে।
+                          </span>
+                          {personalNotes && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (confirm("আপনি কি নিশ্চিতভাবে এই লেসনের ব্যক্তিগত নোট মুছে ফেলতে চান?")) {
+                                  handleSavePersonalNotes("");
+                                }
+                              }}
+                              className="text-red-500 hover:underline flex items-center gap-1 text-[11px]"
+                            >
+                              <Trash2 className="size-3" />
+                              <span>নোট মুছুন</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </div>
               ) : activeTab === "resources" ? (
@@ -627,34 +886,46 @@ export default function LessonClassroomPage() {
                         </div>
 
                         {qUseTimestamp && (
-                          <div className="mt-3 flex items-center gap-3 pt-2 border-t border-border/50 text-xs">
-                            <div className="flex items-center gap-1.5">
-                              <input
-                                type="number"
-                                min={0}
-                                max={300}
-                                value={qMinutes}
-                                onChange={(e) => setQMinutes(Math.max(0, parseInt(e.target.value) || 0))}
-                                className="w-16 rounded-lg border border-border bg-surface px-2 py-1 text-xs text-center font-mono font-bold"
-                              />
-                              <span className="text-muted-foreground font-medium">মিনিট</span>
-                            </div>
-                            <span className="font-bold text-muted-foreground">:</span>
-                            <div className="flex items-center gap-1.5">
-                              <input
-                                type="number"
-                                min={0}
-                                max={59}
-                                value={qSeconds}
-                                onChange={(e) => setQSeconds(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
-                                className="w-16 rounded-lg border border-border bg-surface px-2 py-1 text-xs text-center font-mono font-bold"
-                              />
-                              <span className="text-muted-foreground font-medium">সেকেন্ড</span>
+                          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-border/50 text-xs">
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1.5">
+                                <input
+                                  type="number"
+                                  min={0}
+                                  max={300}
+                                  value={qMinutes}
+                                  onChange={(e) => setQMinutes(Math.max(0, parseInt(e.target.value) || 0))}
+                                  className="w-16 rounded-lg border border-border bg-surface px-2 py-1 text-xs text-center font-mono font-bold"
+                                />
+                                <span className="text-muted-foreground font-medium">মিনিট</span>
+                              </div>
+                              <span className="font-bold text-muted-foreground">:</span>
+                              <div className="flex items-center gap-1.5">
+                                <input
+                                  type="number"
+                                  min={0}
+                                  max={59}
+                                  value={qSeconds}
+                                  onChange={(e) => setQSeconds(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
+                                  className="w-16 rounded-lg border border-border bg-surface px-2 py-1 text-xs text-center font-mono font-bold"
+                                />
+                                <span className="text-muted-foreground font-medium">সেকেন্ড</span>
+                              </div>
                             </div>
 
-                            <span className="text-muted-foreground text-[11px] ml-auto">
-                              ট্যাগ: ⏱️ {String(qMinutes).padStart(2, "0")}:{String(qSeconds).padStart(2, "0")}
-                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const cur = currentPlayheadRef.current || 0;
+                                setQMinutes(Math.floor(cur / 60));
+                                setQSeconds(cur % 60);
+                                toast.success("বর্তমান ভিডিও সময় যুক্ত করা হয়েছে ⏱️");
+                              }}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-600 hover:bg-amber-500/20 transition-colors"
+                            >
+                              <Clock className="size-3" />
+                              <span>বর্তমান সময় নিন</span>
+                            </button>
                           </div>
                         )}
                       </div>
@@ -713,10 +984,18 @@ export default function LessonClassroomPage() {
                           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/40 pb-3">
                             <div className="flex flex-wrap items-center gap-2">
                               {q.timestamp_seconds > 0 ? (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-mono font-bold text-amber-600 border border-amber-500/20">
-                                  <Clock className="size-3" />
+                                <button
+                                  type="button"
+                                  onClick={() => handleSeekTo(q.timestamp_seconds, q.timestamp_formatted)}
+                                  className="group inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 hover:bg-amber-500/25 px-2.5 py-0.5 text-[11px] font-mono font-bold text-amber-700 dark:text-amber-300 border border-amber-500/30 transition-all hover:scale-105 active:scale-95 shadow-2xs"
+                                  title="ভিডিওর এই মুহূর্তে প্লে করতে ক্লিক করুন"
+                                >
+                                  <PlayCircle className="size-3 text-amber-600 group-hover:scale-110 transition-transform" />
                                   <span>{q.timestamp_formatted}</span>
-                                </span>
+                                  <span className="text-[9px] font-sans font-medium opacity-80 underline decoration-amber-500/40">
+                                    (প্লে করুন)
+                                  </span>
+                                </button>
                               ) : (
                                 <span className="inline-flex items-center gap-1 rounded-full bg-muted/60 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                                   সাধারণ জিজ্ঞাসা
