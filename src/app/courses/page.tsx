@@ -209,22 +209,29 @@ export default function CoursesPage() {
 
 function CourseCard({ course }: { course: CourseListItem }) {
   const isFree = course.price === 0;
+  const [avatarError, setAvatarError] = React.useState(false);
+  const [thumbError, setThumbError] = React.useState(false);
 
   return (
     <Reveal>
       <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/80 bg-surface shadow-soft transition-all duration-300 hover:-translate-y-1 hover:border-brand-500/40 hover:shadow-elevation">
         {/* Thumbnail with 16:9 Aspect Ratio */}
         <Link href={`/courses/${course.slug}`} className="relative aspect-video w-full overflow-hidden bg-surface-muted block">
-          {course.thumbnail_url ? (
+          {course.thumbnail_url && !thumbError ? (
             <Image
               src={course.thumbnail_url}
               alt={course.title}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
+              onError={() => setThumbError(true)}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-brand-950/20 text-brand-500">
-              <GraduationCap className="size-12 opacity-40" />
+            <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-amber-950/80 via-neutral-900 to-amber-950/40 text-amber-500 p-4 text-center">
+              <div className="flex size-14 items-center justify-center rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 mb-2">
+                <span className="text-2xl">☸</span>
+              </div>
+              <span className="text-[11px] font-serif font-bold uppercase tracking-wider text-amber-300/90">Astra Cosmic Gurukul</span>
+              <span className="text-[10px] text-amber-200/60 line-clamp-1">{course.title}</span>
             </div>
           )}
 
@@ -285,13 +292,14 @@ function CourseCard({ course }: { course: CourseListItem }) {
 
           {/* Instructor Row */}
           <div className="mt-4 flex items-center gap-2 border-t border-border/60 pt-3">
-            {course.instructor_avatar ? (
+            {course.instructor_avatar && !avatarError ? (
               <Image
                 src={course.instructor_avatar}
                 alt={course.instructor_name}
                 width={28}
                 height={28}
                 className="rounded-full object-cover ring-1 ring-border"
+                onError={() => setAvatarError(true)}
               />
             ) : (
               <div className="flex size-7 items-center justify-center rounded-full bg-brand-500/10 text-xs font-bold text-brand-600">

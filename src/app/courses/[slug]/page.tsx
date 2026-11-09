@@ -78,6 +78,8 @@ export default function CourseDetailPage() {
   const [expandedSections, setExpandedSections] = React.useState<Record<string, boolean>>({});
   const [previewLesson, setPreviewLesson] = React.useState<CourseLesson | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = React.useState(false);
+  const [avatarError, setAvatarError] = React.useState(false);
+  const [thumbError, setThumbError] = React.useState(false);
 
   const {
     data: course,
@@ -318,13 +320,14 @@ export default function CourseDetailPage() {
 
                 {/* Instructor Block */}
                 <div className="mt-6 flex items-center gap-3 rounded-2xl border border-border/80 bg-surface p-4">
-                  {course.instructor_avatar ? (
+                  {course.instructor_avatar && !avatarError ? (
                     <Image
                       src={course.instructor_avatar}
                       alt={course.instructor_name}
                       width={48}
                       height={48}
                       className="rounded-full object-cover ring-2 ring-brand-500/20"
+                      onError={() => setAvatarError(true)}
                     />
                   ) : (
                     <div className="flex size-12 items-center justify-center rounded-full bg-brand-500/10 text-base font-bold text-brand-600">
@@ -344,13 +347,19 @@ export default function CourseDetailPage() {
                 <div className="sticky top-24 overflow-hidden rounded-2xl border border-border bg-surface shadow-elevation">
                   {/* Thumbnail / Trailer */}
                   <div className="relative aspect-video w-full overflow-hidden bg-black">
-                    {course.thumbnail_url && (
+                    {course.thumbnail_url && !thumbError ? (
                       <Image
                         src={course.thumbnail_url}
                         alt={course.title}
                         fill
                         className="object-cover opacity-90"
+                        onError={() => setThumbError(true)}
                       />
+                    ) : (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-amber-950 via-neutral-900 to-black text-amber-500">
+                        <span className="text-3xl mb-1">☸</span>
+                        <span className="text-[11px] font-serif font-bold tracking-widest text-amber-400/80 uppercase">Astra Gurukul</span>
+                      </div>
                     )}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40">
                       {firstLessonId && (

@@ -407,7 +407,7 @@ export default function CourseCertificateVerificationPage() {
       {!loading && cert && (
         <div className="certificate-page-wrap mx-auto max-w-[1100px]">
           {/* Certificate Board Border */}
-          <div className="certificate-border relative overflow-hidden rounded-2xl border-[10px] border-[#c29b38] bg-[#fdfbf7] p-5 sm:p-10 shadow-2xl text-[#2a1705]">
+          <div className="certificate-border relative overflow-hidden rounded-2xl border-[10px] print:border-[6px] border-[#c29b38] bg-[#fdfbf7] p-5 sm:p-10 print:p-2 shadow-2xl text-[#2a1705]">
             {/* Micro-Text Perimeter Bands (Anti-Counterfeit Protection) */}
             <div className="microtext-top select-none pointer-events-none absolute top-1 left-4 right-4 text-center font-mono text-[5.5px] uppercase tracking-[2px] text-[#b8860b]/40 overflow-hidden whitespace-nowrap">
               ASTRA GURUKUL CELESTIAL CREDENTIALS • OFFICIALLY CONSECRATED BY BOARD OF ASTROLOGICAL REGENTS • CANONICAL HASH VERIFIED • ASTRA GURUKUL CELESTIAL CREDENTIALS
@@ -417,18 +417,18 @@ export default function CourseCertificateVerificationPage() {
             </div>
 
             {/* Inner Golden Inset Border */}
-            <div className="relative rounded-lg border-2 border-[#b8860b] p-6 sm:p-12">
+            <div className="certificate-inner relative rounded-lg border-2 border-[#b8860b] p-6 sm:p-12 print:p-4 flex flex-col justify-between">
               {/* Corner Ornaments */}
-              <div className="absolute top-2 left-2 text-lg sm:text-2xl text-[#b8860b] opacity-80 select-none">
+              <div className="absolute top-2 left-2 text-lg sm:text-2xl print:text-base text-[#b8860b] opacity-80 select-none">
                 ☸
               </div>
-              <div className="absolute top-2 right-2 text-lg sm:text-2xl text-[#b8860b] opacity-80 select-none">
+              <div className="absolute top-2 right-2 text-lg sm:text-2xl print:text-base text-[#b8860b] opacity-80 select-none">
                 ☸
               </div>
-              <div className="absolute bottom-2 left-2 text-lg sm:text-2xl text-[#b8860b] opacity-80 select-none">
+              <div className="absolute bottom-2 left-2 text-lg sm:text-2xl print:text-base text-[#b8860b] opacity-80 select-none">
                 ☸
               </div>
-              <div className="absolute bottom-2 right-2 text-lg sm:text-2xl text-[#b8860b] opacity-80 select-none">
+              <div className="absolute bottom-2 right-2 text-lg sm:text-2xl print:text-base text-[#b8860b] opacity-80 select-none">
                 ☸
               </div>
 
@@ -527,105 +527,105 @@ export default function CourseCertificateVerificationPage() {
               </div>
 
               {/* Certificate Header */}
-              <div className="relative text-center space-y-1">
-                <div className="inline-flex items-center gap-2 rounded-full border border-[#b8860b]/40 bg-[#b8860b]/10 px-4 py-1 text-[11px] font-bold uppercase tracking-widest text-[#78350f]">
-                  <Sparkles className="size-3 text-[#b8860b]" />
+              <div className="relative text-center space-y-1 print:space-y-0.5">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#b8860b]/40 bg-[#b8860b]/10 px-4 py-1 print:px-2 print:py-0.5 text-[11px] print:text-[9px] font-bold uppercase tracking-widest text-[#78350f]">
+                  <Sparkles className="size-3 print:size-2 text-[#b8860b]" />
                   <span>Astra Gurukul • অ্যাস্ট্রা গুরুকুল</span>
-                  <Sparkles className="size-3 text-[#b8860b]" />
+                  <Sparkles className="size-3 print:size-2 text-[#b8860b]" />
                 </div>
-                <h2 className="font-serif text-xs sm:text-sm font-semibold tracking-wider text-[#78350f] uppercase">
+                <h2 className="font-serif text-xs sm:text-sm print:text-[10px] font-semibold tracking-wider text-[#78350f] uppercase">
                   Council of Vedic Astrological Sciences & Celestial Arts
                 </h2>
-                <div className="pt-2">
-                  <h1 className="font-serif text-2xl sm:text-4xl md:text-5xl font-black tracking-tight text-[#3b1e08]">
+                <div className="pt-2 print:pt-0.5">
+                  <h1 className="font-serif text-2xl sm:text-4xl md:text-5xl print:text-2xl font-black tracking-tight text-[#3b1e08]">
                     Certificate of Vedic Mastery
                   </h1>
-                  <p className="font-serif text-xs sm:text-sm italic text-[#854d0e] mt-1">
+                  <p className="font-serif text-xs sm:text-sm print:text-[10px] italic text-[#854d0e] mt-1 print:mt-0">
                     বৈদিক জ্যোতিষ বিদ্যা পারঙ্গত প্রামাণ্যপত্র
                   </p>
                 </div>
               </div>
 
               {/* Divider Ribbon */}
-              <div className="relative mx-auto my-6 flex items-center justify-center gap-3 max-w-md">
+              <div className="relative mx-auto my-6 print:my-1.5 flex items-center justify-center gap-3 max-w-md">
                 <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[#b8860b] to-[#b8860b]" />
-                <span className="text-sm font-bold text-[#b8860b]">✦ ॐ ✦</span>
+                <span className="text-sm print:text-xs font-bold text-[#b8860b]">✦ ॐ ✦</span>
                 <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent via-[#b8860b] to-[#b8860b]" />
               </div>
 
               {/* Certification Statement */}
-              <div className="relative text-center space-y-4 max-w-3xl mx-auto">
-                <p className="font-serif text-xs sm:text-sm uppercase tracking-widest text-[#78350f]">
+              <div className="relative text-center space-y-4 print:space-y-1 max-w-3xl mx-auto">
+                <p className="font-serif text-xs sm:text-sm print:text-[10px] uppercase tracking-widest text-[#78350f]">
                   This is to solemnly certify and consecrate that
                 </p>
 
                 {/* Recipient Scholar Name */}
-                <div className="py-2">
-                  <h3 className="font-serif text-3xl sm:text-5xl font-extrabold text-[#311802] tracking-wide underline decoration-[#c29b38]/50 decoration-wavy underline-offset-8">
+                <div className="py-2 print:py-0.5">
+                  <h3 className="font-serif text-3xl sm:text-5xl print:text-3xl font-extrabold text-[#311802] tracking-wide underline decoration-[#c29b38]/50 decoration-wavy underline-offset-8 print:underline-offset-4">
                     {cert.student_name}
                   </h3>
                 </div>
 
                 {/* Distinction Badge */}
-                <div className="inline-flex items-center gap-2 rounded-lg border border-[#c29b38]/40 bg-[#faecc7]/50 px-4 py-1.5 text-xs sm:text-sm font-bold text-[#78350f]">
-                  <Award className="size-4 text-[#b8860b]" />
+                <div className="inline-flex items-center gap-2 rounded-lg border border-[#c29b38]/40 bg-[#faecc7]/50 px-4 py-1.5 print:px-3 print:py-0.5 text-xs sm:text-sm print:text-[11px] font-bold text-[#78350f]">
+                  <Award className="size-4 print:size-3 text-[#b8860b]" />
                   <span>{cert.distinction}</span>
                 </div>
 
-                <p className="font-serif text-xs sm:text-sm text-[#573312] leading-relaxed max-w-2xl mx-auto">
+                <p className="font-serif text-xs sm:text-sm print:text-[10px] text-[#573312] leading-relaxed max-w-2xl mx-auto print:leading-tight">
                   has thoroughly mastered the sacred principles, astronomical calculations,
                   predictive methodologies, and remedies prescribed in the classical curriculum of
                 </p>
 
                 {/* Course Title */}
-                <div className="rounded-xl border border-[#b8860b]/30 bg-[#fdf6e2]/80 p-3 sm:p-4 shadow-xs">
-                  <h4 className="font-serif text-lg sm:text-2xl font-bold text-[#3b1e08]">
+                <div className="rounded-xl border border-[#b8860b]/30 bg-[#fdf6e2]/80 p-3 sm:p-4 print:p-1.5 print:my-0.5 shadow-xs">
+                  <h4 className="font-serif text-lg sm:text-2xl print:text-base font-bold text-[#3b1e08]">
                     {cert.course_title}
                   </h4>
-                  <p className="text-[11px] sm:text-xs text-[#78350f] mt-1">
+                  <p className="text-[11px] sm:text-xs print:text-[9px] text-[#78350f] mt-1 print:mt-0">
                     Completed 100% curriculum ({cert.total_lessons_completed} Lessons & Practicums)
                   </p>
                 </div>
 
                 {/* Sanskrit Blessing Shloka */}
-                <div className="pt-2 text-center">
-                  <p className="font-serif text-xs sm:text-sm italic font-medium text-[#78350f]">
+                <div className="pt-2 print:pt-0.5 text-center">
+                  <p className="font-serif text-xs sm:text-sm print:text-[9.5px] italic font-medium text-[#78350f]">
                     {cert.digital_seal?.mantra ||
                       "विद्या ददाति विनयं विनयाद्याति पात्रताम् । पात्रत्वाद्धनमाप्नोति धनाद्धर्मं ततः सुखम् ॥"}
                   </p>
-                  <p className="text-[10px] text-[#854d0e] mt-0.5">
+                  <p className="text-[10px] print:text-[8px] text-[#854d0e] mt-0.5 print:mt-0">
                     — Hitopadesha (True knowledge bestows humility, worthiness, and supreme fulfillment)
                   </p>
                 </div>
               </div>
 
               {/* Signatures & Seal Section */}
-              <div className="relative mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-3 items-end gap-6 pt-6 border-t border-[#b8860b]/30">
+              <div className="relative mt-8 sm:mt-12 print:mt-2 grid grid-cols-1 sm:grid-cols-3 print:grid-cols-3 items-end gap-6 print:gap-2 pt-6 print:pt-1 border-t border-[#b8860b]/30">
                 {/* Left Signature: Master Instructor */}
-                <div className="text-center sm:text-left order-2 sm:order-1">
-                  <div className="font-serif italic text-base sm:text-lg text-[#311802] font-bold">
+                <div className="text-center sm:text-left print:text-left order-2 sm:order-1 print:order-1">
+                  <div className="font-serif italic text-base sm:text-lg print:text-sm text-[#311802] font-bold">
                     {cert.instructor_name}
                   </div>
-                  <div className="h-[1.5px] w-44 mx-auto sm:mx-0 my-1 bg-[#311802]/60" />
-                  <p className="text-xs font-semibold text-[#573312]">
+                  <div className="h-[1.5px] w-44 print:w-32 mx-auto sm:mx-0 print:mx-0 my-1 print:my-0.5 bg-[#311802]/60" />
+                  <p className="text-xs print:text-[10px] font-semibold text-[#573312]">
                     Lead Master & Acharya
                   </p>
-                  <p className="text-[10px] text-[#78350f]">
+                  <p className="text-[10px] print:text-[8px] text-[#78350f]">
                     {cert.instructor_title}
                   </p>
                 </div>
 
                 {/* Center Medallion Seal */}
-                <div className="flex flex-col items-center justify-center order-1 sm:order-2">
-                  <div className="relative flex size-24 sm:size-28 items-center justify-center rounded-full border-4 border-[#b8860b] bg-gradient-to-tr from-[#996515] via-[#ffd700] to-[#b8860b] p-1 shadow-lg ring-4 ring-[#b8860b]/20 text-neutral-900">
+                <div className="flex flex-col items-center justify-center order-1 sm:order-2 print:order-2">
+                  <div className="relative flex size-24 sm:size-28 print:size-16 items-center justify-center rounded-full border-4 print:border-2 border-[#b8860b] bg-gradient-to-tr from-[#996515] via-[#ffd700] to-[#b8860b] p-1 shadow-lg ring-4 print:ring-1 ring-[#b8860b]/20 text-neutral-900">
                     <div className="flex size-full flex-col items-center justify-center rounded-full border border-dashed border-[#78350f] bg-[#fef8e7] text-center p-1">
-                      <span className="text-[9px] font-black uppercase tracking-wider text-[#78350f]">
+                      <span className="text-[9px] print:text-[7px] font-black uppercase tracking-wider text-[#78350f]">
                         Astra Gurukul
                       </span>
-                      <span className="text-xl sm:text-2xl text-[#b8860b] leading-none my-0.5">
+                      <span className="text-xl sm:text-2xl print:text-sm text-[#b8860b] leading-none my-0.5 print:my-0">
                         ☸
                       </span>
-                      <span className="text-[8px] font-black uppercase tracking-wider text-[#78350f]">
+                      <span className="text-[8px] print:text-[6.5px] font-black uppercase tracking-wider text-[#78350f]">
                         Consecrated
                       </span>
                     </div>
@@ -633,10 +633,10 @@ export default function CourseCertificateVerificationPage() {
                 </div>
 
                 {/* Right Signature: Council Registrar & QR Code */}
-                <div className="flex flex-col items-center sm:items-end text-center sm:text-right order-3">
-                  <div className="flex items-center gap-3">
+                <div className="flex flex-col items-center sm:items-end print:items-end text-center sm:text-right print:text-right order-3">
+                  <div className="flex items-center gap-3 print:gap-2">
                     {qrCodeDataUrl && (
-                      <div className="relative size-14 sm:size-16 rounded-md border border-[#b8860b]/40 bg-white p-1 shadow-xs">
+                      <div className="relative size-14 sm:size-16 print:size-12 rounded-md border border-[#b8860b]/40 bg-white p-1 shadow-xs">
                         <img
                           src={qrCodeDataUrl}
                           alt="Verification QR Code"
@@ -644,15 +644,15 @@ export default function CourseCertificateVerificationPage() {
                         />
                       </div>
                     )}
-                    <div className="text-center sm:text-right">
-                      <div className="font-serif text-sm font-bold text-[#311802]">
+                    <div className="text-center sm:text-right print:text-right">
+                      <div className="font-serif text-sm print:text-xs font-bold text-[#311802]">
                         Board of Astrological Regents
                       </div>
-                      <div className="h-[1.5px] w-36 mx-auto sm:ml-auto my-1 bg-[#311802]/60" />
-                      <p className="text-xs font-semibold text-[#573312]">
+                      <div className="h-[1.5px] w-36 print:w-28 mx-auto sm:ml-auto print:ml-auto my-1 print:my-0.5 bg-[#311802]/60" />
+                      <p className="text-xs print:text-[10px] font-semibold text-[#573312]">
                         Council Registrar
                       </p>
-                      <p className="text-[10px] text-[#78350f]">
+                      <p className="text-[10px] print:text-[8px] text-[#78350f]">
                         Director of Celestial Credentials
                       </p>
                     </div>
@@ -661,7 +661,7 @@ export default function CourseCertificateVerificationPage() {
               </div>
 
               {/* Bottom Metadata & Hash Strip */}
-              <div className="relative mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-[#b8860b]/20 pt-3 text-[10px] text-[#78350f] font-mono">
+              <div className="relative mt-6 print:mt-1.5 flex flex-wrap items-center justify-between gap-2 border-t border-[#b8860b]/20 pt-3 print:pt-1 text-[10px] print:text-[8px] text-[#78350f] font-mono">
                 <div>
                   ID: <span className="font-bold text-[#311802]">{cert.certificate_id}</span>
                 </div>
@@ -670,13 +670,13 @@ export default function CourseCertificateVerificationPage() {
                 </div>
                 <div className="truncate max-w-[220px]" title={cert.canonical_hash || ""}>
                   Hash:{" "}
-                  <span className="text-[9px] opacity-80">
+                  <span className="text-[9px] print:text-[7.5px] opacity-80">
                     {cert.canonical_hash ? `${cert.canonical_hash.slice(0, 16)}...` : "VERIFIED-CANONICAL"}
                   </span>
                 </div>
                 <div className="truncate max-w-[220px]" title={cert.cryptographic_signature || ""}>
                   Sig:{" "}
-                  <span className="text-[9px] opacity-80">
+                  <span className="text-[9px] print:text-[7.5px] opacity-80">
                     {cert.cryptographic_signature ? `${cert.cryptographic_signature.slice(0, 16)}...` : "HMAC-SHA256"}
                   </span>
                 </div>
@@ -686,36 +686,82 @@ export default function CourseCertificateVerificationPage() {
         </div>
       )}
 
-      {/* Print-specific Stylesheet */}
-      <style jsx global>{`
+      {/* Print-specific Stylesheet for Guaranteed Exact 1-Page Landscape Output */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         @media print {
           @page {
-            size: landscape;
-            margin: 6mm;
+            size: A4 landscape;
+            margin: 0 !important;
           }
-          body {
-            background: #ffffff !important;
-            color: #000000 !important;
+          *, *::before, *::after {
+            box-sizing: border-box !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+          }
+          html, body {
+            width: 297mm !important;
+            height: 210mm !important;
+            max-height: 210mm !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+            overflow: hidden !important;
           }
           header,
           footer,
           nav,
-          .print\\:hidden {
+          .print\\:hidden,
+          [data-print-hide] {
             display: none !important;
           }
           .certificate-page-wrap {
-            max-width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
+            width: 297mm !important;
+            height: 210mm !important;
+            max-height: 210mm !important;
+            margin: 0 auto !important;
+            padding: 3mm 4mm !important;
+            box-sizing: border-box !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            page-break-after: avoid !important;
+            page-break-before: avoid !important;
+            overflow: hidden !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
           }
           .certificate-border {
-            border-width: 6px !important;
+            width: 100% !important;
+            height: 100% !important;
+            max-height: 204mm !important;
+            border-width: 5px !important;
             box-shadow: none !important;
+            padding: 2mm !important;
+            box-sizing: border-box !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            overflow: hidden !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+          }
+          .certificate-inner {
+            height: 100% !important;
+            box-sizing: border-box !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            padding: 3mm 4mm !important;
           }
         }
-      `}</style>
+      `,
+        }}
+      />
     </div>
   );
 }
