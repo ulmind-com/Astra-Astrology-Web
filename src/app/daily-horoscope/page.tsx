@@ -1612,9 +1612,9 @@ function HoroscopeContent() {
                   >
                     {/* Top: icon + name + date range + score */}
                     <div className="flex items-start gap-3">
-                      <span className="size-12 shrink-0 overflow-hidden rounded-full shadow-sm ring-1 ring-black/5 transition-transform group-hover:scale-105">
+                      <span className="flex size-12 shrink-0 items-center justify-center rounded-full ring-1 ring-[#d9b64a] bg-gradient-to-br from-[#fdf6da] to-[#f3e3a0] shadow-sm transition-transform group-hover:scale-105">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={`/images/zodiac/characters/${sign.id}.svg`} alt={sign.en} width={48} height={48} className="size-full" />
+                        <img src={sign.icon} alt={sign.en} width={30} height={30} className="size-7 object-contain" />
                       </span>
                       <div className="min-w-0 flex-1">
                         <h3 className="text-base font-bold leading-tight text-[#1a1208] group-hover:text-[#b06d4e] transition-colors">
@@ -1741,14 +1741,14 @@ function HoroscopeContent() {
                   
                   {/* Left: Sign Identity */}
                   <div className="flex items-center gap-4 sm:gap-5">
-                    <div className="size-16 sm:size-20 shrink-0 overflow-hidden rounded-full shadow-sm ring-1 ring-black/5">
+                    <div className="flex size-16 sm:size-20 shrink-0 items-center justify-center rounded-2xl border border-[#d9b64a] bg-gradient-to-br from-[#fdf6da] to-[#f3e3a0] shadow-sm">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={`/images/zodiac/characters/${ZODIAC_LIST[activeSignIndex]?.id ?? "aries"}.svg`}
+                        src={ZODIAC_LIST[activeSignIndex]?.icon ?? "/images/zodiac/vedic/mesha.svg"}
                         alt={activeSignData.sign_name}
-                        width={80}
-                        height={80}
-                        className="size-full"
+                        width={56}
+                        height={56}
+                        className="size-10 sm:size-12 object-contain"
                       />
                     </div>
                     <div>

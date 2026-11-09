@@ -20,6 +20,7 @@ import { AstrologyPredictionZodiac } from "@/components/home/astrology-predictio
 import { AppDownloadSection } from "@/components/home/app-download-section";
 import { AstroyogiHeader } from "@/components/home/astroyogi-header";
 import { CelebrityVideosSection } from "@/components/home/celebrity-videos-section";
+import { CoursesSection } from "@/components/home/courses-section";
 import { FirstChatFreeModal } from "@/components/home/first-chat-free-modal";
 import { FreeAstrologyReadings } from "@/components/home/free-astrology-readings";
 import { HeroAstroyogi } from "@/components/home/hero-astroyogi";
@@ -113,6 +114,9 @@ export default function HomePage() {
 
         {/* 5b. OUR SERVICES (horizontal premium rail) */}
         <OurServicesSection />
+
+        {/* 6. LEARN: ASTROLOGY MASTERCLASSES */}
+        <CoursesSection />
 
         {/* 7. CELEBRITY VIDEOS */}
         <CelebrityVideosSection />
