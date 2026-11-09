@@ -25,7 +25,7 @@ function CourseCard({ course }: { course: CourseListItem }) {
       className="group flex flex-col overflow-hidden rounded-[22px] border border-stone-200 bg-white shadow-[0_10px_30px_-18px_rgba(26,18,8,0.18)] transition-all duration-300 hover:-translate-y-1.5 hover:border-brand-400 hover:shadow-[0_22px_44px_-20px_rgba(26,18,8,0.28)]"
     >
       {/* Thumbnail */}
-      <div className="relative aspect-[16/10] overflow-hidden bg-stone-100">
+      <div className="relative aspect-[16/9] overflow-hidden bg-stone-100">
         {course.thumbnail_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -56,7 +56,7 @@ function CourseCard({ course }: { course: CourseListItem }) {
       </div>
 
       {/* Body */}
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex flex-1 flex-col p-4">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#8b5e0a]">
             {course.category?.replace(/_/g, " ")}
@@ -68,7 +68,7 @@ function CourseCard({ course }: { course: CourseListItem }) {
           </span>
         </div>
 
-        <h3 className="mt-2 line-clamp-1 font-display text-lg font-bold text-[#1a1208] transition-colors group-hover:text-brand-900">
+        <h3 className="mt-2 line-clamp-1 font-display text-base font-bold text-[#1a1208] transition-colors group-hover:text-brand-900">
           {course.title}
         </h3>
         {course.subtitle && (
@@ -141,7 +141,7 @@ export function CoursesSection() {
     refetchOnWindowFocus: false,
   });
 
-  const courses = (data ?? []).slice(0, 3);
+  const courses = (data ?? []).slice(0, 4);
 
   const t = {
     badge: language === "bn" ? "মাস্টারক্লাস" : language === "hi" ? "मास्टरक्लास" : "Masterclasses",
@@ -190,10 +190,10 @@ export function CoursesSection() {
 
         {/* Grid */}
         {isLoading ? (
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => (
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
               <div key={i} className="overflow-hidden rounded-[22px] border border-stone-200 bg-white">
-                <div className="aspect-[16/10] animate-pulse bg-stone-200" />
+                <div className="aspect-[16/9] animate-pulse bg-stone-200" />
                 <div className="space-y-3 p-5">
                   <div className="h-4 w-1/3 animate-pulse rounded bg-stone-200" />
                   <div className="h-5 w-3/4 animate-pulse rounded bg-stone-200" />
@@ -203,7 +203,7 @@ export function CoursesSection() {
             ))}
           </div>
         ) : (
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {courses.map((course) => (
               <CourseCard key={course.id} course={course} />
             ))}
