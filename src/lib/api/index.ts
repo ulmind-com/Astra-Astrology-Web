@@ -784,6 +784,13 @@ export const astrologyApi = {
       payload || {},
     ),
 
+  /** Charge 10 coins to open a sign's detailed daily reading (idempotent per day). */
+  unlockDailyHoroscope: (signIndex: number) =>
+    api.post<{ charged: number; balance: number }>(
+      endpoints.astrology.dailyUnlock,
+      { sign_index: signIndex },
+    ),
+
   /** 1-Year Annual Horoscope & Lal Kitab Varshphal Prediction Report. */
   annualHoroscope: (payload: AnnualHoroscopeRequest) =>
     api.post<AnnualHoroscopeResponse>(

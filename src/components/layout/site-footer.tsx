@@ -1,5 +1,7 @@
 "use client";
 
+import { Lock, ShieldCheck, Wallet } from "lucide-react";
+import { FaApple, FaFacebookF, FaGooglePlay, FaInstagram, FaLinkedinIn, FaYoutube } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
 import { Year } from "@/components/ui";
@@ -202,6 +204,121 @@ export function SiteFooter() {
               </ul>
             </div>
           ))}
+        </div>
+
+        {/* Secondary row: corporate, astrologer/contact, secure, app */}
+        <div className="mt-12 grid gap-10 border-t border-[#efe3c0] pt-10 sm:grid-cols-2 md:grid-cols-4">
+          {/* Corporate Info */}
+          <div>
+            <p className="text-sm font-bold text-[#1a1208]">
+              {language === "bn" ? "কর্পোরেট তথ্য" : language === "hi" ? "कॉर्पोरेट जानकारी" : "Corporate Info"}
+            </p>
+            <ul className="mt-4 space-y-2.5">
+              {[
+                language === "bn" ? "রিফান্ড ও বাতিল নীতি" : language === "hi" ? "रिफंड एवं रद्दीकरण नीति" : "Refund & Cancellation Policy",
+                language === "bn" ? "শর্তাবলী" : language === "hi" ? "नियम एवं शर्तें" : "Terms & Conditions",
+                language === "bn" ? "গোপনীয়তা নীতি" : language === "hi" ? "गोपनीयता नीति" : "Privacy Policy",
+                language === "bn" ? "দাবিত্যাগ" : language === "hi" ? "अस्वीकरण" : "Disclaimer",
+                language === "bn" ? "আমাদের সম্পর্কে" : language === "hi" ? "हमारे बारे में" : "About Us",
+                language === "bn" ? "মূল্য নীতি" : language === "hi" ? "मूल्य नीति" : "Pricing Policy",
+              ].map((label) => (
+                <li key={label}>
+                  <Link href="#" className="text-sm text-[#6b5f4d] transition-colors hover:text-[#8b5e0a]">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Astrologer + Contact */}
+          <div>
+            <p className="text-sm font-bold text-[#1a1208]">
+              {language === "bn" ? "জ্যোতিষী" : language === "hi" ? "ज्योतिषी" : "Astrologer"}
+            </p>
+            <ul className="mt-4 space-y-2.5">
+              <li>
+                <Link href="#" className="text-sm text-[#6b5f4d] transition-colors hover:text-[#8b5e0a]">
+                  {language === "bn" ? "জ্যোতিষী লগইন" : language === "hi" ? "ज्योतिषी लॉगिन" : "Astrologer Login"}
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="text-sm text-[#6b5f4d] transition-colors hover:text-[#8b5e0a]">
+                  {language === "bn" ? "জ্যোতিষী নিবন্ধন" : language === "hi" ? "ज्योतिषी पंजीकरण" : "Astrologer Registration"}
+                </Link>
+              </li>
+            </ul>
+            <p className="mt-6 text-sm font-bold text-[#1a1208]">
+              {language === "bn" ? "যোগাযোগ" : language === "hi" ? "संपर्क करें" : "Contact us"}
+            </p>
+            <p className="mt-3 text-sm text-[#6b5f4d]">
+              {language === "bn" ? "চ্যাট সাপোর্টে ২৪x৭ উপলব্ধ" : language === "hi" ? "चैट सपोर्ट पर 24x7 उपलब्ध" : "We are available 24x7 on chat support"}
+            </p>
+            <Link href="/support" className="mt-1.5 inline-block text-sm font-semibold text-[#8b5e0a] hover:underline">
+              {language === "bn" ? "সাহায্য কেন্দ্র" : language === "hi" ? "सहायता केंद्र" : "Help & Support"}
+            </Link>
+          </div>
+
+          {/* Secure + social */}
+          <div>
+            <p className="text-sm font-bold text-[#1a1208]">
+              {language === "bn" ? "সুরক্ষিত" : language === "hi" ? "सुरक्षित" : "Secure"}
+            </p>
+            <ul className="mt-4 space-y-3">
+              <li className="flex items-center gap-2.5 text-sm text-[#6b5f4d]">
+                <Lock className="size-4 text-[#8b5e0a]" />
+                {language === "bn" ? "গোপনীয় ও সুরক্ষিত" : language === "hi" ? "निजी एवं गोपनीय" : "Private & Confidential"}
+              </li>
+              <li className="flex items-center gap-2.5 text-sm text-[#6b5f4d]">
+                <ShieldCheck className="size-4 text-[#8b5e0a]" />
+                {language === "bn" ? "যাচাইকৃত জ্যোতিষী" : language === "hi" ? "सत्यापित ज्योतिषी" : "Verified Astrologers"}
+              </li>
+              <li className="flex items-center gap-2.5 text-sm text-[#6b5f4d]">
+                <Wallet className="size-4 text-[#8b5e0a]" />
+                {language === "bn" ? "নিরাপদ পেমেন্ট" : language === "hi" ? "सुरक्षित भुगतान" : "Secure Payments"}
+              </li>
+            </ul>
+            <div className="mt-5 flex items-center gap-3">
+              {[
+                { label: "Facebook", Icon: FaFacebookF },
+                { label: "Instagram", Icon: FaInstagram },
+                { label: "LinkedIn", Icon: FaLinkedinIn },
+                { label: "YouTube", Icon: FaYoutube },
+              ].map(({ label, Icon }) => (
+                <a
+                  key={label}
+                  href="#"
+                  aria-label={label}
+                  className="flex size-9 items-center justify-center rounded-full border border-[#eadf9a] bg-white text-[#6b5f4d] shadow-2xs transition-colors hover:border-[#d9b64a] hover:text-[#8b5e0a]"
+                >
+                  <Icon className="size-4" aria-hidden="true" />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Download the App */}
+          <div>
+            <p className="text-sm font-bold text-[#1a1208]">
+              {language === "bn" ? "অ্যাপ ডাউনলোড করুন" : language === "hi" ? "ऐप डाउनलोड करें" : "Download the App"}
+            </p>
+            <div className="mt-4 flex flex-col gap-3">
+              <a href="#" aria-label="Get it on Google Play" className="inline-flex w-44 items-center gap-2.5 rounded-xl bg-[#1a1208] px-4 py-2.5 text-white transition-transform hover:scale-[1.02]">
+                <FaGooglePlay className="size-6 shrink-0" />
+                <span className="flex flex-col leading-tight">
+                  <span className="text-[9px] uppercase tracking-wide opacity-80">Get it on</span>
+                  <span className="text-sm font-bold">Google Play</span>
+                </span>
+              </a>
+              <a href="#" aria-label="Download on the App Store" className="inline-flex w-44 items-center gap-2.5 rounded-xl bg-[#1a1208] px-4 py-2.5 text-white transition-transform hover:scale-[1.02]">
+                <FaApple className="size-6 shrink-0" />
+                <span className="flex flex-col leading-tight">
+                  <span className="text-[9px] uppercase tracking-wide opacity-80">Download on the</span>
+                  <span className="text-sm font-bold">App Store</span>
+                </span>
+              </a>
+            </div>
+          </div>
         </div>
 
         <div className="mt-12 border-t border-[#efe3c0] pt-6">

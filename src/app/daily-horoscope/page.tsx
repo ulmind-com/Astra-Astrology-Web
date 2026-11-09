@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Sparkles,
   Calendar,
@@ -193,9 +193,11 @@ function formatDateToYMD(d: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-function HoroscopeContent() {
+export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const initialSign = searchParams?.get("sign") || "aries";
+  const isDetail = Boolean(detailSign);
+  const initialSign = detailSign || searchParams?.get("sign") || "aries";
 
   const { isSignedIn } = useAuth();
   const { data: profile } = useProfile({ enabled: isSignedIn });
@@ -767,6 +769,30 @@ function HoroscopeContent() {
     return d.toLocaleDateString(locale, { day: "numeric", month: "long", year: "numeric" });
   }, [selectedDate, language]);
 
+  // Clicking a sign charges 10 coins, then opens its detailed page.
+  async function handleOpenSign(index: number, id: string) {
+    if (!isSignedIn) {
+      setCoinModalReason("unauthorized");
+      setCoinModalOpen(true);
+      return;
+    }
+    try {
+      await astrologyApi.unlockDailyHoroscope(index);
+      router.push(`/daily-horoscope/${id}`);
+    } catch (err: unknown) {
+      const e = err as { code?: string; status?: number; message?: string };
+      if (e?.code === "insufficient_coins") {
+        setCoinModalReason("insufficient_coins");
+        setCoinModalOpen(true);
+      } else if (e?.code === "authentication_required" || e?.status === 401) {
+        setCoinModalReason("unauthorized");
+        setCoinModalOpen(true);
+      } else {
+        toast.error(e?.message || "Could not open this reading.");
+      }
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#faf6f0] text-[#332c39]">
       <SiteHeader />
@@ -780,7 +806,19 @@ function HoroscopeContent() {
         </div>
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          
+
+          {/* Detail page: back link to the full directory */}
+          {isDetail && (
+            <Link
+              href="/daily-horoscope"
+              className="mb-6 inline-flex items-center gap-1.5 text-sm font-semibold text-[#b06d4e] transition-colors hover:text-[#8c5035]"
+            >
+              <ArrowRight className="size-4 rotate-180" />
+              {language === "bn" ? "সব রাশি" : language === "hi" ? "सभी राशियां" : "All signs"}
+            </Link>
+          )}
+
+          {!isDetail && (<>
           {/* Header Hero Section — Astrotalk style */}
           <div className="relative mb-8 overflow-hidden">
             <div className="relative z-10 max-w-2xl">
@@ -1598,12 +1636,7 @@ function HoroscopeContent() {
                   <button
                     key={sign.id}
                     type="button"
-                    onClick={() => {
-                      setActiveSignIndex(sign.index);
-                      document
-                        .getElementById("sign-detail")
-                        ?.scrollIntoView({ behavior: "smooth", block: "start" });
-                    }}
+                    onClick={() => handleOpenSign(sign.index, sign.id)}
                     className={`group flex flex-col rounded-2xl border bg-white p-4 text-left shadow-[0_2px_8px_-4px_rgba(26,18,8,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_-14px_rgba(176,109,78,0.45)] ${
                       isSelected
                         ? "border-[#b06d4e] ring-2 ring-[#b06d4e]/25"
@@ -1669,8 +1702,10 @@ function HoroscopeContent() {
             </div>
           </div>
 
-          {/* Active Sign Deep Horoscope View */}
-          {loading ? (
+          </>)}
+
+          {/* Active Sign Deep Horoscope View — detail page only */}
+          {isDetail && (loading ? (
             <div className="rounded-3xl border border-[#ebd7c8] bg-[#fdf9f4] p-12 text-center shadow-sm">
               <RotateCcw className="size-8 text-[#b06d4e] animate-spin mx-auto mb-3" />
               <p className="font-cinzel text-lg font-bold text-[#4D4664]">{t.calculatingTitle}</p>
@@ -2316,7 +2351,7 @@ function HoroscopeContent() {
               </div>
 
             </div>
-          ) : null}
+          ) : null)}
 
         </div>
       </main>
@@ -2325,7 +2360,7 @@ function HoroscopeContent() {
         open={coinModalOpen}
         onClose={() => setCoinModalOpen(false)}
         featureName={horoscopeFeature?.name || t.title}
-        requiredCoins={horoscopeFeature?.coins ?? 0}
+        requiredCoins={10}
         walletBalance={walletBalance}
         reason={coinModalReason}
         language={language}
