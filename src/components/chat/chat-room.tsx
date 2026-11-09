@@ -212,7 +212,7 @@ export function ChatRoom({
   let lastDay = "";
 
   return (
-    <div className="flex h-full flex-col bg-surface-muted/40">
+    <div className="relative flex h-full flex-col bg-gradient-to-b from-amber-50/50 via-surface-muted/30 to-surface-muted/40">
       {/* ------------------------------------------------------ messages */}
       <div className="relative flex-1 overflow-hidden">
         <div
@@ -257,7 +257,7 @@ export function ChatRoom({
                   <React.Fragment key={message.id}>
                     {newDay && (
                       <li className="flex justify-center py-3">
-                        <span className="rounded-full bg-surface px-3 py-1 text-[11px] font-medium text-muted-foreground shadow-sm">
+                        <span className="rounded-full bg-surface/80 px-3 py-1 text-[11px] font-semibold text-muted-foreground shadow-sm ring-1 ring-border/60 backdrop-blur">
                           {day}
                         </span>
                       </li>
@@ -271,10 +271,10 @@ export function ChatRoom({
                     >
                       <div
                         className={cn(
-                          "max-w-[82%] px-3.5 py-2 text-sm shadow-sm sm:max-w-[70%]",
+                          "max-w-[82%] px-3.5 py-2.5 text-sm sm:max-w-[70%]",
                           mine
-                            ? "rounded-2xl rounded-br-md bg-brand-300 text-brand-950"
-                            : "rounded-2xl rounded-bl-md bg-surface text-foreground",
+                            ? "rounded-2xl rounded-br-md bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-[0_4px_14px_rgba(217,119,6,0.30)] ring-1 ring-orange-500/20"
+                            : "rounded-2xl rounded-bl-md bg-surface text-foreground shadow-sm ring-1 ring-border/70",
                         )}
                       >
                         <p className="whitespace-pre-wrap break-words leading-relaxed">
@@ -283,7 +283,7 @@ export function ChatRoom({
                         <span
                           className={cn(
                             "mt-1 flex items-center justify-end gap-1 text-[10px]",
-                            mine ? "text-ink-600" : "text-muted-foreground",
+                            mine ? "text-white/80" : "text-muted-foreground",
                           )}
                         >
                           {message.sentAt ? clockTime(message.sentAt) : "…"}
@@ -307,7 +307,7 @@ export function ChatRoom({
               scrollToBottom();
             }}
             aria-label="Jump to the latest message"
-            className="absolute bottom-3 right-4 flex size-9 items-center justify-center rounded-full bg-surface shadow-lg ring-1 ring-border transition-transform hover:scale-105"
+            className="absolute bottom-3 right-4 flex size-10 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-[0_6px_18px_rgba(217,119,6,0.35)] ring-1 ring-white/30 transition-transform hover:scale-110 active:scale-95"
           >
             <ArrowDown className="size-4" />
           </button>
@@ -321,7 +321,7 @@ export function ChatRoom({
             e.preventDefault();
             void submit();
           }}
-          className="flex items-end gap-2 border-t border-border bg-surface px-2.5 pt-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] sm:p-3"
+          className="flex items-end gap-2 border-t border-border bg-surface/95 backdrop-blur-md shadow-[0_-4px_20px_rgba(180,83,9,0.06)] px-2.5 pt-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] sm:p-3"
         >
           <textarea
             ref={boxRef}
@@ -331,13 +331,13 @@ export function ChatRoom({
             placeholder="Write a message…"
             rows={1}
             maxLength={4000}
-            className="max-h-32 min-h-11 flex-1 resize-none rounded-2xl border border-border bg-surface-muted/60 px-4 py-2.5 text-base sm:text-sm leading-relaxed outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-brand-500/50"
+            className="max-h-32 min-h-11 flex-1 resize-none rounded-2xl border border-border bg-surface-muted/60 px-4 py-2.5 text-base sm:text-sm leading-relaxed shadow-inner outline-none transition-all placeholder:text-muted-foreground/70 focus:border-amber-500/60 focus:bg-surface focus:ring-4 focus:ring-amber-500/10"
           />
           <button
             type="submit"
             disabled={!draft.trim() || sending}
             aria-label="Send message"
-            className="flex size-11 shrink-0 items-center justify-center rounded-full bg-brand-300 text-brand-950 transition-all hover:bg-brand-400 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex size-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-[0_6px_18px_rgba(217,119,6,0.35)] transition-all hover:brightness-105 hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:grayscale"
           >
             {sending ? (
               <Loader2 className="size-4 animate-spin" />

@@ -49,10 +49,13 @@ export function DirectoryFilters({
   filters,
   onChange,
   total,
+  trailing,
 }: {
   filters: Filters;
   onChange: (next: Filters) => void;
   total?: number;
+  /** Rendered inline in the search row (e.g. quick-category chips), scrollable. */
+  trailing?: React.ReactNode;
 }) {
   const { language } = useLanguage();
   const t = ASTROLOGERS_I18N[language] || ASTROLOGERS_I18N.en;
@@ -64,8 +67,8 @@ export function DirectoryFilters({
 
   return (
     <div className="space-y-3">
-      <div className="flex gap-2">
-        <div className="relative flex-1">
+      <div className="flex items-center gap-2">
+        <div className="relative w-full max-w-[190px] shrink-0 sm:max-w-[240px]">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={filters.search}
@@ -89,6 +92,7 @@ export function DirectoryFilters({
           variant={open || active > 0 ? "primary" : "secondary"}
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
+          className="shrink-0"
         >
           <SlidersHorizontal className="size-4" />
           {t.filtersBtn}
@@ -96,6 +100,12 @@ export function DirectoryFilters({
             <span className="ml-0.5 rounded-full bg-ink-900/10 px-1.5 text-xs">{active}</span>
           )}
         </Button>
+
+        {trailing && (
+          <div className="min-w-0 flex-1 overflow-x-auto scrollbar-none">
+            {trailing}
+          </div>
+        )}
       </div>
 
       {/* Quick toggles stay visible — they are the two people reach for most. */}

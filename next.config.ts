@@ -4,8 +4,10 @@ const nextConfig: NextConfig = {
   experimental: {
     agentUpgrade: "security",
   },
-  // Allow the dev server to be opened from a phone on the LAN (QR workflow).
-  allowedDevOrigins: ["192.168.31.41"],
+  // Allow the dev server to be opened from a phone on the LAN (QR workflow), or
+  // through a Cloudflare quick tunnel (npm run tunnel) whose *.trycloudflare.com
+  // host is random each run — the wildcard covers every run without edits.
+  allowedDevOrigins: ["192.168.31.41", "*.trycloudflare.com"],
   // Hide the Next.js dev indicator (bottom-left "N" overlay).
   devIndicators: false,
   // `cacheComponents` (on by default in the scaffold) refuses to prerender any

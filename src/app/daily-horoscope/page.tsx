@@ -75,6 +75,46 @@ const ZODIAC_LIST = [
   { id: "pisces", index: 11, en: "Pisces", bn: "মীন", hi: "मीन", sa: "Meena", symbol: "♓", element: "Water", ruler: "Jupiter", icon: "/images/zodiac/vedic/meena.svg" },
 ];
 
+// Western date ranges per sign — shown on each zodiac card (Astrotalk-style).
+const SIGN_DATES: Record<string, string> = {
+  aries: "Mar 21 – Apr 19",
+  taurus: "Apr 20 – May 20",
+  gemini: "May 21 – Jun 20",
+  cancer: "Jun 21 – Jul 22",
+  leo: "Jul 23 – Aug 22",
+  virgo: "Aug 23 – Sep 22",
+  libra: "Sep 23 – Oct 22",
+  scorpio: "Oct 23 – Nov 21",
+  sagittarius: "Nov 22 – Dec 21",
+  capricorn: "Dec 22 – Jan 19",
+  aquarius: "Jan 20 – Feb 18",
+  pisces: "Feb 19 – Mar 20",
+};
+
+// Lucky-colour name (en/bn/hi) → a swatch hex for the colour dot.
+function colorHex(name?: string): string {
+  if (!name) return "#f2d94a";
+  const n = name.toLowerCase();
+  const map: [string, string][] = [
+    ["red", "#e4572e"], ["লাল", "#e4572e"], ["लाल", "#e4572e"],
+    ["orange", "#f28c28"], ["কমলা", "#f28c28"], ["नारंगी", "#f28c28"],
+    ["saffron", "#f4a300"], ["গেরুয়া", "#f4a300"], ["केसरी", "#f4a300"],
+    ["gold", "#e0b43a"], ["সোনালি", "#e0b43a"], ["सोना", "#e0b43a"],
+    ["yellow", "#f2d94a"], ["হলুদ", "#f2d94a"], ["पीला", "#f2d94a"],
+    ["green", "#2cb459"], ["সবুজ", "#2cb459"], ["हरा", "#2cb459"],
+    ["blue", "#3b82f6"], ["নীল", "#3b82f6"], ["नीला", "#3b82f6"],
+    ["white", "#f5f5f4"], ["সাদা", "#f5f5f4"], ["सफेद", "#f5f5f4"],
+    ["black", "#44403c"], ["কালো", "#44403c"], ["काला", "#44403c"],
+    ["pink", "#ec4899"], ["গোলাপি", "#ec4899"], ["गुलाबी", "#ec4899"],
+    ["purple", "#8b5cf6"], ["বেগুনি", "#8b5cf6"], ["बैंगनी", "#8b5cf6"],
+    ["brown", "#92400e"], ["বাদামি", "#92400e"], ["भूरा", "#92400e"],
+    ["silver", "#cbd5e1"], ["রুপালি", "#cbd5e1"], ["चांदी", "#cbd5e1"],
+    ["maroon", "#7f1d1d"], ["cream", "#f5e9d0"],
+  ];
+  for (const [k, v] of map) if (n.includes(k)) return v;
+  return "#f2d94a";
+}
+
 // 27 Nakshatras list for quick personalization
 const NAKSHATRA_OPTIONS = [
   { index: 0, en: "Ashwini", bn: "অশ্বিনী", hi: "अश्विनी", lord: "Ketu", rashi: "Aries" },
@@ -719,6 +759,14 @@ function HoroscopeContent() {
     return activeSignData.favorable_direction;
   }, [activeSignData?.favorable_direction, t]);
 
+  // "9 November, 2026" style label for the hero.
+  const heroDateLabel = React.useMemo(() => {
+    const d = new Date(selectedDate + "T00:00:00");
+    if (isNaN(d.getTime())) return selectedDate;
+    const locale = language === "bn" ? "bn-IN" : language === "hi" ? "hi-IN" : "en-US";
+    return d.toLocaleDateString(locale, { day: "numeric", month: "long", year: "numeric" });
+  }, [selectedDate, language]);
+
   return (
     <div className="min-h-screen bg-[#faf6f0] text-[#332c39]">
       <SiteHeader />
@@ -733,19 +781,49 @@ function HoroscopeContent() {
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           
-          {/* Header Hero Section */}
-          <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#d6b7a2] bg-[#fbf1e7]/80 px-3.5 py-1 text-xs font-semibold text-[#8c5035] shadow-xs backdrop-blur-xs mb-3">
-              <Sparkles className="size-3.5 text-[#b06d4e]" />
-              <span>{t.tag}</span>
+          {/* Header Hero Section — Astrotalk style */}
+          <div className="relative mb-8 overflow-hidden">
+            <div className="relative z-10 max-w-2xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#d6b7a2] bg-[#fbf1e7]/80 px-3.5 py-1 text-xs font-semibold text-[#8c5035] shadow-xs backdrop-blur-xs mb-4">
+                <Sparkles className="size-3.5 text-[#b06d4e]" />
+                <span>{t.tag}</span>
+              </div>
+
+              <h1 className="font-cinzel text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-[#4D4664]">
+                {t.title}
+              </h1>
+
+              <p className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[#8c7e97]">
+                <Calendar className="size-4 text-[#b06d4e]" />
+                {language === "bn" ? "আপডেট" : language === "hi" ? "अपडेट" : "Updated on"}:{" "}
+                <span className="font-semibold text-[#4D4664]">{heroDateLabel}</span>
+              </p>
+
+              <p className="mt-4 max-w-xl text-sm sm:text-base leading-relaxed text-[#6f637b]">
+                {language === "bn"
+                  ? "নির্ভুল দৈনিক রাশিফল খুঁজছেন? নিচে আপনার রাশিতে ক্লিক করে প্রেম, কর্ম, স্বাস্থ্য ও অর্থভাগ্যের আজকের পূর্বাভাস জানুন — দিনের গ্রহ-অবস্থানের নিখুঁত বৈদিক গণনা থেকে তৈরি।"
+                  : language === "hi"
+                  ? "सटीक दैनिक राशिफल खोज रहे हैं? नीचे अपनी राशि पर क्लिक करके प्रेम, करियर, स्वास्थ्य और धन का आज का पूर्वानुमान जानें — दिन की ग्रह-स्थिति की सटीक वैदिक गणना से तैयार।"
+                  : "Looking for an accurate daily horoscope? Tap your zodiac sign below to discover insights for your love, career, health, and finances — prepared from precise Vedic planetary calculations for the day."}
+              </p>
+
+              <Link
+                href="/astrologers"
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#f2d94a] px-6 py-3 text-sm font-bold text-[#1a1208] shadow-[0_8px_20px_-8px_rgba(242,217,74,0.9)] transition-all hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0"
+              >
+                <Sparkles className="size-4" />
+                {language === "bn" ? "ফ্রি পরামর্শ নিন" : language === "hi" ? "फ्री परामर्श लें" : "Get Free Consultation"}
+              </Link>
             </div>
 
-            <h1 className="font-cinzel text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#4D4664]">
-              {t.title}
-            </h1>
-            <p className="mt-2 text-sm sm:text-base text-[#6f637b] leading-relaxed">
-              {t.subtitle}
-            </p>
+            {/* Faint rotating zodiac wheel on the right */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/zodiac-wheel-gold.webp"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-16 -top-20 hidden size-[440px] select-none opacity-30 mix-blend-multiply animate-spin [animation-duration:120s] motion-reduce:animate-none lg:block"
+            />
           </div>
 
           {/* Pricing coin pill banner */}
@@ -1492,55 +1570,99 @@ function HoroscopeContent() {
             </div>
           )}
 
-          {/* 12 Zodiac Sign Tabs Grid */}
+          {/* Read Your Daily Horoscope by choosing your Zodiac Sign — Astrotalk style */}
           <div className="mb-8">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="font-cinzel text-lg font-bold text-[#4D4664]">
-                {t.allSigns}
-              </h2>
-              <span className="text-xs text-[#8c7e97]">
-                {t.clickSignHint}
-              </span>
-            </div>
+            <h2 className="font-cinzel text-2xl sm:text-3xl font-bold text-[#4D4664]">
+              {language === "bn"
+                ? "আপনার রাশি বেছে দৈনিক রাশিফল পড়ুন"
+                : language === "hi"
+                ? "अपनी राशि चुनकर दैनिक राशिफल पढ़ें"
+                : "Read Your Daily Horoscope by choosing your Zodiac Sign"}
+            </h2>
+            <p className="mt-1 mb-5 text-sm text-[#8c7e97]">
+              {language === "bn"
+                ? "১২টি রাশির আজকের পূর্বাভাস পড়ুন।"
+                : language === "hi"
+                ? "सभी 12 राशियों का आज का पूर्वानुमान पढ़ें।"
+                : "Read today's prediction for all 12 zodiac signs."}
+            </p>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {ZODIAC_LIST.map((sign) => {
                 const isSelected = sign.index === activeSignIndex;
-                const signHoroscope = horoscopeData?.signs?.find((s) => s.sign_index === sign.index);
-                const score = signHoroscope?.overall_score ?? 75;
+                const sh = horoscopeData?.signs?.find((s) => s.sign_index === sign.index);
+                const name = language === "bn" ? sign.bn : language === "hi" ? sign.hi : sign.en;
+                const score = sh?.overall_score;
 
                 return (
                   <button
                     key={sign.id}
                     type="button"
-                    onClick={() => setActiveSignIndex(sign.index)}
-                    className={`group relative rounded-2xl border p-3 text-left press transition-all duration-200 ${
+                    onClick={() => {
+                      setActiveSignIndex(sign.index);
+                      document
+                        .getElementById("sign-detail")
+                        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                    className={`group flex flex-col rounded-2xl border bg-white p-4 text-left shadow-[0_2px_8px_-4px_rgba(26,18,8,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_-14px_rgba(176,109,78,0.45)] ${
                       isSelected
-                        ? "border-[#b06d4e] bg-[#fbf1e7] shadow-md -translate-y-0.5 ring-2 ring-[#b06d4e]/30"
-                        : "border-[#e8d7c9] bg-[#fffaf5] hover:border-[#b06d4e]/60 hover:bg-[#faf2ea]"
+                        ? "border-[#b06d4e] ring-2 ring-[#b06d4e]/25"
+                        : "border-[#ece0d4] hover:border-[#b06d4e]/50"
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className={`flex size-10 items-center justify-center rounded-xl ring-1 ring-[#d9b64a] bg-gradient-to-br from-[#fdf6da] to-[#f3e3a0] shadow-sm transition-transform ${isSelected ? "scale-110 ring-[#b06d4e]" : ""}`}>
+                    {/* Top: icon + name + date range + score */}
+                    <div className="flex items-start gap-3">
+                      <span className="size-12 shrink-0 overflow-hidden rounded-full shadow-sm ring-1 ring-black/5 transition-transform group-hover:scale-105">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={sign.icon} alt={sign.en} width={28} height={28} className="size-7 object-contain" />
+                        <img src={`/images/zodiac/characters/${sign.id}.svg`} alt={sign.en} width={48} height={48} className="size-full" />
                       </span>
-                      {signHoroscope && (
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
-                          score >= 75 ? "bg-emerald-100 text-emerald-800" : score >= 55 ? "bg-blue-100 text-blue-800" : "bg-amber-100 text-amber-800"
-                        }`}>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-base font-bold leading-tight text-[#1a1208] group-hover:text-[#b06d4e] transition-colors">
+                          {name}
+                        </h3>
+                        <p className="text-xs text-[#8c7e97]">{SIGN_DATES[sign.id]}</p>
+                      </div>
+                      {typeof score === "number" && (
+                        <span
+                          className={`shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold ${
+                            score >= 75
+                              ? "bg-emerald-100 text-emerald-800"
+                              : score >= 55
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-amber-100 text-amber-800"
+                          }`}
+                        >
                           {score}%
                         </span>
                       )}
                     </div>
-                    <div className="mt-2">
-                      <p className={`font-bold text-sm ${isSelected ? "text-[#b06d4e]" : "text-[#4D4664]"}`}>
-                        {language === "bn" ? sign.bn : language === "hi" ? sign.hi : sign.en}
-                      </p>
-                      <p className="text-[11px] text-[#8c7e97] truncate">
-                        {sign.sa} • {sign.ruler}
-                      </p>
+
+                    {/* Lucky number + colour */}
+                    <div className="mt-3 flex items-center gap-4 text-xs text-[#6f637b]">
+                      <span className="inline-flex items-center gap-1">
+                        {t.luckyNumber}:{" "}
+                        <strong className="text-[#4D4664]">{sh ? sh.lucky_number : "—"}</strong>
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        {t.luckyColor}:
+                        <span
+                          className="inline-block size-3.5 rounded-full ring-1 ring-black/10"
+                          style={{ backgroundColor: colorHex(sh?.lucky_color) }}
+                          title={sh?.lucky_color}
+                        />
+                      </span>
                     </div>
+
+                    {/* Prediction snippet (backend) */}
+                    <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-[#6f637b]">
+                      {sh
+                        ? sh.summary
+                        : language === "bn"
+                        ? "আজকের পূর্বাভাস লোড হচ্ছে…"
+                        : language === "hi"
+                        ? "आज का पूर्वानुमान लोड हो रहा है…"
+                        : "Loading today's prediction…"}
+                    </p>
                   </button>
                 );
               })}
@@ -1577,8 +1699,8 @@ function HoroscopeContent() {
               </Button>
             </div>
           ) : activeSignData ? (
-            <div className="space-y-6">
-              
+            <div id="sign-detail" className="scroll-mt-24 space-y-6">
+
               {/* Chandrashtama High-Priority Alert Banner (If Moon in 8th House) */}
               {activeSignData.is_chandrashtama && activeSignData.chandrashtama_advice && (
                 <div className="rounded-2xl border-2 border-amber-500/50 bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-amber-500/10 p-5 shadow-xs animate-pulse">
@@ -1619,14 +1741,14 @@ function HoroscopeContent() {
                   
                   {/* Left: Sign Identity */}
                   <div className="flex items-center gap-4 sm:gap-5">
-                    <div className="flex size-16 sm:size-20 shrink-0 items-center justify-center rounded-2xl border border-[#d9b64a] bg-gradient-to-br from-[#fdf6da] to-[#f3e3a0] shadow-sm">
+                    <div className="size-16 sm:size-20 shrink-0 overflow-hidden rounded-full shadow-sm ring-1 ring-black/5">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={ZODIAC_LIST[activeSignIndex]?.icon ?? "/images/zodiac/vedic/mesha.svg"}
+                        src={`/images/zodiac/characters/${ZODIAC_LIST[activeSignIndex]?.id ?? "aries"}.svg`}
                         alt={activeSignData.sign_name}
-                        width={56}
-                        height={56}
-                        className="size-10 sm:size-12 object-contain"
+                        width={80}
+                        height={80}
+                        className="size-full"
                       />
                     </div>
                     <div>

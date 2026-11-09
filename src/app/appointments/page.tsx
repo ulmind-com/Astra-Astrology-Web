@@ -680,15 +680,15 @@ function AppointmentsContent() {
 
             {/* Selected Astrologer Master Experience Card (District Showcase) */}
             {selectedAstrologer ? (
-              <div className="relative overflow-hidden rounded-3xl border border-amber-900/15 bg-white/95 backdrop-blur-md p-6 sm:p-8 shadow-[0_16px_48px_rgba(180,83,9,0.08)] ring-1 ring-amber-400/20 group">
+              <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-amber-900/15 bg-white/95 backdrop-blur-md p-4 sm:p-8 shadow-[0_16px_48px_rgba(180,83,9,0.08)] ring-1 ring-amber-400/20 group">
                 {/* Subtle card interior shimmer background */}
                 <div className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-gradient-to-br from-amber-200/30 via-orange-100/20 to-transparent blur-2xl" />
 
                 <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                   {/* Avatar & Core Bio */}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
-                    <div className="relative group/avatar">
-                      <div className="size-24 sm:size-28 rounded-3xl overflow-hidden ring-4 ring-amber-400/30 group-hover/avatar:ring-amber-500 shadow-lg transition-all duration-300">
+                  <div className="flex flex-row items-start sm:items-center gap-4 sm:gap-6">
+                    <div className="relative group/avatar shrink-0">
+                      <div className="size-16 sm:size-28 rounded-2xl sm:rounded-3xl overflow-hidden ring-2 sm:ring-4 ring-amber-400/30 group-hover/avatar:ring-amber-500 shadow-lg transition-all duration-300">
                         <Avatar
                           src={selectedAstrologer.profile_image_url}
                           name={selectedAstrologer.display_name}
@@ -696,17 +696,17 @@ function AppointmentsContent() {
                           className="size-full object-cover group-hover/avatar:scale-105 transition-transform duration-500"
                         />
                       </div>
-                      <span className="absolute -bottom-2 -right-2 flex size-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md ring-2 ring-white">
-                        <Check className="size-4 stroke-[3]" />
+                      <span className="absolute -bottom-1.5 -right-1.5 sm:-bottom-2 sm:-right-2 flex size-6 sm:size-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md ring-2 ring-white">
+                        <Check className="size-3.5 sm:size-4 stroke-[3]" />
                       </span>
                     </div>
 
-                    <div className="space-y-1.5">
-                      <div className="flex flex-wrap items-center gap-2.5">
-                        <h2 className="font-display text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+                    <div className="min-w-0 space-y-1 sm:space-y-1.5">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-2.5">
+                        <h2 className="font-display text-lg sm:text-3xl font-black tracking-tight text-slate-900 leading-tight">
                           {selectedAstrologer.display_name}
                         </h2>
-                        <span className="rounded-full bg-gradient-to-r from-amber-500/15 to-orange-500/15 border border-amber-500/30 px-3 py-0.5 text-xs font-bold text-amber-950 flex items-center gap-1 shadow-2xs">
+                        <span className="rounded-full bg-gradient-to-r from-amber-500/15 to-orange-500/15 border border-amber-500/30 px-2 sm:px-3 py-0.5 text-[11px] sm:text-xs font-bold text-amber-950 flex items-center gap-1 shadow-2xs">
                           <Sparkles className="size-3 text-amber-600" />
                           <span>{SKILL_LABELS[selectedAstrologer.skills[0] || "vedic_astrology"]}</span>
                         </span>
@@ -793,7 +793,7 @@ function AppointmentsContent() {
               {/* Horizontal Date Pills Scroller */}
               <div
                 id="bms-date-strip"
-                className="flex items-center gap-2.5 overflow-x-auto scrollbar-none py-1 scroll-smooth"
+                className="flex items-center gap-2.5 overflow-x-auto scrollbar-none pt-4 pb-2 scroll-smooth"
               >
                 {dateStrip.map((item) => {
                   const isSelected = item.key === selectedDayKey;
@@ -821,7 +821,7 @@ function AppointmentsContent() {
 
                       {item.isToday && (
                         <span className={cn(
-                          "absolute -top-2 rounded-full px-2 py-0.2 text-[9px] font-black uppercase tracking-wider shadow-xs",
+                          "absolute -top-2.5 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider shadow-md ring-1 ring-white/70",
                           isSelected ? "bg-white text-amber-950 font-black" : "bg-gradient-to-r from-amber-500 to-orange-500 text-white"
                         )}>
                           TODAY
@@ -830,7 +830,7 @@ function AppointmentsContent() {
 
                       {item.isTomorrow && (
                         <span className={cn(
-                          "absolute -top-2 rounded-full px-2 py-0.2 text-[9px] font-black uppercase tracking-wider shadow-xs",
+                          "absolute -top-2.5 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider shadow-md ring-1 ring-white/70",
                           isSelected ? "bg-white text-amber-950 font-black" : "bg-sky-600 text-white"
                         )}>
                           TOMORROW
