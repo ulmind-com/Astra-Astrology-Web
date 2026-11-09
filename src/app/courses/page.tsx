@@ -80,7 +80,7 @@ export default function CoursesPage() {
           <div className="relative mx-auto max-w-6xl text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-gold-dark shadow-soft">
               <Sparkles className="size-3.5 text-gold" />
-              <span>Astra Vedic Gurukul</span>
+              <span>DivinLink Gurukul</span>
             </div>
 
             <h1 className="mt-4 font-serif text-3xl font-bold tracking-tight text-foreground sm:text-5xl">
@@ -230,7 +230,7 @@ function CourseCard({ course }: { course: CourseListItem }) {
               <div className="flex size-14 items-center justify-center rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 mb-2">
                 <span className="text-2xl">☸</span>
               </div>
-              <span className="text-[11px] font-serif font-bold uppercase tracking-wider text-amber-300/90">Astra Cosmic Gurukul</span>
+              <span className="text-[11px] font-serif font-bold uppercase tracking-wider text-amber-300/90">DivinLink Gurukul</span>
               <span className="text-[10px] text-amber-200/60 line-clamp-1">{course.title}</span>
             </div>
           )}

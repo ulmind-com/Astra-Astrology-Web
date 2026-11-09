@@ -5,14 +5,17 @@ import {
   ArrowLeft,
   Award,
   BookOpen,
+  Check,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
   Clock,
+  Copy,
   Download,
   GraduationCap,
   HelpCircle,
   Lock,
+  MessageCircle,
   Play,
   PlayCircle,
   Share2,
@@ -80,6 +83,8 @@ export default function CourseDetailPage() {
   const [isProcessingPayment, setIsProcessingPayment] = React.useState(false);
   const [avatarError, setAvatarError] = React.useState(false);
   const [thumbError, setThumbError] = React.useState(false);
+  const [showShareModal, setShowShareModal] = React.useState(false);
+  const [copiedLink, setCopiedLink] = React.useState(false);
 
   const {
     data: course,
@@ -91,6 +96,62 @@ export default function CourseDetailPage() {
     queryFn: () => courseApi.getCourseDetail(slug),
     enabled: Boolean(slug),
   });
+
+  // Fetch tokenized stream for free preview lesson (Dynamic Bunny library ID & token signed by backend)
+  const {
+    data: previewStream,
+    isLoading: isPreviewLoading,
+    isError: isPreviewError,
+  } = useQuery({
+    queryKey: ["lesson-preview-stream", course?.id, previewLesson?.id],
+    queryFn: () => {
+      if (!course?.id || !previewLesson?.id) throw new Error("Missing parameters");
+      return courseApi.getLessonStream(course.id, previewLesson.id);
+    },
+    enabled: Boolean(course?.id && previewLesson?.id),
+    staleTime: 1000 * 60 * 30, // 30 minutes cache
+  });
+
+  // Social Share Handlers
+  const courseUrl =
+    typeof window !== "undefined"
+      ? window.location.href
+      : `https://astra-astrology-web.vercel.app/courses/${slug}`;
+
+  const handleShareClick = async () => {
+    if (typeof navigator !== "undefined" && navigator.share && course) {
+      try {
+        await navigator.share({
+          title: `${course.title} — DivinLink Gurukul`,
+          text: `Master ${course.title} with classical Vedic wisdom & certified degree at DivinLink Gurukul!`,
+          url: courseUrl,
+        });
+        return;
+      } catch {
+        // Fallback to share modal if user dismisses or API is blocked
+      }
+    }
+    setShowShareModal(true);
+  };
+
+  const handleCopyLink = () => {
+    if (typeof window !== "undefined") {
+      navigator.clipboard.writeText(courseUrl);
+      setCopiedLink(true);
+      toast.success("Masterclass link copied to clipboard!");
+      setTimeout(() => setCopiedLink(false), 2500);
+    }
+  };
+
+  const whatsappShareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(
+    `Check out this sacred Vedic masterclass "${course?.title || "Masterclass"}" at DivinLink Gurukul!\n\n${courseUrl}`
+  )}`;
+
+  const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(
+    courseUrl
+  )}&text=${encodeURIComponent(
+    `Check out "${course?.title || "Masterclass"}" at DivinLink Gurukul!`
+  )}`;
 
   // Auto-expand first 2 sections on load
   React.useEffect(() => {
@@ -159,7 +220,7 @@ export default function CourseDetailPage() {
         order_id: order.order_id,
         amount: order.amount_paise,
         currency: order.currency || "INR",
-        name: "Astra Cosmic Gurukul",
+        name: "DivinLink Gurukul",
         description: course.title,
         image: "/icon.png",
         prefill: {
@@ -256,18 +317,29 @@ export default function CourseDetailPage() {
       <SiteHeader />
 
       <main className="flex-1 pb-20">
-        {/* Navigation Breadcrumb */}
+        {/* Navigation Breadcrumb & Share */}
         <div className="border-b border-border/60 bg-surface/50 px-4 py-3 sm:px-6">
-          <div className="mx-auto flex max-w-6xl items-center gap-2 text-xs text-muted-foreground">
-            <Link href="/" className="hover:text-foreground">
-              Home
-            </Link>
-            <ChevronRight className="size-3" />
-            <Link href="/courses" className="hover:text-foreground">
-              Gurukul
-            </Link>
-            <ChevronRight className="size-3" />
-            <span className="truncate font-medium text-foreground">{course.title}</span>
+          <div className="mx-auto flex max-w-6xl items-center justify-between text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 overflow-hidden truncate">
+              <Link href="/" className="hover:text-foreground">
+                Home
+              </Link>
+              <ChevronRight className="size-3" />
+              <Link href="/courses" className="hover:text-foreground">
+                Gurukul
+              </Link>
+              <ChevronRight className="size-3" />
+              <span className="truncate font-medium text-foreground">{course.title}</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleShareClick}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-surface-muted transition-colors shadow-2xs"
+            >
+              <Share2 className="size-3.5 text-brand-600" />
+              <span>Share</span>
+            </button>
           </div>
         </div>
 
@@ -472,6 +544,18 @@ export default function CourseDetailPage() {
                         </div>
                       )}
                     </div>
+
+                    {/* Share Action */}
+                    <div className="mt-5 border-t border-border/60 pt-4">
+                      <button
+                        type="button"
+                        onClick={handleShareClick}
+                        className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface-muted/60 py-2.5 text-xs font-semibold text-foreground hover:bg-surface-muted hover:border-brand-500/30 transition-colors"
+                      >
+                        <Share2 className="size-3.5 text-brand-600" />
+                        <span>Share Masterclass with Friends</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -620,39 +704,129 @@ export default function CourseDetailPage() {
         </div>
       </main>
 
-      {/* Free Lesson Preview Modal */}
+      {/* Free Lesson Preview Modal with Dynamic Token-authenticated Stream */}
       {previewLesson && (
         <Modal
           open={Boolean(previewLesson)}
           onClose={() => setPreviewLesson(null)}
-          title={`Preview: ${previewLesson.title}`}
+          title={`Lecture Preview: ${previewLesson.title}`}
         >
           <div className="space-y-4">
             <p className="text-xs text-muted-foreground">
-              Watch this preview lesson to experience the teaching depth before enrolling.
+              Watch this official preview lecture to experience the depth and pedagogy of DivinLink Gurukul.
             </p>
-            <div className="aspect-video w-full overflow-hidden rounded-xl bg-black">
-              {previewLesson.video_provider === "bunny_stream" && previewLesson.video_id ? (
-                <iframe
-                  src={`https://iframe.mediadelivery.net/embed/803267/${previewLesson.video_id}?autoplay=true&preload=true`}
-                  loading="lazy"
-                  className="h-full w-full border-0"
-                  allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;"
-                  allowFullScreen
-                />
+
+            <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black shadow-lg">
+              {isPreviewLoading ? (
+                <div className="flex h-full w-full items-center justify-center">
+                  <LoadingBlock label="Preparing secure preview stream…" />
+                </div>
+              ) : isPreviewError || !previewStream?.embed_url ? (
+                <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center text-white">
+                  <Lock className="size-10 text-amber-500 opacity-80 mb-2" />
+                  <p className="text-sm font-bold text-white">Preview Currently Unavailable</p>
+                  <p className="text-xs text-neutral-400 max-w-sm mt-1">
+                    Please enroll in the masterclass to gain full lifetime access to all lectures, charts, and resources.
+                  </p>
+                </div>
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
-                  Video preview unavailable
+                <div className="relative h-full w-full">
+                  <iframe
+                    src={`${previewStream.embed_url}${previewStream.embed_url.includes("?") ? "&" : "?"}autoplay=true&preload=true`}
+                    loading="eager"
+                    className="h-full w-full border-0 select-none"
+                    allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;"
+                    allowFullScreen
+                  />
+                  {previewStream.watermark_text && (
+                    <div className="pointer-events-none absolute bottom-3 right-3 text-[10px] font-mono text-white/40 bg-black/40 px-2 py-0.5 rounded backdrop-blur-[1px]">
+                      {previewStream.watermark_text}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-            <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => setPreviewLesson(null)}>
-                Close Preview
-              </Button>
-              <Button onClick={() => { setPreviewLesson(null); handleEnrollOrBuy(); }}>
-                Enroll in Masterclass
-              </Button>
+
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
+              <span className="text-[11px] text-muted-foreground font-medium">
+                {previewLesson.duration_minutes > 0 ? `Duration: ${previewLesson.duration_minutes} minutes` : "Full Free Preview"}
+              </span>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setPreviewLesson(null)}>
+                  Close
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setPreviewLesson(null);
+                    handleEnrollOrBuy();
+                  }}
+                >
+                  Enroll in Masterclass
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Social Share Modal */}
+      {showShareModal && (
+        <Modal
+          open={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          title="Share this Vedic Masterclass"
+        >
+          <div className="space-y-4 pt-1">
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Share <strong className="text-foreground">{course.title}</strong> with colleagues, students, or friends interested in authentic Vedic astrology and occult sciences.
+            </p>
+
+            {/* Quick Share Buttons */}
+            <div className="grid grid-cols-2 gap-2.5">
+              <a
+                href={whatsappShareUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600/10 border border-emerald-600/30 py-2.5 px-3 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-600/20 transition-colors shadow-2xs"
+              >
+                <MessageCircle className="size-4 text-emerald-600" />
+                <span>Share via WhatsApp</span>
+              </a>
+
+              <a
+                href={telegramShareUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-xl bg-sky-600/10 border border-sky-600/30 py-2.5 px-3 text-xs font-bold text-sky-700 dark:text-sky-300 hover:bg-sky-600/20 transition-colors shadow-2xs"
+              >
+                <Share2 className="size-4 text-sky-600" />
+                <span>Share via Telegram</span>
+              </a>
+            </div>
+
+            {/* Copy Link Input Row */}
+            <div className="rounded-xl border border-border bg-surface-muted/50 p-3">
+              <label className="block text-[11px] font-semibold text-muted-foreground mb-1.5">
+                Direct Masterclass Link
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={courseUrl}
+                  className="flex-1 bg-surface rounded-lg border border-border px-3 py-1.5 text-xs font-mono text-foreground select-all outline-none"
+                />
+                <Button
+                  size="sm"
+                  variant={copiedLink ? "primary" : "outline"}
+                  onClick={handleCopyLink}
+                  className="gap-1.5 text-xs shrink-0"
+                >
+                  {copiedLink ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+                  <span>{copiedLink ? "Copied" : "Copy"}</span>
+                </Button>
+              </div>
             </div>
           </div>
         </Modal>
