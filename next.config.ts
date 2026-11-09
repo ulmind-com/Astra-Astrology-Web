@@ -24,8 +24,10 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
-    // Profile pictures and galleries are served from Cloudinary.
-    remotePatterns: [{ protocol: "https", hostname: "res.cloudinary.com" }],
+    // Profile pictures, course thumbnails, and galleries served from Cloudinary.
+    remotePatterns: [
+      { protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" },
+    ],
   },
   async redirects() {
     return [

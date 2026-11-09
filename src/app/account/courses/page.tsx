@@ -112,15 +112,16 @@ function EnrolledCourseCard({ item }: { item: CourseEnrollment }) {
               src={item.thumbnail_url}
               alt={item.course_title || "Course"}
               fill
+              unoptimized
               className="object-cover"
               onError={() => setThumbError(true)}
             />
           ) : (
-            <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-amber-950/80 via-neutral-900 to-amber-950/40 text-amber-500 p-3 text-center">
-              <div className="flex size-10 items-center justify-center rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 mb-1">
+            <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-neutral-950 via-amber-950/60 to-neutral-950 text-amber-500 p-3 text-center border-b border-amber-500/20">
+              <div className="flex size-10 items-center justify-center rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 mb-1">
                 <span className="text-xl">☸</span>
               </div>
-              <span className="text-[10px] font-serif font-bold uppercase tracking-wider text-amber-300/90">DivinLink Gurukul</span>
+              <span className="text-[10px] font-serif font-bold uppercase tracking-[1.5px] text-amber-300">DivinLink Gurukul</span>
             </div>
           )}
           {isCompleted && (
