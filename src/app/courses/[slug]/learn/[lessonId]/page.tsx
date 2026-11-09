@@ -273,7 +273,7 @@ export default function LessonClassroomPage() {
   if (isCourseLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
-        <LoadingBlock label="Entering Astra Gurukul classroom…" />
+        <LoadingBlock label="Entering DivinLink Gurukul classroom…" />
       </div>
     );
   }
@@ -983,7 +983,7 @@ export default function LessonClassroomPage() {
 
             <div className="space-y-1">
               <span className="inline-block rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
-                Astra Gurukul Consecrated Award
+                DivinLink Gurukul Consecrated Award
               </span>
               <h3 className="font-serif text-2xl font-bold text-foreground">
                 You Have Mastered the Entire Course!

@@ -120,7 +120,7 @@ function EnrolledCourseCard({ item }: { item: CourseEnrollment }) {
               <div className="flex size-10 items-center justify-center rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 mb-1">
                 <span className="text-xl">☸</span>
               </div>
-              <span className="text-[10px] font-serif font-bold uppercase tracking-wider text-amber-300/90">Astra Gurukul</span>
+              <span className="text-[10px] font-serif font-bold uppercase tracking-wider text-amber-300/90">DivinLink Gurukul</span>
             </div>
           )}
           {isCompleted && (

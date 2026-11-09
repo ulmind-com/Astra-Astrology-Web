@@ -183,7 +183,7 @@ export default function CourseDetailPage() {
               razorpay_signature: response.razorpay_signature,
             });
 
-            toast.success("Payment verified! Welcome to Astra Gurukul.", { id: "rzp-verify" });
+            toast.success("Payment verified! Welcome to DivinLink Gurukul.", { id: "rzp-verify" });
             await queryClient.invalidateQueries({ queryKey: ["course-detail", slug] });
             if (firstLessonId) {
               router.push(`/courses/${slug}/learn/${firstLessonId}`);
@@ -358,7 +358,7 @@ export default function CourseDetailPage() {
                     ) : (
                       <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-amber-950 via-neutral-900 to-black text-amber-500">
                         <span className="text-3xl mb-1">☸</span>
-                        <span className="text-[11px] font-serif font-bold tracking-widest text-amber-400/80 uppercase">Astra Gurukul</span>
+                        <span className="text-[11px] font-serif font-bold tracking-widest text-amber-400/80 uppercase">DivinLink Gurukul</span>
                       </div>
                     )}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40">

@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import QRCode from "qrcode";
 import {
   Award,
@@ -134,7 +135,7 @@ export default function CourseCertificateVerificationPage() {
       try {
         await navigator.share({
           title: `${cert.student_name}'s Consecrated Vedic Certificate`,
-          text: `Verified Certificate of Vedic Mastery in ${cert.course_title} from Astra Gurukul.`,
+          text: `Verified Certificate of Vedic Mastery in ${cert.course_title} from DivinLink Gurukul.`,
           url: window.location.href,
         });
       } catch {
@@ -184,7 +185,7 @@ export default function CourseCertificateVerificationPage() {
                 </span>
               </div>
               <h1 className="font-serif text-sm sm:text-base font-bold text-neutral-100">
-                Astra Gurukul Official Credential Registry
+                DivinLink Gurukul Official Credential Registry
               </h1>
             </div>
           </div>
@@ -301,7 +302,7 @@ export default function CourseCertificateVerificationPage() {
             <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-neutral-400 pt-2 border-t border-neutral-800/80">
               <div>
                 Authority:{" "}
-                <strong className="text-neutral-200">Astra Gurukul</strong>
+                <strong className="text-neutral-200">DivinLink Gurukul</strong>
               </div>
               <div>
                 Algorithm:{" "}
@@ -352,7 +353,7 @@ export default function CourseCertificateVerificationPage() {
                   Scholar Name (<strong className="text-amber-300">{cert.student_name}</strong>),
                   Course (<strong className="text-amber-300">{cert.course_title}</strong>),
                   and Certificate ID (<strong className="text-amber-300">{cert.certificate_id}</strong>)
-                  must strictly match the record above from Astra Gurukul&apos;s authoritative ledger.
+                  must strictly match the record above from DivinLink Gurukul&apos;s authoritative ledger.
                   Any difference in printed name proves the physical document was altered or forged.
                 </p>
               </div>
@@ -403,127 +404,183 @@ export default function CourseCertificateVerificationPage() {
         </div>
       )}
 
-      {/* Verified Certificate Canvas — Exact Replica of Production Template */}
+      {/* Verified Certificate Canvas — Ultra-Advanced DivinLink Gurukul Masterwork */}
       {!loading && cert && (
-        <div className="certificate-page-wrap mx-auto max-w-[1040px]">
-          <div className="certificate-canvas relative overflow-hidden rounded-xl bg-[#FAF8F2] shadow-2xl text-[#1A1816] flex flex-col md:flex-row border border-[#D1B26F]/30 select-none">
-            {/* Micro-Text Perimeter Security Bands */}
-            <div className="microtext-top select-none pointer-events-none absolute top-1.5 left-4 right-4 flex justify-between font-mono text-[5.5px] uppercase tracking-[1.5px] text-[#8C7A62]/45 overflow-hidden whitespace-nowrap z-20">
-              <span>ASTRA GURUKUL CELESTIAL CREDENTIALS • OFFICIALLY CONSECRATED • CANONICAL HASH VERIFIED</span>
+        <div className="certificate-page-wrap mx-auto max-w-[1060px]">
+          <div className="certificate-canvas relative overflow-hidden rounded-xl bg-[#FAF8F3] shadow-2xl text-[#1A1816] flex flex-col md:flex-row border border-[#D1B26F]/40 select-none">
+            {/* Guilloche Anti-Counterfeit Background Rosette Watermark */}
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.038] z-0 overflow-hidden">
+              <svg viewBox="0 0 600 600" className="size-[580px]" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="300" cy="300" r="270" fill="none" stroke="#C59B27" strokeWidth="1.5" strokeDasharray="5,5"/>
+                <circle cx="300" cy="300" r="230" fill="none" stroke="#C59B27" strokeWidth="1"/>
+                <circle cx="300" cy="300" r="180" fill="none" stroke="#C59B27" strokeWidth="1.2" strokeDasharray="3,3"/>
+                <circle cx="300" cy="300" r="130" fill="none" stroke="#C59B27" strokeWidth="0.8"/>
+                <g stroke="#C59B27" strokeWidth="0.75" fill="none">
+                  <ellipse cx="300" cy="300" rx="260" ry="50" transform="rotate(0 300 300)"/>
+                  <ellipse cx="300" cy="300" rx="260" ry="50" transform="rotate(15 300 300)"/>
+                  <ellipse cx="300" cy="300" rx="260" ry="50" transform="rotate(30 300 300)"/>
+                  <ellipse cx="300" cy="300" rx="260" ry="50" transform="rotate(45 300 300)"/>
+                  <ellipse cx="300" cy="300" rx="260" ry="50" transform="rotate(60 300 300)"/>
+                  <ellipse cx="300" cy="300" rx="260" ry="50" transform="rotate(75 300 300)"/>
+                  <ellipse cx="300" cy="300" rx="260" ry="50" transform="rotate(90 300 300)"/>
+                  <ellipse cx="300" cy="300" rx="260" ry="50" transform="rotate(105 300 300)"/>
+                  <ellipse cx="300" cy="300" rx="260" ry="50" transform="rotate(120 300 300)"/>
+                  <ellipse cx="300" cy="300" rx="260" ry="50" transform="rotate(135 300 300)"/>
+                  <ellipse cx="300" cy="300" rx="260" ry="50" transform="rotate(150 300 300)"/>
+                  <ellipse cx="300" cy="300" rx="260" ry="50" transform="rotate(165 300 300)"/>
+                </g>
+                <text x="300" y="325" fill="#C59B27" fontSize="80" fontFamily="'Playfair Display', serif" fontWeight="bold" textAnchor="middle" opacity="0.35">ॐ</text>
+              </svg>
+            </div>
+
+            {/* Micro-Text Perimeter Security Bands (Anti-Forgery Protection) */}
+            <div className="microtext-top select-none pointer-events-none absolute top-1.5 left-5 right-5 flex justify-between font-mono text-[5.5px] uppercase tracking-[1.5px] text-[#8C7A62]/50 overflow-hidden whitespace-nowrap z-20">
+              <span>DIVINLINK GURUKUL CELESTIAL CREDENTIALS • OFFICIALLY CONSECRATED • CANONICAL HASH VERIFIED</span>
               <span>HMAC-SHA256 DIGITAL SECURITY SEAL • MATHEMATICALLY TAMPER-PROOF • VERIFIABLE AT ASTRAGURUKUL.COM</span>
             </div>
-            <div className="microtext-bot select-none pointer-events-none absolute bottom-1.5 left-4 right-4 flex justify-between font-mono text-[5.5px] uppercase tracking-[1.5px] text-[#8C7A62]/45 overflow-hidden whitespace-nowrap z-20">
-              <span>ID: {cert.certificate_id}</span>
+            <div className="microtext-bot select-none pointer-events-none absolute bottom-1.5 left-5 right-5 flex justify-between font-mono text-[5.5px] uppercase tracking-[1.5px] text-[#8C7A62]/50 overflow-hidden whitespace-nowrap z-20">
+              <span>ID: {cert.certificate_id} • LEDGER VERIFIED</span>
               <span>SIG: {cert.cryptographic_signature ? `${cert.cryptographic_signature.slice(0, 24)}...` : "HMAC-SHA256"}</span>
             </div>
 
             {/* Left Column (66% width) */}
             <div className="cert-left-content w-full md:w-[66%] p-6 sm:p-9 md:p-10 lg:p-11 flex flex-col justify-between relative z-10">
-              {/* Brand Header */}
-              <div className="flex items-center gap-3">
-                <svg className="size-10 sm:size-11 shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="5" y="5" width="90" height="90" rx="16" fill="#1A1816"/>
-                  <circle cx="50" cy="50" r="38" stroke="#D4AF37" strokeWidth="1.5" strokeDasharray="2,2"/>
-                  <circle cx="50" cy="50" r="28" stroke="#D4AF37" strokeWidth="1"/>
-                  <path d="M 50,22 C 38,22 38,50 50,50 C 62,50 62,22 50,22 Z" fill="#D4AF37" opacity="0.9"/>
-                  <path d="M 50,78 C 38,78 38,50 50,50 C 62,50 62,78 50,78 Z" fill="#D4AF37" opacity="0.9"/>
-                  <path d="M 22,50 C 22,38 50,38 50,50 C 50,62 22,62 22,50 Z" fill="#D4AF37" opacity="0.9"/>
-                  <path d="M 78,50 C 78,38 50,38 50,50 C 50,62 78,62 78,50 Z" fill="#D4AF37" opacity="0.9"/>
-                  <circle cx="50" cy="50" r="5" fill="#FFF"/>
-                </svg>
+              {/* Brand Header with Real Official Logo */}
+              <div className="flex items-center gap-3.5">
+                <div className="relative size-12 sm:size-14 rounded-full border-2 border-[#C59B27] bg-white p-1 shadow-sm shrink-0 flex items-center justify-center">
+                  <Image
+                    src="/logo.png"
+                    alt="DivinLink Gurukul Official Logo"
+                    width={48}
+                    height={48}
+                    className="size-full object-contain"
+                    unoptimized
+                    priority
+                  />
+                </div>
                 <div>
-                  <div className="font-cert-sans text-sm sm:text-base font-extrabold tracking-[2.5px] text-[#1A1816] uppercase leading-none">
-                    Astra Gurukul
+                  <div className="flex items-center gap-2">
+                    <span className="font-cert-sans text-base sm:text-lg font-black tracking-[2.5px] text-[#1A1816] uppercase leading-none">
+                      DivinLink Gurukul
+                    </span>
+                    <span className="rounded bg-[#C59B27]/15 border border-[#C59B27]/30 px-1.5 py-0.5 text-[8px] font-bold text-[#8C6514] uppercase tracking-wider">
+                      ESTD. 2026
+                    </span>
                   </div>
-                  <div className="font-cert-sans text-[8px] sm:text-[9px] font-semibold tracking-[2px] text-[#7A6C58] uppercase mt-1">
-                    Council of Vedic Sciences
+                  <div className="font-cert-sans text-[8.5px] sm:text-[9.5px] font-bold tracking-[2px] text-[#7A6C58] uppercase mt-1">
+                    Council of Vedic Astrological Sciences & Celestial Arts
                   </div>
                 </div>
               </div>
 
               {/* Title Block */}
-              <div className="mt-4 sm:mt-5">
-                <h1 className="cert-main-title font-cert-display text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-black tracking-tight text-[#1A1816] leading-none">
+              <div className="mt-3.5 sm:mt-4">
+                <h1 className="cert-main-title font-cert-display text-4xl sm:text-5xl md:text-5xl lg:text-[54px] font-black tracking-tight text-[#1A1816] leading-none drop-shadow-xs">
                   Certificate
                 </h1>
-                <div className="flex items-center gap-2 sm:gap-3 mt-1.5 max-w-[280px] sm:max-w-[320px]">
+                <div className="flex items-center gap-2.5 sm:gap-3.5 mt-1.5 max-w-[340px] sm:max-w-[380px]">
                   <div className="flex-1 h-[1px] bg-[#8C7A62]" />
                   <span className="font-cert-sans text-[8px] sm:text-[9.5px] font-bold tracking-[2.5px] text-[#6E604E] uppercase whitespace-nowrap">
-                    ✦ OF ACHIEVEMENT ✦
+                    ✦ OF SCHOLARLY ACHIEVEMENT ✦
                   </span>
                   <div className="flex-1 h-[1px] bg-[#8C7A62]" />
                 </div>
               </div>
 
-              {/* Consecration Line */}
-              <div className="font-cert-sans text-[8px] sm:text-[9px] md:text-[9.5px] font-bold tracking-[2px] text-[#7A6C58] uppercase mt-4 sm:mt-5">
-                This certificate is proudly presented to
+              {/* Consecration Label */}
+              <div className="font-cert-sans text-[8.5px] sm:text-[9.5px] font-bold tracking-[2.5px] text-[#7A6C58] uppercase mt-3.5 sm:mt-4">
+                This is to solemnly certify & consecrate that
               </div>
 
               {/* Recipient Scholar Name */}
-              <div className="mt-1">
-                <div className="recipient-name font-cert-script text-3xl sm:text-4xl md:text-5xl lg:text-[50px] text-[#1A1816] leading-tight pl-1">
+              <div className="mt-0.5">
+                <div className="recipient-name font-cert-script text-3xl sm:text-4xl md:text-5xl lg:text-[52px] text-[#1A1816] leading-tight pl-1 drop-shadow-xs">
                   {cert.student_name}
                 </div>
-                <div className="w-full h-[1px] bg-[#8C7A62] mt-1" />
+                <div className="relative w-full h-[1.5px] bg-gradient-to-r from-transparent via-[#8C7A62] to-transparent mt-0.5 flex items-center justify-center">
+                  <span className="bg-[#FAF8F3] px-2 text-[#C59B27] text-xs leading-none">✦</span>
+                </div>
               </div>
 
-              {/* Citation Body Paragraph */}
-              <div className="mt-2.5 sm:mt-3 text-[#4A4237] max-w-[500px]">
-                <p className="font-cert-body text-[11px] sm:text-xs md:text-[12.5px] leading-relaxed">
-                  has successfully completed the sacred curriculum and demonstrated scholarly excellence in{" "}
-                  <strong className="text-[#1A1816] font-bold">{cert.course_title}</strong>, mastering classical predictive calculations, nakshatra computations, and remedial planetary sciences.
+              {/* Distinction Ribbon Badge */}
+              <div className="mt-2">
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-[#C59B27]/40 bg-gradient-to-r from-[#C59B27]/10 via-[#FFEBA0]/25 to-[#C59B27]/10 px-3.5 py-0.5 text-[9px] sm:text-[10px] font-bold text-[#78350F] tracking-wider uppercase shadow-2xs">
+                  <Award className="size-3 text-[#B8860B]" />
+                  <span>Vidya Parangata (Summa Cum Laude) • {cert.distinction || "Mastery of Sacred Canon"}</span>
+                </div>
+              </div>
+
+              {/* Citation Body & Course Plaque */}
+              <div className="mt-2 text-[#4A4237] max-w-[500px]">
+                <p className="font-cert-body text-[11px] sm:text-xs md:text-[12px] leading-relaxed">
+                  has thoroughly mastered the sacred principles, astronomical calculations, predictive methodologies, and remedies prescribed in the curriculum of
                 </p>
-                <p className="font-cert-display italic text-[10px] sm:text-[11px] text-[#7A5D28] mt-1 sm:mt-1.5 leading-snug">
+                <div className="mt-1.5 rounded-lg border border-[#C59B27]/30 bg-[#FFFDF7] px-3.5 py-1.5 shadow-2xs flex items-center justify-between">
+                  <div>
+                    <h3 className="font-cert-display text-sm sm:text-base font-bold text-[#1A1816] leading-tight">
+                      {cert.course_title}
+                    </h3>
+                    <p className="font-cert-sans text-[8.5px] text-[#7A6C58] uppercase tracking-wider mt-0.5">
+                      Completed 100% Curriculum ({cert.total_lessons_completed} Lessons & Practicums)
+                    </p>
+                  </div>
+                  <span className="rounded bg-emerald-100 text-emerald-800 text-[9px] font-bold px-2 py-0.5 border border-emerald-300">
+                    PASSED
+                  </span>
+                </div>
+                <p className="font-cert-display italic text-[10px] sm:text-[10.5px] text-[#7A5D28] mt-1.5 leading-snug">
                   « विद्या ददाति विनयं विनयाद्याति पात्रताम् • True knowledge bestows humility, worthiness, and supreme fulfillment »
                 </p>
               </div>
 
-              {/* Footer Row: Date, Live QR Code, Signature */}
-              <div className="mt-4 sm:mt-5 pt-1 flex items-end justify-between gap-3 pr-2 sm:pr-4">
-                {/* Date */}
-                <div className="w-24 sm:w-32 md:w-36 text-center">
+              {/* Footer: Date, Live QR Code, Dual Signatures */}
+              <div className="mt-4 pt-1 flex items-end justify-between gap-3 pr-2 sm:pr-4">
+                {/* Date Column */}
+                <div className="w-24 sm:w-32 text-center">
                   <div className="font-cert-display text-[11px] sm:text-xs font-semibold text-[#1A1816] min-h-[22px] flex items-end justify-center pb-0.5">
                     {cert.issued_at_formatted || new Date(cert.issued_at).toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" })}
                   </div>
                   <div className="w-full h-[1px] bg-[#8C7A62]" />
                   <div className="font-cert-sans text-[8px] sm:text-[9px] font-semibold tracking-[1px] text-[#7A6C58] uppercase mt-1">
-                    Date
+                    Date Consecrated
                   </div>
                 </div>
 
-                {/* Verification QR Code */}
+                {/* 2-Way Live QR Code Verification Box */}
                 {qrCodeDataUrl && (
                   <div className="flex flex-col items-center text-center">
-                    <div className="size-11 sm:size-12 p-1 bg-white rounded border border-[#C59B27] shadow-xs flex items-center justify-center">
+                    <div className="size-12 sm:size-13 p-1 bg-white rounded-md border-2 border-[#C59B27] shadow-xs flex items-center justify-center">
                       <img
                         src={qrCodeDataUrl}
                         alt="Verification QR Code"
                         className="size-full object-contain"
                       />
                     </div>
-                    <div className="font-cert-sans text-[6.5px] sm:text-[7.5px] font-bold tracking-[0.5px] text-[#7A6C58] uppercase mt-0.5">
-                      Verify QR
+                    <div className="font-cert-sans text-[7px] sm:text-[8px] font-bold tracking-[0.5px] text-[#7A6C58] uppercase mt-0.5">
+                      Scan to Verify
                     </div>
                   </div>
                 )}
 
-                {/* Signature */}
-                <div className="w-28 sm:w-36 md:w-40 text-center">
+                {/* Dual Signatures Column */}
+                <div className="w-32 sm:w-40 text-center">
                   <div className="font-cert-script text-xl sm:text-2xl text-[#1A1816] min-h-[24px] flex items-end justify-center leading-none pb-0.5">
-                    {cert.instructor_name || "Acharya Rahul Sharma"}
+                    {cert.instructor_name || "Pt. Acharya Rahul Sharma"}
                   </div>
                   <div className="w-full h-[1px] bg-[#8C7A62]" />
                   <div className="font-cert-sans text-[8px] sm:text-[9px] font-semibold tracking-[1px] text-[#7A6C58] uppercase mt-1">
-                    Signature
+                    Lead Master & Acharya
+                  </div>
+                  <div className="font-cert-sans text-[7px] text-[#8C7A62] uppercase tracking-wider">
+                    Council Registrar
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Gold Ribbon Medal Badge (overlapping content and right pattern) */}
-            <div className="seal-badge-wrap absolute right-[26%] sm:right-[27%] md:right-[28%] lg:right-[29%] top-[10%] sm:top-[12%] md:top-[13%] z-30 pointer-events-none drop-shadow-xl scale-75 sm:scale-90 md:scale-100 origin-top">
-              <svg viewBox="0 0 160 200" width="130" height="162" xmlns="http://www.w3.org/2000/svg">
+            {/* Gold Ribbon Medal Badge with DIVINLINK GURUKUL */}
+            <div className="seal-badge-wrap absolute right-[26%] sm:right-[27%] md:right-[28%] lg:right-[29%] top-[10%] sm:top-[12%] md:top-[13%] z-30 pointer-events-none drop-shadow-2xl scale-75 sm:scale-90 md:scale-100 origin-top">
+              <svg viewBox="0 0 160 200" width="134" height="168" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <linearGradient id="ribbonL" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#D8B467"/>
@@ -574,12 +631,13 @@ export default function CourseCertificateVerificationPage() {
                 <circle cx="80" cy="80" r="28.5" fill="url(#darkDisc)"/>
                 <circle cx="80" cy="80" r="27" fill="none" stroke="#D4AF37" strokeWidth="0.6"/>
 
-                {/* Medallion Text */}
-                <text x="80" y="66" fill="#FFE89E" fontFamily="sans-serif" fontSize="5.5" fontWeight="bold" textAnchor="middle" letterSpacing="1.5">★ ★ ★</text>
-                <text x="80" y="76" fill="#FFF3CA" fontFamily="'Cinzel', serif" fontSize="9" fontWeight="900" textAnchor="middle" letterSpacing="1.2">BEST</text>
-                <path d="M 59,80 L 64,80 M 96,80 L 101,80" stroke="#D4AF37" strokeWidth="0.5"/>
-                <text x="80" y="83" fill="#E5C370" fontFamily="sans-serif" fontSize="5" fontWeight="800" textAnchor="middle" letterSpacing="1.5">AWARD</text>
-                <text x="80" y="92" fill="#FFF3CA" fontFamily="'Cinzel', serif" fontSize="7.5" fontWeight="700" textAnchor="middle" letterSpacing="1">2026</text>
+                {/* Medallion Text — DIVINLINK GURUKUL */}
+                <text x="80" y="65" fill="#FFE89E" fontFamily="sans-serif" fontSize="5" fontWeight="bold" textAnchor="middle" letterSpacing="1.5">★ ★ ★</text>
+                <text x="80" y="74" fill="#FFF3CA" fontFamily="'Cinzel', serif" fontSize="7" fontWeight="900" textAnchor="middle" letterSpacing="1">DIVINLINK</text>
+                <text x="80" y="81" fill="#E5C370" fontFamily="'Cinzel', serif" fontSize="6" fontWeight="800" textAnchor="middle" letterSpacing="1.2">GURUKUL</text>
+                <path d="M 59,84 L 64,84 M 96,84 L 101,84" stroke="#D4AF37" strokeWidth="0.5"/>
+                <text x="80" y="87" fill="#E5C370" fontFamily="sans-serif" fontSize="4.5" fontWeight="800" textAnchor="middle" letterSpacing="1.2">EXCELLENCE</text>
+                <text x="80" y="95" fill="#FFF3CA" fontFamily="'Cinzel', serif" fontSize="7" fontWeight="700" textAnchor="middle" letterSpacing="1">2026</text>
               </svg>
             </div>
 
@@ -600,38 +658,33 @@ export default function CourseCertificateVerificationPage() {
                   </linearGradient>
 
                   <g id="patDiamondCross">
-                    {/* Diagonal 45-deg intersecting bands */}
                     <path d="M-160,-160 L160,160 M160,-160 L-160,160" stroke="url(#patGoldMetal)" strokeWidth="16" fill="none"/>
                     
-                    {/* Outer diamond frame */}
                     <polygon points="0,-110 110,0 0,110 -110,0" fill="none" stroke="url(#patGoldMetal)" strokeWidth="14"/>
-                    <polygon points="0,-96 96,0 0,96 -96,0" fill="none" stroke="#FAF8F2" strokeWidth="4"/>
+                    <polygon points="0,-96 96,0 0,96 -96,0" fill="none" stroke="#FAF8F3" strokeWidth="4"/>
                     <polygon points="0,-90 90,0 0,90 -90,0" fill="none" stroke="url(#patGoldLight)" strokeWidth="3"/>
 
-                    {/* 4 Stepped Cross Arms */}
                     <path d="M-28,-28 L-28,-80 L0,-100 L28,-80 L28,-28 Z" fill="url(#patGoldMetal)"/>
-                    <path d="M-20,-28 L-20,-75 L0,-90 L20,-75 L20,-28 Z" fill="#FAF8F2"/>
+                    <path d="M-20,-28 L-20,-75 L0,-90 L20,-75 L20,-28 Z" fill="#FAF8F3"/>
                     <path d="M-12,-28 L-12,-70 L0,-80 L12,-70 L12,-28 Z" fill="url(#patGoldLight)"/>
 
                     <path d="M-28,28 L-28,80 L0,100 L28,80 L28,28 Z" fill="url(#patGoldMetal)"/>
-                    <path d="M-20,28 L-20,75 L0,90 L20,75 L20,28 Z" fill="#FAF8F2"/>
+                    <path d="M-20,28 L-20,75 L0,90 L20,75 L20,28 Z" fill="#FAF8F3"/>
                     <path d="M-12,28 L-12,70 L0,80 L12,70 L12,28 Z" fill="url(#patGoldLight)"/>
 
                     <path d="M-28,-28 L-80,-28 L-100,0 L-80,28 L-28,28 Z" fill="url(#patGoldMetal)"/>
-                    <path d="M-28,-20 L-75,-20 L-90,0 L-75,20 L-28,20 Z" fill="#FAF8F2"/>
+                    <path d="M-28,-20 L-75,-20 L-90,0 L-75,20 L-28,20 Z" fill="#FAF8F3"/>
                     <path d="M-28,-12 L-70,-12 L-80,0 L-70,12 L-28,12 Z" fill="url(#patGoldLight)"/>
 
                     <path d="M28,-28 L80,-28 L100,0 L80,28 L28,28 Z" fill="url(#patGoldMetal)"/>
-                    <path d="M28,-20 L75,-20 L90,0 L75,20 L28,20 Z" fill="#FAF8F2"/>
+                    <path d="M28,-20 L75,-20 L90,0 L75,20 L28,20 Z" fill="#FAF8F3"/>
                     <path d="M28,-12 L70,-12 L80,0 L70,12 L28,12 Z" fill="url(#patGoldLight)"/>
 
-                    {/* Center Diamond */}
                     <polygon points="0,-28 28,0 0,28 -28,0" fill="url(#patGoldMetal)"/>
-                    <polygon points="0,-20 20,0 0,20 -20,0" fill="#FAF8F2"/>
+                    <polygon points="0,-20 20,0 0,20 -20,0" fill="#FAF8F3"/>
                     <polygon points="0,-12 12,0 0,12 -12,0" fill="url(#patGoldLight)"/>
                     <polygon points="0,-5 5,0 0,5 -5,0" fill="url(#patGoldMetal)"/>
 
-                    {/* Quadrant Stepped Chevron Fills */}
                     <path d="M38,-38 L55,-55 M46,-38 L63,-55 M54,-38 L71,-55" stroke="url(#patGoldMetal)" strokeWidth="3" fill="none"/>
                     <path d="M38,38 L55,55 M46,38 L63,55 M54,38 L71,55" stroke="url(#patGoldMetal)" strokeWidth="3" fill="none"/>
                     <path d="M-38,38 L-55,55 M-46,38 L-63,55 M-54,38 L-71,55" stroke="url(#patGoldMetal)" strokeWidth="3" fill="none"/>
@@ -639,7 +692,7 @@ export default function CourseCertificateVerificationPage() {
                   </g>
                 </defs>
 
-                <rect width="320" height="640" fill="#FAF8F2"/>
+                <rect width="320" height="640" fill="#FAF8F3"/>
 
                 <g transform="translate(160, -30)"><use href="#patDiamondCross"/></g>
                 <g transform="translate(160, 210)"><use href="#patDiamondCross"/></g>
@@ -737,7 +790,7 @@ export default function CourseCertificateVerificationPage() {
           .cert-left-content {
             width: 66% !important;
             height: 100% !important;
-            padding: 16mm 10mm 12mm 18mm !important;
+            padding: 14mm 10mm 10mm 16mm !important;
             display: flex !important;
             flex-direction: column !important;
             justify-content: space-between !important;
