@@ -1145,7 +1145,7 @@ export const courseApi = {
   }) =>
     api.get<CourseListItem[]>(endpoints.courses.list, {
       query: params,
-      auth: false,
+      auth: true,
     }),
 
   getCourseDetail: (slug: string) =>

@@ -405,14 +405,22 @@ function CourseCard({ course }: { course: CourseListItem }) {
               className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-semibold shadow-soft transition-all ${
                 course.is_enrolled
                   ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 hover:shadow-emerald-900/20"
-                  : "bg-brand-600 text-white hover:bg-brand-700"
+                  : isFree
+                    ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                    : "bg-brand-600 text-white hover:bg-brand-700"
               }`}
             >
-              <span>{course.is_enrolled ? "Continue Learning" : "Explore"}</span>
+              <span>
+                {course.is_enrolled
+                  ? "Continue Learning"
+                  : isFree
+                    ? "Enroll Free"
+                    : "Enroll Now"}
+              </span>
               {course.is_enrolled ? (
                 <ArrowRight className="size-3.5" />
               ) : (
-                <PlayCircle className="size-3.5" />
+                <Sparkles className="size-3.5" />
               )}
             </Link>
           </div>
