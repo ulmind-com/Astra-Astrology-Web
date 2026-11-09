@@ -2,8 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import {
+  ArrowRight,
   Award,
   BookOpen,
+  CheckCircle2,
   Clock,
   Filter,
   GraduationCap,
@@ -12,6 +14,7 @@ import {
   Sparkles,
   Star,
   Users,
+  X,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -47,6 +50,7 @@ export default function CoursesPage() {
   const [selectedLevel, setSelectedLevel] = React.useState("all");
   const [search, setSearch] = React.useState("");
   const [debouncedSearch, setDebouncedSearch] = React.useState("");
+  const searchInputRef = React.useRef<HTMLInputElement | null>(null);
 
   React.useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 300);
@@ -111,14 +115,30 @@ export default function CoursesPage() {
           {/* Search & Level Filter Row */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <input
+                ref={searchInputRef}
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search masterclasses, topics, or gurus…"
-                className="w-full rounded-xl border border-border bg-surface px-10 py-2.5 text-sm text-foreground shadow-sm placeholder:text-muted-foreground focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                className="w-full rounded-xl border border-border bg-surface pl-10 pr-10 py-2.5 text-sm text-foreground shadow-sm placeholder:text-muted-foreground focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
               />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch("");
+                    setDebouncedSearch("");
+                    searchInputRef.current?.focus();
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-surface-muted hover:text-foreground transition-colors"
+                  title="Clear search"
+                  aria-label="Clear search"
+                >
+                  <X className="size-4" />
+                </button>
+              )}
             </div>
 
             {/* Level Selector */}
@@ -222,26 +242,33 @@ function CourseCard({ course }: { course: CourseListItem }) {
               src={course.thumbnail_url}
               alt={course.title}
               fill
+              unoptimized
               className="object-cover transition-transform duration-500 group-hover:scale-105"
               onError={() => setThumbError(true)}
             />
           ) : (
-            <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-amber-950/80 via-neutral-900 to-amber-950/40 text-amber-500 p-4 text-center">
-              <div className="flex size-14 items-center justify-center rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 mb-2">
-                <span className="text-2xl">☸</span>
+            <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-neutral-950 via-amber-950/60 to-neutral-950 text-amber-500 p-4 text-center border-b border-amber-500/20">
+              <div className="flex size-14 items-center justify-center rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 mb-2 shadow-inner">
+                <span className="text-2xl drop-shadow-md">☸</span>
               </div>
-              <span className="text-[11px] font-serif font-bold uppercase tracking-wider text-amber-300/90">DivinLink Gurukul</span>
-              <span className="text-[10px] text-amber-200/60 line-clamp-1">{course.title}</span>
+              <span className="text-[11px] font-serif font-bold uppercase tracking-[2px] text-amber-300 drop-shadow-sm">DivinLink Gurukul</span>
+              <span className="text-[10px] text-amber-200/80 line-clamp-1 mt-0.5">{course.title}</span>
             </div>
           )}
 
-          {/* Free or Discount Badge */}
-          <div className="absolute left-3 top-3 flex items-center gap-1.5">
-            {isFree ? (
+          {/* Enrolled, Free, or Discount Badge */}
+          <div className="absolute left-3 top-3 flex items-center gap-1.5 flex-wrap">
+            {course.is_enrolled && (
+              <span className="flex items-center gap-1 rounded-md bg-emerald-600 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm ring-1 ring-emerald-400/40">
+                <CheckCircle2 className="size-3" />
+                ENROLLED
+              </span>
+            )}
+            {!course.is_enrolled && isFree ? (
               <span className="rounded-md bg-emerald-600 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
                 FREE
               </span>
-            ) : course.discount_percent > 0 ? (
+            ) : !course.is_enrolled && course.discount_percent > 0 ? (
               <span className="rounded-md bg-amber-500 px-2 py-0.5 text-xs font-bold text-ink-900 shadow-sm">
                 {course.discount_percent}% OFF
               </span>
@@ -298,6 +325,7 @@ function CourseCard({ course }: { course: CourseListItem }) {
                 alt={course.instructor_name}
                 width={28}
                 height={28}
+                unoptimized
                 className="rounded-full object-cover ring-1 ring-border"
                 onError={() => setAvatarError(true)}
               />
@@ -336,10 +364,27 @@ function CourseCard({ course }: { course: CourseListItem }) {
 
           <div className="flex-1" />
 
-          {/* Price & Action Button */}
+          {/* Price & Action Button (with Enrolled state detection) */}
           <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3">
             <div>
-              {isFree ? (
+              {course.is_enrolled ? (
+                <div>
+                  <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                    <CheckCircle2 className="size-3" />
+                    {course.user_progress_percent && course.user_progress_percent >= 100
+                      ? "Completed (100%)"
+                      : `${Math.round(course.user_progress_percent || 0)}% Completed`}
+                  </span>
+                  <div className="mt-1 h-1.5 w-28 overflow-hidden rounded-full bg-emerald-950/20 dark:bg-emerald-500/20">
+                    <div
+                      className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                      style={{
+                        width: `${Math.min(100, Math.max(0, course.user_progress_percent || 0))}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : isFree ? (
                 <span className="text-lg font-bold text-emerald-600">Free Access</span>
               ) : (
                 <div className="flex items-baseline gap-2">
@@ -357,10 +402,18 @@ function CourseCard({ course }: { course: CourseListItem }) {
 
             <Link
               href={`/courses/${course.slug}`}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-soft transition-all hover:bg-brand-700"
+              className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-semibold shadow-soft transition-all ${
+                course.is_enrolled
+                  ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 hover:shadow-emerald-900/20"
+                  : "bg-brand-600 text-white hover:bg-brand-700"
+              }`}
             >
-              <span>Explore</span>
-              <PlayCircle className="size-3.5" />
+              <span>{course.is_enrolled ? "Continue Learning" : "Explore"}</span>
+              {course.is_enrolled ? (
+                <ArrowRight className="size-3.5" />
+              ) : (
+                <PlayCircle className="size-3.5" />
+              )}
             </Link>
           </div>
         </div>

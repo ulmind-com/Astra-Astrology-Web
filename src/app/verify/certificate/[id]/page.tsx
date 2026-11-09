@@ -406,7 +406,7 @@ export default function CourseCertificateVerificationPage() {
 
       {/* Verified Certificate Canvas — Ultra-Advanced DivinLink Gurukul Masterwork */}
       {!loading && cert && (
-        <div className="certificate-page-wrap mx-auto max-w-[1060px]">
+        <div id="gurukul-printable-certificate" className="certificate-page-wrap mx-auto max-w-[1060px]">
           <div className="certificate-canvas relative overflow-hidden rounded-xl bg-[#FAF8F3] shadow-2xl text-[#1A1816] flex flex-col md:flex-row border border-[#D1B26F]/40 select-none">
             {/* Guilloche Anti-Counterfeit Background Rosette Watermark */}
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.038] z-0 overflow-hidden">
@@ -747,32 +747,45 @@ export default function CourseCertificateVerificationPage() {
             max-height: 210mm !important;
             margin: 0 !important;
             padding: 0 !important;
-            background: #ffffff !important;
+            background: #FAF8F3 !important;
             color: #000000 !important;
             overflow: hidden !important;
+          }
+          /* Strict 1-Page Print Isolation: hide all page chrome & ancestors */
+          body * {
+            visibility: hidden !important;
           }
           header,
           footer,
           nav,
-          .print\\:hidden,
+          .print\:hidden,
           [data-print-hide] {
             display: none !important;
           }
-          .certificate-page-wrap {
+          #gurukul-printable-certificate,
+          #gurukul-printable-certificate * {
+            visibility: visible !important;
+          }
+          #gurukul-printable-certificate {
+            position: fixed !important;
+            left: 0 !important;
+            top: 0 !important;
             width: 297mm !important;
             height: 210mm !important;
+            max-width: 297mm !important;
             max-height: 210mm !important;
-            margin: 0 auto !important;
+            margin: 0 !important;
             padding: 0 !important;
             box-sizing: border-box !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
             page-break-after: avoid !important;
             page-break-before: avoid !important;
+            break-after: avoid !important;
+            break-before: avoid !important;
             overflow: hidden !important;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: center !important;
+            background: #FAF8F3 !important;
+            z-index: 999999 !important;
           }
           .certificate-canvas {
             width: 297mm !important;
@@ -786,19 +799,23 @@ export default function CourseCertificateVerificationPage() {
             flex-direction: row !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
+            margin: 0 !important;
+            padding: 0 !important;
           }
           .cert-left-content {
             width: 66% !important;
-            height: 100% !important;
-            padding: 14mm 10mm 10mm 16mm !important;
+            height: 210mm !important;
+            max-height: 210mm !important;
+            padding: 10mm 8mm 8mm 14mm !important;
             display: flex !important;
             flex-direction: column !important;
             justify-content: space-between !important;
+            box-sizing: border-box !important;
           }
           .cert-right-pattern {
             display: block !important;
             width: 34% !important;
-            height: 100% !important;
+            height: 210mm !important;
           }
           .seal-badge-wrap {
             display: block !important;

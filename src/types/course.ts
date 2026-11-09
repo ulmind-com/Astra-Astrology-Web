@@ -21,6 +21,8 @@ export interface CourseListItem {
   rating_count: number;
   is_featured: boolean;
   certificate_enabled: boolean;
+  is_enrolled?: boolean;
+  user_progress_percent?: number;
 }
 
 export interface LessonResource {
