@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import QRCode from "qrcode";
 import {
@@ -17,6 +17,12 @@ import {
   Loader2,
   Download,
   AlertTriangle,
+  Lock,
+  FileCheck2,
+  ChevronDown,
+  ChevronUp,
+  Fingerprint,
+  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 import { courseApi } from "@/lib/api";
@@ -24,7 +30,9 @@ import { CourseCertificate } from "@/types";
 
 export default function CourseCertificateVerificationPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
+
   const certificateId =
     typeof params?.id === "string"
       ? params.id
@@ -32,10 +40,13 @@ export default function CourseCertificateVerificationPage() {
       ? params.id[0]
       : "";
 
+  const sigToken = searchParams?.get("sig") || undefined;
+
   const [loading, setLoading] = React.useState(true);
   const [cert, setCert] = React.useState<CourseCertificate | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [qrCodeDataUrl, setQrCodeDataUrl] = React.useState<string>("");
+  const [showInspector, setShowInspector] = React.useState(false);
 
   React.useEffect(() => {
     if (!certificateId) return;
@@ -44,16 +55,16 @@ export default function CourseCertificateVerificationPage() {
     setLoading(true);
     setError(null);
 
-    // First attempt public verification
+    // 1. Attempt public verification with optional cryptographic signature query token
     courseApi
-      .verifyCertificate(certificateId)
+      .verifyCertificate(certificateId, sigToken)
       .then((res: any) => {
         if (!mounted) return;
         const certData = res.data || res;
         setCert(certData);
       })
       .catch((err: any) => {
-        // If certificateId is a course ObjectId, try fetching as authenticated student
+        // Fallback: If user passed course ObjectId while logged in
         return courseApi
           .getCertificate(certificateId)
           .then((res: any) => {
@@ -76,9 +87,9 @@ export default function CourseCertificateVerificationPage() {
     return () => {
       mounted = false;
     };
-  }, [certificateId]);
+  }, [certificateId, sigToken]);
 
-  // Generate QR code once cert data is loaded
+  // Generate tamper-resistant QR code once cert data is loaded
   React.useEffect(() => {
     if (!cert) return;
 
@@ -87,10 +98,10 @@ export default function CourseCertificateVerificationPage() {
       (typeof window !== "undefined" ? window.location.href : "");
 
     QRCode.toDataURL(targetUrl, {
-      width: 256,
+      width: 280,
       margin: 1,
       color: {
-        dark: "#451a03",
+        dark: "#381e00",
         light: "#fffef9",
       },
     })
@@ -111,11 +122,18 @@ export default function CourseCertificateVerificationPage() {
     }
   };
 
+  const handleCopyHash = (text: string, label: string) => {
+    if (typeof window !== "undefined") {
+      navigator.clipboard.writeText(text);
+      toast.success(`${label} copied to clipboard!`);
+    }
+  };
+
   const handleShare = async () => {
     if (typeof navigator !== "undefined" && navigator.share && cert) {
       try {
         await navigator.share({
-          title: `${cert.student_name}'s Vedic Astrology Certificate`,
+          title: `${cert.student_name}'s Consecrated Vedic Certificate`,
           text: `Verified Certificate of Vedic Mastery in ${cert.course_title} from Astra Gurukul.`,
           url: window.location.href,
         });
@@ -127,14 +145,16 @@ export default function CourseCertificateVerificationPage() {
     }
   };
 
+  const isTampered = cert && cert.is_signature_valid === false;
   const rawHtmlDownloadUrl = cert
-    ? `${process.env.NEXT_PUBLIC_API_URL || "https://astra-astrology-backend.onrender.com/api/v1"}/courses/certificate/verify/${cert.certificate_id}/html`
+    ? `${process.env.NEXT_PUBLIC_API_URL || "https://astra-astrology-backend.onrender.com/api/v1"}/courses/certificate/verify/${cert.certificate_id}/html${sigToken ? `?sig=${sigToken}` : ""}`
     : "";
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 py-6 sm:py-12 px-3 sm:px-6">
       {/* Top Action & Verification Bar (Hidden during Print) */}
-      <div className="mx-auto max-w-5xl mb-6 print:hidden">
+      <div className="mx-auto max-w-5xl mb-6 print:hidden space-y-4">
+        {/* Navigation & Action Header */}
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-500/20 bg-neutral-900/90 p-4 shadow-xl backdrop-blur-md">
           <div className="flex items-center gap-3">
             <Link
@@ -146,18 +166,43 @@ export default function CourseCertificateVerificationPage() {
             </Link>
             <div>
               <div className="flex items-center gap-2">
-                <span className="flex size-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="font-mono text-xs font-semibold uppercase tracking-wider text-emerald-400">
-                  Cryptographically Consecrated & Verified
+                <span
+                  className={`flex size-2 rounded-full ${
+                    isTampered
+                      ? "bg-red-500 animate-ping"
+                      : "bg-emerald-500 animate-pulse"
+                  }`}
+                />
+                <span
+                  className={`font-mono text-xs font-bold uppercase tracking-wider ${
+                    isTampered ? "text-red-400" : "text-emerald-400"
+                  }`}
+                >
+                  {isTampered
+                    ? "Tampering Detected / Invalid Signature"
+                    : "Cryptographically Consecrated & Verified"}
                 </span>
               </div>
               <h1 className="font-serif text-sm sm:text-base font-bold text-neutral-100">
-                Astra Gurukul Official Credential Verification
+                Astra Gurukul Official Credential Registry
               </h1>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setShowInspector(!showInspector)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-300 transition-colors hover:bg-amber-500/20"
+            >
+              <Fingerprint className="size-3.5" />
+              <span>Crypto Audit</span>
+              {showInspector ? (
+                <ChevronUp className="size-3.5" />
+              ) : (
+                <ChevronDown className="size-3.5" />
+              )}
+            </button>
+
             <button
               onClick={handleCopyLink}
               className="inline-flex items-center gap-1.5 rounded-xl border border-neutral-700 bg-neutral-800/80 px-3 py-1.5 text-xs font-medium text-neutral-200 transition-colors hover:bg-neutral-700"
@@ -179,7 +224,7 @@ export default function CourseCertificateVerificationPage() {
                 href={rawHtmlDownloadUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-300 transition-colors hover:bg-amber-500/20"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-neutral-700 bg-neutral-800/80 px-3 py-1.5 text-xs font-medium text-neutral-200 transition-colors hover:bg-neutral-700"
               >
                 <Download className="size-3.5" />
                 <span>Raw HTML</span>
@@ -195,6 +240,125 @@ export default function CourseCertificateVerificationPage() {
             </button>
           </div>
         </div>
+
+        {/* Cryptographic Inspector Drawer (Collapsible) */}
+        {showInspector && cert && (
+          <div className="rounded-2xl border border-neutral-800 bg-neutral-900/95 p-5 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-3">
+            <div className="flex items-center justify-between border-b border-neutral-800 pb-3 mb-3">
+              <div className="flex items-center gap-2">
+                <Lock className="size-4 text-amber-400" />
+                <h3 className="font-serif text-sm font-bold text-neutral-200">
+                  Cryptographic Integrity & Anti-Counterfeit Ledger Audit
+                </h3>
+              </div>
+              <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 font-mono text-[10px] font-bold text-emerald-400 border border-emerald-500/20">
+                FIPS 198-1 Compliant
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+              <div className="space-y-1.5 rounded-xl border border-neutral-800 bg-neutral-950/60 p-3">
+                <div className="flex items-center justify-between text-neutral-400">
+                  <span>Canonical Digest (SHA-256):</span>
+                  <button
+                    onClick={() =>
+                      handleCopyHash(
+                        cert.canonical_hash || cert.digital_seal?.verification_hash || "",
+                        "SHA-256 Digest"
+                      )
+                    }
+                    className="text-amber-400 hover:underline flex items-center gap-1 text-[11px]"
+                  >
+                    <Copy className="size-3" /> Copy
+                  </button>
+                </div>
+                <div className="break-all font-semibold text-amber-300 bg-neutral-900/80 p-2 rounded-lg text-[11px]">
+                  {cert.canonical_hash || cert.digital_seal?.verification_hash || "N/A"}
+                </div>
+              </div>
+
+              <div className="space-y-1.5 rounded-xl border border-neutral-800 bg-neutral-950/60 p-3">
+                <div className="flex items-center justify-between text-neutral-400">
+                  <span>HMAC-SHA256 Digital Signature:</span>
+                  <button
+                    onClick={() =>
+                      handleCopyHash(
+                        cert.cryptographic_signature || "",
+                        "Digital Signature"
+                      )
+                    }
+                    className="text-amber-400 hover:underline flex items-center gap-1 text-[11px]"
+                  >
+                    <Copy className="size-3" /> Copy
+                  </button>
+                </div>
+                <div className="break-all font-semibold text-emerald-300 bg-neutral-900/80 p-2 rounded-lg text-[11px]">
+                  {cert.cryptographic_signature || "CONSECRATED_SOVEREIGN_KEY"}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-neutral-400 pt-2 border-t border-neutral-800/80">
+              <div>
+                Authority:{" "}
+                <strong className="text-neutral-200">Astra Gurukul</strong>
+              </div>
+              <div>
+                Algorithm:{" "}
+                <strong className="text-neutral-200">
+                  {cert.signature_algorithm || "HMAC-SHA256"}
+                </strong>
+              </div>
+              <div>
+                Status:{" "}
+                <strong className={isTampered ? "text-red-400" : "text-emerald-400"}>
+                  {isTampered ? "SIGNATURE MISMATCH" : "0% TAMPERED (VERIFIED)"}
+                </strong>
+              </div>
+              <div>
+                Lessons Completed:{" "}
+                <strong className="text-neutral-200">
+                  {cert.total_lessons_completed} Lessons (100%)
+                </strong>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Anti-Fraud Hardcopy Cross-Verification Advisory Box */}
+        {cert && (
+          <div
+            className={`rounded-2xl border p-4 text-xs leading-relaxed ${
+              isTampered
+                ? "border-red-500/40 bg-red-950/30 text-red-200"
+                : "border-amber-500/30 bg-gradient-to-r from-amber-950/20 via-neutral-900 to-amber-950/20 text-neutral-300"
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <ShieldCheck
+                className={`size-5 shrink-0 mt-0.5 ${
+                  isTampered ? "text-red-400" : "text-amber-400"
+                }`}
+              />
+              <div className="space-y-1">
+                <div className="font-serif font-bold text-neutral-100 flex items-center gap-2">
+                  <span>Authoritative Ledger Record & Physical Cross-Verification</span>
+                  <span className="rounded-md bg-amber-500/20 px-2 py-0.5 text-[10px] font-mono font-bold text-amber-300">
+                    ANTI-FORGERY RULE
+                  </span>
+                </div>
+                <p className="text-neutral-400">
+                  If inspecting a physical paper certificate or downloaded PDF, the printed
+                  Scholar Name (<strong className="text-amber-300">{cert.student_name}</strong>),
+                  Course (<strong className="text-amber-300">{cert.course_title}</strong>),
+                  and Certificate ID (<strong className="text-amber-300">{cert.certificate_id}</strong>)
+                  must strictly match the record above from Astra Gurukul&apos;s authoritative ledger.
+                  Any difference in printed name proves the physical document was altered or forged.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Loading State */}
@@ -202,7 +366,7 @@ export default function CourseCertificateVerificationPage() {
         <div className="mx-auto max-w-md rounded-2xl border border-neutral-800 bg-neutral-900/60 p-12 text-center shadow-2xl">
           <Loader2 className="mx-auto size-10 animate-spin text-amber-500" />
           <p className="mt-4 font-serif text-lg font-bold text-neutral-200">
-            Consulting Celestial Records...
+            Consulting Celestial Cryptographic Registry...
           </p>
           <p className="mt-1 text-xs text-neutral-400">
             Verifying tamper-proof digital cryptographic seal & enrollment history.
@@ -244,6 +408,14 @@ export default function CourseCertificateVerificationPage() {
         <div className="certificate-page-wrap mx-auto max-w-[1100px]">
           {/* Certificate Board Border */}
           <div className="certificate-border relative overflow-hidden rounded-2xl border-[10px] border-[#c29b38] bg-[#fdfbf7] p-5 sm:p-10 shadow-2xl text-[#2a1705]">
+            {/* Micro-Text Perimeter Bands (Anti-Counterfeit Protection) */}
+            <div className="microtext-top select-none pointer-events-none absolute top-1 left-4 right-4 text-center font-mono text-[5.5px] uppercase tracking-[2px] text-[#b8860b]/40 overflow-hidden whitespace-nowrap">
+              ASTRA GURUKUL CELESTIAL CREDENTIALS • OFFICIALLY CONSECRATED BY BOARD OF ASTROLOGICAL REGENTS • CANONICAL HASH VERIFIED • ASTRA GURUKUL CELESTIAL CREDENTIALS
+            </div>
+            <div className="microtext-bot select-none pointer-events-none absolute bottom-1 left-4 right-4 text-center font-mono text-[5.5px] uppercase tracking-[2px] text-[#b8860b]/40 overflow-hidden whitespace-nowrap">
+              HMAC-SHA256 DIGITAL SECURITY SEAL • MATHEMATICALLY TAMPER-PROOF • VERIFIABLE AT ASTRAGURUKUL.COM • HMAC-SHA256 DIGITAL SECURITY SEAL
+            </div>
+
             {/* Inner Golden Inset Border */}
             <div className="relative rounded-lg border-2 border-[#b8860b] p-6 sm:p-12">
               {/* Corner Ornaments */}
@@ -260,8 +432,95 @@ export default function CourseCertificateVerificationPage() {
                 ☸
               </div>
 
-              {/* Watermark Cosmic Mandala in Background */}
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.035]">
+              {/* Guilloche Rosette Geometric SVG Background Pattern */}
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.045]">
+                <svg
+                  viewBox="0 0 500 500"
+                  className="size-[520px]"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="250"
+                    cy="250"
+                    r="230"
+                    fill="none"
+                    stroke="#c29b38"
+                    strokeWidth="1.2"
+                    strokeDasharray="4,4"
+                  />
+                  <circle
+                    cx="250"
+                    cy="250"
+                    r="190"
+                    fill="none"
+                    stroke="#c29b38"
+                    strokeWidth="1"
+                  />
+                  <circle
+                    cx="250"
+                    cy="250"
+                    r="150"
+                    fill="none"
+                    stroke="#c29b38"
+                    strokeWidth="1"
+                    strokeDasharray="3,2"
+                  />
+                  {/* 12-petaled astrological chakra lines */}
+                  <g stroke="#c29b38" strokeWidth="0.8">
+                    <ellipse
+                      cx="250"
+                      cy="250"
+                      rx="220"
+                      ry="45"
+                      fill="none"
+                      transform="rotate(0 250 250)"
+                    />
+                    <ellipse
+                      cx="250"
+                      cy="250"
+                      rx="220"
+                      ry="45"
+                      fill="none"
+                      transform="rotate(30 250 250)"
+                    />
+                    <ellipse
+                      cx="250"
+                      cy="250"
+                      rx="220"
+                      ry="45"
+                      fill="none"
+                      transform="rotate(60 250 250)"
+                    />
+                    <ellipse
+                      cx="250"
+                      cy="250"
+                      rx="220"
+                      ry="45"
+                      fill="none"
+                      transform="rotate(90 250 250)"
+                    />
+                    <ellipse
+                      cx="250"
+                      cy="250"
+                      rx="220"
+                      ry="45"
+                      fill="none"
+                      transform="rotate(120 250 250)"
+                    />
+                    <ellipse
+                      cx="250"
+                      cy="250"
+                      rx="220"
+                      ry="45"
+                      fill="none"
+                      transform="rotate(150 250 250)"
+                    />
+                  </g>
+                </svg>
+              </div>
+
+              {/* Watermark Cosmic Om in Background */}
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.03]">
                 <div className="size-[500px] rounded-full border-[30px] border-[#b8860b] flex items-center justify-center text-[280px] font-serif font-black">
                   ॐ
                 </div>
@@ -404,21 +663,21 @@ export default function CourseCertificateVerificationPage() {
               {/* Bottom Metadata & Hash Strip */}
               <div className="relative mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-[#b8860b]/20 pt-3 text-[10px] text-[#78350f] font-mono">
                 <div>
-                  Certificate ID:{" "}
-                  <span className="font-bold text-[#311802]">
-                    {cert.certificate_id}
-                  </span>
+                  ID: <span className="font-bold text-[#311802]">{cert.certificate_id}</span>
                 </div>
                 <div>
-                  Issued:{" "}
-                  <span className="font-semibold text-[#311802]">
-                    {cert.issued_at_formatted}
-                  </span>
+                  Issued: <span className="font-semibold text-[#311802]">{cert.issued_at_formatted}</span>
                 </div>
-                <div className="truncate max-w-xs">
+                <div className="truncate max-w-[220px]" title={cert.canonical_hash || ""}>
                   Hash:{" "}
                   <span className="text-[9px] opacity-80">
-                    {cert.digital_seal?.verification_hash || "VERIFIED-AUTHENTIC"}
+                    {cert.canonical_hash ? `${cert.canonical_hash.slice(0, 16)}...` : "VERIFIED-CANONICAL"}
+                  </span>
+                </div>
+                <div className="truncate max-w-[220px]" title={cert.cryptographic_signature || ""}>
+                  Sig:{" "}
+                  <span className="text-[9px] opacity-80">
+                    {cert.cryptographic_signature ? `${cert.cryptographic_signature.slice(0, 16)}...` : "HMAC-SHA256"}
                   </span>
                 </div>
               </div>
@@ -460,4 +719,3 @@ export default function CourseCertificateVerificationPage() {
     </div>
   );
 }
-

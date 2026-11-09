@@ -1203,8 +1203,11 @@ export const courseApi = {
   getCertificate: (courseId: string) =>
     api.get<CourseCertificate>(endpoints.courses.certificate(courseId)),
 
-  verifyCertificate: (certificateId: string) =>
-    api.get<CourseCertificate>(endpoints.courses.verifyCertificate(certificateId), { auth: false }),
+  verifyCertificate: (certificateId: string, sig?: string) =>
+    api.get<CourseCertificate>(endpoints.courses.verifyCertificate(certificateId), {
+      query: sig ? { sig } : undefined,
+      auth: false,
+    }),
 
   getCertificateHtmlUrl: (courseId: string) =>
     `${process.env.NEXT_PUBLIC_API_URL || "https://astra-astrology-backend.onrender.com/api/v1"}${endpoints.courses.certificateHtml(courseId)}`,

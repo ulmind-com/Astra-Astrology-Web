@@ -161,6 +161,29 @@ export interface CourseCertificate {
   distinction: string;
   verification_url: string;
   certificate_html_url: string;
+  cryptographic_signature?: string;
+  canonical_hash?: string;
+  signature_algorithm?: string;
+  is_signature_valid?: boolean;
+  tamper_check?: {
+    status: string;
+    is_valid: boolean;
+    tamper_reason?: string | null;
+    hash_verified?: boolean;
+    canonical_hash?: string;
+    signature_truncated?: string;
+    full_signature?: string;
+    signature_algorithm?: string;
+    authoritative_domain?: string;
+    verified_at?: string;
+    canonical_payload?: {
+      certificate_id: string;
+      student_name: string;
+      course_title: string;
+      issued_iso: string;
+      lessons_count: number;
+    };
+  };
   digital_seal: {
     seal_type?: string;
     consecrated_by?: string;
