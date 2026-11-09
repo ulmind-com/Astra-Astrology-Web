@@ -597,7 +597,14 @@ export default function CourseDetailPage() {
                 </div>
 
                 <div className="mt-4 space-y-3">
-                  {course.sections.map((section: CourseSection) => {
+                  {course.sections.length === 0 ? (
+                    <div className="rounded-xl border border-dashed border-border/80 bg-surface/50 p-8 text-center text-xs text-muted-foreground">
+                      <GraduationCap className="mx-auto size-8 text-amber-500/60 mb-2" />
+                      <p className="font-semibold text-foreground">Curriculum In Progress</p>
+                      <p className="mt-1">Detailed module syllabus and video lectures are being scheduled by the Acharya.</p>
+                    </div>
+                  ) : (
+                    course.sections.map((section: CourseSection) => {
                     const isExpanded = Boolean(expandedSections[section.id]);
                     return (
                       <div
@@ -674,7 +681,7 @@ export default function CourseDetailPage() {
                         )}
                       </div>
                     );
-                  })}
+                  }))}
                 </div>
               </div>
 
