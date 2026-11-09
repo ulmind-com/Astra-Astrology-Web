@@ -34,13 +34,18 @@ export function Badge({
 
 /** The green/grey/amber dot used for an astrologer's online state. */
 export function StatusDot({ online, busy }: { online: boolean; busy?: boolean }) {
-  const tone = busy ? "bg-gold-400" : online ? "bg-success" : "bg-brand-300/30";
+  const liveGreen = online && !busy;
+  const tone = busy
+    ? "bg-amber-400 shadow-[0_0_0_1.5px_#fff,0_0_8px_1px_rgba(251,191,36,0.6)]"
+    : online
+      ? "bg-emerald-500 shadow-[0_0_0_1.5px_#fff,0_0_9px_1.5px_rgba(16,185,129,0.65)]"
+      : "bg-slate-300 shadow-[0_0_0_1.5px_#fff]";
   return (
-    <span className="relative flex size-2.5" aria-hidden>
-      {online && !busy && (
-        <span className="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-55" />
+    <span className="relative flex size-3" aria-hidden>
+      {liveGreen && (
+        <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-60" />
       )}
-      <span className={cn("relative inline-flex size-2.5 rounded-full", tone)} />
+      <span className={cn("relative inline-flex size-3 rounded-full", tone)} />
     </span>
   );
 }

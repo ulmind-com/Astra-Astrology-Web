@@ -257,9 +257,14 @@ export function AstrologyPredictionZodiac() {
                     selected ? "ring-[#e0b000]/60" : "ring-[#e7dcae]"
                   }`}
                 >
-                  <span className="transition-transform duration-300 group-hover:scale-110">
-                    <RashiIcon icon={sign.icon} size={42} color={selected ? "#c99a14" : "#b8860b"} />
-                  </span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`/images/zodiac/characters/${sign.id}.svg`}
+                    alt={sign.name}
+                    width={52}
+                    height={52}
+                    className="size-full transition-transform duration-300 group-hover:scale-110"
+                  />
                 </span>
                 <span className="flex flex-col leading-tight">
                   <span
@@ -282,7 +287,14 @@ export function AstrologyPredictionZodiac() {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-center gap-3.5">
               <span className="flex size-14 items-center justify-center overflow-hidden rounded-full ring-1 ring-stone-200 sm:size-16">
-                <RashiIcon icon={activeMeta.icon} size={54} color="#c99a14" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/images/zodiac/characters/${activeMeta.id}.svg`}
+                  alt={activeMeta.name}
+                  width={64}
+                  height={64}
+                  className="size-full"
+                />
               </span>
               <div>
                 <div className="flex items-baseline gap-2">

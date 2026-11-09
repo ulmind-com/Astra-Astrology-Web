@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="cancer">
+  <defs>
+    <radialGradient id="bg-cancer" cx="38%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#6fe0d2"/>
+      <stop offset="100%" stop-color="#3f8fd6"/>
+    </radialGradient>
+  </defs>
+  <circle cx="60" cy="60" r="60" fill="url(#bg-cancer)"/>
+  <ellipse cx="44" cy="30" rx="30" ry="16" fill="#ffffff" opacity="0.14"/>
+  <g fill="#ffffff">
+    <ellipse cx="60" cy="64" rx="18" ry="13"/>
+    <circle cx="53" cy="60" r="3" fill="#155a66"/><circle cx="67" cy="60" r="3" fill="#155a66"/>
+    <path d="M60 68c-3 0-6 1-6 3h12c0-2-3-3-6-3z" fill="#155a66"/>
+    <path d="M42 58c-8-4-12-2-14-8 2 6-2 10 4 14z"/>
+    <path d="M78 58c8-4 12-2 14-8-2 6 2 10-4 14z"/>
+    <path d="M46 76l-8 8M74 76l8 8M54 78l-4 9M66 78l4 9" stroke="#fff" stroke-width="3" stroke-linecap="round"/></g>
+  <g fill="#ffffff" opacity="0.9">
+    <path d="M96 30 l2.2 5 5 2.2 -5 2.2 -2.2 5 -2.2 -5 -5 -2.2 5 -2.2z"/>
+    <circle cx="26" cy="84" r="2.4"/>
+    <circle cx="92" cy="74" r="1.8"/>
+  </g>
+</svg>

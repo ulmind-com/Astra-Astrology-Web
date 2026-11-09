@@ -30,6 +30,8 @@ export interface AstrologersTranslations {
   rateLabel: string;
   perMinute: string;
   getInTouch: string;
+  chat: string;
+  call: string;
   featuredBadge: string;
   bookmarkRemoved: string;
   bookmarkSaved: string;
@@ -104,6 +106,8 @@ export const ASTROLOGERS_I18N: Record<AstrologyLanguage, AstrologersTranslations
     rateLabel: "ফি",
     perMinute: "/মিনিট",
     getInTouch: "পরামর্শ নিন",
+    chat: "চ্যাট",
+    call: "কল",
     featuredBadge: "✦ বিশিষ্ট",
     bookmarkRemoved: "পছন্দের তালিকা থেকে সরানো হয়েছে",
     bookmarkSaved: "পছন্দের তালিকায় যুক্ত হয়েছে",
@@ -194,6 +198,8 @@ export const ASTROLOGERS_I18N: Record<AstrologyLanguage, AstrologersTranslations
     rateLabel: "दर",
     perMinute: "/मिनट",
     getInTouch: "परामर्श लें",
+    chat: "चैट",
+    call: "कॉल",
     featuredBadge: "✦ विशिष्ट",
     bookmarkRemoved: "पसंदीदा सूची से हटाया गया",
     bookmarkSaved: "पसंदीदा सूची में सहेजा गया",
@@ -284,6 +290,8 @@ export const ASTROLOGERS_I18N: Record<AstrologyLanguage, AstrologersTranslations
     rateLabel: "rate",
     perMinute: "/min",
     getInTouch: "Get In Touch",
+    chat: "Chat",
+    call: "Call",
     featuredBadge: "✦ Featured",
     bookmarkRemoved: "Removed from saved astrologers.",
     bookmarkSaved: "Saved to favorites.",

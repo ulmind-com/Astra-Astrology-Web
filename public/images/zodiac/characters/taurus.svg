@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="taurus">
+  <defs>
+    <radialGradient id="bg-taurus" cx="38%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#8fd17a"/>
+      <stop offset="100%" stop-color="#3f9d5f"/>
+    </radialGradient>
+  </defs>
+  <circle cx="60" cy="60" r="60" fill="url(#bg-taurus)"/>
+  <ellipse cx="44" cy="30" rx="30" ry="16" fill="#ffffff" opacity="0.14"/>
+  <g fill="#ffffff">
+    <path d="M60 46c-11 0-19 8-19 19s8 19 19 19 19-8 19-19-8-19-19-19z"/>
+    <path d="M41 52C31 46 24 48 22 42c6 1 13 3 21 6z"/>
+    <path d="M79 52c10-6 17-4 19-10-6 1-13 3-21 6z"/>
+    <circle cx="52" cy="62" r="3" fill="#1f5b32"/><circle cx="68" cy="62" r="3" fill="#1f5b32"/>
+    <ellipse cx="60" cy="72" rx="8" ry="5" fill="#1f5b32"/>
+    <circle cx="56" cy="72" r="1.6" fill="#fff"/><circle cx="64" cy="72" r="1.6" fill="#fff"/></g>
+  <g fill="#ffffff" opacity="0.9">
+    <path d="M96 30 l2.2 5 5 2.2 -5 2.2 -2.2 5 -2.2 -5 -5 -2.2 5 -2.2z"/>
+    <circle cx="26" cy="84" r="2.4"/>
+    <circle cx="92" cy="74" r="1.8"/>
+  </g>
+</svg>

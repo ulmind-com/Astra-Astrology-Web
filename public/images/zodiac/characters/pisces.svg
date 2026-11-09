@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="pisces">
+  <defs>
+    <radialGradient id="bg-pisces" cx="38%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#6fe0d2"/>
+      <stop offset="100%" stop-color="#3f8fd6"/>
+    </radialGradient>
+  </defs>
+  <circle cx="60" cy="60" r="60" fill="url(#bg-pisces)"/>
+  <ellipse cx="44" cy="30" rx="30" ry="16" fill="#ffffff" opacity="0.14"/>
+  <g fill="#ffffff">
+    <path d="M44 46c-10 4-14 12-14 20s4 14 10 14c-6-8-6-20 0-28 3-4 2-6 4-6z"/>
+    <path d="M30 60l-8-5v10z" fill="#155a66"/>
+    <path d="M76 74c10-4 14-12 14-20s-4-14-10-14c6 8 6 20 0 28-3 4-2 6-4 6z"/>
+    <path d="M90 60l8 5v-10z" fill="#155a66"/>
+    <circle cx="44" cy="52" r="2.4" fill="#155a66"/><circle cx="76" cy="68" r="2.4" fill="#155a66"/></g>
+  <g fill="#ffffff" opacity="0.9">
+    <path d="M96 30 l2.2 5 5 2.2 -5 2.2 -2.2 5 -2.2 -5 -5 -2.2 5 -2.2z"/>
+    <circle cx="26" cy="84" r="2.4"/>
+    <circle cx="92" cy="74" r="1.8"/>
+  </g>
+</svg>

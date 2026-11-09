@@ -21,6 +21,10 @@ export function Avatar({
   const [failed, setFailed] = React.useState(false);
   const px = SIZES[size];
   const showImage = Boolean(src) && !failed;
+  // When the caller sizes the Avatar through className (e.g. "size-full" to fill
+  // a wrapper), don't pin a fixed width/height — the inline style would override
+  // the class and crop the image. `size` then only scales the initials fallback.
+  const fillsParent = Boolean(className && /\bsize-full\b/.test(className));
 
   return (
     <span
@@ -31,7 +35,7 @@ export function Avatar({
         "shadow-soft",
         className,
       )}
-      style={{ width: px, height: px, fontSize: px * 0.36 }}
+      style={fillsParent ? { fontSize: px * 0.36 } : { width: px, height: px, fontSize: px * 0.36 }}
     >
       {showImage ? (
         <Image

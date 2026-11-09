@@ -6,6 +6,7 @@
     "dev": "next dev",
     "dev:mobile": "node scripts/dev-mobile.mjs",
     "qr": "node scripts/dev-mobile.mjs --qr-only",
+    "tunnel": "node scripts/dev-mobile-tunnel.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

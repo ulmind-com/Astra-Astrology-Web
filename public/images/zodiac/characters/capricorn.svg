@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="capricorn">
+  <defs>
+    <radialGradient id="bg-capricorn" cx="38%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#8fd17a"/>
+      <stop offset="100%" stop-color="#3f9d5f"/>
+    </radialGradient>
+  </defs>
+  <circle cx="60" cy="60" r="60" fill="url(#bg-capricorn)"/>
+  <ellipse cx="44" cy="30" rx="30" ry="16" fill="#ffffff" opacity="0.14"/>
+  <g fill="#ffffff">
+    <path d="M58 48c-10 0-16 7-16 16 0 9 7 15 15 15 3 0 5-1 7-3z"/>
+    <path d="M44 50c-8-4-12-2-14-8 2 6-2 10 4 14z"/>
+    <circle cx="52" cy="60" r="3" fill="#1f5b32"/>
+    <path d="M52 66c-2 0-4 2-4 3h8c0-1-2-3-4-3z" fill="#1f5b32"/>
+    <path d="M64 70c6 0 6 8 12 8 5 0 8-4 8-9 0-3-3-5-4-2-1 2-2 3-4 3-4 0-5-8-12-8z" fill="#1f5b32"/></g>
+  <g fill="#ffffff" opacity="0.9">
+    <path d="M96 30 l2.2 5 5 2.2 -5 2.2 -2.2 5 -2.2 -5 -5 -2.2 5 -2.2z"/>
+    <circle cx="26" cy="84" r="2.4"/>
+    <circle cx="92" cy="74" r="1.8"/>
+  </g>
+</svg>
