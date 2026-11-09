@@ -7,36 +7,49 @@ import { UlmindCredit } from "@/components/ulmind-credit";
 import { useLanguage } from "@/providers/language-provider";
 import type { AstrologyLanguage } from "@/types";
 
-function getFooterColumns(lang: AstrologyLanguage) {
+type Column = { title: string; links: { href: string; label: string }[] };
+
+// Only real routes that exist in the app are linked here.
+function getFooterColumns(lang: AstrologyLanguage): Column[] {
   if (lang === "bn") {
     return [
       {
-        title: "বৈদিক মাধ্যম",
+        title: "রাশিফল ও পঞ্চাঙ্গ",
         links: [
-          { href: "/numerology", label: "সংখ্যাতত্ত্ব ও লো শু" },
-          { href: "/vastu", label: "বাস্তু ১৬-দিক কম্পাস" },
-          { href: "/tarot", label: "ট্যারোট কার্ড গণনা" },
-          { href: "/kundli", label: "জন্ম কুণ্ডলী তৈরি" },
-          { href: "/kundli-matching", label: "বিবাহ যোটক বিচার" },
           { href: "/daily-horoscope", label: "দৈনিক রাশিফল" },
+          { href: "/panchang", label: "আজকের পঞ্চাঙ্গ" },
+          { href: "/muhurat", label: "শুভ মুহূর্ত" },
+          { href: "/festivals", label: "উৎসব ও তিথি" },
         ],
       },
       {
-        title: "পরামর্শ",
+        title: "ফ্রি টুলস",
+        links: [
+          { href: "/kundli", label: "ফ্রি কুণ্ডলী" },
+          { href: "/kundli-matching", label: "কুণ্ডলী মিলন" },
+          { href: "/numerology", label: "সংখ্যাতত্ত্ব" },
+          { href: "/tarot", label: "ট্যারো রিডিং" },
+          { href: "/vastu", label: "বাস্তু কম্পাস" },
+        ],
+      },
+      {
+        title: "ক্যালকুলেটর",
+        links: [
+          { href: "/dasha-calculator", label: "দশা ক্যালকুলেটর" },
+          { href: "/kp-calculator", label: "কেপি ক্যালকুলেটর" },
+          { href: "/nakshatra-calculator", label: "নক্ষত্র নির্ণয়" },
+          { href: "/rashi-calculator", label: "রাশি নির্ণয়" },
+          { href: "/face-reading", label: "ফেস রিডিং" },
+          { href: "/palm-reading", label: "হস্তরেখা" },
+        ],
+      },
+      {
+        title: "পরামর্শ ও শপ",
         links: [
           { href: "/astrologers", label: "সকল জ্যোতিষী" },
-          { href: "/astrologers?online_only=true", label: "এখন অনলাইন" },
-          { href: "/astrologers?skill=vedic_astrology", label: "বৈদিক জ্যোতিষ" },
-          { href: "/astrologers?skill=numerology", label: "সংখ্যাতত্ত্ব" },
-        ],
-      },
-      {
-        title: "অ্যাকাউন্ট",
-        links: [
-          { href: "/account", label: "আমার প্রোফাইল" },
-          { href: "/account/birth-details", label: "জন্ম বিবরণ" },
-          { href: "/account/addresses", label: "ঠিকানা" },
-          { href: "/account/security", label: "নিরাপত্তা" },
+          { href: "/ai-astrologer", label: "এআই জ্যোতিষী" },
+          { href: "/courses", label: "কোর্স" },
+          { href: "/shop", label: "অ্যাস্ট্রো শপ" },
           { href: "/support", label: "সাহায্য ও সহায়তা" },
         ],
       },
@@ -45,32 +58,42 @@ function getFooterColumns(lang: AstrologyLanguage) {
   if (lang === "hi") {
     return [
       {
-        title: "वैदिक टूल्स",
+        title: "राशिफल एवं पंचांग",
         links: [
-          { href: "/numerology", label: "अंकशास्त्र एवं लो शू" },
-          { href: "/vastu", label: "वास्तु 16-दिशा कम्पास" },
-          { href: "/tarot", label: "टैरो कार्ड विचार" },
-          { href: "/kundli", label: "जन्म कुंडली कैलकुलेटर" },
-          { href: "/kundli-matching", label: "कुंडली मिलान" },
           { href: "/daily-horoscope", label: "दैनिक राशिफल" },
+          { href: "/panchang", label: "आज का पंचांग" },
+          { href: "/muhurat", label: "शुभ मुहूर्त" },
+          { href: "/festivals", label: "त्योहार एवं तिथि" },
         ],
       },
       {
-        title: "परामर्श",
+        title: "फ्री टूल्स",
+        links: [
+          { href: "/kundli", label: "फ्री कुंडली" },
+          { href: "/kundli-matching", label: "कुंडली मिलान" },
+          { href: "/numerology", label: "अंकशास्त्र" },
+          { href: "/tarot", label: "टैरो रीडिंग" },
+          { href: "/vastu", label: "वास्तु कम्पास" },
+        ],
+      },
+      {
+        title: "कैलकुलेटर",
+        links: [
+          { href: "/dasha-calculator", label: "दशा कैलकुलेटर" },
+          { href: "/kp-calculator", label: "केपी कैलकुलेटर" },
+          { href: "/nakshatra-calculator", label: "नक्षत्र खोजें" },
+          { href: "/rashi-calculator", label: "राशि खोजें" },
+          { href: "/face-reading", label: "फेस रीडिंग" },
+          { href: "/palm-reading", label: "हस्तरेखा" },
+        ],
+      },
+      {
+        title: "परामर्श एवं शॉप",
         links: [
           { href: "/astrologers", label: "सभी ज्योतिषी" },
-          { href: "/astrologers?online_only=true", label: "अभी ऑनलाइन" },
-          { href: "/astrologers?skill=vedic_astrology", label: "वैदिक ज्योतिष" },
-          { href: "/astrologers?skill=numerology", label: "अंकशास्त्र" },
-        ],
-      },
-      {
-        title: "अकाउंट",
-        links: [
-          { href: "/account", label: "मेरी प्रोफ़ाइल" },
-          { href: "/account/birth-details", label: "जन्म विवरण" },
-          { href: "/account/addresses", label: "पता" },
-          { href: "/account/security", label: "सुरक्षा" },
+          { href: "/ai-astrologer", label: "एआई ज्योतिषी" },
+          { href: "/courses", label: "कोर्स" },
+          { href: "/shop", label: "एस्ट्रो शॉप" },
           { href: "/support", label: "सहायता केंद्र" },
         ],
       },
@@ -78,32 +101,42 @@ function getFooterColumns(lang: AstrologyLanguage) {
   }
   return [
     {
-      title: "Vedic Tools",
+      title: "Horoscope & Panchang",
       links: [
-        { href: "/numerology", label: "Numerology & Lo Shu" },
-        { href: "/vastu", label: "Vastu 16-Zone Compass" },
-        { href: "/tarot", label: "Tarot Card Reading" },
-        { href: "/kundli", label: "Kundli Calculator" },
-        { href: "/kundli-matching", label: "Kundli Matching" },
         { href: "/daily-horoscope", label: "Daily Horoscope" },
+        { href: "/panchang", label: "Today's Panchang" },
+        { href: "/muhurat", label: "Shubh Muhurat" },
+        { href: "/festivals", label: "Festivals & Tithi" },
       ],
     },
     {
-      title: "Consult",
+      title: "Free Tools",
       links: [
-        { href: "/astrologers", label: "All astrologers" },
-        { href: "/astrologers?online_only=true", label: "Online now" },
-        { href: "/astrologers?skill=vedic_astrology", label: "Vedic astrology" },
-        { href: "/astrologers?skill=numerology", label: "Numerology" },
+        { href: "/kundli", label: "Free Kundli" },
+        { href: "/kundli-matching", label: "Kundli Matching" },
+        { href: "/numerology", label: "Numerology" },
+        { href: "/tarot", label: "Tarot Reading" },
+        { href: "/vastu", label: "Vastu Compass" },
       ],
     },
     {
-      title: "Account",
+      title: "Calculators",
       links: [
-        { href: "/account", label: "My profile" },
-        { href: "/account/birth-details", label: "Birth details" },
-        { href: "/account/addresses", label: "Addresses" },
-        { href: "/account/security", label: "Security" },
+        { href: "/dasha-calculator", label: "Dasha Calculator" },
+        { href: "/kp-calculator", label: "KP Calculator" },
+        { href: "/nakshatra-calculator", label: "Nakshatra Finder" },
+        { href: "/rashi-calculator", label: "Rashi Calculator" },
+        { href: "/face-reading", label: "Face Reading" },
+        { href: "/palm-reading", label: "Palm Reading" },
+      ],
+    },
+    {
+      title: "Consult & Shop",
+      links: [
+        { href: "/astrologers", label: "All Astrologers" },
+        { href: "/ai-astrologer", label: "AI Astrologer" },
+        { href: "/courses", label: "Courses" },
+        { href: "/shop", label: "Astro Shop" },
         { href: "/support", label: "Help & Support" },
       ],
     },
@@ -115,42 +148,53 @@ export function SiteFooter() {
   const columns = getFooterColumns(language);
 
   return (
-    <footer className="relative mt-20 bg-surface print:hidden">
-      <div className="hairline absolute inset-x-0 top-0 h-px" aria-hidden />
-      <div className="mx-auto max-w-6xl px-4 py-12">
-        <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-4">
+    <footer className="relative mt-20 overflow-hidden border-t border-[#efe3c0] bg-gradient-to-b from-[#fffdf5] to-[#fdf6e3] print:hidden">
+      {/* Faint rotating zodiac wheel at the very bottom */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/zodiac-wheel-gold.webp"
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-48 left-1/2 size-[560px] -translate-x-1/2 select-none opacity-[0.08] mix-blend-multiply animate-spin [animation-duration:140s] motion-reduce:animate-none"
+      />
+
+      <div className="relative z-10 mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+        <div className="grid gap-10 md:grid-cols-6">
+          {/* Brand block */}
           <div className="md:col-span-2">
-            <div className="flex items-center gap-2 font-semibold">
-              <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl">
-                <Image
-                  src="/logo.png"
-                  alt="DivinLink"
-                  width={36}
-                  height={36}
-                  className="size-full object-contain"
-                />
+            <div className="flex items-center gap-2.5 font-semibold">
+              <span className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-[#eadf9a]">
+                <Image src="/logo.png" alt="DivinLink" width={40} height={40} className="size-full object-contain" />
               </span>
-              <span className="font-display tracking-wide">DivinLink</span>
+              <span className="font-display text-lg tracking-wide text-[#1a1208]">DivinLink</span>
             </div>
-            <p className="mt-3 max-w-sm text-sm text-muted-foreground">
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-[#6b5f4d]">
               {language === "bn"
                 ? "বিশ্বস্ত বৈদিক জ্যোতিষীদের কাছ থেকে সঠিক পরামর্শ — কুণ্ডলী, যোটক বিচার, সংখ্যাতত্ত্ব ও বাস্তু, যখনই আপনার প্রয়োজন।"
                 : language === "hi"
                 ? "सत्यापित वैदिक विद्वानों से सही मार्गदर्शन — कुंडली, गुण मिलान, अंकशास्त्र एवं वास्तु समाधान।"
                 : "Guidance from verified astrologers — kundli, matchmaking, numerology and vastu, whenever you need clarity."}
             </p>
+            <Link
+              href="/astrologers"
+              className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#fcd404] px-5 py-2.5 text-sm font-extrabold text-[#1c1304] shadow-sm transition-transform hover:scale-105"
+            >
+              {language === "bn" ? "ফ্রি পরামর্শ নিন" : language === "hi" ? "फ्री परामर्श लें" : "Consult for Free"}
+            </Link>
           </div>
 
+          {/* Link columns */}
           {columns.map((column) => (
             <div key={column.title}>
-              <p className="text-sm font-semibold text-foreground">{column.title}</p>
-              <ul className="mt-3 space-y-2">
+              <p className="text-sm font-bold tracking-tight text-[#1a1208]">{column.title}</p>
+              <ul className="mt-4 space-y-2.5">
                 {column.links.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="inline-flex min-h-9 items-center text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      className="group inline-flex items-center gap-1.5 text-sm text-[#6b5f4d] transition-colors hover:text-[#8b5e0a]"
                     >
+                      <span className="size-1 rounded-full bg-[#d9b64a] opacity-0 transition-opacity group-hover:opacity-100" />
                       {link.label}
                     </Link>
                   </li>
@@ -160,18 +204,14 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <div className="mt-10 border-t border-border pt-6">
+        <div className="mt-12 border-t border-[#efe3c0] pt-6">
           <UlmindCredit />
         </div>
 
-        <div className="mt-6 flex flex-col gap-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-6 flex flex-col gap-3 text-xs text-[#8b7d63] sm:flex-row sm:items-center sm:justify-between">
           <p>
             © <Year /> DivinLink.{" "}
-            {language === "bn"
-              ? "সর্বস্বত্ব সংরক্ষিত।"
-              : language === "hi"
-              ? "सर्वाधिकार सुरक्षित।"
-              : "All rights reserved."}
+            {language === "bn" ? "সর্বস্বত্ব সংরক্ষিত।" : language === "hi" ? "सर्वाधिकार सुरक्षित।" : "All rights reserved."}
           </p>
           <p className="max-w-md sm:text-right">
             {language === "bn"
