@@ -2,9 +2,9 @@
  * Where the signed-in session lives.
  *
  * `localStorage`, because the API returns bearer tokens rather than setting a
- * cookie. The backend has **no refresh endpoint yet**, so an expired access
- * token means signing in again — `client.ts` handles that by clearing the
- * session rather than trying to refresh something that does not exist.
+ * cookie. The access token lasts a day and the refresh token a month;
+ * `client.ts` exchanges one for the other when a request comes back 401, so
+ * a session survives until the refresh token itself runs out.
  *
  * Every read and write is wrapped: storage throws in private windows and when
  * site data is blocked, and the app must still render.

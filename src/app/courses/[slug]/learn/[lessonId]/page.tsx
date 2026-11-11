@@ -127,6 +127,7 @@ export default function LessonClassroomPage() {
     isLoading: isStreamLoading,
     isError: isStreamError,
     error: streamError,
+    refetch: refetchStream,
   } = useQuery({
     queryKey: ["lesson-stream", course?.id, lessonId],
     queryFn: () => {
@@ -134,7 +135,26 @@ export default function LessonClassroomPage() {
       return courseApi.getLessonStream(course.id, lessonId);
     },
     enabled: Boolean(course?.id && lessonId && hasAccess),
+    // The signed URL expires. Bunny then serves its own 403 page inside the
+    // player — which is the "403" students were reporting. Coming back to
+    // the tab is the moment a stale one would be used, so refresh then.
+    refetchOnWindowFocus: true,
+    staleTime: 5 * 60 * 1000,
   });
+
+  // The src is pinned for as long as one lesson is on screen. A refreshed URL
+  // is a different string, and handing it to the iframe would reload the
+  // player and throw away the student's place in the video. The fresh one is
+  // picked up the next time they open a lesson, which is when it is needed.
+  const [pinnedEmbedUrl, setPinnedEmbedUrl] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    setPinnedEmbedUrl(null);
+  }, [lessonId]);
+  React.useEffect(() => {
+    if (streamData?.embed_url) {
+      setPinnedEmbedUrl((current) => current ?? streamData.embed_url);
+    }
+  }, [streamData?.embed_url]);
 
   // Load personal notes for this lesson from localStorage
   const personalStorageKey = `divinlink_notes_${course?.id || ""}_${lessonId}`;
@@ -581,24 +601,60 @@ export default function LessonClassroomPage() {
                 <LoadingBlock label="Preparing secure video stream…" />
               </div>
             ) : isStreamError || !streamData ? (
-              <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center text-white">
-                <Lock className="size-12 text-brand-400 opacity-60 mb-2" />
-                <p className="text-base font-semibold">Protected Lesson</p>
-                <p className="text-xs text-white/70 max-w-sm mt-1">
-                  {streamError instanceof ApiError && streamError.status === 403
-                    ? "You need to enroll in this course to access this lesson."
-                    : "Unable to load video stream. Please ensure you are enrolled."}
-                </p>
-                <Link href={`/courses/${slug}`} className="mt-4">
-                  <Button size="sm">Enroll Now to Unlock</Button>
-                </Link>
-              </div>
+              (() => {
+                // Three different reasons, and telling them apart matters: a
+                // student whose session ended used to be told to enroll in a
+                // course they had already paid for, so they tried to buy it
+                // twice.
+                const code =
+                  streamError instanceof ApiError ? streamError.code : undefined;
+                const needsSignIn =
+                  streamError instanceof ApiError &&
+                  streamError.status === 401 &&
+                  (code === "sign_in_required" ||
+                    code === "token_expired" ||
+                    code === "invalid_token");
+                const notEnrolled =
+                  streamError instanceof ApiError && streamError.status === 403;
+
+                return (
+                  <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center text-white">
+                    <Lock className="size-12 text-brand-400 opacity-60 mb-2" />
+                    <p className="text-base font-semibold">
+                      {needsSignIn ? "Please sign in" : "Protected Lesson"}
+                    </p>
+                    <p className="text-xs text-white/70 max-w-sm mt-1">
+                      {needsSignIn
+                        ? "Your session has ended. Sign in again to carry on watching — your enrollment is safe."
+                        : notEnrolled
+                          ? "You need to enroll in this course to access this lesson."
+                          : "Unable to load this video right now. Please try again in a moment."}
+                    </p>
+                    {needsSignIn ? (
+                      <Link
+                        href={`/login?next=/courses/${slug}/learn/${lessonId}`}
+                        className="mt-4"
+                      >
+                        <Button size="sm">Sign in again</Button>
+                      </Link>
+                    ) : notEnrolled ? (
+                      <Link href={`/courses/${slug}`} className="mt-4">
+                        <Button size="sm">Enroll Now to Unlock</Button>
+                      </Link>
+                    ) : (
+                      <Button size="sm" className="mt-4" onClick={() => refetchStream()}>
+                        Try again
+                      </Button>
+                    )}
+                  </div>
+                );
+              })()
             ) : (
               <div className="relative h-full w-full overflow-hidden">
                 {/* Bunny Stream Secure Iframe Player */}
                 <iframe
                   ref={iframeRef}
-                  src={streamData.embed_url}
+                  src={pinnedEmbedUrl ?? streamData.embed_url}
                   loading="eager"
                   className="h-full w-full border-0 select-none"
                   allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;"
