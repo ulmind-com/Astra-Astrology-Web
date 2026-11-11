@@ -80,6 +80,7 @@ import type {
   LessonStreamData,
   CourseOrderCreateResponse,
   CoursePaymentVerifyRequest,
+  CoursePaymentSyncResponse,
   CourseQuestion,
   CourseQuestionAnswer,
   CourseCertificate,
@@ -1168,6 +1169,12 @@ export const courseApi = {
     api.post<{ success: boolean; enrollment_id: string; course_id: string; course_slug: string }>(
       endpoints.courses.verifyPayment(courseId),
       payload
+    ),
+
+  syncPayment: (courseId: string, payload?: { razorpay_order_id?: string | null }) =>
+    api.post<CoursePaymentSyncResponse>(
+      endpoints.courses.syncPayment(courseId),
+      payload ?? {}
     ),
 
   getLessonStream: (courseId: string, lessonId: string) =>

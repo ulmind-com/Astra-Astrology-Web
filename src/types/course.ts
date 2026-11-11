@@ -99,6 +99,7 @@ export interface LessonStreamData {
 
 export interface CourseOrderCreateResponse {
   free_enrolled: boolean;
+  already_paid?: boolean;
   order_id?: string | null;
   amount_paise: number;
   amount_inr: number;
@@ -107,12 +108,23 @@ export interface CourseOrderCreateResponse {
   course_id: string;
   course_title: string;
   course_slug: string;
+  message?: string | null;
 }
 
 export interface CoursePaymentVerifyRequest {
   razorpay_order_id: string;
   razorpay_payment_id: string;
   razorpay_signature: string;
+}
+
+export interface CoursePaymentSyncResponse {
+  enrolled: boolean;
+  status: string;
+  enrollment_id?: string | null;
+  course_id: string;
+  course_slug: string;
+  course_title: string;
+  message: string;
 }
 
 export interface CourseQuestionAnswer {

@@ -182,6 +182,63 @@ export default function CourseDetailPage() {
     return null;
   }, [course]);
 
+  const activeOrderIdRef = React.useRef<string | null>(null);
+  const checkoutOpenRef = React.useRef(false);
+  const syncInFlightRef = React.useRef(false);
+
+  const navigateAfterEnrollment = React.useCallback(
+    async (successMessage: string) => {
+      checkoutOpenRef.current = false;
+      activeOrderIdRef.current = null;
+      toast.success(successMessage, { id: "rzp-verify" });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["course-detail", slug] }),
+        queryClient.invalidateQueries({ queryKey: ["my-enrolled-courses"] }),
+      ]);
+      if (firstLessonId) {
+        router.push(`/courses/${slug}/learn/${firstLessonId}`);
+      } else {
+        router.push("/account/courses");
+      }
+    },
+    [firstLessonId, queryClient, router, slug]
+  );
+
+  const trySyncCoursePayment = React.useCallback(
+    async (orderId?: string | null): Promise<boolean> => {
+      if (!course || syncInFlightRef.current) return false;
+      syncInFlightRef.current = true;
+      try {
+        const res = await courseApi.syncPayment(
+          course.id,
+          orderId ? { razorpay_order_id: orderId } : undefined
+        );
+        if (res.enrolled) {
+          await navigateAfterEnrollment(
+            res.message || "Payment confirmed! Welcome to DivinLink Gurukul."
+          );
+          return true;
+        }
+        return false;
+      } catch {
+        return false;
+      } finally {
+        syncInFlightRef.current = false;
+      }
+    },
+    [course, navigateAfterEnrollment]
+  );
+
+  React.useEffect(() => {
+    const handleFocus = () => {
+      if (checkoutOpenRef.current && activeOrderIdRef.current) {
+        void trySyncCoursePayment(activeOrderIdRef.current);
+      }
+    };
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [trySyncCoursePayment]);
+
   const handleEnrollOrBuy = async () => {
     if (!isSignedIn) {
       toast.info("Please sign in or create an account to enroll.");
@@ -195,15 +252,11 @@ export default function CourseDetailPage() {
       setIsProcessingPayment(true);
       const order = await courseApi.createOrder(course.id);
 
-      // Scenario 1: Free Course (Instant enrollment)
-      if (order.free_enrolled) {
-        toast.success("Enrolled successfully! Welcome to the Masterclass.");
-        await queryClient.invalidateQueries({ queryKey: ["course-detail", slug] });
-        if (firstLessonId) {
-          router.push(`/courses/${slug}/learn/${firstLessonId}`);
-        } else {
-          router.push("/account/courses");
-        }
+      // Scenario 1: Free Course or Recovered Already-Paid Order (Instant enrollment)
+      if (order.free_enrolled || order.already_paid) {
+        await navigateAfterEnrollment(
+          order.message || "Enrolled successfully! Welcome to the Masterclass."
+        );
         return;
       }
 
@@ -214,6 +267,9 @@ export default function CourseDetailPage() {
         setIsProcessingPayment(false);
         return;
       }
+
+      activeOrderIdRef.current = order.order_id || null;
+      checkoutOpenRef.current = true;
 
       const rzp = new (window as any).Razorpay({
         key: order.key_id,
@@ -236,40 +292,48 @@ export default function CourseDetailPage() {
           razorpay_payment_id: string;
           razorpay_signature: string;
         }) => {
+          checkoutOpenRef.current = false;
           try {
             toast.loading("Verifying payment...", { id: "rzp-verify" });
-            const verifyRes = await courseApi.verifyPayment(course.id, {
+            await courseApi.verifyPayment(course.id, {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
             });
 
-            toast.success("Payment verified! Welcome to DivinLink Gurukul.", { id: "rzp-verify" });
-            await queryClient.invalidateQueries({ queryKey: ["course-detail", slug] });
-            if (firstLessonId) {
-              router.push(`/courses/${slug}/learn/${firstLessonId}`);
-            } else {
-              router.push("/account/courses");
-            }
+            await navigateAfterEnrollment("Payment verified! Welcome to DivinLink Gurukul.");
           } catch (err) {
-            toast.error(
-              err instanceof ApiError ? err.message : "Payment verification failed. Please contact support.",
-              { id: "rzp-verify" }
+            const recovered = await trySyncCoursePayment(
+              response.razorpay_order_id || activeOrderIdRef.current
             );
+            if (!recovered) {
+              toast.error(
+                err instanceof ApiError
+                  ? err.message
+                  : "Payment verification timed out. If money was deducted, click Buy again or refresh in a few seconds.",
+                { id: "rzp-verify" }
+              );
+            }
           } finally {
             setIsProcessingPayment(false);
           }
         },
         modal: {
-          ondismiss: () => {
+          ondismiss: async () => {
+            checkoutOpenRef.current = false;
+            const pendingId = activeOrderIdRef.current;
+            const recovered = pendingId ? await trySyncCoursePayment(pendingId) : false;
             setIsProcessingPayment(false);
-            toast.message("Payment cancelled.");
+            if (!recovered) {
+              toast.message("Payment cancelled.");
+            }
           },
         },
       });
 
       rzp.open();
     } catch (err) {
+      checkoutOpenRef.current = false;
       setIsProcessingPayment(false);
       toast.error(
         err instanceof ApiError ? err.message : "Failed to initiate enrollment. Please try again."

@@ -230,6 +230,7 @@ export const endpoints = {
     detail: (slug: string) => `/courses/detail/${slug}`,
     createOrder: (courseId: string) => `/courses/${courseId}/order`,
     verifyPayment: (courseId: string) => `/courses/${courseId}/verify-payment`,
+    syncPayment: (courseId: string) => `/courses/${courseId}/sync-payment`,
     myEnrolled: "/courses/my/enrolled",
     lessonStream: (courseId: string, lessonId: string) => `/courses/${courseId}/lessons/${lessonId}/stream`,
     lessonProgress: (courseId: string, lessonId: string) => `/courses/${courseId}/lessons/${lessonId}/progress`,
