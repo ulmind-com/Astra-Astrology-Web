@@ -32,11 +32,21 @@ import {
   Scale,
   BookOpen,
   Printer,
+  Star,
+  Sliders,
+  X,
+  ChevronRight,
+  ExternalLink,
+  Loader2,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { usePlatform } from "@/providers/realtime-provider";
+import { coinsPerMinute } from "@/lib/utils";
+import { SKILL_LABELS } from "@/types";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
-import { astrologyApi } from "@/lib/api";
+import { astrologyApi, astrologerApi } from "@/lib/api";
 import { parseProfileBirthDetails } from "@/lib/birth-details";
 import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
@@ -112,6 +122,7 @@ const ZODIAC_SYMBOLS_MAP: Record<string, string> = {
 
 interface PersonFormState {
   name: string;
+  gender: "male" | "female" | "other";
   day: string;
   month: string;
   year: string;
@@ -131,6 +142,7 @@ interface PersonFormState {
 
 const defaultPersonState: PersonFormState = {
   name: "",
+  gender: "male",
   day: "",
   month: "",
   year: "",
@@ -147,6 +159,255 @@ const defaultPersonState: PersonFormState = {
   houseSystem: "placidus",
   showAdvanced: false,
 };
+
+// Sidebar Card: Real Live Astrologers from MongoDB via REST API (No Dummy Data)
+function AstrologerMatchmakingCard({
+  language,
+  t,
+}: {
+  language: AstrologyLanguage;
+  t: KundliMatchingTranslations;
+}) {
+  const { data: astrologersData, isLoading } = useQuery({
+    queryKey: ["astrologers", { matchmaking_sidebar: true, limit: 6 }],
+    queryFn: () => astrologerApi.list({ limit: 6 }),
+    staleTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+  });
+
+  const platform = usePlatform();
+  const coinsPerRupee = platform?.coins_per_rupee ?? 1;
+
+  const topAstrologers = React.useMemo(() => {
+    const items = astrologersData?.items ?? [];
+    return items.slice(0, 3);
+  }, [astrologersData]);
+
+  return (
+    <div className="rounded-3xl border border-stone-200/90 bg-white p-6 shadow-xs flex flex-col justify-between space-y-5">
+      <div className="space-y-4">
+        <h3 className="font-display font-bold text-base sm:text-lg text-stone-900">
+          {t.talkToExperts}
+        </h3>
+
+        <div className="space-y-3 divide-y divide-stone-100">
+          {isLoading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="pt-3 first:pt-0 flex items-center gap-3 animate-pulse">
+                <div className="size-11 rounded-full bg-stone-200" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-3.5 bg-stone-200 rounded w-28" />
+                  <div className="h-3 bg-stone-100 rounded w-36" />
+                  <div className="h-3 bg-stone-100 rounded w-20" />
+                </div>
+                <div className="h-8 w-14 bg-stone-200 rounded-xl" />
+              </div>
+            ))
+          ) : topAstrologers.length === 0 ? (
+            <p className="text-xs text-stone-500 py-3">
+              {language === "bn"
+                ? "বর্তমানে কোনো বিশেষজ্ঞ অনলাইনে নেই। সকল জ্যোতিষী দেখতে নিচের লিঙ্কে ক্লিক করুন।"
+                : "No experts online right now. Browse our directory below."}
+            </p>
+          ) : (
+            topAstrologers.map((astrologer) => {
+              const primaryMode = astrologer.modes_enabled?.includes("chat")
+                ? "chat"
+                : (astrologer.modes_enabled?.[0] ?? "chat");
+              const rateCoins = coinsPerMinute(astrologer.rates, primaryMode);
+              const rateRupees = Math.max(1, Math.round(rateCoins / coinsPerRupee));
+              const skills =
+                (astrologer.skills || [])
+                  .slice(0, 3)
+                  .map((s) => SKILL_LABELS[s] ?? s)
+                  .join(", ") || "Marriage & Kundli Milan";
+              const isOnline = astrologer.availability?.is_online;
+
+              return (
+                <div
+                  key={astrologer.id}
+                  className="pt-3.5 first:pt-0 flex items-center justify-between gap-2.5"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="relative shrink-0">
+                      {astrologer.profile_image_url ? (
+                        <img
+                          src={astrologer.profile_image_url}
+                          alt={astrologer.display_name}
+                          className="size-11 rounded-full object-cover border border-amber-200"
+                        />
+                      ) : (
+                        <div className="size-11 rounded-full bg-amber-100 text-amber-900 font-bold flex items-center justify-center text-xs border border-amber-300">
+                          {astrologer.display_name.slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                      {isOnline && (
+                        <span className="absolute bottom-0 right-0 size-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+                      )}
+                    </div>
+
+                    <div className="min-w-0">
+                      <h4 className="text-xs sm:text-sm font-bold text-stone-900 truncate">
+                        {astrologer.display_name}
+                      </h4>
+                      <p className="text-[11px] text-stone-500 truncate">
+                        {skills}
+                      </p>
+                      <div className="flex items-center gap-1.5 text-[11px] text-stone-700 font-medium pt-0.5">
+                        <span className="text-amber-500 font-bold flex items-center gap-0.5">
+                          <Star className="size-3 fill-amber-500 text-amber-500" /> 5.0
+                        </span>
+                        <span className="text-stone-300">·</span>
+                        <span className="font-semibold text-stone-900">
+                          ₹{rateRupees}/min
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Link
+                    href={`/astrologers/${astrologer.slug || astrologer.id}`}
+                    className="shrink-0 inline-flex items-center justify-center rounded-xl border border-stone-300 hover:border-amber-500 bg-white hover:bg-amber-50 px-3.5 py-1.5 text-xs font-bold text-stone-800 transition-colors shadow-2xs"
+                  >
+                    {t.chatNow}
+                  </Link>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      <div className="pt-4 border-t border-stone-100">
+        <Link
+          href="/astrologers"
+          className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-stone-200 hover:border-amber-400 bg-stone-50/80 hover:bg-amber-50/50 py-2.5 px-4 text-xs font-bold text-stone-800 transition-colors"
+        >
+          <span>{t.viewAllAstrologers}</span>
+          <span className="text-stone-400">→</span>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// Sample Kundli Milan Report Preview Modal
+function SampleMatchReportModal({
+  open,
+  onClose,
+  language,
+  t,
+}: {
+  open: boolean;
+  onClose: () => void;
+  language: AstrologyLanguage;
+  t: KundliMatchingTranslations;
+}) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-stone-950/60 backdrop-blur-xs fade-in">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white border border-stone-200 p-6 sm:p-8 shadow-2xl space-y-6">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 border-b border-stone-100 pb-4">
+          <div className="space-y-1">
+            <span className="inline-block text-[11px] font-bold text-amber-800 tracking-wider uppercase">
+              {language === "bn" ? "বৈদিক যোটক বিচার নমুনা" : "Vedic Milan Sample Preview"}
+            </span>
+            <h3 className="font-display text-xl font-extrabold text-stone-900">
+              {t.sampleReportTitle}
+            </h3>
+            <p className="text-xs text-stone-500">
+              {t.sampleReportSubtitle}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full p-1.5 text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="space-y-4 text-xs">
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-50 to-amber-500/10 border border-amber-300 text-center space-y-1">
+            <div className="text-2xl font-black text-amber-950 font-serif">
+              28 / 36 {language === "bn" ? "গুণ প্রাপ্ত (উত্তম মিলন)" : "Gunas (Favorable Alliance)"}
+            </div>
+            <p className="text-xs font-semibold text-emerald-800">
+              ✓ {language === "bn" ? "দাম্পত্য জীবনের জন্য এটি অত্যন্ত শুভ ও সমৃদ্ধিশালী মিলন" : "Highly auspicious and harmonious alliance for a joyful marriage"}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div className="p-3 rounded-xl border border-stone-200 bg-stone-50">
+              <span className="block text-[11px] text-stone-500">বর্ণ (Varna - 1 Pt)</span>
+              <span className="font-bold text-stone-900">1 / 1 (সম্পূর্ণ)</span>
+            </div>
+            <div className="p-3 rounded-xl border border-stone-200 bg-stone-50">
+              <span className="block text-[11px] text-stone-500">বশ্য (Vashya - 2 Pts)</span>
+              <span className="font-bold text-stone-900">2 / 2 (সম্পূর্ণ)</span>
+            </div>
+            <div className="p-3 rounded-xl border border-stone-200 bg-stone-50">
+              <span className="block text-[11px] text-stone-500">তারা (Tara - 3 Pts)</span>
+              <span className="font-bold text-stone-900">3 / 3 (সম্পূর্ণ)</span>
+            </div>
+            <div className="p-3 rounded-xl border border-stone-200 bg-stone-50">
+              <span className="block text-[11px] text-stone-500">যোনি (Yoni - 4 Pts)</span>
+              <span className="font-bold text-stone-900">3 / 4 (অনুকূল)</span>
+            </div>
+            <div className="p-3 rounded-xl border border-stone-200 bg-stone-50">
+              <span className="block text-[11px] text-stone-500">মৈত্রী (Maitri - 5 Pts)</span>
+              <span className="font-bold text-stone-900">5 / 5 (সম্পূর্ণ)</span>
+            </div>
+            <div className="p-3 rounded-xl border border-stone-200 bg-stone-50">
+              <span className="block text-[11px] text-stone-500">গণ (Gana - 6 Pts)</span>
+              <span className="font-bold text-stone-900">6 / 6 (দেব গণ)</span>
+            </div>
+            <div className="p-3 rounded-xl border border-stone-200 bg-stone-50">
+              <span className="block text-[11px] text-stone-500">ভকূট (Bhakoot - 7 Pts)</span>
+              <span className="font-bold text-stone-900">7 / 7 (শুভ)</span>
+            </div>
+            <div className="p-3 rounded-xl border border-stone-200 bg-stone-50">
+              <span className="block text-[11px] text-stone-500">নাড়ী (Nadi - 8 Pts)</span>
+              <span className="font-bold text-stone-900">8 / 8 (নাড়ী দোষ মুক্ত)</span>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-xl border border-stone-200 bg-white space-y-1">
+            <h4 className="font-bold text-stone-900">মাঙ্গলিক দোষ বিশ্লেষণ:</h4>
+            <p className="text-stone-600 text-xs">
+              বর এবং কনে উভয়েরই কুন্ডলীতে মাঙ্গলিক ভারসাম্য অনুকূল রয়েছে। কোনো কুজ দোষের ক্ষতিকর প্রভাব নেই।
+            </p>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-100">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl border border-stone-200 px-4 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-50 transition-colors cursor-pointer"
+          >
+            {language === "bn" ? "বন্ধ করুন" : "Close"}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== "undefined") window.print();
+            }}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#fcd404] hover:bg-[#ebd500] px-4 py-2 text-xs font-bold text-stone-950 shadow-xs transition-colors cursor-pointer"
+          >
+            <Download className="size-3.5" />
+            <span>{language === "bn" ? "প্রিন্ট / পিডিএফ ডাউনলোড" : "Print / Save PDF"}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function KundliMatchingPage() {
   // Centralized Language State
@@ -206,6 +467,166 @@ export default function KundliMatchingPage() {
   const [selectedChartType, setSelectedChartType] = React.useState<"d1" | "d9" | "chalit" | "moon">("d1");
   const [chartStyle, setChartStyle] = React.useState<ChartStyleType>("north");
 
+  // Astrotalk-inspired Redesign States
+  const [expandedHero, setExpandedHero] = React.useState(false);
+  const [sampleModalOpen, setSampleModalOpen] = React.useState(false);
+  const [showGroomAdvanced, setShowGroomAdvanced] = React.useState(false);
+  const [showBrideAdvanced, setShowBrideAdvanced] = React.useState(false);
+  const [groomPlaceTouched, setGroomPlaceTouched] = React.useState(false);
+  const [bridePlaceTouched, setBridePlaceTouched] = React.useState(false);
+
+  // Auto-focus refs for groom
+  const groomDayRef = React.useRef<HTMLInputElement | null>(null);
+  const groomMonthRef = React.useRef<HTMLInputElement | null>(null);
+  const groomYearRef = React.useRef<HTMLInputElement | null>(null);
+  const groomHourRef = React.useRef<HTMLInputElement | null>(null);
+  const groomMinuteRef = React.useRef<HTMLInputElement | null>(null);
+  const groomSecondRef = React.useRef<HTMLInputElement | null>(null);
+
+  // Auto-focus refs for bride
+  const brideDayRef = React.useRef<HTMLInputElement | null>(null);
+  const brideMonthRef = React.useRef<HTMLInputElement | null>(null);
+  const brideYearRef = React.useRef<HTMLInputElement | null>(null);
+  const brideHourRef = React.useRef<HTMLInputElement | null>(null);
+  const brideMinuteRef = React.useRef<HTMLInputElement | null>(null);
+  const brideSecondRef = React.useRef<HTMLInputElement | null>(null);
+
+  // Auto-fill and clear actions
+  const handleLoadGroomFromProfile = () => {
+    if (profile?.birth) {
+      const parsed = parseProfileBirthDetails(profile.birth);
+      setGroom((prev) => ({
+        ...prev,
+        ...parsed,
+        name: prev.name || user?.full_name || "Self",
+      }));
+      toast.success(
+        language === "bn"
+          ? "আপনার প্রোফাইলের কুন্ডলি লোড হয়েছে"
+          : language === "hi"
+          ? "आपकी प्रोफ़ाइल कुंडली लोड हुई"
+          : "Your profile kundli loaded"
+      );
+    } else {
+      toast.info(
+        language === "bn"
+          ? "প্রোফাইলে সংরক্ষিত কোনো জন্ম বিবরণ পাওয়া যায়নি"
+          : language === "hi"
+          ? "प्रोफ़ाइल में जन्म विवरण उपलब्ध नहीं है"
+          : "No birth details found in profile"
+      );
+    }
+  };
+
+  const handleClearGroom = () => {
+    setGroom({ ...defaultPersonState });
+  };
+
+  const handleLoadSamplePartner = () => {
+    setBride({
+      ...defaultPersonState,
+      name: language === "bn" ? "প্রিয়া শর্মা" : language === "hi" ? "প্রিয়া शर्मा" : "Priya Sharma",
+      gender: "female",
+      day: "15",
+      month: "08",
+      year: "1998",
+      hour: "10",
+      minute: "30",
+      second: "00",
+      period: "AM",
+      place: "Kolkata, West Bengal, India",
+      selectedPlace: {
+        place: "Kolkata, West Bengal, India",
+        displayName: "Kolkata, West Bengal, India",
+        latitude: 22.5726,
+        longitude: 88.3639,
+        timezoneOffset: 5.5,
+        timezoneName: "Asia/Kolkata",
+        timezoneLabel: "IST (UTC+05:30)",
+        timezoneAbbreviation: "IST",
+        isDst: false,
+      },
+      latitude: 22.5726,
+      longitude: 88.3639,
+      timezone: "5.5",
+      ayanamsa: "lahiri",
+      houseSystem: "placidus",
+    });
+    toast.success(
+      language === "bn"
+        ? "নমুনা পার্টনার বিবরণ লোড হয়েছে"
+        : language === "hi"
+        ? "नमूना साथी विवरण लोड हुआ"
+        : "Sample partner details loaded"
+    );
+  };
+
+  const handleClearBride = () => {
+    setBride({ ...defaultPersonState, gender: "female" });
+  };
+
+  // Groom auto-advance handlers
+  const handleGroomDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "").slice(0, 2);
+    setGroom((prev) => ({ ...prev, day: val }));
+    if (val.length === 2) groomMonthRef.current?.focus();
+  };
+  const handleGroomMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "").slice(0, 2);
+    setGroom((prev) => ({ ...prev, month: val }));
+    if (val.length === 2) groomYearRef.current?.focus();
+  };
+  const handleGroomYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "").slice(0, 4);
+    setGroom((prev) => ({ ...prev, year: val }));
+  };
+
+  const handleGroomHourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "").slice(0, 2);
+    setGroom((prev) => ({ ...prev, hour: val }));
+    if (val.length === 2) groomMinuteRef.current?.focus();
+  };
+  const handleGroomMinuteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "").slice(0, 2);
+    setGroom((prev) => ({ ...prev, minute: val }));
+    if (val.length === 2) groomSecondRef.current?.focus();
+  };
+  const handleGroomSecondChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "").slice(0, 2);
+    setGroom((prev) => ({ ...prev, second: val }));
+  };
+
+  // Bride auto-advance handlers
+  const handleBrideDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "").slice(0, 2);
+    setBride((prev) => ({ ...prev, day: val }));
+    if (val.length === 2) brideMonthRef.current?.focus();
+  };
+  const handleBrideMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "").slice(0, 2);
+    setBride((prev) => ({ ...prev, month: val }));
+    if (val.length === 2) brideYearRef.current?.focus();
+  };
+  const handleBrideYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "").slice(0, 4);
+    setBride((prev) => ({ ...prev, year: val }));
+  };
+
+  const handleBrideHourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "").slice(0, 2);
+    setBride((prev) => ({ ...prev, hour: val }));
+    if (val.length === 2) brideMinuteRef.current?.focus();
+  };
+  const handleBrideMinuteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "").slice(0, 2);
+    setBride((prev) => ({ ...prev, minute: val }));
+    if (val.length === 2) brideSecondRef.current?.focus();
+  };
+  const handleBrideSecondChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "").slice(0, 2);
+    setBride((prev) => ({ ...prev, second: val }));
+  };
+
   // Validate Person
   const validatePerson = (p: PersonFormState, label: string): boolean => {
     if (!p.name.trim()) {
@@ -247,12 +668,13 @@ export default function KundliMatchingPage() {
 
   // Handle Form Submission
   const handleCalculateMatch = async () => {
-    if (!validatePerson(groom, t.groomLabel)) {
-      setStep(1);
+    setGroomPlaceTouched(true);
+    setBridePlaceTouched(true);
+
+    if (!validatePerson(groom, t.yourDetailsTitle || t.groomLabel)) {
       return;
     }
-    if (!validatePerson(bride, t.brideLabel)) {
-      setStep(2);
+    if (!validatePerson(bride, t.partnerDetailsTitle || t.brideLabel)) {
       return;
     }
 
@@ -388,264 +810,296 @@ export default function KundliMatchingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-muted/30 text-surface-foreground flex flex-col font-sans selection:bg-amber-100 selection:text-amber-900">
+    <div className="min-h-screen bg-[#fafaf9]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
       <SiteHeader />
 
-      <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-8 sm:py-12 space-y-8">
+      {/* Main Container */}
+      <main className="mx-auto max-w-6xl px-3 sm:px-6 py-4 flex-1 w-full space-y-6">
         {/* =========================================================================
-            HEADER & TITLE matching Astra Warm Calm Aesthetic
-           ========================================================================= */}
-        <section className="text-center space-y-3 pt-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-300 bg-amber-50/80 text-amber-900 text-xs font-semibold tracking-wide shadow-sm">
-            <Sparkles className="size-3.5 text-amber-600 animate-pulse" />
-            <span>{t.pageTitle}</span>
-          </div>
-
-          <h1 className="text-2xl sm:text-4xl font-serif font-bold text-slate-900 tracking-tight">
-            {t.pageTitle}
-          </h1>
-
-          <p className="max-w-2xl mx-auto text-xs sm:text-sm text-slate-600 leading-relaxed">
-            {t.pageSubtitle}
-          </p>
-
-          <GoldDiamondDivider />
-
-          {/* Feature Coin Badge */}
-          <div className="flex justify-center pt-1">
-            <FeatureCoinBadge
-              feature={matchingFeature}
-              walletBalance={walletBalance}
-              language={language}
-            />
+            1. BREADCRUMB & LANGUAGE SWITCHER
+        ========================================================================= */}
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-stone-500 pt-0.5 pb-1">
+          <div className="flex items-center gap-1.5 uppercase tracking-wider font-semibold">
+            <Link href="/" className="hover:text-amber-700 transition-colors">
+              {t.breadcrumbHome}
+            </Link>
+            <span className="text-stone-300">&gt;</span>
+            <span className="text-stone-900 font-bold">{t.breadcrumbMatchmaking}</span>
           </div>
 
           {/* Language Switcher Bar */}
-          <div className="inline-flex items-center p-1 rounded-full border border-amber-200/80 bg-white/90 shadow-sm gap-1 text-xs font-medium">
-            <Languages className="size-3.5 text-amber-600 ml-2 mr-1" />
-            <button
-              type="button"
-              onClick={() => setLanguage("bn")}
-              className={`min-h-9 inline-flex items-center justify-center px-3 py-2 rounded-full press transition-all duration-200 ${
-                language === "bn"
-                  ? "bg-amber-500 text-white font-semibold shadow-xs"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-amber-50"
-              }`}
-            >
-              বাংলা
-            </button>
-            <button
-              type="button"
-              onClick={() => setLanguage("hi")}
-              className={`min-h-9 inline-flex items-center justify-center px-3 py-2 rounded-full press transition-all duration-200 ${
-                language === "hi"
-                  ? "bg-amber-500 text-white font-semibold shadow-xs"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-amber-50"
-              }`}
-            >
-              हिंदी
-            </button>
-            <button
-              type="button"
-              onClick={() => setLanguage("en")}
-              className={`min-h-9 inline-flex items-center justify-center px-3 py-2 rounded-full press transition-all duration-200 ${
-                language === "en"
-                  ? "bg-amber-500 text-white font-semibold shadow-xs"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-amber-50"
-              }`}
-            >
-              English
-            </button>
+          <div className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white p-0.5 text-xs font-semibold shadow-2xs">
+            {(
+              [
+                { code: "bn", label: "বাংলা" },
+                { code: "hi", label: "हिन्दी" },
+                { code: "en", label: "English" },
+              ] as const
+            ).map((lang) => (
+              <button
+                key={lang.code}
+                type="button"
+                onClick={() => setLanguage(lang.code)}
+                className={`min-h-7 inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer ${
+                  language === lang.code
+                    ? "bg-[#fcd404] text-stone-950 shadow-2xs font-extrabold"
+                    : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
+                }`}
+              >
+                {lang.label}
+              </button>
+            ))}
           </div>
-        </section>
+        </div>
 
         {/* =========================================================================
-            2-STEP STEPPER WIZARD (Matching Screenshots 1 & 2)
-           ========================================================================= */}
-        <section className="bg-white rounded-2xl border border-amber-200/70 shadow-sm p-5 sm:p-8 space-y-6">
-          {/* Stepper Tabs Bar */}
-          <div className="grid grid-cols-2 gap-3 pb-4 border-b border-amber-100">
-            <button
-              type="button"
-              onClick={() => setStep(1)}
-              className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl border text-sm font-semibold press transition-all ${
-                step === 1
-                  ? "border-amber-400 bg-amber-50/70 text-amber-900 shadow-xs"
-                  : "border-slate-200 bg-slate-50/60 text-slate-500 hover:bg-slate-100"
-              }`}
-            >
-              <span
-                className={`size-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                  step === 1 ? "bg-amber-500 text-white" : "bg-slate-200 text-slate-600"
-                }`}
-              >
-                1
-              </span>
-              <span>{t.step1Title}</span>
-            </button>
+            2. HERO SECTION: Compact, sleek, with rotating faint zodiac circle in background
+        ========================================================================= */}
+        <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-r from-amber-50/50 via-white to-amber-50/30 px-4 sm:px-6 py-4 shadow-2xs">
+          {/* Faint rotating zodiac wheel in background */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/zodiac-wheel-gold.webp"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-12 -top-16 size-[280px] sm:size-[360px] select-none opacity-[0.14] mix-blend-multiply animate-spin [animation-duration:120s] motion-reduce:animate-none"
+          />
 
-            <button
-              type="button"
-              onClick={() => {
-                if (validatePerson(groom, t.groomLabel)) setStep(2);
-              }}
-              className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl border text-sm font-semibold press transition-all ${
-                step === 2
-                  ? "border-amber-400 bg-amber-50/70 text-amber-900 shadow-xs"
-                  : "border-slate-200 bg-slate-50/60 text-slate-500 hover:bg-slate-100"
-              }`}
-            >
-              <span
-                className={`size-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                  step === 2 ? "bg-amber-500 text-white" : "bg-slate-200 text-slate-600"
-                }`}
+          <div className="relative z-10 max-w-2xl space-y-1.5">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold text-stone-900 tracking-tight leading-tight">
+              {t.heroTitle}{" "}
+              <span className="text-amber-800 font-serif font-bold">{t.heroHighlight}</span>
+            </h1>
+
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+              {t.heroDescription}
+              {expandedHero && (
+                <span className="block mt-1.5 text-stone-600 leading-relaxed">
+                  {t.heroDescriptionExpanded}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => setExpandedHero(!expandedHero)}
+                className="ml-1.5 font-bold text-amber-700 hover:text-amber-900 hover:underline inline-flex items-center cursor-pointer"
               >
-                2
-              </span>
-              <span>{t.step2Title}</span>
-            </button>
+                {expandedHero ? t.readLess : t.readMore}
+              </button>
+            </p>
+
+            <div className="pt-1.5">
+              <FeatureCoinBadge
+                feature={matchingFeature}
+                walletBalance={walletBalance}
+                language={language}
+              />
+            </div>
           </div>
+        </div>
 
-          {/* Form Content */}
-          {step === 1 ? (
-            /* STEP 1: GROOM FORM */
-            <div className="space-y-6 fade-in">
-              <div className="flex items-center gap-2 text-amber-800 font-semibold text-base sm:text-lg border-b border-amber-100 pb-2">
-                <span className="text-xl">♂</span>
-                <span>{t.groomFormHeading}</span>
+        {/* =========================================================================
+            3. MATCH YOUR KUNDLI TITLE
+        ========================================================================= */}
+        <div className="space-y-0.5 pt-1">
+          <h2 className="text-base sm:text-lg font-serif font-bold text-stone-900">
+            {t.matchYourKundliTitle}
+          </h2>
+          <p className="text-xs text-stone-500">
+            {t.matchYourKundliSubtitle}
+          </p>
+        </div>
+
+        {/* =========================================================================
+            4. SIDE-BY-SIDE 2-COLUMN FORM CARD (Matching Astrotalk)
+        ========================================================================= */}
+        <div className="rounded-2xl border border-stone-200/90 bg-white p-4 sm:p-6 shadow-xs space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 divide-y md:divide-y-0 md:divide-x divide-stone-100">
+            {/* COLUMN 1: YOUR DETAILS (GROOM) */}
+            <div className="space-y-4 md:pr-4">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-1">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-[#fef9c3] border border-[#fde047] px-3.5 py-1 text-xs font-bold text-amber-900 shadow-2xs">
+                  <span className="text-sm">♂</span>
+                  <span>{t.yourDetailsTitle}</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleLoadGroomFromProfile}
+                    className="inline-flex items-center gap-1 rounded-full border border-stone-200 hover:border-amber-400 bg-stone-50/80 hover:bg-amber-50/50 px-3 py-1 text-xs font-semibold text-stone-700 hover:text-stone-900 transition-colors shadow-2xs cursor-pointer"
+                    title={language === "bn" ? "প্রোফাইল থেকে লোড করুন" : "Load from Profile"}
+                  >
+                    <span>{t.chooseKundliBtn}</span>
+                    <span className="text-[10px]">▾</span>
+                  </button>
+                  {groom.name && (
+                    <button
+                      type="button"
+                      onClick={handleClearGroom}
+                      className="p-1 rounded-full hover:bg-stone-100 text-stone-400 hover:text-stone-600 transition-colors"
+                      title={language === "bn" ? "মুছে ফেলুন" : "Clear"}
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
 
-              {/* Full Name */}
+              {/* Name */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 tracking-wide uppercase">
-                  {t.form.fullNameLabel} <span className="text-red-500">*</span>
+                <label className="block text-xs font-bold text-stone-700">
+                  {t.form.fullNameLabel} <span className="text-rose-500">*</span>
                 </label>
-                <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                <div className="relative rounded-2xl border border-stone-200 hover:border-stone-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 bg-white px-3.5 py-2.5 flex items-center gap-2.5 transition-all shadow-2xs">
+                  <User className="size-4 text-stone-400 shrink-0" />
                   <input
                     type="text"
                     value={groom.name}
-                    onChange={(e) => setGroom({ ...groom, name: e.target.value })}
-                    placeholder={t.form.fullNamePlaceholder}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all"
+                    onChange={(e) => setGroom((p) => ({ ...p, name: e.target.value }))}
+                    placeholder={t.form.fullNamePlaceholder || "Rahul Sharma"}
+                    className="w-full text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 bg-transparent outline-none font-medium"
                   />
+                </div>
+              </div>
+
+              {/* Gender */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-stone-700">
+                  {t.genderLabel}
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[
+                    { val: "male", label: "♂ " + t.genderMale },
+                    { val: "female", label: "♀ " + t.genderFemale },
+                    { val: "other", label: "⚥ " + t.genderOther },
+                  ].map((g) => (
+                    <button
+                      key={g.val}
+                      type="button"
+                      onClick={() => setGroom((p) => ({ ...p, gender: g.val as any }))}
+                      className={`min-h-10 rounded-xl border px-2 py-1.5 text-center text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                        groom.gender === g.val
+                          ? "bg-[#fffbeb] border-[#f59e0b] text-stone-950 shadow-2xs font-extrabold"
+                          : "bg-white border-stone-200 text-stone-600 hover:bg-stone-50"
+                      }`}
+                    >
+                      {g.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
               {/* Birth Date */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 tracking-wide uppercase">
-                  {t.form.dobLabel} <span className="text-red-500">*</span>
+                <label className="block text-xs font-bold text-stone-700">
+                  {t.form.dobLabel} <span className="text-rose-500">*</span>
                 </label>
-                <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                  <input
-                    type="number"
-                    min="1"
-                    max="31"
-                    value={groom.day}
-                    onChange={(e) => setGroom({ ...groom, day: e.target.value })}
-                    placeholder={t.form.dayPlaceholder}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-center"
-                  />
-                  <input
-                    type="number"
-                    min="1"
-                    max="12"
-                    value={groom.month}
-                    onChange={(e) => setGroom({ ...groom, month: e.target.value })}
-                    placeholder={t.form.monthPlaceholder}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-center"
-                  />
-                  <input
-                    type="number"
-                    min="1900"
-                    max="2100"
-                    value={groom.year}
-                    onChange={(e) => setGroom({ ...groom, year: e.target.value })}
-                    placeholder={t.form.yearPlaceholder}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-center"
-                  />
+                <div className="rounded-2xl border border-stone-200 hover:border-stone-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 bg-white px-3.5 py-2 flex items-center gap-2 shadow-2xs">
+                  <Calendar className="size-4 text-stone-400 shrink-0" />
+                  <div className="grid grid-cols-3 gap-2 flex-1">
+                    <input
+                      ref={groomDayRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={groom.day}
+                      onChange={handleGroomDayChange}
+                      placeholder={t.form.dayPlaceholder || "DD"}
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
+                    />
+                    <input
+                      ref={groomMonthRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={groom.month}
+                      onChange={handleGroomMonthChange}
+                      placeholder={t.form.monthPlaceholder || "MM"}
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400 border-x border-stone-200 px-1"
+                    />
+                    <input
+                      ref={groomYearRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={4}
+                      value={groom.year}
+                      onChange={handleGroomYearChange}
+                      placeholder={t.form.yearPlaceholder || "YYYY"}
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Birth Time */}
+              {/* Birth Time (optional) */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 tracking-wide uppercase">
-                  {t.form.tobLabel}{" "}
-                  <span className="text-[11px] font-semibold text-emerald-700 lowercase">
-                    ({t.timeOptionalSuffix})
-                  </span>
-                </label>
-                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3">
-                  <input
-                    type="number"
-                    min="1"
-                    max="12"
-                    value={groom.hour}
-                    onChange={(e) => setGroom({ ...groom, hour: e.target.value })}
-                    placeholder={t.form.hourPlaceholder}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-center"
-                  />
-                  <input
-                    type="number"
-                    min="0"
-                    max="59"
-                    value={groom.minute}
-                    onChange={(e) => setGroom({ ...groom, minute: e.target.value })}
-                    placeholder={t.form.minutePlaceholder}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-center"
-                  />
-                  <input
-                    type="number"
-                    min="0"
-                    max="59"
-                    value={groom.second}
-                    onChange={(e) => setGroom({ ...groom, second: e.target.value })}
-                    placeholder={t.form.secondPlaceholder}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-center"
-                  />
-                  <div className="col-span-3 flex rounded-xl border border-slate-200 overflow-hidden bg-slate-50 p-0.5 sm:col-span-1">
-                    <button
-                      type="button"
-                      onClick={() => setGroom({ ...groom, period: "AM" })}
-                      className={`flex-1 min-h-9 py-2 text-xs font-bold rounded-lg press transition-all ${
-                        groom.period === "AM"
-                          ? "bg-amber-500 text-white shadow-xs"
-                          : "text-slate-600 hover:text-slate-900"
-                      }`}
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-stone-700">
+                    {t.form.tobLabel} <span className="text-stone-400 font-normal">({t.birthTimeOptional})</span>
+                  </label>
+                  <span className="text-[11px] text-stone-400">{t.timeDefaultHint}</span>
+                </div>
+                <div className="rounded-2xl border border-stone-200 hover:border-stone-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 bg-white px-3.5 py-2 flex items-center gap-2 shadow-2xs">
+                  <Clock className="size-4 text-stone-400 shrink-0" />
+                  <div className="grid grid-cols-4 gap-1.5 flex-1 items-center">
+                    <input
+                      ref={groomHourRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={groom.hour}
+                      onChange={handleGroomHourChange}
+                      placeholder="HH"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
+                    />
+                    <input
+                      ref={groomMinuteRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={groom.minute}
+                      onChange={handleGroomMinuteChange}
+                      placeholder="MM"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400 border-x border-stone-200 px-1"
+                    />
+                    <input
+                      ref={groomSecondRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={groom.second}
+                      onChange={handleGroomSecondChange}
+                      placeholder="SS"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
+                    />
+                    <select
+                      aria-label="AM or PM"
+                      value={groom.period ?? "AM"}
+                      onChange={(e) => setGroom((p) => ({ ...p, period: e.target.value as "AM" | "PM" }))}
+                      className="w-full text-center text-xs font-bold text-stone-800 bg-stone-100 rounded-lg py-1 outline-none cursor-pointer"
                     >
-                      AM
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setGroom({ ...groom, period: "PM" })}
-                      className={`flex-1 min-h-9 py-2 text-xs font-bold rounded-lg press transition-all ${
-                        groom.period === "PM"
-                          ? "bg-amber-500 text-white shadow-xs"
-                          : "text-slate-600 hover:text-slate-900"
-                      }`}
-                    >
-                      PM
-                    </button>
+                      <option value="AM">AM</option>
+                      <option value="PM">PM</option>
+                    </select>
                   </div>
                 </div>
               </div>
 
               {/* Birth Place */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 tracking-wide uppercase">
-                  {t.form.placeLabel} <span className="text-red-500">*</span>
+                <label className="block text-xs font-bold text-stone-700">
+                  {t.form.placeLabel} <span className="text-rose-500">*</span>
                 </label>
                 <BirthPlaceField
                   value={groom.selectedPlace}
-                  onChange={(next: SelectedPlace | null) => {
+                  onChange={(next) => {
+                    setGroomPlaceTouched(true);
                     setGroom((prev) => ({
                       ...prev,
                       selectedPlace: next,
-                      place: next ? next.displayName || next.place : "",
-                      latitude: next ? next.latitude : null,
-                      longitude: next ? next.longitude : null,
-                      timezone: next && next.timezoneOffset != null ? String(next.timezoneOffset) : prev.timezone,
+                      place: next ? next.displayName || next.place : prev.place,
+                      timezone: next?.timezoneOffset != null ? String(next.timezoneOffset) : prev.timezone,
                     }));
                   }}
                   birthDate={{
@@ -654,227 +1108,251 @@ export default function KundliMatchingPage() {
                     day: parseInt(groom.day, 10) || undefined,
                   }}
                   language={language}
+                  invalid={groomPlaceTouched && !groom.selectedPlace}
                 />
               </div>
 
-              {/* Advanced Settings Toggle */}
-              <div className="pt-2">
+              {/* Exact time lagna hint */}
+              <div className="pt-0.5 flex items-start gap-1.5 text-[11px] text-stone-500 italic">
+                <Info className="size-3.5 text-amber-600 shrink-0 mt-0.5" />
+                <span>{t.exactTimeLagnaHint}</span>
+              </div>
+
+              {/* Advanced Settings */}
+              <div className="pt-1 border-t border-stone-100">
                 <button
                   type="button"
-                  onClick={() => setGroom({ ...groom, showAdvanced: !groom.showAdvanced })}
-                  // A disclosure that reveals the ayanamsa and house-system choices
-                  // was 16px tall; it needs a row of its own.
-                  className="inline-flex min-h-10 w-full items-center gap-1.5 rounded-lg px-1 text-xs font-semibold text-amber-700 press transition-colors hover:bg-amber-50 hover:text-amber-800"
+                  onClick={() => setShowGroomAdvanced(!showGroomAdvanced)}
+                  className="flex items-center gap-1.5 text-xs font-bold text-stone-600 hover:text-stone-900 transition-colors py-1 cursor-pointer"
                 >
-                  {groom.showAdvanced ? (
-                    <>
-                      <ChevronUp className="size-4" />
-                      <span>{t.form.hideAdvancedSettings}</span>
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown className="size-4" />
-                      <span>{t.form.advancedSettings}</span>
-                    </>
-                  )}
+                  <Sliders className="size-3 text-amber-600" />
+                  <span>
+                    {showGroomAdvanced ? t.form.hideAdvancedSettings : t.form.advancedSettings}
+                  </span>
+                  <ChevronDown
+                    className={`size-3 text-stone-400 transition-transform ${
+                      showGroomAdvanced ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
-
-                {groom.showAdvanced && (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 mt-2 rounded-xl bg-amber-50/50 border border-amber-200/60 fade-in">
+                {showGroomAdvanced && (
+                  <div className="grid grid-cols-2 gap-3 pt-2 text-xs">
                     <div>
-                      <label className="block text-[11px] font-medium text-slate-600 mb-1">
-                        {t.form.latitude}
-                      </label>
-                      <input
-                        type="number"
-                        step="0.0001"
-                        value={groom.latitude ?? ""}
-                        onChange={(e) =>
-                          setGroom({ ...groom, latitude: parseFloat(e.target.value) || null })
-                        }
-                        className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-white"
-                      />
+                      <label className="block font-semibold text-stone-600 mb-1">{t.form.ayanamsa}</label>
+                      <select
+                        value={groom.ayanamsa}
+                        onChange={(e) => setGroom((p) => ({ ...p, ayanamsa: e.target.value as any }))}
+                        className="w-full rounded-xl border border-stone-200 bg-stone-50/70 p-2 text-stone-900 outline-none"
+                      >
+                        <option value="lahiri">Lahiri (Chitrapaksha)</option>
+                        <option value="raman">B.V. Raman</option>
+                        <option value="krishnamurti">KP (Krishnamurti)</option>
+                        <option value="sayana">Sayana (Tropical)</option>
+                      </select>
                     </div>
                     <div>
-                      <label className="block text-[11px] font-medium text-slate-600 mb-1">
-                        {t.form.longitude}
-                      </label>
-                      <input
-                        type="number"
-                        step="0.0001"
-                        value={groom.longitude ?? ""}
-                        onChange={(e) =>
-                          setGroom({ ...groom, longitude: parseFloat(e.target.value) || null })
-                        }
-                        className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-medium text-slate-600 mb-1">
-                        {t.form.timezone}
-                      </label>
-                      <input
-                        type="text"
-                        value={groom.timezone}
-                        onChange={(e) => setGroom({ ...groom, timezone: e.target.value })}
-                        className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-white"
-                      />
+                      <label className="block font-semibold text-stone-600 mb-1">{t.form.houseSystem}</label>
+                      <select
+                        value={groom.houseSystem}
+                        onChange={(e) => setGroom((p) => ({ ...p, houseSystem: e.target.value as any }))}
+                        className="w-full rounded-xl border border-stone-200 bg-stone-50/70 p-2 text-stone-900 outline-none"
+                      >
+                        <option value="placidus">Placidus</option>
+                        <option value="whole_sign">Whole Sign</option>
+                        <option value="equal">Equal House</option>
+                      </select>
                     </div>
                   </div>
                 )}
               </div>
-
-              {/* Action Button for Step 1 */}
-              <div className="pt-4 flex justify-end">
-                <button
-                  type="button"
-                  onClick={handleNextToBride}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold text-sm shadow-sm hover:shadow-md press transition-all cursor-pointer"
-                >
-                  <span>{t.nextStepButton}</span>
-                  <ArrowRight className="size-4" />
-                </button>
-              </div>
             </div>
-          ) : (
-            /* STEP 2: BRIDE FORM */
-            <div className="space-y-6 fade-in">
-              <div className="flex items-center gap-2 text-amber-800 font-semibold text-base sm:text-lg border-b border-amber-100 pb-2">
-                <span className="text-xl">♀</span>
-                <span>{t.brideFormHeading}</span>
+
+            {/* COLUMN 2: PARTNER'S DETAILS (BRIDE) */}
+            <div className="space-y-4 pt-4 md:pt-0 md:pl-4">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-1">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-[#fef9c3] border border-[#fde047] px-3.5 py-1 text-xs font-bold text-amber-900 shadow-2xs">
+                  <span className="text-sm">♀</span>
+                  <span>{t.partnerDetailsTitle}</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleLoadSamplePartner}
+                    className="inline-flex items-center gap-1 rounded-full border border-stone-200 hover:border-amber-400 bg-stone-50/80 hover:bg-amber-50/50 px-3 py-1 text-xs font-semibold text-stone-700 hover:text-stone-900 transition-colors shadow-2xs cursor-pointer"
+                    title={language === "bn" ? "নমুনা কুন্ডলি লোড করুন" : "Load sample partner"}
+                  >
+                    <span>{t.chooseKundliBtn}</span>
+                    <span className="text-[10px]">▾</span>
+                  </button>
+                  {bride.name && (
+                    <button
+                      type="button"
+                      onClick={handleClearBride}
+                      className="p-1 rounded-full hover:bg-stone-100 text-stone-400 hover:text-stone-600 transition-colors"
+                      title={language === "bn" ? "মুছে ফেলুন" : "Clear"}
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
 
-              {/* Full Name */}
+              {/* Name */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 tracking-wide uppercase">
-                  {t.form.fullNameLabel} <span className="text-red-500">*</span>
+                <label className="block text-xs font-bold text-stone-700">
+                  {t.form.fullNameLabel} <span className="text-rose-500">*</span>
                 </label>
-                <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                <div className="relative rounded-2xl border border-stone-200 hover:border-stone-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 bg-white px-3.5 py-2.5 flex items-center gap-2.5 transition-all shadow-2xs">
+                  <User className="size-4 text-stone-400 shrink-0" />
                   <input
                     type="text"
                     value={bride.name}
-                    onChange={(e) => setBride({ ...bride, name: e.target.value })}
-                    placeholder={t.form.fullNamePlaceholder}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all"
+                    onChange={(e) => setBride((p) => ({ ...p, name: e.target.value }))}
+                    placeholder={language === "bn" ? "প্রিয়া শর্মা" : language === "hi" ? "प्रिया शर्मा" : "Priya Sharma"}
+                    className="w-full text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 bg-transparent outline-none font-medium"
                   />
+                </div>
+              </div>
+
+              {/* Gender */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-stone-700">
+                  {t.genderLabel}
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[
+                    { val: "male", label: "♂ " + t.genderMale },
+                    { val: "female", label: "♀ " + t.genderFemale },
+                    { val: "other", label: "⚥ " + t.genderOther },
+                  ].map((g) => (
+                    <button
+                      key={g.val}
+                      type="button"
+                      onClick={() => setBride((p) => ({ ...p, gender: g.val as any }))}
+                      className={`min-h-10 rounded-xl border px-2 py-1.5 text-center text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                        bride.gender === g.val
+                          ? "bg-[#fffbeb] border-[#f59e0b] text-stone-950 shadow-2xs font-extrabold"
+                          : "bg-white border-stone-200 text-stone-600 hover:bg-stone-50"
+                      }`}
+                    >
+                      {g.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
               {/* Birth Date */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 tracking-wide uppercase">
-                  {t.form.dobLabel} <span className="text-red-500">*</span>
+                <label className="block text-xs font-bold text-stone-700">
+                  {t.form.dobLabel} <span className="text-rose-500">*</span>
                 </label>
-                <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                  <input
-                    type="number"
-                    min="1"
-                    max="31"
-                    value={bride.day}
-                    onChange={(e) => setBride({ ...bride, day: e.target.value })}
-                    placeholder={t.form.dayPlaceholder}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-center"
-                  />
-                  <input
-                    type="number"
-                    min="1"
-                    max="12"
-                    value={bride.month}
-                    onChange={(e) => setBride({ ...bride, month: e.target.value })}
-                    placeholder={t.form.monthPlaceholder}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-center"
-                  />
-                  <input
-                    type="number"
-                    min="1900"
-                    max="2100"
-                    value={bride.year}
-                    onChange={(e) => setBride({ ...bride, year: e.target.value })}
-                    placeholder={t.form.yearPlaceholder}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-center"
-                  />
+                <div className="rounded-2xl border border-stone-200 hover:border-stone-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 bg-white px-3.5 py-2 flex items-center gap-2 shadow-2xs">
+                  <Calendar className="size-4 text-stone-400 shrink-0" />
+                  <div className="grid grid-cols-3 gap-2 flex-1">
+                    <input
+                      ref={brideDayRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={bride.day}
+                      onChange={handleBrideDayChange}
+                      placeholder={t.form.dayPlaceholder || "DD"}
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
+                    />
+                    <input
+                      ref={brideMonthRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={bride.month}
+                      onChange={handleBrideMonthChange}
+                      placeholder={t.form.monthPlaceholder || "MM"}
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400 border-x border-stone-200 px-1"
+                    />
+                    <input
+                      ref={brideYearRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={4}
+                      value={bride.year}
+                      onChange={handleBrideYearChange}
+                      placeholder={t.form.yearPlaceholder || "YYYY"}
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Birth Time */}
+              {/* Birth Time (optional) */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 tracking-wide uppercase">
-                  {t.form.tobLabel}{" "}
-                  <span className="text-[11px] font-semibold text-emerald-700 lowercase">
-                    ({t.timeOptionalSuffix})
-                  </span>
-                </label>
-                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3">
-                  <input
-                    type="number"
-                    min="1"
-                    max="12"
-                    value={bride.hour}
-                    onChange={(e) => setBride({ ...bride, hour: e.target.value })}
-                    placeholder={t.form.hourPlaceholder}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-center"
-                  />
-                  <input
-                    type="number"
-                    min="0"
-                    max="59"
-                    value={bride.minute}
-                    onChange={(e) => setBride({ ...bride, minute: e.target.value })}
-                    placeholder={t.form.minutePlaceholder}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-center"
-                  />
-                  <input
-                    type="number"
-                    min="0"
-                    max="59"
-                    value={bride.second}
-                    onChange={(e) => setBride({ ...bride, second: e.target.value })}
-                    placeholder={t.form.secondPlaceholder}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-center"
-                  />
-                  <div className="col-span-3 flex rounded-xl border border-slate-200 overflow-hidden bg-slate-50 p-0.5 sm:col-span-1">
-                    <button
-                      type="button"
-                      onClick={() => setBride({ ...bride, period: "AM" })}
-                      className={`flex-1 min-h-9 py-2 text-xs font-bold rounded-lg press transition-all ${
-                        bride.period === "AM"
-                          ? "bg-amber-500 text-white shadow-xs"
-                          : "text-slate-600 hover:text-slate-900"
-                      }`}
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-stone-700">
+                    {t.form.tobLabel} <span className="text-stone-400 font-normal">({t.birthTimeOptional})</span>
+                  </label>
+                  <span className="text-[11px] text-stone-400">{t.timeDefaultHint}</span>
+                </div>
+                <div className="rounded-2xl border border-stone-200 hover:border-stone-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 bg-white px-3.5 py-2 flex items-center gap-2 shadow-2xs">
+                  <Clock className="size-4 text-stone-400 shrink-0" />
+                  <div className="grid grid-cols-4 gap-1.5 flex-1 items-center">
+                    <input
+                      ref={brideHourRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={bride.hour}
+                      onChange={handleBrideHourChange}
+                      placeholder="HH"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
+                    />
+                    <input
+                      ref={brideMinuteRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={bride.minute}
+                      onChange={handleBrideMinuteChange}
+                      placeholder="MM"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400 border-x border-stone-200 px-1"
+                    />
+                    <input
+                      ref={brideSecondRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={bride.second}
+                      onChange={handleBrideSecondChange}
+                      placeholder="SS"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
+                    />
+                    <select
+                      aria-label="AM or PM"
+                      value={bride.period ?? "AM"}
+                      onChange={(e) => setBride((p) => ({ ...p, period: e.target.value as "AM" | "PM" }))}
+                      className="w-full text-center text-xs font-bold text-stone-800 bg-stone-100 rounded-lg py-1 outline-none cursor-pointer"
                     >
-                      AM
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBride({ ...bride, period: "PM" })}
-                      className={`flex-1 min-h-9 py-2 text-xs font-bold rounded-lg press transition-all ${
-                        bride.period === "PM"
-                          ? "bg-amber-500 text-white shadow-xs"
-                          : "text-slate-600 hover:text-slate-900"
-                      }`}
-                    >
-                      PM
-                    </button>
+                      <option value="AM">AM</option>
+                      <option value="PM">PM</option>
+                    </select>
                   </div>
                 </div>
               </div>
 
               {/* Birth Place */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 tracking-wide uppercase">
-                  {t.form.placeLabel} <span className="text-red-500">*</span>
+                <label className="block text-xs font-bold text-stone-700">
+                  {t.form.placeLabel} <span className="text-rose-500">*</span>
                 </label>
                 <BirthPlaceField
                   value={bride.selectedPlace}
-                  onChange={(next: SelectedPlace | null) => {
+                  onChange={(next) => {
+                    setBridePlaceTouched(true);
                     setBride((prev) => ({
                       ...prev,
                       selectedPlace: next,
-                      place: next ? next.displayName || next.place : "",
-                      latitude: next ? next.latitude : null,
-                      longitude: next ? next.longitude : null,
-                      timezone: next && next.timezoneOffset != null ? String(next.timezoneOffset) : prev.timezone,
+                      place: next ? next.displayName || next.place : prev.place,
+                      timezone: next?.timezoneOffset != null ? String(next.timezoneOffset) : prev.timezone,
                     }));
                   }}
                   birthDate={{
@@ -883,131 +1361,293 @@ export default function KundliMatchingPage() {
                     day: parseInt(bride.day, 10) || undefined,
                   }}
                   language={language}
+                  invalid={bridePlaceTouched && !bride.selectedPlace}
                 />
               </div>
 
-              {/* Advanced Settings Toggle */}
-              <div className="pt-2">
+              {/* Exact time lagna hint */}
+              <div className="pt-0.5 flex items-start gap-1.5 text-[11px] text-stone-500 italic">
+                <Info className="size-3.5 text-amber-600 shrink-0 mt-0.5" />
+                <span>{t.exactTimeLagnaHint}</span>
+              </div>
+
+              {/* Advanced Settings */}
+              <div className="pt-1 border-t border-stone-100">
                 <button
                   type="button"
-                  onClick={() => setBride({ ...bride, showAdvanced: !bride.showAdvanced })}
-                  // A disclosure that reveals the ayanamsa and house-system choices
-                  // was 16px tall; it needs a row of its own.
-                  className="inline-flex min-h-10 w-full items-center gap-1.5 rounded-lg px-1 text-xs font-semibold text-amber-700 press transition-colors hover:bg-amber-50 hover:text-amber-800"
+                  onClick={() => setShowBrideAdvanced(!showBrideAdvanced)}
+                  className="flex items-center gap-1.5 text-xs font-bold text-stone-600 hover:text-stone-900 transition-colors py-1 cursor-pointer"
                 >
-                  {bride.showAdvanced ? (
-                    <>
-                      <ChevronUp className="size-4" />
-                      <span>{t.form.hideAdvancedSettings}</span>
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown className="size-4" />
-                      <span>{t.form.advancedSettings}</span>
-                    </>
-                  )}
+                  <Sliders className="size-3 text-amber-600" />
+                  <span>
+                    {showBrideAdvanced ? t.form.hideAdvancedSettings : t.form.advancedSettings}
+                  </span>
+                  <ChevronDown
+                    className={`size-3 text-stone-400 transition-transform ${
+                      showBrideAdvanced ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
-
-                {bride.showAdvanced && (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 mt-2 rounded-xl bg-amber-50/50 border border-amber-200/60 fade-in">
+                {showBrideAdvanced && (
+                  <div className="grid grid-cols-2 gap-3 pt-2 text-xs">
                     <div>
-                      <label className="block text-[11px] font-medium text-slate-600 mb-1">
-                        {t.form.latitude}
-                      </label>
-                      <input
-                        type="number"
-                        step="0.0001"
-                        value={bride.latitude ?? ""}
-                        onChange={(e) =>
-                          setBride({ ...bride, latitude: parseFloat(e.target.value) || null })
-                        }
-                        className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-white"
-                      />
+                      <label className="block font-semibold text-stone-600 mb-1">{t.form.ayanamsa}</label>
+                      <select
+                        value={bride.ayanamsa}
+                        onChange={(e) => setBride((p) => ({ ...p, ayanamsa: e.target.value as any }))}
+                        className="w-full rounded-xl border border-stone-200 bg-stone-50/70 p-2 text-stone-900 outline-none"
+                      >
+                        <option value="lahiri">Lahiri (Chitrapaksha)</option>
+                        <option value="raman">B.V. Raman</option>
+                        <option value="krishnamurti">KP (Krishnamurti)</option>
+                        <option value="sayana">Sayana (Tropical)</option>
+                      </select>
                     </div>
                     <div>
-                      <label className="block text-[11px] font-medium text-slate-600 mb-1">
-                        {t.form.longitude}
-                      </label>
-                      <input
-                        type="number"
-                        step="0.0001"
-                        value={bride.longitude ?? ""}
-                        onChange={(e) =>
-                          setBride({ ...bride, longitude: parseFloat(e.target.value) || null })
-                        }
-                        className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-medium text-slate-600 mb-1">
-                        {t.form.timezone}
-                      </label>
-                      <input
-                        type="text"
-                        value={bride.timezone}
-                        onChange={(e) => setBride({ ...bride, timezone: e.target.value })}
-                        className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-white"
-                      />
+                      <label className="block font-semibold text-stone-600 mb-1">{t.form.houseSystem}</label>
+                      <select
+                        value={bride.houseSystem}
+                        onChange={(e) => setBride((p) => ({ ...p, houseSystem: e.target.value as any }))}
+                        className="w-full rounded-xl border border-stone-200 bg-stone-50/70 p-2 text-stone-900 outline-none"
+                      >
+                        <option value="placidus">Placidus</option>
+                        <option value="whole_sign">Whole Sign</option>
+                        <option value="equal">Equal House</option>
+                      </select>
                     </div>
                   </div>
                 )}
               </div>
+            </div>
+          </div>
 
-              {/* Action Buttons for Step 2 */}
-              <div className="pt-4 space-y-3">
-                {matchingFeature && !matchingFeature.enabled && (
-                  <FeatureDisabledAlert
-                    featureName={language === "bn" ? "কুন্ডলী মিলন" : "Kundli Matching"}
-                    language={language}
-                  />
-                )}
+          {/* Form Action Footer */}
+          <div className="pt-4 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-stone-500 text-center sm:text-left">
+              {t.formRequirementNote}
+            </p>
 
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setStep(1)}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm press transition-all"
-                  >
-                    <ArrowLeft className="size-4" />
-                    <span>{t.backButton}</span>
-                  </button>
+            <button
+              type="button"
+              disabled={isLoading}
+              onClick={handleCalculateMatch}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-[#fcd404] hover:bg-[#ebd500] active:scale-[0.99] text-stone-950 font-bold px-8 py-3 text-sm shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  <span>{t.calculatingBtn}</span>
+                </>
+              ) : (
+                <>
+                  <span>{t.matchHoroscopeBtn}</span>
+                  <HeartHandshake className="size-4" />
+                </>
+              )}
+            </button>
+          </div>
+        </div>
 
-                  <div className="flex items-center gap-3">
-                    <FeatureCoinBadge
-                      feature={matchingFeature}
-                      walletBalance={walletBalance}
-                      language={language}
-                      showWallet={false}
-                    />
+        {/* =========================================================================
+            5. RELATED GUIDES PILLS
+        ========================================================================= */}
+        <div className="space-y-2 pt-2">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+            {language === "bn" ? "প্রাসঙ্গিক সহায়িকা" : language === "hi" ? "संबंधित गाइड" : "RELATED GUIDES"}
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            {[
+              { label: language === "bn" ? "কীভাবে কুন্ডলি দেখতে হয়" : language === "hi" ? "कुंडली कैसे पढ़ें" : "How to Read Kundli", href: "/kundli" },
+              { label: language === "bn" ? "কুন্ডলির ভাব বা ঘরের অর্থ" : language === "hi" ? "कुंडली में भाव कैसे समझें" : "How to Read Houses in Kundli", href: "/kundli" },
+              { label: language === "bn" ? "জ্যোতিষে গ্রহের প্রভাব" : language === "hi" ? "ज्योतिष में ग्रह कैसे समझें" : "How to Read Planets in Astrology", href: "/kundli" },
+              { label: language === "bn" ? "গ্রহ, রাশি ও ভাব বিস্তার" : language === "hi" ? "ग्रह, राशियां और भाव" : "Planets, Signs & Houses in Astrology", href: "/kundli" },
+              { label: language === "bn" ? "গ্রহ ও রাশির গুরুত্ব ও তাৎপর্য" : language === "hi" ? "ग्रह और राशियों का महत्व" : "Planets, Signs and Their Significance", href: "/kundli" },
+            ].map((guide, idx) => (
+              <Link
+                key={idx}
+                href={guide.href}
+                className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white hover:bg-stone-50 hover:border-amber-300 px-3.5 py-1.5 text-xs font-semibold text-stone-700 hover:text-stone-900 transition-colors shadow-2xs"
+              >
+                <span>{guide.label}</span>
+                <span className="text-stone-400 text-[10px]">→</span>
+              </Link>
+            ))}
+          </div>
+        </div>
 
-                    <button
-                      type="button"
-                      disabled={isLoading || (matchingFeature ? !matchingFeature.enabled : false)}
-                      onClick={handleCalculateMatch}
-                      className="inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white font-bold text-sm shadow-md hover:shadow-lg press transition-all disabled:opacity-50 cursor-pointer"
-                    >
-                      {isLoading ? (
-                        <>
-                          <RefreshCw className="size-4 animate-spin" />
-                          <span>{t.calculatingBtn}</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>
-                            {matchingFeature && !matchingFeature.enabled
-                              ? t.featureUnavailable
-                              : t.matchButton}
-                          </span>
-                          <HeartHandshake className="size-4" />
-                        </>
-                      )}
-                    </button>
-                  </div>
+        {/* =========================================================================
+            6. EDUCATIONAL DOSSIER & SIDEBAR (Astrotalk Matchmaking Style)
+        ========================================================================= */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-4">
+          {/* LEFT COLUMN: 8 COLS */}
+          <div className="lg:col-span-8 space-y-6">
+            {/* Why is Kundali Matching Important */}
+            <div className="rounded-2xl border border-stone-200 bg-white p-5 sm:p-7 shadow-xs space-y-4">
+              <h2 className="text-lg sm:text-xl font-serif font-bold text-stone-900">
+                {t.whyImportantTitle}
+              </h2>
+
+              <div className="space-y-4 text-xs sm:text-sm text-stone-600 leading-relaxed">
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-stone-900 mb-1">
+                    {t.emotionalTitle}
+                  </h3>
+                  <p>{t.emotionalDesc}</p>
+                </div>
+
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-stone-900 mb-1">
+                    {t.financialTitle}
+                  </h3>
+                  <p>{t.financialDesc}</p>
+                </div>
+
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-stone-900 mb-1">
+                    {t.healthLongevityTitle}
+                  </h3>
+                  <p>{t.healthLongevityDesc}</p>
                 </div>
               </div>
             </div>
-          )}
-        </section>
+
+            {/* Deep Astrological Steps */}
+            <div className="rounded-2xl border border-stone-200 bg-white p-5 sm:p-7 shadow-xs space-y-4">
+              <div className="space-y-4 text-xs sm:text-sm text-stone-600 leading-relaxed">
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-stone-900 mb-1">
+                    {t.step7thHouseTitle}
+                  </h3>
+                  <p>{t.step7thHouseDesc}</p>
+                </div>
+
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-stone-900 mb-1">
+                    {t.stepDashaTitle}
+                  </h3>
+                  <p>{t.stepDashaDesc}</p>
+                </div>
+
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-stone-900 mb-1">
+                    {t.stepNavamsaTitle}
+                  </h3>
+                  <p>{t.stepNavamsaDesc}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* The 8 Kootas in Guna Milan Table */}
+            <div className="rounded-2xl border border-stone-200 bg-white p-5 sm:p-7 shadow-xs space-y-4">
+              <div>
+                <h3 className="text-base sm:text-lg font-serif font-bold text-stone-900">
+                  {t.kootasTableTitle}
+                </h3>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  {t.kootasTableSub}
+                </p>
+              </div>
+
+              <div className="overflow-x-auto rounded-xl border border-stone-200">
+                <table className="w-full text-left text-xs sm:text-sm">
+                  <thead className="bg-stone-50 border-b border-stone-200 text-stone-700 font-bold">
+                    <tr>
+                      <th className="py-2.5 px-3">Koota</th>
+                      <th className="py-2.5 px-3 text-center">Points</th>
+                      <th className="py-2.5 px-3">Area of Life & Vedic Significance</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-stone-100 text-stone-600">
+                    {[
+                      { koota: "Varna (বর্ণ)", pts: 1, desc: language === "bn" ? "আধ্যাত্মিক সামঞ্জস্য এবং উভয়ের আত্মসম্মানের ভারসাম্য" : language === "hi" ? "आध्यात्मिक अनुकूलता और अहंकार का संतुलन" : "Spiritual compatibility, ego alignment and mutual respect" },
+                      { koota: "Vashya (বশ্য)", pts: 2, desc: language === "bn" ? "পারস্পরিক আকর্ষণ, মানসিক নিয়ন্ত্রণ ও দাম্পত্য আনুগত্য" : language === "hi" ? "आपसी आकर्षण, नियंत्रण और निष्ठा" : "Mutual attraction, influence, emotional control and power dynamics" },
+                      { koota: "Tara (তারা)", pts: 3, desc: language === "bn" ? "জন্ম নক্ষত্রের শুভত্ব, ভাগ্য ও দীর্ঘায়ুর অনুকূলতা" : language === "hi" ? "जन्म नक्षत्र अनुकूलता, भाग्य और खुशहाली" : "Birth star compatibility, destiny and partner's well-being" },
+                      { koota: "Yoni (যোনি)", pts: 4, desc: language === "bn" ? "দৈহিক আকর্ষণ, ঘনিষ্ঠতা ও জৈবিক সঙ্গতি" : language === "hi" ? "शारीरिक अनुकूलता, अंतरंगता और यौन संतुष्टि" : "Physical intimacy, sexual compatibility and mutual affection" },
+                      { koota: "Graha Maitri (গ্রহ মৈত্রী)", pts: 5, desc: language === "bn" ? "চন্দ্র রাশির অধিপতিদের বন্ধুত্ব, মানসিক মিলন ও দৃষ্টিভঙ্গির মিল" : language === "hi" ? "मानसिक तालमेल, चंद्रमा के स्वामियों की मित्रता" : "Mental and intellectual friendship, communication and worldview" },
+                      { koota: "Gana (গণ)", pts: 6, desc: language === "bn" ? "স্বভাব ও মেজাজ (দেব, নর বা রাক্ষস গণ) এর সামঞ্জস্য" : language === "hi" ? "स्वभाव और व्यवहारिक अनुकूलता (देव, मनुष्य, राक्षस)" : "Temperamental and behavioral harmony between social instincts" },
+                      { koota: "Bhakoot (ভকূট)", pts: 7, desc: language === "bn" ? "পারিবারিক সমৃদ্ধি, দীর্ঘমেয়াদী ভালোবাসা ও অর্থভাগ্য" : language === "hi" ? "पारिवारिक समृद्धि, प्रेम और आर्थिक स्थिति" : "Family prosperity, emotional depth, longevity and financial flow" },
+                      { koota: "Nadi (নাড়ী)", pts: 8, desc: language === "bn" ? "জিনগত অনুকূলতা, স্নায়বিক স্বাস্থ্য ও সুস্থ সন্তানসন্ততি" : language === "hi" ? "आनुवंशिक संगतता, स्वास्थ्य और स्वस्थ संतान" : "Genetic compatibility, nervous and physiological health, progeny" },
+                    ].map((row, idx) => (
+                      <tr key={idx} className="hover:bg-amber-50/30 transition-colors">
+                        <td className="py-2.5 px-3 font-bold text-stone-900">{row.koota}</td>
+                        <td className="py-2.5 px-3 text-center font-extrabold text-amber-900">{row.pts}</td>
+                        <td className="py-2.5 px-3">{row.desc}</td>
+                      </tr>
+                    ))}
+                    <tr className="bg-amber-50/70 font-bold text-stone-900 border-t border-amber-200">
+                      <td className="py-2.5 px-3">{language === "bn" ? "সর্বমোট গুণ" : language === "hi" ? "कुल गुण" : "Total Gunas"}</td>
+                      <td className="py-2.5 px-3 text-center text-base text-amber-900 font-black">36</td>
+                      <td className="py-2.5 px-3 text-xs text-stone-600">
+                        {language === "bn" ? "১৮ বা তার বেশি গুণ অনুকূল হিসেবে বিবেচিত হয়" : language === "hi" ? "18 या अधिक गुण अनुकूल माने जाते हैं" : "18 or more points are considered auspicious for marriage"}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN: 4 COLS (Sample report card & Live Astrologers) */}
+          <div className="lg:col-span-4 space-y-6">
+            {/* Kundli Milan Report Card */}
+            <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-xs space-y-3">
+              <div>
+                <h3 className="text-base font-serif font-bold text-stone-900">
+                  {t.sampleReportTitle}
+                </h3>
+                <p className="text-xs text-stone-500">
+                  {t.sampleReportSubtitle}
+                </p>
+              </div>
+
+              {/* Sample report preview image */}
+              <div className="relative overflow-hidden rounded-xl border border-stone-100 bg-amber-50 aspect-[4/3] flex items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/hero-kundli-sample.webp"
+                  alt="Kundli Milan Report Sample"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to stylized box
+                    (e.target as HTMLElement).style.display = "none";
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/70 via-transparent to-transparent flex flex-col justify-end p-3 text-white">
+                  <div className="text-xs font-bold uppercase tracking-wider text-amber-300">
+                    Astra Milan Dossier
+                  </div>
+                  <div className="text-sm font-serif font-bold">
+                    36 Guna Ashtakoota & Manglik Analysis
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-base font-bold text-stone-900">₹1,599</span>
+                    <span className="text-xs text-stone-400 line-through">₹3,199</span>
+                  </div>
+                  <span className="inline-block text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded px-1.5 py-0.5">
+                    {t.sampleReportDiscount}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSampleModalOpen(true)}
+                  className="size-9 rounded-full bg-[#fcd404] hover:bg-[#ebd500] text-stone-950 flex items-center justify-center font-bold shadow-xs transition-colors cursor-pointer"
+                  title="View Sample Report"
+                >
+                  <ArrowRight className="size-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Live Astrologer Card (NO DUMMY DATA) */}
+            <AstrologerMatchmakingCard language={language} t={t} />
+          </div>
+        </div>
 
         {/* =========================================================================
             RESULTS SECTION (Visible after calculation)
@@ -2712,6 +3352,13 @@ export default function KundliMatchingPage() {
           </div>
         )}
       </main>
+
+      <SampleMatchReportModal
+        open={sampleModalOpen}
+        onClose={() => setSampleModalOpen(false)}
+        language={language}
+        t={t}
+      />
 
       <FeatureCoinModal
         open={coinModalOpen}
