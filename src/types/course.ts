@@ -21,6 +21,9 @@ export interface CourseListItem {
   rating_count: number;
   is_featured: boolean;
   certificate_enabled: boolean;
+  access_duration_days?: number | null;
+  expires_at?: string | null;
+  is_expired?: boolean;
   is_enrolled?: boolean;
   user_progress_percent?: number;
 }
@@ -74,6 +77,8 @@ export interface CourseEnrollment {
   instructor_name?: string | null;
   enrolled_at: string;
   expires_at?: string | null;
+  is_expired?: boolean;
+  access_duration_days?: number | null;
   progress_percent: number;
   completed_lesson_ids: string[];
   certificate_issued: boolean;
