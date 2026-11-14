@@ -33,6 +33,9 @@ import {
   Layers,
   Radio,
   Info,
+  Search,
+  HelpCircle,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -54,6 +57,13 @@ import {
   translateRashiList,
   translatePayaBadge,
 } from "@/lib/rashi-translations";
+import {
+  RASHI_ASTROTALK_ROLE,
+  ALL_12_MOON_SIGNS,
+  RASHI_ELEMENT_COMPATIBILITY,
+  RASHI_FAQS,
+  RASHI_RELATED_TOOLS,
+} from "@/lib/rashi-guide-data";
 import {
   translatePlanetName,
   translateRashiName,
@@ -144,6 +154,32 @@ export default function RashiCalculatorPage() {
 
   const resultsRef = React.useRef<HTMLDivElement>(null);
   const hasAutoFilled = React.useRef(false);
+
+  // Astrotalk Guide State
+  const [expandedHero, setExpandedHero] = React.useState(false);
+  const [rashiSearch, setRashiSearch] = React.useState("");
+  const [selectedElementFilter, setSelectedElementFilter] = React.useState<string>("all");
+  const [openFaqIndex, setOpenFaqIndex] = React.useState<number | null>(null);
+
+  const filteredRashis = React.useMemo(() => {
+    return ALL_12_MOON_SIGNS.filter((item) => {
+      if (selectedElementFilter !== "all") {
+        const el = item.element.en.toLowerCase();
+        if (!el.includes(selectedElementFilter.toLowerCase())) return false;
+      }
+      if (!rashiSearch.trim()) return true;
+      const q = rashiSearch.toLowerCase().trim();
+      return (
+        item.name.en.toLowerCase().includes(q) ||
+        item.name.bn.toLowerCase().includes(q) ||
+        item.name.hi.toLowerCase().includes(q) ||
+        item.id.toLowerCase().includes(q) ||
+        item.ruler.en.toLowerCase().includes(q) ||
+        item.ruler.bn.toLowerCase().includes(q) ||
+        item.ruler.hi.toLowerCase().includes(q)
+      );
+    });
+  }, [rashiSearch, selectedElementFilter]);
 
   // Auto re-calculate when language preference changes so backend-generated narratives update instantly
   React.useEffect(() => {
@@ -619,544 +655,433 @@ export default function RashiCalculatorPage() {
   }, [result, language]);
 
   return (
-    <>
+    <div className="min-h-screen bg-[#fafaf9]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
       <SiteHeader />
 
-      <main className="min-h-screen bg-surface-muted/30 pb-20">
+      <main className="mx-auto max-w-5xl px-4 pt-6 sm:px-6 lg:px-8 space-y-8 flex-1">
         {/* =========================================================================
-            HEADER & BREADCRUMBS
+            1. BREADCRUMB & LANGUAGE SWITCHER
         ========================================================================= */}
-        <div className="mx-auto max-w-5xl px-4 pt-10 sm:px-6 lg:px-8 text-center space-y-3">
-          <div className="inline-flex items-center gap-2 rounded-full bg-amber-100/90 text-amber-950 border border-amber-300 font-bold px-4 py-1.5 text-xs shadow-2xs">
-            <Sparkles className="size-3.5 text-amber-600" />
-            <span>{t.badge}</span>
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-1.5 font-bold tracking-wider uppercase text-stone-400">
+            <Link href="/" className="hover:text-amber-700 transition-colors">HOME</Link>
+            <span>&gt;</span>
+            <span className="text-stone-700">RASHI CALCULATOR</span>
           </div>
 
-          <h1 className="font-display text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
-            {t.title}
-          </h1>
-
-          <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto">
-            {t.subtitle}
-          </p>
-
-          {/* Feature Coin Badge */}
-          <div className="pt-2 flex justify-center">
-            <FeatureCoinBadge
-              feature={rashiFeature}
-              walletBalance={walletBalance}
-              language={language}
-            />
-          </div>
-
-          {/* Interactive Language Switcher Bar */}
-          <div className="pt-2 flex items-center justify-center gap-2">
-            <div className="inline-flex items-center gap-1.5 p-1 rounded-2xl bg-white border border-amber-300/80 shadow-xs">
-              <span className="text-[11px] font-bold text-muted-foreground px-2 flex items-center gap-1">
-                <Languages className="size-3 text-amber-600" />
-                <span>{t.languageLabel}</span>
-              </span>
+          <div className="flex items-center gap-1 rounded-full border border-stone-200 bg-white p-1 shadow-2xs">
+            {(
+              [
+                { code: "bn", label: "বাংলা" },
+                { code: "hi", label: "हिन्दी" },
+                { code: "en", label: "English" },
+              ] as const
+            ).map((lang) => (
               <button
+                key={lang.code}
                 type="button"
-                onClick={() => setLanguage("bn")}
-                className={`min-h-9 inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-bold press transition-all ${
-                  language === "bn"
-                    ? "bg-amber-500 text-amber-950 shadow-xs scale-105 font-black"
-                    : "text-muted-foreground hover:text-foreground"
+                onClick={() => setLanguage(lang.code)}
+                className={`min-h-7 inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer ${
+                  language === lang.code
+                    ? "bg-[#fcd404] text-stone-950 shadow-2xs font-extrabold"
+                    : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
                 }`}
               >
-                বাংলা
+                {lang.label}
               </button>
-              <button
-                type="button"
-                onClick={() => setLanguage("hi")}
-                className={`min-h-9 inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-bold press transition-all ${
-                  language === "hi"
-                    ? "bg-amber-500 text-amber-950 shadow-xs scale-105 font-black"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                हिन्दी
-              </button>
-              <button
-                type="button"
-                onClick={() => setLanguage("en")}
-                className={`min-h-9 inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-bold press transition-all ${
-                  language === "en"
-                    ? "bg-amber-500 text-amber-950 shadow-xs scale-105 font-black"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                English
-              </button>
-            </div>
+            ))}
           </div>
         </div>
 
         {/* =========================================================================
-            FORM SECTION
+            2. HERO SECTION: Compact left title, faint gold rotating zodiac wheel on right
         ========================================================================= */}
-        <div className="mx-auto max-w-3xl px-4 pt-7 sm:px-6">
-          <div className="rounded-[28px] border border-amber-300/70 bg-card p-6 sm:p-9 shadow-[0_12px_40px_-15px_rgba(26,18,8,0.08)] backdrop-blur-md">
-            <h2 className="text-center font-display text-xl sm:text-2xl font-bold text-foreground mb-4">
-              {t.formTitle}
-            </h2>
+        <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-r from-amber-50/50 via-white to-amber-50/30 px-4 sm:px-6 py-5 shadow-2xs">
+          {/* Faint rotating golden zodiac wheel in background top-right */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/zodiac-wheel-gold.webp"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-12 -top-16 size-[260px] sm:size-[340px] select-none opacity-[0.16] mix-blend-multiply animate-spin [animation-duration:120s] motion-reduce:animate-none"
+          />
 
-            {rashiFeature && !rashiFeature.enabled && (
-              <div className="mb-6">
-                <FeatureDisabledAlert
-                  featureName={language === "bn" ? "রাশি ক্যালকুলেটর" : language === "hi" ? "राशि कैलकुलेटर" : "Rashi Calculator"}
-                  language={language}
-                />
-              </div>
-            )}
+          <div className="relative z-10 max-w-2xl space-y-2">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-bold text-amber-900">
+              <Sparkles className="size-3 text-amber-600" />
+              <span>{t.badge}</span>
+            </div>
 
-            {/* Dynamic Profile Sync Status Banner */}
-            {isSignedIn && (
-              <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-amber-500/10 border border-amber-300/80 px-4 py-3 text-xs text-amber-950 font-medium shadow-2xs">
-                <div className="flex items-center gap-2.5">
-                  <div className="size-6 rounded-full bg-emerald-500/20 text-emerald-700 flex items-center justify-center font-bold text-[11px]">
-                    ✓
-                  </div>
-                  <div>
-                    <span className="font-bold">
-                      {t.profileSyncWelcome(profile?.full_name || user?.full_name || user?.first_name || (language === "bn" ? "সম্মানিত ব্যবহারকারী" : language === "hi" ? "उपयोगकर्ता" : "User"))}
-                    </span>
-                    <span className="text-muted-foreground ml-1.5 block sm:inline">
-                      {profile?.birth?.date_of_birth
-                        ? t.profileSyncSaved
-                        : t.profileSyncNameOnly}
-                    </span>
-                  </div>
-                </div>
+            <h1 className="text-xl sm:text-2xl font-serif font-bold text-stone-900 tracking-tight leading-tight">
+              {language === "bn"
+                ? "রাশি (চন্দ্র রাশি) ক্যালকুলেটর: জন্ম তারিখ ও সময় অনুযায়ী"
+                : language === "hi"
+                ? "राशि (चंद्र राशि) कैलकुलेटर: जन्म तिथि व समय के अनुसार"
+                : "Rashi (Moon Sign) Calculator by Date of Birth & Time"}
+            </h1>
 
-                <div className="flex items-center gap-2 ml-auto">
-                  {profile && (
-                    <button
-                      type="button"
-                      onClick={handleReloadFromProfile}
-                      className="inline-flex items-center gap-1 rounded-xl bg-white/90 hover:bg-white px-2.5 py-1 text-[11px] font-bold text-amber-900 border border-amber-300 shadow-2xs press transition-colors cursor-pointer"
-                    >
-                      <RefreshCw className="size-3 text-amber-700" />
-                      <span>{t.reloadProfile}</span>
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={handleResetForm}
-                    className="inline-flex items-center gap-1 rounded-xl bg-white/90 hover:bg-white px-2.5 py-1 text-[11px] font-bold text-rose-800 border border-rose-300 shadow-2xs press transition-colors cursor-pointer"
-                  >
-                    <RotateCcw className="size-3 text-rose-600" />
-                    <span>{t.clearForm}</span>
-                  </button>
-                </div>
-              </div>
-            )}
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+              {expandedHero
+                ? (language === "bn"
+                    ? "কীভাবে নিজের জন্ম রাশি জানতে হয় — এটি বহু মানুষের সাধারণ জিজ্ঞাসা। রাশি শুধুমাত্র মানুষের সঙ্গে আপনার সামঞ্জস্য নির্দেশ করে না, বরং মানসিক চাপ সামলানোর কৌশল এবং ক্যারিয়ারের সঠিক পছন্দ বেছে নিতে সাহায্য করে। চন্দ্র রাশি ক্যালকুলেটর ব্যবহার করে তাৎক্ষণিক ফলাফল পান।"
+                    : language === "hi"
+                    ? "अपनी चंद्र राशि कैसे जानें—यह अधिकांश लोगों की मुख्य जिज्ञासा होती है। यह न केवल दूसरों के साथ अनुकूलता बताती है, बल्कि तनाव से निपटने और सही करियर चुनने में भी मार्गदर्शन करती है। चंद्र राशि कैलकुलेटर से तुरंत फल प्राप्त करें।"
+                    : "How to find moon sign is a common question for many. It not only reveals how compatible you are with another person, but also your coping mechanisms with stress, and helps you make better career choices. Use the moon sign calculator to get instant results.")
+                : (language === "bn"
+                    ? "কীভাবে নিজের জন্ম রাশি জানতে হয় — এটি বহু মানুষের সাধারণ জিজ্ঞাসা। রাশি সম্পর্কের সামঞ্জস্য ও মানসিক চাপের মোকাবিলা..."
+                    : language === "hi"
+                    ? "अपनी चंद्र राशि कैसे जानें—यह जिज्ञासा अनुकूलता और करियर चयन में..."
+                    : "How to find moon sign is a common question for many. It not only reveals how compatible you are with another person, but also your coping mechanisms with stress...")}
+              <button
+                type="button"
+                onClick={() => setExpandedHero(!expandedHero)}
+                className="ml-1.5 font-bold text-amber-700 hover:text-amber-900 hover:underline inline-flex items-center cursor-pointer"
+              >
+                {expandedHero
+                  ? (language === "bn" ? "কম দেখুন" : language === "hi" ? "कम देखें" : "Read less")
+                  : (language === "bn" ? "আরও পড়ুন" : language === "hi" ? "और पढ़ें" : "Read more")}
+              </button>
+            </p>
 
-            {!isSignedIn && (
-              <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-surface-muted/50 border border-border/80 px-4 py-3 text-xs text-muted-foreground shadow-2xs">
-                <div className="flex items-center gap-2">
-                  <User className="size-4 text-amber-600 shrink-0" />
-                  <span>{t.signInPrompt}</span>
-                </div>
-                <Link
-                  href="/login"
-                  className="ml-auto inline-flex min-h-9 items-center rounded-xl bg-amber-500 text-amber-950 px-3.5 py-2 text-[11px] font-bold shadow-2xs hover:bg-amber-400 press transition-colors"
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              {isSignedIn && profile && (
+                <button
+                  type="button"
+                  onClick={handleReloadFromProfile}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 hover:border-amber-400 bg-white/90 hover:bg-amber-50/70 px-3 py-1 text-xs font-semibold text-stone-700 hover:text-stone-900 transition-colors shadow-2xs cursor-pointer"
                 >
-                  {t.signInBtn}
-                </Link>
-              </div>
-            )}
+                  <User className="size-3.5 text-amber-600" />
+                  <span>{t.reloadProfile}</span>
+                </button>
+              )}
 
-            <form onSubmit={handleCalculate} className="space-y-5 text-xs sm:text-sm">
-              {/* 1. Name */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
-                <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
-                  <User className="size-4 text-amber-600" />
-                  <span>{t.fullName}</span>
+              <FeatureCoinBadge
+                feature={rashiFeature}
+                walletBalance={walletBalance}
+                language={language}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Section title above form */}
+        <div className="space-y-0.5 pt-1">
+          <h2 className="text-base sm:text-lg font-serif font-bold text-stone-900">
+            {language === "bn"
+              ? "রাশি ক্যালকুলেটর"
+              : language === "hi"
+              ? "राशि कैलकुलेटर"
+              : "Rashi Calculator"}
+          </h2>
+          <p className="text-xs text-stone-500">
+            {language === "bn"
+              ? "আপনার রাশি (চন্দ্র রাশি) জানতে জন্ম বিবরণ লিখুন"
+              : language === "hi"
+              ? "अपनी राशि जानने के लिए जन्म विवरण दर्ज करें"
+              : "Enter your birth details to calculate your rashi (zodiac sign)"}
+          </p>
+        </div>
+
+        {/* =========================================================================
+            3. ULTRA-PRO BIRTH DETAILS INPUT FORM (Astrotalk Luxury Style)
+        ========================================================================= */}
+        <div className="rounded-2xl border border-stone-200/90 bg-white p-4 sm:p-6 shadow-xs space-y-5">
+          {/* Header inside form */}
+          <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+            <div className="inline-flex items-center gap-2">
+              <div className="size-2 rounded-full bg-[#fcd404]" />
+              <span className="text-sm font-bold text-stone-900">
+                {language === "bn" ? "আপনার জন্ম বিবরণ (Your Birth Details)" : language === "hi" ? "जन्म विवरण (Your Birth Details)" : "Your Birth Details"}
+              </span>
+            </div>
+            {isSignedIn && profile && (
+              <button
+                type="button"
+                onClick={handleReloadFromProfile}
+                className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 hover:text-amber-900 hover:underline cursor-pointer"
+              >
+                <User className="size-3" />
+                <span>{t.reloadProfile}</span>
+              </button>
+            )}
+          </div>
+
+          {rashiFeature && !rashiFeature.enabled && (
+            <div className="mb-2">
+              <FeatureDisabledAlert
+                featureName={language === "bn" ? "রাশি ক্যালকুলেটর" : language === "hi" ? "राशि कैलकुलेटर" : "Rashi Calculator"}
+                language={language}
+              />
+            </div>
+          )}
+
+          <form onSubmit={handleCalculate} className="space-y-4">
+            {/* Name and Gender */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-stone-700">
+                  {t.fullName} <span className="text-stone-400 font-normal">({language === "bn" ? "ঐচ্ছিক" : language === "hi" ? "वैकल्पिक" : "optional"})</span>
                 </label>
-                <div className="sm:col-span-9">
+                <div className="relative rounded-2xl border border-stone-200 hover:border-stone-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 bg-stone-50/50 hover:bg-white focus-within:bg-white px-3.5 py-2.5 flex items-center gap-2.5 transition-all shadow-2xs">
+                  <User className="size-4 text-stone-400 shrink-0" />
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder={t.fullNamePlaceholder}
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs font-medium"
+                    className="w-full text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 bg-transparent outline-none font-medium"
                   />
                 </div>
               </div>
 
-              {/* 2. Gender */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
-                <label htmlFor="rashi-gender" className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
-                  <HeartHandshake className="size-4 text-indigo-500" />
-                  <span>{t.gender}</span>
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-stone-700">
+                  {t.gender}
                 </label>
-                <div className="sm:col-span-9">
-                  <select
-                    id="rashi-gender"
-                    value={gender}
-                    onChange={(e) => setGender(e.target.value as any)}
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs sm:text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs cursor-pointer font-medium"
-                  >
-                    <option value="male">{t.male}</option>
-                    <option value="female">{t.female}</option>
-                    <option value="other">{t.other}</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* 3. Birth Day (DD-MM-YYYY in 3 separate inputs) - MANDATORY */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
-                <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
-                  <Calendar className="size-4 text-amber-600" />
-                  <span>
-                    {t.dob}
-                    <span className="text-[11px] font-bold text-rose-600 ml-1.5">
-                      * ({t.mandatory})
-                    </span>
-                  </span>
-                </label>
-                <div className="sm:col-span-9 grid grid-cols-3 gap-2">
-                  <input
-                    ref={dayRef}
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={2}
-                    value={day}
-                    onChange={handleDayChange}
-                    placeholder="DD"
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                  <input
-                    ref={monthRef}
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={2}
-                    value={month}
-                    onChange={handleMonthChange}
-                    onKeyDown={(e) => handleKeyDown(e, dayRef)}
-                    placeholder="MM"
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                  <input
-                    ref={yearRef}
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={4}
-                    value={year}
-                    onChange={handleYearChange}
-                    onKeyDown={(e) => handleKeyDown(e, monthRef)}
-                    placeholder="YYYY"
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-3 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                </div>
-              </div>
-
-              {/* 4. Birth Time (HH:mm:ss in 3 inputs + AM/PM) - OPTIONAL */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
-                <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
-                  <Clock className="size-4 text-emerald-600" />
-                  <span>
-                    {t.tob}
-                    <span className="text-[11px] font-semibold text-emerald-700 ml-1.5">
-                      ({t.optionalTob})
-                    </span>
-                  </span>
-                </label>
-                <div className="sm:col-span-9 grid grid-cols-4 gap-2">
-                  <input
-                    ref={hourRef}
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={2}
-                    value={hour}
-                    onChange={handleHourChange}
-                    placeholder="HH"
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                  <input
-                    ref={minuteRef}
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={2}
-                    value={minute}
-                    onChange={handleMinuteChange}
-                    onKeyDown={(e) => handleKeyDown(e, hourRef)}
-                    placeholder="MM"
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                  <input
-                    ref={secondRef}
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={2}
-                    value={second}
-                    onChange={handleSecondChange}
-                    onKeyDown={(e) => handleKeyDown(e, minuteRef)}
-                    placeholder="SS"
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                  <select
-                    aria-label="AM or PM"
-                    value={period}
-                    onChange={(e) => setPeriod(e.target.value as any)}
-                    className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2.5 text-center text-xs sm:text-sm font-bold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs cursor-pointer"
-                  >
-                    <option value="AM">AM</option>
-                    <option value="PM">PM</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* 5. Birth Place - geocoded inline, with the resolved timezone shown */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4">
-                <label
-                  htmlFor="birth-place"
-                  className="sm:col-span-3 flex items-start gap-2 pt-3 font-bold text-foreground"
-                >
-                  <MapPin className="mt-0.5 size-4 shrink-0 text-rose-500" />
-                  <span>
-                    {t.pob}
-                    <span className="ml-1 text-rose-500">*</span>
-                  </span>
-                </label>
-                <div className="sm:col-span-9">
-                  <BirthPlaceField
-                    id="birth-place"
-                    value={selectedPlace}
-                    onChange={handlePlaceSelected}
-                    birthDate={{
-                      year: parseInt(year, 10) || undefined,
-                      month: parseInt(month, 10) || undefined,
-                      day: parseInt(day, 10) || undefined,
-                    }}
-                    language={language}
-                    invalid={placeTouched}
-                  />
-                </div>
-              </div>
-
-              {/* Collapsible Advance Settings Toggle */}
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAdvance((prev) => !prev)}
-                  className="w-full flex items-center justify-between rounded-xl bg-surface-muted/60 hover:bg-surface-muted px-4 py-3 text-xs font-bold text-foreground press transition-colors border border-border/60"
-                >
-                  <span className="flex items-center gap-2 text-amber-900">
-                    <Sliders className="size-4 text-amber-600" />
-                    <span>{t.advancedSettings}</span>
-                  </span>
-                  {showAdvance ? (
-                    <ChevronUp className="size-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="size-4 text-muted-foreground" />
-                  )}
-                </button>
-              </div>
-
-              {/* Advance Settings Body */}
-              {showAdvance && (
-                <div className="rounded-2xl border border-border/80 bg-surface-muted/20 p-4 sm:p-5 space-y-4 fade-in">
-                  {/* Longitude */}
-                  <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
-                    <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
-                      <Compass className="size-4 text-indigo-500" />
-                      <span>{t.longitude}</span>
-                    </label>
-                    <div className="sm:col-span-9 grid grid-cols-3 gap-2">
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        maxLength={3}
-                        value={lonDeg}
-                        onChange={handleLonDegChange}
-                        placeholder="Deg"
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      />
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        maxLength={2}
-                        value={lonMin}
-                        onChange={handleLonMinChange}
-                        placeholder="Min"
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      />
-                      <select
-                        value={lonDir}
-                        onChange={(e) => setLonDir(e.target.value as any)}
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-bold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer"
-                      >
-                        <option value="E">{t.east}</option>
-                        <option value="W">{t.west}</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Latitude */}
-                  <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
-                    <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
-                      <Compass className="size-4 text-rose-500" />
-                      <span>{t.latitude}</span>
-                    </label>
-                    <div className="sm:col-span-9 grid grid-cols-3 gap-2">
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        maxLength={2}
-                        value={latDeg}
-                        onChange={handleLatDegChange}
-                        placeholder="Deg"
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      />
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        maxLength={2}
-                        value={latMin}
-                        onChange={handleLatMinChange}
-                        placeholder="Min"
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      />
-                      <select
-                        value={latDir}
-                        onChange={(e) => setLatDir(e.target.value as any)}
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-2 py-2 text-center text-xs font-bold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer"
-                      >
-                        <option value="N">{t.north}</option>
-                        <option value="S">{t.south}</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Timezone */}
-                  <div className="grid grid-cols-1 sm:grid-cols-12 items-start gap-2 sm:gap-4">
-                    <label
-                      htmlFor="timezone"
-                      className="sm:col-span-3 flex items-center gap-2 pt-2 font-bold text-foreground"
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[
+                    { id: "male", label: "♂ " + t.male },
+                    { id: "female", label: "♀ " + t.female },
+                    { id: "other", label: "⚥ " + t.other },
+                  ].map((g) => (
+                    <button
+                      key={g.id}
+                      type="button"
+                      onClick={() => setGender(g.id as any)}
+                      className={`min-h-10 rounded-xl border px-2 py-1.5 text-center text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                        gender === g.id
+                          ? "bg-[#fcd404] border-[#fcd404] text-stone-950 shadow-xs font-extrabold"
+                          : "bg-stone-100/70 border-stone-200/80 text-stone-700 hover:bg-stone-200/60 font-semibold"
+                      }`}
                     >
-                      <Globe className="size-4 text-emerald-500" />
-                      <span>{t.timezone}</span>
-                    </label>
-                    <div className="sm:col-span-9">
-                      {selectedPlace?.timezoneName ? (
-                        <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 px-3.5 py-2.5">
-                          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-bold text-emerald-900">
-                            <span>{selectedPlace.timezoneName}</span>
-                            {selectedPlace.timezoneLabel && (
-                              <span className="rounded-md bg-white px-1.5 py-0.5 tabular-nums">
-                                {selectedPlace.timezoneLabel}
-                              </span>
-                            )}
-                            {selectedPlace.timezoneAbbreviation && (
-                              <span className="font-semibold text-emerald-700">
-                                {selectedPlace.timezoneAbbreviation}
-                              </span>
-                            )}
-                          </p>
-                          <p className="mt-1 text-[11px] leading-relaxed text-emerald-800/90">
-                            {t.timezoneResolved}
-                          </p>
-                        </div>
-                      ) : (
-                        <>
-                          <input
-                            id="timezone"
-                            type="text"
-                            inputMode="decimal"
-                            value={timezone}
-                            onChange={(e) =>
-                              setTimezone(e.target.value.replace(/[^0-9.+-]/g, ""))
-                            }
-                            placeholder="5.5"
-                            className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2.5 text-xs font-semibold tabular-nums text-foreground shadow-2xs focus:outline-hidden focus:ring-2 focus:ring-amber-500 sm:text-sm"
-                          />
-                          <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">
-                            {t.timezoneManualHelp}
-                          </p>
-                        </>
-                      )}
+                      {g.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* DOB & TOB */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* DOB */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-stone-700">
+                  {t.dob} <span className="text-rose-500">*</span>
+                </label>
+                <div className="rounded-2xl border border-stone-200 hover:border-stone-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 bg-stone-50/50 hover:bg-white focus-within:bg-white px-3.5 py-2 flex items-center gap-2 shadow-2xs transition-all">
+                  <Calendar className="size-4 text-stone-400 shrink-0" />
+                  <div className="grid grid-cols-3 gap-2 flex-1">
+                    <input
+                      ref={dayRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={day}
+                      onChange={handleDayChange}
+                      placeholder="DD"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
+                    />
+                    <input
+                      ref={monthRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={month}
+                      onChange={handleMonthChange}
+                      onKeyDown={(e) => handleKeyDown(e, dayRef)}
+                      placeholder="MM"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400 border-x border-stone-200 px-1"
+                    />
+                    <input
+                      ref={yearRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={4}
+                      value={year}
+                      onChange={handleYearChange}
+                      onKeyDown={(e) => handleKeyDown(e, monthRef)}
+                      placeholder="YYYY"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* TOB */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-stone-700">
+                    {t.tob} <span className="text-stone-400 font-normal">({language === "bn" ? "ঐচ্ছিক" : language === "hi" ? "वैकल्पिक" : "optional"})</span>
+                  </label>
+                  <span className="text-[11px] text-stone-400">
+                    {hour.trim() === ""
+                      ? (language === "bn" ? "না দিলে দুপুর ১২:০০ ধরা হবে" : language === "hi" ? "खाली रहने पर 12:00 PM माना जाएगा" : "Defaults to 12:00 PM")
+                      : ""}
+                  </span>
+                </div>
+                <div className="rounded-2xl border border-stone-200 hover:border-stone-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 bg-stone-50/50 hover:bg-white focus-within:bg-white px-3.5 py-2 flex items-center gap-2 shadow-2xs transition-all">
+                  <Clock className="size-4 text-stone-400 shrink-0" />
+                  <div className="grid grid-cols-4 gap-1.5 flex-1 items-center">
+                    <input
+                      ref={hourRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={hour}
+                      onChange={handleHourChange}
+                      placeholder="HH"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
+                    />
+                    <input
+                      ref={minuteRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={minute}
+                      onChange={handleMinuteChange}
+                      onKeyDown={(e) => handleKeyDown(e, hourRef)}
+                      placeholder="MM"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400 border-x border-stone-200 px-1"
+                    />
+                    <input
+                      ref={secondRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={second}
+                      onChange={handleSecondChange}
+                      onKeyDown={(e) => handleKeyDown(e, minuteRef)}
+                      placeholder="SS"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
+                    />
+                    <div className="flex rounded-lg border border-stone-200 bg-stone-100 p-0.5 overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => setPeriod("AM")}
+                        className={`flex-1 text-[11px] font-bold py-1 rounded-md transition-all cursor-pointer ${
+                          period === "AM" ? "bg-[#fcd404] text-stone-950 font-extrabold shadow-2xs" : "text-stone-600 hover:text-stone-900"
+                        }`}
+                      >
+                        AM
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPeriod("PM")}
+                        className={`flex-1 text-[11px] font-bold py-1 rounded-md transition-all cursor-pointer ${
+                          period === "PM" ? "bg-[#fcd404] text-stone-950 font-extrabold shadow-2xs" : "text-stone-600 hover:text-stone-900"
+                        }`}
+                      >
+                        PM
+                      </button>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
 
-                  {/* Ayanamsa */}
-                  <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
-                    <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
-                      <Sliders className="size-4 text-indigo-400" />
-                      <span>{t.ayanamsa}</span>
-                    </label>
-                    <div className="sm:col-span-9">
+            {/* Place of Birth */}
+            <div className="space-y-1.5">
+              <label htmlFor="birth-place" className="block text-xs font-bold text-stone-700">
+                {t.pob} <span className="text-rose-500">*</span>
+              </label>
+              <BirthPlaceField
+                id="birth-place"
+                value={selectedPlace}
+                onChange={handlePlaceSelected}
+                birthDate={{
+                  year: parseInt(year, 10) || undefined,
+                  month: parseInt(month, 10) || undefined,
+                  day: parseInt(day, 10) || undefined,
+                }}
+                language={language}
+                invalid={placeTouched}
+              />
+            </div>
+
+            {/* Advanced Settings Accordion */}
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() => setShowAdvance((prev) => !prev)}
+                className="w-full flex items-center justify-between rounded-xl bg-stone-50 hover:bg-stone-100 px-4 py-2.5 text-xs font-bold text-stone-700 transition-colors border border-stone-200 cursor-pointer"
+              >
+                <span className="flex items-center gap-2">
+                  <Sliders className="size-3.5 text-amber-600" />
+                  <span>{t.advancedSettings}</span>
+                </span>
+                {showAdvance ? (
+                  <ChevronUp className="size-4 text-stone-400" />
+                ) : (
+                  <ChevronDown className="size-4 text-stone-400" />
+                )}
+              </button>
+
+              {showAdvance && (
+                <div className="mt-3 rounded-2xl border border-stone-200 bg-stone-50/60 p-4 space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {/* Ayanamsa */}
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-stone-600 block">{t.ayanamsa}</label>
                       <select
                         value={ayanamsa}
                         onChange={(e) => setAyanamsa(e.target.value as any)}
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2 text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer"
+                        className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs font-semibold text-stone-800 focus:outline-none focus:border-amber-400 cursor-pointer"
                       >
-                        <option value="lahiri">Lahiri (Chitra Paksha - Most Popular)</option>
+                        <option value="lahiri">Lahiri (Chitra Paksha - Standard)</option>
                         <option value="bv_raman">B.V. Raman</option>
-                        <option value="krishnamurti">Krishnamurti (KP Standard)</option>
+                        <option value="krishnamurti">Krishnamurti (KP)</option>
                         <option value="yukteshwar">Yukteshwar</option>
                         <option value="suryasiddhanta">Suryasiddhanta</option>
-                        <option value="true_pushya">True Pushya (PVRN Rao)</option>
-                        <option value="true_mula">True Mula (Chandra Hari)</option>
+                        <option value="true_pushya">True Pushya</option>
+                        <option value="true_mula">True Mula</option>
                       </select>
                     </div>
-                  </div>
 
-                  {/* House System */}
-                  <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
-                    <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
-                      <Sliders className="size-4 text-amber-500" />
-                      <span>{t.houseSystem}</span>
-                    </label>
-                    <div className="sm:col-span-9">
+                    {/* House System */}
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-stone-600 block">{t.houseSystem}</label>
                       <select
                         value={houseSystem}
                         onChange={(e) => setHouseSystem(e.target.value as any)}
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2 text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer"
+                        className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs font-semibold text-stone-800 focus:outline-none focus:border-amber-400 cursor-pointer"
                       >
-                        <option value="placidus">Placidus (Standard in KP)</option>
+                        <option value="placidus">Placidus (KP)</option>
                         <option value="equal">Equal House</option>
                         <option value="whole_sign">Whole Sign</option>
                         <option value="koch">Koch</option>
                       </select>
                     </div>
-                  </div>
 
-                  {/* Chart Style */}
-                  <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
-                    <label className="sm:col-span-3 flex items-center gap-2 font-bold text-foreground">
-                      <Sliders className="size-4 text-indigo-400" />
-                      <span>{t.chartStyle}</span>
-                    </label>
-                    <div className="sm:col-span-9">
+                    {/* Chart Style */}
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-stone-600 block">{t.chartStyle}</label>
                       <select
                         value={chartStyle}
                         onChange={(e) => setChartStyle(e.target.value as any)}
-                        className="w-full rounded-xl border border-border bg-surface-muted/40 px-3.5 py-2 text-xs font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer"
+                        className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs font-semibold text-stone-800 focus:outline-none focus:border-amber-400 cursor-pointer"
                       >
                         <option value="north_indian">North Indian (Diamond)</option>
-                        <option value="south_indian">South Indian (Square Grid)</option>
+                        <option value="south_indian">South Indian (Box Grid)</option>
                         <option value="east_indian">East Indian (Bengali ছক)</option>
                       </select>
                     </div>
                   </div>
                 </div>
               )}
+            </div>
 
-              {/* Submit CTA */}
-              <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+            {/* Submit Actions */}
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-stone-100">
+              <button
+                type="button"
+                onClick={handleResetForm}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-500 hover:text-stone-800 cursor-pointer order-2 sm:order-1"
+              >
+                <RotateCcw className="size-3.5" />
+                <span>{t.clearForm}</span>
+              </button>
+
+              <div className="flex items-center gap-3 order-1 sm:order-2 w-full sm:w-auto">
                 <FeatureCoinBadge
                   feature={rashiFeature}
                   walletBalance={walletBalance}
@@ -1168,11 +1093,11 @@ export default function RashiCalculatorPage() {
                   type="submit"
                   size="lg"
                   disabled={loading || (rashiFeature ? !rashiFeature.enabled : false)}
-                  className="px-9 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-ink-950 font-black text-sm shadow-[0_8px_24px_rgba(234,179,8,0.35)] hover:shadow-[0_12px_32px_rgba(234,179,8,0.45)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                  className="flex-1 sm:flex-none min-h-11 px-8 py-2.5 rounded-xl bg-[#fcd404] hover:bg-[#ebd500] text-stone-950 font-bold text-xs sm:text-sm shadow-xs transition-all cursor-pointer border border-amber-300/80 active:scale-95"
                 >
                   {loading ? (
                     <span className="flex items-center gap-2">
-                      <span className="animate-spin text-base">✦</span>
+                      <span className="animate-spin text-sm">✦</span>
                       <span>{t.calculatingBtn}</span>
                     </span>
                   ) : (
@@ -1180,15 +1105,15 @@ export default function RashiCalculatorPage() {
                       <span>
                         {rashiFeature && !rashiFeature.enabled
                           ? t.featureDisabledBtn
-                          : t.calculateBtn}
+                          : (language === "bn" ? "আমার রাশি গণনা করুন" : language === "hi" ? "मेरी राशि की गणना करें" : "Calculate my Rashi")}
                       </span>
-                      <ArrowRight className="size-4" />
+                      <ArrowRight className="size-3.5" />
                     </span>
                   )}
                 </Button>
               </div>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
 
         {/* =========================================================================
@@ -2055,6 +1980,350 @@ export default function RashiCalculatorPage() {
           </div>
         )}
 
+        {/* =========================================================================
+            4. WHAT IS THE ROLE OF MOON SIGN (RASHI) IN ASTROLOGY? (Astrotalk Guide)
+        ========================================================================= */}
+        <div className="rounded-3xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-xs font-bold text-amber-900">
+              <Sparkles className="size-3 text-amber-600" />
+              <span>
+                {language === "bn" ? "জ্যোতিষশাস্ত্রে ভূমিকা" : language === "hi" ? "ज्योतिष में भूमिका" : "Role in Astrology"}
+              </span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-serif font-bold text-stone-900">
+              {RASHI_ASTROTALK_ROLE.roleHeading[language]}
+            </h3>
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed pt-1">
+              {RASHI_ASTROTALK_ROLE.roleSub[language]}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {RASHI_ASTROTALK_ROLE.roles.map((r, i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-stone-200/80 bg-stone-50/40 hover:bg-white p-5 space-y-2 hover:border-amber-300 transition-all shadow-2xs hover:shadow-xs"
+              >
+                <h4 className="text-sm font-bold text-stone-900 flex items-center gap-2">
+                  <span className="size-2 rounded-full bg-[#fcd404]" />
+                  <span>{r.title[language]}</span>
+                </h4>
+                <p className="text-xs text-stone-600 leading-relaxed pl-4">
+                  {r.desc[language]}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* =========================================================================
+            5. RASHI FINDER: FIND OUT WHAT YOUR MOON SIGN SAYS (12 Moon Signs Guide)
+        ========================================================================= */}
+        <div className="rounded-3xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-stone-100">
+            <div>
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-xs font-bold text-amber-900">
+                <BookOpen className="size-3 text-amber-600" />
+                <span>
+                  {language === "bn" ? "১২টি চন্দ্র রাশি বিশ্লেষণ" : language === "hi" ? "12 चंद्र राशि विश्लेषण" : "All 12 Moon Signs"}
+                </span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-serif font-bold text-stone-900 mt-1">
+                {language === "bn"
+                  ? "রাশি বিবরণ ও ব্যক্তিত্ব: আপনার চন্দ্র রাশি কী নির্দেশ করে"
+                  : language === "hi"
+                  ? "राशि विवरण एवं स्वभाव: आपकी चंद्र राशि क्या बताती है"
+                  : "Rashi Finder: Find Out What Your Moon Sign Says"}
+              </h3>
+              <p className="text-xs text-stone-500 mt-1">
+                {language === "bn"
+                  ? "মেষ থেকে মীন — ১২টি চন্দ্র রাশির গভীর ব্যক্তিত্ব, মানসিক ধরণ, ক্যারিয়ার ও দাম্পত্য জীবনের প্রতিফলন"
+                  : language === "hi"
+                  ? "मेष से मीन — 12 चंद्र राशियों का व्यक्तित्व, भावनात्मक शैली, करियर और संबंध"
+                  : "From Aries to Pisces — explore personality, emotional style, career path, and relationship expectations"}
+              </p>
+            </div>
+
+            {/* Search Input */}
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-stone-400" />
+              <input
+                type="text"
+                value={rashiSearch}
+                onChange={(e) => setRashiSearch(e.target.value)}
+                placeholder={language === "bn" ? "রাশি বা অধিপতি খুঁজুন..." : language === "hi" ? "राशि या स्वामी खोजें..." : "Search Moon sign or ruler..."}
+                className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-stone-200 bg-stone-50/60 focus:bg-white focus:border-amber-500 focus:outline-none transition-all"
+              />
+              {rashiSearch && (
+                <button
+                  type="button"
+                  onClick={() => setRashiSearch("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-stone-400 hover:text-stone-700 cursor-pointer"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Element Filter Pills */}
+          <div className="flex flex-wrap items-center gap-1.5 pt-1">
+            <span className="text-[11px] font-bold text-stone-500 mr-1">
+              {language === "bn" ? "তত্ত্ব (Element):" : language === "hi" ? "तत्व (Element):" : "Element:"}
+            </span>
+            {[
+              { id: "all", label: language === "bn" ? "সকল (১২)" : language === "hi" ? "सभी (12)" : "All (12)" },
+              { id: "fire", label: language === "bn" ? "অগ্নি (Fire)" : language === "hi" ? "अग्नि (Fire)" : "Fire (3)" },
+              { id: "earth", label: language === "bn" ? "পৃথিবী (Earth)" : language === "hi" ? "पृथ्वी (Earth)" : "Earth (3)" },
+              { id: "air", label: language === "bn" ? "বায়ু (Air)" : language === "hi" ? "वायु (Air)" : "Air (3)" },
+              { id: "water", label: language === "bn" ? "জল (Water)" : language === "hi" ? "जल (Water)" : "Water (3)" },
+            ].map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setSelectedElementFilter(f.id)}
+                className={`px-3 py-1 text-xs rounded-full font-bold transition-all cursor-pointer ${
+                  selectedElementFilter === f.id
+                    ? "bg-[#fcd404] text-stone-950 font-extrabold shadow-2xs"
+                    : "bg-stone-100/80 text-stone-600 hover:bg-stone-200/70"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            {filteredRashis.map((item) => (
+              <div
+                key={item.id}
+                className="rounded-2xl border border-stone-200/90 bg-stone-50/30 hover:bg-white p-5 space-y-3.5 transition-all shadow-2xs hover:shadow-xs hover:border-amber-300"
+              >
+                <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+                  <div>
+                    <h4 className="text-base font-serif font-bold text-stone-900">
+                      {item.name[language]}
+                    </h4>
+                    <p className="text-[11px] text-stone-500 mt-0.5">
+                      {language === "bn" ? "তত্ত্ব:" : language === "hi" ? "तत्व:" : "Element:"}{" "}
+                      <span className="font-semibold text-stone-700">{item.element[language]}</span>
+                    </p>
+                  </div>
+                  <div className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 text-[11px] font-bold text-amber-900">
+                    <span>{item.ruler[language]}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  <div>
+                    <span className="font-bold text-stone-900 block mb-0.5">
+                      • {language === "bn" ? "স্বভাব ও ব্যক্তিত্ব (Overview):" : language === "hi" ? "स्वभाव (Overview):" : "Overview:"}
+                    </span>
+                    <p className="text-stone-600 leading-relaxed pl-3">
+                      {item.overview[language]}
+                    </p>
+                  </div>
+
+                  <div>
+                    <span className="font-bold text-stone-900 block mb-0.5">
+                      • {language === "bn" ? "আবেগিক বৈশিষ্ট্য (Emotional Style):" : language === "hi" ? "भावनात्मक शैली (Emotional Style):" : "Emotional Style:"}
+                    </span>
+                    <p className="text-stone-600 leading-relaxed pl-3">
+                      {item.emotionalStyle[language]}
+                    </p>
+                  </div>
+
+                  <div>
+                    <span className="font-bold text-stone-900 block mb-0.5">
+                      • {language === "bn" ? "সম্পর্ক ও ভালোবাসা (Relationships):" : language === "hi" ? "संबंध एवं प्रेम (Relationships):" : "Relationships:"}
+                    </span>
+                    <p className="text-stone-600 leading-relaxed pl-3">
+                      {item.relationship[language]}
+                    </p>
+                  </div>
+
+                  <div className="pt-1">
+                    <span className="text-[11px] font-bold text-stone-500 block mb-1">
+                      {language === "bn" ? "সেরা সামঞ্জস্যপূর্ণ রাশি:" : language === "hi" ? "सर्वोत्तम अनुकूल राशियां:" : "Best Matching Signs:"}
+                    </span>
+                    <div className="flex flex-wrap gap-1.5 pl-3">
+                      {item.bestMatches.map((m, idx) => (
+                        <span
+                          key={idx}
+                          className="rounded-lg bg-amber-50 border border-amber-200/80 text-amber-950 font-bold px-2 py-0.5 text-[11px]"
+                        >
+                          ✦ {m}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {filteredRashis.length === 0 && (
+            <div className="py-12 text-center text-xs text-stone-500">
+              {language === "bn"
+                ? "কোনো রাশি পাওয়া যায়নি। অন্য বানান দিয়ে অনুসন্ধান করুন।"
+                : language === "hi"
+                ? "कोई राशि नहीं मिली। पुनः प्रयास करें।"
+                : "No Moon signs match your search."}
+            </div>
+          )}
+        </div>
+
+        {/* =========================================================================
+            6. MOON SIGN COMPATIBILITY: CHECK OUT THE BEST MATCHES (Vedic 4 Elements)
+        ========================================================================= */}
+        <div className="rounded-3xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-xs font-bold text-amber-900">
+              <Sparkles className="size-3 text-amber-600" />
+              <span>
+                {language === "bn" ? "বৈদিক তত্ত্ব সামঞ্জস্য" : language === "hi" ? "वैदिक तत्व अनुकूलता" : "Element Compatibility"}
+              </span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-serif font-bold text-stone-900">
+              {RASHI_ELEMENT_COMPATIBILITY.title[language]}
+            </h3>
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed pt-1">
+              {RASHI_ELEMENT_COMPATIBILITY.subtitle[language]}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {RASHI_ELEMENT_COMPATIBILITY.rules.map((rule, i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-stone-200/90 bg-stone-50/40 hover:bg-white p-5 space-y-3 transition-all shadow-2xs hover:shadow-xs hover:border-amber-300"
+              >
+                <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+                  <h4 className="text-sm font-bold text-stone-900 flex items-center gap-2">
+                    <span className="size-2 rounded-full bg-[#fcd404]" />
+                    <span>{rule.element[language]}</span>
+                  </h4>
+                  <span className="text-[11px] font-semibold text-stone-500">
+                    {rule.signs[language]}
+                  </span>
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  <div>
+                    <span className="font-bold text-stone-900">
+                      {language === "bn" ? "সেরা যোটক:" : language === "hi" ? "सर्वोत्तम मिलान:" : "Best Matches:"}{" "}
+                    </span>
+                    <span className="font-semibold text-amber-800">{rule.compatibleWith[language]}</span>
+                  </div>
+                  <p className="text-stone-600 leading-relaxed">
+                    {rule.why[language]}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* =========================================================================
+            7. DISCOVER MORE ABOUT YOURSELF (RELATED TOOLS)
+        ========================================================================= */}
+        <div className="rounded-3xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="space-y-1">
+            <h3 className="text-xl sm:text-2xl font-serif font-bold text-stone-900">
+              {language === "bn"
+                ? "নিজের সম্পর্কে আরও জানুন (সম্পর্কিত বৈদিক গণনা)"
+                : language === "hi"
+                ? "अपने बारे में और अधिक जानें (अन्य वैदिक सेवाएं)"
+                : "Discover More About Yourself"}
+            </h3>
+            <p className="text-xs text-stone-500">
+              {language === "bn"
+                ? "আপনার কুন্ডলী, নক্ষত্র, দশা ও ভাগ্যের সম্পূর্ণ মহাজাগতিক রূপরেখা আবিষ্কার করুন"
+                : language === "hi"
+                ? "अपनी कुंडली, नक्षत्र, दशा और भाग्य की संपूर्ण जानकारी प्राप्त करें"
+                : "Explore your full Vedic birth chart, love compatibility, and life timelines"}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {RASHI_RELATED_TOOLS.map((tool, i) => (
+              <Link
+                key={i}
+                href={tool.href}
+                className="group rounded-2xl border border-stone-200/80 bg-stone-50/50 hover:bg-white p-5 space-y-2 hover:border-amber-400 hover:shadow-xs transition-all flex flex-col justify-between"
+              >
+                <div className="space-y-1.5">
+                  <div className="size-8 rounded-xl bg-amber-500/10 text-amber-800 flex items-center justify-center font-bold text-xs group-hover:bg-[#fcd404] group-hover:text-stone-950 transition-colors">
+                    ✦
+                  </div>
+                  <h4 className="text-sm font-bold text-stone-900 group-hover:text-amber-800 transition-colors">
+                    {tool.title[language]}
+                  </h4>
+                  <p className="text-xs text-stone-600 leading-relaxed">
+                    {tool.desc[language]}
+                  </p>
+                </div>
+                <div className="pt-2 flex items-center gap-1 text-xs font-bold text-amber-700 group-hover:text-amber-900 group-hover:translate-x-1 transition-all">
+                  <span>{language === "bn" ? "গণনা করুন" : language === "hi" ? "गणना करें" : "Explore Now"}</span>
+                  <span>→</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* =========================================================================
+            8. FREQUENTLY ASKED QUESTIONS (FAQ)
+        ========================================================================= */}
+        <div className="rounded-3xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-xs font-bold text-amber-900">
+              <HelpCircle className="size-3 text-amber-600" />
+              <span>{language === "bn" ? "সাধারণ জিজ্ঞাসা" : language === "hi" ? "अक्सर पूछे जाने वाले प्रश्न" : "Frequently Asked Questions"}</span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-serif font-bold text-stone-900">
+              {language === "bn"
+                ? "চন্দ্র রাশি সংক্রান্ত সচরাচর জিজ্ঞাসিত প্রশ্নোত্তর"
+                : language === "hi"
+                ? "चंद्र राशि से संबंधित महत्वपूर्ण प्रश्न व उत्तर"
+                : "Frequently Asked Questions About Moon Signs (Rashi)"}
+            </h3>
+          </div>
+
+          <div className="space-y-3">
+            {RASHI_FAQS.map((faq, idx) => {
+              const isOpen = openFaqIndex === idx;
+              return (
+                <div
+                  key={idx}
+                  className="rounded-2xl border border-stone-200/80 bg-stone-50/40 overflow-hidden transition-all"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                    className="w-full p-4 sm:p-5 flex items-center justify-between gap-3 text-left hover:bg-stone-50 cursor-pointer transition-colors"
+                  >
+                    <span className="text-xs sm:text-sm font-bold text-stone-900">
+                      {faq.question[language]}
+                    </span>
+                    <ChevronDown
+                      className={`size-4 text-stone-400 shrink-0 transition-transform duration-200 ${
+                        isOpen ? "rotate-180 text-amber-600" : ""
+                      }`}
+                    />
+                  </button>
+                  {isOpen && (
+                    <div className="px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-stone-600 leading-relaxed border-t border-stone-100">
+                      {faq.answer[language]}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </main>
 
       <FeatureCoinModal
@@ -2068,6 +2337,6 @@ export default function RashiCalculatorPage() {
       />
 
       <SiteFooter />
-    </>
+    </div>
   );
 }
