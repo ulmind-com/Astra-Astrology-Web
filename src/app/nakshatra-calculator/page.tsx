@@ -37,6 +37,9 @@ import {
   Radio,
   Layers,
   Info,
+  Search,
+  HelpCircle,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -54,6 +57,13 @@ import { CalculationDetails } from "@/components/astrology/calculation-details";
 import { NakshatraWheel } from "@/components/astrology/nakshatra-wheel";
 import { KundaliChart } from "@/components/astrology/kundali-chart";
 import { NAKSHATRA_UI_TEXTS } from "@/lib/nakshatra-translations";
+import {
+  NAKSHATRA_STEPS,
+  NAKSHATRA_ASTROTALK_GUIDE,
+  ALL_27_NAKSHATRAS,
+  NAKSHATRA_RELATED_TOOLS,
+  NAKSHATRA_FAQS,
+} from "@/lib/nakshatra-guide-data";
 import {
   toLocalizedDigits,
   translatePlanetName,
@@ -137,6 +147,35 @@ export default function NakshatraCalculatorPage() {
   }, []);
   const [ayanamsa, setAyanamsa] = React.useState<AyanamsaType>("lahiri");
   const [showAdvance, setShowAdvance] = React.useState(false);
+
+  // Astrotalk Redesign States
+  const [expandedHero, setExpandedHero] = React.useState(false);
+  const [nakshatraSearch, setNakshatraSearch] = React.useState("");
+  const [selectedLordFilter, setSelectedLordFilter] = React.useState<string>("all");
+  const [openFaqIndex, setOpenFaqIndex] = React.useState<number | null>(0);
+  const [openGuideCardId, setOpenGuideCardId] = React.useState<string | null>("ashwini");
+
+  const filteredNakshatras = React.useMemo(() => {
+    return ALL_27_NAKSHATRAS.filter((item) => {
+      const q = nakshatraSearch.trim().toLowerCase();
+      const matchesSearch =
+        !q ||
+        item.name.en.toLowerCase().includes(q) ||
+        item.name.bn.toLowerCase().includes(q) ||
+        item.name.hi.toLowerCase().includes(q) ||
+        item.lord.en.toLowerCase().includes(q) ||
+        item.lord.bn.toLowerCase().includes(q) ||
+        item.lord.hi.toLowerCase().includes(q) ||
+        item.personality.en.toLowerCase().includes(q) ||
+        item.career.en.toLowerCase().includes(q);
+
+      const matchesLord =
+        selectedLordFilter === "all" ||
+        item.lord.en.toLowerCase() === selectedLordFilter.toLowerCase();
+
+      return matchesSearch && matchesLord;
+    });
+  }, [nakshatraSearch, selectedLordFilter]);
 
   // Loading & Result
   const [loading, setLoading] = React.useState(false);
@@ -565,62 +604,111 @@ export default function NakshatraCalculatorPage() {
     : "";
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-brand-500/20">
+    <div className="min-h-screen bg-[#fafaf9]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
       <SiteHeader />
 
-      <main className="flex-1 pb-20">
-        {/* Top Hero Section */}
-        <section className="relative overflow-hidden py-14 md:py-20 border-b border-border/50 bg-gradient-to-b from-surface-muted/60 via-background to-background">
-          <div className="absolute inset-0 -z-10 pointer-events-none">
-            <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[380px] bg-brand-500/10 rounded-full blur-[130px]" />
-            <div className="absolute top-1/3 left-1/4 w-[360px] h-[280px] bg-indigo-500/10 rounded-full blur-[100px]" />
-            <div className="absolute top-1/3 right-1/4 w-[360px] h-[280px] bg-amber-500/10 rounded-full blur-[100px]" />
+      <main className="mx-auto max-w-6xl px-3 sm:px-6 py-4 flex-1 w-full space-y-8">
+        {/* =========================================================================
+            1. BREADCRUMB & LANGUAGE SWITCHER
+        ========================================================================= */}
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-stone-500 pt-0.5 pb-1">
+          <div className="flex items-center gap-1.5 uppercase tracking-wider font-semibold">
+            <Link href="/" className="hover:text-amber-700 transition-colors">
+              {language === "bn" ? "হোম" : language === "hi" ? "होम" : "Home"}
+            </Link>
+            <span className="text-stone-300">&gt;</span>
+            <span className="text-stone-900 font-bold">
+              {language === "bn" ? "জন্ম নক্ষত্র ক্যালকুলেটর" : language === "hi" ? "नक्षत्र कैलकुलेटर" : "Nakshatra Calculator"}
+            </span>
           </div>
 
-          <div className="max-w-5xl mx-auto px-4 text-center">
-            {/* Language Switcher Bar */}
-            <div className="inline-flex items-center gap-1.5 p-1 rounded-full bg-surface-muted/80 border border-border/80 shadow-2xs mb-6 backdrop-blur-md">
-              <span className="flex items-center gap-1 px-2.5 py-1 text-xs text-muted-foreground font-medium">
-                <Languages className="size-3.5" />
-                Language:
-              </span>
-              {(
-                [
-                  { code: "bn", label: "বাংলা" },
-                  { code: "en", label: "English" },
-                  { code: "hi", label: "हिन्दी" },
-                ] as const
-              ).map((lang) => (
-                <button
-                  key={lang.code}
-                  type="button"
-                  onClick={() => handleLanguageSwitch(lang.code)}
-                  className={`inline-flex min-h-9 items-center justify-center px-3 py-2 text-xs rounded-full font-semibold press transition-all duration-200 ${
-                    language === lang.code
-                      ? "bg-brand-500 text-white shadow-soft scale-102"
-                      : "text-muted-foreground hover:text-foreground hover:bg-surface-elevated/80"
-                  }`}
-                >
-                  {lang.label}
-                </button>
-              ))}
-            </div>
+          {/* Language Switcher Bar */}
+          <div className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white p-0.5 text-xs font-semibold shadow-2xs">
+            {(
+              [
+                { code: "bn", label: "বাংলা" },
+                { code: "hi", label: "हिन्दी" },
+                { code: "en", label: "English" },
+              ] as const
+            ).map((lang) => (
+              <button
+                key={lang.code}
+                type="button"
+                onClick={() => handleLanguageSwitch(lang.code)}
+                className={`min-h-7 inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer ${
+                  language === lang.code
+                    ? "bg-[#fcd404] text-stone-950 shadow-2xs font-extrabold"
+                    : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
+                }`}
+              >
+                {lang.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-700 text-xs font-semibold uppercase tracking-wider mb-4 shadow-2xs">
-              <Sparkles className="size-3.5 text-brand-500 animate-pulse" />
+        {/* =========================================================================
+            2. HERO SECTION: Compact, sleek, with rotating faint zodiac circle in background
+        ========================================================================= */}
+        <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-r from-amber-50/50 via-white to-amber-50/30 px-4 sm:px-6 py-4 shadow-2xs">
+          {/* Faint rotating zodiac wheel in background */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/zodiac-wheel-gold.webp"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-12 -top-16 size-[260px] sm:size-[340px] select-none opacity-[0.14] mix-blend-multiply animate-spin [animation-duration:120s] motion-reduce:animate-none"
+          />
+
+          <div className="relative z-10 max-w-2xl space-y-1.5">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-bold text-amber-900">
+              <Sparkles className="size-3 text-amber-600" />
               <span>{ui.badge}</span>
             </div>
 
-            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground max-w-3xl mx-auto leading-tight">
-              {ui.title}
+            <h1 className="text-xl sm:text-2xl font-serif font-bold text-stone-900 tracking-tight leading-tight">
+              {language === "bn"
+                ? "নক্ষত্র ক্যালকুলেটর: জন্মতারিখ দিয়ে নক্ষত্র জানুন"
+                : language === "hi"
+                ? "नक्षत्र कैलकुलेटर: जन्म तिथि से जानें अपना नक्षत्र"
+                : "Nakshatra Calculator: Find Nakshatra by Date of Birth"}
             </h1>
 
-            <p className="mt-4 text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              {ui.subtitle}
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+              {expandedHero
+                ? (language === "bn"
+                    ? "কখনও ভেবে দেখেছেন কেন একই দিনে জন্ম নিয়েও দুই মানুষের জীবন সম্পূর্ণ আলাদা হয়? এর কারণ হলো জন্মের মুহূর্তের চন্দ্র নক্ষত্রের অবস্থান। এটি আপনার গভীর মানসিকতা, ব্যক্তিত্ব, স্বাস্থ্য প্রবণতা, আদর্শ ক্যারিয়ার এবং সম্পর্কের সামঞ্জস্য নির্ধারণ করে।"
+                    : language === "hi"
+                    ? "क्या आपने कभी सोचा है कि एक ही दिन जन्मे दो व्यक्तियों का जीवन इतना अलग क्यों होता है? इसका मुख्य कारण जन्म के समय चंद्रमा का विशिष्ट नक्षत्र होता है। यह आपके स्वभाव, स्वास्थ्य, करियर और वैवाहिक अनुकूलता को तय करता है।"
+                    : "Have you ever wondered why two people are born on the same day but still lead different lives? It is because of the nakshatra placement at the time of birth. It defines your personality, health challenges, best career, and compatibility with others.")
+                : (language === "bn"
+                    ? "কখনও ভেবে দেখেছেন কেন একই দিনে জন্ম নিয়েও দুই মানুষের জীবন আলাদা হয়? কারণ জন্মের মুহূর্তের চন্দ্র নক্ষত্রের অবস্থান..."
+                    : language === "hi"
+                    ? "क्या आपने कभी सोचा है कि एक ही दिन जन्मे दो व्यक्तियों का जीवन अलग क्यों होता है? क्योंकि जन्म नक्षत्र ही..."
+                    : "Have you ever wondered why two people are born on the same day but still lead different lives? It is because of the nakshatra...")}
+              <button
+                type="button"
+                onClick={() => setExpandedHero(!expandedHero)}
+                className="ml-1.5 font-bold text-amber-700 hover:text-amber-900 hover:underline inline-flex items-center cursor-pointer"
+              >
+                {expandedHero
+                  ? (language === "bn" ? "কম দেখুন" : language === "hi" ? "कम देखें" : "Read less")
+                  : (language === "bn" ? "আরও পড়ুন" : language === "hi" ? "और पढ़ें" : "Read more")}
+              </button>
             </p>
 
-            <div className="pt-4 flex justify-center">
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              {isSignedIn && profile && (
+                <button
+                  type="button"
+                  onClick={handleReloadFromProfile}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 hover:border-amber-400 bg-white/90 hover:bg-amber-50/70 px-3 py-1 text-xs font-semibold text-stone-700 hover:text-stone-900 transition-colors shadow-2xs cursor-pointer"
+                >
+                  <User className="size-3.5 text-amber-600" />
+                  <span>{ui.syncProfileBtn}</span>
+                </button>
+              )}
+
               <FeatureCoinBadge
                 feature={nakshatraFeature}
                 walletBalance={walletBalance}
@@ -628,340 +716,358 @@ export default function NakshatraCalculatorPage() {
               />
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* Calculator Form Section */}
-        <section className="max-w-4xl mx-auto px-4 -mt-6">
-          <div className="rounded-2xl border border-border/80 bg-surface-elevated/95 backdrop-blur-xl shadow-xl overflow-hidden">
-            {nakshatraFeature && !nakshatraFeature.enabled && (
-              <div className="p-4 bg-amber-500/10 border-b border-amber-300">
-                <FeatureDisabledAlert
-                  featureName={language === "bn" ? "নক্ষত্র ক্যালকুলেটর" : "Nakshatra Calculator"}
-                  language={language}
-                />
-              </div>
-            )}
+        {/* Section title above form */}
+        <div className="space-y-0.5 pt-1">
+          <h2 className="text-base sm:text-lg font-serif font-bold text-stone-900">
+            {language === "bn"
+              ? "এখানে আপনার জন্ম নক্ষত্র গণনা করুন"
+              : language === "hi"
+              ? "यहाँ अपना जन्म नक्षत्र गणना करें"
+              : "Calculate your Nakshatra here"}
+          </h2>
+          <p className="text-xs text-stone-500">
+            {language === "bn"
+              ? "সঠিক জন্ম বিবরণ দিন। সঠিক সময় না থাকলে ফাঁকা রাখুন, দুপুর ১২:০০ ধরা হবে।"
+              : language === "hi"
+              ? "सटीक जन्म विवरण दें। समय न होने पर दोपहर 12:00 माना जाएगा।"
+              : "Enter both birth details. Accurate time and place give the sharpest Vedic reading."}
+          </p>
+        </div>
 
-            {/* Auto-fill banner if user is logged in */}
+        {/* =========================================================================
+            3. ULTRA-PRO BIRTH DETAILS INPUT FORM (Astrotalk Style)
+        ========================================================================= */}
+        <div className="rounded-2xl border border-stone-200/90 bg-white p-4 sm:p-6 shadow-xs space-y-5">
+          {/* Header inside form */}
+          <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+            <div className="inline-flex items-center gap-2">
+              <div className="size-2 rounded-full bg-[#fcd404]" />
+              <span className="text-sm font-bold text-stone-900">
+                {language === "bn" ? "আপনার জন্ম বিবরণ (Your Birth Details)" : language === "hi" ? "जन्म विवरण (Your Birth Details)" : "Your Birth Details"}
+              </span>
+            </div>
             {isSignedIn && profile && (
-              <div className="px-5 py-3 bg-brand-500/10 border-b border-brand-500/20 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <div className="flex items-center gap-2 text-brand-900 font-medium">
-                  <CheckCircle2 className="size-4 text-brand-600 shrink-0" />
-                  <span>{ui.syncProfileNotice}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleReloadFromProfile}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-brand-500/20 hover:bg-brand-500/30 text-brand-900 font-semibold press transition-colors"
-                >
-                  <RefreshCw className="size-3" />
-                  <span>{ui.syncProfileBtn}</span>
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={handleReloadFromProfile}
+                className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 hover:text-amber-900 hover:underline cursor-pointer"
+              >
+                <User className="size-3" />
+                <span>{ui.syncProfileBtn}</span>
+              </button>
             )}
+          </div>
 
-            <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
-              {/* Row 1: Name and Gender */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-2">
-                    {ui.nameLabel}
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder={ui.namePlaceholder}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-surface-muted/50 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition-all placeholder:text-muted-foreground/60"
-                    />
-                  </div>
-                </div>
+          {nakshatraFeature && !nakshatraFeature.enabled && (
+            <div className="mb-2">
+              <FeatureDisabledAlert
+                featureName={language === "bn" ? "নক্ষত্র ক্যালকুলেটর" : "Nakshatra Calculator"}
+                language={language}
+              />
+            </div>
+          )}
 
-                <div>
-                  <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-2">
-                    {ui.genderLabel}
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {(
-                      [
-                        { id: "male", label: ui.genderMale },
-                        { id: "female", label: ui.genderFemale },
-                        { id: "other", label: ui.genderOther },
-                      ] as const
-                    ).map((g) => (
-                      <button
-                        key={g.id}
-                        type="button"
-                        onClick={() => setGender(g.id)}
-                        className={`py-2.5 px-2 rounded-xl text-xs font-semibold border press transition-all ${
-                          gender === g.id
-                            ? "border-brand-500 bg-brand-500/15 text-brand-900 shadow-2xs"
-                            : "border-border bg-surface-muted/30 text-muted-foreground hover:bg-surface-muted hover:text-foreground"
-                        }`}
-                      >
-                        {g.label}
-                      </button>
-                    ))}
-                  </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Name and Gender */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-stone-700">
+                  {ui.nameLabel} <span className="text-stone-400 font-normal">({language === "bn" ? "ঐচ্ছিক" : language === "hi" ? "वैकल्पिक" : "optional"})</span>
+                </label>
+                <div className="relative rounded-2xl border border-stone-200 hover:border-stone-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 bg-stone-50/50 hover:bg-white focus-within:bg-white px-3.5 py-2.5 flex items-center gap-2.5 transition-all shadow-2xs">
+                  <User className="size-4 text-stone-400 shrink-0" />
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder={ui.namePlaceholder}
+                    className="w-full text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 bg-transparent outline-none font-medium"
+                  />
                 </div>
               </div>
 
-              {/* Row 2: Date of Birth (Mandatory) & Time of Birth (Optional) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-1">
-                {/* DOB with auto-advance */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                      <Calendar className="size-3.5 text-brand-500" />
-                      <span>{ui.dobLabel}</span>
-                      <span className="text-rose-500 font-bold">*</span>
-                    </label>
-                    <span className="text-[11px] text-muted-foreground">{ui.dobNotice}</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-stone-700">
+                  {ui.genderLabel}
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[
+                    { id: "male", label: "♂ " + ui.genderMale },
+                    { id: "female", label: "♀ " + ui.genderFemale },
+                    { id: "other", label: "⚥ " + ui.genderOther },
+                  ].map((g) => (
+                    <button
+                      key={g.id}
+                      type="button"
+                      onClick={() => setGender(g.id as any)}
+                      className={`min-h-10 rounded-xl border px-2 py-1.5 text-center text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                        gender === g.id
+                          ? "bg-[#fcd404] border-[#fcd404] text-stone-950 shadow-xs font-extrabold"
+                          : "bg-stone-100/70 border-stone-200/80 text-stone-700 hover:bg-stone-200/60 font-semibold"
+                      }`}
+                    >
+                      {g.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* DOB & TOB */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* DOB */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-stone-700">
+                  {ui.dobLabel} <span className="text-rose-500">*</span>
+                </label>
+                <div className="rounded-2xl border border-stone-200 hover:border-stone-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 bg-stone-50/50 hover:bg-white focus-within:bg-white px-3.5 py-2 flex items-center gap-2 shadow-2xs transition-all">
+                  <Calendar className="size-4 text-stone-400 shrink-0" />
+                  <div className="grid grid-cols-3 gap-2 flex-1">
                     <input
                       ref={dayRef}
                       type="text"
                       inputMode="numeric"
+                      maxLength={2}
                       value={day}
                       onChange={handleDayChange}
                       onKeyDown={(e) => handleKeyDown(e)}
                       placeholder={ui.dayPlaceholder}
-                      maxLength={2}
-                      className="text-center py-2.5 px-2 rounded-xl border border-border bg-surface-muted/50 text-foreground font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition-all placeholder:text-muted-foreground/60"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
                     />
                     <input
                       ref={monthRef}
                       type="text"
                       inputMode="numeric"
+                      maxLength={2}
                       value={month}
                       onChange={handleMonthChange}
                       onKeyDown={(e) => handleKeyDown(e, dayRef)}
                       placeholder={ui.monthPlaceholder}
-                      maxLength={2}
-                      className="text-center py-2.5 px-2 rounded-xl border border-border bg-surface-muted/50 text-foreground font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition-all placeholder:text-muted-foreground/60"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400 border-x border-stone-200 px-1"
                     />
                     <input
                       ref={yearRef}
                       type="text"
                       inputMode="numeric"
+                      maxLength={4}
                       value={year}
                       onChange={handleYearChange}
                       onKeyDown={(e) => handleKeyDown(e, monthRef)}
                       placeholder={ui.yearPlaceholder}
-                      maxLength={4}
-                      className="text-center py-2.5 px-2 rounded-xl border border-border bg-surface-muted/50 text-foreground font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition-all placeholder:text-muted-foreground/60"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
                     />
                   </div>
                 </div>
+              </div>
 
-                {/* TOB (Optional) */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                      <Clock className="size-3.5 text-brand-500" />
-                      <span>{ui.tobLabel}</span>
-                    </label>
-                    <span className="text-[11px] text-emerald-700 font-semibold">
-                      {hour.trim() === "" ? (language === "bn" ? "ঐচ্ছিক — না দিলে ১২:০০ PM" : language === "hi" ? "वैकल्पिक — 12:00 PM" : "Optional — 12:00 PM") : ""}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-4 gap-2">
+              {/* TOB */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-stone-700">
+                    {ui.tobLabel} <span className="text-stone-400 font-normal">({language === "bn" ? "ঐচ্ছিক" : language === "hi" ? "वैकल्पिक" : "optional"})</span>
+                  </label>
+                  <span className="text-[11px] text-stone-400">
+                    {hour.trim() === ""
+                      ? (language === "bn" ? "না দিলে দুপুর ১২:০০ ধরা হবে" : language === "hi" ? "खाली रहने पर 12:00 PM माना जाएगा" : "Defaults to 12:00 PM")
+                      : ""}
+                  </span>
+                </div>
+                <div className="rounded-2xl border border-stone-200 hover:border-stone-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 bg-stone-50/50 hover:bg-white focus-within:bg-white px-3.5 py-2 flex items-center gap-2 shadow-2xs transition-all">
+                  <Clock className="size-4 text-stone-400 shrink-0" />
+                  <div className="grid grid-cols-4 gap-1.5 flex-1 items-center">
                     <input
                       ref={hourRef}
                       type="text"
                       inputMode="numeric"
+                      maxLength={2}
                       value={hour}
                       onChange={handleHourChange}
                       onKeyDown={(e) => handleKeyDown(e, yearRef)}
                       placeholder={ui.hourPlaceholder}
-                      maxLength={2}
-                      className="text-center py-2.5 px-2 rounded-xl border border-border bg-surface-muted/50 text-foreground font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition-all placeholder:text-muted-foreground/60"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
                     />
                     <input
                       ref={minuteRef}
                       type="text"
                       inputMode="numeric"
+                      maxLength={2}
                       value={minute}
                       onChange={handleMinuteChange}
                       onKeyDown={(e) => handleKeyDown(e, hourRef)}
                       placeholder={ui.minutePlaceholder}
-                      maxLength={2}
-                      className="text-center py-2.5 px-2 rounded-xl border border-border bg-surface-muted/50 text-foreground font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition-all placeholder:text-muted-foreground/60"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400 border-x border-stone-200 px-1"
                     />
                     <input
                       ref={secondRef}
                       type="text"
                       inputMode="numeric"
+                      maxLength={2}
                       value={second}
                       onChange={handleSecondChange}
                       onKeyDown={(e) => handleKeyDown(e, minuteRef)}
                       placeholder="SS"
-                      maxLength={2}
-                      className="text-center py-2.5 px-2 rounded-xl border border-border bg-surface-muted/50 text-foreground font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition-all placeholder:text-muted-foreground/60"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
                     />
-                    <button
-                      type="button"
-                      onClick={() => setPeriod(period === "AM" ? "PM" : "AM")}
-                      className="py-2.5 px-2 rounded-xl border border-border bg-surface-muted/70 text-foreground font-bold text-xs hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-brand-500/40 press transition-all"
-                    >
-                      {period}
-                    </button>
+                    <div className="flex rounded-lg border border-stone-200 bg-stone-100 p-0.5 overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => setPeriod("AM")}
+                        className={`flex-1 text-[11px] font-bold py-1 rounded-md transition-all cursor-pointer ${
+                          period === "AM" ? "bg-[#fcd404] text-stone-950 font-extrabold shadow-2xs" : "text-stone-600 hover:text-stone-900"
+                        }`}
+                      >
+                        AM
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPeriod("PM")}
+                        className={`flex-1 text-[11px] font-bold py-1 rounded-md transition-all cursor-pointer ${
+                          period === "PM" ? "bg-[#fcd404] text-stone-950 font-extrabold shadow-2xs" : "text-stone-600 hover:text-stone-900"
+                        }`}
+                      >
+                        PM
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Row 3: Birth Place - geocoded inline, with its real timezone */}
-              <div>
-                <label
-                  htmlFor="nakshatra-birth-place"
-                  className="mb-2 block text-xs font-semibold uppercase tracking-wider text-foreground"
-                >
-                  {ui.locationLabel} <span className="text-rose-500">*</span>
-                </label>
-                <BirthPlaceField
-                  id="nakshatra-birth-place"
-                  value={selectedPlace}
-                  onChange={handlePlaceSelected}
-                  birthDate={{
-                    year: parseInt(year, 10) || undefined,
-                    month: parseInt(month, 10) || undefined,
-                    day: parseInt(day, 10) || undefined,
-                  }}
-                  language={language}
-                  invalid={placeTouched}
-                />
-              </div>
+            {/* Birth Place */}
+            <div className="space-y-1.5">
+              <label htmlFor="nakshatra-birth-place" className="block text-xs font-bold text-stone-700">
+                {ui.locationLabel} <span className="text-rose-500">*</span>
+              </label>
+              <BirthPlaceField
+                id="nakshatra-birth-place"
+                value={selectedPlace}
+                onChange={handlePlaceSelected}
+                birthDate={{
+                  year: parseInt(year, 10) || undefined,
+                  month: parseInt(month, 10) || undefined,
+                  day: parseInt(day, 10) || undefined,
+                }}
+                language={language}
+                invalid={placeTouched}
+              />
+            </div>
 
-              {/* Advanced Settings Accordion */}
-              <div className="border border-border/70 rounded-xl overflow-hidden bg-surface-muted/20">
-                <button
-                  type="button"
-                  onClick={() => setShowAdvance(!showAdvance)}
-                  className="w-full px-4 py-2.5 flex items-center justify-between text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-surface-muted/40 press transition-all"
-                >
-                  <span className="flex items-center gap-2">
-                    <Sliders className="size-3.5 text-brand-500" />
-                    Advanced Ephemeris & Ayanamsa Options
+            {/* Advanced Settings */}
+            <div className="pt-1 border-t border-stone-100">
+              <button
+                type="button"
+                onClick={() => setShowAdvance(!showAdvance)}
+                className="inline-flex items-center justify-between w-full py-2 text-xs font-bold text-stone-600 hover:text-stone-900 cursor-pointer group"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Sliders className="size-3.5 text-amber-600" />
+                  <span>
+                    {language === "bn"
+                      ? "উন্নত জ্যোতিষ সেটিংস (অয়নাংশ ও সময়াঞ্চল)"
+                      : language === "hi"
+                      ? "उन्नत ज्योतिष सेटिंग्स (अयनांश व समय क्षेत्र)"
+                      : "Advanced Ephemeris & Ayanamsa Options"}
                   </span>
-                  {showAdvance ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-                </button>
+                </span>
+                <ChevronDown
+                  className={`size-4 text-stone-400 transition-transform duration-200 ${
+                    showAdvance ? "rotate-180 text-amber-600" : ""
+                  }`}
+                />
+              </button>
 
-                {showAdvance && (
-                  <div className="p-4 border-t border-border/70 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-surface-muted/30">
-                    <div>
-                      <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                        {ui.ayanamsaLabel}
-                      </label>
-                      <select
-                        value={ayanamsa}
-                        onChange={(e) => setAyanamsa(e.target.value as AyanamsaType)}
-                        className="w-full py-2 px-3 rounded-lg border border-border bg-surface-elevated text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-brand-500/40"
-                      >
-                        <option value="lahiri">Lahiri (Chitra Paksha) - Standard Vedic Canonical</option>
-                        <option value="krishnamurti">Krishnamurti (KP System)</option>
-                        <option value="bv_raman">B.V. Raman</option>
-                        <option value="yukteshwar">Sri Yukteshwar</option>
-                        <option value="true_pushya">True Pushya (PVRN Rao)</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="nakshatra-timezone"
-                        className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
-                      >
-                        {language === "bn"
-                          ? "সময়াঞ্চল"
-                          : language === "hi"
-                          ? "समय क्षेत्र"
-                          : "Timezone"}
-                      </label>
-                      {selectedPlace?.timezoneName ? (
-                        <div className="rounded-lg border border-emerald-200 bg-emerald-50/70 px-3 py-2">
-                          <p className="flex flex-wrap items-center gap-x-1.5 text-[11px] font-bold text-emerald-900">
-                            <span>{selectedPlace.timezoneName}</span>
-                            {selectedPlace.timezoneLabel && (
-                              <span className="rounded bg-white px-1 tabular-nums">
-                                {selectedPlace.timezoneLabel}
-                              </span>
-                            )}
-                          </p>
-                          <p className="mt-0.5 text-[10px] leading-relaxed text-emerald-800/90">
-                            {language === "bn"
-                              ? "জন্মস্থান ও তারিখ অনুসারে নির্ণীত — ডেলাইট সেভিং ও ঐতিহাসিক পরিবর্তন সহ।"
-                              : language === "hi"
-                              ? "जन्म स्थान एवं तिथि अनुसार निर्धारित — डेलाइट सेविंग एवं ऐतिहासिक परिवर्तन सहित।"
-                              : "Resolved from your birth place and date, daylight saving and historical changes included."}
-                          </p>
-                        </div>
-                      ) : (
-                        <input
-                          id="nakshatra-timezone"
-                          type="text"
-                          inputMode="decimal"
-                          value={timezone}
-                          onChange={(e) =>
-                            setTimezone(e.target.value.replace(/[^0-9.+-]/g, ""))
-                          }
-                          placeholder="5.5 (for IST)"
-                          className="w-full rounded-lg border border-border bg-surface-elevated px-3 py-2 text-xs tabular-nums text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500/40"
-                        />
-                      )}
-                    </div>
+              {showAdvance && (
+                <div className="mt-2 p-4 rounded-2xl border border-stone-200/80 bg-stone-50/60 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="block text-xs font-bold text-stone-700">
+                      {ui.ayanamsaLabel}
+                    </label>
+                    <select
+                      value={ayanamsa}
+                      onChange={(e) => setAyanamsa(e.target.value as AyanamsaType)}
+                      className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs font-semibold text-stone-800 outline-none focus:border-amber-500 shadow-2xs cursor-pointer"
+                    >
+                      <option value="lahiri">Lahiri (Chitra Paksha - Standard)</option>
+                      <option value="krishnamurti">KP (Krishnamurti Standard)</option>
+                      <option value="bv_raman">BV Raman</option>
+                      <option value="yukteshwar">Sri Yukteshwar</option>
+                      <option value="true_pushya">True Pushya (PVRN Rao)</option>
+                    </select>
                   </div>
-                )}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-                <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:flex-1">
-                  <Button
-                    type="submit"
-                    disabled={loading || (nakshatraFeature ? !nakshatraFeature.enabled : false)}
-                    className="w-full sm:flex-1 py-3 text-sm font-bold bg-brand-500 hover:bg-brand-600 text-white rounded-xl shadow-soft hover:shadow-glow transition-all duration-200 disabled:opacity-50"
-                  >
-                    {loading ? (
-                      <span className="flex items-center gap-2">
-                        <RefreshCw className="size-4 animate-spin" />
-                        {ui.calculating}
-                      </span>
+                  <div className="space-y-1">
+                    <label className="block text-xs font-bold text-stone-700">
+                      {language === "bn" ? "সময়াঞ্চল" : language === "hi" ? "समय क्षेत्र" : "Timezone"}
+                    </label>
+                    {selectedPlace?.timezoneName ? (
+                      <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 px-3 py-2 text-xs font-semibold text-emerald-900">
+                        {selectedPlace.timezoneName} ({selectedPlace.timezoneLabel})
+                      </div>
                     ) : (
-                      <span className="flex items-center gap-2">
-                        <Star className="size-4 fill-amber-300 text-amber-300" />
-                        {nakshatraFeature && !nakshatraFeature.enabled
-                          ? language === "bn"
-                            ? "ফিচারটি বন্ধ রয়েছে"
-                            : "Feature Disabled"
-                          : ui.calculateBtn}
-                        <ArrowRight className="size-4" />
-                      </span>
+                      <input
+                        type="text"
+                        value={timezone}
+                        onChange={(e) => setTimezone(e.target.value)}
+                        placeholder="5.5"
+                        className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-800 outline-none focus:border-amber-500 shadow-2xs"
+                      />
                     )}
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleResetForm}
-                    className="w-full sm:w-auto px-5 py-3 rounded-xl text-xs font-semibold"
-                  >
-                    <RotateCcw className="size-3.5 mr-1.5" />
-                    {ui.resetBtn}
-                  </Button>
+                  </div>
                 </div>
+              )}
+            </div>
 
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-stone-100">
+              <button
+                type="button"
+                onClick={handleResetForm}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-stone-500 hover:text-stone-800 py-2.5 px-4 rounded-xl hover:bg-stone-100 transition-colors order-2 sm:order-1 cursor-pointer"
+              >
+                <RotateCcw className="size-3.5" />
+                <span>{ui.resetBtn}</span>
+              </button>
+
+              <div className="flex items-center gap-3 w-full sm:w-auto justify-end order-1 sm:order-2">
                 <FeatureCoinBadge
                   feature={nakshatraFeature}
                   walletBalance={walletBalance}
                   language={language}
                   showWallet={false}
                 />
+
+                <button
+                  type="submit"
+                  disabled={loading || (nakshatraFeature ? !nakshatraFeature.enabled : false)}
+                  className="min-h-[48px] w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-8 rounded-2xl text-xs sm:text-sm font-bold text-stone-950 bg-[#fcd404] hover:bg-[#ebd500] shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer active:scale-[0.99]"
+                >
+                  {loading ? (
+                    <>
+                      <RefreshCw className="size-4 animate-spin text-stone-950" />
+                      <span className="font-bold">{ui.calculating}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Star className="size-4 fill-stone-950 text-stone-950" />
+                      <span className="font-bold">
+                        {nakshatraFeature && !nakshatraFeature.enabled
+                          ? language === "bn"
+                            ? "ফিচারটি বন্ধ রয়েছে"
+                            : "Feature Disabled"
+                          : language === "bn"
+                          ? "জন্ম নক্ষত্র গণনা করুন"
+                          : language === "hi"
+                          ? "जन्म नक्षत्र गणना करें"
+                          : "Calculate my Nakshatra"}
+                      </span>
+                    </>
+                  )}
+                </button>
               </div>
-            </form>
-          </div>
-        </section>
+            </div>
+          </form>
+        </div>
 
         {/* =================================================================== */}
         {/* Results Dashboard Section (5-Tab Cosmic UI) */}
@@ -1996,6 +2102,337 @@ export default function NakshatraCalculatorPage() {
             />
           </section>
         )}
+
+        {/* =========================================================================
+            4. STEP 1, STEP 2, STEP 3: HOW TO CALCULATE
+        ========================================================================= */}
+        <div className="rounded-3xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="text-center max-w-2xl mx-auto space-y-1.5">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-xs font-bold text-amber-900">
+              <Star className="size-3 text-amber-600" />
+              <span>{language === "bn" ? "সহজ ৩টি ধাপ" : language === "hi" ? "सरल 3 चरण" : "3 Simple Steps"}</span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-serif font-bold text-stone-900">
+              {NAKSHATRA_STEPS.title[language]}
+            </h3>
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+              {NAKSHATRA_STEPS.subtitle[language]}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+            {NAKSHATRA_STEPS.steps.map((st) => (
+              <div
+                key={st.step}
+                className="relative overflow-hidden rounded-2xl border border-amber-200/70 bg-gradient-to-b from-amber-50/40 via-white to-white p-5 space-y-2.5 shadow-2xs hover:shadow-xs hover:border-amber-400 transition-all"
+              >
+                <div className="size-9 rounded-xl bg-[#fcd404] text-stone-950 font-black flex items-center justify-center text-sm shadow-2xs">
+                  0{st.step}
+                </div>
+                <h4 className="text-sm font-bold text-stone-900 pt-1">
+                  {st.title[language]}
+                </h4>
+                <p className="text-xs text-stone-600 leading-relaxed">
+                  {st.desc[language]}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* =========================================================================
+            5. ASTROTALK CANONICAL GUIDE: UNLOCK YOUR COSMIC DESTINY
+        ========================================================================= */}
+        <div className="rounded-3xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs space-y-8">
+          <div className="space-y-3">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold text-stone-900 tracking-tight">
+              {NAKSHATRA_ASTROTALK_GUIDE.mainTitle[language]}
+            </h2>
+
+            <div className="space-y-2 rounded-2xl bg-stone-50/70 border border-stone-200/80 p-5">
+              <h3 className="text-base sm:text-lg font-bold text-stone-900 flex items-center gap-2">
+                <Sparkles className="size-4 text-amber-600" />
+                <span>{NAKSHATRA_ASTROTALK_GUIDE.whatIsTitle[language]}</span>
+              </h3>
+              <p className="text-xs sm:text-sm text-stone-700 leading-relaxed">
+                {NAKSHATRA_ASTROTALK_GUIDE.whatIsContent[language]}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="border-b border-stone-100 pb-2">
+              <h3 className="text-lg sm:text-xl font-serif font-bold text-stone-900">
+                {NAKSHATRA_ASTROTALK_GUIDE.roleTitle[language]}
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {NAKSHATRA_ASTROTALK_GUIDE.roles.map((r, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl border border-stone-200/90 bg-stone-50/40 p-4 sm:p-5 space-y-2 hover:bg-white hover:border-amber-300 transition-all shadow-2xs"
+                >
+                  <h4 className="text-xs sm:text-sm font-bold text-amber-900">
+                    {r.title[language]}
+                  </h4>
+                  <p className="text-xs text-stone-600 leading-relaxed">
+                    {r.desc[language]}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* =========================================================================
+            6. ALL 27 NAKSHATRAS IN ORDER: DISCOVER YOURSELF IN DETAIL
+        ========================================================================= */}
+        <div className="rounded-3xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-stone-100">
+            <div>
+              <h3 className="text-xl sm:text-2xl font-serif font-bold text-stone-900">
+                {language === "bn"
+                  ? "২৭টি নক্ষত্রের প্রামাণ্য তালিকা (নক্ষত্র পরিচয়)"
+                  : language === "hi"
+                  ? "27 नक्षत्रों की विस्तृत सूची (व्यक्तित्व व फल)"
+                  : "Nakshatra List in Order: Discover Yourself in Detail"}
+              </h3>
+              <p className="text-xs text-stone-500 mt-1">
+                {language === "bn"
+                  ? "অশ্বিনী থেকে রেবতী — প্রতিটি নক্ষত্রের ব্যক্তিত্ব, ক্যারিয়ার, স্বাস্থ্য ও সম্পর্কের বিশেষত্ব জানুন"
+                  : language === "hi"
+                  ? "अश्विनी से रेवती तक — स्वभाव, आजीविका, स्वास्थ्य एवं वैवाहिक संबंध"
+                  : "From Ashwini to Revati — explore personality, career, health, and relationship demeanor"}
+              </p>
+            </div>
+
+            {/* Search Input */}
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-stone-400" />
+              <input
+                type="text"
+                value={nakshatraSearch}
+                onChange={(e) => setNakshatraSearch(e.target.value)}
+                placeholder={language === "bn" ? "নক্ষত্র খুঁজুন..." : language === "hi" ? "नक्षत्र खोजें..." : "Search Nakshatra..."}
+                className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-stone-200 bg-stone-50/60 focus:bg-white focus:border-amber-500 focus:outline-none transition-all"
+              />
+              {nakshatraSearch && (
+                <button
+                  type="button"
+                  onClick={() => setNakshatraSearch("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-stone-400 hover:text-stone-700 cursor-pointer"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Planetary Lord Filter Pills */}
+          <div className="flex flex-wrap items-center gap-1.5 pt-1">
+            <span className="text-[11px] font-bold text-stone-500 mr-1">
+              {language === "bn" ? "অধিপতি গ্রহ:" : language === "hi" ? "स्वामी ग्रह:" : "Ruling Lord:"}
+            </span>
+            {[
+              { id: "all", label: language === "bn" ? "সকল (২৭)" : language === "hi" ? "सभी (27)" : "All (27)" },
+              { id: "ketu", label: language === "bn" ? "কেতু" : language === "hi" ? "केतु" : "Ketu" },
+              { id: "venus", label: language === "bn" ? "শুক্র" : language === "hi" ? "शुक्र" : "Venus" },
+              { id: "sun", label: language === "bn" ? "সূর্য" : language === "hi" ? "सूर्य" : "Sun" },
+              { id: "moon", label: language === "bn" ? "চন্দ্র" : language === "hi" ? "चंद्र" : "Moon" },
+              { id: "mars", label: language === "bn" ? "মঙ্গল" : language === "hi" ? "मंगल" : "Mars" },
+              { id: "rahu", label: language === "bn" ? "রাহু" : language === "hi" ? "राहु" : "Rahu" },
+              { id: "jupiter", label: language === "bn" ? "বৃহস্পতি" : language === "hi" ? "बृहस्पति" : "Jupiter" },
+              { id: "saturn", label: language === "bn" ? "শনি" : language === "hi" ? "शनि" : "Saturn" },
+              { id: "mercury", label: language === "bn" ? "বুধ" : language === "hi" ? "बुध" : "Mercury" },
+            ].map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setSelectedLordFilter(f.id)}
+                className={`px-3 py-1 text-xs rounded-full font-bold transition-all cursor-pointer ${
+                  selectedLordFilter === f.id
+                    ? "bg-[#fcd404] text-stone-950 font-extrabold shadow-2xs"
+                    : "bg-stone-100/80 text-stone-600 hover:bg-stone-200/70"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            {filteredNakshatras.map((n) => (
+              <div
+                key={n.id}
+                className="rounded-2xl border border-stone-200/90 bg-stone-50/30 hover:bg-white p-5 space-y-3.5 transition-all shadow-2xs hover:shadow-xs hover:border-amber-300"
+              >
+                <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+                  <div>
+                    <h4 className="text-base font-serif font-bold text-stone-900">
+                      {n.name[language]}
+                    </h4>
+                    <p className="text-[11px] text-stone-500 mt-0.5">
+                      {language === "bn" ? "রাশি বিস্তার:" : language === "hi" ? "राशि विस्तार:" : "Zodiac Span:"}{" "}
+                      <span className="font-semibold text-stone-700">{n.rashi[language]}</span>
+                    </p>
+                  </div>
+                  <div className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 text-[11px] font-bold text-amber-900">
+                    <span>{n.lord[language]}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  <div>
+                    <span className="font-bold text-stone-900 block mb-0.5">
+                      • {language === "bn" ? "ব্যক্তিত্ব (Personality):" : language === "hi" ? "व्यक्तित्व (Personality):" : "Personality:"}
+                    </span>
+                    <p className="text-stone-600 leading-relaxed pl-3">
+                      {n.personality[language]}
+                    </p>
+                  </div>
+
+                  <div>
+                    <span className="font-bold text-stone-900 block mb-0.5">
+                      • {language === "bn" ? "ক্যারিয়ার ও জীবিকা (Career):" : language === "hi" ? "आजीविका (Career):" : "Career:"}
+                    </span>
+                    <p className="text-stone-600 leading-relaxed pl-3">
+                      {n.career[language]}
+                    </p>
+                  </div>
+
+                  <div>
+                    <span className="font-bold text-stone-900 block mb-0.5">
+                      • {language === "bn" ? "স্বাস্থ্য প্রবণতা (Health Issues):" : language === "hi" ? "स्वास्थ्य (Health Issues):" : "Health Issues:"}
+                    </span>
+                    <p className="text-stone-600 leading-relaxed pl-3">
+                      {n.health[language]}
+                    </p>
+                  </div>
+
+                  <div>
+                    <span className="font-bold text-stone-900 block mb-0.5">
+                      • {language === "bn" ? "সম্পর্ক ও দাম্পত্য (Relationship):" : language === "hi" ? "संबंध (Relationship):" : "Relationship:"}
+                    </span>
+                    <p className="text-stone-600 leading-relaxed pl-3">
+                      {n.relationship[language]}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {filteredNakshatras.length === 0 && (
+            <div className="py-12 text-center text-xs text-stone-500">
+              {language === "bn"
+                ? "কোনো নক্ষত্র পাওয়া যায়নি। অন্য বানান দিয়ে অনুসন্ধান করুন।"
+                : language === "hi"
+                ? "कोई नक्षत्र नहीं मिला। पुनः प्रयास करें।"
+                : "No Nakshatras match your search."}
+            </div>
+          )}
+        </div>
+
+        {/* =========================================================================
+            7. DISCOVER MORE ABOUT YOURSELF (RELATED TOOLS)
+        ========================================================================= */}
+        <div className="rounded-3xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="space-y-1">
+            <h3 className="text-xl sm:text-2xl font-serif font-bold text-stone-900">
+              {language === "bn"
+                ? "নিজের সম্পর্কে আরও জানুন (সম্পর্কিত বৈদিক গণনা)"
+                : language === "hi"
+                ? "अपने बारे में और अधिक जानें (अन्य वैदिक सेवाएं)"
+                : "Discover More About Yourself"}
+            </h3>
+            <p className="text-xs text-stone-500">
+              {language === "bn"
+                ? "আপনার কুন্ডলী, প্রেম ও ভাগ্যের সম্পূর্ণ মহাজাগতিক রূপরেখা আবিষ্কার করুন"
+                : language === "hi"
+                ? "अपनी कुंडली, प्रेम और भाग्य की संपूर्ण जानकारी प्राप्त करें"
+                : "Explore your full Vedic birth chart, love compatibility, and life timelines"}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {NAKSHATRA_RELATED_TOOLS.map((tool, i) => (
+              <Link
+                key={i}
+                href={tool.href}
+                className="group rounded-2xl border border-stone-200/80 bg-stone-50/50 hover:bg-white p-5 space-y-2 hover:border-amber-400 hover:shadow-xs transition-all flex flex-col justify-between"
+              >
+                <div className="space-y-1.5">
+                  <div className="size-8 rounded-xl bg-amber-500/10 text-amber-800 flex items-center justify-center font-bold text-xs group-hover:bg-[#fcd404] group-hover:text-stone-950 transition-colors">
+                    ✦
+                  </div>
+                  <h4 className="text-sm font-bold text-stone-900 group-hover:text-amber-800 transition-colors">
+                    {tool.title[language]}
+                  </h4>
+                  <p className="text-xs text-stone-600 leading-relaxed">
+                    {tool.desc[language]}
+                  </p>
+                </div>
+                <div className="pt-2 flex items-center gap-1 text-xs font-bold text-amber-700 group-hover:text-amber-900 group-hover:translate-x-1 transition-all">
+                  <span>{language === "bn" ? "গণনা করুন" : language === "hi" ? "गणना करें" : "Explore Now"}</span>
+                  <span>→</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* =========================================================================
+            8. FREQUENTLY ASKED QUESTIONS (FAQ)
+        ========================================================================= */}
+        <div className="rounded-3xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1 text-xs font-bold text-amber-900">
+              <HelpCircle className="size-3 text-amber-600" />
+              <span>{language === "bn" ? "সাধারণ জিজ্ঞাসা" : language === "hi" ? "अक्सर पूछे जाने वाले प्रश्न" : "Frequently Asked Questions"}</span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-serif font-bold text-stone-900">
+              {language === "bn"
+                ? "নক্ষত্র সংক্রান্ত সচরাচর জিজ্ঞাসিত প্রশ্নোত্তর"
+                : language === "hi"
+                ? "नक्षत्र से संबंधित महत्वपूर्ण प्रश्न व उत्तर"
+                : "Frequently Asked Questions About Nakshatras"}
+            </h3>
+          </div>
+
+          <div className="space-y-3">
+            {NAKSHATRA_FAQS.map((faq, idx) => {
+              const isOpen = openFaqIndex === idx;
+              return (
+                <div
+                  key={idx}
+                  className="rounded-2xl border border-stone-200/80 bg-stone-50/40 overflow-hidden transition-all"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                    className="w-full p-4 sm:p-5 flex items-center justify-between gap-3 text-left hover:bg-stone-50 cursor-pointer transition-colors"
+                  >
+                    <span className="text-xs sm:text-sm font-bold text-stone-900">
+                      {faq.question[language]}
+                    </span>
+                    <ChevronDown
+                      className={`size-4 text-stone-400 shrink-0 transition-transform duration-200 ${
+                        isOpen ? "rotate-180 text-amber-600" : ""
+                      }`}
+                    />
+                  </button>
+                  {isOpen && (
+                    <div className="px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-stone-600 leading-relaxed border-t border-stone-100">
+                      {faq.answer[language]}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </main>
 
       <FeatureCoinModal
