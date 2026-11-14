@@ -980,8 +980,8 @@ export default function KundliMatchingPage() {
                       onClick={() => setGroom((p) => ({ ...p, gender: g.val as any }))}
                       className={`min-h-10 rounded-xl border px-2 py-1.5 text-center text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                         groom.gender === g.val
-                          ? "bg-[#fffbeb] border-[#f59e0b] text-stone-950 shadow-2xs font-extrabold"
-                          : "bg-white border-stone-200 text-stone-600 hover:bg-stone-50"
+                          ? "bg-[#fcd404] border-[#fcd404] text-stone-950 shadow-xs font-extrabold"
+                          : "bg-stone-100/70 border-stone-200/80 text-stone-700 hover:bg-stone-200/60 font-semibold"
                       }`}
                     >
                       {g.label}
@@ -1233,8 +1233,8 @@ export default function KundliMatchingPage() {
                       onClick={() => setBride((p) => ({ ...p, gender: g.val as any }))}
                       className={`min-h-10 rounded-xl border px-2 py-1.5 text-center text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                         bride.gender === g.val
-                          ? "bg-[#fffbeb] border-[#f59e0b] text-stone-950 shadow-2xs font-extrabold"
-                          : "bg-white border-stone-200 text-stone-600 hover:bg-stone-50"
+                          ? "bg-[#fcd404] border-[#fcd404] text-stone-950 shadow-xs font-extrabold"
+                          : "bg-stone-100/70 border-stone-200/80 text-stone-700 hover:bg-stone-200/60 font-semibold"
                       }`}
                     >
                       {g.label}
@@ -1481,6 +1481,21 @@ export default function KundliMatchingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-4">
           {/* LEFT COLUMN: 8 COLS */}
           <div className="lg:col-span-8 space-y-6">
+            {/* What is Kundali Matching (Matching Astrotalk Screenshot 7) */}
+            <div className="rounded-2xl border border-stone-200 bg-white p-5 sm:p-7 shadow-xs space-y-3.5">
+              <h2 className="text-lg sm:text-xl font-serif font-bold text-stone-900">
+                {t.whatIsMatchingTitle}
+              </h2>
+              <div className="space-y-3 text-xs sm:text-sm text-stone-600 leading-relaxed">
+                <p>{t.whatIsMatchingP1}</p>
+                <p>{t.whatIsMatchingP2}</p>
+                <p>{t.whatIsMatchingP3}</p>
+                <p className="rounded-xl bg-amber-50/70 border border-amber-200/60 p-3 text-stone-700 font-medium">
+                  {t.whatIsMatchingP4}
+                </p>
+              </div>
+            </div>
+
             {/* Why is Kundali Matching Important */}
             <div className="rounded-2xl border border-stone-200 bg-white p-5 sm:p-7 shadow-xs space-y-4">
               <h2 className="text-lg sm:text-xl font-serif font-bold text-stone-900">
@@ -1600,24 +1615,50 @@ export default function KundliMatchingPage() {
                 </p>
               </div>
 
-              {/* Sample report preview image */}
-              <div className="relative overflow-hidden rounded-xl border border-stone-100 bg-amber-50 aspect-[4/3] flex items-center justify-center">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/hero-kundli-sample.webp"
-                  alt="Kundli Milan Report Sample"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    // Fallback to stylized box
-                    (e.target as HTMLElement).style.display = "none";
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/70 via-transparent to-transparent flex flex-col justify-end p-3 text-white">
-                  <div className="text-xs font-bold uppercase tracking-wider text-amber-300">
-                    Astra Milan Dossier
+              {/* Sample report preview: Regal Hardcover Book styling matching Astrotalk */}
+              <div
+                onClick={() => setSampleModalOpen(true)}
+                className="group relative cursor-pointer overflow-hidden rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 via-white to-amber-100/50 p-3 shadow-md hover:shadow-lg transition-all"
+              >
+                {/* Book Card container */}
+                <div className="relative mx-auto aspect-[4/5] max-w-[240px] rounded-xl border-2 border-amber-300/90 bg-[#fffdfa] p-3 text-center shadow-lg transition-transform group-hover:scale-[1.02] flex flex-col justify-between">
+                  {/* Decorative book corner accents */}
+                  <div className="absolute top-1.5 left-1.5 size-3 border-t-2 border-l-2 border-amber-500" />
+                  <div className="absolute top-1.5 right-1.5 size-3 border-t-2 border-r-2 border-amber-500" />
+                  <div className="absolute bottom-1.5 left-1.5 size-3 border-b-2 border-l-2 border-amber-500" />
+                  <div className="absolute bottom-1.5 right-1.5 size-3 border-b-2 border-r-2 border-amber-500" />
+
+                  {/* Header text */}
+                  <div className="space-y-0.5 pt-1">
+                    <span className="text-[9px] font-bold tracking-widest text-amber-700 uppercase">
+                      Astra Vedic
+                    </span>
+                    <h4 className="font-serif text-sm sm:text-base font-extrabold tracking-tight text-amber-950 uppercase">
+                      Kundli Milan
+                    </h4>
+                    <span className="inline-block text-[10px] tracking-widest text-amber-600 font-bold">
+                      ✦ REPORT ✦
+                    </span>
                   </div>
-                  <div className="text-sm font-serif font-bold">
-                    36 Guna Ashtakoota & Manglik Analysis
+
+                  {/* Center sacred couple image */}
+                  <div className="my-2 relative overflow-hidden rounded-lg border border-amber-200 aspect-[16/9] shadow-2xs">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/kundli-milan-report-cover.png"
+                      alt="Sacred Kundli Milan Dossier"
+                      className="size-full object-cover"
+                    />
+                  </div>
+
+                  {/* Footer badge */}
+                  <div className="pb-1 space-y-0.5 border-t border-amber-200/60 pt-1">
+                    <p className="text-[10px] font-serif font-bold text-stone-800">
+                      36 Guna Ashtakoota Analysis
+                    </p>
+                    <p className="text-[9px] text-amber-700/80">
+                      Manglik Dosha & Bhakoot Shanti
+                    </p>
                   </div>
                 </div>
               </div>
