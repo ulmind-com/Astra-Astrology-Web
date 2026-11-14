@@ -518,6 +518,16 @@ export default function CourseDetailPage() {
                           <p className="mt-1 text-sm font-bold text-foreground">
                             Course Progress: {Math.round(course.user_progress_percent)}%
                           </p>
+                          {course.expires_at && (
+                            <p className="mt-1 text-xs font-medium text-emerald-700">
+                              Access valid until{" "}
+                              {new Date(course.expires_at).toLocaleDateString("en-IN", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}
+                            </p>
+                          )}
                           <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-emerald-950/20">
                             <div
                               className="h-full bg-emerald-500 transition-all duration-500"
@@ -542,6 +552,25 @@ export default function CourseDetailPage() {
                       </div>
                     ) : (
                       <div>
+                        {course.is_expired && (
+                          <div className="mb-4 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-center">
+                            <p className="text-xs font-bold uppercase tracking-wider text-rose-600">
+                              Access Expired
+                            </p>
+                            <p className="mt-1 text-xs text-rose-700">
+                              Your access to this course expired
+                              {course.expires_at
+                                ? ` on ${new Date(course.expires_at).toLocaleDateString("en-IN", {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                  })}`
+                                : ""}
+                              . Renew your enrollment to continue learning.
+                            </p>
+                          </div>
+                        )}
+
                         {/* Price Display */}
                         <div className="flex items-baseline gap-3">
                           {isFree ? (
@@ -574,13 +603,15 @@ export default function CourseDetailPage() {
                             onClick={handleEnrollOrBuy}
                             disabled={isProcessingPayment}
                           >
-                            {isProcessingPayment ? (
-                              "Processing Enrollment..."
-                            ) : isFree ? (
-                              "Enroll Now for Free"
-                            ) : (
-                              "Enroll Now • Instant Access"
-                            )}
+                            {isProcessingPayment
+                              ? "Processing Enrollment..."
+                              : course.is_expired
+                                ? isFree
+                                  ? "Renew Enrollment for Free"
+                                  : `Renew Access • ₹${course.price.toLocaleString("en-IN")}`
+                                : isFree
+                                  ? "Enroll Now for Free"
+                                  : "Enroll Now • Instant Access"}
                           </Button>
                         </div>
                       </div>
@@ -599,7 +630,11 @@ export default function CourseDetailPage() {
                       </div>
                       <div className="flex items-center gap-2.5">
                         <ShieldCheck className="size-4 text-brand-600" />
-                        <span>Full lifetime access on web & mobile</span>
+                        <span>
+                          {course.access_duration_days
+                            ? `${course.access_duration_days} days full access on web & mobile`
+                            : "Full lifetime access on web & mobile"}
+                        </span>
                       </div>
                       {course.certificate_enabled && (
                         <div className="flex items-center gap-2.5 text-emerald-600 font-medium">

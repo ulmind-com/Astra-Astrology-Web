@@ -630,26 +630,40 @@ export default function LessonClassroomPage() {
                 const code =
                   streamError instanceof ApiError ? streamError.code : undefined;
                 const needsSignIn =
-                  streamError instanceof ApiError &&
-                  streamError.status === 401 &&
-                  (code === "sign_in_required" ||
-                    code === "token_expired" ||
-                    code === "invalid_token");
+                  (!isSignedIn && !isFreePreview) ||
+                  (streamError instanceof ApiError &&
+                    streamError.status === 401 &&
+                    (code === "sign_in_required" ||
+                      code === "token_expired" ||
+                      code === "invalid_token"));
+                const isExpired =
+                  Boolean(course?.is_expired) ||
+                  (streamError instanceof ApiError &&
+                    (code === "enrollment_expired" ||
+                      (streamError.status === 403 &&
+                        String(streamError.message).toLowerCase().includes("expired"))));
                 const notEnrolled =
-                  streamError instanceof ApiError && streamError.status === 403;
+                  (!course?.is_enrolled && !isFreePreview) ||
+                  (streamError instanceof ApiError && streamError.status === 403);
 
                 return (
                   <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center text-white">
                     <Lock className="size-12 text-brand-400 opacity-60 mb-2" />
                     <p className="text-base font-semibold">
-                      {needsSignIn ? "Please sign in" : "Protected Lesson"}
+                      {needsSignIn
+                        ? "Please sign in"
+                        : isExpired
+                          ? "Course Enrollment Expired"
+                          : "Protected Lesson"}
                     </p>
                     <p className="text-xs text-white/70 max-w-sm mt-1">
                       {needsSignIn
                         ? "Your session has ended. Sign in again to carry on watching — your enrollment is safe."
-                        : notEnrolled
-                          ? "You need to enroll in this course to access this lesson."
-                          : "Unable to load this video right now. Please try again in a moment."}
+                        : isExpired
+                          ? "Your access to this course has expired. Renew your enrollment to continue learning."
+                          : notEnrolled || !hasAccess
+                            ? "You need to enroll in this course to access this lesson."
+                            : "Unable to load this video right now. Please try again in a moment."}
                     </p>
                     {needsSignIn ? (
                       <Link
@@ -658,7 +672,11 @@ export default function LessonClassroomPage() {
                       >
                         <Button size="sm">Sign in again</Button>
                       </Link>
-                    ) : notEnrolled ? (
+                    ) : isExpired ? (
+                      <Link href={`/courses/${slug}`} className="mt-4">
+                        <Button size="sm">Renew Access</Button>
+                      </Link>
+                    ) : notEnrolled || !hasAccess ? (
                       <Link href={`/courses/${slug}`} className="mt-4">
                         <Button size="sm">Enroll Now to Unlock</Button>
                       </Link>

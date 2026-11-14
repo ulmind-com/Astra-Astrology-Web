@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   GraduationCap,
   PlayCircle,
+  RefreshCw,
   Sparkles,
 } from "lucide-react";
 import Image from "next/image";
@@ -134,9 +135,26 @@ function EnrolledCourseCard({ item }: { item: CourseEnrollment }) {
         {/* Metadata & Progress */}
         <div className="sm:col-span-8 flex flex-col justify-between h-full space-y-3">
           <div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Calendar className="size-3.5" />
-              <span>Enrolled on {new Date(item.enrolled_at).toLocaleDateString()}</span>
+            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <Calendar className="size-3.5" />
+                <span>Enrolled on {new Date(item.enrolled_at).toLocaleDateString()}</span>
+              </span>
+              {item.expires_at ? (
+                item.is_expired ? (
+                  <span className="rounded-md bg-rose-500/10 px-2 py-0.5 text-[10px] font-bold text-rose-600 border border-rose-500/30">
+                    Expired on {new Date(item.expires_at).toLocaleDateString()}
+                  </span>
+                ) : (
+                  <span className="rounded-md bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-400">
+                    Valid until {new Date(item.expires_at).toLocaleDateString()}
+                  </span>
+                )
+              ) : (
+                <span className="rounded-md bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+                  Lifetime Access
+                </span>
+              )}
               {item.instructor_name && (
                 <>
                   <span>•</span>
@@ -172,13 +190,23 @@ function EnrolledCourseCard({ item }: { item: CourseEnrollment }) {
 
           {/* Actions */}
           <div className="flex flex-wrap items-center gap-3 pt-2">
-            <Link
-              href={`/courses/${item.course_slug || item.course_id}`}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2 text-xs font-semibold text-white shadow-soft transition-colors hover:bg-brand-700"
-            >
-              <PlayCircle className="size-4" />
-              <span>{isCompleted ? "Review Masterclass" : "Continue Learning"}</span>
-            </Link>
+            {item.is_expired ? (
+              <Link
+                href={`/courses/${item.course_slug || item.course_id}`}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-amber-600 px-4 py-2 text-xs font-semibold text-white shadow-soft transition-colors hover:bg-amber-700"
+              >
+                <RefreshCw className="size-3.5" />
+                <span>Renew Access</span>
+              </Link>
+            ) : (
+              <Link
+                href={`/courses/${item.course_slug || item.course_id}`}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2 text-xs font-semibold text-white shadow-soft transition-colors hover:bg-brand-700"
+              >
+                <PlayCircle className="size-4" />
+                <span>{isCompleted ? "Review Masterclass" : "Continue Learning"}</span>
+              </Link>
+            )}
 
             {isCompleted && (
               <Link
