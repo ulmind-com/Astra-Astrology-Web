@@ -743,6 +743,45 @@ export interface KundliUiStrings {
   favorableDirectionLabel: string;
   favorableColorsLabel: string;
   favorableNumbersLabel: string;
+
+  // Astrotalk-inspired Hero & Layout
+  heroTitle: string;
+  heroHighlight: string;
+  heroDescription: string;
+  heroDescriptionExpanded: string;
+  readMore: string;
+  readLess: string;
+  breadcrumbHome: string;
+  breadcrumbKundli: string;
+  newKundliBadge: string;
+  savedKundliBtn: string;
+  exactBirthTimeHint: string;
+  generateKundliBtn: string;
+  talkToExperts: string;
+  viewAllAstrologers: string;
+  chatNow: string;
+  notSureYet: string;
+  sampleReportTitle: string;
+  sampleReportDesc: string;
+  downloadSampleReport: string;
+
+  // Astrotalk Vedic Dossier Section
+  whatIsKundliTitle: string;
+  whatIsKundliP1: string;
+  whatIsKundliP2: string;
+  whatIsKundliP3: string;
+  whatIncludesTitle: string;
+  lagnaSectionTitle: string;
+  lagnaSectionDesc: string;
+  rashiSectionTitle: string;
+  rashiSectionDesc: string;
+  navgrahasTitle: string;
+  navgrahasSubtitle: string;
+  navgrahasNote: string;
+  nakshatrasTitle: string;
+  nakshatrasP1: string;
+  nakshatrasP2: string;
+  nakshatrasP3: string;
 }
 
 export const KUNDLI_UI_STRINGS: Record<KundliLanguage, KundliUiStrings> = {
@@ -928,6 +967,57 @@ export const KUNDLI_UI_STRINGS: Record<KundliLanguage, KundliUiStrings> = {
     favorableDirectionLabel: "শুভ দিক:",
     favorableColorsLabel: "শুভ বর্ণ:",
     favorableNumbersLabel: "শুভ সংখ্যা:",
+
+    // Astrotalk-inspired Hero & Layout
+    heroTitle: "অনলাইন ফ্রি কুন্ডলী",
+    heroHighlight: "জন্মতারিখ অনুযায়ী",
+    heroDescription:
+      "আমাদের ফ্রি অনলাইন কুন্ডলী টুলের মাধ্যমে নিমেষেই তৈরি করুন আপনার পূর্ণাঙ্গ জন্ম কুন্ডলী। বৈদিক জ্যোতিষশাস্ত্রের প্রাচীন সূত্রের উপর ভিত্তি করে লগ্ন, গ্রহের অবস্থান, ১২টি ভাব, শুভ যোগ, অশুভ দোষ, বিংশোত্তরী দশা ও নক্ষত্রের নির্ভুল গণনা জানুন।",
+    heroDescriptionExpanded:
+      "জন্মকুন্ডলী হলো আপনার জন্মের মুহূর্তে মহাকাশের গ্রহ-নক্ষত্রের এক প্রামাণ্য মহাজাগতিক প্রতিচ্ছবি। ১২টি ভাব এবং গ্রহের অবস্থান বিশ্লেষণের মাধ্যমে বৈদিক জ্যোতিষ আপনার সহজাত গুণাবলী, কর্মফল, আধ্যাত্মিক সংযোগ এবং জীবনের পথ নির্দেশ করে। এমনকি কয়েক মিনিটের তারতম্যেও লগ্ন ও নবাংশের পরিবর্তন ঘটতে পারে।",
+    readMore: "...আরও পড়ুন",
+    readLess: "সংক্ষেপ করুন",
+    breadcrumbHome: "হোম",
+    breadcrumbKundli: "ফ্রি কুন্ডলী",
+    newKundliBadge: "নতুন কুন্ডলী",
+    savedKundliBtn: "সংরক্ষিত কুন্ডলী →",
+    exactBirthTimeHint:
+      "সঠিক জন্মসময় আপনার লগ্ন স্থির করে — যা কুন্ডলীর প্রতিটি গ্রহের অবস্থানকে নিখুঁত করে",
+    generateKundliBtn: "কুন্ডলী তৈরি করুন →",
+    talkToExperts: "কুন্ডলী ও জন্মছক বিশেষজ্ঞদের সাথে পরামর্শ করুন",
+    viewAllAstrologers: "সকল জ্যোতিষী দেখুন",
+    chatNow: "চ্যাট",
+    notSureYet: "এখনও নিশ্চিত নন?",
+    sampleReportTitle: "প্রথমে একটি নমুনা রিপোর্ট দেখুন",
+    sampleReportDesc: "সম্পূর্ণ কুন্ডলী রিপোর্টের নির্ভুল কাঠামো ও গভীরতা যাচাই করুন।",
+    downloadSampleReport: "নমুনা রিপোর্ট ডাউনলোড করুন",
+
+    // Astrotalk Vedic Dossier Section
+    whatIsKundliTitle: "কুন্ডলী কী?",
+    whatIsKundliP1:
+      "সংস্কৃত শব্দ 'কুণ্ডলী' থেকে কুন্ডলী কথাটি এসেছে, যার অর্থ 'বৃত্তাকার' বা 'কুন্ডলীকৃত'। প্রাচীনকালে বৈদিক জ্যোতিষীগণ হাতে বৃত্তাকার ছক এঁকে গ্রহ ও নক্ষত্রের অবস্থান নির্ধারণ করতেন, যা কালের পরিক্রমায় আমাদের আধুনিক জন্ম কুন্ডলীতে রূপ নিয়েছে।",
+    whatIsKundliP2:
+      "তবে একটি কুন্ডলী শুধুমাত্র একটি ছক নয়। এটি আপনার জন্মমুহূর্তে সৌরজগতের সমস্ত গ্রহ ও নক্ষত্রের নিখুঁত অবস্থানচিত্র। ১২টি ভাব ও ১২টি রাশিতে সূর্য, চন্দ্র, মঙ্গল, বুধ, বৃহস্পতি, শুক্র, শনি, রাহু ও কেতুর অবস্থান থেকে ব্যক্তিত্ব, ভূত-ভবিষ্যত ও জীবনের প্রধান ঘটনাবলী বিশ্লেষণ করা হয়।",
+    whatIsKundliP3:
+      "একই দিনে জন্ম নেওয়া দুজন ব্যক্তির কুন্ডলীও আলাদা হতে পারে, কারণ মাত্র কয়েক সেকেন্ডের ব্যবধানে লগ্ন ও উপগ্রহের অবস্থান পরিবর্তিত হয়। তাই অনলাইনে কুন্ডলী তৈরির সময় সঠিক জন্ম বিবরণ দেওয়া অত্যন্ত জরুরি।",
+    whatIncludesTitle: "আপনার কুন্ডলীতে কী কী থাকে?",
+    lagnaSectionTitle: "লগ্ন বা এসেন্ডেন্ট — আপনার জন্মছকের ভিত্তি",
+    lagnaSectionDesc:
+      "বৈদিক জ্যোতিষে সূর্য রাশির চেয়েও লগ্নকে বেশি প্রাধান্য দেওয়া হয়। আপনার জন্মের সময় পূর্ব দিগন্তে যে রাশি উদিত হয়, সেটিই আপনার লগ্ন। যেমন মেষ লগ্নের ক্ষেত্রে মঙ্গল শুভ ফল দিলেও তুলা লগ্নের ক্ষেত্রে চ্যালেঞ্জ আনতে পারে। তাই অভিজ্ঞ জ্যোতিষীরা লগ্ন ধরে নিখুঁত ভবিষ্যৎ গণনা করেন।",
+    rashiSectionTitle: "রাশি বা চন্দ্র রাশি",
+    rashiSectionDesc:
+      "জন্মের সময় চন্দ্র যে রাশিতে অবস্থান করে, সেটিই আপনার চন্দ্র রাশি। বৈদিক জ্যোতিষে চন্দ্রকে মন, অনুভূতি, স্বভাব ও অভ্যন্তরীণ প্রতিক্রিয়ার কারক মনে করা হয়। ফলে ঐতিহ্যবাহী কুন্ডলী বিশ্লেষণে চন্দ্র রাশির গুরুত্ব অপরিসীম।",
+    navgrahasTitle: "নবগ্রহ — ৯টি গ্রহ ও মানবজীবনে তাদের ভূমিকা",
+    navgrahasSubtitle: "প্রতিটি গ্রহের নিজস্ব শক্তি ও প্রভাব রয়েছে, যা মানবজীবনের বিভিন্ন ক্ষেত্রে প্রভাব বিস্তার করে:",
+    navgrahasNote:
+      "বিশেষ দ্রষ্টব্য: কোনো গ্রহই স্থায়ীভাবে অশুভ নয়। এমনকি শনি ও রাহু সঠিক অবস্থানে থাকলে জীবনে বিপুল সাফল্য ও সৌভাগ্য এনে দেয়।",
+    nakshatrasTitle: "নক্ষত্র — আপনার জন্ম নক্ষত্র",
+    nakshatrasP1:
+      "জন্মের সময় চন্দ্র যে নক্ষত্রমণ্ডলে অবস্থান করে, সেটিই আপনার জন্ম নক্ষত্র। রাশি যেমন সাধারণ স্বভাব প্রকাশ করে, তেমনই নক্ষত্র মানুষের গভীর মনস্তত্ত্ব, সহজাত প্রবৃত্তি ও কর্মফলের দিক উন্মোচন করে।",
+    nakshatrasP2:
+      "উদাহরণস্বরূপ, অশ্বিনী নক্ষত্রের জাতকরা চটপটে ও স্বাধীনচেতা হন, যেখানে রোহিণী নক্ষত্রের জাতকরা সৃজনশীল ও অনুভূতিপ্রবণ হন।",
+    nakshatrasP3:
+      "এই কারণেই বিবাহে কুন্ডলী মেলানো (অষ্টকূট মিলন) এবং শুভ মুহূর্ত নির্বাচনের ক্ষেত্রে জ্যোতিষীরা নক্ষত্রকে সর্বাধিক গুরুত্ব দেন।",
   },
   hi: {
     badge: "वैदिक ज्योतिष शास्त्र आधारित सटीक कुण्डली कैलकुलेटर",
@@ -1111,6 +1201,57 @@ export const KUNDLI_UI_STRINGS: Record<KundliLanguage, KundliUiStrings> = {
     favorableDirectionLabel: "शुभ दिशा:",
     favorableColorsLabel: "शुभ रंग:",
     favorableNumbersLabel: "शुभ अंक:",
+
+    // Astrotalk-inspired Hero & Layout
+    heroTitle: "फ्री ऑनलाइन कुंडली",
+    heroHighlight: "जन्म तिथि अनुसार",
+    heroDescription:
+      "हमारे फ्री ऑनलाइन कुंडली टूल से तुरंत बनाएं अपनी विस्तृत जन्म कुंडली। वैदिक ज्योतिष के सिद्धांतों पर आधारित यह टूल आपको ग्रहों की स्थिति, 12 भाव, दोष, दशा, और नक्षत्रों का सटीक विवरण प्रदान करता है।",
+    heroDescriptionExpanded:
+      "जन्म कुंडली आपके जन्म के समय आकाश में स्थित ग्रहों और नक्षत्रों का एक दिव्य मानचित्र है। 12 भावों और नवग्रहों के विश्लेषण से वैदिक ज्योतिष आपकी स्वाभाविक क्षमता, कर्मफल, और जीवन की दिशा को स्पष्ट करता है। कुछ ही मिनटों के अंतर से लग्न और नवमांश बदल सकते हैं।",
+    readMore: "...और पढ़ें",
+    readLess: "कम पढ़ें",
+    breadcrumbHome: "होम",
+    breadcrumbKundli: "फ्री कुंडली",
+    newKundliBadge: "नई कुंडली",
+    savedKundliBtn: "सहेजी गई कुंडली →",
+    exactBirthTimeHint:
+      "सटीक जन्म समय आपके लग्न को निर्धारित करता है — जिससे आपकी कुंडली की हर स्थिति स्पष्ट होती है",
+    generateKundliBtn: "कुंडली बनाएं →",
+    talkToExperts: "कुंडली और जन्म पत्रिका विशेषज्ञों से बात करें",
+    viewAllAstrologers: "सभी ज्योतिषी देखें",
+    chatNow: "बात करें",
+    notSureYet: "अभी भी निश्चित नहीं?",
+    sampleReportTitle: "पहले एक नमूना रिपोर्ट देखें",
+    sampleReportDesc: "पूरी कुंडली रिपोर्ट की सटीक संरचना और गहराई को पहले देखें।",
+    downloadSampleReport: "नमूना रिपोर्ट डाउनलोड करें",
+
+    // Astrotalk Vedic Dossier Section
+    whatIsKundliTitle: "कुंडली क्या है?",
+    whatIsKundliP1:
+      "कुंडली शब्द संस्कृत के 'कुण्डली' से लिया गया है, जिसका अर्थ है 'गोलाकार' या 'कुंडलित'। प्राचीन काल में ज्योतिषी हाथ से गोल चक्र बनाकर ग्रहों और भावों की स्थिति निर्धारित करते थे, जो आज की आधुनिक जन्म कुंडली में विकसित हुआ है।",
+    whatIsKundliP2:
+      "हालांकि, कुंडली केवल एक चार्ट नहीं है। यह आपके जन्म के सटीक समय पर सभी ग्रहों और नक्षत्रों की वास्तविक स्थिति है। 12 भावों और 12 राशियों में सूर्य, चंद्र, मंगल, बुध, गुरु, शुक्र, शनि, राहु और केतु की स्थिति आपके व्यक्तित्व, अतीत, वर्तमान और भविष्य को समझने में मदद करती है।",
+    whatIsKundliP3:
+      "एक ही दिन जन्मे दो व्यक्तियों की कुंडली भी भिन्न हो सकती है, क्योंकि कुछ ही सेकंड के अंतर से लग्न और ग्रह स्थिति बदल जाती है। इसीलिए ऑनलाइन कुंडली बनाते समय जन्म का सटीक विवरण होना आवश्यक है।",
+    whatIncludesTitle: "आपकी कुंडली में क्या-क्या शामिल होता है?",
+    lagnaSectionTitle: "लग्न - आपकी कुंडली की नींव",
+    lagnaSectionDesc:
+      "वैदिक ज्योतिष में लग्न को सूर्य राशि से भी अधिक महत्वपूर्ण माना जाता है। जन्म के समय पूर्वी क्षितिज पर उदित होने वाली राशि ही आपका लग्न होती है। उदाहरण के लिए, मेष लग्न के लिए मंगल शुभ हो सकता है लेकिन तुला लग्न के लिए चुनौतीपूर्ण। इसलिए ज्योतिषी सटीक भविष्यवाणी के लिए लग्न को आधार बनाते हैं।",
+    rashiSectionTitle: "राशि / चंद्र राशि",
+    rashiSectionDesc:
+      "जन्म के समय चंद्रमा जिस राशि में स्थित होता है, वह आपकी चंद्र राशि कहलाती है। वैदिक ज्योतिष में चंद्रमा को मन, भावनाओं, और आंतरिक स्वभाव का प्रतीक माना गया है। इसलिए पारंपरिक कुंडली विश्लेषण में चंद्र राशि अत्यंत महत्वपूर्ण है।",
+    navgrahasTitle: "नवग्रह — 9 ग्रह और उनकी भूमिका",
+    navgrahasSubtitle: "प्रत्येक ग्रह की अपनी विशेष ऊर्जा है और वह जीवन के विभिन्न पहलुओं को प्रभावित करता है:",
+    navgrahasNote:
+      "ध्यान दें: कोई भी ग्रह हमेशा के लिए नकारात्मक फल नहीं देता। सही स्थिति में शनि और राहु भी जातक को अपार सफलता और समृद्धि प्रदान करते हैं।",
+    nakshatrasTitle: "नक्षत्र — आपका जन्म नक्षत्र",
+    nakshatrasP1:
+      "जन्म के समय चंद्रमा जिस नक्षत्र में होता है, उसे आपका जन्म नक्षत्र कहा जाता है। राशि जहां आपके मूल स्वभाव को दर्शाती है, वहीं नक्षत्र आपकी गहरी मानसिक प्रवृत्तियों और कर्मफल को निर्धारित करता है।",
+    nakshatrasP2:
+      "उदाहरण के लिए, अश्विनी नक्षत्र के लोग साहसी और स्वतंत्र होते हैं, जबकि रोहिणी नक्षत्र के लोग रचनात्मक और भावुक होते हैं।",
+    nakshatrasP3:
+      "इसीलिए विवाह हेतु कुंडली मिलान (अष्टकूट मिलान) और शुभ मुहूर्त चयन में नक्षत्रों को सर्वोच्च प्राथमिकता दी जाती है।",
   },
   en: {
     badge: "Vedic Astrology Certified Accurate Kundli Calculator",
@@ -1294,5 +1435,56 @@ export const KUNDLI_UI_STRINGS: Record<KundliLanguage, KundliUiStrings> = {
     favorableDirectionLabel: "Direction:",
     favorableColorsLabel: "Colors:",
     favorableNumbersLabel: "Numbers:",
+
+    // Astrotalk-inspired Hero & Layout
+    heroTitle: "Free Kundli Online",
+    heroHighlight: "By Date of Birth",
+    heroDescription:
+      "Astrotalk's free online kundli tool will help you generate a detailed Janam Kundli instantly. Based on the principles of Vedic Astrology, this tool provides accurate details of the planetary positions, houses, doshas, dashas, nakshatras, etc., in your birth chart.",
+    heroDescriptionExpanded:
+      "A Janam Kundli acts as a cosmic snapshot of the celestial sky at the exact instant of your birth. By analyzing the 12 houses and planetary alignments, Vedic astrology uncovers your natural strengths, karmic challenges, spiritual inclination, and life trajectory. Even a difference of minutes in your birth time shifts the Lagna and Navamsa divisions.",
+    readMore: "...Read more",
+    readLess: "Read less",
+    breadcrumbHome: "HOME",
+    breadcrumbKundli: "FREE KUNDLI",
+    newKundliBadge: "New Kundli",
+    savedKundliBtn: "Saved Kundli →",
+    exactBirthTimeHint:
+      "Exact birth time fixes the Lagna — it sharpens every placement in your chart",
+    generateKundliBtn: "Generate Kundli →",
+    talkToExperts: "Talk to Kundli & birth chart experts",
+    viewAllAstrologers: "View all astrologers",
+    chatNow: "Chat",
+    notSureYet: "NOT SURE YET?",
+    sampleReportTitle: "See a Sample Report First",
+    sampleReportDesc: "Preview the exact structure and depth of a full Kundli report before you buy.",
+    downloadSampleReport: "Download Sample Report",
+
+    // Astrotalk Vedic Dossier Section
+    whatIsKundliTitle: "What is Kundli?",
+    whatIsKundliP1:
+      "The term 'kundli' is derived from the Sanskrit word 'Kundali' meaning 'circular' or 'coiled'. It refers to the ancient method of reading a Kundli, in which astrologers drew circular birth charts by hand and divided them into different houses and planetary positions. It eventually evolved into our modern-day Janam Kundlis.",
+    whatIsKundliP2:
+      "However, a Kundli is much more than just a chart. It is the precise position of all the planets and nakshatras in your horoscope at the exact time of your birth. You can check the astrological positions of the Sun, Moon, Rahu, Ketu, Saturn, Jupiter, Mars, Mercury, and Venus across the 12 houses and 12 zodiac signs. It helps you decode your personality and your past, present, and future, as well as prominent life events.",
+    whatIsKundliP3:
+      "It is exciting to note that two people born on the same day may have different Janam Kundlis because even a few seconds' difference can shift the Lagna and other planetary placements. This is why exact birth details matter while generating your Kundali online.",
+    whatIncludesTitle: "What does your Kundli include?",
+    lagnaSectionTitle: "Lagna/Ascendant - The Foundation Of Your Chart",
+    lagnaSectionDesc:
+      "Vedic astrologers consider Lagna more important than your Sun sign. Lagna is like the starting point of your life and represents the zodiac sign rising on the eastern horizon at the time of your birth. For example, Mars can be beneficial for an Aries Lagna but bring challenges for the Libra Lagna. That is why professional astrologers consider your ascendant for making accurate predictions.",
+    rashiSectionTitle: "Rashi/ Moon Sign",
+    rashiSectionDesc:
+      "Rashi refers to your zodiac sign occupied by the Moon at the time of your birth. Vedic Astrology associates the Moon with mind, emotions, habits, and inner responses. This is what makes your Moon Sign an integral part of traditional Kundli analysis.",
+    navgrahasTitle: "Navgrahas - The 9 Planets and Their Role",
+    navgrahasSubtitle: "Each planet has its own energy and impacts your life differently. Here is how it works:",
+    navgrahasNote:
+      "FYI, no planet gives permanently negative results. Even Saturn and Rahu bestow success to a person when placed correctly in a chart.",
+    nakshatrasTitle: "Nakshatras - Your Birth Star",
+    nakshatrasP1:
+      "The lunar constellation that the Moon occupies at your birth is called your Nakshatra. While the zodiac sign reveals your personality traits, Nakshatra is responsible for your compatibility, emotional patterns, instincts, and karmic tendencies on a deeper level.",
+    nakshatrasP2:
+      "For example, people born in Ashwini Nakshatra act quickly and independently, while those under Rohini Nakshatra are creative and emotionally expressive.",
+    nakshatrasP3:
+      "This is why astrologers consider Nakshatra when kundli matching for marriage and selecting a muhurat.",
   },
 };

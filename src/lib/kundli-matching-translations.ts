@@ -228,6 +228,60 @@ export interface KundliMatchingTranslations {
   floatingFavorable: string;
   floatingCaution: string;
   consultAstrologerBtn: string;
+
+  // Astrotalk Matchmaking layout
+  breadcrumbHome: string;
+  breadcrumbMatchmaking: string;
+  heroTitle: string;
+  heroHighlight: string;
+  heroDescription: string;
+  heroDescriptionExpanded: string;
+  readMore: string;
+  readLess: string;
+
+  // Form Section
+  matchYourKundliTitle: string;
+  matchYourKundliSubtitle: string;
+  yourDetailsTitle: string;
+  partnerDetailsTitle: string;
+  chooseKundliBtn: string;
+  genderLabel: string;
+  genderMale: string;
+  genderFemale: string;
+  genderOther: string;
+  birthTimeOptional: string;
+  timeDefaultHint: string;
+  exactTimeLagnaHint: string;
+  formRequirementNote: string;
+  matchHoroscopeBtn: string;
+
+  // Educational Section
+  whatIsMatchingTitle: string;
+  whatIsMatchingP1: string;
+  whatIsMatchingP2: string;
+  whatIsMatchingP3: string;
+  whatIsMatchingP4: string;
+  whyImportantTitle: string;
+  emotionalTitle: string;
+  emotionalDesc: string;
+  financialTitle: string;
+  financialDesc: string;
+  healthLongevityTitle: string;
+  healthLongevityDesc: string;
+  step7thHouseTitle: string;
+  step7thHouseDesc: string;
+  stepDashaTitle: string;
+  stepDashaDesc: string;
+  stepNavamsaTitle: string;
+  stepNavamsaDesc: string;
+  kootasTableTitle: string;
+  kootasTableSub: string;
+  talkToExperts: string;
+  viewAllAstrologers: string;
+  chatNow: string;
+  sampleReportTitle: string;
+  sampleReportSubtitle: string;
+  sampleReportDiscount: string;
 }
 
 export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTranslations> = {
@@ -533,6 +587,72 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
     floatingFavorable: "অনুকূল যোটক",
     floatingCaution: "সতর্কতা প্রয়োজন",
     consultAstrologerBtn: "জ্যোতিষীর পরামর্শ নিন",
+
+    // Astrotalk Matchmaking layout
+    breadcrumbHome: "হোম",
+    breadcrumbMatchmaking: "যোটক বিচার",
+    heroTitle: "বিবাহের যোটক বিচার",
+    heroHighlight: "(কুন্ডলী মিলন)",
+    heroDescription:
+      "আমাদের ফ্রি অনলাইন কুন্ডলী মিলন টুলের মাধ্যমে নিমেষেই দাম্পত্য জীবনের সামঞ্জস্য ও প্রেম বিচার করুন। বৈদিক জ্যোতিষশাস্ত্রের প্রাচীন অষ্টকূট (৩৬ গুণ) পদ্ধতির উপর ভিত্তি করে মানসিক মিলন, স্বাস্থ্য, বংশবৃদ্ধি ও সৌভাগ্য নির্ণয় করা হয়।",
+    heroDescriptionExpanded:
+      "বিবাহের পূর্বে কুন্ডলী মিলন হলো দুটি আত্মার মহাজাগতিক সংযোগের বিশ্লেষণ। বর্ণ, বশ্য, তারা, যোনি, গ্রহ মৈত্রী, গণ, ভকূট এবং নাড়ী — এই ৮টি কূটের মাধ্যমে ৩৬ গুণের বিচার করা হয়। পাশাপাশি মাঙ্গলিক দোষ ও দশা বিচার দাম্পত্য জীবনের দীর্ঘস্থায়ী সুখ নিশ্চিত করে।",
+    readMore: "...আরও পড়ুন",
+    readLess: "সংক্ষেপ করুন",
+
+    matchYourKundliTitle: "কুন্ডলী মিলন করুন",
+    matchYourKundliSubtitle: "বর ও কনে উভয়ের জন্ম বিবরণ প্রদান করুন। সঠিক সময় ও স্থান নির্ভুল গণনা নিশ্চিত করে।",
+    yourDetailsTitle: "আপনার বিবরণ",
+    partnerDetailsTitle: "সঙ্গী/সঙ্গিনীর বিবরণ",
+    chooseKundliBtn: "কুন্ডলী নির্বাচন করুন ▾",
+    genderLabel: "লিঙ্গ",
+    genderMale: "পুরুষ",
+    genderFemale: "মহিলা",
+    genderOther: "অন্যান্য",
+    birthTimeOptional: "জন্মসময় (ঐচ্ছিক)",
+    timeDefaultHint: "না দিলে দুপুর ১২:০০ PM ধরে গণনা করা হবে",
+    exactTimeLagnaHint: "সঠিক জন্মসময় লগ্ন স্থির করে — যা যোটক বিচারকে নিখুঁত করে।",
+    formRequirementNote: "উভয়ের নাম, জন্মতারিখ ও জন্মস্থান প্রদান করা আবশ্যক।",
+    matchHoroscopeBtn: "যোটক বিচার করুন →",
+
+    whatIsMatchingTitle: "কুন্ডলী মিলন বা যোটক বিচার কী? (Kundli Milan Meaning)",
+    whatIsMatchingP1:
+      "কুন্ডলী মিলন বা যোটক বিচার হলো বৈদিক জ্যোতিষশাস্ত্রের একটি প্রাচীন ও প্রামাণিক পদ্ধতি, যার মাধ্যমে বিবাহের পূর্বে পাত্র ও পাত্রীর পারস্পরিক মানসিক, আত্মিক ও দৈহিক সামঞ্জস্য বিচার করা হয়। বৈদিক জ্যোতিষে উভয় সঙ্গীর জন্মকুন্ডলী পুঙ্খানুপুঙ্খ বিশ্লেষণ করে দেখা হয় তাঁদের বৈবাহিক জীবন কতটা সুখময়, দীর্ঘস্থায়ী ও কল্যাণকর হবে।",
+    whatIsMatchingP2:
+      "এই পদ্ধতিতে প্রধানত অষ্টকূট গুণ মিলনের ৩৬টি গুণের সমন্বয়, চন্দ্ররাশি, জন্ম নক্ষত্র এবং গ্রহের অবস্থান বিচার করা হয়। প্রতিটি কূট দাম্পত্য জীবনের এক একটি অপরিহার্য ভিত্তি নির্দেশ করে — যেমন মানসিক ঐক্য, বংশবৃদ্ধি, স্বাস্থ্য, আর্থিক সমৃদ্ধি ও পারস্পরিক আকর্ষণ।",
+    whatIsMatchingP3:
+      "যোটক বিচার, কুন্ডলী মিলন এবং জন্মপত্রিকা মিলন একই বৈদিক শাস্ত্রীয় প্রক্রিয়ার অংশ। উত্তর ও পূর্ব ভারতে এটি বিশেষ গুরুত্ব সহকারে পালন করা হয়।",
+    whatIsMatchingP4:
+      "সাধারণত ৩৬ গুণের মধ্যে কমপক্ষে ১৮ গুণ অনুকূল হলে বিবাহকে শুভ বলে গণ্য করা হয়। এর পাশাপাশি মাঙ্গলিক দোষ ও নবমাংশ (D9) কুন্ডলীর অবস্থানও বিচার করা অত্যন্ত আবশ্যক।",
+
+    whyImportantTitle: "বিবাহের জন্য কুন্ডলী মিলন বা যোটক বিচার কেন জরুরি?",
+    emotionalTitle: "মানসিক ও আবেগিক সামঞ্জস্য — গণ ও গ্রহ মৈত্রী",
+    emotionalDesc:
+      "কুন্ডলী মিলনের অন্যতম প্রধান লক্ষ্য হলো মানসিক ও আবেগিক সামঞ্জস্য জানা। ভালোবাসার পরেও অনেক সময় যোগাযোগ ও দৃষ্টিভঙ্গির অমিল দেখা দিতে পারে। গণ ও গ্রহ মৈত্রী কূটের মাধ্যমে জানা যায় উভয় সঙ্গী পরস্পরের মানসিক প্রত্যাশা পূরণ করতে পারবেন কিনা।",
+    financialTitle: "বিবাহের পর আর্থিক সচ্ছলতা ও স্থায়িত্ব",
+    financialDesc:
+      "আবেগিক মিলনের মতো আর্থিক সামঞ্জস্যও সমান গুরুত্বপূর্ণ। কুন্ডলীর ২য় (ধনভাব), ৭ম (দাম্পত্য) ও ১১শ (লাভ) ভাব এবং ভকূট বিশ্লেষণ নিশ্চিত করে বিবাহের পর দম্পতির আর্থিক উন্নতি ও যৌথ সমৃদ্ধি ঘটবে কিনা।",
+    healthLongevityTitle: "দম্পতির স্বাস্থ্য ও পরমায়ু বিচার",
+    healthLongevityDesc:
+      "দম্পতির শারীরিক সুস্থতা ও দীর্ঘায়ু নিশ্চিত করা অত্যন্ত জরুরি। নাড়ী বিচার (Nadi Koota) এক্ষেত্রে সবচেয়ে গুরুত্বপূর্ণ ভূমিকা পালন করে, যা জিনগত স্বাস্থ্য, সুস্থ সন্তানসন্ততি ও দীর্ঘ দাম্পত্য জীবনের ভিত্তি।",
+    step7thHouseTitle: "ধাপ ৪: সপ্তম ভাব ও দাম্পত্য সুখ বিশ্লেষণ",
+    step7thHouseDesc:
+      "কুন্ডলীর সপ্তম ভাব হলো বিবাহ ও জীবনসঙ্গীর ভাব। অভিজ্ঞ জ্যোতিষীগণ উভয় কুন্ডলীর ৭ম ভাব, ৭ম পতি এবং শুক্র ও বৃহস্পতির শুভ দৃষ্টি বিশ্লেষণ করে দাম্পত্যের স্থায়িত্ব যাচাই করেন।",
+    stepDashaTitle: "ধাপ ৫: বিংশোত্তরী দশা মার্গদর্শন ও প্রতিকূলতা",
+    stepDashaDesc:
+      "জ্যোতিষে সময়ের গুরুত্ব অপরিসীম। ভালো গুণ মেলানোর পরেও যদি কোনো একজন সঙ্গী অশুভ রাহু বা শনির মহাদশায় প্রবেশ করেন, তবে চ্যালেঞ্জ দেখা দিতে পারে। তাই মহাদশা ও অন্তর্দশার সমকাল বিচার করা অপরিহার্য।",
+    stepNavamsaTitle: "ধাপ ৬: নবাংশ চার্ট (D9) ও বিবাহের আত্মিক শক্তি",
+    stepNavamsaDesc:
+      "নবাংশ কুন্ডলী (D9) সম্পর্কের গভীর অভ্যন্তরীণ শক্তি, গ্রহের প্রকৃত শুভাশুভ এবং দীর্ঘমেয়াদী বোঝাপড়া প্রকাশ করে। লগ্ন ছকে যা স্পষ্ট হয় না, নবাংশ চার্ট তা নির্ভুলভাবে তুলে ধরে।",
+    kootasTableTitle: "অষ্টকূটের ৮টি ধাপ — সম্পূর্ণ ৩৬ গুণের বিশদ ব্যাখ্যা",
+    kootasTableSub:
+      "বৈদিক অষ্টকূটে ৮টি স্তরে মোট ৩৬ পয়েন্ট বণ্টন করা হয়। সুখী দাম্পত্যের জন্য সাধারণত ১৮ বা তার বেশি গুণ শুভ বলে গণ্য হয়।",
+    talkToExperts: "বিবাহ ও যোটক বিচার বিশেষজ্ঞদের সাথে পরামর্শ করুন",
+    viewAllAstrologers: "সকল জ্যোতিষী দেখুন →",
+    chatNow: "চ্যাট",
+    sampleReportTitle: "কুন্ডলী মিলন প্রিমিয়াম রিপোর্ট",
+    sampleReportSubtitle: "অষ্টকূট ৩৬ গুণ মিলন ও পূর্ণাঙ্গ দাম্পত্য বিশ্লেষণ",
+    sampleReportDiscount: "৫০% ছাড়",
   },
 
   hi: {
@@ -837,6 +957,72 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
     floatingFavorable: "अनुकूल मिलान",
     floatingCaution: "सावधानी अपेक्षित",
     consultAstrologerBtn: "ज्योतिषी से परामर्श लें",
+
+    // Astrotalk Matchmaking layout
+    breadcrumbHome: "होम",
+    breadcrumbMatchmaking: "कुंडली मिलान",
+    heroTitle: "विवाह हेतु कुंडली मिलान",
+    heroHighlight: "(गुण मिलान)",
+    heroDescription:
+      "हमारे फ्री ऑनलाइन कुंडली मिलान टूल से तुरंत जानें अपने वैवाहिक जीवन का सामंजस्य। वैदिक ज्योतिष के अष्टकूट (36 गुण) पद्धति पर आधारित यह टूल मानसिक अनुकूलता, स्वास्थ्य, संतान और सुख-समृद्धि का सटीक विश्लेषण करता है।",
+    heroDescriptionExpanded:
+      "विवाह से पूर्व कुंडली मिलान दो आत्माओं के लौकिक एवं आत्मिक संबंध का विश्लेषण है। वर्ण, वश्य, तारा, योनि, ग्रह मैत्री, गण, भकूट और नाड़ी — इन 8 कूटों से 36 गुणों का मिलान किया जाता है। साथ ही मांगलिक दोष और दशा सामंजस्य से वैवाहिक जीवन सुखमय बनता है।",
+    readMore: "...और पढ़ें",
+    readLess: "कम पढ़ें",
+
+    matchYourKundliTitle: "अपनी कुंडली मिलाएं",
+    matchYourKundliSubtitle: "दोनों का जन्म विवरण भरें। सटीक समय और स्थान से सबसे सटीक परिणाम प्राप्त होता है।",
+    yourDetailsTitle: "आपका विवरण",
+    partnerDetailsTitle: "जीवनसाथी का विवरण",
+    chooseKundliBtn: "कुंडली चुनें ▾",
+    genderLabel: "लिंग",
+    genderMale: "पुरुष",
+    genderFemale: "महिला",
+    genderOther: "अन्य",
+    birthTimeOptional: "जन्म समय (वैकल्पिक)",
+    timeDefaultHint: "समय न देने पर दोपहर 12:00 माना जाएगा",
+    exactTimeLagnaHint: "सटीक जन्म समय लग्न निर्धारित करता है — जिससे फलादेश स्पष्ट होता है।",
+    formRequirementNote: "दोनों पक्षों का नाम, जन्म तिथि एवं जन्म स्थान आवश्यक है।",
+    matchHoroscopeBtn: "कुंडली मिलान करें →",
+
+    whatIsMatchingTitle: "कुंडली मिलान क्या है? (Kundli Milan Meaning)",
+    whatIsMatchingP1:
+      "कुंडली मिलान, जिसे वर-वधू गुण मिलान या पत्रिका मिलान भी कहा जाता है, वैदिक ज्योतिष की एक प्राचीन एवं प्रामाणिक पद्धति है। इसके माध्यम से विवाह से पूर्व दो व्यक्तियों के बीच मानसिक, शारीरिक, आध्यात्मिक एवं व्यावहारिक अनुकूलता का आकलन किया जाता है।",
+    whatIsMatchingP2:
+      "इस शास्त्रीय पद्धति में दोनों जातकों के जन्म नक्षत्र, चंद्र राशि और ग्रहों की स्थिति के आधार पर अष्टकूट मिलान के कुल 36 गुणों की गणना की जाती है। प्रत्येक कूट वैवाहिक जीवन के किसी महत्वपूर्ण पहलू जैसे मानसिक तालमेल, संतान सुख, स्वास्थ्य और आर्थिक स्थिरता का प्रतिनिधित्व करता है।",
+    whatIsMatchingP3:
+      "कुंडली मिलान और पत्रिका मिलान एक ही वैदिक प्रक्रिया के समानार्थी हैं। भारत और संपूर्ण दक्षिण एशिया में विवाह के समय इसे अत्यंत शुभ और अनिवार्य माना जाता है।",
+    whatIsMatchingP4:
+      "शास्त्रों के अनुसार 36 में से कम से कम 18 गुण मिलने पर विवाह अनुकूल माना जाता है। साथ ही मांगलिक दोष और नवमांश (D9) चक्र का विश्लेषण भी अवश्य किया जाता है।",
+
+    whyImportantTitle: "विवाह के लिए कुंडली मिलान क्यों आवश्यक है?",
+    emotionalTitle: "मानसिक एवं भावनात्मक सामंजस्य — गण एवं ग्रह मैत्री",
+    emotionalDesc:
+      "कुंडली मिलान का मुख्य उद्देश्य विवाह पूर्व मानसिक एवं भावनात्मक अनुकूलता को समझना है। प्रेम होने के बावजूद संवाद और स्वभाव में भिन्नता आ सकती है। गण एवं ग्रह मैत्री कूट से यह सुनिश्चित होता है कि दोनों एक-दूसरे की अपेक्षाओं को समझ सकें।",
+    financialTitle: "विवाह के बाद आर्थिक स्थिरता एवं समृद्धि",
+    financialDesc:
+      "भावनात्मक जुड़ाव की तरह ही वित्तीय तालमेल भी महत्वपूर्ण है। कुंडली के दूसरे (धन), सातवें और ग्यारहवें (लाभ) भाव एवं भकूट से यह पता चलता है कि विवाह के पश्चात दंपति की आर्थिक उन्नति कैसी रहेगी।",
+    healthLongevityTitle: "दंपति का स्वास्थ्य एवं दीर्घायु विचार",
+    healthLongevityDesc:
+      "दोनों का स्वास्थ्य और दीर्घायु सुनिश्चित करना अनिवार्य है। नाड़ी मिलान (Nadi Koota) इस दृष्टि से सर्वाधिक महत्वपूर्ण है, जो आनुवंशिक स्वास्थ्य, उत्तम संतान और सुखद पारिवारिक जीवन की नींव रखता है।",
+    step7thHouseTitle: "चरण 4: सप्तम भाव एवं वैवाहिक सुख विश्लेषण",
+    step7thHouseDesc:
+      "कुंडली का सातवां भाव विवाह और जीवनसाथी का कारक होता है। विद्वान ज्योतिषी दोनों कुंडलियों के सातवें भाव, भावेश तथा शुक्र और गुरु की स्थिति का मिलान कर वैवाहिक स्थिरता का आकलन करते हैं।",
+    stepDashaTitle: "चरण 5: महादशा एवं अंतर्दशा का प्रभाव",
+    stepDashaDesc:
+      "ज्योतिष में कालखंड का बड़ा महत्व है। उत्तम गुण मिलने पर भी यदि किसी एक जातक पर राहु या शनि की प्रतिकूल महादशा हो तो चुनौतियां आ सकती हैं। इसलिए दशाओं का सामंजस्य आवश्यक है।",
+    stepNavamsaTitle: "चरण 6: नवमांश चक्र (D9) का गहन विश्लेषण",
+    stepNavamsaDesc:
+      "नवमांश कुंडली (D9) वैवाहिक संबंधों की आंतरिक शक्ति और ग्रहों की वास्तविक परिपक्वता दर्शाती है। मुख्य लग्न चक्र में छिपी बातें नवमांश चक्र से पूर्णतः स्पष्ट हो जाती हैं।",
+    kootasTableTitle: "अष्टकूट मिलान के 8 अंग — सम्पूर्ण 36 गुणों की व्याख्या",
+    kootasTableSub:
+      "वैदिक अष्टकूट में 8 स्तरों पर कुल 36 अंक निर्धारित हैं। सुखद वैवाहिक जीवन के लिए 18 या उससे अधिक गुण शुभ माने जाते हैं।",
+    talkToExperts: "विवाह एवं कुंडली मिलान विशेषज्ञों से परामर्श करें",
+    viewAllAstrologers: "सभी ज्योतिषी देखें →",
+    chatNow: "बात करें",
+    sampleReportTitle: "कुंडली मिलान प्रीमियम रिपोर्ट",
+    sampleReportSubtitle: "अष्टकूट 36 गुण मिलान एवं दांपत्य फलादेश",
+    sampleReportDiscount: "50% छूट",
   },
 
   en: {
@@ -1141,6 +1327,72 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
     floatingFavorable: "Favorable Match",
     floatingCaution: "Caution Needed",
     consultAstrologerBtn: "Consult Astrologer",
+
+    // Astrotalk Matchmaking layout
+    breadcrumbHome: "HOME",
+    breadcrumbMatchmaking: "MATCHMAKING",
+    heroTitle: "Kundali Matching",
+    heroHighlight: "for Marriage",
+    heroDescription:
+      "Use our free online Kundali Matching tool to find your marriage compatibility instantly. Based on Vedic Astrology principles, our Kundli Milan system assesses compatibility between two people using the Ashtakoota method (36 Gunas).",
+    heroDescriptionExpanded:
+      "Kundali matching for marriage evaluates emotional compatibility, mental wavelength, financial prosperity, health, and mutual longevity through the 8 Kootas (Varna, Vashya, Tara, Yoni, Graha Maitri, Gana, Bhakoot, and Nadi). It also checks for Manglik Dosha and planetary synchronization.",
+    readMore: "...Read more",
+    readLess: "Read less",
+
+    matchYourKundliTitle: "Match Your Kundli",
+    matchYourKundliSubtitle: "Enter both birth details. Accurate time and place give the sharpest reading.",
+    yourDetailsTitle: "Your Details",
+    partnerDetailsTitle: "Partner's Details",
+    chooseKundliBtn: "Choose kundli ▾",
+    genderLabel: "Gender",
+    genderMale: "Male",
+    genderFemale: "Female",
+    genderOther: "Other",
+    birthTimeOptional: "Birth Time (optional)",
+    timeDefaultHint: "Defaults to 12:00 PM if not provided",
+    exactTimeLagnaHint: "Exact birth time fixes the Lagna — it sharpens the reading.",
+    formRequirementNote: "Name, birth date and birth place are needed for both partners.",
+    matchHoroscopeBtn: "Match Horoscope →",
+
+    whatIsMatchingTitle: "What is Kundali Matching? (Kundli Milan Meaning)",
+    whatIsMatchingP1:
+      "Kundli matching, also known as Horoscope Matching or Kundli Milan, is a traditional Vedic Astrology method that astrologers use to check compatibility between two people before marriage. In Vedic Astrology, the Janam Kundlis of both prospective partners are thoroughly evaluated and compared to determine whether they are emotionally, physically, spiritually, and mentally aligned for a blessed, long-term marriage.",
+    whatIsMatchingP2:
+      "The classical Vedic process evaluates the precise planetary positions, Nakshatras, Moon signs (Rashis), and the sacred Ashtakoota Guna Milan system comprising 36 vital points. Each Koota assesses an essential pillar of married life — from emotional bonding and mutual respect to health, financial stability, and progeny.",
+    whatIsMatchingP3:
+      "Horoscope matching and kundli matching are widely used as synonyms. It is the same sacred process, also popularly known as Patrika Matching (যোটক বিচার / पत्रिका मिलान), especially across India and South Asia.",
+    whatIsMatchingP4:
+      "Vedic astrologers recommend that a minimum of 18 out of 36 Gunas should match for an auspicious union, while also verifying Manglik Dosha, 7th house strength, and Navamsha (D9) chart alignment.",
+
+    whyImportantTitle: "Why is Kundali Matching Important for Marriage?",
+    emotionalTitle: "Emotional Compatibility - Gana and Graha Maitri",
+    emotionalDesc:
+      "One of the main reasons for kundli matching is to understand emotional and mental compatibility before marriage. Two people can be deeply in love but face challenges in communication, temperament, and emotional expectations after marriage. The Gana and Graha Maitri kootas help astrologers assess whether both partners meet each other's emotional expectations.",
+    financialTitle: "Financial Stability After Marriage",
+    financialDesc:
+      "Financial harmony is as important as emotional alignment. Specific houses in a kundli and Guna Milan factors help ascertain whether finances will be stable after marriage. Strong alignment in Graha Maitri and Bhakoot often leads to mutual financial growth, shared goals, and better financial decision-making as a couple.",
+    healthLongevityTitle: "Health and Longevity of the Couple",
+    healthLongevityDesc:
+      "Checking the health and longevity of both partners is essential, as some planetary combinations may create emotional and mental distress. Nadi Matching plays an important role here, as it is connected to physical compatibility, genetic health, and the overall well-being of family life.",
+    step7thHouseTitle: "Step 4: Analysing the 7th House Compatibility",
+    step7thHouseDesc:
+      "The 7th house represents marriage and relationships. Vedic astrologers compare the 7th house in both charts, along with the placement of its ruling planet, Venus, and Jupiter, to understand stability and compatibility between spouses.",
+    stepDashaTitle: "Step 5: Examining Dasha Periods",
+    stepDashaDesc:
+      "Timing is of great importance in astrology. Even a good compatibility score can bring challenges after marriage if one partner enters Saturn or Rahu Mahadasha without favorable counter-aspects. This is why Mahadasha and Antardasha periods are synchronized before finalising a marriage report.",
+    stepNavamsaTitle: "Step 6: Navamsa Chart (D9) Analysis",
+    stepNavamsaDesc:
+      "The Navamsa Chart reveals deeper strengths and weaknesses of a relationship, the maturity of planets, and long-term stability. Therefore, astrologers consider the D9 chart, as many times things appear fine in the main chart, but the Navamsa analysis reveals deeper spiritual challenges.",
+    kootasTableTitle: "The 8 Kootas in Guna Milan - All 36 Guna Points Explained",
+    kootasTableSub:
+      "Vedic Ashtakoota assigns 36 points across 8 dimensions. A score of 18 or higher is generally considered auspicious for a joyful marriage.",
+    talkToExperts: "Talk to Marriage & Kundli Matching Experts",
+    viewAllAstrologers: "View all astrologers →",
+    chatNow: "Chat",
+    sampleReportTitle: "Kundli Milan Report",
+    sampleReportSubtitle: "Ashtakoota Guna Milan",
+    sampleReportDiscount: "50% OFF",
   },
 };
 

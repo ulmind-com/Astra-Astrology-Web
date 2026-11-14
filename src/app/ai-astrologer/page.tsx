@@ -39,7 +39,10 @@ import {
   Trash2,
   User,
   UserRound,
+  Volume2,
+  VolumeX,
   Wand2,
+  ArrowRight,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -52,6 +55,7 @@ import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
 import { useProfile } from "@/hooks/use-profile";
 import { parseProfileBirthDetails } from "@/lib/birth-details";
+import { celestialAudio } from "@/lib/audio-chime";
 import {
   askAstrologer,
   canRecord,
@@ -385,6 +389,7 @@ export default function AIAstrologerPage() {
   const [messages, setMessages] = React.useState<AIChatMessage[]>([]);
   const [inputQuery, setInputQuery] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+  const [soundEnabled, setSoundEnabled] = React.useState(true);
 
   // Birth details state for personalization
   const [showBirthModal, setShowBirthModal] = React.useState(false);
@@ -403,8 +408,12 @@ export default function AIAstrologerPage() {
   const chatBottomRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  // Initialize session and birth details from localStorage / profile
+  // Initialize session, sound, and birth details
   React.useEffect(() => {
+    setSoundEnabled(celestialAudio.getSoundEnabled());
+    // Play the opening ChatGPT-style "Toong" chime as soon as AI Astrologer loads
+    celestialAudio.playOpeningChime();
+
     const savedSession = localStorage.getItem("astra_ai_session_id");
     if (savedSession) {
       setSessionId(savedSession);
@@ -428,6 +437,30 @@ export default function AIAstrologerPage() {
       }
     }
   }, []);
+
+  const toggleSound = () => {
+    const next = !soundEnabled;
+    setSoundEnabled(next);
+    celestialAudio.setSoundEnabled(next);
+    if (next) {
+      celestialAudio.playOpeningChime();
+      toast.success(
+        language === "bn"
+          ? "সাউন্ড সক্রিয় করা হয়েছে"
+          : language === "hi"
+          ? "ध्वनि सक्षम की गई"
+          : "Sound effects enabled",
+      );
+    } else {
+      toast.info(
+        language === "bn"
+          ? "সাউন্ড বন্ধ করা হয়েছে"
+          : language === "hi"
+          ? "ध्वनि म्यूट की गई"
+          : "Sound effects muted",
+      );
+    }
+  };
 
   // Auto-fill from signed-in user's profile if local birth details are not set
   React.useEffect(() => {
@@ -604,6 +637,7 @@ export default function AIAstrologerPage() {
     const query = (textToSend || inputQuery).trim();
     if (!query || loading) return;
 
+    celestialAudio.playSendChime();
     setInputQuery("");
     const userMsgId = `user_${Date.now()}`;
     const userMsg: AIChatMessage = {
@@ -707,6 +741,7 @@ export default function AIAstrologerPage() {
             }
             return next;
           });
+          celestialAudio.playReceiveChime();
           setLoading(false);
           break;
         }
@@ -885,6 +920,28 @@ export default function AIAstrologerPage() {
                 {birthDate && <span className="text-[10px] text-emerald-600 font-bold">✓</span>}
               </button>
 
+              {/* Sound Toggle Button */}
+              <button
+                type="button"
+                onClick={toggleSound}
+                className={`flex size-8 sm:size-9 items-center justify-center rounded-xl border press transition-all cursor-pointer ${
+                  soundEnabled
+                    ? "border-amber-300 bg-amber-50/80 text-amber-900 shadow-2xs hover:bg-amber-100"
+                    : "border-stone-200 bg-white/90 text-stone-400 shadow-2xs hover:bg-stone-50 hover:text-stone-600"
+                }`}
+                title={
+                  soundEnabled
+                    ? "Sound chime enabled (click to mute)"
+                    : "Sound muted (click to enable)"
+                }
+              >
+                {soundEnabled ? (
+                  <Volume2 className="size-3.5 text-amber-700" />
+                ) : (
+                  <VolumeX className="size-3.5" />
+                )}
+              </button>
+
               {/* Language Switcher Pill */}
               <div className="inline-flex items-center rounded-xl border border-amber-200/80 bg-white/90 p-0.5 text-xs shadow-2xs">
                 {(
@@ -913,7 +970,7 @@ export default function AIAstrologerPage() {
               <button
                 type="button"
                 onClick={clearChat}
-                className="flex size-8 items-center justify-center rounded-xl border border-amber-200/70 bg-white/90 text-slate-500 shadow-2xs press transition-colors hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 active:scale-95 cursor-pointer"
+                className="flex size-8 sm:size-9 items-center justify-center rounded-xl border border-amber-200/70 bg-white/90 text-slate-500 shadow-2xs press transition-colors hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 active:scale-95 cursor-pointer"
                 title={t.newChat}
               >
                 <RotateCcw className="size-3.5" />
@@ -929,26 +986,51 @@ export default function AIAstrologerPage() {
           {/* Welcome Screen / Hero Cards (Shown only on fresh session) */}
           {isFreshConversation && (
             <div className="my-auto py-6 text-center fade-in">
-              {/* Celestial Orbit Emblem */}
-              <div className="relative mx-auto mb-4 flex size-20 items-center justify-center">
-                <span className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-400/30 via-gold-400/20 to-transparent animate-ping opacity-60" />
-                <div className="relative flex size-18 items-center justify-center rounded-3xl bg-gradient-to-tr from-amber-500 via-amber-600 to-amber-700 p-0.5 shadow-[0_8px_30px_rgba(217,119,6,0.35)] ring-2 ring-amber-300/60">
+              {/* Celestial Orbit Emblem with Rotating Gold Zodiac Wheel */}
+              <div className="relative mx-auto mb-5 flex size-28 items-center justify-center">
+                {/* Rotating zodiac wheel in background */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/zodiac-wheel-gold.webp"
+                  alt=""
+                  aria-hidden="true"
+                  className="pointer-events-none absolute size-[220px] sm:size-[260px] select-none opacity-[0.22] mix-blend-multiply animate-spin [animation-duration:120s] motion-reduce:animate-none"
+                />
+
+                <span className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-400/25 via-gold-400/15 to-transparent animate-pulse blur-md" />
+
+                <div className="relative flex size-20 items-center justify-center rounded-3xl bg-gradient-to-tr from-amber-500 via-amber-600 to-amber-700 p-0.5 shadow-[0_8px_36px_rgba(217,119,6,0.38)] ring-2 ring-amber-300/80 transition-transform hover:scale-105 duration-300">
                   <Image
                     src="/logo.png"
                     alt="Mandala Emblem"
-                    width={64}
-                    height={64}
+                    width={72}
+                    height={72}
                     className="size-full object-contain"
                     priority
                   />
                 </div>
               </div>
 
-              <h2 className="font-display text-xl sm:text-3xl font-extrabold tracking-tight text-amber-950">
-                {t.heroHeading}
+              <h2 className="font-serif text-xl sm:text-3xl font-extrabold tracking-tight text-stone-900">
+                {language === "bn" ? (
+                  <>
+                    নক্ষত্র ও গ্রহের নির্দেশনায় জীবনের{" "}
+                    <span className="text-amber-800 font-serif">সঠিক দিশা পান</span>
+                  </>
+                ) : language === "hi" ? (
+                  <>
+                    ग्रह-नक्षत्रों के मार्गदर्शन से अपने जीवन का{" "}
+                    <span className="text-amber-800 font-serif">सही मार्ग जानें</span>
+                  </>
+                ) : (
+                  <>
+                    Discover Celestial Clarity Through{" "}
+                    <span className="text-amber-800 font-serif">Vedic Wisdom</span>
+                  </>
+                )}
               </h2>
 
-              <p className="mx-auto mt-2 max-w-xl text-xs sm:text-sm text-slate-600 leading-relaxed">
+              <p className="mx-auto mt-2 max-w-xl text-xs sm:text-sm text-stone-600 leading-relaxed">
                 {t.heroDesc}
               </p>
 
@@ -975,12 +1057,12 @@ export default function AIAstrologerPage() {
 
               {/* Categorized Suggested Prompt Cards */}
               <div className="mt-8 text-left">
-                <p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-900/70">
+                <p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-900/80">
                   <Wand2 className="size-3.5 text-amber-600" />
                   {t.popularTopics}
                 </p>
 
-                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
                   {promptList.map((p, idx) => {
                     const Icon = p.icon;
                     return (
@@ -989,22 +1071,25 @@ export default function AIAstrologerPage() {
                         type="button"
                         onClick={() => handleSendMessage(p.query)}
                         disabled={loading}
-                        className={`group relative flex flex-col justify-between rounded-2xl border bg-white/95 p-3.5 text-left shadow-2xs backdrop-blur-xs press transition-all hover:scale-[1.02] hover:shadow-md cursor-pointer ${p.gradient}`}
+                        className={`group relative flex flex-col justify-between rounded-2xl border bg-white/95 hover:bg-white p-4 text-left shadow-2xs backdrop-blur-xs press transition-all duration-300 hover:-translate-y-1 hover:shadow-lg cursor-pointer ${p.gradient}`}
                       >
                         <div>
                           <div className="flex items-center justify-between gap-2">
-                            <span className="flex size-7 items-center justify-center rounded-xl bg-amber-500/10 text-amber-700 group-hover:bg-amber-500/20 transition-colors">
-                              <Icon className="size-3.5" />
+                            <span className="flex size-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-800 group-hover:bg-amber-500/20 group-hover:scale-110 transition-all shadow-2xs">
+                              <Icon className="size-4" />
                             </span>
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800/60">
-                              {p.category}
-                            </span>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900/70 bg-amber-50/80 px-2 py-0.5 rounded-full border border-amber-200/50">
+                                {p.category}
+                              </span>
+                              <ArrowRight className="size-3 text-amber-500 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-amber-700 transition-all duration-200" />
+                            </div>
                           </div>
-                          <h3 className="mt-2 text-xs sm:text-[13px] font-bold text-slate-900 group-hover:text-amber-800 transition-colors">
+                          <h3 className="mt-2.5 text-xs sm:text-[13px] font-bold text-stone-900 group-hover:text-amber-900 transition-colors">
                             {p.title}
                           </h3>
                         </div>
-                        <p className="mt-1 line-clamp-2 text-[11px] text-slate-500 leading-snug">
+                        <p className="mt-1.5 line-clamp-2 text-[11px] text-stone-500 leading-snug group-hover:text-stone-600 transition-colors">
                           {p.query}
                         </p>
                       </button>
@@ -1204,7 +1289,7 @@ export default function AIAstrologerPage() {
                 e.preventDefault();
                 handleSendMessage();
               }}
-              className="relative flex items-center gap-2 rounded-2xl border border-amber-300/70 bg-white p-1.5 shadow-[0_4px_20px_-6px_rgba(217,119,6,0.2)] transition-all focus-within:border-amber-500 focus-within:shadow-[0_6px_24px_-4px_rgba(217,119,6,0.3)]"
+              className="relative flex items-center gap-2 rounded-2xl border border-stone-200/90 hover:border-amber-300/80 bg-white p-1.5 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.06)] transition-all focus-within:border-amber-400 focus-within:shadow-[0_4px_20px_-4px_rgba(217,119,6,0.15)] outline-none"
             >
               <input
                 ref={inputRef}
@@ -1215,7 +1300,8 @@ export default function AIAstrologerPage() {
                 disabled={loading}
                 enterKeyHint="send"
                 autoComplete="off"
-                className="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none disabled:opacity-60"
+                style={{ outline: "none", boxShadow: "none" }}
+                className="no-focus-ring min-w-0 flex-1 bg-transparent px-3 py-2.5 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 border-none outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 shadow-none ring-0 disabled:opacity-60"
               />
 
               {/* Voice Record Toggle Button */}
@@ -1225,7 +1311,7 @@ export default function AIAstrologerPage() {
                 disabled={loading || transcribing}
                 aria-label={t.holdToSpeak}
                 title={recording ? t.listening : t.holdToSpeak}
-                className={`flex size-10 shrink-0 items-center justify-center rounded-xl press transition-all cursor-pointer ${
+                className={`no-focus-ring outline-none focus:outline-none focus-visible:outline-none flex size-10 shrink-0 items-center justify-center rounded-xl press transition-all cursor-pointer ${
                   recording
                     ? "bg-rose-500 text-white animate-pulse shadow-md scale-105"
                     : "bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200/60"
@@ -1244,7 +1330,7 @@ export default function AIAstrologerPage() {
               <button
                 type="submit"
                 disabled={!inputQuery.trim() || loading}
-                className="flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-4 text-xs font-bold text-white shadow-xs press transition-all hover:from-amber-600 hover:to-amber-800 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+                className="no-focus-ring outline-none focus:outline-none focus-visible:outline-none flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-[#fcd404] hover:bg-[#ebd500] text-stone-950 font-bold px-5 text-xs sm:text-sm shadow-xs press transition-all active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
               >
                 {loading ? (
                   <Loader2 className="size-4 animate-spin" />

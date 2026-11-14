@@ -11,6 +11,7 @@ import {
   RefreshCw,
   Sliders,
   ChevronRight,
+  ChevronDown,
   Sun,
   ShieldCheck,
   CheckCircle2,
@@ -147,6 +148,7 @@ export default function DashaCalculatorPage() {
   const [ayanamsa, setAyanamsa] = React.useState<AyanamsaType>("krishnamurti");
   const [isMapModalOpen, setIsMapModalOpen] = React.useState(false);
   const [showAdvance, setShowAdvance] = React.useState(false);
+  const [expandedHero, setExpandedHero] = React.useState(false);
 
   // Loading & Result
   const [loading, setLoading] = React.useState(false);
@@ -448,116 +450,178 @@ export default function DashaCalculatorPage() {
   }, [phalaList, selectedPhalaPlanet]);
 
   return (
-    <div className="min-h-screen bg-slate-50/70 text-slate-900 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#fafaf9]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
       <SiteHeader />
 
-      {/* Hero Header */}
-      <div className="relative border-b border-amber-200/60 bg-gradient-to-b from-amber-500/10 via-amber-50/40 to-background py-8 sm:py-12">
-        <div className="mx-auto max-w-6xl px-4 text-center">
-          {/* Language Switcher Bar */}
-          <div className="flex items-center justify-center gap-1.5 mb-5">
-            <span className="text-xs font-semibold text-slate-500 mr-1">
-              {language === "bn" ? "ভাষা:" : language === "hi" ? "भाषा:" : "Language:"}
+      {/* Main Container */}
+      <main className="mx-auto max-w-6xl px-3 sm:px-6 py-4 flex-1 w-full space-y-6">
+        {/* =========================================================================
+            1. BREADCRUMB & LANGUAGE SWITCHER
+        ========================================================================= */}
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-stone-500 pt-0.5 pb-1">
+          <div className="flex items-center gap-1.5 uppercase tracking-wider font-semibold">
+            <Link href="/" className="hover:text-amber-700 transition-colors">
+              {language === "bn" ? "হোম" : language === "hi" ? "होम" : "Home"}
+            </Link>
+            <span className="text-stone-300">&gt;</span>
+            <span className="text-stone-900 font-bold">
+              {language === "bn" ? "দশা ক্যালকুলেটর" : language === "hi" ? "दशा कैलकुलेटर" : "Dasha Calculator"}
             </span>
+          </div>
+
+          {/* Language Switcher Bar */}
+          <div className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white p-0.5 text-xs font-semibold shadow-2xs">
             {(
               [
                 { code: "bn", label: "বাংলা" },
-                { code: "en", label: "English" },
                 { code: "hi", label: "हिन्दी" },
+                { code: "en", label: "English" },
               ] as const
             ).map((lang) => (
               <button
                 key={lang.code}
                 type="button"
                 onClick={() => setLanguage(lang.code)}
-                className={`min-h-9 inline-flex items-center justify-center rounded-full px-3 py-2 text-xs font-bold press transition-all ${
+                className={`min-h-7 inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer ${
                   language === lang.code
-                    ? "bg-amber-500 text-white shadow-xs"
-                    : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900"
+                    ? "bg-[#fcd404] text-stone-950 shadow-2xs font-extrabold"
+                    : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
                 }`}
               >
                 {lang.label}
               </button>
             ))}
           </div>
+        </div>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-semibold text-amber-900">
-            <Sparkles className="size-3.5 text-amber-600" />
-            <span>{ui.badgeVimshottari}</span>
+        {/* =========================================================================
+            2. HERO SECTION: Compact, sleek, with rotating faint zodiac circle in background
+        ========================================================================= */}
+        <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-r from-amber-50/50 via-white to-amber-50/30 px-4 sm:px-6 py-4 shadow-2xs">
+          {/* Faint rotating zodiac wheel in background */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/zodiac-wheel-gold.webp"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-12 -top-16 size-[260px] sm:size-[340px] select-none opacity-[0.14] mix-blend-multiply animate-spin [animation-duration:120s] motion-reduce:animate-none"
+          />
+
+          <div className="relative z-10 max-w-2xl space-y-1.5">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-bold text-amber-900">
+              <Sparkles className="size-3 text-amber-600" />
+              <span>{ui.badgeVimshottari}</span>
+            </div>
+
+            <h1 className="text-xl sm:text-2xl font-serif font-bold text-stone-900 tracking-tight leading-tight">
+              {ui.titleMain}
+            </h1>
+
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+              {expandedHero ? ui.subtitleMain : `${ui.subtitleMain.slice(0, 115)}...`}
+              <button
+                type="button"
+                onClick={() => setExpandedHero(!expandedHero)}
+                className="ml-1.5 font-bold text-amber-700 hover:text-amber-900 hover:underline inline-flex items-center cursor-pointer"
+              >
+                {expandedHero
+                  ? (language === "bn" ? "কম দেখুন" : language === "hi" ? "कम देखें" : "Read less")
+                  : (language === "bn" ? "আরও পড়ুন" : language === "hi" ? "और पढ़ें" : "Read more")}
+              </button>
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              {profile && (
+                <button
+                  type="button"
+                  onClick={() => populateFromProfileData(profile, user)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 hover:border-amber-400 bg-white/90 hover:bg-amber-50/70 px-3 py-1 text-xs font-semibold text-stone-700 hover:text-stone-900 transition-colors shadow-2xs cursor-pointer"
+                >
+                  <User className="size-3.5 text-amber-600" />
+                  <span>{ui.profileSync}</span>
+                </button>
+              )}
+
+              <FeatureCoinBadge
+                feature={dashaFeature}
+                coins={dashaFeature?.coins ?? 15}
+                language={language}
+              />
+            </div>
           </div>
+        </div>
 
-          <h1 className="mt-3.5 font-display text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-950">
-            {ui.titleMain}
-          </h1>
-
-          <p className="mx-auto mt-3 max-w-3xl text-sm sm:text-base text-slate-600 leading-relaxed">
-            {ui.subtitleMain}
-          </p>
-
-          {profile && (
-            <div className="mt-4 flex items-center justify-center">
+        {/* =========================================================================
+            3. ULTRA-PRO BIRTH DETAILS INPUT FORM
+        ========================================================================= */}
+        <div className="rounded-2xl border border-stone-200/90 bg-white p-4 sm:p-6 shadow-xs space-y-5">
+          {/* Header inside form */}
+          <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+            <div className="inline-flex items-center gap-2">
+              <div className="size-2 rounded-full bg-[#fcd404]" />
+              <span className="text-sm font-bold text-stone-900">
+                {language === "bn" ? "জন্ম বিবরণ প্রদান করুন" : language === "hi" ? "जन्म विवरण दर्ज करें" : "Enter Birth Details"}
+              </span>
+            </div>
+            {profile && (
               <button
                 type="button"
                 onClick={() => populateFromProfileData(profile, user)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50/80 px-3 py-1 text-xs font-bold text-amber-900 hover:bg-amber-100 press transition-colors"
+                className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 hover:text-amber-900 hover:underline cursor-pointer"
               >
-                <User className="size-3.5" />
+                <User className="size-3" />
                 <span>{ui.profileSync}</span>
               </button>
-            </div>
-          )}
-        </div>
-      </div>
+            )}
+          </div>
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-6xl px-4 py-8 flex-1 w-full space-y-10">
-        {/* Birth Details Input Form */}
-        <div className="rounded-2xl border border-amber-300/80 bg-white p-5 sm:p-8 shadow-sm">
           {dashaFeature && !dashaFeature.enabled && (
-            <div className="mb-6">
+            <div className="mb-2">
               <FeatureDisabledAlert featureName={dashaFeature?.name} language={language} />
             </div>
           )}
 
-          <form onSubmit={handleCalculate} className="space-y-6">
+          <form onSubmit={handleCalculate} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                  {ui.formFullName}
+              {/* Full Name */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-stone-700">
+                  {ui.formFullName} <span className="text-stone-400 font-normal">({language === "bn" ? "ঐচ্ছিক" : language === "hi" ? "वैकल्पिक" : "optional"})</span>
                 </label>
-                <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                <div className="relative rounded-2xl border border-stone-200 hover:border-stone-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 bg-stone-50/50 hover:bg-white focus-within:bg-white px-3.5 py-2.5 flex items-center gap-2.5 transition-all shadow-2xs">
+                  <User className="size-4 text-stone-400 shrink-0" />
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder={ui.formFullNamePlaceholder}
-                    className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm focus:border-amber-500 focus:outline-none"
+                    className="w-full text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 bg-transparent outline-none font-medium"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+              {/* Gender */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-stone-700">
                   {ui.formGender}
                 </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(["male", "female", "other"] as const).map((g) => (
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[
+                    { val: "male", label: "♂ " + ui.formMale },
+                    { val: "female", label: "♀ " + ui.formFemale },
+                    { val: "other", label: "⚥ " + ui.formOther },
+                  ].map((g) => (
                     <button
-                      key={g}
+                      key={g.val}
                       type="button"
-                      onClick={() => setGender(g)}
-                      className={`rounded-xl py-2.5 text-xs font-bold capitalize press transition-all border ${
-                        gender === g
-                          ? "bg-amber-500 text-white border-amber-500 shadow-xs"
-                          : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                      onClick={() => setGender(g.val as any)}
+                      className={`min-h-10 rounded-xl border px-2 py-1.5 text-center text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                        gender === g.val
+                          ? "bg-[#fcd404] border-[#fcd404] text-stone-950 shadow-xs font-extrabold"
+                          : "bg-stone-100/70 border-stone-200/80 text-stone-700 hover:bg-stone-200/60 font-semibold"
                       }`}
                     >
-                      {g === "male"
-                        ? ui.formMale
-                        : g === "female"
-                        ? ui.formFemale
-                        : ui.formOther}
+                      {g.label}
                     </button>
                   ))}
                 </div>
@@ -567,174 +631,198 @@ export default function DashaCalculatorPage() {
             {/* Birth Date & Time */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* DOB */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                  <Calendar className="inline-block size-3.5 mr-1 text-amber-600" />
-                  <span>{ui.formDob}</span>
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-stone-700">
+                  {ui.formDob} <span className="text-rose-500">*</span>
                 </label>
-                <div className="grid grid-cols-3 gap-2">
-                  <input
-                    ref={dayRef}
-                    type="text"
-                    value={day}
-                    onChange={(e) => {
-                      const v = e.target.value.replace(/\D/g, "").slice(0, 2);
-                      setDay(v);
-                      if (v.length === 2) monthRef.current?.focus();
-                    }}
-                    placeholder="DD"
-                    maxLength={2}
-                    className="w-full text-center rounded-xl border border-slate-200 py-2.5 text-sm font-semibold focus:border-amber-500 focus:outline-none"
-                  />
-                  <input
-                    ref={monthRef}
-                    type="text"
-                    value={month}
-                    onChange={(e) => {
-                      const v = e.target.value.replace(/\D/g, "").slice(0, 2);
-                      setMonth(v);
-                      if (v.length === 2) yearRef.current?.focus();
-                    }}
-                    placeholder="MM"
-                    maxLength={2}
-                    className="w-full text-center rounded-xl border border-slate-200 py-2.5 text-sm font-semibold focus:border-amber-500 focus:outline-none"
-                  />
-                  <input
-                    ref={yearRef}
-                    type="text"
-                    value={year}
-                    onChange={(e) => {
-                      const v = e.target.value.replace(/\D/g, "").slice(0, 4);
-                      setYear(v);
-                      if (v.length === 4) hourRef.current?.focus();
-                    }}
-                    placeholder="YYYY"
-                    maxLength={4}
-                    className="w-full text-center rounded-xl border border-slate-200 py-2.5 text-sm font-semibold focus:border-amber-500 focus:outline-none"
-                  />
+                <div className="rounded-2xl border border-stone-200 hover:border-stone-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 bg-stone-50/50 hover:bg-white focus-within:bg-white px-3.5 py-2 flex items-center gap-2 shadow-2xs transition-all">
+                  <Calendar className="size-4 text-stone-400 shrink-0" />
+                  <div className="grid grid-cols-3 gap-2 flex-1">
+                    <input
+                      ref={dayRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={day}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, "").slice(0, 2);
+                        setDay(v);
+                        if (v.length === 2) monthRef.current?.focus();
+                      }}
+                      placeholder="DD"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
+                    />
+                    <input
+                      ref={monthRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={month}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, "").slice(0, 2);
+                        setMonth(v);
+                        if (v.length === 2) yearRef.current?.focus();
+                      }}
+                      placeholder="MM"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400 border-x border-stone-200 px-1"
+                    />
+                    <input
+                      ref={yearRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={4}
+                      value={year}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, "").slice(0, 4);
+                        setYear(v);
+                        if (v.length === 4) hourRef.current?.focus();
+                      }}
+                      placeholder="YYYY"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* TOB */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                  <Clock className="inline-block size-3.5 mr-1 text-amber-600" />
-                  <span>{ui.formTob}</span>
-                </label>
-                <div className="grid grid-cols-4 gap-2">
-                  <input
-                    ref={hourRef}
-                    type="text"
-                    value={hour}
-                    onChange={(e) => {
-                      const v = e.target.value.replace(/\D/g, "").slice(0, 2);
-                      setHour(v);
-                      if (v.length === 2) minuteRef.current?.focus();
-                    }}
-                    placeholder="HH"
-                    maxLength={2}
-                    className="w-full text-center rounded-xl border border-slate-200 py-2.5 text-sm font-semibold focus:border-amber-500 focus:outline-none"
-                  />
-                  <input
-                    ref={minuteRef}
-                    type="text"
-                    value={minute}
-                    onChange={(e) => {
-                      const v = e.target.value.replace(/\D/g, "").slice(0, 2);
-                      setMinute(v);
-                      if (v.length === 2) secondRef.current?.focus();
-                    }}
-                    placeholder="MM"
-                    maxLength={2}
-                    className="w-full text-center rounded-xl border border-slate-200 py-2.5 text-sm font-semibold focus:border-amber-500 focus:outline-none"
-                  />
-                  <input
-                    ref={secondRef}
-                    type="text"
-                    value={second}
-                    onChange={(e) => setSecond(e.target.value.replace(/\D/g, "").slice(0, 2))}
-                    placeholder="SS"
-                    maxLength={2}
-                    className="w-full text-center rounded-xl border border-slate-200 py-2.5 text-sm font-semibold focus:border-amber-500 focus:outline-none"
-                  />
-                  <div className="flex rounded-xl border border-slate-200 overflow-hidden">
-                    <button
-                      type="button"
-                      onClick={() => setPeriod("AM")}
-                      className={`flex-1 text-xs font-bold py-2.5 ${
-                        period === "AM" ? "bg-amber-500 text-white" : "bg-white text-slate-600"
-                      }`}
-                    >
-                      AM
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPeriod("PM")}
-                      className={`flex-1 text-xs font-bold py-2.5 ${
-                        period === "PM" ? "bg-amber-500 text-white" : "bg-white text-slate-600"
-                      }`}
-                    >
-                      PM
-                    </button>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-stone-700">
+                    {ui.formTob} <span className="text-stone-400 font-normal">({language === "bn" ? "ঐচ্ছিক" : language === "hi" ? "वैकल्पिक" : "optional"})</span>
+                  </label>
+                  <span className="text-[11px] text-stone-400">
+                    {language === "bn" ? "না দিলে দুপুর ১২:০০ ধরা হবে" : language === "hi" ? "खाली रहने पर 12:00 PM माना जाएगा" : "Defaults to 12:00 PM"}
+                  </span>
+                </div>
+                <div className="rounded-2xl border border-stone-200 hover:border-stone-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 bg-stone-50/50 hover:bg-white focus-within:bg-white px-3.5 py-2 flex items-center gap-2 shadow-2xs transition-all">
+                  <Clock className="size-4 text-stone-400 shrink-0" />
+                  <div className="grid grid-cols-4 gap-1.5 flex-1 items-center">
+                    <input
+                      ref={hourRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={hour}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, "").slice(0, 2);
+                        setHour(v);
+                        if (v.length === 2) minuteRef.current?.focus();
+                      }}
+                      placeholder="HH"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
+                    />
+                    <input
+                      ref={minuteRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={minute}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, "").slice(0, 2);
+                        setMinute(v);
+                        if (v.length === 2) secondRef.current?.focus();
+                      }}
+                      placeholder="MM"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400 border-x border-stone-200 px-1"
+                    />
+                    <input
+                      ref={secondRef}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={2}
+                      value={second}
+                      onChange={(e) => setSecond(e.target.value.replace(/\D/g, "").slice(0, 2))}
+                      placeholder="SS"
+                      className="w-full text-center text-xs sm:text-sm font-semibold text-stone-900 bg-transparent outline-none placeholder:text-stone-400"
+                    />
+                    <div className="flex rounded-lg border border-stone-200 bg-stone-100 p-0.5 overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => setPeriod("AM")}
+                        className={`flex-1 text-[11px] font-bold py-1 rounded-md transition-all cursor-pointer ${
+                          period === "AM" ? "bg-[#fcd404] text-stone-950 font-extrabold shadow-2xs" : "text-stone-600 hover:text-stone-900"
+                        }`}
+                      >
+                        AM
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPeriod("PM")}
+                        className={`flex-1 text-[11px] font-bold py-1 rounded-md transition-all cursor-pointer ${
+                          period === "PM" ? "bg-[#fcd404] text-stone-950 font-extrabold shadow-2xs" : "text-stone-600 hover:text-stone-900"
+                        }`}
+                      >
+                        PM
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Place */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                <MapPin className="inline-block size-3.5 mr-1 text-amber-600" />
-                <span>{ui.formPob}</span>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-stone-700">
+                {ui.formPob} <span className="text-rose-500">*</span>
               </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={place}
-                  onChange={(e) => setPlace(e.target.value)}
-                  placeholder={ui.formPobPlaceholder}
-                  className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-amber-500 focus:outline-none"
-                />
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1 rounded-2xl border border-stone-200 hover:border-stone-300 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 bg-stone-50/50 hover:bg-white focus-within:bg-white px-3.5 py-2.5 flex items-center gap-2.5 transition-all shadow-2xs">
+                  <MapPin className="size-4 text-stone-400 shrink-0" />
+                  <input
+                    type="text"
+                    value={place}
+                    onChange={(e) => setPlace(e.target.value)}
+                    placeholder={ui.formPobPlaceholder}
+                    className="w-full text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 bg-transparent outline-none font-medium"
+                  />
+                </div>
                 <button
                   type="button"
                   onClick={() => setIsMapModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-xs font-bold text-amber-800 hover:bg-amber-100 press transition-colors"
+                  className="min-h-11 inline-flex items-center gap-1.5 rounded-2xl border border-amber-300 bg-amber-50/80 hover:bg-amber-100 px-4 py-2 text-xs font-bold text-amber-900 transition-colors shadow-2xs cursor-pointer shrink-0"
                 >
-                  <Compass className="size-4" />
+                  <Compass className="size-4 text-amber-700" />
                   <span>{ui.formMap}</span>
                 </button>
               </div>
             </div>
 
-            {/* Advance Settings Toggle */}
-            <div className="pt-1">
+            {/* Advanced Settings Toggle */}
+            <div className="pt-1 border-t border-stone-100">
               <button
                 type="button"
                 onClick={() => setShowAdvance(!showAdvance)}
-                className="inline-flex min-h-10 w-full items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800"
+                className="inline-flex items-center justify-between w-full py-2 text-xs font-bold text-stone-600 hover:text-stone-900 cursor-pointer group"
               >
-                <Sliders className="size-3.5" />
-                <span>{ui.formAdvancedSettings}</span>
+                <span className="inline-flex items-center gap-2">
+                  <Sliders className="size-3.5 text-amber-600" />
+                  <span>{ui.formAdvancedSettings}</span>
+                </span>
+                <ChevronDown
+                  className={`size-4 text-stone-400 transition-transform duration-200 ${
+                    showAdvance ? "rotate-180 text-amber-600" : ""
+                  }`}
+                />
               </button>
 
               {showAdvance && (
-                <div className="mt-3 p-4 rounded-xl border border-slate-100 bg-slate-50/70 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                <div className="mt-2 p-4 rounded-2xl border border-stone-200/80 bg-stone-50/60 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="block text-xs font-bold text-stone-700">
                       {ui.formAyanamsa}
                     </label>
                     <select
                       value={ayanamsa}
                       onChange={(e) => setAyanamsa(e.target.value as AyanamsaType)}
-                      className="w-full rounded-lg border border-slate-200 bg-white p-2 text-xs font-semibold"
+                      className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs font-semibold text-stone-800 outline-none focus:border-amber-500 shadow-2xs cursor-pointer"
                     >
+                      <option value="lahiri">Lahiri (Chitra Paksha - Standard)</option>
                       <option value="krishnamurti">KP (Krishnamurti Standard)</option>
-                      <option value="lahiri">Lahiri (Chitra Paksha)</option>
                       <option value="raman">BV Raman</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                  <div className="space-y-1">
+                    <label className="block text-xs font-bold text-stone-700">
                       {ui.formTimezone}
                     </label>
                     <input
@@ -742,7 +830,7 @@ export default function DashaCalculatorPage() {
                       value={timezone}
                       onChange={(e) => setTimezone(e.target.value)}
                       placeholder="+5.5"
-                      className="w-full rounded-lg border border-slate-200 bg-white p-2 text-xs"
+                      className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-800 outline-none focus:border-amber-500 shadow-2xs"
                     />
                   </div>
                 </div>
@@ -750,11 +838,11 @@ export default function DashaCalculatorPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-stone-100">
               <button
                 type="button"
                 onClick={handleReset}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 py-2.5 px-4 rounded-xl hover:bg-slate-100 press transition-colors order-2 sm:order-1 cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-stone-500 hover:text-stone-800 py-2.5 px-4 rounded-xl hover:bg-stone-100 transition-colors order-2 sm:order-1 cursor-pointer"
               >
                 <RotateCcw className="size-3.5" />
                 <span>{ui.resetBtn}</span>
@@ -770,17 +858,17 @@ export default function DashaCalculatorPage() {
                 <button
                   type="submit"
                   disabled={loading || (dashaFeature ? !dashaFeature.enabled : false)}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed press transition-all cursor-pointer"
+                  className="min-h-[48px] w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-8 rounded-2xl text-xs sm:text-sm font-bold text-stone-950 bg-[#fcd404] hover:bg-[#ebd500] shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer active:scale-[0.99]"
                 >
                   {loading ? (
                     <>
-                      <RefreshCw className="size-4 animate-spin" />
-                      <span>{ui.calculating}</span>
+                      <RefreshCw className="size-4 animate-spin text-stone-950" />
+                      <span className="font-bold">{ui.calculating}</span>
                     </>
                   ) : (
                     <>
-                      <Sparkles className="size-4" />
-                      <span>{ui.calculateBtn}</span>
+                      <Sparkles className="size-4 text-stone-950" />
+                      <span className="font-bold">{ui.calculateBtn}</span>
                     </>
                   )}
                 </button>
