@@ -1012,8 +1012,8 @@ export default function KundliPage() {
                           onClick={() => setGender(g.val as any)}
                           className={`min-h-11 rounded-2xl border px-2 py-2 text-center text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                             gender === g.val
-                              ? "bg-[#fffbeb] border-[#f59e0b] text-stone-950 shadow-2xs font-extrabold"
-                              : "bg-white border-stone-200 text-stone-600 hover:bg-stone-50"
+                              ? "bg-[#fcd404] border-[#fcd404] text-stone-950 shadow-xs font-extrabold"
+                              : "bg-stone-100/70 border-stone-200/80 text-stone-700 hover:bg-stone-200/60 font-semibold"
                           }`}
                         >
                           {g.label}

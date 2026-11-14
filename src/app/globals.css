@@ -810,6 +810,14 @@
   outline-offset: 2px;
 }
 
+.no-focus-ring,
+.no-focus-ring:focus,
+.no-focus-ring:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+}
+
 /* A single sweep of light across a surface, for a result that has just
    arrived. Runs once, then the pseudo-element is done. */
 @keyframes sheen {

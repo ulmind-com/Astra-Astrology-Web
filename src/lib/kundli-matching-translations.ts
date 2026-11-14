@@ -256,6 +256,11 @@ export interface KundliMatchingTranslations {
   matchHoroscopeBtn: string;
 
   // Educational Section
+  whatIsMatchingTitle: string;
+  whatIsMatchingP1: string;
+  whatIsMatchingP2: string;
+  whatIsMatchingP3: string;
+  whatIsMatchingP4: string;
   whyImportantTitle: string;
   emotionalTitle: string;
   emotionalDesc: string;
@@ -609,6 +614,16 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
     exactTimeLagnaHint: "সঠিক জন্মসময় লগ্ন স্থির করে — যা যোটক বিচারকে নিখুঁত করে।",
     formRequirementNote: "উভয়ের নাম, জন্মতারিখ ও জন্মস্থান প্রদান করা আবশ্যক।",
     matchHoroscopeBtn: "যোটক বিচার করুন →",
+
+    whatIsMatchingTitle: "কুন্ডলী মিলন বা যোটক বিচার কী? (Kundli Milan Meaning)",
+    whatIsMatchingP1:
+      "কুন্ডলী মিলন বা যোটক বিচার হলো বৈদিক জ্যোতিষশাস্ত্রের একটি প্রাচীন ও প্রামাণিক পদ্ধতি, যার মাধ্যমে বিবাহের পূর্বে পাত্র ও পাত্রীর পারস্পরিক মানসিক, আত্মিক ও দৈহিক সামঞ্জস্য বিচার করা হয়। বৈদিক জ্যোতিষে উভয় সঙ্গীর জন্মকুন্ডলী পুঙ্খানুপুঙ্খ বিশ্লেষণ করে দেখা হয় তাঁদের বৈবাহিক জীবন কতটা সুখময়, দীর্ঘস্থায়ী ও কল্যাণকর হবে।",
+    whatIsMatchingP2:
+      "এই পদ্ধতিতে প্রধানত অষ্টকূট গুণ মিলনের ৩৬টি গুণের সমন্বয়, চন্দ্ররাশি, জন্ম নক্ষত্র এবং গ্রহের অবস্থান বিচার করা হয়। প্রতিটি কূট দাম্পত্য জীবনের এক একটি অপরিহার্য ভিত্তি নির্দেশ করে — যেমন মানসিক ঐক্য, বংশবৃদ্ধি, স্বাস্থ্য, আর্থিক সমৃদ্ধি ও পারস্পরিক আকর্ষণ।",
+    whatIsMatchingP3:
+      "যোটক বিচার, কুন্ডলী মিলন এবং জন্মপত্রিকা মিলন একই বৈদিক শাস্ত্রীয় প্রক্রিয়ার অংশ। উত্তর ও পূর্ব ভারতে এটি বিশেষ গুরুত্ব সহকারে পালন করা হয়।",
+    whatIsMatchingP4:
+      "সাধারণত ৩৬ গুণের মধ্যে কমপক্ষে ১৮ গুণ অনুকূল হলে বিবাহকে শুভ বলে গণ্য করা হয়। এর পাশাপাশি মাঙ্গলিক দোষ ও নবমাংশ (D9) কুন্ডলীর অবস্থানও বিচার করা অত্যন্ত আবশ্যক।",
 
     whyImportantTitle: "বিবাহের জন্য কুন্ডলী মিলন বা যোটক বিচার কেন জরুরি?",
     emotionalTitle: "মানসিক ও আবেগিক সামঞ্জস্য — গণ ও গ্রহ মৈত্রী",
@@ -970,6 +985,16 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
     formRequirementNote: "दोनों पक्षों का नाम, जन्म तिथि एवं जन्म स्थान आवश्यक है।",
     matchHoroscopeBtn: "कुंडली मिलान करें →",
 
+    whatIsMatchingTitle: "कुंडली मिलान क्या है? (Kundli Milan Meaning)",
+    whatIsMatchingP1:
+      "कुंडली मिलान, जिसे वर-वधू गुण मिलान या पत्रिका मिलान भी कहा जाता है, वैदिक ज्योतिष की एक प्राचीन एवं प्रामाणिक पद्धति है। इसके माध्यम से विवाह से पूर्व दो व्यक्तियों के बीच मानसिक, शारीरिक, आध्यात्मिक एवं व्यावहारिक अनुकूलता का आकलन किया जाता है।",
+    whatIsMatchingP2:
+      "इस शास्त्रीय पद्धति में दोनों जातकों के जन्म नक्षत्र, चंद्र राशि और ग्रहों की स्थिति के आधार पर अष्टकूट मिलान के कुल 36 गुणों की गणना की जाती है। प्रत्येक कूट वैवाहिक जीवन के किसी महत्वपूर्ण पहलू जैसे मानसिक तालमेल, संतान सुख, स्वास्थ्य और आर्थिक स्थिरता का प्रतिनिधित्व करता है।",
+    whatIsMatchingP3:
+      "कुंडली मिलान और पत्रिका मिलान एक ही वैदिक प्रक्रिया के समानार्थी हैं। भारत और संपूर्ण दक्षिण एशिया में विवाह के समय इसे अत्यंत शुभ और अनिवार्य माना जाता है।",
+    whatIsMatchingP4:
+      "शास्त्रों के अनुसार 36 में से कम से कम 18 गुण मिलने पर विवाह अनुकूल माना जाता है। साथ ही मांगलिक दोष और नवमांश (D9) चक्र का विश्लेषण भी अवश्य किया जाता है।",
+
     whyImportantTitle: "विवाह के लिए कुंडली मिलान क्यों आवश्यक है?",
     emotionalTitle: "मानसिक एवं भावनात्मक सामंजस्य — गण एवं ग्रह मैत्री",
     emotionalDesc:
@@ -1329,6 +1354,16 @@ export const KUNDLI_MATCHING_STRINGS: Record<AstrologyLanguage, KundliMatchingTr
     exactTimeLagnaHint: "Exact birth time fixes the Lagna — it sharpens the reading.",
     formRequirementNote: "Name, birth date and birth place are needed for both partners.",
     matchHoroscopeBtn: "Match Horoscope →",
+
+    whatIsMatchingTitle: "What is Kundali Matching? (Kundli Milan Meaning)",
+    whatIsMatchingP1:
+      "Kundli matching, also known as Horoscope Matching or Kundli Milan, is a traditional Vedic Astrology method that astrologers use to check compatibility between two people before marriage. In Vedic Astrology, the Janam Kundlis of both prospective partners are thoroughly evaluated and compared to determine whether they are emotionally, physically, spiritually, and mentally aligned for a blessed, long-term marriage.",
+    whatIsMatchingP2:
+      "The classical Vedic process evaluates the precise planetary positions, Nakshatras, Moon signs (Rashis), and the sacred Ashtakoota Guna Milan system comprising 36 vital points. Each Koota assesses an essential pillar of married life — from emotional bonding and mutual respect to health, financial stability, and progeny.",
+    whatIsMatchingP3:
+      "Horoscope matching and kundli matching are widely used as synonyms. It is the same sacred process, also popularly known as Patrika Matching (যোটক বিচার / पत्रिका मिलान), especially across India and South Asia.",
+    whatIsMatchingP4:
+      "Vedic astrologers recommend that a minimum of 18 out of 36 Gunas should match for an auspicious union, while also verifying Manglik Dosha, 7th house strength, and Navamsha (D9) chart alignment.",
 
     whyImportantTitle: "Why is Kundali Matching Important for Marriage?",
     emotionalTitle: "Emotional Compatibility - Gana and Graha Maitri",
