@@ -902,11 +902,11 @@ export const ALL_27_NAKSHATRAS: NakshatraGuideItem[] = [
 
 export const NAKSHATRA_RELATED_TOOLS = [
   {
-    title: { bn: "ফ্রি জন্ম কুণ্ডলী", hi: "फ्री जन्म कुंडली", en: "Free Janam Kundli" },
+    title: { bn: "ফ্রি জন্ম কুণ্ডলী", hi: "फ्री जन्म कुंडली", en: "Free Kundli" },
     desc: {
       bn: "আপনার সম্পূর্ণ জন্মছক, ১২টি ভাব এবং সমস্ত গ্রহের সঠিক ডিগ্রি জানুন।",
       hi: "अपनी संपूर्ण जन्म कुंडली, 12 भाव और सभी ग्रहों की स्थिति जानें।",
-      en: "Generate your complete Vedic birth chart with 12 houses and planetary degrees.",
+      en: "Generate your free online kundli report with detailed houses and planetary degrees.",
     },
     href: "/kundli",
     icon: "Scroll",
@@ -916,10 +916,100 @@ export const NAKSHATRA_RELATED_TOOLS = [
     desc: {
       bn: "৩৬ গুণ মিলন, মাঙ্গলিক দোষ ও রাজযোটক বিচারের প্রামাণ্য বিশ্লেষণ।",
       hi: "अष्टकूट 36 गुण मिलान, मांगलिक दोष एवं संपूर्ण वैवाहिक सामंजस्य।",
-      en: "Authentic 36 Guna Ashtakoota compatibility and Manglik dosha analysis.",
+      en: "Check Love Compatibility and Marriage Prediction online with 36 Guna Ashtakoota.",
     },
     href: "/kundli-matching",
     icon: "Heart",
+  },
+  {
+    title: { bn: "লাভ ক্যালকুলেটর", hi: "लव कैलकुलेटर", en: "Love Calculator" },
+    desc: {
+      bn: "নাম ও জন্মতারিখ দিয়ে দুজনের মধ্যে ভালোবাসার শতাংশ ও আন্তরিক মেলবন্ধন জানুন।",
+      hi: "नाम और जन्मतिथि से प्रेम अनुकूलता और संबंधों का सामंजस्य मापें।",
+      en: "Measure the romantic compatibility between you and your partner by name and birth details.",
+    },
+    href: "/kundli-matching",
+    icon: "Heart",
+  },
+  {
+    title: { bn: "নাম নিউমেরোলজি ক্যালকুলেটর", hi: "नाम अंकज्योतिष कैलकुलेटर", en: "Name Numerology Calculator" },
+    desc: {
+      bn: "আপনার নামের চাল্ডিয়ান ও পিথাগোরিয়ান সংখ্যাতত্ত্ব বিশ্লেষণ এবং ভাগ্যাঙ্ক জানুন।",
+      hi: "अपने नाम का अंकज्योतिषीय विश्लेषण और जीवन पथ संख्या जानें।",
+      en: "Discover your Life Path Number and Destiny Number to understand your true purpose.",
+    },
+    href: "/numerology",
+    icon: "Sparkles",
+  },
+  {
+    title: { bn: "সূর্য রাশি ক্যালকুলেটর", hi: "सूर्य राशि कैलकुलेटर", en: "Sun Sign Calculator" },
+    desc: {
+      bn: "পাশ্চাত্য ও বৈদিক সৌর রাশি জেনে আত্মবিশ্বাস ও সামাজিক ব্যক্তিস্বরূপ উন্মোচন করুন।",
+      hi: "अपनी सूर्य राशि जानें और व्यक्तित्व व कार्यशैली को समझें।",
+      en: "Get your complete astrological profile based on your exact birth details and sun sign.",
+    },
+    href: "/rashi-calculator",
+    icon: "Star",
+  },
+  {
+    title: { bn: "রাশি ও চন্দ্র রাশি ক্যালকুলেটর", hi: "राशि / चंद्र राशि कैलकुलेटर", en: "Rashi/Moon Sign Calculator" },
+    desc: {
+      bn: "আপনার জন্মকালীন চন্দ্র রাশি, মানসিক স্বভাব ও আবেগের গভীর চাহিদা আবিষ্কার করুন।",
+      hi: "अपनी चंद्र राशि, स्वभाव और आंतरिक भावनाओं को गहराई से जानें।",
+      en: "Uncover your emotional nature and inner self by discovering your moon sign.",
+    },
+    href: "/rashi-calculator",
+    icon: "Moon",
+  },
+  {
+    title: { bn: "লগ্ন / অ্যাসেন্ডেন্ট ক্যালকুলেটর", hi: "लग्न / राइजिंग कैलकुलेटर", en: "Rising/Ascendant Calculator" },
+    desc: {
+      bn: "আপনার প্রথম ভাব বা লগ্ন রাশি নির্ণয় করে শারীরিক গঠন ও ব্যক্তিত্ব জানুন।",
+      hi: "अपनी लग्न राशि जानें जो आपके बाह्य व्यक्तित्व और रूप-रंग को दर्शाती है।",
+      en: "Find your rising sign to understand how others perceive you and your personality.",
+    },
+    href: "/kundli",
+    icon: "ArrowUp",
+  },
+  {
+    title: { bn: "জন্মছক ও নেটাল চার্ট", hi: "जन्म चक्र / नेटल चार्ट", en: "Birth Chart/Natal Chart Calculator" },
+    desc: {
+      bn: "গ্রহের রাশি ও নক্ষত্রের অবস্থান সহ সম্পূর্ণ বৈদিক নেটাল চার্ট বিশ্লেষণ।",
+      hi: "ग्रहों की स्थिति व दृष्टि के साथ संपूर्ण वैदिक जन्म चक्र रिपोर्ट।",
+      en: "Get a complete snapshot of your astrological blueprint with planetary positions.",
+    },
+    href: "/kundli",
+    icon: "Compass",
+  },
+  {
+    title: { bn: "মাঙ্গলিক দোষ ক্যালকুলেটর", hi: "मांगलिक दोष कैलकुलेटर", en: "Mangal Dosha Calculator" },
+    desc: {
+      bn: "মঙ্গল ১, ৪, ৭, ৮ বা ১২তম ভাবে অবস্থান করছে কিনা এবং এর প্রতিকার জানুন।",
+      hi: "कुंडली में मंगल दोष की उपस्थिति और इसके वैदिक निवारण उपाय जानें।",
+      en: "Check Manglik Dosha in your birth chart and discover authentic Vedic remedies.",
+    },
+    href: "/kundli",
+    icon: "Flame",
+  },
+  {
+    title: { bn: "শনি সাড়ে সাতি ক্যালকুলেটর", hi: "शनि साढ़े साती कैलकुलेटर", en: "Shani Sade Sati Calculator" },
+    desc: {
+      bn: "শনির সাড়ে সাতি ও ধাইয়া পর্যায়, চলমান প্রভাব ও শান্তির উপায় জেনে নিন।",
+      hi: "शनि साढ़ेसाती और ढैय्या का प्रभाव व अवधि की सटीक गणना।",
+      en: "Determine your current Saturn Sade Sati and Dhaiya phases with remedial guidance.",
+    },
+    href: "/dasha-calculator",
+    icon: "ShieldAlert",
+  },
+  {
+    title: { bn: "ইষ্ট দেবতা ক্যালকুলেটর", hi: "इष्ट देवता कैलकुलेटर", en: "Ishta Devata Calculator" },
+    desc: {
+      bn: "আত্মকারক গ্রহ ও দ্বাদশ ভাব থেকে আপনার মোক্ষদাতা ইষ্ট দেবতাকে চিনুন।",
+      hi: "अपनी कुंडली के आत्मकारक ग्रह से अपने इष्ट देव को पहचानें।",
+      en: "Identify your personal Ishta Devata for spiritual peace and soul evolution.",
+    },
+    href: "/kundli",
+    icon: "Award",
   },
   {
     title: { bn: "দশা ক্যালকুলেটর", hi: "दशा कैलकुलेटर", en: "Dasha Calculator" },
@@ -930,26 +1020,6 @@ export const NAKSHATRA_RELATED_TOOLS = [
     },
     href: "/dasha-calculator",
     icon: "Clock",
-  },
-  {
-    title: { bn: "দৈনিক রাশিফল", hi: "दैनिक राशिफल", en: "Daily Horoscope" },
-    desc: {
-      bn: "চন্দ্রের গোচর অনুসারে আজকের দিনটির ভাগ্য, শুভ রঙ ও শুভ সংখ্যা।",
-      hi: "चंद्र गोचर के आधार पर आज का दिन, शुभ रंग व शुभ अंक।",
-      en: "Planetary transits for today's career, romance, lucky color, and lucky numbers.",
-    },
-    href: "/daily-horoscope",
-    icon: "Star",
-  },
-  {
-    title: { bn: "এআই বৈদিক জ্যোতিষী", hi: "एआई वैदिक ज्योतिषी", en: "AI Vedic Astrologer" },
-    desc: {
-      bn: "যে কোনো জ্যোতিষীয় প্রশ্ন করুন এবং শাস্ত্রসম্মত তাৎক্ষণিক উত্তর পান।",
-      hi: "किसी भी ज्योतिषीय प्रश्न का प्रामाणिक एवं त्वरित उत्तर पाएं।",
-      en: "Ask any personalized question on Vedic astrology, Dasha, and authentic remedies.",
-    },
-    href: "/ai-astrologer",
-    icon: "Sparkles",
   },
 ];
 

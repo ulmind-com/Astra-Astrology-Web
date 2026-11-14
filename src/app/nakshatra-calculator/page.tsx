@@ -119,6 +119,7 @@ export default function NakshatraCalculatorPage() {
   const [minute, setMinute] = React.useState("");
   const [second, setSecond] = React.useState("");
   const [period, setPeriod] = React.useState<"AM" | "PM">("PM");
+  const [unknownTime, setUnknownTime] = React.useState(false);
 
   // Place & Coordinates
   // `selectedPlace` is the authoritative source for coordinates and timezone. It is
@@ -314,6 +315,7 @@ export default function NakshatraCalculatorPage() {
     setMinute("");
     setSecond("");
     setPeriod("PM");
+    setUnknownTime(false);
     setPlace("");
     setLatitude(null);
     setLongitude(null);
@@ -432,13 +434,13 @@ export default function NakshatraCalculatorPage() {
       return;
     }
 
-    // 2. Optional Birth Time handling (defaulting to 12:00 PM if omitted)
+    // 2. Optional Birth Time handling (defaulting to 12:00 PM if omitted or unknownTime is checked)
     let parsedHour = 12;
     let parsedMinute = 0;
     let parsedSecond = 0;
     let effectivePeriod: "AM" | "PM" = "PM";
 
-    if (hour.trim() !== "") {
+    if (!unknownTime && hour.trim() !== "") {
       parsedHour = parseInt(hour, 10) || 12;
       parsedMinute = parseInt(minute, 10) || 0;
       parsedSecond = parseInt(second, 10) || 0;
@@ -607,23 +609,18 @@ export default function NakshatraCalculatorPage() {
     <div className="min-h-screen bg-[#fafaf9]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
       <SiteHeader />
 
-      <main className="mx-auto max-w-6xl px-3 sm:px-6 py-4 flex-1 w-full space-y-8">
+      <main className="mx-auto max-w-5xl px-4 pt-6 sm:px-6 lg:px-8 space-y-8 flex-1">
         {/* =========================================================================
             1. BREADCRUMB & LANGUAGE SWITCHER
         ========================================================================= */}
-        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-stone-500 pt-0.5 pb-1">
-          <div className="flex items-center gap-1.5 uppercase tracking-wider font-semibold">
-            <Link href="/" className="hover:text-amber-700 transition-colors">
-              {language === "bn" ? "হোম" : language === "hi" ? "होम" : "Home"}
-            </Link>
-            <span className="text-stone-300">&gt;</span>
-            <span className="text-stone-900 font-bold">
-              {language === "bn" ? "জন্ম নক্ষত্র ক্যালকুলেটর" : language === "hi" ? "नक्षत्र कैलकुलेटर" : "Nakshatra Calculator"}
-            </span>
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-1.5 font-bold tracking-wider uppercase text-stone-400">
+            <Link href="/" className="hover:text-amber-700 transition-colors">HOME</Link>
+            <span>&gt;</span>
+            <span className="text-stone-700">NAKSHATRA CALCULATOR</span>
           </div>
 
-          {/* Language Switcher Bar */}
-          <div className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white p-0.5 text-xs font-semibold shadow-2xs">
+          <div className="flex items-center gap-1 rounded-full border border-stone-200 bg-white p-1 shadow-2xs">
             {(
               [
                 { code: "bn", label: "বাংলা" },
@@ -650,17 +647,17 @@ export default function NakshatraCalculatorPage() {
         {/* =========================================================================
             2. HERO SECTION: Compact, sleek, with rotating faint zodiac circle in background
         ========================================================================= */}
-        <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-r from-amber-50/50 via-white to-amber-50/30 px-4 sm:px-6 py-4 shadow-2xs">
+        <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-r from-amber-50/50 via-white to-amber-50/30 px-4 sm:px-6 py-5 shadow-2xs">
           {/* Faint rotating zodiac wheel in background */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/zodiac-wheel-gold.webp"
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute -right-12 -top-16 size-[260px] sm:size-[340px] select-none opacity-[0.14] mix-blend-multiply animate-spin [animation-duration:120s] motion-reduce:animate-none"
+            className="pointer-events-none absolute -right-12 -top-16 size-[260px] sm:size-[340px] select-none opacity-[0.16] mix-blend-multiply animate-spin [animation-duration:120s] motion-reduce:animate-none"
           />
 
-          <div className="relative z-10 max-w-2xl space-y-1.5">
+          <div className="relative z-10 max-w-2xl space-y-2">
             <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-bold text-amber-900">
               <Sparkles className="size-3 text-amber-600" />
               <span>{ui.badge}</span>
@@ -932,6 +929,34 @@ export default function NakshatraCalculatorPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Unknown birth time checkbox - Astrotalk matching */}
+                <div className="pt-1.5 flex items-center justify-between">
+                  <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={unknownTime}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setUnknownTime(checked);
+                        if (checked) {
+                          setHour("12");
+                          setMinute("00");
+                          setSecond("00");
+                          setPeriod("PM");
+                        }
+                      }}
+                      className="rounded border-stone-300 text-amber-500 focus:ring-amber-400 size-4 cursor-pointer"
+                    />
+                    <span className="text-xs text-stone-600 font-medium">
+                      {language === "bn"
+                        ? "আমি আমার সঠিক জন্ম সময় জানি না (দুপুর ১২:০০ ধরা হবে)"
+                        : language === "hi"
+                        ? "मुझे अपना जन्म समय नहीं पता (दोपहर 12:00 माना जाएगा)"
+                        : "I don't know my birth time"}
+                    </span>
+                  </label>
+                </div>
               </div>
             </div>
 
@@ -1019,17 +1044,17 @@ export default function NakshatraCalculatorPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-stone-100">
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-stone-100">
               <button
                 type="button"
                 onClick={handleResetForm}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-stone-500 hover:text-stone-800 py-2.5 px-4 rounded-xl hover:bg-stone-100 transition-colors order-2 sm:order-1 cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-500 hover:text-stone-800 cursor-pointer order-2 sm:order-1"
               >
                 <RotateCcw className="size-3.5" />
                 <span>{ui.resetBtn}</span>
               </button>
 
-              <div className="flex items-center gap-3 w-full sm:w-auto justify-end order-1 sm:order-2">
+              <div className="flex items-center gap-3 order-1 sm:order-2 w-full sm:w-auto">
                 <FeatureCoinBadge
                   feature={nakshatraFeature}
                   walletBalance={walletBalance}
@@ -1037,33 +1062,28 @@ export default function NakshatraCalculatorPage() {
                   showWallet={false}
                 />
 
-                <button
+                <Button
                   type="submit"
+                  size="lg"
                   disabled={loading || (nakshatraFeature ? !nakshatraFeature.enabled : false)}
-                  className="min-h-[48px] w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-8 rounded-2xl text-xs sm:text-sm font-bold text-stone-950 bg-[#fcd404] hover:bg-[#ebd500] shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer active:scale-[0.99]"
+                  className="flex-1 sm:flex-none min-h-11 px-8 py-2.5 rounded-xl bg-[#fcd404] hover:bg-[#ebd500] text-stone-950 font-bold text-xs sm:text-sm shadow-xs transition-all cursor-pointer border border-amber-300/80 active:scale-95"
                 >
                   {loading ? (
-                    <>
-                      <RefreshCw className="size-4 animate-spin text-stone-950" />
-                      <span className="font-bold">{ui.calculating}</span>
-                    </>
+                    <span className="flex items-center gap-2">
+                      <RefreshCw className="size-3.5 animate-spin text-stone-950" />
+                      <span>{ui.calculating}</span>
+                    </span>
                   ) : (
-                    <>
-                      <Star className="size-4 fill-stone-950 text-stone-950" />
-                      <span className="font-bold">
+                    <span className="flex items-center gap-2">
+                      <span>
                         {nakshatraFeature && !nakshatraFeature.enabled
-                          ? language === "bn"
-                            ? "ফিচারটি বন্ধ রয়েছে"
-                            : "Feature Disabled"
-                          : language === "bn"
-                          ? "জন্ম নক্ষত্র গণনা করুন"
-                          : language === "hi"
-                          ? "जन्म नक्षत्र गणना करें"
-                          : "Calculate my Nakshatra"}
+                          ? (language === "bn" ? "ফিচার সাময়িক বন্ধ" : "Feature Disabled")
+                          : (language === "bn" ? "আমার জন্ম নক্ষত্র গণনা করুন" : language === "hi" ? "नक्षत्र गणना करें" : "Calculate my Nakshatra")}
                       </span>
-                    </>
+                      <ArrowRight className="size-3.5" />
+                    </span>
                   )}
-                </button>
+                </Button>
               </div>
             </div>
           </form>
