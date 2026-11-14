@@ -79,6 +79,9 @@ export default function LessonClassroomPage() {
   const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
   const playerContainerRef = React.useRef<HTMLDivElement | null>(null);
   const currentPlayheadRef = React.useRef<number>(0);
+  // Held in a ref next to the playhead so the completion handler can read
+  // both without taking a dependency on the lesson object.
+  const lessonDurationRef = React.useRef<number>(0);
   const lastReportedTimeRef = React.useRef<number>(0);
   const hasNotifiedResume = React.useRef<boolean>(false);
 
@@ -334,13 +337,27 @@ export default function LessonClassroomPage() {
     if (!course || !course.is_enrolled || isUpdatingProgress) return;
     try {
       setIsUpdatingProgress(true);
+      // The real playhead, not a number that says the lesson is over. The
+      // server credits watch time against its own clock now, and a made-up
+      // figure here would push the recorded position past anything the
+      // player later reports — after which no further time could be earned.
+      const duration = lessonDurationRef.current;
       const res = await courseApi.updateProgress(course.id, lessonId, {
-        watched_seconds: 3600,
-        total_seconds: 3600,
+        watched_seconds: Math.round(currentPlayheadRef.current),
+        total_seconds: duration || Math.round(currentPlayheadRef.current),
         mark_completed: true,
       });
 
-      // Optimistically update React Query cache so progress bar & lesson checkmarks jump immediately
+      // The server decides whether it counts. Marking the lesson done here
+      // regardless would show a tick the next refresh takes away again.
+      if (!res.is_lesson_completed) {
+        toast.info(
+          res.message ||
+            "Please watch a little more of this lesson before marking it complete.",
+        );
+        return;
+      }
+
       queryClient.setQueryData(["course-detail", slug], (old: any) => {
         if (!old) return old;
         const newSections = old.sections?.map((sec: any) => ({
@@ -373,6 +390,10 @@ export default function LessonClassroomPage() {
       setIsUpdatingProgress(false);
     }
   }, [course, isUpdatingProgress, lessonId, nextLesson, queryClient, router, slug]);
+
+  React.useEffect(() => {
+    lessonDurationRef.current = (currentLesson?.duration_minutes || 0) * 60;
+  }, [currentLesson?.duration_minutes]);
 
   // Listen for Bunny Stream player messages ('ended' for completion & 'timeupdate' for watch progress)
   React.useEffect(() => {

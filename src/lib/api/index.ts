@@ -1185,7 +1185,7 @@ export const courseApi = {
     lessonId: string,
     payload: { watched_seconds: number; total_seconds: number; mark_completed?: boolean }
   ) =>
-    api.post<{ progress_percent: number; is_lesson_completed: boolean; certificate_issued: boolean; certificate_id?: string }>(
+    api.post<{ progress_percent: number; is_lesson_completed: boolean; certificate_issued: boolean; certificate_id?: string; message?: string | null }>(
       endpoints.courses.lessonProgress(courseId, lessonId),
       payload
     ),
