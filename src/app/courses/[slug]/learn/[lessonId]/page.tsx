@@ -84,6 +84,7 @@ export default function LessonClassroomPage() {
   // both without taking a dependency on the lesson object.
   const lessonDurationRef = React.useRef<number>(0);
   const lastReportedTimeRef = React.useRef<number>(0);
+  const activePresenceSecondsRef = React.useRef<number>(0);
   const hasNotifiedResume = React.useRef<boolean>(false);
 
   // Student Personal Study Notebook States
@@ -338,14 +339,15 @@ export default function LessonClassroomPage() {
     if (!course || !course.is_enrolled || isUpdatingProgress) return;
     try {
       setIsUpdatingProgress(true);
-      // The real playhead, not a number that says the lesson is over. The
-      // server credits watch time against its own clock now, and a made-up
-      // figure here would push the recorded position past anything the
-      // player later reports — after which no further time could be earned.
-      const duration = lessonDurationRef.current;
+      // Determine effective watch position: max of reported playhead and active presence time
+      const watchSecs = Math.max(currentPlayheadRef.current, activePresenceSecondsRef.current);
+      const duration =
+        lessonDurationRef.current ||
+        (currentLesson?.duration_minutes ? currentLesson.duration_minutes * 60 : 0);
+
       const res = await courseApi.updateProgress(course.id, lessonId, {
-        watched_seconds: Math.round(currentPlayheadRef.current),
-        total_seconds: duration || Math.round(currentPlayheadRef.current),
+        watched_seconds: Math.round(watchSecs),
+        total_seconds: duration || Math.round(watchSecs),
         mark_completed: true,
       });
 
@@ -399,18 +401,52 @@ export default function LessonClassroomPage() {
     lessonDurationRef.current = (currentLesson?.duration_minutes || 0) * 60;
   }, [currentLesson?.duration_minutes]);
 
-  // Listen for Bunny Stream player messages ('ended' for completion & 'timeupdate' for watch progress)
+  // Sync active presence seconds from previously saved progress
   React.useEffect(() => {
-    const handleBunnyMessage = (event: MessageEvent) => {
+    activePresenceSecondsRef.current = streamData?.last_watched_seconds ?? 0;
+  }, [lessonId, streamData?.last_watched_seconds]);
+
+  // Active classroom presence ticker (increments while student is actively on the tab)
+  React.useEffect(() => {
+    const ticker = setInterval(() => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        activePresenceSecondsRef.current += 1;
+      }
+    }, 1000);
+    return () => clearInterval(ticker);
+  }, [lessonId]);
+
+  // Listen for Bunny Stream and YouTube Player API messages
+  React.useEffect(() => {
+    const handlePlayerMessage = (event: MessageEvent) => {
       try {
         const data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
-        // 1. Video finished
-        if (data?.event === "ended" || data?.type === "ended" || data?.name === "ended") {
+
+        // 1. YouTube IFrame Player API progress & duration delivery
+        if (data?.event === "infoDelivery" && data?.info) {
+          if (typeof data.info.currentTime === "number" && data.info.currentTime > 0) {
+            currentPlayheadRef.current = Math.floor(data.info.currentTime);
+          }
+          if (
+            typeof data.info.duration === "number" &&
+            data.info.duration > 0 &&
+            !lessonDurationRef.current
+          ) {
+            lessonDurationRef.current = Math.floor(data.info.duration);
+          }
+          if (data.info.playerState === 0 && currentLesson && !currentLesson.is_completed) {
+            handleMarkComplete();
+          }
+        }
+
+        // 2. YouTube onStateChange ended (0 = ENDED)
+        if (data?.event === "onStateChange" && data?.info === 0) {
           if (currentLesson && !currentLesson.is_completed) {
             handleMarkComplete();
           }
         }
-        // 2. Playback progress update
+
+        // 3. Bunny Stream playback progress update
         if (data?.event === "timeupdate" || data?.type === "timeupdate") {
           const secs = Math.floor(
             data?.value?.seconds || data?.value?.currentTime || data?.data?.currentTime || 0
@@ -419,28 +455,56 @@ export default function LessonClassroomPage() {
             currentPlayheadRef.current = secs;
           }
         }
+
+        // 4. Bunny Stream ended
+        if (data?.event === "ended" || data?.type === "ended" || data?.name === "ended") {
+          if (currentLesson && !currentLesson.is_completed) {
+            handleMarkComplete();
+          }
+        }
       } catch {
         // Ignore non-JSON postMessages
       }
     };
-    window.addEventListener("message", handleBunnyMessage);
-    return () => window.removeEventListener("message", handleBunnyMessage);
+    window.addEventListener("message", handlePlayerMessage);
+    return () => window.removeEventListener("message", handlePlayerMessage);
   }, [currentLesson, handleMarkComplete]);
+
+  // Periodic YouTube listening handshake to ensure YouTube sends postMessage updates
+  React.useEffect(() => {
+    const handshakeTimer = setInterval(() => {
+      if (iframeRef.current?.contentWindow) {
+        try {
+          iframeRef.current.contentWindow.postMessage(
+            JSON.stringify({ event: "listening" }),
+            "*"
+          );
+        } catch {}
+      }
+    }, 4000);
+    return () => clearInterval(handshakeTimer);
+  }, [lessonId]);
 
   // Periodic watch progress sync every 25 seconds
   React.useEffect(() => {
     const syncInterval = setInterval(() => {
+      const watchSecs = Math.max(currentPlayheadRef.current, activePresenceSecondsRef.current);
+      const duration =
+        lessonDurationRef.current ||
+        (currentLesson?.duration_minutes ? currentLesson.duration_minutes * 60 : 0) ||
+        3600;
+
       if (
         course?.id &&
         course?.is_enrolled &&
         lessonId &&
-        currentPlayheadRef.current > 5 &&
-        Math.abs(currentPlayheadRef.current - lastReportedTimeRef.current) >= 15
+        watchSecs > 5 &&
+        Math.abs(watchSecs - lastReportedTimeRef.current) >= 15
       ) {
-        lastReportedTimeRef.current = currentPlayheadRef.current;
+        lastReportedTimeRef.current = watchSecs;
         courseApi.updateProgress(course.id, lessonId, {
-          watched_seconds: currentPlayheadRef.current,
-          total_seconds: (currentLesson?.duration_minutes || 0) * 60 || 3600,
+          watched_seconds: Math.round(watchSecs),
+          total_seconds: duration,
           mark_completed: false,
         }).catch(() => {});
       }
