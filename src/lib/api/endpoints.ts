@@ -224,6 +224,12 @@ export const endpoints = {
     recommendations: "/shop/recommendations",
     reserveStock: "/shop/reserve-stock",
     releaseStock: "/shop/release-stock",
+    checkout: "/shop/checkout",
+    verifyPayment: "/shop/verify-payment",
+    myOrders: "/shop/orders/mine",
+    orderDetail: (orderKey: string) => `/shop/orders/${orderKey}`,
+    cancelOrder: (orderKey: string) => `/shop/orders/${orderKey}/cancel`,
+    checkPincode: (pincode: string) => `/shop/pincode/${pincode}`,
   },
   courses: {
     list: "/courses",

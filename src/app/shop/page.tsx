@@ -14,26 +14,35 @@ import {
   Package,
   ShieldCheck,
   ShoppingBag,
-  ExternalLink,
-  ChevronRight,
-  PhoneCall,
-  Clock,
+  Coins,
+  Gift,
+  ArrowRight,
   RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
-import { shopApi, type ShopProduct, type ShopProductCategory } from "@/lib/api";
+import { shopApi, type ShopProduct, type ShopProductCategory, type ShopBannerSettings } from "@/lib/api";
 import { useLanguage } from "@/providers/language-provider";
+import { useCartStore } from "@/lib/stores/use-cart-store";
+import { CartDrawer } from "@/components/shop/CartDrawer";
+import { ShopAnnouncementMarquee } from "@/components/shop/ShopAnnouncementMarquee";
+import { ShopHeroSlider } from "@/components/shop/ShopHeroSlider";
+import { ShopCategoryPills } from "@/components/shop/ShopCategoryPills";
+import { ShopByWhatMatters } from "@/components/shop/ShopByWhatMatters";
+import { ShopBestsellers } from "@/components/shop/ShopBestsellers";
+import { CashbackPromoBanner } from "@/components/shop/CashbackPromoBanner";
+import { AstraPromiseSection } from "@/components/shop/AstraPromiseSection";
+import { ShopFaqAccordion } from "@/components/shop/ShopFaqAccordion";
 
 const FALLBACK_PRODUCTS: ShopProduct[] = [
   {
     id: "prod-saturn-7m",
-    title: "খাঁটি নেপালি ৭-মুখী রুদ্রাক্ষ (৭-Mukhi Nepali Rudraksha)",
+    title: "খাঁটি নেপালি ৭-মুখী রুদ্রাক্ষ (৭-Mukhi Siddh Nepali Rudraksha)",
     slug: "nepali-7-mukhi-rudraksha",
     sku: "ASTRA-RUD-7M",
     short_description: "শনির সাড়ে সাতি, ধাইয়া ও কণ্টক শনির অশুভ প্রভাব প্রশমনকারী মহালক্ষ্মী ও শনিসিদ্ধ পবিত্র রুদ্রাক্ষ।",
-    detailed_description: "নেপালের উচ্চ পার্বত্য অঞ্চল থেকে সংগৃহীত ১০০% প্রাকৃতিক ও আদি ৭-মুখী রুদ্রাক্ষ।",
+    detailed_description: "নেপালের উচ্চ পার্বত্য অঞ্চল থেকে সংগৃহীত ১০০% প্রাকৃতিক ও আদি ৭-মুখী রুদ্রাক্ষ। কাশীর পুরোহিত দ্বারা ১০৮ বার মহামৃত্যুঞ্জয় মন্ত্রে প্রাণ-প্রতিষ্ঠিত।",
     category_id: "cat-rudraksha",
     category_slug: "rudraksha",
     category_type: "rudraksha",
@@ -41,6 +50,14 @@ const FALLBACK_PRODUCTS: ShopProduct[] = [
     deity: "Mahalakshmi & Shani Dev",
     benefits: ["শনির সাড়েসাতি প্রশমন", "কর্মক্ষেত্রে প্রমোশন", "আকস্মিক অর্থক্ষতি রোধ"],
     life_pillars: ["career", "finance"],
+    purpose_tags: ["dosha", "career", "protection"],
+    free_gift_title: "Raw Selenite Charging Plate",
+    free_gift_value: 729,
+    free_gift_badge: "FREE Raw Selenite Plate worth ₹729",
+    cashback_percent: 100,
+    lab_certified: true,
+    lab_certificate_name: "Govt. Approved Gemological Lab",
+    lab_certificate_number: "IGL-RUD-2026-7789",
     mrp: 3999,
     sale_price: 1899,
     discount_percent: 52,
@@ -55,31 +72,73 @@ const FALLBACK_PRODUCTS: ShopProduct[] = [
     review_count: 84,
   },
   {
-    id: "prod-rahu-silver",
-    title: "বিশুদ্ধ ৪ গ্রাম নিরেট চৌকো রুপোর পাত ও ৮-মুখী রুদ্রাক্ষ",
-    slug: "solid-square-silver-rahu-combo",
-    sku: "ASTRA-LK-RAHU-SILVER",
-    short_description: "৮ম ও ১২শ ভাবে রাহুর পীড়া, মানসিক বিভ্রান্তি, দুঃস্বপ্ন ও ভয় দূরীকরণে বিশুদ্ধ শাস্ত্রীয় লাল কিতাব ক্যানন।",
-    detailed_description: "৯৯.৯% খাঁটি নিরেট চারকোনা রুপোর টুকরো এবং প্রস্ফুটিত ৮-মুখী রুদ্রাক্ষের সম্মিলিত সুরক্ষা বলয়।",
-    category_id: "cat-silver",
-    category_slug: "silver",
-    category_type: "ritual_items",
-    ruling_planet: "Rahu",
-    deity: "Ganesha & Bhairava",
-    benefits: ["রাহুর গোচর শান্তি", "মানসিক উদ্বেগ মুক্তি", "আকস্মিক দুর্ঘটনার সুরক্ষা"],
-    life_pillars: ["health", "luck"],
-    mrp: 2999,
-    sale_price: 1499,
-    discount_percent: 50,
-    stock_quantity: 18,
+    id: "prod-pyrite-ring",
+    title: "খাঁটি পায়রাইট ধন আকর্ষণ আংটি ও রিং (Natural Pyrite Stud Ring)",
+    slug: "natural-pyrite-stud-ring",
+    sku: "ASTRA-PYR-RING",
+    short_description: "আর্থিক সমৃদ্ধি, আটকে থাকা টাকা উদ্ধার ও ব্যবসা বৃদ্ধিতে প্রত্যক্ষ ফলদায়ী দেবগুরু ও বুধ যোগের সিদ্ধ রিং।",
+    detailed_description: "প্রাকৃতিক গোল্ডেন পায়রাইট পাথর খচিত প্রিমিয়াম রিং। এটি ধারণে আত্মবিশ্বাস ও আর্থিক সুযোগ আকর্ষিত হয়।",
+    category_id: "cat-pyrite",
+    category_slug: "pyrite",
+    category_type: "crystal_bracelet",
+    ruling_planet: "Sun & Mercury",
+    deity: "Maha Lakshmi & Kuber",
+    benefits: ["স্থায়ী ধনবৃদ্ধি", "আটকে থাকা টাকা ফেরত", "কর্মক্ষেত্রে সাফল্য"],
+    life_pillars: ["finance", "career"],
+    purpose_tags: ["wealth", "career"],
+    free_gift_title: "Raw Selenite Charging Plate",
+    free_gift_value: 729,
+    free_gift_badge: "FREE Raw Selenite Plate worth ₹729",
+    cashback_percent: 100,
+    lab_certified: true,
+    lab_certificate_name: "Govt. Approved Gemological Lab",
+    lab_certificate_number: "VGL-PYR-2026-4412",
+    mrp: 2499,
+    sale_price: 999,
+    discount_percent: 60,
+    stock_quantity: 25,
     in_stock: true,
     featured_image: "https://images.unsplash.com/photo-1611591475879-166258f33cf2?w=600&auto=format&fit=crop&q=80",
     images: ["https://images.unsplash.com/photo-1611591475879-166258f33cf2?w=600&auto=format&fit=crop&q=80"],
     is_active: true,
     is_featured: true,
     is_energized: true,
-    average_rating: 4.8,
-    review_count: 62,
+    average_rating: 5.0,
+    review_count: 142,
+  },
+  {
+    id: "prod-leo-zodiac-band",
+    title: "সিংহ রাশি মেটাল ও ক্রিস্টাল ব্রেসলেট (Leo Zodiac Metal Bracelet)",
+    slug: "leo-zodiac-metal-bracelet-free-selenite",
+    sku: "ASTRA-ZOD-LEO",
+    short_description: "সিংহ রাশির রবি গ্রহের তেজ, আত্মবিশ্বাস ও নেতৃত্ব গুণাবলী বৃদ্ধির বিশেষ সূর্যকান্ত ব্রেসলেট।",
+    detailed_description: "প্রাকৃতিক সানস্টোন, টাইগার আই ও খাঁটি মেটাল চার্ম খচিত সিংহ রাশি ব্রেসলেট। সাথে সম্পূর্ণ ফ্রি ₹৭২৯ মূল্যের সেলিনাইট প্লেট।",
+    category_id: "cat-zodiac",
+    category_slug: "zodiac",
+    category_type: "crystal_bracelet",
+    ruling_planet: "Sun",
+    deity: "Surya Bhagavan",
+    benefits: ["নেতৃত্ব ও সম্মান বৃদ্ধি", "রবি গ্রহের শুভত্ব", "পিতৃদোষ নিবারণ"],
+    life_pillars: ["luck", "career"],
+    purpose_tags: ["zodiac", "career"],
+    free_gift_title: "Raw Selenite Charging Plate",
+    free_gift_value: 729,
+    free_gift_badge: "FREE Raw Selenite Plate worth ₹729",
+    cashback_percent: 100,
+    lab_certified: true,
+    lab_certificate_name: "Govt. Approved Gemological Lab",
+    mrp: 2800,
+    sale_price: 999,
+    discount_percent: 64,
+    stock_quantity: 18,
+    in_stock: true,
+    featured_image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&auto=format&fit=crop&q=80",
+    images: ["https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&auto=format&fit=crop&q=80"],
+    is_active: true,
+    is_featured: true,
+    is_energized: true,
+    average_rating: 4.9,
+    review_count: 110,
   },
   {
     id: "prod-mars-coral",
@@ -90,11 +149,18 @@ const FALLBACK_PRODUCTS: ShopProduct[] = [
     detailed_description: "প্রাকৃতিক খাঁটি ইতালীয় রক্তপ্রবাল ও অগ্নিস্বরূপ ৩-মুখী রুদ্রাক্ষের সমন্বয়ে তৈরি পবিত্র রক্ষা কবচ।",
     category_id: "cat-gemstones",
     category_slug: "gemstones",
-    category_type: "gemstones",
+    category_type: "gemstone",
     ruling_planet: "Mars",
     deity: "Hanuman & Kartikeya",
     benefits: ["মাঙ্গলিক দোষ নিবারণ", "বীর্য ও জীবনীশক্তি বৃদ্ধি", "সম্পত্তি সংকট মোচন"],
     life_pillars: ["love", "family"],
+    purpose_tags: ["dosha", "love"],
+    free_gift_title: "Raw Selenite Charging Plate",
+    free_gift_value: 729,
+    free_gift_badge: "FREE Raw Selenite Plate worth ₹729",
+    cashback_percent: 100,
+    lab_certified: true,
+    lab_certificate_name: "Govt. Approved Gemological Lab",
     mrp: 4999,
     sale_price: 2499,
     discount_percent: 50,
@@ -122,6 +188,12 @@ const FALLBACK_PRODUCTS: ShopProduct[] = [
     deity: "Maha Lakshmi & Kuber",
     benefits: ["আটকে থাকা টাকা ফেরত", "স্থায়ী ধনবৃদ্ধি", "ঋণমুক্তি"],
     life_pillars: ["finance", "family"],
+    purpose_tags: ["wealth"],
+    free_gift_title: "Raw Selenite Charging Plate",
+    free_gift_value: 729,
+    free_gift_badge: "FREE Raw Selenite Plate worth ₹729",
+    cashback_percent: 100,
+    lab_certified: true,
     mrp: 2199,
     sale_price: 999,
     discount_percent: 55,
@@ -136,22 +208,28 @@ const FALLBACK_PRODUCTS: ShopProduct[] = [
     review_count: 112,
   },
   {
-    id: "prod-jupiter-5m",
-    title: "নেপালি ৫-মুখী রুদ্রাক্ষ ও কাঁচা হলুদের সিদ্ধ মালা",
-    slug: "nepali-5-mukhi-haldi-mala",
-    sku: "ASTRA-RUD-5M-HALDI",
-    short_description: "বৃহস্পতি গ্রহের শুভত্ব বৃদ্ধি, আধ্যাত্মিক জ্ঞান, উচ্চশিক্ষা ও দাম্পত্য সুখের জন্য দেবগুরু বিহিত প্রতিকার।",
-    detailed_description: "কাঁচা হলুদের গাঁট দিয়ে তৈরি সিদ্ধ মালা ও নেপালি ৫-মুখী পঞ্চমুখী রুদ্রাক্ষ।",
-    category_id: "cat-rudraksha",
-    category_slug: "rudraksha",
-    category_type: "rudraksha",
-    ruling_planet: "Jupiter",
-    deity: "Brihaspati & Lord Shiva",
-    benefits: ["জ্ঞান ও মেধা বিকাশ", "সন্তানসুখ", "বিবাহ বাধা নিরসন"],
-    life_pillars: ["career", "family"],
-    mrp: 2499,
-    sale_price: 1199,
-    discount_percent: 52,
+    id: "prod-karungali-mala",
+    title: "সিদ্ধ ১০৮ দানার করুঙ্গালি কাঠের মালা (Original Karungali Mala)",
+    slug: "original-karungali-mala-108-beads",
+    sku: "ASTRA-KAR-108",
+    short_description: "নেতিবাচক শক্তি, শত্রুদমন, নজরদোষ ও কালো জাদু বিনাশী ভগবান মুরুগান সিদ্ধ পবিত্র কালো আবলুস কাঠের মালা।",
+    detailed_description: "দক্ষিণ ভারতের খাঁটি কালো আবলুস (Karungali) কাঠ থেকে নির্মিত পবিত্র ১০৮ দানার জপমালা।",
+    category_id: "cat-karungali",
+    category_slug: "karungali",
+    category_type: "mala_rosary",
+    ruling_planet: "Mars & Murugan",
+    deity: "Lord Murugan",
+    benefits: ["নজরদোষ বিনাশ", "শত্রুভয় নিবারণ", "আত্মরক্ষা কবচ"],
+    life_pillars: ["health", "luck"],
+    purpose_tags: ["protection"],
+    free_gift_title: "Raw Selenite Charging Plate",
+    free_gift_value: 729,
+    free_gift_badge: "FREE Raw Selenite Plate worth ₹729",
+    cashback_percent: 100,
+    lab_certified: true,
+    mrp: 2999,
+    sale_price: 1399,
+    discount_percent: 53,
     stock_quantity: 14,
     in_stock: true,
     featured_image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80",
@@ -159,35 +237,8 @@ const FALLBACK_PRODUCTS: ShopProduct[] = [
     is_active: true,
     is_featured: true,
     is_energized: true,
-    average_rating: 4.7,
-    review_count: 38,
-  },
-  {
-    id: "prod-sun-yantra-12m",
-    title: "বিশুদ্ধ তাম্র সূর্য যন্ত্র ও ১২-মুখী রুদ্রাক্ষ কম্বো",
-    slug: "pure-copper-surya-yantra-12m",
-    sku: "ASTRA-YAN-SURYA-12M",
-    short_description: "সরকারি চাকরি, পদোন্নতি, পিতৃসুখ, আত্মবিশ্বাস ও সমাজে উচ্চ সম্মান বৃদ্ধির জন্য রবি গ্রহের অব্যর্থ প্রতিকার।",
-    detailed_description: "খাঁটি তামার পাত্রে খোদাই করা ত্রিকোণ সূর্য যন্ত্র এবং মহাবলশালী দ্বাদশমুখী সূর্য রুদ্রাক্ষ।",
-    category_id: "cat-yantra",
-    category_slug: "yantra",
-    category_type: "yantra",
-    ruling_planet: "Sun",
-    deity: "Surya Bhagavan",
-    benefits: ["সরকারি পদলাভ", "আত্মবিশ্বাস বৃদ্ধি", "পিতৃদোষ নিবারণ"],
-    life_pillars: ["career", "luck"],
-    mrp: 3299,
-    sale_price: 1599,
-    discount_percent: 51,
-    stock_quantity: 10,
-    in_stock: true,
-    featured_image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&auto=format&fit=crop&q=80"],
-    is_active: true,
-    is_featured: true,
-    is_energized: true,
     average_rating: 4.9,
-    review_count: 53,
+    review_count: 88,
   },
 ];
 
@@ -196,26 +247,31 @@ function ShopInner() {
   const searchParams = useSearchParams();
   const initialPlanet = searchParams.get("planet") || "";
   const initialCategory = searchParams.get("category") || "";
+  const initialPurpose = searchParams.get("purpose") || "";
 
   const [selectedPlanet, setSelectedPlanet] = React.useState<string>(initialPlanet);
   const [selectedCategory, setSelectedCategory] = React.useState<string>(initialCategory);
+  const [selectedPurpose, setSelectedPurpose] = React.useState<string>(initialPurpose);
   const [searchTerm, setSearchTerm] = React.useState<string>("");
-  const [activeModalProduct, setActiveModalProduct] = React.useState<ShopProduct | null>(null);
+
+  const { openCart, getItemCount } = useCartStore();
+  const cartItemCount = getItemCount();
 
   React.useEffect(() => {
     if (initialPlanet) setSelectedPlanet(initialPlanet);
     if (initialCategory) setSelectedCategory(initialCategory);
-  }, [initialPlanet, initialCategory]);
+    if (initialPurpose) setSelectedPurpose(initialPurpose);
+  }, [initialPlanet, initialCategory, initialPurpose]);
 
-  // Fetch Public Categories
-  const { data: serverCategories = [] } = useQuery<ShopProductCategory[]>({
-    queryKey: ["shop_public_categories"],
+  // Fetch Public Banners
+  const { data: bannerSettings } = useQuery<ShopBannerSettings | null>({
+    queryKey: ["shop_public_banners"],
     queryFn: async () => {
       try {
-        const res = await shopApi.getCategories();
-        return res || [];
+        const res = await shopApi.getBanners();
+        return res;
       } catch {
-        return [];
+        return null;
       }
     },
   });
@@ -230,7 +286,7 @@ function ShopInner() {
           category_id: selectedCategory || undefined,
           search: searchTerm || undefined,
           in_stock_only: false,
-          limit: 30,
+          limit: 50,
         });
         return res;
       } catch {
@@ -249,6 +305,9 @@ function ShopInner() {
           if (selectedCategory && p.category_slug !== selectedCategory) {
             return false;
           }
+          if (selectedPurpose && !p.purpose_tags?.includes(selectedPurpose)) {
+            return false;
+          }
           if (searchTerm) {
             const term = searchTerm.toLowerCase();
             return (
@@ -260,344 +319,256 @@ function ShopInner() {
           return true;
         });
 
-  const planetFilters = [
-    { id: "", label_bn: "সব গ্রহ", label_hi: "सभी ग्रह", label_en: "All Planets" },
-    { id: "saturn", label_bn: "♄ শনি দেব", label_hi: "♄ शनि", label_en: "♄ Saturn" },
-    { id: "jupiter", label_bn: "♃ বৃহস্পতি", label_hi: "♃ गुरु", label_en: "♃ Jupiter" },
-    { id: "mars", label_bn: "♂ মঙ্গল", label_hi: "♂ मंगल", label_en: "♂ Mars" },
-    { id: "rahu", label_bn: "☊ রাহু", label_hi: "☊ राहु", label_en: "☊ Rahu" },
-    { id: "sun", label_bn: "☉ সূর্য", label_hi: "☉ सूर्य", label_en: "☉ Sun" },
-    { id: "moon", label_bn: "☽ চন্দ্র", label_hi: "☽ चंद्र", label_en: "☽ Moon" },
-    { id: "venus", label_bn: "♀ শুক্র", label_hi: "♀ शुक्र", label_en: "♀ Venus" },
-    { id: "mercury", label_bn: "☿ বুধ", label_hi: "☿ बुध", label_en: "☿ Mercury" },
-  ];
+  const handleSelectFilter = (type: string, val: string) => {
+    if (type === "purpose") setSelectedPurpose(val);
+    if (type === "rashi") {
+      setSearchTerm(val);
+    }
+    if (type === "planet") setSelectedPlanet(val);
+    if (type === "crystal") setSearchTerm(val);
+
+    // Scroll smoothly to products section
+    const el = document.getElementById("all-products-section");
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
     <div className="min-h-screen bg-[#faf6f0] text-[#332c39]">
+      {/* 1. Top Announcement Bar & Infinite Marquee */}
+      <ShopAnnouncementMarquee
+        announcementText={bannerSettings?.announcement_bar_text}
+        announcementLink={bannerSettings?.announcement_bar_link}
+        marqueeItems={bannerSettings?.marquee_items}
+      />
+
       <SiteHeader />
 
-      <main className="max-w-6xl mx-auto px-4 py-8 sm:py-12 space-y-8">
-        {/* Hero Banner */}
-        <div className="relative overflow-hidden rounded-3xl border-2 border-amber-500/50 bg-gradient-to-br from-[#2a1b12] via-[#3a2519] to-[#1f1510] p-6 sm:p-10 text-white shadow-2xl">
-          <div className="pointer-events-none absolute -top-24 -right-24 size-80 rounded-full bg-amber-500/15 blur-3xl" />
-          <div className="pointer-events-none absolute top-4 right-8 text-8xl font-serif text-amber-500/10 select-none">
-            ॐ
-          </div>
+      {/* Global Slide-Over Cart Drawer */}
+      <CartDrawer />
 
-          <div className="relative z-10 max-w-2xl space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/50 bg-amber-500/20 px-3.5 py-1 text-xs font-semibold text-amber-200">
-              <Sparkles className="size-3.5 text-amber-300 animate-pulse" />
-              <span>
-                {language === "bn"
-                  ? "আস্ট্রা দিব্য এস্ট্রোস্টোর • ১০০% খাঁটি ও প্রাণ-প্রতিষ্ঠিত প্রতিকার"
-                  : language === "hi"
-                  ? "अस्ट्रा दिव्य एस्ट्रोस्टोर • 100% प्रामाणिक व प्राण-प्रतिष्ठित सामग्री"
-                  : "Astra Consecrated AstroStore • 100% Lab Certified Vedic Remedies"}
-              </span>
-            </div>
+      <main className="max-w-6xl mx-auto px-4 py-6 sm:py-10 space-y-12">
+        {/* 2. Hero Banner Slider */}
+        <ShopHeroSlider banners={bannerSettings?.hero_banners} />
 
-            <h1 className="font-cinzel text-2xl sm:text-4xl font-extrabold text-amber-100 tracking-tight">
-              {language === "bn"
-                ? "শাস্ত্রীয় রুদ্রাক্ষ, পবিত্র রত্ন ও দৈব যন্ত্র"
-                : language === "hi"
-                ? "शास्त्रीय रुद्राक्ष, प्राकृतिक रत्न व सिद्ध यंत्र"
-                : "Sacred Rudraksha, Certified Gemstones & Yantras"}
-            </h1>
+        {/* 3. Category Pills (Circular Icons inspired by Astrotalk) */}
+        <ShopCategoryPills />
 
-            <p className="text-xs sm:text-sm text-amber-200/80 leading-relaxed font-medium">
-              {language === "bn"
-                ? "আপনার জন্মছক ও বর্ষফলের অশুভ গ্রহপীড়া নিবারণে প্রতিটি সামগ্রী বারাণসীর গঙ্গাতীরে বৈদিক মন্ত্রোচ্চারণে প্রাণ-প্রতিষ্ঠা ও শোধন করে প্রদান করা হয়।"
-                : language === "hi"
-                ? "आपकी कुंडली के ग्रह दोष निवारण हेतु प्रत्येक सामग्री वाराणसी में वैदिक रीति से अभिमंत्रित व प्रतिष्ठित की जाती है।"
-                : "Every sacred remedy is laboratory tested and individually consecrated on the banks of Varanasi with authentic Vedic mantras."}
-            </p>
+        {/* 4. "Shop by What Matters" Tabs (Purpose / Rashi / Planet / Crystal) */}
+        <ShopByWhatMatters onSelectFilter={handleSelectFilter} />
 
-            <div className="flex items-center gap-4 pt-2 text-xs text-amber-300/90 font-semibold flex-wrap">
-              <span className="flex items-center gap-1.5">
-                <ShieldCheck className="size-4 text-emerald-400" />
-                <span>{language === "bn" ? "ল্যাব সার্টিফাইড গ্যারান্টি" : language === "hi" ? "लैब प्रमाणित" : "Lab Certified"}</span>
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1.5">
-                <Flame className="size-4 text-amber-400" />
-                <span>{language === "bn" ? "মন্ত্রপূত প্রাণ-প্রতিষ্ঠা" : language === "hi" ? "प्राण-प्रतिष्ठित" : "Prana-Pratishthit"}</span>
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="size-4 text-emerald-400" />
-                <span>{language === "bn" ? "সরাসরি ক্যাশ অন ডেলিভারি / অনলাইন" : language === "hi" ? "सुरक्षित डिलीवरी" : "Pan-India Delivery"}</span>
-              </span>
-            </div>
-          </div>
-        </div>
+        {/* 5. Most Loved Bestsellers with Badges & 1-Click Quick Add */}
+        <ShopBestsellers products={products} />
 
-        {/* Filter & Search Bar */}
-        <div className="rounded-2xl border border-[#ebd7c8] bg-[#fbf5ee]/95 p-4 sm:p-5 shadow-sm space-y-4">
-          {/* Planet Pills */}
-          <div className="space-y-1.5">
-            <span className="text-[11px] font-bold text-amber-900 uppercase tracking-wider block">
-              {language === "bn" ? "গ্রহ ভিত্তিক প্রতিকার ফিল্টার:" : language === "hi" ? "ग्रह अनुसार फिल्टर:" : "Filter by Ruling Planet:"}
-            </span>
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-              {planetFilters.map((pl) => (
+        {/* 6. 100% Wallet Cashback Promo Hook Banner */}
+        <CashbackPromoBanner />
+
+        {/* 7. All Products Listing & Search Filter Bar */}
+        <section id="all-products-section" className="space-y-6">
+          <div className="rounded-3xl border border-stone-200 bg-white p-4 sm:p-6 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <h3 className="font-cinzel text-lg sm:text-xl font-bold text-stone-900 flex items-center gap-2">
+                  <ShoppingBag className="size-5 text-amber-700" />
+                  <span>
+                    {language === "bn"
+                      ? `সমস্ত বৈদিক প্রতিকার ও রত্ন (${products.length})`
+                      : `All Consecrated Remedies (${products.length})`}
+                  </span>
+                </h3>
+                <p className="text-xs text-stone-500 font-medium">
+                  {language === "bn"
+                    ? "১০০% ওয়ালেট ক্যাশব্যাক ও ফ্রি সেলিনাইট প্লেট অন্তর্ভুক্ত।"
+                    : "Includes 100% Wallet Cashback & Free Selenite Plate on all prepaid orders."}
+                </p>
+              </div>
+
+              {(selectedPlanet || selectedCategory || selectedPurpose || searchTerm) && (
                 <button
-                  key={pl.id}
                   type="button"
-                  onClick={() => setSelectedPlanet(pl.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-                    selectedPlanet.toLowerCase() === pl.id.toLowerCase()
-                      ? "bg-amber-600 text-white shadow-xs"
-                      : "bg-white text-stone-700 hover:bg-stone-100 border border-stone-200"
-                  }`}
+                  onClick={() => {
+                    setSelectedPlanet("");
+                    setSelectedCategory("");
+                    setSelectedPurpose("");
+                    setSearchTerm("");
+                  }}
+                  className="text-xs font-bold text-rose-700 hover:underline cursor-pointer bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-200"
                 >
-                  {pl[`label_${language}` as "label_bn" | "label_hi" | "label_en"] || pl.label_en}
+                  {language === "bn" ? "সমস্ত ফিল্টার মুছুন ✕" : "Clear All Filters ✕"}
                 </button>
-              ))}
+              )}
+            </div>
+
+            {/* Search Input */}
+            <div className="relative">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-stone-400" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder={
+                  language === "bn"
+                    ? "রুদ্রাক্ষ, নীলম, রক্তপ্রবাল, গোমতী চক্র বা উদ্দেশ্য লিখে খুঁজুন..."
+                    : "Search Siddh Rudraksha, Blue Sapphire, Red Coral, Pyrite, Gomti Chakra..."
+                }
+                className="w-full rounded-2xl border border-stone-300 bg-stone-50 pl-10 pr-4 py-2.5 text-xs sm:text-sm focus:border-amber-600 focus:bg-white focus:outline-hidden transition-colors"
+              />
             </div>
           </div>
 
-          {/* Search Input */}
-          <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-stone-400" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder={
-                language === "bn"
-                  ? "রুদ্রাক্ষ, নীলম, রক্তপ্রবাল, গোমতী চক্র বা সুবিধা লিখে খুঁজুন..."
-                  : language === "hi"
-                  ? "रुद्राक्ष, नीलम, मूंगा, गोमती चक्र खोजें..."
-                  : "Search sacred Rudraksha, Blue Sapphire, Red Coral, Gomti Chakra..."
-              }
-              className="w-full rounded-xl border border-stone-300 bg-white pl-10 pr-4 py-2.5 text-sm focus:border-amber-600 focus:outline-hidden"
-            />
-          </div>
-        </div>
-
-        {/* Products Grid */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="font-cinzel text-lg sm:text-xl font-bold text-stone-900 flex items-center gap-2">
-              <ShoppingBag className="size-5 text-amber-700" />
-              <span>
-                {language === "bn"
-                  ? `উপলব্ধ সামগ্রী (${products.length})`
-                  : language === "hi"
-                  ? `उपलब्ध सामग्री (${products.length})`
-                  : `Sacred Products (${products.length})`}
-              </span>
-            </h2>
-            {selectedPlanet && (
-              <button
-                type="button"
-                onClick={() => setSelectedPlanet("")}
-                className="text-xs font-bold text-amber-700 hover:underline cursor-pointer"
-              >
-                {language === "bn" ? "ফিল্টার মুছুন ✕" : language === "hi" ? "फिल्टर हटाएं ✕" : "Clear Filter ✕"}
-              </button>
-            )}
-          </div>
-
+          {/* Grid */}
           {isLoading ? (
             <div className="py-20 text-center space-y-3">
               <RotateCcw className="size-8 text-amber-600 animate-spin mx-auto" />
-              <p className="text-xs text-stone-500">
+              <p className="text-xs text-stone-500 font-medium">
                 {language === "bn" ? "পবিত্র রত্ন ও রুদ্রাক্ষ লোড হচ্ছে..." : "Loading consecrated remedies..."}
               </p>
             </div>
           ) : products.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-12 text-center space-y-2">
-              <Package className="size-10 text-stone-400 mx-auto" />
-              <h4 className="font-bold text-sm text-stone-700">
-                {language === "bn" ? "কোনো পণ্য পাওয়া যায়নি" : "No remedies matched your filter"}
+            <div className="rounded-3xl border border-dashed border-stone-300 bg-white p-12 text-center space-y-3">
+              <Package className="size-12 text-stone-300 mx-auto" />
+              <h4 className="font-bold text-base text-stone-800">
+                {language === "bn" ? "কোনো প্রতিকার খুঁজে পাওয়া যায়নি" : "No remedies matched your filter"}
               </h4>
-              <p className="text-xs text-stone-500">
-                {language === "bn" ? "অন্য কোনো গ্রহ বা নাম দিয়ে খুঁজে দেখুন।" : "Try searching another planet or keyword."}
+              <p className="text-xs text-stone-500 max-w-sm mx-auto">
+                {language === "bn"
+                  ? "অন্য কোনো গ্রহ, রাশি বা সামগ্রীর নাম লিখে অনুসন্ধান করুন।"
+                  : "Try searching another planet, rashi or keyword."}
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-              {products.map((p) => (
-                <div
-                  key={p.id}
-                  className="rounded-3xl border-2 border-stone-200/90 bg-white p-4 shadow-xs hover:border-amber-400 hover:shadow-lg transition-all flex flex-col justify-between group"
-                >
-                  <div className="space-y-3">
-                    {/* Thumbnail */}
-                    <div className="relative aspect-4/3 w-full rounded-2xl overflow-hidden bg-stone-100 border border-stone-100">
-                      {p.featured_image ? (
-                        <Image
-                          src={p.featured_image}
-                          alt={p.title}
-                          fill
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          unoptimized
-                        />
-                      ) : (
-                        <div className="size-full flex items-center justify-center text-stone-300">
-                          <Package className="size-12" />
-                        </div>
-                      )}
-                      {p.is_energized && (
-                        <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1 bg-amber-900/90 backdrop-blur-xs text-amber-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-amber-500/50">
-                          <Flame className="size-2.5 text-amber-400 fill-current" />
-                          <span>{language === "bn" ? "প্রাণ-প্রতিষ্ঠিত" : "Consecrated"}</span>
-                        </span>
-                      )}
-                    </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+              {products.map((p) => {
+                const discount = p.discount_percent || Math.round(((p.mrp - p.sale_price) / p.mrp) * 100);
+                const freeGiftBadge = p.free_gift_badge || "FREE Raw Selenite Plate worth ₹729";
 
-                    {/* Metadata Tags */}
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      {p.ruling_planet && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded-md border border-amber-200">
-                          <Sparkles className="size-2.5 text-amber-600" />
-                          <span>{p.ruling_planet}</span>
-                        </span>
-                      )}
-                      <span className="text-[10px] font-bold text-stone-600 bg-stone-100 px-2 py-0.5 rounded-md capitalize">
-                        {p.category_slug.replace(/-/g, " ")}
-                      </span>
-                    </div>
+                return (
+                  <div
+                    key={p.id}
+                    className="rounded-3xl border-2 border-stone-200/90 bg-white p-3.5 shadow-xs hover:border-amber-400 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group"
+                  >
+                    <div className="space-y-2.5">
+                      {/* Image */}
+                      <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-stone-100 border border-stone-100">
+                        <Link href={`/shop/products/${p.slug}`}>
+                          {p.featured_image ? (
+                            <Image
+                              src={p.featured_image}
+                              alt={p.title}
+                              fill
+                              sizes="(max-width: 768px) 100vw, 25vw"
+                              className="object-cover group-hover:scale-106 transition-transform duration-500"
+                              unoptimized
+                            />
+                          ) : (
+                            <div className="size-full flex items-center justify-center text-stone-300">
+                              <ShoppingBag className="size-12" />
+                            </div>
+                          )}
+                        </Link>
 
-                    {/* Title & Short Description */}
-                    <h3 className="font-bold text-sm text-stone-900 group-hover:text-amber-800 transition-colors line-clamp-2">
-                      {p.title}
-                    </h3>
-
-                    <p className="text-xs text-stone-600 line-clamp-2 leading-relaxed">
-                      {p.short_description}
-                    </p>
-                  </div>
-
-                  {/* Pricing & CTA */}
-                  <div className="pt-3 mt-3 border-t border-stone-100 flex items-center justify-between">
-                    <div>
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="font-extrabold text-stone-900 text-lg">
-                          ₹{p.sale_price.toLocaleString("en-IN")}
-                        </span>
-                        {p.mrp > p.sale_price && (
-                          <span className="text-xs text-stone-400 line-through">
-                            ₹{p.mrp.toLocaleString("en-IN")}
+                        {/* Badges */}
+                        <div className="absolute top-2 left-2 flex flex-col gap-1 items-start">
+                          {discount > 0 && (
+                            <span className="bg-rose-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow-xs">
+                              {discount}% OFF
+                            </span>
+                          )}
+                          <span className="inline-flex items-center gap-1 bg-emerald-700 text-emerald-100 text-[9px] font-black px-2 py-0.5 rounded shadow-xs">
+                            <Coins className="size-2.5 text-amber-300" />
+                            <span>100% Cashback</span>
                           </span>
-                        )}
+                        </div>
                       </div>
-                      {p.discount_percent > 0 && (
-                        <span className="text-[10px] font-bold text-emerald-700">
-                          {p.discount_percent}% {language === "bn" ? "ছাড়" : "OFF"}
-                        </span>
-                      )}
+
+                      {/* Gift Badge */}
+                      <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 flex items-center gap-1.5 text-[9px] font-bold text-amber-900 truncate">
+                        <Gift className="size-2.5 text-amber-600 shrink-0" />
+                        <span className="truncate">{freeGiftBadge}</span>
+                      </div>
+
+                      {/* Title */}
+                      <Link
+                        href={`/shop/products/${p.slug}`}
+                        className="font-bold text-xs text-stone-900 line-clamp-2 hover:text-amber-700 transition-colors block"
+                      >
+                        {p.title}
+                      </Link>
+
+                      <p className="text-[11px] text-stone-500 line-clamp-2">
+                        {p.short_description}
+                      </p>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => setActiveModalProduct(p)}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-white font-bold text-xs hover:from-amber-700 hover:to-amber-600 transition-all shadow-xs cursor-pointer"
-                    >
-                      <span>{language === "bn" ? "বিবরণ ও অর্ডার" : "Details & Order"}</span>
-                      <ChevronRight className="size-3.5" />
-                    </button>
+                    {/* Pricing & Add */}
+                    <div className="pt-3 mt-2 border-t border-stone-100 space-y-2">
+                      <div className="flex items-baseline justify-between">
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="font-extrabold text-sm sm:text-base text-stone-900">
+                            ₹{p.sale_price.toLocaleString("en-IN")}
+                          </span>
+                          {p.mrp > p.sale_price && (
+                            <span className="text-[11px] text-stone-400 line-through">
+                              ₹{p.mrp.toLocaleString("en-IN")}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[9px] text-emerald-700 font-extrabold uppercase">
+                          In Stock
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <Link
+                          href={`/shop/products/${p.slug}`}
+                          className="py-2 px-2 rounded-xl border border-stone-200 text-stone-700 font-bold text-[11px] hover:bg-stone-50 transition-colors text-center"
+                        >
+                          Details
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            useCartStore.getState().addItem(p, 1);
+                            toast.success(`${p.title} added to cart! Free gift included.`);
+                          }}
+                          className="py-2 px-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                        >
+                          <ShoppingBag className="size-3" />
+                          <span>Add</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
-        </div>
+        </section>
+
+        {/* 8. The Astra Promise Section */}
+        <AstraPromiseSection />
+
+        {/* 9. FAQs */}
+        <ShopFaqAccordion />
       </main>
 
-      {/* Product Quick-View & Consultation Modal */}
-      {activeModalProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in">
-          <div className="relative w-full max-w-lg rounded-3xl border-2 border-amber-500 bg-[#faf6f0] p-6 sm:p-8 text-[#332c39] shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
-            <div className="flex items-start justify-between pb-3 border-b border-[#ebd7c8]">
-              <div>
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-900 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300">
-                  <ShieldCheck className="size-3 text-amber-700" />
-                  <span>{activeModalProduct.sku}</span>
-                </span>
-                <h3 className="font-cinzel text-lg sm:text-xl font-bold text-[#4D4664] mt-1">
-                  {activeModalProduct.title}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveModalProduct(null)}
-                className="text-stone-400 hover:text-stone-600 p-1 rounded-lg"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-stone-100 border border-stone-200">
-              {activeModalProduct.featured_image && (
-                <Image
-                  src={activeModalProduct.featured_image}
-                  alt={activeModalProduct.title}
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
-                {language === "bn" ? "শাস্ত্রমত উপকারিতা ও বিধান:" : "Sacred Benefits & Blessings:"}
-              </h4>
-              <p className="text-xs text-stone-700 leading-relaxed font-medium">
-                {activeModalProduct.detailed_description || activeModalProduct.short_description}
-              </p>
-            </div>
-
-            {activeModalProduct.benefits.length > 0 && (
-              <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3 space-y-1.5">
-                <span className="text-[11px] font-bold text-amber-900 block">
-                  ✦ {language === "bn" ? "প্রধান শুভ ফল:" : "Key Astrological Influences:"}
-                </span>
-                <ul className="text-xs text-stone-700 space-y-1 list-disc list-inside">
-                  {activeModalProduct.benefits.map((b, i) => (
-                    <li key={i}>{b}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            <div className="pt-3 border-t border-[#ebd7c8] flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-xl font-extrabold text-stone-900">
-                    ₹{activeModalProduct.sale_price.toLocaleString("en-IN")}
-                  </span>
-                  <span className="text-xs text-stone-400 line-through">
-                    ₹{activeModalProduct.mrp.toLocaleString("en-IN")}
-                  </span>
-                </div>
-                <span className="text-[10px] font-bold text-emerald-700">
-                  {language === "bn" ? "১০০% প্রামাণ্য খাঁটি সার্টিফিকেট সহ" : "Includes Authenticity Certificate"}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2 w-full sm:w-auto">
-                <button
-                  type="button"
-                  onClick={() => {
-                    toast.success(
-                      language === "bn"
-                        ? "আপনার অনুরোধ সংরক্ষিত হয়েছে! বৈদিক আচার্য অবিলম্বে যোগাযোগ করবেন।"
-                        : "Consecration request placed! An Acharya will guide you shortly."
-                    );
-                    setActiveModalProduct(null);
-                  }}
-                  className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-white font-bold text-xs hover:from-amber-700 hover:to-amber-600 transition-all shadow-md cursor-pointer text-center"
-                >
-                  {language === "bn" ? "অর্ডার সম্পন্ন করুন (₹" + activeModalProduct.sale_price + ")" : "Complete Order (₹" + activeModalProduct.sale_price + ")"}
-                </button>
-              </div>
-            </div>
+      {/* Floating Cart Trigger on Mobile / Desktop */}
+      {cartItemCount > 0 && (
+        <button
+          type="button"
+          onClick={openCart}
+          className="fixed bottom-6 right-6 z-40 px-4 py-3 rounded-full bg-gradient-to-r from-amber-600 to-amber-700 text-white font-bold text-xs sm:text-sm shadow-2xl flex items-center gap-2 hover:scale-105 transition-all cursor-pointer border-2 border-amber-300"
+        >
+          <div className="relative">
+            <ShoppingBag className="size-5" />
+            <span className="absolute -top-2 -right-2 bg-rose-600 text-white text-[10px] font-black size-4 rounded-full flex items-center justify-center shadow-xs">
+              {cartItemCount}
+            </span>
           </div>
-        </div>
+          <span>View Cart</span>
+          <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs font-black">
+            ₹{useCartStore.getState().getSubtotal().toLocaleString("en-IN")}
+          </span>
+        </button>
       )}
 
       <SiteFooter />
@@ -610,7 +581,7 @@ export default function ShopPage() {
     <React.Suspense
       fallback={
         <div className="min-h-screen bg-[#faf6f0] flex items-center justify-center">
-          <RotateCcw className="size-8 text-amber-600 animate-spin" />
+          <div className="size-8 rounded-full border-2 border-amber-600 border-t-transparent animate-spin" />
         </div>
       }
     >
