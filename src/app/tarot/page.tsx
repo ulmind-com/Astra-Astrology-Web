@@ -41,6 +41,7 @@ import {
 import { TarotCardView } from "@/components/tarot/tarot-card-view";
 import { TarotSpreadLayout } from "@/components/tarot/tarot-spread-layout";
 import { TarotReadingDetail } from "@/components/tarot/tarot-reading-detail";
+import { fireCelestialConfetti } from "@/components/ui/confetti";
 import type {
   SpreadConfig,
   TarotCard,
@@ -216,6 +217,7 @@ export default function TarotPage() {
         setReadingResult(res);
         setFlippedCards(new Array(res.drawn_cards.length).fill(true));
         setStep(4);
+        fireCelestialConfetti();
         refreshWallet();
         if (access.requiredCoins > 0) {
           toast.success(t.coinsDeducted(access.requiredCoins));

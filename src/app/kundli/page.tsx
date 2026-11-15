@@ -46,6 +46,7 @@ import {
   type SelectedPlace,
 } from "@/components/astrology/birth-place-field";
 import { KundliDiamondChart } from "@/components/astrology/kundli-diamond-chart";
+import { PlanetaryStrengthRadarChart } from "@/components/astrology/planetary-strength-radar-chart";
 import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
 import { usePlatform } from "@/providers/realtime-provider";
@@ -1877,18 +1878,24 @@ export default function KundliPage() {
               </div>
             </div>
 
-            {/* Table: Planetary Dignities, Combustion & Avasthas */}
+            {/* Recharts Radar Spectrum & Table: Planetary Dignities, Combustion & Avasthas */}
             {result.planetary_dignities && result.planetary_dignities.length > 0 && (
-              <div className="rounded-3xl border border-amber-200/80 bg-white p-5 sm:p-6 shadow-soft space-y-4">
-                <div className="text-center space-y-1">
-                  <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">
-                    {t.dignitiesTableTitle}
-                  </h3>
-                  <p className="text-xs text-foreground-muted">
-                    {t.dignitiesTableSub}
-                  </p>
-                  <GoldDiamondDivider />
-                </div>
+              <div className="space-y-6">
+                <PlanetaryStrengthRadarChart
+                  dignities={result.planetary_dignities}
+                  language={language as any}
+                />
+
+                <div className="rounded-3xl border border-amber-200/80 bg-white p-5 sm:p-6 shadow-soft space-y-4">
+                  <div className="text-center space-y-1">
+                    <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">
+                      {t.dignitiesTableTitle}
+                    </h3>
+                    <p className="text-xs text-foreground-muted">
+                      {t.dignitiesTableSub}
+                    </p>
+                    <GoldDiamondDivider />
+                  </div>
 
                 <div className="overflow-x-auto rounded-2xl border border-amber-200/80">
                   <table className="w-full border-collapse text-left text-xs sm:text-sm">
@@ -1981,6 +1988,7 @@ export default function KundliPage() {
                   </table>
                 </div>
               </div>
+            </div>
             )}
 
             {/* ─────────────────────────────────────────────────────────────

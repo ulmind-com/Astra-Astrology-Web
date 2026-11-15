@@ -21,17 +21,22 @@ const Sacred3DViewer = dynamic(
 interface Product3DModalProps {
   open: boolean;
   onClose: () => void;
-  productName: string;
+  productName?: string;
   category?: string;
+  product?: { title: string; category_slug?: string; category_type?: string } | null;
 }
 
 export function Product3DModal({
   open,
   onClose,
-  productName,
-  category,
+  productName: productNameProp,
+  category: categoryProp,
+  product,
 }: Product3DModalProps) {
   if (!open) return null;
+
+  const productName = productNameProp || product?.title || "Sacred Item";
+  const category = categoryProp || product?.category_slug || product?.category_type || "gemstone";
 
   // Derive gem color dynamically based on product name/category
   const name = productName.toLowerCase();

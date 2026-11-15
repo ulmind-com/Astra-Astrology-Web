@@ -8,6 +8,7 @@ import React from "react";
 import { courseApi } from "@/lib/api";
 import { useLanguage } from "@/providers/language-provider";
 import type { CourseListItem } from "@/types";
+import { CardTilt } from "@/components/ui/card-tilt";
 
 function money(currency: string, value: number): string {
   const symbol = currency === "INR" || currency === "₹" ? "₹" : currency ? `${currency} ` : "₹";
@@ -20,10 +21,11 @@ function CourseCard({ course }: { course: CourseListItem }) {
   const ratingCount = course.rating_count > 0 ? course.rating_count : course.total_students || 120;
 
   return (
-    <Link
-      href={href}
-      className="group flex flex-col overflow-hidden rounded-[22px] border border-stone-200 bg-white shadow-[0_10px_30px_-18px_rgba(26,18,8,0.18)] transition-all duration-300 hover:-translate-y-1.5 hover:border-brand-400 hover:shadow-[0_22px_44px_-20px_rgba(26,18,8,0.28)]"
-    >
+    <CardTilt className="h-full">
+      <Link
+        href={href}
+        className="group flex h-full flex-col overflow-hidden rounded-[22px] border border-stone-200 bg-white shadow-[0_10px_30px_-18px_rgba(26,18,8,0.18)] transition-all duration-300 hover:border-brand-400 hover:shadow-[0_22px_44px_-20px_rgba(26,18,8,0.28)]"
+      >
       {/* Thumbnail */}
       <div className="relative aspect-[16/9] overflow-hidden bg-stone-100">
         {course.thumbnail_url ? (
@@ -128,6 +130,7 @@ function CourseCard({ course }: { course: CourseListItem }) {
         </div>
       </div>
     </Link>
+  </CardTilt>
   );
 }
 

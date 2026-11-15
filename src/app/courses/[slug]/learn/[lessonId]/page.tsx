@@ -41,6 +41,7 @@ import * as React from "react";
 import { toast } from "sonner";
 
 import { Alert, Avatar, Badge, Button, EmptyState, LoadingBlock, Modal } from "@/components/ui";
+import { fireCelestialConfetti } from "@/components/ui/confetti";
 import { courseApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/providers/auth-provider";
@@ -387,6 +388,7 @@ export default function LessonClassroomPage() {
           setIssuedCertUrl(res.certificate_url);
         }
         setShowCertificateModal(true);
+        fireCelestialConfetti();
       } else if (nextLesson) {
         router.push(`/courses/${slug}/learn/${nextLesson.id}`);
       }

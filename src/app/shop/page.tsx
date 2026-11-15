@@ -34,6 +34,9 @@ import { ShopBestsellers } from "@/components/shop/ShopBestsellers";
 import { CashbackPromoBanner } from "@/components/shop/CashbackPromoBanner";
 import { AstraPromiseSection } from "@/components/shop/AstraPromiseSection";
 import { ShopFaqAccordion } from "@/components/shop/ShopFaqAccordion";
+import { CardTilt } from "@/components/ui/card-tilt";
+import { Product3DModal } from "@/components/shop/Product3DModal";
+import { ShopFilterDrawer } from "@/components/shop/ShopFilterDrawer";
 
 const FALLBACK_PRODUCTS: ShopProduct[] = [
   {
@@ -253,6 +256,8 @@ function ShopInner() {
   const [selectedCategory, setSelectedCategory] = React.useState<string>(initialCategory);
   const [selectedPurpose, setSelectedPurpose] = React.useState<string>(initialPurpose);
   const [searchTerm, setSearchTerm] = React.useState<string>("");
+  const [product3DModalOpen, setProduct3DModalOpen] = React.useState(false);
+  const [selected3DProduct, setSelected3DProduct] = React.useState<ShopProduct | null>(null);
 
   const { openCart, getItemCount } = useCartStore();
   const cartItemCount = getItemCount();
@@ -382,20 +387,44 @@ function ShopInner() {
                 </p>
               </div>
 
-              {(selectedPlanet || selectedCategory || selectedPurpose || searchTerm) && (
-                <button
-                  type="button"
-                  onClick={() => {
+              <div className="flex items-center gap-2">
+                <ShopFilterDrawer
+                  selectedCategory={selectedCategory}
+                  onSelectCategory={setSelectedCategory}
+                  selectedPlanet={selectedPlanet}
+                  onSelectPlanet={setSelectedPlanet}
+                  selectedPurpose={selectedPurpose}
+                  onSelectPurpose={setSelectedPurpose}
+                  onResetFilters={() => {
                     setSelectedPlanet("");
                     setSelectedCategory("");
                     setSelectedPurpose("");
                     setSearchTerm("");
                   }}
-                  className="text-xs font-bold text-rose-700 hover:underline cursor-pointer bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-200"
-                >
-                  {language === "bn" ? "সমস্ত ফিল্টার মুছুন ✕" : "Clear All Filters ✕"}
-                </button>
-              )}
+                  activeCount={
+                    (selectedPlanet ? 1 : 0) +
+                    (selectedCategory ? 1 : 0) +
+                    (selectedPurpose ? 1 : 0) +
+                    (searchTerm ? 1 : 0)
+                  }
+                  language={language as any}
+                />
+
+                {(selectedPlanet || selectedCategory || selectedPurpose || searchTerm) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedPlanet("");
+                      setSelectedCategory("");
+                      setSelectedPurpose("");
+                      setSearchTerm("");
+                    }}
+                    className="text-xs font-bold text-rose-700 hover:underline cursor-pointer bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-200"
+                  >
+                    {language === "bn" ? "ফিল্টার মুছুন ✕" : "Clear ✕"}
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Search Input */}
@@ -442,102 +471,116 @@ function ShopInner() {
                 const freeGiftBadge = p.free_gift_badge || "FREE Raw Selenite Plate worth ₹729";
 
                 return (
-                  <div
-                    key={p.id}
-                    className="rounded-3xl border-2 border-stone-200/90 bg-white p-3.5 shadow-xs hover:border-amber-400 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group"
-                  >
-                    <div className="space-y-2.5">
-                      {/* Image */}
-                      <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-stone-100 border border-stone-100">
-                        <Link href={`/shop/products/${p.slug}`}>
-                          {p.featured_image ? (
-                            <Image
-                              src={p.featured_image}
-                              alt={p.title}
-                              fill
-                              sizes="(max-width: 768px) 100vw, 25vw"
-                              className="object-cover group-hover:scale-106 transition-transform duration-500"
-                              unoptimized
-                            />
-                          ) : (
-                            <div className="size-full flex items-center justify-center text-stone-300">
-                              <ShoppingBag className="size-12" />
-                            </div>
-                          )}
-                        </Link>
+                  <CardTilt key={p.id} className="h-full">
+                    <div className="h-full rounded-3xl border-2 border-stone-200/90 bg-white p-3.5 shadow-xs hover:border-amber-400 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
+                      <div className="space-y-2.5">
+                        {/* Image */}
+                        <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-stone-100 border border-stone-100">
+                          <Link href={`/shop/products/${p.slug}`}>
+                            {p.featured_image ? (
+                              <Image
+                                src={p.featured_image}
+                                alt={p.title}
+                                fill
+                                sizes="(max-width: 768px) 100vw, 25vw"
+                                className="object-cover group-hover:scale-106 transition-transform duration-500"
+                                unoptimized
+                              />
+                            ) : (
+                              <div className="size-full flex items-center justify-center text-stone-300">
+                                <ShoppingBag className="size-12" />
+                              </div>
+                            )}
+                          </Link>
 
-                        {/* Badges */}
-                        <div className="absolute top-2 left-2 flex flex-col gap-1 items-start">
-                          {discount > 0 && (
-                            <span className="bg-rose-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow-xs">
-                              {discount}% OFF
+                          {/* Badges */}
+                          <div className="absolute top-2 left-2 flex flex-col gap-1 items-start">
+                            {discount > 0 && (
+                              <span className="bg-rose-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow-xs">
+                                {discount}% OFF
+                              </span>
+                            )}
+                            <span className="inline-flex items-center gap-1 bg-emerald-700 text-emerald-100 text-[9px] font-black px-2 py-0.5 rounded shadow-xs">
+                              <Coins className="size-2.5 text-amber-300" />
+                              <span>100% Cashback</span>
                             </span>
-                          )}
-                          <span className="inline-flex items-center gap-1 bg-emerald-700 text-emerald-100 text-[9px] font-black px-2 py-0.5 rounded shadow-xs">
-                            <Coins className="size-2.5 text-amber-300" />
-                            <span>100% Cashback</span>
-                          </span>
+                          </div>
+
+                          {/* 3D Interactive Model Preview Badge */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setSelected3DProduct(p);
+                              setProduct3DModalOpen(true);
+                            }}
+                            className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-stone-900/80 backdrop-blur-md px-2.5 py-1 text-[9px] font-bold text-amber-300 hover:bg-stone-900 shadow-md cursor-pointer transition-transform hover:scale-105"
+                          >
+                            <Sparkles className="size-2.5 text-amber-400" />
+                            <span>3D View</span>
+                          </button>
                         </div>
-                      </div>
 
-                      {/* Gift Badge */}
-                      <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 flex items-center gap-1.5 text-[9px] font-bold text-amber-900 truncate">
-                        <Gift className="size-2.5 text-amber-600 shrink-0" />
-                        <span className="truncate">{freeGiftBadge}</span>
-                      </div>
-
-                      {/* Title */}
-                      <Link
-                        href={`/shop/products/${p.slug}`}
-                        className="font-bold text-xs text-stone-900 line-clamp-2 hover:text-amber-700 transition-colors block"
-                      >
-                        {p.title}
-                      </Link>
-
-                      <p className="text-[11px] text-stone-500 line-clamp-2">
-                        {p.short_description}
-                      </p>
-                    </div>
-
-                    {/* Pricing & Add */}
-                    <div className="pt-3 mt-2 border-t border-stone-100 space-y-2">
-                      <div className="flex items-baseline justify-between">
-                        <div className="flex items-baseline gap-1.5">
-                          <span className="font-extrabold text-sm sm:text-base text-stone-900">
-                            ₹{p.sale_price.toLocaleString("en-IN")}
-                          </span>
-                          {p.mrp > p.sale_price && (
-                            <span className="text-[11px] text-stone-400 line-through">
-                              ₹{p.mrp.toLocaleString("en-IN")}
-                            </span>
-                          )}
+                        {/* Gift Badge */}
+                        <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 flex items-center gap-1.5 text-[9px] font-bold text-amber-900 truncate">
+                          <Gift className="size-2.5 text-amber-600 shrink-0" />
+                          <span className="truncate">{freeGiftBadge}</span>
                         </div>
-                        <span className="text-[9px] text-emerald-700 font-extrabold uppercase">
-                          In Stock
-                        </span>
-                      </div>
 
-                      <div className="grid grid-cols-2 gap-2">
+                        {/* Title */}
                         <Link
                           href={`/shop/products/${p.slug}`}
-                          className="py-2 px-2 rounded-xl border border-stone-200 text-stone-700 font-bold text-[11px] hover:bg-stone-50 transition-colors text-center"
+                          className="font-bold text-xs text-stone-900 line-clamp-2 hover:text-amber-700 transition-colors block"
                         >
-                          Details
+                          {p.title}
                         </Link>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            useCartStore.getState().addItem(p, 1);
-                            toast.success(`${p.title} added to cart! Free gift included.`);
-                          }}
-                          className="py-2 px-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] flex items-center justify-center gap-1 transition-colors cursor-pointer"
-                        >
-                          <ShoppingBag className="size-3" />
-                          <span>Add</span>
-                        </button>
+
+                        <p className="text-[11px] text-stone-500 line-clamp-2">
+                          {p.short_description}
+                        </p>
+                      </div>
+
+                      {/* Pricing & Add */}
+                      <div className="pt-3 mt-2 border-t border-stone-100 space-y-2">
+                        <div className="flex items-baseline justify-between">
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="font-extrabold text-sm sm:text-base text-stone-900">
+                              ₹{p.sale_price.toLocaleString("en-IN")}
+                            </span>
+                            {p.mrp > p.sale_price && (
+                              <span className="text-[11px] text-stone-400 line-through">
+                                ₹{p.mrp.toLocaleString("en-IN")}
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[9px] text-emerald-700 font-extrabold uppercase">
+                            In Stock
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <Link
+                            href={`/shop/products/${p.slug}`}
+                            className="py-2 px-2 rounded-xl border border-stone-200 text-stone-700 font-bold text-[11px] hover:bg-stone-50 transition-colors text-center"
+                          >
+                            Details
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              useCartStore.getState().addItem(p, 1);
+                              toast.success(`${p.title} added to cart! Free gift included.`);
+                            }}
+                            className="py-2 px-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                          >
+                            <ShoppingBag className="size-3" />
+                            <span>Add</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </CardTilt>
                 );
               })}
             </div>
@@ -570,6 +613,13 @@ function ShopInner() {
           </span>
         </button>
       )}
+
+      {/* 3D Sacred Gemstone & Rudraksha Modal Preview */}
+      <Product3DModal
+        open={product3DModalOpen}
+        onClose={() => setProduct3DModalOpen(false)}
+        product={selected3DProduct}
+      />
 
       <SiteFooter />
     </div>
