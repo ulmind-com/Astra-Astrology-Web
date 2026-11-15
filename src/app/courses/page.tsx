@@ -294,13 +294,19 @@ function CourseCard({ course }: { course: CourseListItem }) {
             <span className="font-medium uppercase tracking-wider text-brand-600">
               {course.category.replace(/_/g, " ")}
             </span>
-            <div className="flex items-center gap-1 text-amber-500 font-semibold">
-              <Star className="size-3.5 fill-amber-500" />
-              <span>{course.average_rating > 0 ? course.average_rating.toFixed(1) : "4.9"}</span>
-              <span className="text-muted-foreground font-normal">
-                ({course.rating_count > 0 ? course.rating_count : "120+"})
+            {course.rating_count > 0 ? (
+              <div className="flex items-center gap-1 text-amber-500 font-semibold">
+                <Star className="size-3.5 fill-amber-500" />
+                <span>{course.average_rating.toFixed(1)}</span>
+                <span className="text-muted-foreground font-normal">
+                  ({course.rating_count})
+                </span>
+              </div>
+            ) : (
+              <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-600">
+                নতুন কোর্স
               </span>
-            </div>
+            )}
           </div>
 
           {/* Title */}

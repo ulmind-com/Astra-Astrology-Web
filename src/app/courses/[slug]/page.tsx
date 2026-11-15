@@ -437,13 +437,19 @@ export default function CourseDetailPage() {
 
                 {/* Rating & Stats */}
                 <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1 font-semibold text-amber-500">
-                    <Star className="size-4 fill-amber-500" />
-                    <span>{course.average_rating > 0 ? course.average_rating.toFixed(1) : "4.9"}</span>
-                    <span className="font-normal text-muted-foreground">
-                      ({course.rating_count > 0 ? course.rating_count : "120+"} ratings)
+                  {course.rating_count > 0 ? (
+                    <div className="flex items-center gap-1 font-semibold text-amber-500">
+                      <Star className="size-4 fill-amber-500" />
+                      <span>{course.average_rating.toFixed(1)}</span>
+                      <span className="font-normal text-muted-foreground">
+                        ({course.rating_count} ratings)
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-600">
+                      নতুন কোর্স
                     </span>
-                  </div>
+                  )}
                   <div className="flex items-center gap-1.5">
                     <Users className="size-3.5" />
                     <span>{course.total_students} students enrolled</span>
