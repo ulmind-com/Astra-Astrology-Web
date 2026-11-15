@@ -17,6 +17,8 @@ import { toast } from "sonner";
 import { type ShopProduct } from "@/lib/api";
 import { useCartStore } from "@/lib/stores/use-cart-store";
 import { useLanguage } from "@/providers/language-provider";
+import { CardTilt } from "@/components/ui/card-tilt";
+import { Product3DModal } from "@/components/shop/Product3DModal";
 
 interface Props {
   products: ShopProduct[];
@@ -27,6 +29,7 @@ export function ShopBestsellers({ products }: Props) {
   const { addItem } = useCartStore();
   const [filter, setFilter] = React.useState<string>("all");
   const [addedId, setAddedId] = React.useState<string | null>(null);
+  const [active3DProduct, setActive3DProduct] = React.useState<ShopProduct | null>(null);
 
   const filterTabs = [
     { id: "all", label_bn: "সব বেস্টসেলার", label_en: "All Bestsellers" },
@@ -116,52 +119,65 @@ export function ShopBestsellers({ products }: Props) {
           const cashbackPct = p.cashback_percent ?? 100;
 
           return (
-            <div
-              key={p.id}
-              className="rounded-3xl border-2 border-stone-200/90 bg-white p-3.5 shadow-xs hover:border-amber-500/70 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group relative"
-            >
-              <div className="space-y-3">
-                {/* Image Container */}
-                <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-stone-100 border border-stone-100">
-                  <Link href={`/shop/products/${p.slug}`}>
-                    {p.featured_image ? (
-                      <Image
-                        src={p.featured_image}
-                        alt={p.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 25vw"
-                        className="object-cover group-hover:scale-106 transition-transform duration-500"
-                        unoptimized
-                      />
-                    ) : (
-                      <div className="size-full flex items-center justify-center text-stone-300">
-                        <ShoppingBag className="size-12" />
-                      </div>
-                    )}
-                  </Link>
+            <CardTilt key={p.id} rotationFactor={6} className="h-full">
+              <div className="h-full rounded-3xl border-2 border-stone-200/90 bg-white p-3.5 shadow-xs hover:border-amber-500/70 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group relative">
+                <div className="space-y-3">
+                  {/* Image Container */}
+                  <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-stone-100 border border-stone-100">
+                    <Link href={`/shop/products/${p.slug}`}>
+                      {p.featured_image ? (
+                        <Image
+                          src={p.featured_image}
+                          alt={p.title}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 25vw"
+                          className="object-cover group-hover:scale-106 transition-transform duration-500"
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="size-full flex items-center justify-center text-stone-300">
+                          <ShoppingBag className="size-12" />
+                        </div>
+                      )}
+                    </Link>
 
-                  {/* Top Badges */}
-                  <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start">
-                    {discount > 0 && (
-                      <span className="bg-rose-600 text-white text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs">
-                        {discount}% OFF
-                      </span>
-                    )}
-                    {cashbackPct > 0 && (
-                      <span className="inline-flex items-center gap-1 bg-emerald-700 text-emerald-100 text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs">
-                        <Coins className="size-2.5 text-amber-300" />
-                        <span>100% Cashback</span>
+                    {/* Top Badges */}
+                    <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start">
+                      {discount > 0 && (
+                        <span className="bg-rose-600 text-white text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs">
+                          {discount}% OFF
+                        </span>
+                      )}
+                      {cashbackPct > 0 && (
+                        <span className="inline-flex items-center gap-1 bg-emerald-700 text-emerald-100 text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs">
+                          <Coins className="size-2.5 text-amber-300" />
+                          <span>100% Cashback</span>
+                        </span>
+                      )}
+                    </div>
+
+                    {/* 3D Interactive Model Trigger Button */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setActive3DProduct(p);
+                      }}
+                      className="absolute top-2.5 right-2.5 inline-flex items-center gap-1 rounded-full bg-stone-900/85 backdrop-blur-xs px-2.5 py-1 text-[10px] font-bold text-amber-300 border border-amber-400/40 hover:bg-stone-900 hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer z-10"
+                      title="Preview 3D Crystal/Gem Model"
+                    >
+                      <Sparkles className="size-3 text-amber-400 animate-pulse" />
+                      <span>3D View</span>
+                    </button>
+
+                    {p.is_energized && (
+                      <span className="absolute bottom-2.5 left-2.5 inline-flex items-center gap-1 bg-stone-900/85 backdrop-blur-xs text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-500/40">
+                        <Flame className="size-2.5 text-amber-400 fill-current" />
+                        <span>{language === "bn" ? "প্রাণ-প্রতিষ্ঠিত" : "Consecrated"}</span>
                       </span>
                     )}
                   </div>
-
-                  {p.is_energized && (
-                    <span className="absolute bottom-2.5 left-2.5 inline-flex items-center gap-1 bg-stone-900/85 backdrop-blur-xs text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-500/40">
-                      <Flame className="size-2.5 text-amber-400 fill-current" />
-                      <span>{language === "bn" ? "প্রাণ-প্রতিষ্ঠিত" : "Consecrated"}</span>
-                    </span>
-                  )}
-                </div>
 
                 {/* Free Gift Strip */}
                 <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 flex items-center gap-1.5 text-[10px] font-bold text-amber-900">
@@ -229,9 +245,20 @@ export function ShopBestsellers({ products }: Props) {
                 </button>
               </div>
             </div>
-          );
-        })}
-      </div>
+          </CardTilt>
+        );
+      })}
     </div>
-  );
+
+    {/* 3D Product Interactive Gem Modal */}
+    {active3DProduct && (
+      <Product3DModal
+        open={Boolean(active3DProduct)}
+        onClose={() => setActive3DProduct(null)}
+        productName={active3DProduct.title}
+        category={active3DProduct.category_slug}
+      />
+    )}
+  </div>
+);
 }

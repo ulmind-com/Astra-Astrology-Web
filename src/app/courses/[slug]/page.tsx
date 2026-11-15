@@ -849,6 +849,7 @@ export default function CourseDetailPage() {
                     className="h-full w-full border-0 select-none"
                     allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;"
                     allowFullScreen
+                    referrerPolicy="origin"
                   />
                   {previewStream.watermark_text && (
                     <div className="pointer-events-none absolute bottom-3 right-3 text-[10px] font-mono text-white/40 bg-black/40 px-2 py-0.5 rounded backdrop-blur-[1px]">

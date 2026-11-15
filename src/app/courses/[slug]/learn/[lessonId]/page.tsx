@@ -766,6 +766,7 @@ export default function LessonClassroomPage() {
                   className="h-full w-full border-0 select-none"
                   allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;"
                   allowFullScreen
+                  referrerPolicy="origin"
                 />
 
                 {/* Dynamic Anti-Piracy Watermark (Safe on mobile screens) */}

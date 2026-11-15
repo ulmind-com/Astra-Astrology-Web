@@ -4,12 +4,20 @@ import * as React from "react";
 import Link from "next/link";
 import { Coins, PhoneCall, Sparkles, ArrowRight, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { useLanguage } from "@/providers/language-provider";
+import { MovingBorderContainer } from "@/components/ui/moving-border";
 
 export function CashbackPromoBanner() {
   const { language } = useLanguage();
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border-2 border-emerald-500/50 bg-gradient-to-br from-[#0c241b] via-[#123326] to-[#081812] p-6 sm:p-10 text-white shadow-2xl">
+    <MovingBorderContainer
+      borderRadius="1.75rem"
+      duration={4000}
+      borderClassName="bg-[radial-gradient(#fcd404_40%,#10b981_60%,transparent_80%)] size-28"
+      containerClassName="w-full"
+      className="p-0"
+    >
+      <div className="relative w-full overflow-hidden rounded-3xl border border-emerald-500/40 bg-gradient-to-br from-[#0c241b] via-[#123326] to-[#081812] p-6 sm:p-10 text-white shadow-2xl">
       <div className="pointer-events-none absolute -top-24 -right-24 size-80 rounded-full bg-emerald-500/20 blur-3xl" />
       <div className="pointer-events-none absolute top-4 right-8 text-8xl font-serif text-emerald-500/10 select-none">
         ₹
@@ -87,5 +95,6 @@ export function CashbackPromoBanner() {
         </div>
       </div>
     </div>
-  );
+  </MovingBorderContainer>
+);
 }
