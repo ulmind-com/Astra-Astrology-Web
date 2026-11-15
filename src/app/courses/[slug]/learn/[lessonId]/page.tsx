@@ -73,6 +73,7 @@ export default function LessonClassroomPage() {
   });
   const [showCertificateModal, setShowCertificateModal] = React.useState(false);
   const [issuedCertId, setIssuedCertId] = React.useState<string | null>(null);
+  const [issuedCertUrl, setIssuedCertUrl] = React.useState<string | null>(null);
   const [isUpdatingProgress, setIsUpdatingProgress] = React.useState(false);
 
   // Video Player & Interactive Seek References
@@ -379,6 +380,9 @@ export default function LessonClassroomPage() {
       if (res.certificate_issued) {
         if (res.certificate_id) {
           setIssuedCertId(res.certificate_id);
+        }
+        if (res.certificate_url) {
+          setIssuedCertUrl(res.certificate_url);
         }
         setShowCertificateModal(true);
       } else if (nextLesson) {
@@ -1454,7 +1458,7 @@ export default function LessonClassroomPage() {
 
             <div className="flex flex-col sm:flex-row justify-center gap-2 pt-2">
               <Link
-                href={`/verify/certificate/${issuedCertId || course.id}`}
+                href={issuedCertUrl || `/verify/certificate/${issuedCertId || course.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
