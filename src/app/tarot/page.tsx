@@ -267,68 +267,90 @@ export default function TarotPage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50/70 text-slate-900 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#fafaf9]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
       <SiteHeader />
 
-      {/* Hero Header - Matching Dasha Calculator Exactly */}
-      <div className="relative border-b border-amber-200/60 bg-gradient-to-b from-amber-500/10 via-amber-50/40 to-background py-8 sm:py-12">
-        <div className="mx-auto max-w-6xl px-4 text-center">
+      <main className="mx-auto max-w-6xl px-3 sm:px-6 py-4 flex-1 w-full space-y-6">
+        {/* =========================================================================
+            1. BREADCRUMB & LANGUAGE SWITCHER
+        ========================================================================= */}
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-stone-500 pt-0.5 pb-1">
+          <div className="flex items-center gap-1.5 uppercase tracking-wider font-semibold">
+            <Link href="/" className="hover:text-amber-700 transition-colors">
+              {language === "bn" ? "হোম" : language === "hi" ? "होम" : "Home"}
+            </Link>
+            <span className="text-stone-300">&gt;</span>
+            <span className="text-stone-900 font-bold">{t.title}</span>
+          </div>
+
           {/* Language Switcher Bar */}
-          <div className="flex items-center justify-center gap-1.5 mb-5">
-            <span className="text-xs font-semibold text-slate-500 mr-1">
-              {language === "bn" ? "ভাষা:" : language === "hi" ? "भाषा:" : "Language:"}
-            </span>
+          <div className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white p-0.5 text-xs font-semibold shadow-2xs">
             {(
               [
                 { code: "bn", label: "বাংলা" },
-                { code: "en", label: "English" },
                 { code: "hi", label: "हिन्दी" },
+                { code: "en", label: "English" },
               ] as const
             ).map((lang) => (
               <button
                 key={lang.code}
                 type="button"
                 onClick={() => setLanguage(lang.code)}
-                className={`min-h-9 inline-flex items-center justify-center rounded-full px-3 py-2 text-xs font-bold press transition-all ${
+                className={`min-h-7 inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer ${
                   language === lang.code
-                    ? "bg-amber-500 text-white shadow-xs"
-                    : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900"
+                    ? "bg-[#fcd404] text-stone-950 shadow-2xs font-extrabold"
+                    : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
                 }`}
               >
                 {lang.label}
               </button>
             ))}
           </div>
+        </div>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-semibold text-amber-900">
-            <Sparkles className="size-3.5 text-amber-600" />
-            <span>{t.badge}</span>
-          </div>
+        {/* =========================================================================
+            2. HERO SECTION: Sleek with rotating faint gold zodiac circle in background
+        ========================================================================= */}
+        <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-r from-amber-50/50 via-white to-amber-50/30 px-4 sm:px-6 py-5 shadow-2xs">
+          {/* Faint rotating zodiac wheel in background */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/zodiac-wheel-gold.webp"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-12 -top-16 size-[260px] sm:size-[340px] select-none opacity-[0.14] mix-blend-multiply animate-spin [animation-duration:120s] motion-reduce:animate-none"
+          />
 
-          <h1 className="mt-3.5 font-display text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-950">
-            {t.title}
-          </h1>
+          <div className="relative z-10 max-w-2xl space-y-1.5">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-bold text-amber-900">
+              <Sparkles className="size-3 text-amber-600" />
+              <span>{t.badge}</span>
+            </div>
 
-          <p className="mx-auto mt-3 max-w-3xl text-sm sm:text-base text-slate-600 leading-relaxed">
-            {t.subtitle}
-          </p>
+            <h1 className="text-xl sm:text-2xl font-serif font-bold text-stone-900 tracking-tight leading-tight">
+              {t.title}
+            </h1>
 
-          {/* Pricing & Navigation Bar */}
-          <div className="mt-6 flex items-center justify-center gap-3 flex-wrap">
-            <FeatureCoinBadge
-              feature={tarotFeature}
-              walletBalance={walletBalance}
-              language={language}
-            />
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+              {t.subtitle}
+            </p>
 
-            {/* Navigation Tabs (Tarot Oracle vs 78 Cards Deck) */}
-            <div className="inline-flex items-center rounded-full border border-slate-200 bg-white p-1 text-xs shadow-2xs">
+            {/* Pricing & Navigation Bar */}
+            <div className="pt-2 flex items-center gap-3 flex-wrap">
+              <FeatureCoinBadge
+                feature={tarotFeature}
+                walletBalance={walletBalance}
+                language={language}
+              />
+
+              {/* Navigation Tabs (Tarot Oracle vs 78 Cards Deck) */}
+              <div className="inline-flex items-center rounded-full border border-stone-200 bg-white p-1 text-xs shadow-2xs">
               <button
                 onClick={() => setMainTab("reading")}
-                className={`px-3.5 py-1.5 rounded-full font-bold transition-all flex items-center gap-1.5 ${
+                className={`px-3.5 py-1.5 rounded-full font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   mainTab === "reading"
-                    ? "bg-amber-500 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-[#fcd404] text-[#1c1304] border border-[#d9af00] shadow-2xs font-extrabold"
+                    : "text-stone-600 hover:text-stone-900"
                 }`}
               >
                 <Compass className="w-3.5 h-3.5" />
@@ -342,10 +364,10 @@ export default function TarotPage() {
               </button>
               <button
                 onClick={() => setMainTab("explorer")}
-                className={`px-3.5 py-1.5 rounded-full font-bold transition-all flex items-center gap-1.5 ${
+                className={`px-3.5 py-1.5 rounded-full font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   mainTab === "explorer"
-                    ? "bg-amber-500 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-[#fcd404] text-[#1c1304] border border-[#d9af00] shadow-2xs font-extrabold"
+                    : "text-stone-600 hover:text-stone-900"
                 }`}
               >
                 <BookOpen className="w-3.5 h-3.5" />
@@ -356,8 +378,7 @@ export default function TarotPage() {
         </div>
       </div>
 
-      {/* Main Container */}
-      <main className="mx-auto max-w-6xl px-4 py-8 flex-1 w-full space-y-10">
+      <div className="space-y-10">
         {/* Feature disabled alert if toggled off in admin */}
         {tarotFeature && tarotFeature.enabled === false && (
           <div className="max-w-2xl mx-auto">
@@ -1000,6 +1021,7 @@ export default function TarotPage() {
           reason={coinModalReason}
           language={language}
         />
+        </div>
       </main>
 
       <SiteFooter />

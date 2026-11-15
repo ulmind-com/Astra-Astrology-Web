@@ -73,25 +73,32 @@ export default function CoursesPage() {
   });
 
   return (
-    <div className="flex min-h-screen flex-col bg-background selection:bg-brand-500/20">
+    <div className="flex min-h-screen flex-col bg-[#fafaf9]/70 text-stone-900 selection:bg-amber-100 selection:text-amber-900">
       <SiteHeader />
 
       <main className="flex-1 pb-20">
         {/* Sacred Hero Banner */}
-        <section className="relative overflow-hidden border-b border-border/60 bg-gradient-to-b from-brand-950/20 via-surface to-background px-4 py-12 sm:px-6 sm:py-16">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(217,119,6,0.15),rgba(255,255,255,0))]" />
+        <section className="relative overflow-hidden border-b border-amber-200/60 bg-gradient-to-b from-amber-50/50 via-white to-amber-50/30 px-4 py-10 sm:px-6 sm:py-14">
+          {/* Faint rotating zodiac wheel in background */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/zodiac-wheel-gold.webp"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-12 -top-16 size-[280px] sm:size-[360px] select-none opacity-[0.14] mix-blend-multiply animate-spin [animation-duration:120s] motion-reduce:animate-none"
+          />
           
           <div className="relative mx-auto max-w-6xl text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-gold-dark shadow-soft">
-              <Sparkles className="size-3.5 text-gold" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-amber-900 shadow-2xs">
+              <Sparkles className="size-3.5 text-amber-600" />
               <span>DivinLink Gurukul</span>
             </div>
 
-            <h1 className="mt-4 font-serif text-3xl font-bold tracking-tight text-foreground sm:text-5xl">
-              Sacred Occult Wisdom, <span className="text-brand-600">Modern Mastery</span>
+            <h1 className="mt-4 font-serif text-3xl font-bold tracking-tight text-stone-900 sm:text-5xl">
+              Sacred Occult Wisdom, <span className="text-amber-800">Modern Mastery</span>
             </h1>
 
-            <p className="mx-auto mt-3 max-w-2xl text-base text-muted-foreground sm:text-lg">
+            <p className="mx-auto mt-3 max-w-2xl text-base text-stone-600 sm:text-lg">
               Learn authentic Vedic Jyotish, Tarot Reading, Numerology, and Vastu directly
               from revered astrologers and masters. Comprehensive curriculum, practical chart reading, and certified degrees.
             </p>
@@ -100,7 +107,7 @@ export default function CoursesPage() {
               <div className="mt-6 flex justify-center">
                 <Link
                   href="/account/courses"
-                  className="inline-flex items-center gap-2 rounded-xl border border-brand-500/40 bg-brand-500/10 px-4 py-2 text-sm font-semibold text-brand-600 transition-colors hover:bg-brand-500/20"
+                  className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-[#fcd404] px-5 py-2.5 text-xs sm:text-sm font-extrabold text-[#1c1304] transition-all hover:bg-[#e6be00] shadow-sm"
                 >
                   <GraduationCap className="size-4" />
                   <span>Go to My Enrolled Courses &rarr;</span>
@@ -115,14 +122,14 @@ export default function CoursesPage() {
           {/* Search & Level Filter Row */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400 pointer-events-none" />
               <input
                 ref={searchInputRef}
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search masterclasses, topics, or gurus…"
-                className="w-full rounded-xl border border-border bg-surface pl-10 pr-10 py-2.5 text-sm text-foreground shadow-sm placeholder:text-muted-foreground focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                className="w-full rounded-2xl border border-stone-200 bg-white pl-10 pr-10 py-2.5 text-xs sm:text-sm text-stone-900 shadow-xs placeholder:text-stone-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
               />
               {search && (
                 <button
@@ -132,7 +139,7 @@ export default function CoursesPage() {
                     setDebouncedSearch("");
                     searchInputRef.current?.focus();
                   }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-surface-muted hover:text-foreground transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-700 transition-colors"
                   title="Clear search"
                   aria-label="Clear search"
                 >
@@ -148,10 +155,10 @@ export default function CoursesPage() {
                   key={lvl.id}
                   type="button"
                   onClick={() => setSelectedLevel(lvl.id)}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                  className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                     selectedLevel === lvl.id
-                      ? "bg-foreground text-background shadow-sm"
-                      : "bg-surface-muted text-muted-foreground hover:bg-surface-muted/80 hover:text-foreground"
+                      ? "bg-[#fcd404] text-[#1c1304] border border-[#d9af00] shadow-2xs"
+                      : "bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 hover:text-stone-900"
                   }`}
                 >
                   {lvl.label}
@@ -161,7 +168,7 @@ export default function CoursesPage() {
           </div>
 
           {/* Category Tabs */}
-          <div className="mt-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-border/60">
+          <div className="mt-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-stone-200/80">
             {CATEGORIES.map((cat) => {
               const active = selectedCategory === cat.id;
               return (
@@ -169,10 +176,10 @@ export default function CoursesPage() {
                   key={cat.id}
                   type="button"
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition-all ${
+                  className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                     active
-                      ? "bg-brand-600 text-white shadow-soft"
-                      : "bg-surface text-muted-foreground hover:bg-surface-muted hover:text-foreground"
+                      ? "bg-[#fcd404] text-[#1c1304] border border-[#d9af00] shadow-xs"
+                      : "bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 hover:text-stone-900"
                   }`}
                 >
                   {cat.label}

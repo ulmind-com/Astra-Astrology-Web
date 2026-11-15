@@ -620,7 +620,7 @@
    -------------------------------------------------------------------------- */
 @media (min-width: 768px) {
   body:has([data-site-rail]) {
-    padding-left: 76px;
+    padding-left: 0;
   }
 }
 

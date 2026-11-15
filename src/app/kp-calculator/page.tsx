@@ -489,45 +489,86 @@ export default function KPCalculatorPage() {
   }, [result]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50/50">
+    <div className="min-h-screen bg-[#fafaf9]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
       <SiteHeader />
 
-      <main className="flex-1 py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        {/* Top Header & Language Toggle */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100/80 border border-amber-300 text-amber-900 text-xs font-bold uppercase tracking-wider mb-2">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-              <span>{ui.badge}</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
-              {ui.title}
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-3xl leading-relaxed">
-              {ui.subtitle}
-            </p>
+      <main className="mx-auto max-w-6xl px-3 sm:px-6 py-4 flex-1 w-full space-y-6">
+        {/* =========================================================================
+            1. BREADCRUMB & LANGUAGE SWITCHER
+        ========================================================================= */}
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-stone-500 pt-0.5 pb-1">
+          <div className="flex items-center gap-1.5 uppercase tracking-wider font-semibold">
+            <Link href="/" className="hover:text-amber-700 transition-colors">
+              {language === "bn" ? "হোম" : language === "hi" ? "होम" : "Home"}
+            </Link>
+            <span className="text-stone-300">&gt;</span>
+            <span className="text-stone-900 font-bold">{ui.title}</span>
           </div>
 
-          <div className="inline-flex items-center bg-white rounded-xl p-1 border border-slate-200 shadow-xs self-start md:self-center">
-            {(["bn", "en", "hi"] as const).map((lang) => (
+          {/* Language Switcher Bar */}
+          <div className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white p-0.5 text-xs font-semibold shadow-2xs">
+            {(
+              [
+                { code: "bn", label: "বাংলা" },
+                { code: "hi", label: "हिन्दी" },
+                { code: "en", label: "English" },
+              ] as const
+            ).map((lang) => (
               <button
-                key={lang}
+                key={lang.code}
                 type="button"
-                onClick={() => setLanguage(lang)}
-                className={`min-h-9 inline-flex items-center justify-center px-3.5 py-2 text-xs font-bold rounded-lg press transition-all ${
-                  language === lang
-                    ? "bg-amber-500 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                onClick={() => setLanguage(lang.code)}
+                className={`min-h-7 inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer ${
+                  language === lang.code
+                    ? "bg-[#fcd404] text-stone-950 shadow-2xs font-extrabold"
+                    : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
                 }`}
               >
-                {lang === "bn" ? "বাংলা" : lang === "hi" ? "हिन्दी" : "English"}
+                {lang.label}
               </button>
             ))}
           </div>
         </div>
 
+        {/* =========================================================================
+            2. HERO SECTION: Sleek with rotating faint gold zodiac circle in background
+        ========================================================================= */}
+        <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-r from-amber-50/50 via-white to-amber-50/30 px-4 sm:px-6 py-4 shadow-2xs">
+          {/* Faint rotating zodiac wheel in background */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/zodiac-wheel-gold.webp"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-12 -top-16 size-[260px] sm:size-[340px] select-none opacity-[0.14] mix-blend-multiply animate-spin [animation-duration:120s] motion-reduce:animate-none"
+          />
+
+          <div className="relative z-10 max-w-2xl space-y-1.5">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-bold text-amber-900">
+              <Sparkles className="size-3 text-amber-600" />
+              <span>{ui.badge}</span>
+            </div>
+
+            <h1 className="text-xl sm:text-2xl font-serif font-bold text-stone-900 tracking-tight leading-tight">
+              {ui.title}
+            </h1>
+
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+              {ui.subtitle}
+            </p>
+
+            <div className="pt-1 flex items-center gap-3">
+              <FeatureCoinBadge
+                feature={kpFeature}
+                coins={kpFeature?.coins ?? 20}
+                language={language}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Calculation Input Form */}
-        <div className="bg-white rounded-2xl border border-amber-200/90 shadow-sm p-6 sm:p-8 mb-10">
+        <div className="bg-white rounded-2xl border border-stone-200/90 shadow-xs p-5 sm:p-7 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-slate-100 gap-3">
             <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
               <Compass className="w-5 h-5 text-amber-500" />
@@ -867,7 +908,7 @@ export default function KPCalculatorPage() {
                 <button
                   type="submit"
                   disabled={loading || (kpFeature ? !kpFeature.enabled : false)}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl text-xs sm:text-sm font-extrabold text-white bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed press transition-all"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-7 rounded-full text-xs sm:text-sm font-extrabold text-[#1c1304] bg-[#fcd404] hover:bg-[#e6be00] border border-[#d9af00] shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed press transition-all cursor-pointer"
                 >
                   {loading ? (
                     <>
