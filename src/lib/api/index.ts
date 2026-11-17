@@ -1095,7 +1095,44 @@ export interface StockReservationResponse {
   message: string;
 }
 
+export interface ShopHeroBannerItem {
+  id: string;
+  title: string;
+  subtitle: string;
+  cta_text: string;
+  cta_link: string;
+  badge_text?: string | null;
+  image_url: string;
+  is_active: boolean;
+}
+
+export interface ShopStoreReelItem {
+  id: string;
+  user_handle: string;
+  user_name?: string | null;
+  rating: number;
+  quote: string;
+  thumbnail_url: string;
+  video_url?: string | null;
+  likes_count: string;
+  tagged_product_title?: string | null;
+  tagged_product_price?: number | null;
+  tagged_product_slug?: string | null;
+  is_active: boolean;
+}
+
+export interface ShopBannerSettings {
+  announcement_bar_text?: string | null;
+  announcement_bar_link?: string | null;
+  announcement_bar_active: boolean;
+  hero_banners: ShopHeroBannerItem[];
+  reels: ShopStoreReelItem[];
+}
+
 export const shopApi = {
+  getBanners: () =>
+    api.get<ShopBannerSettings>(endpoints.shop.banners, { auth: false }),
+
   getCategories: () =>
     api.get<ShopProductCategory[]>(endpoints.shop.categories, { auth: false }),
 

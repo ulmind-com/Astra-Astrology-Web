@@ -8,230 +8,86 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Sparkles,
   Search,
-  Filter,
-  Flame,
   CheckCircle2,
   Package,
   ShieldCheck,
   ShoppingBag,
-  ExternalLink,
   ChevronRight,
-  PhoneCall,
-  Clock,
+  ChevronLeft,
   RotateCcw,
+  Heart,
+  Share2,
+  Play,
+  X,
+  Coins,
+  Zap,
+  Award,
+  Gift,
+  Compass,
+  Flame,
+  Sun,
+  Moon,
+  Star,
+  ArrowRight,
+  Plus,
+  Minus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { shopApi, type ShopProduct, type ShopProductCategory } from "@/lib/api";
 import { useLanguage } from "@/providers/language-provider";
+import {
+  DEFAULT_HERO_BANNERS,
+  MARQUEE_TRUST_ITEMS,
+  BESTSELLER_CATEGORIES,
+  BESTSELLER_PRODUCTS,
+  SHOP_BY_WHAT_MATTERS,
+  CUSTOMER_REELS,
+  type BestsellerProduct,
+  type ShopHeroBanner,
+  type CustomerReel,
+} from "@/lib/shop-data";
 
-const FALLBACK_PRODUCTS: ShopProduct[] = [
-  {
-    id: "prod-saturn-7m",
-    title: "খাঁটি নেপালি ৭-মুখী রুদ্রাক্ষ (৭-Mukhi Nepali Rudraksha)",
-    slug: "nepali-7-mukhi-rudraksha",
-    sku: "ASTRA-RUD-7M",
-    short_description: "শনির সাড়ে সাতি, ধাইয়া ও কণ্টক শনির অশুভ প্রভাব প্রশমনকারী মহালক্ষ্মী ও শনিসিদ্ধ পবিত্র রুদ্রাক্ষ।",
-    detailed_description: "নেপালের উচ্চ পার্বত্য অঞ্চল থেকে সংগৃহীত ১০০% প্রাকৃতিক ও আদি ৭-মুখী রুদ্রাক্ষ।",
-    category_id: "cat-rudraksha",
-    category_slug: "rudraksha",
-    category_type: "rudraksha",
-    ruling_planet: "Saturn",
-    deity: "Mahalakshmi & Shani Dev",
-    benefits: ["শনির সাড়েসাতি প্রশমন", "কর্মক্ষেত্রে প্রমোশন", "আকস্মিক অর্থক্ষতি রোধ"],
-    life_pillars: ["career", "finance"],
-    mrp: 3999,
-    sale_price: 1899,
-    discount_percent: 52,
-    stock_quantity: 12,
-    in_stock: true,
-    featured_image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80"],
-    is_active: true,
-    is_featured: true,
-    is_energized: true,
-    average_rating: 4.9,
-    review_count: 84,
-  },
-  {
-    id: "prod-rahu-silver",
-    title: "বিশুদ্ধ ৪ গ্রাম নিরেট চৌকো রুপোর পাত ও ৮-মুখী রুদ্রাক্ষ",
-    slug: "solid-square-silver-rahu-combo",
-    sku: "ASTRA-LK-RAHU-SILVER",
-    short_description: "৮ম ও ১২শ ভাবে রাহুর পীড়া, মানসিক বিভ্রান্তি, দুঃস্বপ্ন ও ভয় দূরীকরণে বিশুদ্ধ শাস্ত্রীয় লাল কিতাব ক্যানন।",
-    detailed_description: "৯৯.৯% খাঁটি নিরেট চারকোনা রুপোর টুকরো এবং প্রস্ফুটিত ৮-মুখী রুদ্রাক্ষের সম্মিলিত সুরক্ষা বলয়।",
-    category_id: "cat-silver",
-    category_slug: "silver",
-    category_type: "ritual_items",
-    ruling_planet: "Rahu",
-    deity: "Ganesha & Bhairava",
-    benefits: ["রাহুর গোচর শান্তি", "মানসিক উদ্বেগ মুক্তি", "আকস্মিক দুর্ঘটনার সুরক্ষা"],
-    life_pillars: ["health", "luck"],
-    mrp: 2999,
-    sale_price: 1499,
-    discount_percent: 50,
-    stock_quantity: 18,
-    in_stock: true,
-    featured_image: "https://images.unsplash.com/photo-1611591475879-166258f33cf2?w=600&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1611591475879-166258f33cf2?w=600&auto=format&fit=crop&q=80"],
-    is_active: true,
-    is_featured: true,
-    is_energized: true,
-    average_rating: 4.8,
-    review_count: 62,
-  },
-  {
-    id: "prod-mars-coral",
-    title: "ন্যাচারাল রক্তপ্রবাল (Certified Red Coral) ও ৩-মুখী রুদ্রাক্ষ কবচ",
-    slug: "certified-red-coral-mars-kavach",
-    sku: "ASTRA-GEM-CORAL",
-    short_description: "মাঙ্গলিক দোষ প্রশমন, রক্তপীড়া ও ভূমি-সম্পত্তি সংক্রান্ত সংকট নিরসনে দেব সেনাপতি মঙ্গলের বিহিত মহাপ্রতিকার।",
-    detailed_description: "প্রাকৃতিক খাঁটি ইতালীয় রক্তপ্রবাল ও অগ্নিস্বরূপ ৩-মুখী রুদ্রাক্ষের সমন্বয়ে তৈরি পবিত্র রক্ষা কবচ।",
-    category_id: "cat-gemstones",
-    category_slug: "gemstones",
-    category_type: "gemstones",
-    ruling_planet: "Mars",
-    deity: "Hanuman & Kartikeya",
-    benefits: ["মাঙ্গলিক দোষ নিবারণ", "বীর্য ও জীবনীশক্তি বৃদ্ধি", "সম্পত্তি সংকট মোচন"],
-    life_pillars: ["love", "family"],
-    mrp: 4999,
-    sale_price: 2499,
-    discount_percent: 50,
-    stock_quantity: 8,
-    in_stock: true,
-    featured_image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&auto=format&fit=crop&q=80"],
-    is_active: true,
-    is_featured: true,
-    is_energized: true,
-    average_rating: 5.0,
-    review_count: 49,
-  },
-  {
-    id: "prod-gomti-chakra-set",
-    title: "৮টি অলৌকিক সিদ্ধ গোমতী চক্র ও কনসেক্রেটেড শ্রীকুবের কয়েন",
-    slug: "8-sacred-gomti-chakra-miracle-set",
-    sku: "ASTRA-GOMTI-8X",
-    short_description: "আটকে থাকা টাকা আদায়, গৃহের বাস্তুদোষ নিবারণ ও ধনলক্ষ্মীর চিরস্থায়ী কৃপাপ্রাপ্তির জন্য অলৌকিক তন্ত্রোক্ত টোটকা।",
-    detailed_description: "গোমতী নদীগর্ভ থেকে সংগৃহীত ৮টি প্রাকৃতিক শ্বেত গোমতী চক্র, গঙ্গাজল ও ধনদা মন্ত্রে ১০৮ বার জপকৃত।",
-    category_id: "cat-gomti",
-    category_slug: "gomti_chakra",
-    category_type: "gomti_chakra",
-    ruling_planet: "Jupiter & Lakshmi",
-    deity: "Maha Lakshmi & Kuber",
-    benefits: ["আটকে থাকা টাকা ফেরত", "স্থায়ী ধনবৃদ্ধি", "ঋণমুক্তি"],
-    life_pillars: ["finance", "family"],
-    mrp: 2199,
-    sale_price: 999,
-    discount_percent: 55,
-    stock_quantity: 25,
-    in_stock: true,
-    featured_image: "https://images.unsplash.com/photo-1611591475879-166258f33cf2?w=600&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1611591475879-166258f33cf2?w=600&auto=format&fit=crop&q=80"],
-    is_active: true,
-    is_featured: true,
-    is_energized: true,
-    average_rating: 4.9,
-    review_count: 112,
-  },
-  {
-    id: "prod-jupiter-5m",
-    title: "নেপালি ৫-মুখী রুদ্রাক্ষ ও কাঁচা হলুদের সিদ্ধ মালা",
-    slug: "nepali-5-mukhi-haldi-mala",
-    sku: "ASTRA-RUD-5M-HALDI",
-    short_description: "বৃহস্পতি গ্রহের শুভত্ব বৃদ্ধি, আধ্যাত্মিক জ্ঞান, উচ্চশিক্ষা ও দাম্পত্য সুখের জন্য দেবগুরু বিহিত প্রতিকার।",
-    detailed_description: "কাঁচা হলুদের গাঁট দিয়ে তৈরি সিদ্ধ মালা ও নেপালি ৫-মুখী পঞ্চমুখী রুদ্রাক্ষ।",
-    category_id: "cat-rudraksha",
-    category_slug: "rudraksha",
-    category_type: "rudraksha",
-    ruling_planet: "Jupiter",
-    deity: "Brihaspati & Lord Shiva",
-    benefits: ["জ্ঞান ও মেধা বিকাশ", "সন্তানসুখ", "বিবাহ বাধা নিরসন"],
-    life_pillars: ["career", "family"],
-    mrp: 2499,
-    sale_price: 1199,
-    discount_percent: 52,
-    stock_quantity: 14,
-    in_stock: true,
-    featured_image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80"],
-    is_active: true,
-    is_featured: true,
-    is_energized: true,
-    average_rating: 4.7,
-    review_count: 38,
-  },
-  {
-    id: "prod-sun-yantra-12m",
-    title: "বিশুদ্ধ তাম্র সূর্য যন্ত্র ও ১২-মুখী রুদ্রাক্ষ কম্বো",
-    slug: "pure-copper-surya-yantra-12m",
-    sku: "ASTRA-YAN-SURYA-12M",
-    short_description: "সরকারি চাকরি, পদোন্নতি, পিতৃসুখ, আত্মবিশ্বাস ও সমাজে উচ্চ সম্মান বৃদ্ধির জন্য রবি গ্রহের অব্যর্থ প্রতিকার।",
-    detailed_description: "খাঁটি তামার পাত্রে খোদাই করা ত্রিকোণ সূর্য যন্ত্র এবং মহাবলশালী দ্বাদশমুখী সূর্য রুদ্রাক্ষ।",
-    category_id: "cat-yantra",
-    category_slug: "yantra",
-    category_type: "yantra",
-    ruling_planet: "Sun",
-    deity: "Surya Bhagavan",
-    benefits: ["সরকারি পদলাভ", "আত্মবিশ্বাস বৃদ্ধি", "পিতৃদোষ নিবারণ"],
-    life_pillars: ["career", "luck"],
-    mrp: 3299,
-    sale_price: 1599,
-    discount_percent: 51,
-    stock_quantity: 10,
-    in_stock: true,
-    featured_image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&auto=format&fit=crop&q=80"],
-    is_active: true,
-    is_featured: true,
-    is_energized: true,
-    average_rating: 4.9,
-    review_count: 53,
-  },
-];
+interface CartItem {
+  id: string;
+  title: string;
+  price: number;
+  image: string;
+  quantity: number;
+}
 
 function ShopInner() {
   const { language } = useLanguage();
   const searchParams = useSearchParams();
-  const initialPlanet = searchParams.get("planet") || "";
-  const initialCategory = searchParams.get("category") || "";
+  const initialCategory = searchParams.get("category") || "all";
+  const initialSearch = searchParams.get("search") || "";
 
-  const [selectedPlanet, setSelectedPlanet] = React.useState<string>(initialPlanet);
-  const [selectedCategory, setSelectedCategory] = React.useState<string>(initialCategory);
-  const [searchTerm, setSearchTerm] = React.useState<string>("");
-  const [activeModalProduct, setActiveModalProduct] = React.useState<ShopProduct | null>(null);
+  // State
+  const [activeCategory, setActiveCategory] = React.useState<string>(initialCategory);
+  const [searchTerm, setSearchTerm] = React.useState<string>(initialSearch);
+  const [activeWhatMattersTab, setActiveWhatMattersTab] = React.useState<"purpose" | "crystal" | "planet">("purpose");
+  const [heroSlideIndex, setHeroSlideIndex] = React.useState<number>(0);
+  const [isHeroPaused, setIsHeroPaused] = React.useState<boolean>(false);
+  const [announcementDismissed, setAnnouncementDismissed] = React.useState<boolean>(false);
+  const [selectedProductModal, setSelectedProductModal] = React.useState<BestsellerProduct | null>(null);
+  const [activeReelModal, setActiveReelModal] = React.useState<CustomerReel | null>(null);
+  const [likedReels, setLikedReels] = React.useState<Record<string, boolean>>({});
+  const [cartItems, setCartItems] = React.useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = React.useState<boolean>(false);
 
+  // Sync query params
   React.useEffect(() => {
-    if (initialPlanet) setSelectedPlanet(initialPlanet);
-    if (initialCategory) setSelectedCategory(initialCategory);
-  }, [initialPlanet, initialCategory]);
+    if (initialCategory) setActiveCategory(initialCategory);
+    if (initialSearch) setSearchTerm(initialSearch);
+  }, [initialCategory, initialSearch]);
 
-  // Fetch Public Categories
-  const { data: serverCategories = [] } = useQuery<ShopProductCategory[]>({
-    queryKey: ["shop_public_categories"],
+  // Fetch Public Banners from Backend CMS
+  const { data: serverBannerData } = useQuery({
+    queryKey: ["shop_public_banners"],
     queryFn: async () => {
       try {
-        const res = await shopApi.getCategories();
-        return res || [];
-      } catch {
-        return [];
-      }
-    },
-  });
-
-  // Fetch Public Products
-  const { data: serverProductData, isLoading } = useQuery({
-    queryKey: ["shop_public_products", selectedPlanet, selectedCategory, searchTerm],
-    queryFn: async () => {
-      try {
-        const res = await shopApi.getProducts({
-          ruling_planet: selectedPlanet || undefined,
-          category_id: selectedCategory || undefined,
-          search: searchTerm || undefined,
-          in_stock_only: false,
-          limit: 30,
-        });
+        const res = await shopApi.getBanners();
         return res;
       } catch {
         return null;
@@ -239,362 +95,898 @@ function ShopInner() {
     },
   });
 
-  const products: ShopProduct[] =
-    serverProductData && serverProductData.items && serverProductData.items.length > 0
-      ? serverProductData.items
-      : FALLBACK_PRODUCTS.filter((p) => {
-          if (selectedPlanet && p.ruling_planet?.toLowerCase() !== selectedPlanet.toLowerCase()) {
-            return false;
-          }
-          if (selectedCategory && p.category_slug !== selectedCategory) {
-            return false;
-          }
-          if (searchTerm) {
-            const term = searchTerm.toLowerCase();
-            return (
-              p.title.toLowerCase().includes(term) ||
-              p.short_description.toLowerCase().includes(term) ||
-              p.sku.toLowerCase().includes(term)
-            );
-          }
-          return true;
-        });
+  const heroBanners: ShopHeroBanner[] =
+    serverBannerData?.hero_banners && serverBannerData.hero_banners.length > 0
+      ? serverBannerData.hero_banners
+      : DEFAULT_HERO_BANNERS;
 
-  const planetFilters = [
-    { id: "", label_bn: "সব গ্রহ", label_hi: "सभी ग्रह", label_en: "All Planets" },
-    { id: "saturn", label_bn: "♄ শনি দেব", label_hi: "♄ शनि", label_en: "♄ Saturn" },
-    { id: "jupiter", label_bn: "♃ বৃহস্পতি", label_hi: "♃ गुरु", label_en: "♃ Jupiter" },
-    { id: "mars", label_bn: "♂ মঙ্গল", label_hi: "♂ मंगल", label_en: "♂ Mars" },
-    { id: "rahu", label_bn: "☊ রাহু", label_hi: "☊ राहु", label_en: "☊ Rahu" },
-    { id: "sun", label_bn: "☉ সূর্য", label_hi: "☉ सूर्य", label_en: "☉ Sun" },
-    { id: "moon", label_bn: "☽ চন্দ্র", label_hi: "☽ चंद्र", label_en: "☽ Moon" },
-    { id: "venus", label_bn: "♀ শুক্র", label_hi: "♀ शुक्र", label_en: "♀ Venus" },
-    { id: "mercury", label_bn: "☿ বুধ", label_hi: "☿ बुध", label_en: "☿ Mercury" },
-  ];
+  const customerReels: CustomerReel[] =
+    serverBannerData?.reels && serverBannerData.reels.length > 0
+      ? (serverBannerData.reels as CustomerReel[])
+      : CUSTOMER_REELS;
+
+  const announcementText =
+    serverBannerData?.announcement_bar_text ||
+    "🛍️ Discover Sacred Jewellery & Energised Remedies Based on Your Mulank & Kundli ✨";
+
+  const showAnnouncement =
+    !announcementDismissed && (serverBannerData?.announcement_bar_active ?? true);
+
+  // Hero Carousel Autoplay
+  React.useEffect(() => {
+    if (isHeroPaused || heroBanners.length <= 1) return;
+    const interval = setInterval(() => {
+      setHeroSlideIndex((prev) => (prev + 1) % heroBanners.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isHeroPaused, heroBanners.length]);
+
+  const nextHeroSlide = () => {
+    setHeroSlideIndex((prev) => (prev + 1) % heroBanners.length);
+  };
+
+  const prevHeroSlide = () => {
+    setHeroSlideIndex((prev) => (prev - 1 + heroBanners.length) % heroBanners.length);
+  };
+
+  // Cart operations
+  const addToCart = (product: BestsellerProduct) => {
+    setCartItems((prev) => {
+      const existing = prev.find((item) => item.id === product.id);
+      if (existing) {
+        return prev.map((item) =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      }
+      return [
+        ...prev,
+        {
+          id: product.id,
+          title: product.title,
+          price: product.sale_price,
+          image: product.image,
+          quantity: 1,
+        },
+      ];
+    });
+    toast.success(
+      language === "bn"
+        ? `"${product.title.slice(0, 24)}..." কার্টে যুক্ত হয়েছে!`
+        : `"${product.title.slice(0, 24)}..." added to cart!`
+    );
+  };
+
+  const updateQuantity = (id: string, delta: number) => {
+    setCartItems((prev) =>
+      prev
+        .map((item) => (item.id === id ? { ...item, quantity: item.quantity + delta } : item))
+        .filter((item) => item.quantity > 0)
+    );
+  };
+
+  const totalCartCount = cartItems.reduce((acc, cur) => acc + cur.quantity, 0);
+  const totalCartAmount = cartItems.reduce((acc, cur) => acc + cur.price * cur.quantity, 0);
+
+  // Filter products
+  const filteredProducts = BESTSELLER_PRODUCTS.filter((prod) => {
+    if (activeCategory !== "all" && prod.category !== activeCategory) {
+      return false;
+    }
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      return (
+        prod.title.toLowerCase().includes(term) ||
+        prod.description.toLowerCase().includes(term) ||
+        prod.benefits.some((b) => b.toLowerCase().includes(term))
+      );
+    }
+    return true;
+  });
+
+  // Handle Reel Like
+  const toggleLikeReel = (id: string) => {
+    setLikedReels((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const shareReel = (reel: CustomerReel) => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.origin + "/shop#" + reel.id);
+      toast.success(language === "bn" ? "ভিডিও লিঙ্ক কপি করা হয়েছে!" : "Reel link copied to clipboard!");
+    }
+  };
+
+  const currentBanner = heroBanners[heroSlideIndex] || heroBanners[0];
 
   return (
-    <div className="min-h-screen bg-[#faf6f0] text-[#332c39]">
+    <div className="min-h-screen bg-[#faf8f4] text-[#1c1917] selection:bg-amber-200 selection:text-amber-900 font-sans">
       <SiteHeader />
 
-      <main className="max-w-6xl mx-auto px-4 py-8 sm:py-12 space-y-8">
-        {/* Hero Banner */}
-        <div className="relative overflow-hidden rounded-3xl border-2 border-amber-500/50 bg-gradient-to-br from-[#2a1b12] via-[#3a2519] to-[#1f1510] p-6 sm:p-10 text-white shadow-2xl">
-          <div className="pointer-events-none absolute -top-24 -right-24 size-80 rounded-full bg-amber-500/15 blur-3xl" />
-          <div className="pointer-events-none absolute top-4 right-8 text-8xl font-serif text-amber-500/10 select-none">
-            ॐ
+      {/* 1. Top Running Announcement Bar */}
+      {showAnnouncement && (
+        <aside
+          aria-label="Store announcement"
+          className="relative bg-gradient-to-r from-[#201c18] via-[#2c2217] to-[#1c1917] text-white px-4 py-2.5 text-xs font-semibold tracking-wide border-b border-amber-500/30"
+        >
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            <div className="flex-1 text-center flex items-center justify-center gap-2 overflow-hidden">
+              <Sparkles className="size-3.5 text-amber-400 shrink-0 animate-pulse" />
+              <Link
+                href={serverBannerData?.announcement_bar_link || "/shop?category=zodiac"}
+                className="hover:underline hover:text-amber-200 transition-colors truncate font-medium text-amber-100"
+              >
+                {announcementText}
+              </Link>
+            </div>
+            <button
+              type="button"
+              onClick={() => setAnnouncementDismissed(true)}
+              className="text-stone-400 hover:text-white p-1 rounded-md transition-colors cursor-pointer shrink-0"
+              aria-label="Dismiss announcement"
+            >
+              <X className="size-3.5" />
+            </button>
           </div>
+        </aside>
+      )}
 
-          <div className="relative z-10 max-w-2xl space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/50 bg-amber-500/20 px-3.5 py-1 text-xs font-semibold text-amber-200">
-              <Sparkles className="size-3.5 text-amber-300 animate-pulse" />
-              <span>
-                {language === "bn"
-                  ? "আস্ট্রা দিব্য এস্ট্রোস্টোর • ১০০% খাঁটি ও প্রাণ-প্রতিষ্ঠিত প্রতিকার"
-                  : language === "hi"
-                  ? "अस्ट्रा दिव्य एस्ट्रोस्टोर • 100% प्रामाणिक व प्राण-प्रतिष्ठित सामग्री"
-                  : "Astra Consecrated AstroStore • 100% Lab Certified Vedic Remedies"}
-              </span>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-12">
+        {/* 2. Hero Section: Large Rounded Carousel Banner */}
+        <section
+          className="relative overflow-hidden rounded-[28px] sm:rounded-[34px] shadow-2xl bg-stone-900 border border-stone-200/40 select-none group"
+          onMouseEnter={() => setIsHeroPaused(true)}
+          onMouseLeave={() => setIsHeroPaused(false)}
+        >
+          {/* Slide Background Image */}
+          <div className="relative aspect-[16/9] sm:aspect-[21/9] lg:aspect-[2.4/1] w-full min-h-[360px] sm:min-h-[460px]">
+            {currentBanner && (
+              <Image
+                src={currentBanner.image_url}
+                alt={currentBanner.title}
+                fill
+                priority
+                sizes="(max-width: 1280px) 100vw, 1280px"
+                className="object-cover object-center transform transition-transform duration-1000 ease-out group-hover:scale-105"
+                unoptimized
+              />
+            )}
+
+            {/* Cinematic Gradient Overlays */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+
+            {/* Sacred Faint Horoscope Wheel Background Watermark */}
+            <div className="pointer-events-none absolute -right-20 -top-20 size-96 rounded-full border border-amber-400/10 opacity-30 blur-[1px] animate-spin-slow" />
+            <div className="pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 size-72 rounded-full border border-amber-300/10 opacity-20" />
+
+            {/* Banner Text Content */}
+            <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-14 lg:px-20 max-w-2xl text-white space-y-3 sm:space-y-4">
+              {currentBanner?.badge_text && (
+                <div className="inline-flex items-center gap-1.5 self-start px-3 py-1 rounded-full bg-amber-500/20 backdrop-blur-md border border-amber-400/40 text-[11px] font-bold text-amber-200 tracking-wider uppercase">
+                  <Sparkles className="size-3 text-amber-300 animate-pulse" />
+                  <span>{currentBanner.badge_text}</span>
+                </div>
+              )}
+
+              <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-amber-50 tracking-tight leading-[1.08] drop-shadow-md">
+                {currentBanner?.title}
+              </h1>
+
+              <div className="flex items-center gap-2 text-amber-400/90 text-sm">
+                <span>✦</span>
+                <div className="h-px w-12 bg-amber-400/40" />
+              </div>
+
+              <p className="text-xs sm:text-base text-stone-200/95 font-medium leading-relaxed max-w-lg drop-shadow-sm">
+                {currentBanner?.subtitle}
+              </p>
+
+              <div className="pt-2">
+                <Link
+                  href={currentBanner?.cta_link || "/shop?category=zodiac"}
+                  className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-full border-2 border-amber-400/80 bg-amber-500/20 hover:bg-amber-400 hover:text-stone-950 backdrop-blur-md text-amber-100 font-bold text-xs sm:text-sm tracking-widest uppercase transition-all duration-300 shadow-lg cursor-pointer"
+                >
+                  <span>{currentBanner?.cta_text || "SHOP NOW"}</span>
+                  <ArrowRight className="size-4" />
+                </Link>
+              </div>
             </div>
 
-            <h1 className="font-cinzel text-2xl sm:text-4xl font-extrabold text-amber-100 tracking-tight">
-              {language === "bn"
-                ? "শাস্ত্রীয় রুদ্রাক্ষ, পবিত্র রত্ন ও দৈব যন্ত্র"
-                : language === "hi"
-                ? "शास्त्रीय रुद्राक्ष, प्राकृतिक रत्न व सिद्ध यंत्र"
-                : "Sacred Rudraksha, Certified Gemstones & Yantras"}
-            </h1>
+            {/* Navigation Arrows */}
+            <button
+              type="button"
+              onClick={prevHeroSlide}
+              aria-label="Previous slide"
+              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 size-10 sm:size-12 rounded-full bg-black/40 hover:bg-black/75 backdrop-blur-md border border-white/20 text-white flex items-center justify-center opacity-70 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer shadow-lg"
+            >
+              <ChevronLeft className="size-5 sm:size-6" />
+            </button>
+            <button
+              type="button"
+              onClick={nextHeroSlide}
+              aria-label="Next slide"
+              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 size-10 sm:size-12 rounded-full bg-black/40 hover:bg-black/75 backdrop-blur-md border border-white/20 text-white flex items-center justify-center opacity-70 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer shadow-lg"
+            >
+              <ChevronRight className="size-5 sm:size-6" />
+            </button>
 
-            <p className="text-xs sm:text-sm text-amber-200/80 leading-relaxed font-medium">
-              {language === "bn"
-                ? "আপনার জন্মছক ও বর্ষফলের অশুভ গ্রহপীড়া নিবারণে প্রতিটি সামগ্রী বারাণসীর গঙ্গাতীরে বৈদিক মন্ত্রোচ্চারণে প্রাণ-প্রতিষ্ঠা ও শোধন করে প্রদান করা হয়।"
-                : language === "hi"
-                ? "आपकी कुंडली के ग्रह दोष निवारण हेतु प्रत्येक सामग्री वाराणसी में वैदिक रीति से अभिमंत्रित व प्रतिष्ठित की जाती है।"
-                : "Every sacred remedy is laboratory tested and individually consecrated on the banks of Varanasi with authentic Vedic mantras."}
-            </p>
-
-            <div className="flex items-center gap-4 pt-2 text-xs text-amber-300/90 font-semibold flex-wrap">
-              <span className="flex items-center gap-1.5">
-                <ShieldCheck className="size-4 text-emerald-400" />
-                <span>{language === "bn" ? "ল্যাব সার্টিফাইড গ্যারান্টি" : language === "hi" ? "लैब प्रमाणित" : "Lab Certified"}</span>
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1.5">
-                <Flame className="size-4 text-amber-400" />
-                <span>{language === "bn" ? "মন্ত্রপূত প্রাণ-প্রতিষ্ঠা" : language === "hi" ? "प्राण-प्रतिष्ठित" : "Prana-Pratishthit"}</span>
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="size-4 text-emerald-400" />
-                <span>{language === "bn" ? "সরাসরি ক্যাশ অন ডেলিভারি / অনলাইন" : language === "hi" ? "सुरक्षित डिलीवरी" : "Pan-India Delivery"}</span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Filter & Search Bar */}
-        <div className="rounded-2xl border border-[#ebd7c8] bg-[#fbf5ee]/95 p-4 sm:p-5 shadow-sm space-y-4">
-          {/* Planet Pills */}
-          <div className="space-y-1.5">
-            <span className="text-[11px] font-bold text-amber-900 uppercase tracking-wider block">
-              {language === "bn" ? "গ্রহ ভিত্তিক প্রতিকার ফিল্টার:" : language === "hi" ? "ग्रह अनुसार फिल्टर:" : "Filter by Ruling Planet:"}
-            </span>
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-              {planetFilters.map((pl) => (
+            {/* Bottom-Left Pagination Dots (Matching Astrotalk Screenshot 1) */}
+            <div className="absolute bottom-5 sm:bottom-8 left-6 sm:left-14 flex items-center gap-2 z-10">
+              {heroBanners.map((_, idx) => (
                 <button
-                  key={pl.id}
+                  key={idx}
                   type="button"
-                  onClick={() => setSelectedPlanet(pl.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-                    selectedPlanet.toLowerCase() === pl.id.toLowerCase()
-                      ? "bg-amber-600 text-white shadow-xs"
+                  onClick={() => setHeroSlideIndex(idx)}
+                  aria-label={`Go to slide ${idx + 1}`}
+                  className={`transition-all duration-300 cursor-pointer ${
+                    heroSlideIndex === idx
+                      ? "w-8 h-2.5 rounded-full bg-amber-400 shadow-md"
+                      : "size-2.5 rounded-full bg-white/40 hover:bg-white/80"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 3. Marquee / Running Trust Strip (Directly beneath Hero) */}
+        <section aria-label="Astra Trust Guarantees" className="overflow-hidden rounded-2xl bg-black text-white py-3.5 px-4 shadow-md border border-stone-800">
+          <div className="flex items-center overflow-hidden whitespace-nowrap">
+            <div className="inline-flex items-center gap-6 sm:gap-10 animate-marquee text-xs sm:text-sm font-bold tracking-wider uppercase text-stone-200">
+              {[...MARQUEE_TRUST_ITEMS, ...MARQUEE_TRUST_ITEMS, ...MARQUEE_TRUST_ITEMS].map(
+                (item, index) => (
+                  <span key={index} className="inline-flex items-center gap-4 shrink-0">
+                    <span className="text-amber-400 font-serif">✦</span>
+                    <span>{item}</span>
+                  </span>
+                )
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* 4. "Most Loved By Customers" (Bestsellers Section) */}
+        <section className="space-y-6">
+          {/* Section Header with Category Tabs */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-widest text-amber-600">
+                <span>✦</span>
+                <span>BESTSELLERS</span>
+              </div>
+              <h2 className="font-serif text-2xl sm:text-4xl font-black text-stone-900 tracking-tight">
+                Most Loved By Customers
+              </h2>
+            </div>
+
+            {/* Category Pills Switcher (Matching Astrotalk Screenshot 2) */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+              {BESTSELLER_CATEGORIES.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`px-4 py-2 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                    activeCategory === cat.id
+                      ? "bg-black text-white shadow-md"
                       : "bg-white text-stone-700 hover:bg-stone-100 border border-stone-200"
                   }`}
                 >
-                  {pl[`label_${language}` as "label_bn" | "label_hi" | "label_en"] || pl.label_en}
+                  {cat.label}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Search Input */}
-          <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-stone-400" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder={
-                language === "bn"
-                  ? "রুদ্রাক্ষ, নীলম, রক্তপ্রবাল, গোমতী চক্র বা সুবিধা লিখে খুঁজুন..."
-                  : language === "hi"
-                  ? "रुद्राक्ष, नीलम, मूंगा, गोमती चक्र खोजें..."
-                  : "Search sacred Rudraksha, Blue Sapphire, Red Coral, Gomti Chakra..."
-              }
-              className="w-full rounded-xl border border-stone-300 bg-white pl-10 pr-4 py-2.5 text-sm focus:border-amber-600 focus:outline-hidden"
-            />
-          </div>
-        </div>
-
-        {/* Products Grid */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="font-cinzel text-lg sm:text-xl font-bold text-stone-900 flex items-center gap-2">
-              <ShoppingBag className="size-5 text-amber-700" />
-              <span>
-                {language === "bn"
-                  ? `উপলব্ধ সামগ্রী (${products.length})`
-                  : language === "hi"
-                  ? `उपलब्ध सामग्री (${products.length})`
-                  : `Sacred Products (${products.length})`}
-              </span>
-            </h2>
-            {selectedPlanet && (
+          {/* Product Cards Grid */}
+          {filteredProducts.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-stone-300 bg-white p-12 text-center space-y-3">
+              <Package className="size-10 text-stone-400 mx-auto" />
+              <h3 className="font-bold text-base text-stone-700">No products found in this category</h3>
+              <p className="text-xs text-stone-500">Try switching to &quot;All Bestsellers&quot; or search another term.</p>
               <button
                 type="button"
-                onClick={() => setSelectedPlanet("")}
-                className="text-xs font-bold text-amber-700 hover:underline cursor-pointer"
+                onClick={() => {
+                  setActiveCategory("all");
+                  setSearchTerm("");
+                }}
+                className="px-4 py-2 rounded-full bg-stone-900 text-white text-xs font-bold hover:bg-stone-800 transition-colors cursor-pointer"
               >
-                {language === "bn" ? "ফিল্টার মুছুন ✕" : language === "hi" ? "फिल्टर हटाएं ✕" : "Clear Filter ✕"}
+                Reset Filters
               </button>
-            )}
-          </div>
-
-          {isLoading ? (
-            <div className="py-20 text-center space-y-3">
-              <RotateCcw className="size-8 text-amber-600 animate-spin mx-auto" />
-              <p className="text-xs text-stone-500">
-                {language === "bn" ? "পবিত্র রত্ন ও রুদ্রাক্ষ লোড হচ্ছে..." : "Loading consecrated remedies..."}
-              </p>
-            </div>
-          ) : products.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-12 text-center space-y-2">
-              <Package className="size-10 text-stone-400 mx-auto" />
-              <h4 className="font-bold text-sm text-stone-700">
-                {language === "bn" ? "কোনো পণ্য পাওয়া যায়নি" : "No remedies matched your filter"}
-              </h4>
-              <p className="text-xs text-stone-500">
-                {language === "bn" ? "অন্য কোনো গ্রহ বা নাম দিয়ে খুঁজে দেখুন।" : "Try searching another planet or keyword."}
-              </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-              {products.map((p) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+              {filteredProducts.map((product) => (
                 <div
-                  key={p.id}
-                  className="rounded-3xl border-2 border-stone-200/90 bg-white p-4 shadow-xs hover:border-amber-400 hover:shadow-lg transition-all flex flex-col justify-between group"
+                  key={product.id}
+                  className="rounded-2xl border border-stone-200 bg-white p-3.5 shadow-xs hover:border-amber-400 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group"
                 >
                   <div className="space-y-3">
-                    {/* Thumbnail */}
-                    <div className="relative aspect-4/3 w-full rounded-2xl overflow-hidden bg-stone-100 border border-stone-100">
-                      {p.featured_image ? (
-                        <Image
-                          src={p.featured_image}
-                          alt={p.title}
-                          fill
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          unoptimized
-                        />
-                      ) : (
-                        <div className="size-full flex items-center justify-center text-stone-300">
-                          <Package className="size-12" />
+                    {/* Aspect-Square Image Container */}
+                    <div
+                      className="relative aspect-square w-full rounded-xl overflow-hidden bg-stone-100 cursor-pointer"
+                      onClick={() => setSelectedProductModal(product)}
+                    >
+                      <Image
+                        src={product.image}
+                        alt={product.title}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                        unoptimized
+                      />
+
+                      {/* Top Badges */}
+                      {product.badge && (
+                        <div className="absolute top-2.5 left-2.5">
+                          <span
+                            className={`px-2.5 py-0.5 rounded-md text-[10px] font-extrabold tracking-wide uppercase ${
+                              product.badge_type === "offer"
+                                ? "bg-red-600 text-white shadow-sm"
+                                : product.badge_type === "numerology"
+                                ? "bg-stone-900 text-amber-200 border border-amber-400/40 shadow-sm"
+                                : "bg-amber-500 text-stone-950 font-black shadow-sm"
+                            }`}
+                          >
+                            {product.badge}
+                          </span>
                         </div>
                       )}
-                      {p.is_energized && (
-                        <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1 bg-amber-900/90 backdrop-blur-xs text-amber-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-amber-500/50">
-                          <Flame className="size-2.5 text-amber-400 fill-current" />
-                          <span>{language === "bn" ? "প্রাণ-প্রতিষ্ঠিত" : "Consecrated"}</span>
-                        </span>
-                      )}
+
+                      {/* Quick Inspect View Icon */}
+                      <div className="absolute bottom-2.5 right-2.5 size-8 rounded-full bg-white/90 backdrop-blur-md text-stone-700 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md">
+                        <Sparkles className="size-3.5 text-amber-600" />
+                      </div>
                     </div>
 
-                    {/* Metadata Tags */}
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      {p.ruling_planet && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded-md border border-amber-200">
-                          <Sparkles className="size-2.5 text-amber-600" />
-                          <span>{p.ruling_planet}</span>
-                        </span>
-                      )}
-                      <span className="text-[10px] font-bold text-stone-600 bg-stone-100 px-2 py-0.5 rounded-md capitalize">
-                        {p.category_slug.replace(/-/g, " ")}
+                    {/* Metadata & Title */}
+                    <div className="space-y-1">
+                      <span className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider block">
+                        {product.category_label}
                       </span>
+                      <h3
+                        onClick={() => setSelectedProductModal(product)}
+                        className="font-bold text-sm text-stone-900 hover:text-amber-800 transition-colors line-clamp-1 cursor-pointer"
+                        title={product.title}
+                      >
+                        {product.title}
+                      </h3>
+                      {product.subtitle_tag && (
+                        <p className="text-[11px] text-stone-500 truncate">{product.subtitle_tag}</p>
+                      )}
                     </div>
-
-                    {/* Title & Short Description */}
-                    <h3 className="font-bold text-sm text-stone-900 group-hover:text-amber-800 transition-colors line-clamp-2">
-                      {p.title}
-                    </h3>
-
-                    <p className="text-xs text-stone-600 line-clamp-2 leading-relaxed">
-                      {p.short_description}
-                    </p>
                   </div>
 
-                  {/* Pricing & CTA */}
-                  <div className="pt-3 mt-3 border-t border-stone-100 flex items-center justify-between">
-                    <div>
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="font-extrabold text-stone-900 text-lg">
-                          ₹{p.sale_price.toLocaleString("en-IN")}
-                        </span>
-                        {p.mrp > p.sale_price && (
-                          <span className="text-xs text-stone-400 line-through">
-                            ₹{p.mrp.toLocaleString("en-IN")}
-                          </span>
-                        )}
-                      </div>
-                      {p.discount_percent > 0 && (
-                        <span className="text-[10px] font-bold text-emerald-700">
-                          {p.discount_percent}% {language === "bn" ? "ছাড়" : "OFF"}
-                        </span>
-                      )}
+                  {/* Pricing & ADD TO CART Button */}
+                  <div className="pt-3 mt-2 border-t border-stone-100 space-y-3">
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-black text-stone-900 text-base sm:text-lg">
+                        ₹{product.sale_price.toLocaleString("en-IN")}
+                      </span>
+                      <span className="text-xs text-stone-400 line-through">
+                        ₹{product.mrp.toLocaleString("en-IN")}
+                      </span>
+                      <span className="text-xs font-bold text-emerald-600">
+                        {product.discount_percent}% off
+                      </span>
                     </div>
 
                     <button
                       type="button"
-                      onClick={() => setActiveModalProduct(p)}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-white font-bold text-xs hover:from-amber-700 hover:to-amber-600 transition-all shadow-xs cursor-pointer"
+                      onClick={() => addToCart(product)}
+                      className="w-full py-2.5 rounded-xl bg-black text-white hover:bg-stone-800 active:scale-[0.98] font-bold text-xs tracking-wider uppercase transition-all shadow-sm cursor-pointer text-center flex items-center justify-center gap-1.5"
                     >
-                      <span>{language === "bn" ? "বিবরণ ও অর্ডার" : "Details & Order"}</span>
-                      <ChevronRight className="size-3.5" />
+                      <ShoppingBag className="size-3.5" />
+                      <span>ADD TO CART</span>
                     </button>
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </div>
+
+          {/* Bottom Center Link (Matching Screenshot 2) */}
+          <div className="text-center pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveCategory("all");
+                window.scrollTo({ top: 400, behavior: "smooth" });
+              }}
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-stone-900 hover:text-amber-700 underline underline-offset-4 cursor-pointer transition-colors"
+            >
+              <span>View all All Bestsellers</span>
+              <ArrowRight className="size-3.5" />
+            </button>
+          </div>
+        </section>
+
+        {/* 5. "Shop by What Matters" Section (Matching Screenshot 3) */}
+        <section className="rounded-3xl border border-[#ebdcc9] bg-[#fbf8f2] p-6 sm:p-10 shadow-sm space-y-8">
+          <div className="text-center max-w-xl mx-auto space-y-2">
+            <div className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-amber-700">
+              <span>✦</span>
+              <span>Shop by What Matters</span>
+              <span>✦</span>
+            </div>
+            <h2 className="font-serif text-2xl sm:text-4xl font-black text-stone-900 tracking-tight">
+              Tell us what you want to attract.
+            </h2>
+            <p className="text-xs sm:text-sm text-stone-600 font-medium">
+              We&apos;ll show you what authentic Vedic remedies &amp; sacred stones work best for it.
+            </p>
+
+            {/* 3 Tab Switcher */}
+            <div className="inline-flex items-center gap-1.5 p-1 rounded-full bg-white/80 border border-stone-200 mt-4 shadow-xs">
+              {(["purpose", "crystal", "planet"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveWhatMattersTab(tab)}
+                  className={`px-5 py-1.5 rounded-full text-xs font-bold capitalize transition-all duration-200 cursor-pointer ${
+                    activeWhatMattersTab === tab
+                      ? "bg-stone-900 text-white shadow-xs"
+                      : "text-stone-600 hover:text-stone-950"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 2-Column Grid (8 Cards Matching Screenshot 3) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {SHOP_BY_WHAT_MATTERS[activeWhatMattersTab].map((item) => (
+              <div
+                key={item.id}
+                onClick={() => {
+                  setActiveCategory(item.query);
+                  toast.info(`Filtering products for: ${item.title}`);
+                  const el = document.getElementById("search-anchor");
+                  el?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="rounded-2xl border border-stone-200/90 bg-white p-4 shadow-xs hover:border-amber-400 hover:shadow-md transition-all duration-200 cursor-pointer group flex items-center justify-between gap-3"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="size-10 rounded-xl bg-amber-500/10 text-amber-700 flex items-center justify-center shrink-0 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                    {item.iconName === "Coins" && <Coins className="size-5" />}
+                    {item.iconName === "Heart" && <Heart className="size-5" />}
+                    {item.iconName === "Shield" && <ShieldCheck className="size-5" />}
+                    {item.iconName === "Zap" && <Zap className="size-5" />}
+                    {item.iconName === "Sparkles" && <Sparkles className="size-5" />}
+                    {item.iconName === "Award" && <Award className="size-5" />}
+                    {item.iconName === "Gift" && <Gift className="size-5" />}
+                    {item.iconName === "Compass" && <Compass className="size-5" />}
+                    {item.iconName === "Flame" && <Flame className="size-5" />}
+                    {item.iconName === "Sun" && <Sun className="size-5" />}
+                    {item.iconName === "Moon" && <Moon className="size-5" />}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-stone-900 group-hover:text-amber-800 transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-[11px] text-stone-500 line-clamp-1">{item.desc}</p>
+                  </div>
+                </div>
+
+                <div className="size-7 rounded-full bg-stone-50 group-hover:bg-amber-50 flex items-center justify-center text-stone-400 group-hover:text-amber-700 transition-all shrink-0">
+                  <ArrowRight className="size-3.5 transform group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div id="search-anchor" className="text-center pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveCategory("all");
+                toast.success("Showing complete sacred store catalog");
+              }}
+              className="px-6 py-2.5 rounded-full border border-stone-800 text-stone-900 hover:bg-stone-900 hover:text-white font-bold text-xs tracking-wider uppercase transition-all cursor-pointer"
+            >
+              Explore all {activeWhatMattersTab}s
+            </button>
+          </div>
+        </section>
+
+        {/* 6. "Loved by You, Shared by You" (Customer Reels Showcase) */}
+        <section className="rounded-3xl bg-[#121015] text-white p-6 sm:p-10 shadow-2xl border border-amber-950/40 relative overflow-hidden space-y-8">
+          <div className="pointer-events-none absolute -top-24 -left-24 size-80 rounded-full bg-amber-500/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 -right-24 size-80 rounded-full bg-amber-600/10 blur-3xl" />
+
+          {/* Section Header */}
+          <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-widest text-amber-400">
+                <span>✦</span>
+                <span>REAL STORIES, REAL EXPERIENCES</span>
+              </div>
+              <h2 className="font-serif text-2xl sm:text-4xl font-black text-amber-50 tracking-tight">
+                Loved by You, Shared by You
+              </h2>
+              <p className="text-xs sm:text-sm text-stone-400 max-w-xl">
+                Real reviews, unboxings and everyday spiritual rituals from our verified community.
+              </p>
+            </div>
+
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-amber-300 hover:text-amber-200 transition-colors self-start md:self-auto"
+            >
+              <span>Follow on Instagram</span>
+              <ArrowRight className="size-3.5" />
+            </a>
+          </div>
+
+          {/* 5 Vertical Reel Cards (9:16 Aspect Ratio) */}
+          <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {customerReels.map((reel) => {
+              const isLiked = likedReels[reel.id] || false;
+              return (
+                <div
+                  key={reel.id}
+                  id={reel.id}
+                  className="relative aspect-[9/16] rounded-2xl overflow-hidden bg-stone-900 border border-stone-800 group shadow-lg flex flex-col justify-between p-3 select-none"
+                >
+                  {/* Thumbnail Image */}
+                  <Image
+                    src={reel.thumbnail_url}
+                    alt={reel.user_handle}
+                    fill
+                    sizes="(max-width: 640px) 50vw, 20vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                    unoptimized
+                  />
+
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/30" />
+
+                  {/* Center Play Button Overlay */}
+                  <div
+                    onClick={() => setActiveReelModal(reel)}
+                    className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                  >
+                    <div className="size-11 sm:size-12 rounded-full bg-black/50 backdrop-blur-md border border-white/30 text-white flex items-center justify-center group-hover:scale-110 group-hover:bg-amber-500 group-hover:text-black transition-all duration-300 shadow-xl">
+                      <Play className="size-5 fill-current ml-0.5" />
+                    </div>
+                  </div>
+
+                  {/* Top Bar: Handle & Rating */}
+                  <div className="relative z-10 flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-white/90 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/10 truncate max-w-[120px]">
+                      {reel.user_handle}
+                    </span>
+                    <div className="flex items-center text-amber-400 text-[10px]">
+                      {"★".repeat(reel.rating)}
+                    </div>
+                  </div>
+
+                  {/* Bottom Bar: Quote & Like/Share Action Buttons */}
+                  <div className="relative z-10 space-y-2">
+                    <p
+                      onClick={() => setActiveReelModal(reel)}
+                      className="text-xs text-white/95 font-medium line-clamp-2 leading-snug drop-shadow-md cursor-pointer hover:text-amber-200 transition-colors"
+                    >
+                      &ldquo;{reel.quote}&rdquo;
+                    </p>
+
+                    <div className="flex items-center justify-between pt-1 border-t border-white/15">
+                      {/* Like Action */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleLikeReel(reel.id);
+                        }}
+                        className="flex items-center gap-1 text-[11px] font-bold text-white/90 hover:text-rose-400 transition-colors cursor-pointer"
+                      >
+                        <Heart
+                          className={`size-3.5 transition-transform ${
+                            isLiked ? "fill-rose-500 text-rose-500 scale-125" : ""
+                          }`}
+                        />
+                        <span>{reel.likes_count}</span>
+                      </button>
+
+                      {/* Share Action */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          shareReel(reel);
+                        }}
+                        className="p-1 rounded-full text-white/80 hover:text-white hover:bg-white/20 transition-all cursor-pointer"
+                        title="Share reel"
+                      >
+                        <Share2 className="size-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
       </main>
 
-      {/* Product Quick-View & Consultation Modal */}
-      {activeModalProduct && (
+      {/* Floating Quick Cart Pill */}
+      {totalCartCount > 0 && (
+        <aside
+          aria-label="Floating quick cart"
+          className="fixed bottom-6 right-6 z-40 animate-in slide-in-from-bottom-6"
+        >
+          <button
+            type="button"
+            onClick={() => setIsCartOpen(true)}
+            className="flex items-center gap-3 px-5 py-3 rounded-full bg-black text-white shadow-2xl hover:bg-stone-900 border border-amber-400/50 transition-all duration-300 hover:scale-105 cursor-pointer"
+          >
+            <div className="relative">
+              <ShoppingBag className="size-5 text-amber-400" />
+              <span className="absolute -top-2 -right-2 size-4 rounded-full bg-amber-500 text-black text-[10px] font-black flex items-center justify-center">
+                {totalCartCount}
+              </span>
+            </div>
+            <div className="text-left">
+              <span className="text-[11px] uppercase tracking-wider block font-bold text-stone-400">
+                Astra Cart
+              </span>
+              <span className="text-sm font-extrabold text-white">
+                ₹{totalCartAmount.toLocaleString("en-IN")}
+              </span>
+            </div>
+            <ChevronRight className="size-4 text-stone-400 ml-1" />
+          </button>
+        </aside>
+      )}
+
+      {/* Cart Slide-Over Drawer */}
+      {isCartOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in">
+          <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col justify-between p-6 overflow-y-auto">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between pb-4 border-b border-stone-200">
+                <div className="flex items-center gap-2">
+                  <ShoppingBag className="size-5 text-amber-600" />
+                  <h3 className="font-bold text-lg text-stone-900">Your Consecrated Cart ({totalCartCount})</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsCartOpen(false)}
+                  className="p-1 rounded-md text-stone-400 hover:text-stone-700 cursor-pointer"
+                >
+                  <X className="size-5" />
+                </button>
+              </div>
+
+              {cartItems.length === 0 ? (
+                <div className="py-20 text-center space-y-2">
+                  <Package className="size-12 text-stone-300 mx-auto" />
+                  <p className="text-sm font-semibold text-stone-500">Your cart is empty.</p>
+                </div>
+              ) : (
+                <div className="space-y-3 divide-y divide-stone-100">
+                  {cartItems.map((item) => (
+                    <div key={item.id} className="pt-3 flex items-center gap-3">
+                      <div className="relative size-16 rounded-xl overflow-hidden bg-stone-100 shrink-0">
+                        <Image src={item.image} alt={item.title} fill className="object-cover" unoptimized />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-xs font-bold text-stone-900 truncate">{item.title}</h4>
+                        <span className="text-xs font-extrabold text-stone-900 block mt-0.5">
+                          ₹{item.price.toLocaleString("en-IN")}
+                        </span>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <button
+                            type="button"
+                            onClick={() => updateQuantity(item.id, -1)}
+                            className="size-6 rounded-md bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-600 cursor-pointer"
+                          >
+                            <Minus className="size-3" />
+                          </button>
+                          <span className="text-xs font-bold">{item.quantity}</span>
+                          <button
+                            type="button"
+                            onClick={() => updateQuantity(item.id, 1)}
+                            className="size-6 rounded-md bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-600 cursor-pointer"
+                          >
+                            <Plus className="size-3" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {cartItems.length > 0 && (
+              <div className="pt-4 border-t border-stone-200 space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium text-stone-600">Total Consecrated Order</span>
+                  <span className="font-extrabold text-stone-900 text-lg">
+                    ₹{totalCartAmount.toLocaleString("en-IN")}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    toast.success(
+                      language === "bn"
+                        ? "অর্ডার প্রক্রিয়া শুরু হয়েছে! বৈদিক আচার্য অবিলম্বে যোগাযোগ করবেন।"
+                        : "Order placed successfully! A Vedic Acharya will contact you shortly."
+                    );
+                    setCartItems([]);
+                    setIsCartOpen(false);
+                  }}
+                  className="w-full py-3 rounded-xl bg-black text-white hover:bg-stone-800 font-bold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer text-center"
+                >
+                  Proceed to Consecrated Checkout
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Product Quick-View Modal */}
+      {selectedProductModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in">
-          <div className="relative w-full max-w-lg rounded-3xl border-2 border-amber-500 bg-[#faf6f0] p-6 sm:p-8 text-[#332c39] shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
-            <div className="flex items-start justify-between pb-3 border-b border-[#ebd7c8]">
+          <div className="relative w-full max-w-lg rounded-3xl border border-stone-200 bg-white p-6 sm:p-8 text-stone-900 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
+            <div className="flex items-start justify-between pb-3 border-b border-stone-100">
               <div>
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-900 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300">
-                  <ShieldCheck className="size-3 text-amber-700" />
-                  <span>{activeModalProduct.sku}</span>
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-900 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300 uppercase">
+                  {selectedProductModal.category_label}
                 </span>
-                <h3 className="font-cinzel text-lg sm:text-xl font-bold text-[#4D4664] mt-1">
-                  {activeModalProduct.title}
+                <h3 className="font-serif text-lg sm:text-xl font-bold text-stone-900 mt-1">
+                  {selectedProductModal.title}
                 </h3>
               </div>
               <button
                 type="button"
-                onClick={() => setActiveModalProduct(null)}
-                className="text-stone-400 hover:text-stone-600 p-1 rounded-lg"
+                onClick={() => setSelectedProductModal(null)}
+                className="text-stone-400 hover:text-stone-700 p-1 rounded-lg cursor-pointer"
               >
-                ✕
+                <X className="size-5" />
               </button>
             </div>
 
             <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-stone-100 border border-stone-200">
-              {activeModalProduct.featured_image && (
-                <Image
-                  src={activeModalProduct.featured_image}
-                  alt={activeModalProduct.title}
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-              )}
+              <Image
+                src={selectedProductModal.image}
+                alt={selectedProductModal.title}
+                fill
+                className="object-cover"
+                unoptimized
+              />
             </div>
 
             <div className="space-y-2">
               <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
-                {language === "bn" ? "শাস্ত্রমত উপকারিতা ও বিধান:" : "Sacred Benefits & Blessings:"}
+                {language === "bn" ? "বৈদিক শাস্ত্রীয় বিবরণ:" : "Sacred Vedic Description:"}
               </h4>
               <p className="text-xs text-stone-700 leading-relaxed font-medium">
-                {activeModalProduct.detailed_description || activeModalProduct.short_description}
+                {selectedProductModal.description}
               </p>
             </div>
 
-            {activeModalProduct.benefits.length > 0 && (
-              <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3 space-y-1.5">
+            {selectedProductModal.benefits.length > 0 && (
+              <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3.5 space-y-1.5">
                 <span className="text-[11px] font-bold text-amber-900 block">
-                  ✦ {language === "bn" ? "প্রধান শুভ ফল:" : "Key Astrological Influences:"}
+                  ✦ {language === "bn" ? "প্রধান শুভ ফল ও প্রভাব:" : "Key Astrological Influences:"}
                 </span>
                 <ul className="text-xs text-stone-700 space-y-1 list-disc list-inside">
-                  {activeModalProduct.benefits.map((b, i) => (
+                  {selectedProductModal.benefits.map((b, i) => (
                     <li key={i}>{b}</li>
                   ))}
                 </ul>
               </div>
             )}
 
-            <div className="pt-3 border-t border-[#ebd7c8] flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="pt-3 border-t border-stone-100 flex flex-col sm:flex-row items-center justify-between gap-3">
               <div>
                 <div className="flex items-baseline gap-2">
                   <span className="text-xl font-extrabold text-stone-900">
-                    ₹{activeModalProduct.sale_price.toLocaleString("en-IN")}
+                    ₹{selectedProductModal.sale_price.toLocaleString("en-IN")}
                   </span>
                   <span className="text-xs text-stone-400 line-through">
-                    ₹{activeModalProduct.mrp.toLocaleString("en-IN")}
+                    ₹{selectedProductModal.mrp.toLocaleString("en-IN")}
+                  </span>
+                  <span className="text-xs font-bold text-emerald-600">
+                    {selectedProductModal.discount_percent}% off
                   </span>
                 </div>
-                <span className="text-[10px] font-bold text-emerald-700">
-                  {language === "bn" ? "১০০% প্রামাণ্য খাঁটি সার্টিফিকেট সহ" : "Includes Authenticity Certificate"}
+                <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-1 mt-0.5">
+                  <ShieldCheck className="size-3" />
+                  <span>100% Authentic with Govt. Lab Guarantee</span>
                 </span>
               </div>
 
-              <div className="flex items-center gap-2 w-full sm:w-auto">
-                <button
-                  type="button"
-                  onClick={() => {
-                    toast.success(
-                      language === "bn"
-                        ? "আপনার অনুরোধ সংরক্ষিত হয়েছে! বৈদিক আচার্য অবিলম্বে যোগাযোগ করবেন।"
-                        : "Consecration request placed! An Acharya will guide you shortly."
-                    );
-                    setActiveModalProduct(null);
-                  }}
-                  className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-white font-bold text-xs hover:from-amber-700 hover:to-amber-600 transition-all shadow-md cursor-pointer text-center"
-                >
-                  {language === "bn" ? "অর্ডার সম্পন্ন করুন (₹" + activeModalProduct.sale_price + ")" : "Complete Order (₹" + activeModalProduct.sale_price + ")"}
-                </button>
+              <button
+                type="button"
+                onClick={() => {
+                  addToCart(selectedProductModal);
+                  setSelectedProductModal(null);
+                }}
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-black text-white hover:bg-stone-800 font-bold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer"
+              >
+                Add to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reel Video Player Modal */}
+      {activeReelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-sm rounded-3xl overflow-hidden bg-stone-950 text-white shadow-2xl border border-stone-800 space-y-4 p-4">
+            <div className="flex items-center justify-between pb-2 border-b border-stone-800">
+              <div className="flex items-center gap-2">
+                <div className="size-7 rounded-full bg-amber-500 text-black font-bold text-xs flex items-center justify-center">
+                  ✦
+                </div>
+                <div>
+                  <span className="text-xs font-bold text-white block">{activeReelModal.user_handle}</span>
+                  <span className="text-[10px] text-stone-400">{activeReelModal.user_name}</span>
+                </div>
               </div>
+              <button
+                type="button"
+                onClick={() => setActiveReelModal(null)}
+                className="text-stone-400 hover:text-white p-1 rounded-md cursor-pointer"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            {/* Video preview / player */}
+            <div className="relative aspect-[9/14] w-full rounded-2xl overflow-hidden bg-black border border-stone-800">
+              <video
+                src={activeReelModal.video_url}
+                poster={activeReelModal.thumbnail_url}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="size-full object-cover"
+              />
+            </div>
+
+            <p className="text-xs text-stone-300 italic px-1">
+              &ldquo;{activeReelModal.quote}&rdquo;
+            </p>
+
+            {/* Tagged product banner */}
+            <div className="rounded-xl bg-stone-900 border border-stone-800 p-3 flex items-center justify-between gap-3">
+              <div>
+                <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider block">
+                  Tagged Sacred Item
+                </span>
+                <span className="text-xs font-bold text-white block truncate max-w-[180px]">
+                  {activeReelModal.tagged_product_title}
+                </span>
+                <span className="text-xs font-black text-amber-300">
+                  ₹{activeReelModal.tagged_product_price.toLocaleString("en-IN")}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  toast.success(`Opening ${activeReelModal.tagged_product_title}`);
+                  setActiveReelModal(null);
+                  setActiveCategory("all");
+                }}
+                className="px-3 py-1.5 rounded-lg bg-amber-500 text-black font-bold text-xs hover:bg-amber-400 transition-colors cursor-pointer"
+              >
+                Shop Now
+              </button>
             </div>
           </div>
         </div>
@@ -609,7 +1001,7 @@ export default function ShopPage() {
   return (
     <React.Suspense
       fallback={
-        <div className="min-h-screen bg-[#faf6f0] flex items-center justify-center">
+        <div className="min-h-screen bg-[#faf8f4] flex items-center justify-center">
           <RotateCcw className="size-8 text-amber-600 animate-spin" />
         </div>
       }
