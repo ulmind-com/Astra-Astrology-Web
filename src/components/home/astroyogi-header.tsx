@@ -547,7 +547,7 @@ export function AstroyogiHeader() {
     // Default English (Clean, Concise, Astrotalk-style single-word labels)
     return [
       {
-        label: "Consultations",
+        label: "Consult",
         href: "/astrologers",
         dropdown: [
           {
@@ -772,8 +772,8 @@ export function AstroyogiHeader() {
       )}
     >
       {/* Astrotalk-Style Unified Single Row Navigation Bar */}
-      <div className="mx-auto max-w-[1440px] px-3 sm:px-6 lg:px-8">
-        <div className="flex h-16 sm:h-[68px] items-center justify-between gap-2 xl:gap-4 overflow-visible">
+      <div className="mx-auto max-w-[1440px] px-3 sm:px-4 xl:px-4 2xl:px-8">
+        <div className="flex h-16 sm:h-[68px] items-center justify-between gap-1.5 xl:gap-2 2xl:gap-4 overflow-visible">
           {/* ================= LEFT: Brand Logo + Name ================= */}
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 whitespace-nowrap">
             {/* Mobile Hamburger Toggle */}
@@ -819,7 +819,7 @@ export function AstroyogiHeader() {
                 >
                   <Link
                     href={cat.href}
-                    className={`whitespace-nowrap shrink-0 inline-flex items-center gap-1 px-2.5 2xl:px-3 py-1.5 rounded-full text-[13px] 2xl:text-[14px] font-semibold tracking-normal transition-all duration-150 select-none ${
+                    className={`whitespace-nowrap shrink-0 inline-flex items-center gap-1 px-2 xl:px-2.5 2xl:px-3 py-1.5 rounded-full text-[12.5px] xl:text-[13px] 2xl:text-[14px] font-semibold tracking-normal transition-all duration-150 select-none ${
                       isActive
                         ? "text-amber-950 font-bold bg-amber-100/90 shadow-2xs"
                         : "text-stone-700 hover:text-stone-950 hover:bg-stone-100/80"
@@ -894,7 +894,7 @@ export function AstroyogiHeader() {
           </nav>
 
           {/* ================= RIGHT: Language, Profile & Astrotalk-Style CTA Button ================= */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 whitespace-nowrap">
+          <div className="flex items-center gap-1.5 xl:gap-2 2xl:gap-2.5 shrink-0 whitespace-nowrap">
             {/* Language Selector Dropdown */}
             <div className="relative shrink-0">
               <button
@@ -1000,7 +1000,7 @@ export function AstroyogiHeader() {
             <Link href="/astrologers" className="shrink-0 group">
               <button
                 type="button"
-                className="group relative inline-flex h-9 sm:h-[38px] items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 px-3 sm:px-4 text-stone-950 font-semibold text-xs sm:text-[13px] tracking-tight shadow-[0_4px_14px_-2px_rgba(245,158,11,0.55)] hover:shadow-[0_6px_18px_-2px_rgba(245,158,11,0.75)] transition-all hover:scale-[1.02] active:scale-[0.98] border border-amber-300 whitespace-nowrap cursor-pointer leading-normal"
+                className="group relative inline-flex h-9 sm:h-[38px] items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 px-3 xl:px-3.5 2xl:px-4 text-stone-950 font-semibold text-xs sm:text-[13px] tracking-tight shadow-[0_4px_14px_-2px_rgba(245,158,11,0.55)] hover:shadow-[0_6px_18px_-2px_rgba(245,158,11,0.75)] transition-all hover:scale-[1.02] active:scale-[0.98] border border-amber-300 whitespace-nowrap cursor-pointer leading-normal"
               >
                 <span className="leading-normal">{ctaPart1}</span>
                 <span className="hidden 2xl:inline opacity-40 font-light leading-normal">|</span>
