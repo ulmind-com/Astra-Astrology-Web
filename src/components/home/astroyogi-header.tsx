@@ -227,7 +227,6 @@ export function AstroyogiHeader() {
         {
           label: "কোর্স",
           href: "/courses",
-          badge: "সার্টিফিকেট",
           dropdown: [
             {
               label: "সমস্ত মাস্টারক্লাস",
@@ -254,7 +253,6 @@ export function AstroyogiHeader() {
         {
           label: "শপ",
           href: "/shop",
-          badge: "১০০% ক্যাশব্যাক",
           dropdown: [
             {
               label: "অ্যাস্ট্রোমল স্টোর (সমস্ত প্রতিকার)",
@@ -434,7 +432,6 @@ export function AstroyogiHeader() {
         {
           label: "कोर्स",
           href: "/courses",
-          badge: "सर्टिफिकेट",
           dropdown: [
             {
               label: "सभी मास्टरक्लास",
@@ -461,7 +458,6 @@ export function AstroyogiHeader() {
         {
           label: "शॉप",
           href: "/shop",
-          badge: "100% कैशबैक",
           dropdown: [
             {
               label: "एस्ट्रोमॉल स्टोर (सभी उपाय)",
@@ -641,7 +637,6 @@ export function AstroyogiHeader() {
       {
         label: "Courses",
         href: "/courses",
-        badge: "Certificate",
         dropdown: [
           {
             label: "All Masterclasses",
@@ -668,7 +663,6 @@ export function AstroyogiHeader() {
       {
         label: "Shop",
         href: "/shop",
-        badge: "100% Cashback",
         dropdown: [
           {
             label: "AstroMall Store (All Remedies)",
@@ -810,7 +804,7 @@ export function AstroyogiHeader() {
           </div>
 
           {/* ================= CENTER: Single-Row Luxury Navigation Links ================= */}
-          <nav className="hidden xl:flex items-center gap-1 2xl:gap-2 whitespace-nowrap shrink-0 overflow-visible">
+          <nav className="hidden xl:flex items-center gap-0.5 2xl:gap-1.5 whitespace-nowrap shrink-0 overflow-visible">
             {navCategories.map((cat) => {
               const isActive = cat.href === pathname || (cat.label === "Home" && pathname === "/");
               const hasDropdown = Boolean(cat.dropdown && cat.dropdown.length > 0);
@@ -825,7 +819,7 @@ export function AstroyogiHeader() {
                 >
                   <Link
                     href={cat.href}
-                    className={`whitespace-nowrap shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-[14px] font-semibold tracking-normal transition-all duration-150 select-none ${
+                    className={`whitespace-nowrap shrink-0 inline-flex items-center gap-1 px-2.5 2xl:px-3 py-1.5 rounded-full text-[13px] 2xl:text-[14px] font-semibold tracking-normal transition-all duration-150 select-none ${
                       isActive
                         ? "text-amber-950 font-bold bg-amber-100/90 shadow-2xs"
                         : "text-stone-700 hover:text-stone-950 hover:bg-stone-100/80"
@@ -846,16 +840,10 @@ export function AstroyogiHeader() {
                       </span>
                     )}
 
-                    {cat.isLive && (
-                      <span className="ml-0.5 rounded-full bg-red-500 px-1.5 py-0.5 text-[8.5px] font-extrabold text-white uppercase tracking-wider shrink-0 leading-none">
-                        Live
-                      </span>
-                    )}
-
                     {hasDropdown && (
                       <ChevronDown
                         className={cn(
-                          "size-3.5 text-stone-400 transition-transform duration-200 shrink-0",
+                          "size-3 2xl:size-3.5 text-stone-400 transition-transform duration-200 shrink-0",
                           isHovered && "rotate-180 text-amber-700"
                         )}
                       />
