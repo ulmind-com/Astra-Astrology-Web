@@ -38,213 +38,6 @@ import { CardTilt } from "@/components/ui/card-tilt";
 import { Product3DModal } from "@/components/shop/Product3DModal";
 import { ShopFilterDrawer } from "@/components/shop/ShopFilterDrawer";
 
-const FALLBACK_PRODUCTS: ShopProduct[] = [
-  {
-    id: "prod-saturn-7m",
-    title: "খাঁটি নেপালি ৭-মুখী রুদ্রাক্ষ (৭-Mukhi Siddh Nepali Rudraksha)",
-    slug: "nepali-7-mukhi-rudraksha",
-    sku: "ASTRA-RUD-7M",
-    short_description: "শনির সাড়ে সাতি, ধাইয়া ও কণ্টক শনির অশুভ প্রভাব প্রশমনকারী মহালক্ষ্মী ও শনিসিদ্ধ পবিত্র রুদ্রাক্ষ।",
-    detailed_description: "নেপালের উচ্চ পার্বত্য অঞ্চল থেকে সংগৃহীত ১০০% প্রাকৃতিক ও আদি ৭-মুখী রুদ্রাক্ষ। কাশীর পুরোহিত দ্বারা ১০৮ বার মহামৃত্যুঞ্জয় মন্ত্রে প্রাণ-প্রতিষ্ঠিত।",
-    category_id: "cat-rudraksha",
-    category_slug: "rudraksha",
-    category_type: "rudraksha",
-    ruling_planet: "Saturn",
-    deity: "Mahalakshmi & Shani Dev",
-    benefits: ["শনির সাড়েসাতি প্রশমন", "কর্মক্ষেত্রে প্রমোশন", "আকস্মিক অর্থক্ষতি রোধ"],
-    life_pillars: ["career", "finance"],
-    purpose_tags: ["dosha", "career", "protection"],
-    free_gift_title: "Raw Selenite Charging Plate",
-    free_gift_value: 729,
-    free_gift_badge: "FREE Raw Selenite Plate worth ₹729",
-    cashback_percent: 100,
-    lab_certified: true,
-    lab_certificate_name: "Govt. Approved Gemological Lab",
-    lab_certificate_number: "IGL-RUD-2026-7789",
-    mrp: 3999,
-    sale_price: 1899,
-    discount_percent: 52,
-    stock_quantity: 12,
-    in_stock: true,
-    featured_image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80"],
-    is_active: true,
-    is_featured: true,
-    is_energized: true,
-    average_rating: 4.9,
-    review_count: 84,
-  },
-  {
-    id: "prod-pyrite-ring",
-    title: "খাঁটি পায়রাইট ধন আকর্ষণ আংটি ও রিং (Natural Pyrite Stud Ring)",
-    slug: "natural-pyrite-stud-ring",
-    sku: "ASTRA-PYR-RING",
-    short_description: "আর্থিক সমৃদ্ধি, আটকে থাকা টাকা উদ্ধার ও ব্যবসা বৃদ্ধিতে প্রত্যক্ষ ফলদায়ী দেবগুরু ও বুধ যোগের সিদ্ধ রিং।",
-    detailed_description: "প্রাকৃতিক গোল্ডেন পায়রাইট পাথর খচিত প্রিমিয়াম রিং। এটি ধারণে আত্মবিশ্বাস ও আর্থিক সুযোগ আকর্ষিত হয়।",
-    category_id: "cat-pyrite",
-    category_slug: "pyrite",
-    category_type: "crystal_bracelet",
-    ruling_planet: "Sun & Mercury",
-    deity: "Maha Lakshmi & Kuber",
-    benefits: ["স্থায়ী ধনবৃদ্ধি", "আটকে থাকা টাকা ফেরত", "কর্মক্ষেত্রে সাফল্য"],
-    life_pillars: ["finance", "career"],
-    purpose_tags: ["wealth", "career"],
-    free_gift_title: "Raw Selenite Charging Plate",
-    free_gift_value: 729,
-    free_gift_badge: "FREE Raw Selenite Plate worth ₹729",
-    cashback_percent: 100,
-    lab_certified: true,
-    lab_certificate_name: "Govt. Approved Gemological Lab",
-    lab_certificate_number: "VGL-PYR-2026-4412",
-    mrp: 2499,
-    sale_price: 999,
-    discount_percent: 60,
-    stock_quantity: 25,
-    in_stock: true,
-    featured_image: "https://images.unsplash.com/photo-1611591475879-166258f33cf2?w=600&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1611591475879-166258f33cf2?w=600&auto=format&fit=crop&q=80"],
-    is_active: true,
-    is_featured: true,
-    is_energized: true,
-    average_rating: 5.0,
-    review_count: 142,
-  },
-  {
-    id: "prod-leo-zodiac-band",
-    title: "সিংহ রাশি মেটাল ও ক্রিস্টাল ব্রেসলেট (Leo Zodiac Metal Bracelet)",
-    slug: "leo-zodiac-metal-bracelet-free-selenite",
-    sku: "ASTRA-ZOD-LEO",
-    short_description: "সিংহ রাশির রবি গ্রহের তেজ, আত্মবিশ্বাস ও নেতৃত্ব গুণাবলী বৃদ্ধির বিশেষ সূর্যকান্ত ব্রেসলেট।",
-    detailed_description: "প্রাকৃতিক সানস্টোন, টাইগার আই ও খাঁটি মেটাল চার্ম খচিত সিংহ রাশি ব্রেসলেট। সাথে সম্পূর্ণ ফ্রি ₹৭২৯ মূল্যের সেলিনাইট প্লেট।",
-    category_id: "cat-zodiac",
-    category_slug: "zodiac",
-    category_type: "crystal_bracelet",
-    ruling_planet: "Sun",
-    deity: "Surya Bhagavan",
-    benefits: ["নেতৃত্ব ও সম্মান বৃদ্ধি", "রবি গ্রহের শুভত্ব", "পিতৃদোষ নিবারণ"],
-    life_pillars: ["luck", "career"],
-    purpose_tags: ["zodiac", "career"],
-    free_gift_title: "Raw Selenite Charging Plate",
-    free_gift_value: 729,
-    free_gift_badge: "FREE Raw Selenite Plate worth ₹729",
-    cashback_percent: 100,
-    lab_certified: true,
-    lab_certificate_name: "Govt. Approved Gemological Lab",
-    mrp: 2800,
-    sale_price: 999,
-    discount_percent: 64,
-    stock_quantity: 18,
-    in_stock: true,
-    featured_image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&auto=format&fit=crop&q=80"],
-    is_active: true,
-    is_featured: true,
-    is_energized: true,
-    average_rating: 4.9,
-    review_count: 110,
-  },
-  {
-    id: "prod-mars-coral",
-    title: "ন্যাচারাল রক্তপ্রবাল (Certified Red Coral) ও ৩-মুখী রুদ্রাক্ষ কবচ",
-    slug: "certified-red-coral-mars-kavach",
-    sku: "ASTRA-GEM-CORAL",
-    short_description: "মাঙ্গলিক দোষ প্রশমন, রক্তপীড়া ও ভূমি-সম্পত্তি সংক্রান্ত সংকট নিরসনে দেব সেনাপতি মঙ্গলের বিহিত মহাপ্রতিকার।",
-    detailed_description: "প্রাকৃতিক খাঁটি ইতালীয় রক্তপ্রবাল ও অগ্নিস্বরূপ ৩-মুখী রুদ্রাক্ষের সমন্বয়ে তৈরি পবিত্র রক্ষা কবচ।",
-    category_id: "cat-gemstones",
-    category_slug: "gemstones",
-    category_type: "gemstone",
-    ruling_planet: "Mars",
-    deity: "Hanuman & Kartikeya",
-    benefits: ["মাঙ্গলিক দোষ নিবারণ", "বীর্য ও জীবনীশক্তি বৃদ্ধি", "সম্পত্তি সংকট মোচন"],
-    life_pillars: ["love", "family"],
-    purpose_tags: ["dosha", "love"],
-    free_gift_title: "Raw Selenite Charging Plate",
-    free_gift_value: 729,
-    free_gift_badge: "FREE Raw Selenite Plate worth ₹729",
-    cashback_percent: 100,
-    lab_certified: true,
-    lab_certificate_name: "Govt. Approved Gemological Lab",
-    mrp: 4999,
-    sale_price: 2499,
-    discount_percent: 50,
-    stock_quantity: 8,
-    in_stock: true,
-    featured_image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&auto=format&fit=crop&q=80"],
-    is_active: true,
-    is_featured: true,
-    is_energized: true,
-    average_rating: 5.0,
-    review_count: 49,
-  },
-  {
-    id: "prod-gomti-chakra-set",
-    title: "৮টি অলৌকিক সিদ্ধ গোমতী চক্র ও কনসেক্রেটেড শ্রীকুবের কয়েন",
-    slug: "8-sacred-gomti-chakra-miracle-set",
-    sku: "ASTRA-GOMTI-8X",
-    short_description: "আটকে থাকা টাকা আদায়, গৃহের বাস্তুদোষ নিবারণ ও ধনলক্ষ্মীর চিরস্থায়ী কৃপাপ্রাপ্তির জন্য অলৌকিক তন্ত্রোক্ত টোটকা।",
-    detailed_description: "গোমতী নদীগর্ভ থেকে সংগৃহীত ৮টি প্রাকৃতিক শ্বেত গোমতী চক্র, গঙ্গাজল ও ধনদা মন্ত্রে ১০৮ বার জপকৃত।",
-    category_id: "cat-gomti",
-    category_slug: "gomti_chakra",
-    category_type: "gomti_chakra",
-    ruling_planet: "Jupiter & Lakshmi",
-    deity: "Maha Lakshmi & Kuber",
-    benefits: ["আটকে থাকা টাকা ফেরত", "স্থায়ী ধনবৃদ্ধি", "ঋণমুক্তি"],
-    life_pillars: ["finance", "family"],
-    purpose_tags: ["wealth"],
-    free_gift_title: "Raw Selenite Charging Plate",
-    free_gift_value: 729,
-    free_gift_badge: "FREE Raw Selenite Plate worth ₹729",
-    cashback_percent: 100,
-    lab_certified: true,
-    mrp: 2199,
-    sale_price: 999,
-    discount_percent: 55,
-    stock_quantity: 25,
-    in_stock: true,
-    featured_image: "https://images.unsplash.com/photo-1611591475879-166258f33cf2?w=600&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1611591475879-166258f33cf2?w=600&auto=format&fit=crop&q=80"],
-    is_active: true,
-    is_featured: true,
-    is_energized: true,
-    average_rating: 4.9,
-    review_count: 112,
-  },
-  {
-    id: "prod-karungali-mala",
-    title: "সিদ্ধ ১০৮ দানার করুঙ্গালি কাঠের মালা (Original Karungali Mala)",
-    slug: "original-karungali-mala-108-beads",
-    sku: "ASTRA-KAR-108",
-    short_description: "নেতিবাচক শক্তি, শত্রুদমন, নজরদোষ ও কালো জাদু বিনাশী ভগবান মুরুগান সিদ্ধ পবিত্র কালো আবলুস কাঠের মালা।",
-    detailed_description: "দক্ষিণ ভারতের খাঁটি কালো আবলুস (Karungali) কাঠ থেকে নির্মিত পবিত্র ১০৮ দানার জপমালা।",
-    category_id: "cat-karungali",
-    category_slug: "karungali",
-    category_type: "mala_rosary",
-    ruling_planet: "Mars & Murugan",
-    deity: "Lord Murugan",
-    benefits: ["নজরদোষ বিনাশ", "শত্রুভয় নিবারণ", "আত্মরক্ষা কবচ"],
-    life_pillars: ["health", "luck"],
-    purpose_tags: ["protection"],
-    free_gift_title: "Raw Selenite Charging Plate",
-    free_gift_value: 729,
-    free_gift_badge: "FREE Raw Selenite Plate worth ₹729",
-    cashback_percent: 100,
-    lab_certified: true,
-    mrp: 2999,
-    sale_price: 1399,
-    discount_percent: 53,
-    stock_quantity: 14,
-    in_stock: true,
-    featured_image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80",
-    images: ["https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80"],
-    is_active: true,
-    is_featured: true,
-    is_energized: true,
-    average_rating: 4.9,
-    review_count: 88,
-  },
-];
-
 function ShopInner() {
   const { language } = useLanguage();
   const searchParams = useSearchParams();
@@ -300,29 +93,14 @@ function ShopInner() {
     },
   });
 
-  const products: ShopProduct[] =
-    serverProductData && serverProductData.items && serverProductData.items.length > 0
+  const rawProducts: ShopProduct[] =
+    serverProductData && serverProductData.items && Array.isArray(serverProductData.items)
       ? serverProductData.items
-      : FALLBACK_PRODUCTS.filter((p) => {
-          if (selectedPlanet && p.ruling_planet?.toLowerCase() !== selectedPlanet.toLowerCase()) {
-            return false;
-          }
-          if (selectedCategory && p.category_slug !== selectedCategory) {
-            return false;
-          }
-          if (selectedPurpose && !p.purpose_tags?.includes(selectedPurpose)) {
-            return false;
-          }
-          if (searchTerm) {
-            const term = searchTerm.toLowerCase();
-            return (
-              p.title.toLowerCase().includes(term) ||
-              p.short_description.toLowerCase().includes(term) ||
-              p.sku.toLowerCase().includes(term)
-            );
-          }
-          return true;
-        });
+      : [];
+
+  const products: ShopProduct[] = selectedPurpose
+    ? rawProducts.filter((p) => p.purpose_tags?.includes(selectedPurpose))
+    : rawProducts;
 
   const handleSelectFilter = (type: string, val: string) => {
     if (type === "purpose") setSelectedPurpose(val);
@@ -456,12 +234,22 @@ function ShopInner() {
             <div className="rounded-3xl border border-dashed border-stone-300 bg-white p-12 text-center space-y-3">
               <Package className="size-12 text-stone-300 mx-auto" />
               <h4 className="font-bold text-base text-stone-800">
-                {language === "bn" ? "কোনো প্রতিকার খুঁজে পাওয়া যায়নি" : "No remedies matched your filter"}
+                {rawProducts.length === 0
+                  ? language === "bn"
+                    ? "কোনো প্রতিকার সামগ্রী উপলব্ধ নেই"
+                    : "No remedies available currently"
+                  : language === "bn"
+                  ? "কোনো প্রতিকার খুঁজে পাওয়া যায়নি"
+                  : "No remedies matched your filter"}
               </h4>
               <p className="text-xs text-stone-500 max-w-sm mx-auto">
-                {language === "bn"
+                {rawProducts.length === 0
+                  ? language === "bn"
+                    ? "অ্যাডমিন প্যানেল থেকে শীঘ্রই নতুন প্রাণ-প্রতিষ্ঠিত বৈদিক প্রতিকার ও রত্ন সামগ্রী যুক্ত করা হবে।"
+                    : "New consecrated Vedic remedies and crystals will be uploaded shortly via Admin Panel."
+                  : language === "bn"
                   ? "অন্য কোনো গ্রহ, রাশি বা সামগ্রীর নাম লিখে অনুসন্ধান করুন।"
-                  : "Try searching another planet, rashi or keyword."}
+                  : "Try clearing filters or searching another keyword."}
               </p>
             </div>
           ) : (

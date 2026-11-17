@@ -31,6 +31,10 @@ export function ShopBestsellers({ products }: Props) {
   const [addedId, setAddedId] = React.useState<string | null>(null);
   const [active3DProduct, setActive3DProduct] = React.useState<ShopProduct | null>(null);
 
+  if (!products || products.length === 0) {
+    return null;
+  }
+
   const filterTabs = [
     { id: "all", label_bn: "সব বেস্টসেলার", label_en: "All Bestsellers" },
     { id: "zodiac", label_bn: "রাশি ব্রেসলেট", label_en: "Zodiac Bracelets" },
