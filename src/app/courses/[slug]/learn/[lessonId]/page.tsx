@@ -41,6 +41,7 @@ import * as React from "react";
 import { toast } from "sonner";
 
 import { Alert, Avatar, Badge, Button, EmptyState, LoadingBlock, Modal } from "@/components/ui";
+import { fireCelestialConfetti } from "@/components/ui/confetti";
 import { courseApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/providers/auth-provider";
@@ -73,13 +74,18 @@ export default function LessonClassroomPage() {
   });
   const [showCertificateModal, setShowCertificateModal] = React.useState(false);
   const [issuedCertId, setIssuedCertId] = React.useState<string | null>(null);
+  const [issuedCertUrl, setIssuedCertUrl] = React.useState<string | null>(null);
   const [isUpdatingProgress, setIsUpdatingProgress] = React.useState(false);
 
   // Video Player & Interactive Seek References
   const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
   const playerContainerRef = React.useRef<HTMLDivElement | null>(null);
   const currentPlayheadRef = React.useRef<number>(0);
+  // Held in a ref next to the playhead so the completion handler can read
+  // both without taking a dependency on the lesson object.
+  const lessonDurationRef = React.useRef<number>(0);
   const lastReportedTimeRef = React.useRef<number>(0);
+  const activePresenceSecondsRef = React.useRef<number>(0);
   const hasNotifiedResume = React.useRef<boolean>(false);
 
   // Student Personal Study Notebook States
@@ -334,13 +340,28 @@ export default function LessonClassroomPage() {
     if (!course || !course.is_enrolled || isUpdatingProgress) return;
     try {
       setIsUpdatingProgress(true);
+      // Determine effective watch position: max of reported playhead and active presence time
+      const watchSecs = Math.max(currentPlayheadRef.current, activePresenceSecondsRef.current);
+      const duration =
+        lessonDurationRef.current ||
+        (currentLesson?.duration_minutes ? currentLesson.duration_minutes * 60 : 0);
+
       const res = await courseApi.updateProgress(course.id, lessonId, {
-        watched_seconds: 3600,
-        total_seconds: 3600,
+        watched_seconds: Math.round(watchSecs),
+        total_seconds: duration || Math.round(watchSecs),
         mark_completed: true,
       });
 
-      // Optimistically update React Query cache so progress bar & lesson checkmarks jump immediately
+      // The server decides whether it counts. Marking the lesson done here
+      // regardless would show a tick the next refresh takes away again.
+      if (!res.is_lesson_completed) {
+        toast.info(
+          res.message ||
+            "Please watch a little more of this lesson before marking it complete.",
+        );
+        return;
+      }
+
       queryClient.setQueryData(["course-detail", slug], (old: any) => {
         if (!old) return old;
         const newSections = old.sections?.map((sec: any) => ({
@@ -363,7 +384,11 @@ export default function LessonClassroomPage() {
         if (res.certificate_id) {
           setIssuedCertId(res.certificate_id);
         }
+        if (res.certificate_url) {
+          setIssuedCertUrl(res.certificate_url);
+        }
         setShowCertificateModal(true);
+        fireCelestialConfetti();
       } else if (nextLesson) {
         router.push(`/courses/${slug}/learn/${nextLesson.id}`);
       }
@@ -374,18 +399,56 @@ export default function LessonClassroomPage() {
     }
   }, [course, isUpdatingProgress, lessonId, nextLesson, queryClient, router, slug]);
 
-  // Listen for Bunny Stream player messages ('ended' for completion & 'timeupdate' for watch progress)
   React.useEffect(() => {
-    const handleBunnyMessage = (event: MessageEvent) => {
+    lessonDurationRef.current = (currentLesson?.duration_minutes || 0) * 60;
+  }, [currentLesson?.duration_minutes]);
+
+  // Sync active presence seconds from previously saved progress
+  React.useEffect(() => {
+    activePresenceSecondsRef.current = streamData?.last_watched_seconds ?? 0;
+  }, [lessonId, streamData?.last_watched_seconds]);
+
+  // Active classroom presence ticker (increments while student is actively on the tab)
+  React.useEffect(() => {
+    const ticker = setInterval(() => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        activePresenceSecondsRef.current += 1;
+      }
+    }, 1000);
+    return () => clearInterval(ticker);
+  }, [lessonId]);
+
+  // Listen for Bunny Stream and YouTube Player API messages
+  React.useEffect(() => {
+    const handlePlayerMessage = (event: MessageEvent) => {
       try {
         const data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
-        // 1. Video finished
-        if (data?.event === "ended" || data?.type === "ended" || data?.name === "ended") {
+
+        // 1. YouTube IFrame Player API progress & duration delivery
+        if (data?.event === "infoDelivery" && data?.info) {
+          if (typeof data.info.currentTime === "number" && data.info.currentTime > 0) {
+            currentPlayheadRef.current = Math.floor(data.info.currentTime);
+          }
+          if (
+            typeof data.info.duration === "number" &&
+            data.info.duration > 0 &&
+            !lessonDurationRef.current
+          ) {
+            lessonDurationRef.current = Math.floor(data.info.duration);
+          }
+          if (data.info.playerState === 0 && currentLesson && !currentLesson.is_completed) {
+            handleMarkComplete();
+          }
+        }
+
+        // 2. YouTube onStateChange ended (0 = ENDED)
+        if (data?.event === "onStateChange" && data?.info === 0) {
           if (currentLesson && !currentLesson.is_completed) {
             handleMarkComplete();
           }
         }
-        // 2. Playback progress update
+
+        // 3. Bunny Stream playback progress update
         if (data?.event === "timeupdate" || data?.type === "timeupdate") {
           const secs = Math.floor(
             data?.value?.seconds || data?.value?.currentTime || data?.data?.currentTime || 0
@@ -394,28 +457,56 @@ export default function LessonClassroomPage() {
             currentPlayheadRef.current = secs;
           }
         }
+
+        // 4. Bunny Stream ended
+        if (data?.event === "ended" || data?.type === "ended" || data?.name === "ended") {
+          if (currentLesson && !currentLesson.is_completed) {
+            handleMarkComplete();
+          }
+        }
       } catch {
         // Ignore non-JSON postMessages
       }
     };
-    window.addEventListener("message", handleBunnyMessage);
-    return () => window.removeEventListener("message", handleBunnyMessage);
+    window.addEventListener("message", handlePlayerMessage);
+    return () => window.removeEventListener("message", handlePlayerMessage);
   }, [currentLesson, handleMarkComplete]);
+
+  // Periodic YouTube listening handshake to ensure YouTube sends postMessage updates
+  React.useEffect(() => {
+    const handshakeTimer = setInterval(() => {
+      if (iframeRef.current?.contentWindow) {
+        try {
+          iframeRef.current.contentWindow.postMessage(
+            JSON.stringify({ event: "listening" }),
+            "*"
+          );
+        } catch {}
+      }
+    }, 4000);
+    return () => clearInterval(handshakeTimer);
+  }, [lessonId]);
 
   // Periodic watch progress sync every 25 seconds
   React.useEffect(() => {
     const syncInterval = setInterval(() => {
+      const watchSecs = Math.max(currentPlayheadRef.current, activePresenceSecondsRef.current);
+      const duration =
+        lessonDurationRef.current ||
+        (currentLesson?.duration_minutes ? currentLesson.duration_minutes * 60 : 0) ||
+        3600;
+
       if (
         course?.id &&
         course?.is_enrolled &&
         lessonId &&
-        currentPlayheadRef.current > 5 &&
-        Math.abs(currentPlayheadRef.current - lastReportedTimeRef.current) >= 15
+        watchSecs > 5 &&
+        Math.abs(watchSecs - lastReportedTimeRef.current) >= 15
       ) {
-        lastReportedTimeRef.current = currentPlayheadRef.current;
+        lastReportedTimeRef.current = watchSecs;
         courseApi.updateProgress(course.id, lessonId, {
-          watched_seconds: currentPlayheadRef.current,
-          total_seconds: (currentLesson?.duration_minutes || 0) * 60 || 3600,
+          watched_seconds: Math.round(watchSecs),
+          total_seconds: duration,
           mark_completed: false,
         }).catch(() => {});
       }
@@ -609,26 +700,40 @@ export default function LessonClassroomPage() {
                 const code =
                   streamError instanceof ApiError ? streamError.code : undefined;
                 const needsSignIn =
-                  streamError instanceof ApiError &&
-                  streamError.status === 401 &&
-                  (code === "sign_in_required" ||
-                    code === "token_expired" ||
-                    code === "invalid_token");
+                  (!isSignedIn && !isFreePreview) ||
+                  (streamError instanceof ApiError &&
+                    streamError.status === 401 &&
+                    (code === "sign_in_required" ||
+                      code === "token_expired" ||
+                      code === "invalid_token"));
+                const isExpired =
+                  Boolean(course?.is_expired) ||
+                  (streamError instanceof ApiError &&
+                    (code === "enrollment_expired" ||
+                      (streamError.status === 403 &&
+                        String(streamError.message).toLowerCase().includes("expired"))));
                 const notEnrolled =
-                  streamError instanceof ApiError && streamError.status === 403;
+                  (!course?.is_enrolled && !isFreePreview) ||
+                  (streamError instanceof ApiError && streamError.status === 403);
 
                 return (
                   <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center text-white">
                     <Lock className="size-12 text-brand-400 opacity-60 mb-2" />
                     <p className="text-base font-semibold">
-                      {needsSignIn ? "Please sign in" : "Protected Lesson"}
+                      {needsSignIn
+                        ? "Please sign in"
+                        : isExpired
+                          ? "Course Enrollment Expired"
+                          : "Protected Lesson"}
                     </p>
                     <p className="text-xs text-white/70 max-w-sm mt-1">
                       {needsSignIn
                         ? "Your session has ended. Sign in again to carry on watching — your enrollment is safe."
-                        : notEnrolled
-                          ? "You need to enroll in this course to access this lesson."
-                          : "Unable to load this video right now. Please try again in a moment."}
+                        : isExpired
+                          ? "Your access to this course has expired. Renew your enrollment to continue learning."
+                          : notEnrolled || !hasAccess
+                            ? "You need to enroll in this course to access this lesson."
+                            : "Unable to load this video right now. Please try again in a moment."}
                     </p>
                     {needsSignIn ? (
                       <Link
@@ -637,7 +742,11 @@ export default function LessonClassroomPage() {
                       >
                         <Button size="sm">Sign in again</Button>
                       </Link>
-                    ) : notEnrolled ? (
+                    ) : isExpired ? (
+                      <Link href={`/courses/${slug}`} className="mt-4">
+                        <Button size="sm">Renew Access</Button>
+                      </Link>
+                    ) : notEnrolled || !hasAccess ? (
                       <Link href={`/courses/${slug}`} className="mt-4">
                         <Button size="sm">Enroll Now to Unlock</Button>
                       </Link>
@@ -659,6 +768,7 @@ export default function LessonClassroomPage() {
                   className="h-full w-full border-0 select-none"
                   allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;"
                   allowFullScreen
+                  referrerPolicy="origin"
                 />
 
                 {/* Dynamic Anti-Piracy Watermark (Safe on mobile screens) */}
@@ -1415,7 +1525,7 @@ export default function LessonClassroomPage() {
 
             <div className="flex flex-col sm:flex-row justify-center gap-2 pt-2">
               <Link
-                href={`/verify/certificate/${issuedCertId || course.id}`}
+                href={issuedCertUrl || `/verify/certificate/${issuedCertId || course.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >

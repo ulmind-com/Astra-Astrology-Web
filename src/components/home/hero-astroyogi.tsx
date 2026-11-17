@@ -9,6 +9,9 @@ import {
   Phone,
   Sparkles,
   Star,
+  Moon,
+  Sun,
+  Orbit,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,6 +20,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { cmsApi, type HeroSlide } from "@/lib/api";
 import { HERO_SLIDES_TRANSLATIONS } from "@/lib/home-translations";
 import { useLanguage } from "@/providers/language-provider";
+import { OrbitingCircles } from "@/components/ui/orbiting-circles";
 
 const DEFAULT_SLIDES: HeroSlide[] = [
   {
@@ -281,6 +285,33 @@ export function HeroAstroyogi() {
             opacity="0.8"
           />
         </svg>
+      </div>
+
+      {/* RIGHT CELESTIAL: Orbiting Planetary Circles (Magic UI) */}
+      <div className="pointer-events-none absolute -right-24 sm:-right-12 top-1/2 -translate-y-1/2 z-0 size-[360px] sm:size-[450px] lg:size-[520px] opacity-40 select-none hidden md:flex items-center justify-center">
+        {/* Inner Orbit (Mercury & Venus) */}
+        <OrbitingCircles radius={100} duration={22} delay={0}>
+          <div className="size-6 rounded-full bg-amber-400 shadow-[0_0_12px_#fcd404] flex items-center justify-center text-[10px] text-stone-900 font-black">
+            ☿
+          </div>
+        </OrbitingCircles>
+        <OrbitingCircles radius={100} duration={22} delay={11} reverse>
+          <div className="size-7 rounded-full bg-[#fde047] shadow-[0_0_14px_#fde047] flex items-center justify-center text-[11px] text-stone-900 font-black">
+            ♀
+          </div>
+        </OrbitingCircles>
+
+        {/* Outer Orbit (Mars & Jupiter) */}
+        <OrbitingCircles radius={180} duration={42} delay={4}>
+          <div className="size-8 rounded-full bg-orange-500 shadow-[0_0_16px_#f97316] flex items-center justify-center text-xs text-white font-black">
+            ♂
+          </div>
+        </OrbitingCircles>
+        <OrbitingCircles radius={180} duration={42} delay={25} reverse>
+          <div className="size-9 rounded-full bg-yellow-500 shadow-[0_0_20px_#eab308] flex items-center justify-center text-xs text-stone-950 font-black">
+            ♃
+          </div>
+        </OrbitingCircles>
       </div>
 
       {/* Floating Constellation Stars */}

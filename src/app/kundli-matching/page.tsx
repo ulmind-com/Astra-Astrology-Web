@@ -48,6 +48,9 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { astrologyApi, astrologerApi } from "@/lib/api";
 import { parseProfileBirthDetails } from "@/lib/birth-details";
+import { NumberTicker } from "@/components/ui/number-ticker";
+import { fireCelestialConfetti } from "@/components/ui/confetti";
+import { AshtakootaRadarChart } from "@/components/astrology/ashtakoota-radar-chart";
 import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
 import { useProfile } from "@/hooks/use-profile";
@@ -774,6 +777,11 @@ export default function KundliMatchingPage() {
       const res = await astrologyApi.calculateKundliMatching(payload);
       if (res) {
         setResult(res);
+        if (res.total_received >= 20 || res.is_compatible) {
+          setTimeout(() => {
+            fireCelestialConfetti();
+          }, 450);
+        }
         if (access.requiredCoins > 0) {
           toast.success(t.toastSuccessCoins(access.requiredCoins));
           refreshWallet();
@@ -808,6 +816,27 @@ export default function KundliMatchingPage() {
     setStep(1);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  // Derived Ashtakoot scores for Recharts 8-koota radar chart
+  const radarScores = React.useMemo(() => {
+    if (!result?.kootas) return null;
+    const findKoota = (attr: string, defaultMax: number) => {
+      const k = result.kootas.find((item: any) =>
+        item.attribute?.toLowerCase().includes(attr.toLowerCase())
+      );
+      return { obtained: k?.received ?? 0, total: k?.out_of ?? defaultMax };
+    };
+    return {
+      varna: findKoota("varna", 1),
+      vashya: findKoota("vashya", 2),
+      tara: findKoota("tara", 3),
+      yoni: findKoota("yoni", 4),
+      graha_maitri: findKoota("maitri", 5),
+      gana: findKoota("gana", 6),
+      bhakoot: findKoota("bhakoot", 7),
+      nadi: findKoota("nadi", 8),
+    };
+  }, [result?.kootas]);
 
   return (
     <div className="min-h-screen bg-[#fafaf9]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
@@ -2015,8 +2044,11 @@ export default function KundliMatchingPage() {
                       <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
                         {t.metricCards.ashtakootTitle}
                       </span>
-                      <div className="mt-2 text-2xl sm:text-3xl font-serif font-bold text-amber-900">
-                        {toLocalizedDigits(result.total_received, language)}
+                      <div className="mt-2 text-2xl sm:text-3xl font-serif font-bold text-amber-900 flex items-center justify-center gap-1">
+                        <NumberTicker
+                          value={result.total_received}
+                          className="font-serif font-bold text-amber-900"
+                        />
                         <span className="text-xs sm:text-sm font-normal text-slate-400">
                           {" "}
                           / {toLocalizedDigits(result.total_out_of, language)}
@@ -2115,6 +2147,39 @@ export default function KundliMatchingPage() {
                       </p>
                     </div>
                   </div>
+
+                  {/* 8-KOOTA COMPATIBILITY RADAR CHART (Recharts) */}
+                  {radarScores && (
+                    <div className="bg-white rounded-2xl border border-amber-200/80 shadow-xs p-5">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-100 gap-2">
+                        <div>
+                          <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-900 border border-amber-300/40">
+                            <Sparkles className="size-3 text-amber-600" />
+                            <span>8-Koota Cosmic Harmony</span>
+                          </div>
+                          <h3 className="font-serif font-bold text-amber-950 text-base sm:text-lg mt-1">
+                            {language === "bn"
+                              ? "অষ্টকূট সামঞ্জস্য রাডার চার্ট"
+                              : language === "hi"
+                              ? "अष्टकूट सामंजस्य रडार चार्ट"
+                              : "Ashtakoota Compatibility Radar Spectrum"}
+                          </h3>
+                        </div>
+                        <span className="text-xs font-semibold text-stone-500">
+                          {language === "bn"
+                            ? "৩৬-গুণ শক্তির সুষম বিশ্লেষণ"
+                            : "Balanced 36-Guna Energy Distribution"}
+                        </span>
+                      </div>
+
+                      <div className="pt-2">
+                        <AshtakootaRadarChart
+                          scores={radarScores}
+                          language={language === "bn" ? "bn" : language === "hi" ? "hi" : "en"}
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   {/* MATCH ASHTAKOOT POINTS TABLE matching screenshot */}
                   <div className="bg-white rounded-2xl border border-amber-200/80 shadow-xs overflow-hidden">

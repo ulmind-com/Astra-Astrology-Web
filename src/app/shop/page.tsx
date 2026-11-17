@@ -29,13 +29,12 @@ import {
   Moon,
   Star,
   ArrowRight,
-  Plus,
-  Minus,
+  Eye,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
-import { shopApi, type ShopProduct, type ShopProductCategory } from "@/lib/api";
+import { shopApi, type ShopProduct } from "@/lib/api";
 import { useLanguage } from "@/providers/language-provider";
 import {
   DEFAULT_HERO_BANNERS,
@@ -48,14 +47,11 @@ import {
   type ShopHeroBanner,
   type CustomerReel,
 } from "@/lib/shop-data";
-
-interface CartItem {
-  id: string;
-  title: string;
-  price: number;
-  image: string;
-  quantity: number;
-}
+import { useCartStore } from "@/lib/stores/use-cart-store";
+import { CartDrawer } from "@/components/shop/CartDrawer";
+import { Product3DModal } from "@/components/shop/Product3DModal";
+import { AstraPromiseSection } from "@/components/shop/AstraPromiseSection";
+import { ShopFaqAccordion } from "@/components/shop/ShopFaqAccordion";
 
 function ShopInner() {
   const { language } = useLanguage();
@@ -73,8 +69,13 @@ function ShopInner() {
   const [selectedProductModal, setSelectedProductModal] = React.useState<BestsellerProduct | null>(null);
   const [activeReelModal, setActiveReelModal] = React.useState<CustomerReel | null>(null);
   const [likedReels, setLikedReels] = React.useState<Record<string, boolean>>({});
-  const [cartItems, setCartItems] = React.useState<CartItem[]>([]);
-  const [isCartOpen, setIsCartOpen] = React.useState<boolean>(false);
+  const [selected3DProduct, setSelected3DProduct] = React.useState<ShopProduct | null>(null);
+  const [product3DModalOpen, setProduct3DModalOpen] = React.useState<boolean>(false);
+
+  // Cart Store hooks
+  const { openCart, addItem } = useCartStore();
+  const cartItemCount = useCartStore((s) => s.getItemCount());
+  const cartSubtotal = useCartStore((s) => s.getSubtotal());
 
   // Sync query params
   React.useEffect(() => {
@@ -129,43 +130,44 @@ function ShopInner() {
     setHeroSlideIndex((prev) => (prev - 1 + heroBanners.length) % heroBanners.length);
   };
 
-  // Cart operations
-  const addToCart = (product: BestsellerProduct) => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
-      if (existing) {
-        return prev.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      }
-      return [
-        ...prev,
-        {
-          id: product.id,
-          title: product.title,
-          price: product.sale_price,
-          image: product.image,
-          quantity: 1,
-        },
-      ];
-    });
+  // Add to Global Cart Store
+  const handleAddToCart = (product: BestsellerProduct) => {
+    const shopProd: any = {
+      id: product.id,
+      slug: product.slug,
+      sku: `ASTRA-${product.id.slice(0, 8).toUpperCase()}`,
+      title: product.title,
+      mrp: product.mrp,
+      sale_price: product.sale_price,
+      discount_percent: product.discount_percent,
+      featured_image: product.image,
+      images: [product.image],
+      stock_quantity: 10,
+      in_stock: true,
+      category_id: product.category,
+      category_slug: product.category,
+      category_type: product.category,
+      short_description: product.description,
+      detailed_description: product.description,
+      benefits: product.benefits,
+      life_pillars: ["career", "finance"],
+      is_active: true,
+      is_featured: true,
+      is_energized: true,
+      average_rating: 4.9,
+      review_count: 50,
+      cashback_percent: 100,
+      free_gift_title: "Raw Selenite Charging Plate",
+      free_gift_value: 729,
+      free_gift_badge: "FREE Raw Selenite Plate worth ₹729",
+    };
+    addItem(shopProd, 1);
     toast.success(
       language === "bn"
         ? `"${product.title.slice(0, 24)}..." কার্টে যুক্ত হয়েছে!`
         : `"${product.title.slice(0, 24)}..." added to cart!`
     );
   };
-
-  const updateQuantity = (id: string, delta: number) => {
-    setCartItems((prev) =>
-      prev
-        .map((item) => (item.id === id ? { ...item, quantity: item.quantity + delta } : item))
-        .filter((item) => item.quantity > 0)
-    );
-  };
-
-  const totalCartCount = cartItems.reduce((acc, cur) => acc + cur.quantity, 0);
-  const totalCartAmount = cartItems.reduce((acc, cur) => acc + cur.price * cur.quantity, 0);
 
   // Filter products
   const filteredProducts = BESTSELLER_PRODUCTS.filter((prod) => {
@@ -476,7 +478,7 @@ function ShopInner() {
 
                     <button
                       type="button"
-                      onClick={() => addToCart(product)}
+                      onClick={() => handleAddToCart(product)}
                       className="w-full py-2.5 rounded-xl bg-black text-white hover:bg-stone-800 active:scale-[0.98] font-bold text-xs tracking-wider uppercase transition-all shadow-sm cursor-pointer text-center flex items-center justify-center gap-1.5"
                     >
                       <ShoppingBag className="size-3.5" />
@@ -714,23 +716,29 @@ function ShopInner() {
             })}
           </div>
         </section>
+
+        {/* 7. The Astra Promise Section */}
+        <AstraPromiseSection />
+
+        {/* 8. FAQs Section */}
+        <ShopFaqAccordion />
       </main>
 
-      {/* Floating Quick Cart Pill */}
-      {totalCartCount > 0 && (
+      {/* Floating Cart Trigger Button */}
+      {cartItemCount > 0 && (
         <aside
           aria-label="Floating quick cart"
           className="fixed bottom-6 right-6 z-40 animate-in slide-in-from-bottom-6"
         >
           <button
             type="button"
-            onClick={() => setIsCartOpen(true)}
+            onClick={openCart}
             className="flex items-center gap-3 px-5 py-3 rounded-full bg-black text-white shadow-2xl hover:bg-stone-900 border border-amber-400/50 transition-all duration-300 hover:scale-105 cursor-pointer"
           >
             <div className="relative">
               <ShoppingBag className="size-5 text-amber-400" />
               <span className="absolute -top-2 -right-2 size-4 rounded-full bg-amber-500 text-black text-[10px] font-black flex items-center justify-center">
-                {totalCartCount}
+                {cartItemCount}
               </span>
             </div>
             <div className="text-left">
@@ -738,7 +746,7 @@ function ShopInner() {
                 Astra Cart
               </span>
               <span className="text-sm font-extrabold text-white">
-                ₹{totalCartAmount.toLocaleString("en-IN")}
+                ₹{cartSubtotal.toLocaleString("en-IN")}
               </span>
             </div>
             <ChevronRight className="size-4 text-stone-400 ml-1" />
@@ -746,94 +754,15 @@ function ShopInner() {
         </aside>
       )}
 
-      {/* Cart Slide-Over Drawer */}
-      {isCartOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in">
-          <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col justify-between p-6 overflow-y-auto">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between pb-4 border-b border-stone-200">
-                <div className="flex items-center gap-2">
-                  <ShoppingBag className="size-5 text-amber-600" />
-                  <h3 className="font-bold text-lg text-stone-900">Your Consecrated Cart ({totalCartCount})</h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsCartOpen(false)}
-                  className="p-1 rounded-md text-stone-400 hover:text-stone-700 cursor-pointer"
-                >
-                  <X className="size-5" />
-                </button>
-              </div>
+      {/* Vaul Cart Slide-Over Drawer */}
+      <CartDrawer />
 
-              {cartItems.length === 0 ? (
-                <div className="py-20 text-center space-y-2">
-                  <Package className="size-12 text-stone-300 mx-auto" />
-                  <p className="text-sm font-semibold text-stone-500">Your cart is empty.</p>
-                </div>
-              ) : (
-                <div className="space-y-3 divide-y divide-stone-100">
-                  {cartItems.map((item) => (
-                    <div key={item.id} className="pt-3 flex items-center gap-3">
-                      <div className="relative size-16 rounded-xl overflow-hidden bg-stone-100 shrink-0">
-                        <Image src={item.image} alt={item.title} fill className="object-cover" unoptimized />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-xs font-bold text-stone-900 truncate">{item.title}</h4>
-                        <span className="text-xs font-extrabold text-stone-900 block mt-0.5">
-                          ₹{item.price.toLocaleString("en-IN")}
-                        </span>
-                        <div className="flex items-center gap-2 mt-1.5">
-                          <button
-                            type="button"
-                            onClick={() => updateQuantity(item.id, -1)}
-                            className="size-6 rounded-md bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-600 cursor-pointer"
-                          >
-                            <Minus className="size-3" />
-                          </button>
-                          <span className="text-xs font-bold">{item.quantity}</span>
-                          <button
-                            type="button"
-                            onClick={() => updateQuantity(item.id, 1)}
-                            className="size-6 rounded-md bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-600 cursor-pointer"
-                          >
-                            <Plus className="size-3" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {cartItems.length > 0 && (
-              <div className="pt-4 border-t border-stone-200 space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium text-stone-600">Total Consecrated Order</span>
-                  <span className="font-extrabold text-stone-900 text-lg">
-                    ₹{totalCartAmount.toLocaleString("en-IN")}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    toast.success(
-                      language === "bn"
-                        ? "অর্ডার প্রক্রিয়া শুরু হয়েছে! বৈদিক আচার্য অবিলম্বে যোগাযোগ করবেন।"
-                        : "Order placed successfully! A Vedic Acharya will contact you shortly."
-                    );
-                    setCartItems([]);
-                    setIsCartOpen(false);
-                  }}
-                  className="w-full py-3 rounded-xl bg-black text-white hover:bg-stone-800 font-bold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer text-center"
-                >
-                  Proceed to Consecrated Checkout
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {/* 3D Sacred Gemstone & Rudraksha Modal Preview */}
+      <Product3DModal
+        open={product3DModalOpen}
+        onClose={() => setProduct3DModalOpen(false)}
+        product={selected3DProduct}
+      />
 
       {/* Product Quick-View Modal */}
       {selectedProductModal && (
@@ -911,7 +840,7 @@ function ShopInner() {
               <button
                 type="button"
                 onClick={() => {
-                  addToCart(selectedProductModal);
+                  handleAddToCart(selectedProductModal);
                   setSelectedProductModal(null);
                 }}
                 className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-black text-white hover:bg-stone-800 font-bold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer"

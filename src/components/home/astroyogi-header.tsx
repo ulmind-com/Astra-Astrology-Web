@@ -2,13 +2,18 @@
 
 import {
   ArrowRight,
+  Award,
   Bell,
+  BookOpen,
   Bot,
   CalendarDays,
   ChevronDown,
   Coins,
   Compass,
+  Gem,
+  Gift,
   Globe,
+  GraduationCap,
   Hand,
   HeartHandshake,
   Hourglass,
@@ -21,6 +26,7 @@ import {
   Radio,
   ScanFace,
   ScrollText,
+  ShoppingBag,
   Sparkles,
   Star,
   Sun,
@@ -35,6 +41,8 @@ import { createPortal } from "react-dom";
 
 import { Avatar } from "@/components/ui";
 import { useWallet } from "@/hooks/use-wallet";
+import { useCartStore } from "@/lib/stores/use-cart-store";
+import { CartDrawer } from "@/components/shop/CartDrawer";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
@@ -51,6 +59,7 @@ interface NavDropdownItem {
 interface NavCategory {
   label: string;
   href: string;
+  badge?: string;
   isLive?: boolean;
   dropdown?: NavDropdownItem[];
 }
@@ -61,6 +70,8 @@ export function AstroyogiHeader() {
   const { language, setLanguage } = useLanguage();
   const { data: walletData } = useWallet(Boolean(isSignedIn));
   const coinsBalance = walletData?.wallet?.balance_coins;
+  const { openCart, getItemCount } = useCartStore();
+  const cartItemCount = getItemCount();
 
   const [hoveredCategory, setHoveredCategory] = React.useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
@@ -214,6 +225,66 @@ export function AstroyogiHeader() {
           ],
         },
         {
+          label: "কোর্স",
+          href: "/courses",
+          dropdown: [
+            {
+              label: "সমস্ত মাস্টারক্লাস",
+              href: "/courses",
+              description: "বৈদিক জ্যোতিষ, লাল কিতাব, নিউমেরোলজি ও কেপি প্রফেশনাল কোর্স",
+              icon: GraduationCap,
+              badge: "গুরুকুল",
+            },
+            {
+              label: "আমার অধ্যয়ন ও ক্লাস",
+              href: "/account/courses",
+              description: "আপনার নথিভুক্ত কোর্স, ভিডিও ক্লাসরুম ও স্টাডি নোট",
+              icon: BookOpen,
+              badge: "এনরোল্ড",
+            },
+            {
+              label: "সার্টিফিকেট যাচাই",
+              href: "/verify/certificate/sample",
+              description: "অনলাইন আইডি ও কিউআর দ্বারা কোর্স সনদপত্র যাচাই করুন",
+              icon: Award,
+            },
+          ],
+        },
+        {
+          label: "শপ",
+          href: "/shop",
+          dropdown: [
+            {
+              label: "অ্যাস্ট্রোমল স্টোর (সমস্ত প্রতিকার)",
+              href: "/shop",
+              description: "কাশীর পুরোহিতদের দ্বারা প্রাণ-প্রতিষ্ঠিত রত্ন, রুদ্রাক্ষ ও কবচ",
+              icon: ShoppingBag,
+              badge: "১০০% ক্যাশব্যাক",
+            },
+            {
+              label: "সিদ্ধ নেপালি রুদ্রাক্ষ",
+              href: "/shop?category=rudraksha",
+              description: "১-১৪ মুখী প্রাকৃতিক ও ল্যাব সার্টিফাইড শনি ও মহামৃত্যুঞ্জয় রুদ্রাক্ষ",
+              icon: Sparkles,
+              badge: "ল্যাব সার্টিফাইড",
+            },
+            {
+              label: "খাঁটি রত্ন ও ক্রিস্টাল",
+              href: "/shop?category=gemstones",
+              description: "নীলম, রক্তপ্রবাল, পান্না ও ধন আকর্ষক প্রাকৃতিক পায়রাইট",
+              icon: Gem,
+              badge: "ন্যাচারাল",
+            },
+            {
+              label: "রাশি ব্রেসলেট ও সেলিনাইট",
+              href: "/shop?category=crystal_bracelet",
+              description: "১২ রাশির পবিত্র ক্রিস্টাল ব্রেসলেট ও সাথে ফ্রি ₹৭২৯ সেলিনাইট প্লেট",
+              icon: Gift,
+              badge: "ফ্রি প্লেট",
+            },
+          ],
+        },
+        {
           label: "এআই রিডিং",
           href: "/palm-reading",
           dropdown: [
@@ -359,6 +430,66 @@ export function AstroyogiHeader() {
           ],
         },
         {
+          label: "कोर्स",
+          href: "/courses",
+          dropdown: [
+            {
+              label: "सभी मास्टरक्लास",
+              href: "/courses",
+              description: "वैदिक ज्योतिष, लाल किताब, न्यूमरोलॉजी एवं केपी प्रोफेशनल कोर्स",
+              icon: GraduationCap,
+              badge: "गुरुकुल",
+            },
+            {
+              label: "मेरी पढ़ाई और कक्षाएं",
+              href: "/account/courses",
+              description: "आपके नामांकित कोर्स, वीडियो क्लासरूम व स्टडी नोट्स",
+              icon: BookOpen,
+              badge: "नामांकित",
+            },
+            {
+              label: "सर्टिफिकेट सत्यापन",
+              href: "/verify/certificate/sample",
+              description: "ऑनलाइन आईडी और क्यूआर द्वारा कोर्स प्रमाण पत्र सत्यापित करें",
+              icon: Award,
+            },
+          ],
+        },
+        {
+          label: "शॉप",
+          href: "/shop",
+          dropdown: [
+            {
+              label: "एस्ट्रोमॉल स्टोर (सभी उपाय)",
+              href: "/shop",
+              description: "काशी के विद्वानों द्वारा प्राण-प्रतिष्ठित रत्न, रुद्राक्ष एवं यंत्र",
+              icon: ShoppingBag,
+              badge: "100% कैशबैक",
+            },
+            {
+              label: "सिद्ध नेपाली रुद्राक्ष",
+              href: "/shop?category=rudraksha",
+              description: "1-14 मुखी प्राकृतिक एवं लैब प्रमाणित शनि व महामृत्युंजय रुद्राक्ष",
+              icon: Sparkles,
+              badge: "सर्टिफाइड",
+            },
+            {
+              label: "असली रत्न एवं क्रिस्टल",
+              href: "/shop?category=gemstones",
+              description: "नीलम, मूंगा, पन्ना व धन आकर्षित प्राकृतिक पायराइट",
+              icon: Gem,
+              badge: "नेचुरल",
+            },
+            {
+              label: "राशि ब्रेसलेट व सेलेनाइट",
+              href: "/shop?category=crystal_bracelet",
+              description: "12 राशियों के पवित्र क्रिस्टल ब्रेसलेट व साथ में फ्री ₹729 सेलेनाइट प्लेट",
+              icon: Gift,
+              badge: "फ्री प्लेट",
+            },
+          ],
+        },
+        {
           label: "एआई रीडिंग",
           href: "/palm-reading",
           dropdown: [
@@ -416,7 +547,7 @@ export function AstroyogiHeader() {
     // Default English (Clean, Concise, Astrotalk-style single-word labels)
     return [
       {
-        label: "Consultations",
+        label: "Consult",
         href: "/astrologers",
         dropdown: [
           {
@@ -504,6 +635,66 @@ export function AstroyogiHeader() {
         ],
       },
       {
+        label: "Courses",
+        href: "/courses",
+        dropdown: [
+          {
+            label: "All Masterclasses",
+            href: "/courses",
+            description: "Vedic Astrology, Lal Kitab, Numerology & KP Professional Courses",
+            icon: GraduationCap,
+            badge: "Gurukul",
+          },
+          {
+            label: "My Enrolled Courses",
+            href: "/account/courses",
+            description: "Your enrolled video classrooms, lessons & study notes",
+            icon: BookOpen,
+            badge: "Enrolled",
+          },
+          {
+            label: "Verify Certificate",
+            href: "/verify/certificate/sample",
+            description: "Verify authentic tamper-proof certificate by ID & QR",
+            icon: Award,
+          },
+        ],
+      },
+      {
+        label: "Shop",
+        href: "/shop",
+        dropdown: [
+          {
+            label: "AstroMall Store (All Remedies)",
+            href: "/shop",
+            description: "Kashi-energized lab-certified gemstones, rudraksha & yantras",
+            icon: ShoppingBag,
+            badge: "100% Cashback",
+          },
+          {
+            label: "Energized Nepali Rudraksha",
+            href: "/shop?category=rudraksha",
+            description: "1-14 Mukhi authentic & certified spiritual beads",
+            icon: Sparkles,
+            badge: "Certified",
+          },
+          {
+            label: "Natural Gemstones & Pyrite",
+            href: "/shop?category=gemstones",
+            description: "Natural blue sapphire, coral, emerald & wealth pyrites",
+            icon: Gem,
+            badge: "Natural",
+          },
+          {
+            label: "Zodiac Bracelets & Selenite",
+            href: "/shop?category=crystal_bracelet",
+            description: "12 Zodiac energized bracelets + Free ₹729 Selenite charging plate",
+            icon: Gift,
+            badge: "Free Plate",
+          },
+        ],
+      },
+      {
         label: "AI Reading",
         href: "/palm-reading",
         dropdown: [
@@ -581,8 +772,8 @@ export function AstroyogiHeader() {
       )}
     >
       {/* Astrotalk-Style Unified Single Row Navigation Bar */}
-      <div className="mx-auto max-w-[1440px] px-3 sm:px-6 lg:px-8">
-        <div className="flex h-16 sm:h-[68px] items-center justify-between gap-2 xl:gap-4 overflow-visible">
+      <div className="mx-auto max-w-[1440px] px-3 sm:px-4 xl:px-4 2xl:px-8">
+        <div className="flex h-16 sm:h-[68px] items-center justify-between gap-1.5 xl:gap-2 2xl:gap-4 overflow-visible">
           {/* ================= LEFT: Brand Logo + Name ================= */}
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 whitespace-nowrap">
             {/* Mobile Hamburger Toggle */}
@@ -613,7 +804,7 @@ export function AstroyogiHeader() {
           </div>
 
           {/* ================= CENTER: Single-Row Luxury Navigation Links ================= */}
-          <nav className="hidden xl:flex items-center gap-1 2xl:gap-2 whitespace-nowrap shrink-0 overflow-visible">
+          <nav className="hidden xl:flex items-center gap-0.5 2xl:gap-1.5 whitespace-nowrap shrink-0 overflow-visible">
             {navCategories.map((cat) => {
               const isActive = cat.href === pathname || (cat.label === "Home" && pathname === "/");
               const hasDropdown = Boolean(cat.dropdown && cat.dropdown.length > 0);
@@ -628,7 +819,7 @@ export function AstroyogiHeader() {
                 >
                   <Link
                     href={cat.href}
-                    className={`whitespace-nowrap shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-[14px] font-semibold tracking-normal transition-all duration-150 select-none ${
+                    className={`whitespace-nowrap shrink-0 inline-flex items-center gap-1 px-2 xl:px-2.5 2xl:px-3 py-1.5 rounded-full text-[12.5px] xl:text-[13px] 2xl:text-[14px] font-semibold tracking-normal transition-all duration-150 select-none ${
                       isActive
                         ? "text-amber-950 font-bold bg-amber-100/90 shadow-2xs"
                         : "text-stone-700 hover:text-stone-950 hover:bg-stone-100/80"
@@ -643,16 +834,16 @@ export function AstroyogiHeader() {
 
                     <span className="whitespace-nowrap leading-normal">{cat.label}</span>
 
-                    {cat.isLive && (
-                      <span className="ml-0.5 rounded-full bg-red-500 px-1.5 py-0.5 text-[8.5px] font-extrabold text-white uppercase tracking-wider shrink-0 leading-none">
-                        Live
+                    {cat.badge && (
+                      <span className="rounded-full bg-amber-500/15 text-amber-900 dark:text-amber-300 text-[9px] font-bold px-1.5 py-0.5 leading-none shrink-0 border border-amber-400/30">
+                        {cat.badge}
                       </span>
                     )}
 
                     {hasDropdown && (
                       <ChevronDown
                         className={cn(
-                          "size-3.5 text-stone-400 transition-transform duration-200 shrink-0",
+                          "size-3 2xl:size-3.5 text-stone-400 transition-transform duration-200 shrink-0",
                           isHovered && "rotate-180 text-amber-700"
                         )}
                       />
@@ -703,7 +894,7 @@ export function AstroyogiHeader() {
           </nav>
 
           {/* ================= RIGHT: Language, Profile & Astrotalk-Style CTA Button ================= */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 whitespace-nowrap">
+          <div className="flex items-center gap-1.5 xl:gap-2 2xl:gap-2.5 shrink-0 whitespace-nowrap">
             {/* Language Selector Dropdown */}
             <div className="relative shrink-0">
               <button
@@ -754,6 +945,22 @@ export function AstroyogiHeader() {
               )}
             </div>
 
+            {/* Quick Cart Button with Live Badge */}
+            <button
+              type="button"
+              onClick={openCart}
+              className="relative inline-flex size-9 sm:size-[38px] items-center justify-center rounded-full border border-stone-200 hover:border-amber-400 bg-white hover:bg-amber-50/50 text-stone-700 hover:text-amber-800 transition-all cursor-pointer shrink-0 shadow-2xs"
+              title={language === "bn" ? "কার্ট দেখুন" : language === "hi" ? "कार्ट देखें" : "View Cart"}
+              aria-label="Shopping Cart"
+            >
+              <ShoppingBag className="size-4 sm:size-4.5" />
+              {cartItemCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-extrabold text-white shadow-xs animate-in zoom-in-75 duration-150">
+                  {cartItemCount > 99 ? "99+" : cartItemCount}
+                </span>
+              )}
+            </button>
+
             {/* User Profile / Wallet or Sign In */}
             {isSignedIn ? (
               <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
@@ -793,7 +1000,7 @@ export function AstroyogiHeader() {
             <Link href="/astrologers" className="shrink-0 group">
               <button
                 type="button"
-                className="group relative inline-flex h-9 sm:h-[38px] items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 px-3 sm:px-4 text-stone-950 font-semibold text-xs sm:text-[13px] tracking-tight shadow-[0_4px_14px_-2px_rgba(245,158,11,0.55)] hover:shadow-[0_6px_18px_-2px_rgba(245,158,11,0.75)] transition-all hover:scale-[1.02] active:scale-[0.98] border border-amber-300 whitespace-nowrap cursor-pointer leading-normal"
+                className="group relative inline-flex h-9 sm:h-[38px] items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 px-3 xl:px-3.5 2xl:px-4 text-stone-950 font-semibold text-xs sm:text-[13px] tracking-tight shadow-[0_4px_14px_-2px_rgba(245,158,11,0.55)] hover:shadow-[0_6px_18px_-2px_rgba(245,158,11,0.75)] transition-all hover:scale-[1.02] active:scale-[0.98] border border-amber-300 whitespace-nowrap cursor-pointer leading-normal"
               >
                 <span className="leading-normal">{ctaPart1}</span>
                 <span className="hidden 2xl:inline opacity-40 font-light leading-normal">|</span>
@@ -811,7 +1018,7 @@ export function AstroyogiHeader() {
       {mounted &&
         mobileMenuOpen &&
         createPortal(
-          <div className="fixed inset-0 z-[60] lg:hidden">
+          <div className="fixed inset-0 z-[60] xl:hidden">
           <div
             className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-300"
             onClick={() => setMobileMenuOpen(false)}
@@ -861,7 +1068,14 @@ export function AstroyogiHeader() {
                             }
                             className="w-full flex items-center justify-between py-2.5 px-3 rounded-xl text-sm font-bold text-stone-800 hover:bg-stone-50"
                           >
-                            <span>{cat.label}</span>
+                            <span className="flex items-center gap-2">
+                              <span>{cat.label}</span>
+                              {cat.badge && (
+                                <span className="rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-0.5 border border-amber-300/60">
+                                  {cat.badge}
+                                </span>
+                              )}
+                            </span>
                             <ChevronDown
                               className={cn(
                                 "size-4 text-stone-400 transition-transform duration-200",
@@ -894,7 +1108,14 @@ export function AstroyogiHeader() {
                           onClick={() => setMobileMenuOpen(false)}
                           className="flex items-center justify-between py-2.5 px-3 rounded-xl text-sm font-bold text-stone-800 hover:bg-stone-50"
                         >
-                          <span>{cat.label}</span>
+                          <span className="flex items-center gap-2">
+                            <span>{cat.label}</span>
+                            {cat.badge && (
+                              <span className="rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-0.5 border border-amber-300/60">
+                                {cat.badge}
+                              </span>
+                            )}
+                          </span>
                           {cat.isLive && (
                             <span className="rounded-full bg-red-500 px-2 py-0.5 text-[9px] font-extrabold text-white uppercase">
                               Live
@@ -936,6 +1157,9 @@ export function AstroyogiHeader() {
           </div>,
           document.body,
         )}
+
+      {/* Universal Cart Drawer accessible across all pages */}
+      <CartDrawer />
     </header>
   );
 }

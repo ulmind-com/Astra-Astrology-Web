@@ -161,60 +161,81 @@ export default function VastuPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-surface-muted/30 text-foreground flex flex-col font-sans pb-24">
+    <div className="min-h-screen bg-[#fafaf9]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
       <SiteHeader />
 
-      <main className="mx-auto max-w-6xl px-3 sm:px-4 py-8 flex-1 w-full space-y-8">
+      <main className="mx-auto max-w-6xl px-3 sm:px-6 py-4 flex-1 w-full space-y-6">
         {/* =========================================================================
-            HEADER & HERO BANNER (Matching Kundli & Daily Horoscope)
+            1. BREADCRUMB & LANGUAGE SWITCHER
         ========================================================================= */}
-        <div className="mx-auto max-w-4xl text-center space-y-3">
-          <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/10 text-amber-900 dark:text-amber-300 border border-amber-400/30 font-bold px-4 py-1.5 text-xs shadow-2xs">
-            <Sparkles className="size-3.5 text-amber-600 dark:text-amber-400" />
-            <span>{t.badge}</span>
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-stone-500 pt-0.5 pb-1">
+          <div className="flex items-center gap-1.5 uppercase tracking-wider font-semibold">
+            <Link href="/" className="hover:text-amber-700 transition-colors">
+              {language === "bn" ? "হোম" : language === "hi" ? "होम" : "Home"}
+            </Link>
+            <span className="text-stone-300">&gt;</span>
+            <span className="text-stone-900 font-bold">{t.title}</span>
           </div>
-
-          <h1 className="font-display text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
-            {t.title}
-          </h1>
-
-          <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto">
-            {t.subtitle}
-          </p>
 
           {/* Language Switcher Bar */}
-          <div className="flex items-center justify-center gap-2 pt-2">
-            <Languages className="size-4 text-muted-foreground" />
-            <div className="inline-flex p-1 rounded-xl bg-surface border border-border/80 shadow-2xs">
-              {(
-                [
-                  { code: "bn", label: "বাংলা" },
-                  { code: "en", label: "English" },
-                  { code: "hi", label: "हिन्दी" },
-                ] as const
-              ).map((lang) => (
-                <button
-                  key={lang.code}
-                  type="button"
-                  onClick={() => setLanguage(lang.code)}
-                  className={`min-h-9 inline-flex items-center justify-center px-3 py-2 rounded-lg text-xs font-semibold press transition-all cursor-pointer ${
-                    language === lang.code
-                      ? "bg-brand-500 text-brand-foreground shadow-2xs"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {lang.label}
-                </button>
-              ))}
-            </div>
+          <div className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white p-0.5 text-xs font-semibold shadow-2xs">
+            {(
+              [
+                { code: "bn", label: "বাংলা" },
+                { code: "hi", label: "हिन्दी" },
+                { code: "en", label: "English" },
+              ] as const
+            ).map((l) => (
+              <button
+                key={l.code}
+                type="button"
+                onClick={() => setLanguage(l.code)}
+                className={`min-h-7 inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer ${
+                  language === l.code
+                    ? "bg-[#fcd404] text-stone-950 shadow-2xs font-extrabold"
+                    : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
+                }`}
+              >
+                {l.label}
+              </button>
+            ))}
           </div>
+        </div>
 
-          <div className="pt-2 flex justify-center">
-            <FeatureCoinBadge
-              feature={vastuFeature}
-              coins={vastuFeature?.coins ?? 25}
-              language={language}
-            />
+        {/* =========================================================================
+            2. HERO SECTION: Sleek with rotating faint gold zodiac circle in background
+        ========================================================================= */}
+        <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-r from-amber-50/50 via-white to-amber-50/30 px-4 sm:px-6 py-4 shadow-2xs">
+          {/* Faint rotating zodiac wheel in background */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/zodiac-wheel-gold.webp"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-12 -top-16 size-[260px] sm:size-[340px] select-none opacity-[0.14] mix-blend-multiply animate-spin [animation-duration:120s] motion-reduce:animate-none"
+          />
+
+          <div className="relative z-10 max-w-2xl space-y-1.5">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-bold text-amber-900">
+              <Sparkles className="size-3 text-amber-600" />
+              <span>{t.badge}</span>
+            </div>
+
+            <h1 className="text-xl sm:text-2xl font-serif font-bold text-stone-900 tracking-tight leading-tight">
+              {t.title}
+            </h1>
+
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+              {t.subtitle}
+            </p>
+
+            <div className="pt-1 flex items-center gap-3">
+              <FeatureCoinBadge
+                feature={vastuFeature}
+                coins={vastuFeature?.coins ?? 25}
+                language={language}
+              />
+            </div>
           </div>
         </div>
 

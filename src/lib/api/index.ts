@@ -1065,6 +1065,11 @@ export interface ShopProduct {
   deity?: string | null;
   benefits: string[];
   life_pillars: string[];
+  purpose_tags?: string[];
+  recommended_for_rashis?: string[];
+  crystal_type?: string | null;
+  beej_mantra?: string | null;
+  wear_instructions?: string | null;
   mrp: number;
   sale_price: number;
   discount_percent: number;
@@ -1072,27 +1077,20 @@ export interface ShopProduct {
   in_stock: boolean;
   featured_image: string;
   images: string[];
+  free_gift_title?: string | null;
+  free_gift_value?: number | null;
+  free_gift_badge?: string | null;
+  free_gift_image_url?: string | null;
+  cashback_percent?: number | null;
+  lab_certified?: boolean;
+  lab_certificate_name?: string | null;
+  lab_certificate_number?: string | null;
+  certificate_image_url?: string | null;
   is_active: boolean;
   is_featured: boolean;
   is_energized: boolean;
   average_rating: number;
   review_count: number;
-}
-
-export interface ShopProductListResponse {
-  items: ShopProduct[];
-  total: number;
-  page: number;
-  limit: number;
-  has_more: boolean;
-}
-
-export interface StockReservationResponse {
-  success: boolean;
-  reserved: boolean;
-  product_id: string;
-  quantity: number;
-  message: string;
 }
 
 export interface ShopHeroBannerItem {
@@ -1125,8 +1123,118 @@ export interface ShopBannerSettings {
   announcement_bar_text?: string | null;
   announcement_bar_link?: string | null;
   announcement_bar_active: boolean;
+  marquee_items?: string[];
   hero_banners: ShopHeroBannerItem[];
-  reels: ShopStoreReelItem[];
+  cashback_enabled?: boolean;
+  cashback_percent?: number;
+  free_gift_default_title?: string;
+  free_gift_default_value?: number;
+  free_gift_default_badge?: string;
+  free_shipping_threshold?: number;
+  standard_shipping_fee?: number;
+  cod_enabled?: boolean;
+  reels?: ShopStoreReelItem[];
+}
+
+export interface ShopCheckoutPayload {
+  items: { product_id: string; quantity: number }[];
+  shipping_address: {
+    recipient_name: string;
+    phone_number: string;
+    alternate_phone?: string;
+    address_line1: string;
+    address_line2?: string;
+    landmark?: string;
+    city: string;
+    state: string;
+    pincode: string;
+    address_type?: string;
+  };
+  sankalpa?: {
+    devotee_name?: string;
+    gotra?: string;
+    date_of_birth?: string;
+    birth_time?: string;
+    birth_place?: string;
+    special_prayer_wish?: string;
+  };
+  payment_method: "razorpay" | "cod" | "wallet";
+  coupon_code?: string;
+}
+
+export interface ShopCheckoutResult {
+  order_id: string;
+  order_number: string;
+  subtotal: number;
+  discount_amount: number;
+  shipping_fee: number;
+  grand_total: number;
+  payment_method: string;
+  payment_status: string;
+  order_status: string;
+  razorpay_order_id?: string | null;
+  razorpay_key_id?: string | null;
+  cashback_percent: number;
+  cashback_coins_eligible: number;
+  free_gifts: any[];
+}
+
+export interface ShopOrder {
+  id: string;
+  order_number: string;
+  user_id: string;
+  user_email: string;
+  user_phone: string;
+  shipping_address: any;
+  items: any[];
+  sankalpa?: any;
+  subtotal: number;
+  discount_amount: number;
+  shipping_fee: number;
+  grand_total: number;
+  payment_method: string;
+  payment_status: string;
+  order_status: string;
+  razorpay_order_id?: string | null;
+  cashback_percent: number;
+  cashback_coins_eligible: number;
+  cashback_coins_credited: number;
+  cashback_credited_at?: string | null;
+  free_gifts: any[];
+  courier_partner?: string | null;
+  tracking_id?: string | null;
+  tracking_url?: string | null;
+  estimated_delivery_date?: string | null;
+  delivered_at?: string | null;
+  consecration_certificate_url?: string | null;
+  status_history: any[];
+  created_at: string;
+}
+
+export interface PincodeResult {
+  pincode: string;
+  city: string;
+  state: string;
+  is_serviceable: boolean;
+  cod_available: boolean;
+  estimated_delivery_days: number;
+  estimated_delivery_date: string;
+}
+
+export interface ShopProductListResponse {
+  items: ShopProduct[];
+  total: number;
+  page: number;
+  limit: number;
+  has_more: boolean;
+}
+
+export interface StockReservationResponse {
+  success: boolean;
+  reserved: boolean;
+  product_id: string;
+  quantity: number;
+  message: string;
 }
 
 export const shopApi = {
@@ -1178,6 +1286,32 @@ export const shopApi = {
       product_id: productId,
       quantity,
     }),
+
+  checkPincode: (pincode: string) =>
+    api.get<PincodeResult>(endpoints.shop.checkPincode(pincode), { auth: false }),
+
+  checkout: (payload: ShopCheckoutPayload) =>
+    api.post<ShopCheckoutResult>(endpoints.shop.checkout, payload, { auth: true }),
+
+  verifyPayment: (payload: {
+    order_id: string;
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+  }) =>
+    api.post<ShopOrder>(endpoints.shop.verifyPayment, payload, { auth: true }),
+
+  getMyOrders: (page = 1, limit = 20) =>
+    api.get<{ items: ShopOrder[]; total: number; page: number; limit: number; pages: number }>(
+      endpoints.shop.myOrders,
+      { query: { page, limit }, auth: true }
+    ),
+
+  getOrderDetail: (orderKey: string) =>
+    api.get<ShopOrder>(endpoints.shop.orderDetail(orderKey), { auth: true }),
+
+  cancelOrder: (orderKey: string) =>
+    api.post<ShopOrder>(endpoints.shop.cancelOrder(orderKey), {}, { auth: true }),
 };
 
 export const courseApi = {
@@ -1222,7 +1356,7 @@ export const courseApi = {
     lessonId: string,
     payload: { watched_seconds: number; total_seconds: number; mark_completed?: boolean }
   ) =>
-    api.post<{ progress_percent: number; is_lesson_completed: boolean; certificate_issued: boolean; certificate_id?: string }>(
+    api.post<{ progress_percent: number; is_lesson_completed: boolean; certificate_issued: boolean; certificate_id?: string; certificate_url?: string; message?: string | null }>(
       endpoints.courses.lessonProgress(courseId, lessonId),
       payload
     ),
