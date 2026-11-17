@@ -4,6 +4,8 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
   ShoppingBag,
@@ -18,15 +20,18 @@ import {
   Coins,
   CheckCircle2,
   Lock,
+  Tag,
+  Truck,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Drawer } from "vaul";
 import { useCartStore } from "@/lib/stores/use-cart-store";
 import { useLanguage } from "@/providers/language-provider";
 
 export function CartDrawer() {
   const router = useRouter();
   const { language } = useLanguage();
+  const [mounted, setMounted] = React.useState(false);
+
   const {
     items,
     isOpen,
@@ -42,17 +47,46 @@ export function CartDrawer() {
   } = useCartStore();
 
   const [couponInput, setCouponInput] = React.useState("");
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Lock body scroll when cart is open
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closeCart();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, closeCart]);
+
   const subtotal = getSubtotal();
   const freeShippingThreshold = 499;
   const progressPercent = Math.min(100, Math.round((subtotal / freeShippingThreshold) * 100));
   const remainingForFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
   const cashbackCoins = getCashbackCoins();
   const bundledGifts = getBundledGifts();
+  const isFreeShipping = subtotal >= freeShippingThreshold || items.length === 0;
+  const shippingFee = isFreeShipping ? 0 : 70;
+  const grandTotal = Math.max(0, subtotal - discountAmount + shippingFee);
 
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
     const code = couponInput.trim().toUpperCase();
     if (!code) return;
+
     if (code === "ASTRA100" || code === "ASTRO10") {
       const disc = Math.round(subtotal * 0.1);
       setCoupon(code, disc);
@@ -63,350 +97,407 @@ export function CartDrawer() {
     setCouponInput("");
   };
 
+  const handleRemoveCoupon = () => {
+    setCoupon(null, 0);
+    toast.info("Coupon removed");
+  };
+
   const handleProceedToCheckout = () => {
     closeCart();
     router.push("/shop/checkout");
   };
 
-  if (!isOpen) return null;
+  if (!mounted) return null;
 
-  const renderContent = () => (
-    <div className="flex flex-col h-full justify-between overflow-hidden">
-      {/* Header */}
-      <div className="p-4 sm:p-5 border-b border-amber-900/10 bg-white/90 backdrop-blur-xs flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-amber-500/15 text-amber-700">
-            <ShoppingBag className="size-5" />
-          </div>
-          <div>
-            <h3 className="font-cinzel font-bold text-base text-stone-900">
-              {language === "bn" ? "আপনার শপিং কার্ট" : "Your AstroStore Cart"}
-            </h3>
-            <span className="text-xs text-stone-500 font-medium">
-              {items.length} {items.length === 1 ? "remedy" : "remedies"} selected
-            </span>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={closeCart}
-          className="p-2 rounded-full hover:bg-stone-100 text-stone-400 hover:text-stone-700 transition-colors cursor-pointer"
-        >
-          <X className="size-5" />
-        </button>
-      </div>
-
-      {/* Free Shipping & Gift Progress Bar */}
-      <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/20 to-orange-500/15 p-3.5 border-b border-amber-500/20 shrink-0">
-        <div className="flex items-center justify-between text-xs font-semibold text-amber-950 mb-1.5">
-          <span className="flex items-center gap-1.5">
-            <Gift className="size-4 text-amber-600" />
-            {remainingForFreeShipping > 0
-              ? language === "bn"
-                ? `আর ₹${remainingForFreeShipping} যোগ করলেই ফ্রি ডেলিভারি!`
-                : `Add ₹${remainingForFreeShipping} more for FREE Delivery!`
-              : language === "bn"
-              ? "🎉 অভিনন্দন! আপনি ফ্রি এক্সপ্রেস ডেলিভারি আনলক করেছেন!"
-              : "🎉 Free Express Delivery Unlocked!"}
-          </span>
-          <span className="text-amber-800 font-bold">{progressPercent}%</span>
-        </div>
-        <div className="w-full bg-amber-200/50 rounded-full h-2 overflow-hidden">
-          <div
-            className="bg-gradient-to-r from-amber-500 to-amber-600 h-2 rounded-full transition-all duration-500"
-            style={{ width: `${progressPercent}%` }}
+  return createPortal(
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex justify-end">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={closeCart}
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            aria-hidden="true"
           />
-        </div>
-      </div>
 
-      {/* 100% Wallet Cashback Notification Strip */}
-      {cashbackCoins > 0 && (
-        <div className="bg-gradient-to-r from-emerald-600 to-teal-700 px-4 py-2.5 text-white flex items-center justify-between text-xs font-semibold shadow-xs shrink-0">
-          <span className="flex items-center gap-1.5">
-            <Coins className="size-4 text-amber-300 animate-bounce" />
-            <span>
-              {language === "bn"
-                ? `১০০% ক্যাশব্যাক: ₹${subtotal} কয়েন ওয়ালেটে জমা হবে!`
-                : `100% Cashback: Earn ${cashbackCoins} Coins in Astra Wallet!`}
-            </span>
-          </span>
-          <span className="bg-white/20 text-emerald-100 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-            Prepaid
-          </span>
-        </div>
-      )}
-
-      {/* Items List */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
-        {items.length === 0 ? (
-          <div className="py-20 text-center space-y-3">
-            <div className="size-16 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto text-amber-700">
-              <ShoppingBag className="size-8" />
-            </div>
-            <h4 className="font-cinzel font-bold text-stone-800 text-base">
-              {language === "bn" ? "কার্টটি বর্তমানে খালি" : "Your cart is currently empty"}
-            </h4>
-            <p className="text-xs text-stone-500 max-w-xs mx-auto">
-              {language === "bn"
-                ? "পবিত্র রুদ্রাক্ষ, বৈদিক রত্ন বা ক্রিস্টাল ব্রেসলেট বেছে নিয়ে আপনার জীবনের গ্রহপীড়া প্রশমন করুন।"
-                : "Explore authentic Siddh Rudraksha, Certified Gemstones & Pyrite to attract wealth & peace."}
-            </p>
-            <button
-              type="button"
-              onClick={closeCart}
-              className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold hover:bg-amber-700 transition-colors cursor-pointer"
-            >
-              <span>{language === "bn" ? "প্রতিকার দেখুন" : "Explore Remedies"}</span>
-              <ArrowRight className="size-3.5" />
-            </button>
-          </div>
-        ) : (
-          items.map((item) => (
-            <div
-              key={item.id}
-              className="rounded-2xl border border-stone-200 bg-white p-3.5 shadow-2xs space-y-3 relative group"
-            >
-              <div className="flex gap-3">
-                {/* Thumbnail */}
-                <div className="relative size-20 rounded-xl overflow-hidden bg-stone-100 border border-stone-100 shrink-0">
-                  {item.image ? (
-                    <Image
-                      src={item.image}
-                      alt={item.title}
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
-                  ) : (
-                    <div className="size-full flex items-center justify-center text-stone-400">
-                      <ShoppingBag className="size-6" />
-                    </div>
-                  )}
+          {/* Right-Side Luxury Slide-Over Panel */}
+          <motion.aside
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 28, stiffness: 300 }}
+            className="relative z-10 flex h-full w-full max-w-full sm:max-w-[460px] flex-col bg-[#fffdf9] text-stone-900 shadow-[-16px_0_48px_rgba(26,18,8,0.28)] border-l border-amber-900/10 focus:outline-none"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Shopping Cart"
+          >
+            {/* ================= Header ================= */}
+            <div className="flex items-center justify-between border-b border-amber-900/10 bg-white/95 px-5 py-4 backdrop-blur-xs shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-stone-950 shadow-sm">
+                  <ShoppingBag className="size-5 stroke-[2.2]" />
                 </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-display text-base font-bold text-stone-950">
+                      {language === "bn"
+                        ? "আপনার শপিং কার্ট"
+                        : language === "hi"
+                        ? "आपकी शॉपिंग कार्ट"
+                        : "AstroStore Cart"}
+                    </h2>
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-extrabold text-amber-900 border border-amber-300/60">
+                      {items.reduce((acc, i) => acc + i.quantity, 0)}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-stone-500 font-medium">
+                    {language === "bn"
+                      ? "কাশীর পণ্ডিতদের দ্বারা সিদ্ধ প্রতিকার"
+                      : "Siddh & Energized Vedic Remedies"}
+                  </p>
+                </div>
+              </div>
 
-                {/* Details */}
-                <div className="flex-1 min-w-0 space-y-1">
-                  <div className="flex items-start justify-between gap-2">
-                    <Link
-                      href={`/shop/products/${item.slug}`}
-                      onClick={closeCart}
-                      className="font-bold text-xs text-stone-900 line-clamp-2 hover:text-amber-700 transition-colors"
+              <button
+                type="button"
+                onClick={closeCart}
+                className="flex size-9 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-500 hover:border-amber-400 hover:bg-amber-50 hover:text-stone-900 transition-colors cursor-pointer"
+                aria-label="Close Cart"
+              >
+                <X className="size-4.5" />
+              </button>
+            </div>
+
+            {/* ================= Unified Free Shipping & Rewards Strip ================= */}
+            <div className="bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-orange-500/15 border-b border-amber-500/20 px-5 py-3 shrink-0">
+              <div className="flex items-center justify-between text-xs font-semibold text-amber-950 mb-1.5">
+                <span className="flex items-center gap-1.5">
+                  <Truck className="size-4 text-amber-700 shrink-0" />
+                  <span>
+                    {remainingForFreeShipping > 0
+                      ? language === "bn"
+                        ? `আর ₹${remainingForFreeShipping} যোগ করলেই ফ্রি ডেলিভারি!`
+                        : `Add ₹${remainingForFreeShipping} more for FREE Express Delivery!`
+                      : language === "bn"
+                      ? "🎉 ফ্রি এক্সপ্রেস ডেলিভারি আনলক হয়েছে!"
+                      : "🎉 Free Express Delivery Unlocked!"}
+                  </span>
+                </span>
+                <span className="text-[11px] font-extrabold text-amber-800">{progressPercent}%</span>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-amber-200/60 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-amber-500 via-amber-600 to-orange-600 transition-all duration-500"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+
+              {cashbackCoins > 0 && (
+                <div className="mt-2 flex items-center justify-between rounded-lg bg-emerald-600/10 px-2.5 py-1 text-[11px] font-bold text-emerald-800 border border-emerald-500/20">
+                  <span className="flex items-center gap-1.5">
+                    <Coins className="size-3.5 text-amber-600 shrink-0" />
+                    <span>
+                      {language === "bn"
+                        ? `১০০% ক্যাশব্যাক: ₹${subtotal} কয়েন ওয়ালেটে জমা হবে`
+                        : `100% Cashback: ₹${subtotal} Coins back to wallet`}
+                    </span>
+                  </span>
+                  <span className="uppercase text-[9px] tracking-wider text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded font-extrabold">
+                    Prepaid
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* ================= Cart Items List ================= */}
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3.5">
+              {items.length === 0 ? (
+                <div className="flex h-full flex-col items-center justify-center py-16 text-center space-y-4">
+                  <div className="flex size-20 items-center justify-center rounded-2xl bg-amber-100/70 text-amber-700 shadow-inner">
+                    <ShoppingBag className="size-9 stroke-[1.5]" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="font-display text-base font-bold text-stone-900">
+                      {language === "bn" ? "কার্টটি বর্তমানে খালি" : "Your cart is empty"}
+                    </h3>
+                    <p className="max-w-[260px] text-xs text-stone-500 leading-relaxed">
+                      {language === "bn"
+                        ? "পবিত্র রুদ্রাক্ষ, বৈদিক রত্ন বা ক্রিস্টাল ব্রেসলেট বেছে নিয়ে আপনার জীবনের গ্রহপীড়া প্রশমন করুন।"
+                        : "Discover authentic Siddh Rudraksha, Certified Gemstones & Pyrite to attract peace and abundance."}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={closeCart}
+                    className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:from-amber-600 hover:to-amber-700 transition-all cursor-pointer"
+                  >
+                    <span>{language === "bn" ? "প্রতিকার দেখুন" : "Explore Sacred Remedies"}</span>
+                    <ArrowRight className="size-3.5" />
+                  </button>
+                </div>
+              ) : (
+                items.map((item) => {
+                  const discountPercent =
+                    item.mrp > item.price ? Math.round(((item.mrp - item.price) / item.mrp) * 100) : 0;
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="group relative flex gap-3.5 rounded-2xl border border-stone-200/90 bg-white p-3.5 shadow-2xs hover:border-amber-300/80 transition-colors"
                     >
-                      {item.title}
-                    </Link>
+                      {/* Product Thumbnail */}
+                      <div className="relative size-20 shrink-0 overflow-hidden rounded-xl border border-stone-100 bg-stone-50">
+                        {item.image ? (
+                          <Image
+                            src={item.image}
+                            alt={item.title}
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            unoptimized
+                          />
+                        ) : (
+                          <div className="flex size-full items-center justify-center text-stone-400">
+                            <ShoppingBag className="size-6" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Details */}
+                      <div className="flex flex-1 min-w-0 flex-col justify-between">
+                        <div>
+                          <div className="flex items-start justify-between gap-1.5">
+                            <Link
+                              href={`/shop/products/${item.slug}`}
+                              onClick={closeCart}
+                              className="font-bold text-xs text-stone-900 leading-snug line-clamp-2 hover:text-amber-700 transition-colors"
+                            >
+                              {item.title}
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => removeItem(item.id)}
+                              className="rounded-lg p-1 text-stone-400 hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer shrink-0"
+                              title="Remove item"
+                              aria-label="Remove item"
+                            >
+                              <Trash2 className="size-4" />
+                            </button>
+                          </div>
+
+                          {/* Price & Savings */}
+                          <div className="mt-1 flex items-center gap-2 flex-wrap">
+                            <span className="font-extrabold text-sm text-stone-950">
+                              ₹{item.price.toLocaleString("en-IN")}
+                            </span>
+                            {item.mrp > item.price && (
+                              <span className="text-xs text-stone-400 line-through">
+                                ₹{item.mrp.toLocaleString("en-IN")}
+                              </span>
+                            )}
+                            {discountPercent > 0 && (
+                              <span className="rounded bg-emerald-50 px-1.5 py-0.2 text-[10px] font-bold text-emerald-700 border border-emerald-200">
+                                {discountPercent}% OFF
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Free Gift Tag */}
+                          {item.free_gift_title && (
+                            <div className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-200/80">
+                              <Gift className="size-3 text-amber-600 shrink-0" />
+                              <span className="truncate">
+                                {item.free_gift_badge || `Includes ${item.free_gift_title}`}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Sankalpa Indicator */}
+                          {item.sankalpa?.devotee_name && (
+                            <div className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-emerald-800">
+                              <Flame className="size-3 text-amber-500 fill-current shrink-0" />
+                              <span className="truncate">
+                                Sankalp: {item.sankalpa.devotee_name} ({item.sankalpa.gotra || "Kashyap"})
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Bottom Stepper Row */}
+                        <div className="mt-2.5 flex items-center justify-between pt-2 border-t border-stone-100">
+                          <span className="text-[11px] text-stone-500 font-medium">Quantity:</span>
+                          <div className="flex items-center rounded-lg border border-stone-200 bg-stone-50 p-0.5">
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              className="flex size-6 items-center justify-center rounded text-stone-600 hover:bg-white hover:text-stone-950 transition-colors cursor-pointer"
+                              aria-label="Decrease quantity"
+                            >
+                              <Minus className="size-3" />
+                            </button>
+                            <span className="w-7 text-center text-xs font-bold text-stone-950">
+                              {item.quantity}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              className="flex size-6 items-center justify-center rounded text-stone-600 hover:bg-white hover:text-stone-950 transition-colors cursor-pointer"
+                              aria-label="Increase quantity"
+                            >
+                              <Plus className="size-3" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+
+              {/* Free Bundled Gifts Card */}
+              {bundledGifts.length > 0 && items.length > 0 && (
+                <div className="rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 via-orange-50/40 to-amber-50/60 p-3.5 space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-950">
+                    <Sparkles className="size-4 text-amber-600 shrink-0" />
+                    <span>Complimentary Sacred Gifts Included:</span>
+                  </div>
+                  {bundledGifts.map((gift, gIdx) => (
+                    <div
+                      key={gIdx}
+                      className="flex items-center justify-between rounded-xl border border-amber-200/90 bg-white/90 p-2 text-xs"
+                    >
+                      <span className="font-semibold text-stone-800">{gift.title}</span>
+                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
+                        FREE (Worth ₹{gift.value})
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* ================= Footer & Checkout Area ================= */}
+            {items.length > 0 && (
+              <div className="border-t border-amber-900/10 bg-white p-5 space-y-3.5 shrink-0 shadow-[0_-8px_24px_rgba(26,18,8,0.06)]">
+                {/* Coupon Code Input */}
+                {!couponCode ? (
+                  <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Tag className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-stone-400" />
+                      <input
+                        type="text"
+                        value={couponInput}
+                        onChange={(e) => setCouponInput(e.target.value)}
+                        placeholder="Coupon code (e.g. ASTRA100)"
+                        className="w-full rounded-xl border border-stone-200 bg-stone-50 pl-8.5 pr-3 py-2 text-xs font-semibold uppercase placeholder:normal-case placeholder:font-normal focus:border-amber-500 focus:bg-white focus:outline-none transition-colors"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="rounded-xl bg-stone-900 px-4 py-2 text-xs font-bold text-white hover:bg-stone-800 transition-colors cursor-pointer"
+                    >
+                      Apply
+                    </button>
+                  </form>
+                ) : (
+                  <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900 font-semibold">
+                    <span className="flex items-center gap-1.5">
+                      <CheckCircle2 className="size-4 text-emerald-600" />
+                      <span>Coupon &apos;{couponCode}&apos; Applied (-₹{discountAmount})</span>
+                    </span>
                     <button
                       type="button"
-                      onClick={() => removeItem(item.id)}
-                      className="text-stone-400 hover:text-rose-600 p-1 rounded-lg transition-colors cursor-pointer"
+                      onClick={handleRemoveCoupon}
+                      className="text-stone-400 hover:text-stone-700 p-1"
                     >
-                      <Trash2 className="size-4" />
+                      <X className="size-3.5" />
                     </button>
                   </div>
+                )}
 
-                  <div className="flex items-baseline gap-2">
-                    <span className="font-extrabold text-sm text-stone-900">
-                      ₹{item.price.toLocaleString("en-IN")}
+                {/* Price Breakdown */}
+                <div className="space-y-1.5 text-xs text-stone-600">
+                  <div className="flex justify-between">
+                    <span>Subtotal</span>
+                    <span className="font-semibold text-stone-950">
+                      ₹{subtotal.toLocaleString("en-IN")}
                     </span>
-                    {item.mrp > item.price && (
-                      <span className="text-xs text-stone-400 line-through">
-                        ₹{item.mrp.toLocaleString("en-IN")}
-                      </span>
-                    )}
                   </div>
 
-                  {/* Free Gift Badge on Item */}
-                  {item.free_gift_title && (
-                    <div className="inline-flex items-center gap-1 bg-amber-50 text-amber-800 border border-amber-200/80 rounded-md px-2 py-0.5 text-[10px] font-bold">
-                      <Gift className="size-3 text-amber-600 shrink-0" />
-                      <span className="truncate">{item.free_gift_badge || `Includes ${item.free_gift_title}`}</span>
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between text-emerald-700 font-semibold">
+                      <span>Coupon Discount</span>
+                      <span>-₹{discountAmount.toLocaleString("en-IN")}</span>
                     </div>
                   )}
 
-                  {/* Sankalpa Indicator */}
-                  {item.sankalpa?.devotee_name && (
-                    <div className="text-[10px] text-emerald-700 font-semibold flex items-center gap-1">
-                      <Flame className="size-3 text-amber-500 fill-current" />
-                      <span>
-                        Sankalp: {item.sankalpa.devotee_name} ({item.sankalpa.gotra || "Kashyap"})
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex justify-between">
+                    <span>Express Shipping</span>
+                    <span>
+                      {isFreeShipping ? (
+                        <span className="font-bold text-emerald-600">FREE</span>
+                      ) : (
+                        <span className="font-semibold text-stone-950">₹70</span>
+                      )}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between text-amber-800 font-semibold">
+                    <span className="flex items-center gap-1">
+                      <Coins className="size-3.5 text-amber-600" />
+                      <span>100% Coins Cashback</span>
+                    </span>
+                    <span className="font-bold text-amber-900">+{cashbackCoins} Coins</span>
+                  </div>
+
+                  <div className="flex justify-between items-baseline pt-2.5 border-t border-stone-200 text-stone-950">
+                    <span className="text-sm font-bold">Grand Total</span>
+                    <span className="font-display text-lg font-extrabold text-amber-800">
+                      ₹{grandTotal.toLocaleString("en-IN")}
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              {/* Quantity Stepper */}
-              <div className="flex items-center justify-between pt-2 border-t border-stone-100 text-xs">
-                <span className="text-stone-500 font-medium">Quantity:</span>
-                <div className="flex items-center gap-2 border border-stone-200 rounded-lg bg-stone-50 p-0.5">
-                  <button
-                    type="button"
-                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                    className="p-1 hover:bg-white rounded text-stone-600 transition-colors cursor-pointer"
-                  >
-                    <Minus className="size-3" />
-                  </button>
-                  <span className="w-6 text-center font-bold text-stone-900 text-xs">
-                    {item.quantity}
+                {/* Checkout Button */}
+                <button
+                  type="button"
+                  onClick={handleProceedToCheckout}
+                  className="group relative flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 py-3.5 px-4 text-stone-950 font-bold text-sm shadow-[0_6px_20px_-3px_rgba(245,158,11,0.5)] hover:shadow-[0_8px_25px_-3px_rgba(245,158,11,0.7)] transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+                >
+                  <Lock className="size-4 text-stone-900" />
+                  <span>
+                    {language === "bn"
+                      ? "নিরাপদ চেকআউটে এগিয়ে যান"
+                      : language === "hi"
+                      ? "सुरक्षित चेकआउट पर जाएं"
+                      : "Proceed to Secure Checkout"}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    className="p-1 hover:bg-white rounded text-stone-600 transition-colors cursor-pointer"
-                  >
-                    <Plus className="size-3" />
-                  </button>
+                  <ArrowRight className="size-4 stroke-[2.2] transition-transform group-hover:translate-x-1" />
+                </button>
+
+                {/* Trust Badges Row */}
+                <div className="flex items-center justify-center gap-3 text-[10px] text-stone-500 font-semibold pt-1">
+                  <span className="flex items-center gap-1">
+                    <ShieldCheck className="size-3.5 text-emerald-600" /> 100% Authentic
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <Flame className="size-3.5 text-amber-600" /> Vedic Energized
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <Coins className="size-3.5 text-amber-600" /> 100% Cashback
+                  </span>
                 </div>
-              </div>
-            </div>
-          ))
-        )}
-
-        {/* Free Bundled Gifts Showcase Strip */}
-        {bundledGifts.length > 0 && (
-          <div className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 via-orange-50/50 to-amber-50 p-3.5 space-y-2">
-            <div className="flex items-center gap-2 text-xs font-bold text-amber-950">
-              <Gift className="size-4 text-amber-600" />
-              <span>Free Vedic Gifts Added to Your Order:</span>
-            </div>
-            {bundledGifts.map((gift, gIdx) => (
-              <div key={gIdx} className="flex items-center justify-between text-xs bg-white/80 p-2 rounded-xl border border-amber-200">
-                <span className="font-semibold text-stone-800">{gift.title}</span>
-                <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                  FREE (Worth ₹{gift.value})
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Footer & Checkout Area */}
-      {items.length > 0 && (
-        <div className="p-4 sm:p-5 bg-white border-t border-amber-900/10 space-y-3.5 shrink-0 shadow-lg">
-          {/* Coupon Code Input */}
-          <form onSubmit={handleApplyCoupon} className="flex gap-2">
-            <input
-              type="text"
-              value={couponInput}
-              onChange={(e) => setCouponInput(e.target.value)}
-              placeholder="Coupon (e.g. ASTRA100)"
-              className="flex-1 bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs uppercase font-semibold placeholder:normal-case placeholder:font-normal focus:outline-none focus:border-amber-600"
-            />
-            <button
-              type="submit"
-              className="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
-            >
-              Apply
-            </button>
-          </form>
-
-          {couponCode && (
-            <div className="flex items-center justify-between text-xs bg-emerald-50 text-emerald-800 px-3 py-1.5 rounded-xl border border-emerald-200">
-              <span className="font-semibold flex items-center gap-1">
-                <CheckCircle2 className="size-3.5 text-emerald-600" />
-                Coupon {couponCode} Applied
-              </span>
-              <span className="font-bold">-₹{discountAmount}</span>
-            </div>
-          )}
-
-          {/* Pricing Summary */}
-          <div className="space-y-1.5 text-xs">
-            <div className="flex justify-between text-stone-600">
-              <span>Subtotal:</span>
-              <span className="font-semibold text-stone-900">₹{subtotal.toLocaleString("en-IN")}</span>
-            </div>
-            {discountAmount > 0 && (
-              <div className="flex justify-between text-emerald-700 font-semibold">
-                <span>Discount:</span>
-                <span>-₹{discountAmount.toLocaleString("en-IN")}</span>
               </div>
             )}
-            <div className="flex justify-between text-stone-600">
-              <span>Estimated Shipping:</span>
-              <span className="font-semibold text-stone-900">
-                {subtotal >= freeShippingThreshold ? (
-                  <span className="text-emerald-600 font-bold">FREE</span>
-                ) : (
-                  "₹70"
-                )}
-              </span>
-            </div>
-            <div className="flex justify-between text-base font-extrabold text-stone-900 pt-2 border-t border-stone-100">
-              <span>Grand Total:</span>
-              <span className="text-amber-700">
-                ₹{(subtotal - discountAmount + (subtotal >= freeShippingThreshold ? 0 : 70)).toLocaleString("en-IN")}
-              </span>
-            </div>
-          </div>
-
-          {/* Checkout CTA Button */}
-          <button
-            type="button"
-            onClick={handleProceedToCheckout}
-            className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 text-white font-bold text-sm shadow-md hover:from-amber-700 hover:to-amber-900 transition-all flex items-center justify-center gap-2 cursor-pointer group"
-          >
-            <Lock className="size-4 text-amber-200" />
-            <span>
-              {language === "bn" ? "নিরাপদ চেকআউটে এগিয়ে যান" : "Proceed to Secure Checkout"}
-            </span>
-            <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
-          </button>
-
-          <div className="flex items-center justify-center gap-3 text-[10px] text-stone-500 font-medium">
-            <span className="flex items-center gap-1">
-              <ShieldCheck className="size-3.5 text-emerald-600" /> 100% Authentic
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1">
-              <Flame className="size-3.5 text-amber-600" /> Vedic Energized
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1">
-              <Coins className="size-3.5 text-amber-600" /> 100% Wallet Cashback
-            </span>
-          </div>
+          </motion.aside>
         </div>
       )}
-    </div>
-  );
-
-  return (
-    <>
-      {/* Mobile Vaul Drawer with native swipe-down spring physics */}
-      <div className="md:hidden">
-        <Drawer.Root open={isOpen} onOpenChange={(open) => !open && closeCart()}>
-          <Drawer.Portal>
-            <Drawer.Overlay
-              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs"
-              onClick={closeCart}
-            />
-            <Drawer.Content className="fixed inset-x-0 bottom-0 z-50 flex max-h-[92vh] flex-col rounded-t-[28px] bg-[#faf7f2] focus:outline-none border-t border-amber-900/10 shadow-2xl">
-              <Drawer.Title className="sr-only">AstroStore Shopping Cart</Drawer.Title>
-              <Drawer.Description className="sr-only">Items in your cart</Drawer.Description>
-              <Drawer.Handle className="my-2.5 mx-auto h-1.5 w-12 rounded-full bg-stone-300 shrink-0" />
-              <div className="flex-1 overflow-hidden flex flex-col">
-                {renderContent()}
-              </div>
-            </Drawer.Content>
-          </Drawer.Portal>
-        </Drawer.Root>
-      </div>
-
-      {/* Desktop Slide-Over Side Drawer */}
-      <div className="hidden md:block">
-        <div className="fixed inset-0 z-50 overflow-hidden">
-          <div
-            onClick={closeCart}
-            className="absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
-          />
-          <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-            <div className="w-screen max-w-md bg-[#faf7f2] text-stone-900 shadow-2xl flex flex-col justify-between border-l border-amber-900/10 animate-in slide-in-from-right duration-300">
-              {renderContent()}
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
+    </AnimatePresence>,
+    document.body
   );
 }
