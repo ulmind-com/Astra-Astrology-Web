@@ -39,7 +39,6 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { CartDrawer } from "@/components/shop/CartDrawer";
-import { Product3DModal } from "@/components/shop/Product3DModal";
 import { AstraPromiseSection } from "@/components/shop/AstraPromiseSection";
 import { CardTilt } from "@/components/ui/card-tilt";
 import { shopApi, type ShopProduct, type PincodeResult } from "@/lib/api";
@@ -63,7 +62,6 @@ export default function ProductDetailPage() {
   // State
   const [activeImageIndex, setActiveImageIndex] = React.useState<number>(0);
   const [quantity, setQuantity] = React.useState<number>(1);
-  const [product3DModalOpen, setProduct3DModalOpen] = React.useState<boolean>(false);
   const [activeTab, setActiveTab] = React.useState<"description" | "rituals" | "certificate">("description");
 
   // Pincode checker state
@@ -269,13 +267,6 @@ export default function ProductDetailPage() {
       <SiteHeader />
       <CartDrawer />
 
-      {/* 3D Interactive Modal */}
-      <Product3DModal
-        open={product3DModalOpen}
-        onClose={() => setProduct3DModalOpen(false)}
-        product={product}
-      />
-
       <main className="max-w-6xl mx-auto px-4 py-4 sm:py-8 space-y-12">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-xs text-stone-500 overflow-x-auto whitespace-nowrap py-1">
@@ -354,16 +345,6 @@ export default function ProductDetailPage() {
                 className="absolute top-3.5 right-3.5 size-9 rounded-full bg-white/90 backdrop-blur-md border border-stone-200 flex items-center justify-center text-stone-700 hover:text-amber-800 hover:bg-white shadow-xs transition-transform hover:scale-105 cursor-pointer z-10"
               >
                 <Share2 className="size-4" />
-              </button>
-
-              {/* Bottom 3D Occult Viewer Action Button */}
-              <button
-                type="button"
-                onClick={() => setProduct3DModalOpen(true)}
-                className="absolute bottom-3.5 right-3.5 inline-flex items-center gap-1.5 rounded-full bg-stone-900/90 hover:bg-stone-900 text-amber-300 font-bold px-3.5 py-1.5 text-xs shadow-lg backdrop-blur-md border border-amber-500/30 transition-transform hover:scale-105 cursor-pointer z-10"
-              >
-                <Sparkles className="size-3.5 text-amber-400 animate-pulse" />
-                <span>{isBn ? "৩ডি মডেল দেখুন" : "View in 3D"}</span>
               </button>
             </div>
 

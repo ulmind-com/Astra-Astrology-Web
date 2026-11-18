@@ -35,7 +35,6 @@ import { CashbackPromoBanner } from "@/components/shop/CashbackPromoBanner";
 import { AstraPromiseSection } from "@/components/shop/AstraPromiseSection";
 import { ShopFaqAccordion } from "@/components/shop/ShopFaqAccordion";
 import { CardTilt } from "@/components/ui/card-tilt";
-import { Product3DModal } from "@/components/shop/Product3DModal";
 import { ShopFilterDrawer } from "@/components/shop/ShopFilterDrawer";
 
 function ShopInner() {
@@ -49,8 +48,6 @@ function ShopInner() {
   const [selectedCategory, setSelectedCategory] = React.useState<string>(initialCategory);
   const [selectedPurpose, setSelectedPurpose] = React.useState<string>(initialPurpose);
   const [searchTerm, setSearchTerm] = React.useState<string>("");
-  const [product3DModalOpen, setProduct3DModalOpen] = React.useState(false);
-  const [selected3DProduct, setSelected3DProduct] = React.useState<ShopProduct | null>(null);
 
   const { openCart, getItemCount } = useCartStore();
   const cartItemCount = getItemCount();
@@ -293,21 +290,6 @@ function ShopInner() {
                               <span>100% Cashback</span>
                             </span>
                           </div>
-
-                          {/* 3D Interactive Model Preview Badge */}
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setSelected3DProduct(p);
-                              setProduct3DModalOpen(true);
-                            }}
-                            className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-stone-900/80 backdrop-blur-md px-2.5 py-1 text-[9px] font-bold text-amber-300 hover:bg-stone-900 shadow-md cursor-pointer transition-transform hover:scale-105"
-                          >
-                            <Sparkles className="size-2.5 text-amber-400" />
-                            <span>3D View</span>
-                          </button>
                         </div>
 
                         {/* Gift Badge */}
@@ -401,13 +383,6 @@ function ShopInner() {
           </span>
         </button>
       )}
-
-      {/* 3D Sacred Gemstone & Rudraksha Modal Preview */}
-      <Product3DModal
-        open={product3DModalOpen}
-        onClose={() => setProduct3DModalOpen(false)}
-        product={selected3DProduct}
-      />
 
       <SiteFooter />
     </div>
