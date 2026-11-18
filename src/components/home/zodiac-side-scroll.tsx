@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 
 interface ZodiacSign {
@@ -273,12 +274,19 @@ export function ZodiacSideScroll() {
                 href={`/daily-horoscope?sign=${sign.id}`}
                 className={`group shrink-0 snap-start w-[270px] sm:w-[290px] rounded-2xl border border-[#f2e9b0] bg-[#fffdf5] p-5 transition-all duration-300 hover:-translate-y-1.5 ${style.glow}`}
               >
-                {/* Top: Symbol Glyphs & Element Badge */}
+                {/* Top: Modern Illustrated Mascot & Element Badge */}
                 <div className="flex items-center justify-between">
                   <div
-                    className={`flex size-13 items-center justify-center rounded-2xl border text-2xl font-serif shadow-sm transition-transform duration-300 group-hover:scale-110 ${style.symbolBg}`}
+                    className={`flex size-14 items-center justify-center rounded-2xl border p-1 shadow-sm transition-transform duration-300 group-hover:scale-110 ${style.symbolBg}`}
                   >
-                    {sign.symbol}
+                    <Image
+                      src={`/images/zodiac/modern/${sign.id}.webp`}
+                      alt={sign.name}
+                      width={48}
+                      height={48}
+                      className="size-11 object-contain drop-shadow-xs"
+                      unoptimized
+                    />
                   </div>
                   <span
                     className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider border ${style.badge}`}

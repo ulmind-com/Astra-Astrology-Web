@@ -134,17 +134,17 @@ function ShopInner() {
 
   return (
     <div className="min-h-screen bg-[#faf6f0] text-stone-900 selection:bg-amber-200 selection:text-amber-950 font-sans">
-      <SiteHeader />
-      <CartDrawer />
-
-      {/* 1. Top Announcement Marquee */}
+      {/* 1. Top Announcement Bar (Exact Astrotalk Screenshot Position) */}
       <ShopAnnouncementMarquee
         announcementText={bannerSettings?.announcement_bar_text}
         announcementLink={bannerSettings?.announcement_bar_link}
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-12 sm:space-y-16">
-        {/* 2. Hero Section: Astrotalk-Style 5-Slide Luxury Carousel */}
+      <SiteHeader />
+      <CartDrawer />
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-10 sm:space-y-14">
+        {/* 2. Hero Section: Exact Astrotalk Luxury Carousel + Trust Strip */}
         <ShopHeroSlider banners={bannerSettings?.hero_banners} />
 
         {/* 3. Category Quick Filter Strip */}

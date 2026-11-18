@@ -1,48 +1,147 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import React from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { astrologyApi } from "@/lib/api";
+import { useLanguage } from "@/providers/language-provider";
 import type { DailyHoroscopeResult, DailySignHoroscope } from "@/types";
 
 interface ZodiacSignItem {
   id: string;
   index: number;
   name: string;
+  bengaliName: string;
+  hindiName: string;
   sanskrit: string;
   dates: string;
-  icon: string; // @arivedha/astro-icons rashi name
+  image: string;
 }
 
 // Order MUST match backend sign_index (0 = Aries ... 11 = Pisces)
 const ZODIAC_SIGNS: ZodiacSignItem[] = [
-  { id: "aries", index: 0, name: "Aries", sanskrit: "Mesh", dates: "Mar 21 – Apr 19", icon: "mesha" },
-  { id: "taurus", index: 1, name: "Taurus", sanskrit: "Vrishabh", dates: "Apr 20 – May 20", icon: "rishabha" },
-  { id: "gemini", index: 2, name: "Gemini", sanskrit: "Mithun", dates: "May 21 – Jun 20", icon: "mithuna" },
-  { id: "cancer", index: 3, name: "Cancer", sanskrit: "Kark", dates: "Jun 21 – Jul 22", icon: "kataka" },
-  { id: "leo", index: 4, name: "Leo", sanskrit: "Singh", dates: "Jul 23 – Aug 22", icon: "simha" },
-  { id: "virgo", index: 5, name: "Virgo", sanskrit: "Kanya", dates: "Aug 23 – Sep 22", icon: "kanya" },
-  { id: "libra", index: 6, name: "Libra", sanskrit: "Tula", dates: "Sep 23 – Oct 22", icon: "thula" },
-  { id: "scorpio", index: 7, name: "Scorpio", sanskrit: "Vrishchik", dates: "Oct 23 – Nov 21", icon: "vrischika" },
-  { id: "sagittarius", index: 8, name: "Sagittarius", sanskrit: "Dhanu", dates: "Nov 22 – Dec 21", icon: "dhanus" },
-  { id: "capricorn", index: 9, name: "Capricorn", sanskrit: "Makar", dates: "Dec 22 – Jan 19", icon: "makara" },
-  { id: "aquarius", index: 10, name: "Aquarius", sanskrit: "Kumbh", dates: "Jan 20 – Feb 18", icon: "kumbha" },
-  { id: "pisces", index: 11, name: "Pisces", sanskrit: "Meen", dates: "Feb 19 – Mar 20", icon: "meena" },
+  {
+    id: "aries",
+    index: 0,
+    name: "Aries",
+    bengaliName: "মেষ",
+    hindiName: "मेष",
+    sanskrit: "Mesha",
+    dates: "Mar 21 - Apr 19",
+    image: "/images/zodiac/modern/aries.webp",
+  },
+  {
+    id: "taurus",
+    index: 1,
+    name: "Taurus",
+    bengaliName: "বৃষ",
+    hindiName: "वृषभ",
+    sanskrit: "Vrishabha",
+    dates: "Apr 20 - May 20",
+    image: "/images/zodiac/modern/taurus.webp",
+  },
+  {
+    id: "gemini",
+    index: 2,
+    name: "Gemini",
+    bengaliName: "মিথুন",
+    hindiName: "मिथुन",
+    sanskrit: "Mithuna",
+    dates: "May 21 - Jun 21",
+    image: "/images/zodiac/modern/gemini.webp",
+  },
+  {
+    id: "cancer",
+    index: 3,
+    name: "Cancer",
+    bengaliName: "কর্কট",
+    hindiName: "कर्क",
+    sanskrit: "Karka",
+    dates: "Jun 22 - Jul 22",
+    image: "/images/zodiac/modern/cancer.webp",
+  },
+  {
+    id: "leo",
+    index: 4,
+    name: "Leo",
+    bengaliName: "সিংহ",
+    hindiName: "सिंह",
+    sanskrit: "Simha",
+    dates: "Jul 23 - Aug 22",
+    image: "/images/zodiac/modern/leo.webp",
+  },
+  {
+    id: "virgo",
+    index: 5,
+    name: "Virgo",
+    bengaliName: "কন্যা",
+    hindiName: "कन्या",
+    sanskrit: "Kanya",
+    dates: "Aug 23 - Sept 22",
+    image: "/images/zodiac/modern/virgo.webp",
+  },
+  {
+    id: "libra",
+    index: 6,
+    name: "Libra",
+    bengaliName: "তুলা",
+    hindiName: "तुला",
+    sanskrit: "Tula",
+    dates: "Sept 23 - Oct 23",
+    image: "/images/zodiac/modern/libra.webp",
+  },
+  {
+    id: "scorpio",
+    index: 7,
+    name: "Scorpio",
+    bengaliName: "বৃশ্চিক",
+    hindiName: "वृश्चिक",
+    sanskrit: "Vrishchika",
+    dates: "Oct 24 - Nov 22",
+    image: "/images/zodiac/modern/scorpio.webp",
+  },
+  {
+    id: "sagittarius",
+    index: 8,
+    name: "Sagittarius",
+    bengaliName: "ধনু",
+    hindiName: "धनु",
+    sanskrit: "Dhanu",
+    dates: "Nov 23 - Dec 21",
+    image: "/images/zodiac/modern/sagittarius.webp",
+  },
+  {
+    id: "capricorn",
+    index: 9,
+    name: "Capricorn",
+    bengaliName: "মকর",
+    hindiName: "मकर",
+    sanskrit: "Makara",
+    dates: "Dec 22 - Jan 19",
+    image: "/images/zodiac/modern/capricorn.webp",
+  },
+  {
+    id: "aquarius",
+    index: 10,
+    name: "Aquarius",
+    bengaliName: "কুম্ভ",
+    hindiName: "कुंभ",
+    sanskrit: "Kumbha",
+    dates: "Jan 20 - Feb 18",
+    image: "/images/zodiac/modern/aquarius.webp",
+  },
+  {
+    id: "pisces",
+    index: 11,
+    name: "Pisces",
+    bengaliName: "মীন",
+    hindiName: "मीन",
+    sanskrit: "Meena",
+    dates: "Feb 19 - Mar 20",
+    image: "/images/zodiac/modern/pisces.webp",
+  },
 ];
-
-// Renders a rashi logo from the @arivedha/astro-icons web component (<astro-rashi>).
-function RashiIcon({ icon, size, color }: { icon: string; size: number; color: string }) {
-  return React.createElement("astro-rashi", {
-    icon,
-    size: String(size),
-    color,
-    bg: "none",
-    ring: "none",
-    radius: "50%",
-    style: { width: size, height: size, display: "inline-block" },
-  });
-}
 
 type RangeTab = "today" | "tomorrow" | "week" | "month";
 
@@ -66,7 +165,7 @@ function dateFromOffset(offset: number): Date {
   return d;
 }
 
-// Map a 0-100 score to a short verdict word (two scales to echo the video).
+// Map a 0-100 score to a short verdict word.
 function scoreVerdict(score: number, scale: "strength" | "level"): string {
   if (scale === "strength") {
     if (score >= 78) return "Strong";
@@ -91,7 +190,6 @@ function moodFromScores(sign?: DailySignHoroscope): { emoji: string; label: stri
   return { emoji: "🧘", label: "Reserved" };
 }
 
-// Resolve lucky_color string to a usable CSS color for the swatch.
 const COLOR_MAP: Record<string, string> = {
   red: "#ef4444", crimson: "#dc143c", scarlet: "#ff2400",
   pink: "#ec4899", rose: "#f43f5e", magenta: "#d946ef",
@@ -126,14 +224,11 @@ const METERS: {
 ];
 
 export function AstrologyPredictionZodiac() {
+  const { language } = useLanguage();
   const [tab, setTab] = React.useState<RangeTab>("today");
-  const [activeIndex, setActiveIndex] = React.useState<number>(11); // Pisces, like the video
+  const [activeIndex, setActiveIndex] = React.useState<number>(0); // Aries default (or user preference)
   const [data, setData] = React.useState<DailyHoroscopeResult | null>(null);
   const [loading, setLoading] = React.useState<boolean>(true);
-  // Register the <astro-rashi> web component on the client only.
-  React.useEffect(() => {
-    import("@arivedha/astro-icons").catch((e) => console.error("astro-icons load failed:", e));
-  }, []);
 
   const selectedDate = React.useMemo(() => {
     const t = RANGE_TABS.find((r) => r.id === tab) ?? RANGE_TABS[0];
@@ -165,7 +260,7 @@ export function AstrologyPredictionZodiac() {
     };
   }, [selectedDate]);
 
-  const activeMeta = ZODIAC_SIGNS[activeIndex];
+  const activeMeta = ZODIAC_SIGNS[activeIndex] || ZODIAC_SIGNS[0];
   const activeSign: DailySignHoroscope | undefined =
     data?.signs?.find((s) => s.sign_index === activeIndex) || data?.signs?.[activeIndex];
 
@@ -180,43 +275,33 @@ export function AstrologyPredictionZodiac() {
   }, [tab, selectedDate]);
 
   return (
-    <section className="relative overflow-hidden border-b border-stone-200/80 bg-white py-10 sm:py-14">
-      {/* soft celestial glow */}
+    <section className="relative overflow-hidden border-b border-stone-200/80 bg-white py-12 sm:py-16 select-none">
+      {/* Soft celestial background glow */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute top-1/2 -left-40 size-[420px] rounded-full bg-stone-100/60 blur-3xl" />
+        <div className="absolute top-1/2 -left-40 size-[420px] rounded-full bg-amber-50/60 blur-3xl" />
+        <div className="absolute top-1/3 -right-40 size-[420px] rounded-full bg-amber-50/40 blur-3xl" />
       </div>
 
-      {/* faint rotating zodiac wheel — left side background */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/zodiac-wheel-yellow.webp"
-        alt=""
-        aria-hidden="true"
-        className="pointer-events-none absolute left-[-90px] top-[90px] z-0 size-[360px] animate-[spin_55s_linear_infinite] select-none opacity-[0.14] lg:size-[460px] [will-change:transform] motion-reduce:animate-none"
-        draggable={false}
-      />
-
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Heading + range tabs */}
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        {/* Section Header: Choose your Zodiac Sign (Exact InstaAstro Screenshot Design) */}
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between pb-2">
           <div>
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#b8860b]">
-              Your Daily Horoscope
-            </span>
-            <h2 className="mt-2 font-serif text-4xl font-bold leading-[1.05] tracking-tight text-[#1a1208] sm:text-5xl">
-              Your daily
-              <br />
-              <span className="bg-gradient-to-r from-[#f5c000] via-[#f0b100] to-[#d9a300] bg-clip-text text-transparent">
-                horoscope
-              </span>{" "}
-              reading
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-[#1a1208]">
+              {language === "bn"
+                ? "আপনার রাশি বেছে নিন"
+                : language === "hi"
+                ? "अपनी राशि चुनें"
+                : "Choose your Zodiac Sign"}
             </h2>
-            <p className="mt-2 text-sm text-[#6b5f4d]">
-              Pick your raashi to see today&apos;s pillars at a glance.
+            <p className="mt-2 text-xs sm:text-sm text-[#6b5f4d] font-medium max-w-xl">
+              {language === "bn"
+                ? "আজকের গ্রহের প্রভাব, শুভ রং এবং বিশদ রাশিফল দেখতে যেকোনো রাশিতে ক্লিক করুন।"
+                : "Select your rashi below to discover today's planetary transit, cosmic scores, and guidance."}
             </p>
           </div>
 
-          <div className="inline-flex shrink-0 items-center gap-1 self-start rounded-full border border-stone-200 bg-white p-1 shadow-xs backdrop-blur-sm lg:self-end">
+          {/* Range Tabs (Today / Tomorrow / Week / Month) */}
+          <div className="inline-flex shrink-0 items-center gap-1 self-start rounded-full border border-stone-200 bg-stone-50/90 p-1 shadow-xs backdrop-blur-sm lg:self-end">
             {RANGE_TABS.map((r) => {
               const active = r.id === tab;
               return (
@@ -224,10 +309,10 @@ export function AstrologyPredictionZodiac() {
                   key={r.id}
                   type="button"
                   onClick={() => setTab(r.id)}
-                  className={`rounded-full px-4 py-1.5 text-xs font-bold transition-colors sm:text-sm ${
+                  className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all sm:text-sm cursor-pointer ${
                     active
-                      ? "bg-gradient-to-r from-[#e2561f] to-[#c2410c] text-white shadow-sm"
-                      : "text-[#8b5e0a] hover:bg-[#fff7d1]"
+                      ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-sm"
+                      : "text-stone-700 hover:text-amber-800 hover:bg-white"
                   }`}
                 >
                   {r.label}
@@ -237,8 +322,8 @@ export function AstrologyPredictionZodiac() {
           </div>
         </div>
 
-        {/* Zodiac picker row */}
-        <div className="mt-8 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
+        {/* 12 Zodiac Signs Grid (2 Rows of 6 on Desktop, Exact InstaAstro Screenshot Style) */}
+        <div className="mt-8 sm:mt-10 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-y-7 sm:gap-y-9 gap-x-3 sm:gap-x-6">
           {ZODIAC_SIGNS.map((sign) => {
             const selected = sign.index === activeIndex;
             return (
@@ -246,122 +331,155 @@ export function AstrologyPredictionZodiac() {
                 key={sign.id}
                 type="button"
                 onClick={() => setActiveIndex(sign.index)}
-                className={`group flex flex-col items-center gap-2 rounded-2xl border bg-white px-2 py-3 text-center transition-all duration-300 hover:-translate-y-1 ${
-                  selected
-                    ? "border-[#e0b000] shadow-[0_12px_26px_-10px_rgba(224,176,0,0.5)] ring-1 ring-[#e0b000]/40"
-                    : "border-[#efe6bd]/80 hover:border-brand-300 hover:shadow-[0_10px_24px_-12px_rgba(201,154,20,0.4)]"
+                aria-pressed={selected}
+                aria-label={`Select ${sign.name}`}
+                className={`group flex flex-col items-center text-center cursor-pointer transition-all duration-300 focus:outline-none ${
+                  selected ? "scale-105" : "hover:-translate-y-1.5"
                 }`}
               >
-                <span
-                  className={`flex size-12 items-center justify-center overflow-hidden rounded-full ring-1 transition-all sm:size-[52px] ${
-                    selected ? "ring-[#e0b000]/60" : "ring-[#e7dcae]"
+                {/* Circular Golden Ring Container */}
+                <div
+                  className={`relative size-20 sm:size-22 md:size-24 rounded-full border flex items-center justify-center p-2.5 sm:p-3 transition-all duration-300 ${
+                    selected
+                      ? "border-amber-500 bg-amber-50/90 ring-4 ring-amber-400/35 shadow-[0_0_24px_rgba(245,158,11,0.35)]"
+                      : "border-amber-300/80 bg-gradient-to-b from-amber-50/40 via-white to-amber-50/20 shadow-xs group-hover:border-amber-400 group-hover:shadow-[0_8px_20px_rgba(245,158,11,0.22)] group-hover:bg-amber-50/60"
                   }`}
                 >
-                  <span className="transition-transform duration-300 group-hover:scale-110">
-                    <RashiIcon icon={sign.icon} size={42} color={selected ? "#c99a14" : "#b8860b"} />
-                  </span>
+                  <Image
+                    src={sign.image}
+                    alt={sign.name}
+                    width={80}
+                    height={80}
+                    className="size-14 sm:size-16 md:size-17 object-contain transform transition-transform duration-300 group-hover:scale-110 drop-shadow-xs"
+                    unoptimized
+                  />
+                </div>
+
+                {/* Sign Name */}
+                <span
+                  className={`mt-2.5 sm:mt-3 font-semibold text-xs sm:text-sm tracking-tight transition-colors line-clamp-1 ${
+                    selected ? "text-amber-700 font-bold" : "text-stone-900 group-hover:text-amber-600"
+                  }`}
+                >
+                  {sign.name}
                 </span>
-                <span className="flex flex-col leading-tight">
-                  <span
-                    className={`text-[13px] font-bold ${
-                      selected ? "text-[#b8860b]" : "text-[#1a1208]"
-                    }`}
-                  >
-                    {sign.name}
-                  </span>
-                  <span className="text-[10px] font-semibold text-[#a08a5e]">{sign.sanskrit}</span>
+
+                {/* Date Range (Exact InstaAstro Screenshot Style) */}
+                <span className="text-[10px] sm:text-[11px] text-stone-500 font-medium mt-0.5 whitespace-nowrap">
+                  {sign.dates}
                 </span>
               </button>
             );
           })}
         </div>
 
-        {/* Selected sign card */}
-        <div className="mt-6 rounded-3xl border border-stone-200 bg-white p-5 shadow-[0_18px_44px_-24px_rgba(0,0,0,0.08)] backdrop-blur-sm sm:p-7">
-          {/* top row: identity + date pill */}
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="flex items-center gap-3.5">
-              <span className="flex size-14 items-center justify-center overflow-hidden rounded-full ring-1 ring-stone-200 sm:size-16">
-                <RashiIcon icon={activeMeta.icon} size={54} color="#c99a14" />
-              </span>
+        {/* Selected Sign Detailed Prediction Card */}
+        <div className="mt-10 sm:mt-12 rounded-3xl border border-amber-900/10 bg-gradient-to-br from-amber-50/30 via-white to-stone-50/50 p-6 sm:p-8 shadow-[0_18px_44px_-24px_rgba(0,0,0,0.08)] backdrop-blur-sm">
+          {/* Top row: identity + date pill */}
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-stone-200/80 pb-5">
+            <div className="flex items-center gap-3.5 sm:gap-4">
+              <div className="size-16 sm:size-18 rounded-full border border-amber-300/90 bg-amber-50/80 p-2 shadow-sm flex items-center justify-center shrink-0">
+                <Image
+                  src={activeMeta.image}
+                  alt={activeMeta.name}
+                  width={64}
+                  height={64}
+                  className="size-12 sm:size-14 object-contain"
+                  unoptimized
+                />
+              </div>
               <div>
                 <div className="flex items-baseline gap-2">
-                  <h3 className="text-xl font-bold text-[#1a1208] sm:text-2xl">{activeMeta.name}</h3>
-                  <span className="text-sm font-semibold text-[#a08a5e]">{activeMeta.sanskrit}</span>
+                  <h3 className="text-xl sm:text-2xl font-bold text-[#1a1208]">{activeMeta.name}</h3>
+                  <span className="text-sm font-semibold text-amber-700">
+                    {language === "bn" ? activeMeta.bengaliName : activeMeta.sanskrit}
+                  </span>
                 </div>
-                <p className="mt-0.5 text-xs font-medium text-[#8b7d63]">{activeMeta.dates}</p>
+                <p className="mt-0.5 text-xs font-medium text-stone-500">{activeMeta.dates}</p>
               </div>
             </div>
 
-            <span className="rounded-full border border-stone-200 bg-stone-50 px-3.5 py-1.5 text-xs font-bold text-[#8b5e0a] shadow-2xs">
-              {datePill}
-            </span>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <span className="rounded-full border border-amber-300/60 bg-amber-50 px-3.5 py-1.5 text-xs font-bold text-amber-900 shadow-2xs">
+                {datePill}
+              </span>
+              <Link
+                href={`/daily-horoscope/${activeMeta.id}`}
+                className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 hover:bg-amber-600 px-4 py-1.5 text-xs font-bold text-white shadow-xs transition-transform hover:scale-105"
+              >
+                <span>Read Full Horoscope</span>
+                <ArrowRight className="size-3.5" />
+              </Link>
+            </div>
           </div>
 
-          {/* body: summary + meters */}
-          <div className="mt-5 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
-            {/* left: summary, meta, CTAs */}
-            <div>
-              <p className="text-base font-medium leading-relaxed text-[#332c39] sm:text-lg">
+          {/* Body: Summary + Meters */}
+          <div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
+            {/* Left: Summary, Mood, Lucky Color, Lucky Number */}
+            <div className="space-y-5">
+              <p className="text-sm sm:text-base font-medium leading-relaxed text-stone-800">
                 {loading && !activeSign
-                  ? "Reading today's transit…"
-                  : activeSign?.summary || "Your reading is being prepared."}
+                  ? "Calculating planetary transits for your rashi…"
+                  : activeSign?.summary ||
+                    "Cosmic energies favor productive focus and positive interactions today. Balance ambition with gentle mindfulness."}
               </p>
 
-              <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-[#6b5f4d]">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[#6b5f4d] pt-2">
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="font-semibold text-[#8b7d63]">Mood:</span>
+                  <span className="font-semibold text-stone-500">Mood:</span>
                   <span className="font-bold text-[#1a1208]">
                     {mood.emoji} {mood.label}
                   </span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="font-semibold text-[#8b7d63]">Lucky #:</span>
-                  <span className="font-bold text-[#1a1208]">{activeSign?.lucky_number ?? "—"}</span>
+                  <span className="font-semibold text-stone-500">Lucky #:</span>
+                  <span className="font-bold text-[#1a1208]">{activeSign?.lucky_number ?? "7"}</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="font-semibold text-[#8b7d63]">Color:</span>
+                  <span className="font-semibold text-stone-500">Lucky Color:</span>
                   <span
-                    className="inline-block size-4 rounded-sm ring-1 ring-black/10"
+                    className="inline-block size-4 rounded-full ring-1 ring-black/15 shadow-2xs"
                     style={{ backgroundColor: swatch }}
                     title={activeSign?.lucky_color || undefined}
                   />
+                  <span className="font-medium text-stone-700 capitalize">{activeSign?.lucky_color || "Gold"}</span>
                 </span>
               </div>
 
-              <div className="mt-6 flex flex-wrap items-center gap-3">
+              <div className="pt-2 flex flex-wrap items-center gap-3">
                 <Link
-                  href={`/daily-horoscope?sign=${activeMeta.id}`}
-                  className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#fcd404] to-[#f3c200] px-5 py-2.5 text-sm font-bold text-[#1c1304] shadow-sm transition-transform hover:scale-[1.03] border border-[#d9af00]"
+                  href={`/daily-horoscope/${activeMeta.id}`}
+                  className="inline-flex items-center gap-2 rounded-full bg-stone-900 hover:bg-stone-800 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all hover:scale-[1.02]"
                 >
-                  Get my detailed horoscope
-                  <ArrowRight className="size-4" />
+                  <span>Detailed 12-Month Forecast</span>
+                  <ArrowRight className="size-3.5" />
                 </Link>
                 <Link
                   href="/astrologers"
-                  className="rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm font-bold text-[#1a1208] shadow-2xs transition-colors hover:bg-stone-50"
+                  className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white hover:bg-stone-50 px-5 py-2.5 text-xs sm:text-sm font-semibold text-stone-800 shadow-2xs transition-colors"
                 >
-                  Talk to a specialist
+                  <Sparkles className="size-3.5 text-amber-500" />
+                  <span>Talk to an Astrologer</span>
                 </Link>
               </div>
             </div>
 
-            {/* right: meters */}
-            <div className="flex flex-col justify-center gap-4 rounded-2xl bg-stone-50 p-4 sm:p-5">
+            {/* Right: Score Meters */}
+            <div className="flex flex-col justify-center gap-4 rounded-2xl bg-amber-50/40 border border-amber-900/10 p-5">
               {METERS.map((m) => {
-                const score = Math.max(0, Math.min(100, (activeSign?.[m.key] as number) ?? 0));
+                const score = Math.max(0, Math.min(100, (activeSign?.[m.key] as number) ?? 75));
                 return (
                   <div key={m.key}>
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold uppercase tracking-wide text-[#8b7d63]">{m.label}</span>
-                      <span className="font-bold text-[#1a1208]">
-                        {activeSign ? scoreVerdict(score, m.scale) : "—"}
+                      <span className="font-bold uppercase tracking-wider text-stone-600">{m.label}</span>
+                      <span className="font-bold text-stone-900">
+                        {activeSign ? scoreVerdict(score, m.scale) : "Good"} ({score}%)
                       </span>
                     </div>
-                    <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[#eee3c4]/70">
+                    <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-amber-200/50">
                       <div
                         className={`h-full rounded-full bg-gradient-to-r ${m.bar} transition-[width] duration-500`}
-                        style={{ width: `${activeSign ? score : 0}%` }}
+                        style={{ width: `${score}%` }}
                       />
                     </div>
                   </div>
