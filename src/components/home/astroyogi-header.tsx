@@ -945,6 +945,19 @@ export function AstroyogiHeader() {
               )}
             </div>
 
+            {/* Direct Shop Navigation Button */}
+            <Link
+              href="/shop"
+              className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/80 bg-gradient-to-r from-amber-50 to-amber-100 hover:from-amber-100 hover:to-amber-200 text-amber-950 font-bold px-2.5 sm:px-3 py-1.5 text-xs shadow-2xs hover:shadow-xs transition-all shrink-0 cursor-pointer"
+              title={language === "bn" ? "অ্যাস্ট্রোমল স্টোরে যান" : language === "hi" ? "एस्ट्रोमॉल स्टोर जाएं" : "Go to AstroMall Shop"}
+            >
+              <ShoppingBag className="size-3.5 text-amber-700" />
+              <span>{language === "bn" ? "শপ" : language === "hi" ? "शॉप" : "Shop"}</span>
+              <span className="hidden sm:inline-block rounded-full bg-amber-500/20 text-amber-900 text-[9px] font-extrabold px-1.5 py-0.2 border border-amber-400/40 uppercase">
+                Store
+              </span>
+            </Link>
+
             {/* Quick Cart Button with Live Badge */}
             <button
               type="button"
