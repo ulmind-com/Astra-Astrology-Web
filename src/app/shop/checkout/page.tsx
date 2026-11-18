@@ -547,7 +547,7 @@ export default function CheckoutPage() {
                 {isBn ? "আরও প্রতিকার কিনুন" : "Continue Shopping"}
               </Link>
               <Link
-                href="/account"
+                href="/account/orders"
                 className="flex-1 inline-flex items-center justify-center gap-2 rounded-full border border-stone-300 bg-white px-6 py-3 text-sm font-bold text-stone-800 hover:bg-stone-50 transition-colors"
               >
                 <Package className="size-4" />

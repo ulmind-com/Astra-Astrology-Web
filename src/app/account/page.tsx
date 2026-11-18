@@ -1,6 +1,7 @@
 "use client";
 
-import { Camera, Check, Globe, Languages, Sparkles, Trash2 } from "lucide-react";
+import { Camera, Check, Globe, Languages, Sparkles, Trash2, Package, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import * as React from "react";
 import { toast } from "sonner";
 import { useLanguage, AVAILABLE_LANGUAGES, type LanguageOption } from "@/providers/language-provider";
@@ -169,6 +170,36 @@ export default function ProfilePage() {
           </div>
         </CardBody>
       </Card>
+
+      {/* Quick Orders Tracker Banner */}
+      <div className="rounded-2xl border border-amber-300/80 bg-linear-to-r from-amber-50 via-white to-stone-50 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="size-10 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+            <Package className="size-5" />
+          </div>
+          <div>
+            <h3 className="font-bold text-sm text-stone-900 flex items-center gap-2">
+              <span>{language === "bn" ? "প্রতিকার সামগ্রী ও লাইভ ট্র্যাকার" : "Remedy Orders & Live Vedic Tracker"}</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                ● LIVE
+              </span>
+            </h3>
+            <p className="text-xs text-stone-500">
+              {language === "bn"
+                ? "কাশীর বিশ্বনাথ ঘাটে সংকল্পের অগ্রগতি ও এয়ার কার্গো ডেলিভারি ট্র্যাক করুন"
+                : "Track Kashi Vishwanath Pran-Pratishtha, express air cargo & doorstep delivery"}
+            </p>
+          </div>
+        </div>
+
+        <Link
+          href="/account/orders"
+          className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shadow-xs shrink-0"
+        >
+          <span>{language === "bn" ? "আমার অর্ডার দেখুন" : "Track My Orders"}</span>
+          <ArrowRight className="size-3.5" />
+        </Link>
+      </div>
 
       {/* --------------------------------------------------------- details */}
       <form onSubmit={onSubmit}>

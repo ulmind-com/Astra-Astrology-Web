@@ -42,9 +42,10 @@ import { CartDrawer } from "@/components/shop/CartDrawer";
 import { SacredImageGallery } from "@/components/shop/SacredImageGallery";
 import { CashbackConsultationBridge } from "@/components/shop/CashbackConsultationBridge";
 import { SacredSpecificationsGrid } from "@/components/shop/SacredSpecificationsGrid";
+import { LivePincodeLogisticsTracker } from "@/components/shop/LivePincodeLogisticsTracker";
 import { AstraPromiseSection } from "@/components/shop/AstraPromiseSection";
 import { CardTilt } from "@/components/ui/card-tilt";
-import { shopApi, type ShopProduct, type PincodeResult } from "@/lib/api";
+import { shopApi, type ShopProduct } from "@/lib/api";
 import { useCartStore } from "@/lib/stores/use-cart-store";
 import { useLanguage } from "@/providers/language-provider";
 
@@ -65,12 +66,6 @@ export default function ProductDetailPage() {
   // State
   const [quantity, setQuantity] = React.useState<number>(1);
   const [activeTab, setActiveTab] = React.useState<"description" | "rituals" | "certificate">("description");
-
-  // Pincode checker state
-  const [pincode, setPincode] = React.useState<string>("");
-  const [pincodeLoading, setPincodeLoading] = React.useState<boolean>(false);
-  const [pincodeResult, setPincodeResult] = React.useState<PincodeResult | null>(null);
-  const [pincodeError, setPincodeError] = React.useState<string | null>(null);
 
   // Fetch product detail from API
   const {
@@ -122,32 +117,6 @@ export default function ProductDetailPage() {
   const freeGiftBadge = product?.free_gift_badge || "FREE Raw Selenite Plate worth ₹729";
   const effectiveCashback = product?.cashback_percent ?? 100;
   const cashbackCoins = Math.round(salePrice * (effectiveCashback / 100));
-
-  // Pincode check
-  const handleCheckPincode = async () => {
-    const cleaned = pincode.replace(/\D/g, "").slice(0, 6);
-    if (cleaned.length !== 6) {
-      setPincodeError(isBn ? "৬ সংখ্যার পিনকোড দিন" : "Enter a 6-digit PIN code");
-      return;
-    }
-    setPincodeLoading(true);
-    setPincodeError(null);
-    try {
-      const res = await shopApi.checkPincode(cleaned);
-      setPincodeResult(res);
-      if (!res.is_serviceable) {
-        setPincodeError(
-          isBn
-            ? "দুঃখিত, এই পিনকোডে ডেলিভারি উপলব্ধ নেই।"
-            : "Sorry, delivery is not available to this PIN code."
-        );
-      }
-    } catch {
-      setPincodeError(isBn ? "পিনকোড যাচাই করা যায়নি।" : "Could not verify PIN code.");
-    } finally {
-      setPincodeLoading(false);
-    }
-  };
 
   // Add to cart handler
   const handleAddToCart = () => {
@@ -388,71 +357,13 @@ export default function ProductDetailPage() {
               categorySlug={product.category_slug}
             />
 
-            {/* Pincode Delivery Estimator */}
-            <div className="rounded-2xl border border-stone-200 bg-white p-4 space-y-2.5 shadow-xs">
-              <div className="flex items-center justify-between text-xs font-bold text-stone-800">
-                <span className="flex items-center gap-1.5">
-                  <Truck className="size-4 text-amber-700" />
-                  {isBn ? "ডেলিভারি সময় ও পিনকোড যাচাই" : "Check Delivery Timeline"}
-                </span>
-                <span className="text-[11px] text-stone-500 font-normal">
-                  {isBn ? "সারা ভারতে সার্ভিস" : "Pan India Delivery"}
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-stone-400" />
-                  <input
-                    type="text"
-                    value={pincode}
-                    onChange={(e) => {
-                      setPincode(e.target.value.replace(/\D/g, "").slice(0, 6));
-                      setPincodeResult(null);
-                      setPincodeError(null);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleCheckPincode();
-                    }}
-                    placeholder={isBn ? "আপনার ৬ ডিজিটের পিনকোড দিন" : "Enter 6-digit PIN code"}
-                    maxLength={6}
-                    inputMode="numeric"
-                    className="w-full rounded-xl border border-stone-300 bg-stone-50 pl-9 pr-3 py-2 text-xs focus:border-amber-600 focus:bg-white focus:outline-none transition-colors"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={handleCheckPincode}
-                  disabled={pincodeLoading || pincode.length !== 6}
-                  className="rounded-xl bg-stone-900 hover:bg-stone-800 disabled:opacity-50 text-white font-bold px-4 py-2 text-xs transition-colors cursor-pointer"
-                >
-                  {pincodeLoading ? <Loader2 className="size-3.5 animate-spin" /> : isBn ? "যাচাই" : "Check"}
-                </button>
-              </div>
-
-              {pincodeError && <p className="text-[11px] text-rose-600 font-medium">{pincodeError}</p>}
-
-              {pincodeResult?.is_serviceable && (
-                <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-2.5 text-xs text-emerald-900 space-y-0.5">
-                  <div className="flex items-center gap-1.5 font-bold">
-                    <CheckCircle2 className="size-3.5 text-emerald-600 shrink-0" />
-                    <span>
-                      {isBn
-                        ? `${pincodeResult.city}, ${pincodeResult.state} এ ডেলিভারি উপলব্ধ`
-                        : `Serviceable to ${pincodeResult.city}, ${pincodeResult.state}`}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-emerald-800 pl-5">
-                    {isBn
-                      ? `আনুমানিক ডেলিভারি: ${pincodeResult.estimated_delivery_days} কার্যদিবসে (${pincodeResult.estimated_delivery_date}) • ${
-                          pincodeResult.cod_available ? "ক্যাশ অন ডেলিভারি (COD) উপলব্ধ" : "শুধুমাত্র অনলাইন পেমেন্ট"
-                        }`
-                      : `Estimated delivery by ${pincodeResult.estimated_delivery_date} (${pincodeResult.estimated_delivery_days} days) • ${
-                          pincodeResult.cod_available ? "Cash on Delivery Available" : "Online payment only"
-                        }`}
-                  </p>
-                </div>
-              )}
-            </div>
+            {/* Live Pincode & Real-Time Logistics Tracker */}
+            <LivePincodeLogisticsTracker
+              salePrice={salePrice}
+              cashbackPercent={effectiveCashback}
+              freeGiftTitle={product.free_gift_title}
+              freeGiftValue={product.free_gift_value}
+            />
 
             {/* Quantity Stepper & Primary CTAs */}
             <div className="space-y-3 pt-2">
