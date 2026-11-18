@@ -871,7 +871,7 @@ export const HOME_STEPS_AND_TRUST_TRANSLATIONS: Record<
         body: "No hidden charges, no forced bundles. Clear rates in Rupees per minute with money-back guarantee.",
       },
       {
-        title: "Rated 4.9/5 by 500,000+ Users",
+        title: "Top Rated & Authentic Guidance",
         body: "Authentic unedited post-consultation reviews help you connect with the right guide instantly.",
       },
     ],
@@ -916,7 +916,7 @@ export const HOME_STEPS_AND_TRUST_TRANSLATIONS: Record<
         body: "কোনো লুকানো চার্জ নেই, কোনো বাধ্যতামূলক বান্ডেল নেই। প্রতি মিনিটের পরিষ্কার রেট ও মানিব্যাক গ্যারান্টি।",
       },
       {
-        title: "৫,০০,০০০+ ব্যবহারকারীর ৪.৯/৫ রেটিং",
+        title: "শীর্ষ রেটেড ও প্রামাণিক সেবা",
         body: "আসল ও অবিকৃত ব্যবহারকারী পর্যালোচনা আপনাকে দ্রুত সঠিক পথপ্রদর্শক নির্বাচন করতে সহায়তা করে।",
       },
     ],
@@ -961,7 +961,7 @@ export const HOME_STEPS_AND_TRUST_TRANSLATIONS: Record<
         body: "कोई छुपा शुल्क नहीं, कोई जबरन पैकेज नहीं। प्रति मिनट स्पष्ट दर एवं मनी-बैक गारंटी।",
       },
       {
-        title: "5,00,000+ प्रयोक्ताओं द्वारा 4.9/5 रेटिंग",
+        title: "शीर्ष रेटेड एवं प्रामाणिक मार्गदर्शन",
         body: "वास्तविक समीक्षाएं आपको सही मार्गदर्शक तुरंत चुनने में मदद करती हैं।",
       },
     ],

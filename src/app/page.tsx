@@ -14,12 +14,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import { ChineseZodiacModal } from "@/components/astrology/chinese-zodiac-modal";
 import { AstrologyPredictionZodiac } from "@/components/home/astrology-prediction-zodiac";
 import { AppDownloadSection } from "@/components/home/app-download-section";
 import { AstroyogiHeader } from "@/components/home/astroyogi-header";
-import { CelebrityVideosSection } from "@/components/home/celebrity-videos-section";
+import { VedicFestivalsSection } from "@/components/home/vedic-festivals-section";
 import { CoursesSection } from "@/components/home/courses-section";
 import { FirstChatFreeModal } from "@/components/home/first-chat-free-modal";
 import { FreeAstrologyReadings } from "@/components/home/free-astrology-readings";
@@ -28,6 +29,7 @@ import { OurServicesSection } from "@/components/home/our-services-section";
 import { TopAstrologersSection } from "@/components/home/top-astrologers-section";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Button } from "@/components/ui";
+import { cmsApi } from "@/lib/api";
 import { HOME_STEPS_AND_TRUST_TRANSLATIONS } from "@/lib/home-translations";
 import { useLanguage } from "@/providers/language-provider";
 
@@ -67,7 +69,7 @@ const TRUST_FEATURES = [
   },
   {
     icon: Star,
-    title: "Rated 4.9/5 by 500,000+ Users",
+    title: "Top Rated & Authentic Guidance",
     body: "Authentic unedited post-consultation reviews help you connect with the right guide instantly.",
   },
 ];
@@ -76,6 +78,12 @@ export default function HomePage() {
   const { language } = useLanguage();
   const [isChineseModalOpen, setIsChineseModalOpen] = React.useState(false);
   const t = HOME_STEPS_AND_TRUST_TRANSLATIONS[language] || HOME_STEPS_AND_TRUST_TRANSLATIONS.en;
+
+  const { data: cmsData } = useQuery({
+    queryKey: ["cms", "homepage"],
+    queryFn: cmsApi.getHomepage,
+    staleTime: 60_000,
+  });
 
   const steps = React.useMemo(() => {
     return t.steps.map((st, i) => ({
@@ -118,8 +126,22 @@ export default function HomePage() {
         {/* 6. LEARN: ASTROLOGY MASTERCLASSES */}
         <CoursesSection />
 
-        {/* 7. CELEBRITY VIDEOS */}
-        <CelebrityVideosSection />
+        {/* 7. VEDIC FESTIVALS & AUSPICIOUS TITHIS (Replaces dummy celebrity videos) */}
+        <VedicFestivalsSection />
+
+        {/* CMS Trust Stats Strip (matching mobile app) */}
+        {cmsData?.trust_stats && cmsData.trust_stats.length > 0 && (
+          <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8 py-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-stone-200 rounded-2xl border border-stone-200 bg-gradient-to-r from-[#fffdf5] via-[#fffdfa] to-[#fffbf0] py-6 shadow-xs text-center">
+              {cmsData.trust_stats.map((stat, i) => (
+                <div key={i} className="px-4 py-2 sm:py-0">
+                  <div className="text-2xl sm:text-3xl font-extrabold text-[#1a1208]">{stat.value}</div>
+                  <div className="mt-1 text-[11px] sm:text-xs font-bold text-[#8b7d63] uppercase tracking-wider">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 8. HOW IT WORKS: 3 STEPS TO CLARITY */}
         <section className="relative overflow-hidden bg-transparent py-12 sm:py-16 border-b border-stone-200/80">
@@ -205,10 +227,10 @@ export default function HomePage() {
             <div className="text-center max-w-2xl mx-auto mb-10">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1a1208] tracking-tight">
                 {language === "bn"
-                  ? "কেন লক্ষ লক্ষ মানুষ ডিভিনলিংক-এ আস্থা রাখেন"
+                  ? "কেন ডিভিনলিংক-এ আস্থা রাখবেন"
                   : language === "hi"
-                  ? "लाखों लोग डिविनलिंक पर क्यों भरोसा करते हैं"
-                  : "Why Millions Trust DivinLink"}
+                  ? "डिविनलिंक पर क्यों भरोसा करें"
+                  : "Why Choose DivinLink"}
               </h2>
               <p className="mt-2 text-xs sm:text-sm text-[#6b5f4d]">
                 {language === "bn"
@@ -268,11 +290,12 @@ export default function HomePage() {
                     : "Ready to Consult with an Expert?"}
                 </h2>
                 <p className="mt-3 text-sm sm:text-base text-[#524436] leading-relaxed">
-                  {language === "bn"
-                    ? "৫ লাখেরও বেশি মানুষের সাথে যুক্ত হন যারা প্রেম, ক্যারিয়ার, বিয়ে ও স্বাস্থ্যে স্পষ্টতা পেয়েছেন। মাত্র ₹১২/মিনিট থেকে শুরু।"
-                    : language === "hi"
-                    ? "5 लाख से अधिक लोगों से जुड़ें जिन्होंने प्रेम, करियर और विवाह में मार्गदर्शन पाया। मात्र ₹12/मिनट से शुरू।"
-                    : "Join over 500,000 seekers who found clarity in love, career, marriage, and health. First consultation starts at just ₹12/Min."}
+                  {cmsData?.cta_description ||
+                    (language === "bn"
+                      ? "প্রেম, ক্যারিয়ার, বিয়ে ও স্বাস্থ্যে শাস্ত্রীয় স্পষ্টতা ও সঠিক প্রতিকার পান। প্রথম কনসালটেশন দিয়ে আজই শুরু করুন।"
+                      : language === "hi"
+                      ? "प्रेम, करियर और जीवन में शास्त्रीय मार्गदर्शन एवं सटीक उपाय पाएं। प्रथम परामर्श से आज ही शुरुआत करें।"
+                      : "Find authentic clarity and personalized Vedic guidance for love, career, and life. Start your journey today.")}
                 </p>
 
                 <div className="mt-7 flex flex-wrap items-center justify-center gap-3.5">

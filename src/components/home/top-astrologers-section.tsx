@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
@@ -22,12 +22,17 @@ export function TopAstrologersSection() {
 
   const items = data?.items ?? [];
   const cards = items.slice(0, 4);
-  const onlineCount =
-    (data as { total?: number } | undefined)?.total ?? (items.length > 0 ? 1240 : 0);
+  const onlineCount = items.filter((a) => a.availability?.is_online).length;
 
   const t = {
     live: language === "bn" ? "লাইভ এখন" : language === "hi" ? "लाइव अभी" : "Live Now",
     online: language === "bn" ? "অনলাইন" : language === "hi" ? "ऑनलाइन" : "Online",
+    verified:
+      language === "bn"
+        ? "যাচাইকৃত শীর্ষ জ্যোতিষী"
+        : language === "hi"
+        ? "सत्यापित शीर्ष ज्योतिषी"
+        : "Verified Astrologers",
     viewAll:
       language === "bn"
         ? "সব জ্যোতিষী দেখুন"
@@ -42,13 +47,20 @@ export function TopAstrologersSection() {
         {/* Header */}
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-[#c2410c]">
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#e2561f] opacity-75" />
-                <span className="relative inline-flex size-2 rounded-full bg-[#e2561f]" />
+            {onlineCount > 0 ? (
+              <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-[#c2410c]">
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#e2561f] opacity-75" />
+                  <span className="relative inline-flex size-2 rounded-full bg-[#e2561f]" />
+                </span>
+                {t.live} · {formatNumber(onlineCount)} {t.online}
               </span>
-              {t.live} · {formatNumber(onlineCount)} {t.online}
-            </span>
+            ) : (
+              <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-[#8b5e0a]">
+                <Sparkles className="size-3.5 text-[#e2561f]" />
+                {items.length > 0 ? `${items.length} ${t.verified}` : t.verified}
+              </span>
+            )}
             <h2 className="mt-3 text-3xl font-bold leading-[1.05] tracking-tight text-[#1a1208] sm:text-4xl lg:text-5xl">
               {language === "en" ? (
                 <>
