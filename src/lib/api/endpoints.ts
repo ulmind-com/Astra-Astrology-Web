@@ -229,7 +229,8 @@ export const endpoints = {
     myOrders: "/shop/orders/mine",
     orderDetail: (orderKey: string) => `/shop/orders/${orderKey}`,
     cancelOrder: (orderKey: string) => `/shop/orders/${orderKey}/cancel`,
-    checkPincode: (pincode: string) => `/shop/pincode/${pincode}`,
+    checkPincode: (pincode: string, phone?: string) =>
+      `/shop/pincode/${pincode}${phone ? `?phone=${encodeURIComponent(phone)}` : ""}`,
   },
   courses: {
     list: "/courses",
