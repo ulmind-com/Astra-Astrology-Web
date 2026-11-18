@@ -160,6 +160,8 @@ export const endpoints = {
     featuresPricing: "/astrology/features/pricing",
     geoReverse: "/astrology/geo-reverse",
     geoDetect: "/astrology/geo-detect",
+    festivals: "/astrology/festivals",
+    upcomingFestivals: "/astrology/festivals/upcoming",
   },
 
   aiAstrologer: {

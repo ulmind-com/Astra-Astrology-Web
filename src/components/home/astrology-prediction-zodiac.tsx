@@ -259,7 +259,7 @@ export function AstrologyPredictionZodiac() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`/images/zodiac/characters/${sign.id}.svg`}
+                    src={`/images/zodiac/medallions/${sign.id}.png`}
                     alt={sign.name}
                     width={52}
                     height={52}
@@ -289,7 +289,7 @@ export function AstrologyPredictionZodiac() {
               <span className="flex size-14 items-center justify-center overflow-hidden rounded-full ring-1 ring-stone-200 sm:size-16">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={`/images/zodiac/characters/${activeMeta.id}.svg`}
+                  src={`/images/zodiac/medallions/${activeMeta.id}.png`}
                   alt={activeMeta.name}
                   width={64}
                   height={64}

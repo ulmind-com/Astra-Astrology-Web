@@ -731,25 +731,37 @@ export default function CourseCertificateVerificationPage() {
           font-family: 'Marcellus', 'Georgia', serif;
         }
 
+        /* Top-level Page rules for strict 1-page landscape PDF export */
+        @page {
+          size: landscape;
+          margin: 0;
+        }
+        @page :first {
+          margin: 0;
+        }
+
         @media print {
-          @page {
-            size: A4 landscape;
-            margin: 0 !important;
-          }
           *, *::before, *::after {
             box-sizing: border-box !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
           html, body {
-            width: 297mm !important;
-            height: 210mm !important;
-            max-height: 210mm !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100vw !important;
+            max-height: 100vh !important;
             margin: 0 !important;
             padding: 0 !important;
-            background: #ffffff !important;
+            background: #FAF8F3 !important;
             color: #000000 !important;
             overflow: hidden !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+            page-break-before: avoid !important;
+            break-before: avoid !important;
           }
           header,
           footer,
@@ -759,25 +771,29 @@ export default function CourseCertificateVerificationPage() {
             display: none !important;
           }
           .certificate-page-wrap {
-            width: 297mm !important;
-            height: 210mm !important;
-            max-height: 210mm !important;
-            margin: 0 auto !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100vw !important;
+            max-height: 100vh !important;
+            margin: 0 !important;
             padding: 0 !important;
             box-sizing: border-box !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
             page-break-after: avoid !important;
+            break-after: avoid !important;
             page-break-before: avoid !important;
+            break-before: avoid !important;
             overflow: hidden !important;
             display: flex !important;
             flex-direction: column !important;
             justify-content: center !important;
           }
           .certificate-canvas {
-            width: 297mm !important;
-            height: 210mm !important;
-            max-height: 210mm !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100vw !important;
+            max-height: 100vh !important;
             border: none !important;
             border-radius: 0 !important;
             box-shadow: none !important;
@@ -786,11 +802,15 @@ export default function CourseCertificateVerificationPage() {
             flex-direction: row !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+            page-break-before: avoid !important;
+            break-before: avoid !important;
           }
           .cert-left-content {
             width: 66% !important;
             height: 100% !important;
-            padding: 14mm 10mm 10mm 16mm !important;
+            padding: 3.5vh 3vw 3vh 4vw !important;
             display: flex !important;
             flex-direction: column !important;
             justify-content: space-between !important;
@@ -807,10 +827,34 @@ export default function CourseCertificateVerificationPage() {
             transform: scale(0.9) !important;
           }
           .cert-main-title {
-            font-size: 38px !important;
+            font-size: 36px !important;
           }
           .recipient-name {
-            font-size: 36px !important;
+            font-size: 34px !important;
+          }
+        }
+
+        @media print and (orientation: portrait) {
+          html, body {
+            height: auto !important;
+            max-height: 100vh !important;
+          }
+          .certificate-page-wrap,
+          .certificate-canvas {
+            width: 100vw !important;
+            height: auto !important;
+            max-height: 100vh !important;
+            aspect-ratio: 1060 / 680 !important;
+            margin: auto 0 !important;
+          }
+          .cert-left-content {
+            padding: 4mm 4mm 4mm 6mm !important;
+          }
+          .recipient-name {
+            font-size: 24px !important;
+          }
+          .cert-main-title {
+            font-size: 26px !important;
           }
         }
       `,

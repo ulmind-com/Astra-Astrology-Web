@@ -1614,7 +1614,7 @@ function HoroscopeContent() {
                     <div className="flex items-start gap-3">
                       <span className="size-12 shrink-0 overflow-hidden rounded-full shadow-sm ring-1 ring-black/5 transition-transform group-hover:scale-105">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={`/images/zodiac/characters/${sign.id}.svg`} alt={sign.en} width={48} height={48} className="size-full" />
+                        <img src={`/images/zodiac/medallions/${sign.id}.png`} alt={sign.en} width={48} height={48} className="size-full" />
                       </span>
                       <div className="min-w-0 flex-1">
                         <h3 className="text-base font-bold leading-tight text-[#1a1208] group-hover:text-[#b06d4e] transition-colors">
@@ -1744,7 +1744,7 @@ function HoroscopeContent() {
                     <div className="size-16 sm:size-20 shrink-0 overflow-hidden rounded-full shadow-sm ring-1 ring-black/5">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={`/images/zodiac/characters/${ZODIAC_LIST[activeSignIndex]?.id ?? "aries"}.svg`}
+                        src={`/images/zodiac/medallions/${ZODIAC_LIST[activeSignIndex]?.id ?? "aries"}.png`}
                         alt={activeSignData.sign_name}
                         width={80}
                         height={80}
