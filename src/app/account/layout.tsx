@@ -6,6 +6,7 @@ import {
   GraduationCap,
   Heart,
   MapPin,
+  Package,
   ShieldCheck,
   UserRound,
   Wallet,
@@ -21,6 +22,7 @@ import { useRequireAuth } from "@/providers/auth-provider";
 
 const NAV = [
   { href: "/account", label: "Profile", icon: UserRound },
+  { href: "/account/orders", label: "My Orders", icon: Package },
   { href: "/account/courses", label: "My Courses", icon: GraduationCap },
   { href: "/account/favorites", label: "Favorite Astrologers", icon: Heart },
   { href: "/account/birth-details", label: "Birth details", icon: CalendarHeart },
