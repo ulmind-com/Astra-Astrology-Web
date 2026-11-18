@@ -3,15 +3,12 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
-  Compass,
+  ChevronLeft,
+  ChevronRight,
   Heart,
   MessageSquare,
   Phone,
   Sparkles,
-  Star,
-  Moon,
-  Sun,
-  Orbit,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -20,7 +17,6 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { cmsApi, type HeroSlide } from "@/lib/api";
 import { HERO_SLIDES_TRANSLATIONS } from "@/lib/home-translations";
 import { useLanguage } from "@/providers/language-provider";
-import { OrbitingCircles } from "@/components/ui/orbiting-circles";
 
 const DEFAULT_SLIDES: HeroSlide[] = [
   {
@@ -91,8 +87,6 @@ const DEFAULT_SLIDES: HeroSlide[] = [
   },
 ];
 
-// Portrait hero art for mobile (couple/scene at the bottom, cream space up top
-// for the overlaid headline). Keyed by slide id; falls back to the landscape art.
 const MOBILE_HERO_IMAGES: Record<string, string> = {
   "slide-1": "/images/hero/mobile/hero-couple-exploring.png",
   "slide-2": "/images/hero/mobile/hero-parchment-kundli.png",
@@ -139,7 +133,6 @@ export function HeroAstroyogi() {
   const [isPaused, setIsPaused] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
-  // Fetch dynamic CMS data
   const { data: cmsData } = useQuery({
     queryKey: ["cms", "homepage"],
     queryFn: cmsApi.getHomepage,
@@ -147,8 +140,13 @@ export function HeroAstroyogi() {
   });
 
   const slides = useMemo<HeroSlide[]>(() => {
+    const baseSlides =
+      cmsData?.hero_slides && cmsData.hero_slides.length > 0
+        ? cmsData.hero_slides
+        : DEFAULT_SLIDES;
+
     const loc = HERO_SLIDES_TRANSLATIONS[language] || HERO_SLIDES_TRANSLATIONS.en;
-    return DEFAULT_SLIDES.map((slide, idx) => {
+    return baseSlides.map((slide, idx) => {
       const trans = loc.slides[idx];
       if (!trans) return slide;
       return {
@@ -161,7 +159,7 @@ export function HeroAstroyogi() {
         badge_rating: trans.badge_rating,
       };
     });
-  }, [language]);
+  }, [language, cmsData]);
 
   const quickActions = useMemo(() => {
     const loc = HERO_SLIDES_TRANSLATIONS[language] || HERO_SLIDES_TRANSLATIONS.en;
@@ -184,7 +182,6 @@ export function HeroAstroyogi() {
     });
   }, [language]);
 
-  // Autoplay timer — slides every 5 seconds
   useEffect(() => {
     if (isPaused || slides.length <= 1) return;
 
@@ -207,7 +204,6 @@ export function HeroAstroyogi() {
     setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
-  // Touch handlers for mobile swipe
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
   };
@@ -225,243 +221,142 @@ export function HeroAstroyogi() {
     touchStartX.current = null;
   };
 
-  const currentSlide = slides[currentIndex] || DEFAULT_SLIDES[0];
-
   return (
-    <section className="relative overflow-hidden bg-[#0c0a08] pt-6 pb-8 sm:pt-8 sm:pb-12 border-b border-amber-900/35 shadow-[0_16px_40px_-10px_rgba(0,0,0,0.7)]">
-      {/* Background radial cosmic glows */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(245,158,11,0.08)_0%,transparent_60%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_50%,rgba(217,119,6,0.08)_0%,transparent_50%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_88%_50%,rgba(245,158,11,0.07)_0%,transparent_50%)]" />
-
-      {/* LEFT CELESTIAL: Rotating Golden Zodiac Wheel (InstaAstro-Style) */}
-      <div className="pointer-events-none absolute -left-20 sm:-left-16 top-1/2 -translate-y-1/2 z-0 size-[380px] sm:size-[480px] lg:size-[560px] opacity-25 select-none">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/zodiac-wheel-yellow.webp"
-          alt=""
-          aria-hidden="true"
-          className="size-full animate-[spin_110s_linear_infinite] [will-change:transform] motion-reduce:animate-none drop-shadow-[0_0_35px_rgba(245,158,11,0.2)]"
-          draggable={false}
-        />
-      </div>
-
-      {/* RIGHT CELESTIAL: Radiant Golden Sun Mandala & Celestial Rings */}
-      <div className="pointer-events-none absolute -right-20 sm:-right-12 top-1/2 -translate-y-1/2 z-0 size-[360px] sm:size-[450px] lg:size-[540px] opacity-25 select-none">
-        <svg
-          viewBox="0 0 200 200"
-          className="size-full animate-[spin_150s_linear_infinite] motion-reduce:animate-none drop-shadow-[0_0_30px_rgba(245,158,11,0.25)]"
-          fill="none"
-          stroke="#f59e0b"
-          strokeWidth="1"
-        >
-          {/* Concentric astrological rings */}
-          <circle cx="100" cy="100" r="92" strokeDasharray="3 3" opacity="0.6" />
-          <circle cx="100" cy="100" r="76" opacity="0.45" />
-          <circle cx="100" cy="100" r="58" strokeDasharray="6 3" opacity="0.75" />
-          <circle cx="100" cy="100" r="38" opacity="0.85" fill="rgba(245,158,11,0.06)" />
-          {/* 16 Radiant Sun Rays */}
-          {Array.from({ length: 16 }).map((_, i) => (
-            <line
-              key={i}
-              x1="100"
-              y1="40"
-              x2="100"
-              y2="12"
-              transform={`rotate(${i * 22.5} 100 100)`}
-              stroke="#fbbf24"
-              strokeWidth={i % 2 === 0 ? "1.6" : "0.9"}
-              opacity="0.85"
-            />
-          ))}
-          {/* Central Vedic Sun face motif */}
-          <circle cx="92" cy="96" r="2.8" fill="#fbbf24" opacity="0.8" />
-          <circle cx="108" cy="96" r="2.8" fill="#fbbf24" opacity="0.8" />
-          <path
-            d="M 93 107 Q 100 113 107 107"
-            stroke="#fbbf24"
-            strokeWidth="1.3"
-            strokeLinecap="round"
-            opacity="0.8"
-          />
-        </svg>
-      </div>
-
-      {/* RIGHT CELESTIAL: Orbiting Planetary Circles (Magic UI) */}
-      <div className="pointer-events-none absolute -right-24 sm:-right-12 top-1/2 -translate-y-1/2 z-0 size-[360px] sm:size-[450px] lg:size-[520px] opacity-40 select-none hidden md:flex items-center justify-center">
-        {/* Inner Orbit (Mercury & Venus) */}
-        <OrbitingCircles radius={100} duration={22} delay={0}>
-          <div className="size-6 rounded-full bg-amber-400 shadow-[0_0_12px_#fcd404] flex items-center justify-center text-[10px] text-stone-900 font-black">
-            ☿
-          </div>
-        </OrbitingCircles>
-        <OrbitingCircles radius={100} duration={22} delay={11} reverse>
-          <div className="size-7 rounded-full bg-[#fde047] shadow-[0_0_14px_#fde047] flex items-center justify-center text-[11px] text-stone-900 font-black">
-            ♀
-          </div>
-        </OrbitingCircles>
-
-        {/* Outer Orbit (Mars & Jupiter) */}
-        <OrbitingCircles radius={180} duration={42} delay={4}>
-          <div className="size-8 rounded-full bg-orange-500 shadow-[0_0_16px_#f97316] flex items-center justify-center text-xs text-white font-black">
-            ♂
-          </div>
-        </OrbitingCircles>
-        <OrbitingCircles radius={180} duration={42} delay={25} reverse>
-          <div className="size-9 rounded-full bg-yellow-500 shadow-[0_0_20px_#eab308] flex items-center justify-center text-xs text-stone-950 font-black">
-            ♃
-          </div>
-        </OrbitingCircles>
-      </div>
-
-      {/* Floating Constellation Stars */}
-      <div className="pointer-events-none absolute inset-0 z-0">
-        <span className="absolute top-[16%] left-[26%] text-amber-300/40 text-xs animate-pulse">✦</span>
-        <span className="absolute top-[76%] left-[20%] text-amber-300/35 text-[11px] animate-pulse [animation-delay:1s]">⋆</span>
-        <span className="absolute top-[20%] right-[28%] text-amber-400/45 text-sm animate-pulse [animation-delay:1.5s]">✦</span>
-        <span className="absolute top-[70%] right-[22%] text-amber-300/35 text-xs animate-pulse [animation-delay:0.5s]">✧</span>
-        <span className="absolute top-[12%] right-[14%] text-amber-200/50 text-[11px] animate-pulse [animation-delay:2s]">⋆</span>
-        <span className="absolute top-[82%] left-[42%] text-amber-400/30 text-xs animate-pulse [animation-delay:1.2s]">✦</span>
-      </div>
-
+    <section className="relative bg-white pt-4 pb-6 sm:pt-6 sm:pb-10">
       <div className="relative z-10 mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
-        {/* Main Hero Slider Container with Continuous Horizontal Sliding Track */}
+        {/* Hero Slider */}
         <div
-          className="relative group/slider overflow-hidden rounded-[26px] sm:rounded-3xl shadow-[0_24px_65px_-15px_rgba(0,0,0,0.85)] border border-amber-400/25 bg-[#fffdf5]"
+          className="relative group/slider overflow-hidden rounded-2xl sm:rounded-3xl shadow-lg"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
-          {/* Continuous Sliding Horizontal Track */}
+          {/* Sliding Track */}
           <div
             className="flex w-full transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]"
             style={{ transform: `translateX(-${currentIndex * 100}%)` }}
           >
             {slides.map((slide, idx) => (
               <div
-                key={slide.id}
-                className="relative w-full shrink-0 aspect-[941/1672] sm:aspect-auto sm:min-h-[380px] lg:h-[400px] overflow-hidden"
+                key={slide.id || idx}
+                className="relative w-full shrink-0 aspect-[16/9] sm:aspect-[2.4/1] overflow-hidden"
               >
-                {/* 1. Full-Bleed 100% Brightness Background Image */}
-                <div className="absolute inset-0 w-full h-full pointer-events-none">
-                  {/* Mobile: portrait card art (scene bottom, cream top for text). */}
-                  <Image
-                    src={MOBILE_HERO_IMAGES[slide.id ?? ""] ?? slide.image_url}
-                    alt={slide.title}
-                    fill
-                    priority={idx === 0}
-                    className="object-cover object-top sm:hidden"
-                    sizes="100vw"
-                    quality={85}
-                  />
-                  {/* Desktop: landscape banner. */}
-                  <Image
-                    src={slide.image_url}
-                    alt={slide.title}
-                    fill
-                    priority={idx === 0}
-                    className="hidden object-cover object-center sm:block"
-                    sizes="(max-width: 1360px) 100vw, 1360px"
-                    quality={90}
-                  />
-                </div>
+                {/* Full-bleed background image */}
+                <Image
+                  src={MOBILE_HERO_IMAGES[slide.id ?? ""] ?? slide.image_url}
+                  alt={slide.title}
+                  fill
+                  priority={idx === 0}
+                  className="object-cover object-top sm:hidden"
+                  sizes="100vw"
+                  quality={85}
+                />
+                <Image
+                  src={slide.image_url}
+                  alt={slide.title}
+                  fill
+                  priority={idx === 0}
+                  className="hidden object-cover object-center sm:block"
+                  sizes="(max-width: 1360px) 100vw, 1360px"
+                  quality={90}
+                />
 
-                {/* Desktop legibility scrim: cream wash on the left behind the text,
-                    fading to transparent so the banner stays visible on the right.
-                    Mobile skips it — the portrait art already has a cream top. */}
-                <div className="pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-[#fffdf5] via-[#fffdf5]/70 to-transparent sm:block" />
+                {/* Left gradient scrim for text readability */}
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent sm:from-black/50 sm:via-black/20" />
 
-                {/* 2. Overlaid Interactive Content Layer */}
-                <div className="relative z-10 flex flex-col justify-start sm:justify-between h-full p-5 sm:p-10 lg:pl-12 lg:pr-8 sm:min-h-[380px] lg:h-[400px]">
-                  {/* Top Bar inside Card: Pill Badge + Slide Counter */}
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 shadow-xs bg-white/90 border border-[#eadf9a] text-[#1a1208] backdrop-blur-xs">
-                      <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#ffd700] to-[#e69500] text-[#1a1208] text-[10px] font-black">
-                        #1
-                      </div>
-                      <span className="text-xs sm:text-sm font-bold tracking-wide">
+                {/* Content overlay */}
+                <div className="relative z-10 flex flex-col justify-end sm:justify-center h-full p-6 sm:p-10 lg:pl-14 lg:pr-8">
+                  <div className="max-w-lg lg:max-w-xl">
+                    {/* Subtitle / brand line */}
+                    {slide.badge_text && (
+                      <p className="text-xs sm:text-sm font-medium tracking-widest uppercase text-white/70 mb-2 sm:mb-3">
                         {slide.badge_text}
-                      </span>
-                      {slide.badge_rating && (
-                        <div className="flex items-center gap-1 border-l border-[#ebd881] pl-2 ml-1">
-                          <Star className="size-3 fill-[#e08c12] text-[#e08c12]" />
-                          <span className="text-xs font-bold text-[#8b5e0a]">
-                            {slide.badge_rating}
-                          </span>
-                        </div>
-                      )}
-                    </div>
+                      </p>
+                    )}
 
-                    {/* Slide Counter */}
-                    <div className="hidden sm:flex items-center gap-1.5 text-xs font-extrabold tracking-wider px-3 py-1 rounded-full bg-white/90 text-[#1a1208]/80 border border-[#eadf9a] backdrop-blur-xs">
-                      <span className="text-[#e08c12]">0{idx + 1}</span>
-                      <span className="opacity-40">/</span>
-                      <span className="opacity-60">0{slides.length}</span>
-                    </div>
-                  </div>
-
-                  {/* Middle: Headline, Subtitle, Description & Action Button */}
-                  <div className="mt-2 sm:my-auto py-1 sm:py-4 max-w-xl lg:max-w-2xl">
+                    {/* Main headline */}
                     <Link href={slide.cta_link} className="block group/link">
-                      <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-[42px] font-black tracking-tight leading-[1.12] text-[#1a1208]">
+                      <h1 className="font-sans text-2xl sm:text-4xl md:text-5xl lg:text-[52px] font-black tracking-tight leading-[1.1] text-white">
                         {slide.title}
-                        <span className="block mt-1 font-bold text-2xl sm:text-3xl md:text-4xl text-[#4a3b2c]">
-                          {slide.subtitle}
-                        </span>
                       </h1>
+                      {slide.subtitle && (
+                        <p className="mt-1 sm:mt-2 text-lg sm:text-2xl md:text-3xl font-semibold text-white/80">
+                          {slide.subtitle}
+                        </p>
+                      )}
                     </Link>
 
+                    {/* Description */}
                     {slide.description && (
-                      <p className="mt-2.5 sm:mt-3 text-xs sm:text-sm md:text-base leading-relaxed line-clamp-2 max-w-lg text-[#5a4c3c]">
+                      <p className="mt-3 sm:mt-4 text-sm sm:text-base leading-relaxed line-clamp-2 text-white/70 max-w-md">
                         {slide.description}
                       </p>
                     )}
 
-                    {/* Action Row */}
-                    <div className="mt-5 sm:mt-7 flex flex-wrap items-center gap-4">
+                    {/* CTA Button */}
+                    <div className="mt-5 sm:mt-7">
                       <Link href={slide.cta_link}>
                         <button
                           type="button"
-                          className="group/btn relative inline-flex items-center gap-3 rounded-full bg-[#fcd404] hover:bg-[#f5c700] px-7 sm:px-9 py-3.5 sm:py-4 text-base sm:text-lg font-extrabold text-[#1c1304] shadow-[0_10px_28px_-6px_rgba(245,199,0,0.7)] transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] border border-[#e2b600] cursor-pointer"
+                          className="inline-flex items-center gap-2.5 rounded-full bg-white hover:bg-gray-100 px-7 sm:px-9 py-3 sm:py-3.5 text-sm sm:text-base font-bold text-gray-900 shadow-md transition-all duration-200 hover:shadow-lg active:scale-[0.97] cursor-pointer"
                         >
                           <span>{slide.cta_text}</span>
-                          <span className="flex size-7 items-center justify-center rounded-full bg-[#1c1304] text-[#fcd404] transition-transform duration-300 group-hover/btn:translate-x-1">
-                            <ArrowRight className="size-4" strokeWidth={2.5} />
-                          </span>
+                          <ArrowRight className="size-4" strokeWidth={2.5} />
                         </button>
                       </Link>
-                    </div>
-                  </div>
-
-                  {/* Bottom Bar: Slide Indicators */}
-                  <div className="mt-auto flex items-center justify-between pt-1">
-                    <div className="flex items-center gap-2">
-                      {slides.map((_, dotIdx) => (
-                        <button
-                          key={dotIdx}
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            goToSlide(dotIdx);
-                          }}
-                          aria-label={`Go to slide ${dotIdx + 1}`}
-                          className={`transition-all duration-300 rounded-full cursor-pointer ${
-                            currentIndex === dotIdx
-                              ? "w-8 sm:w-10 h-2 bg-[#fcd404] shadow-[0_0_10px_rgba(252,212,4,0.8)]"
-                              : "w-2 sm:w-2.5 h-2 bg-[#1a1208]/25 hover:bg-[#1a1208]/50"
-                          }`}
-                        />
-                      ))}
                     </div>
                   </div>
                 </div>
               </div>
             ))}
           </div>
+
+          {/* Bottom bar: dots left, arrows right */}
+          <div className="absolute bottom-4 sm:bottom-6 left-6 sm:left-10 right-6 sm:right-10 z-20 flex items-center justify-between">
+            {/* Dot indicators */}
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              {slides.map((_, dotIdx) => (
+                <button
+                  key={dotIdx}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goToSlide(dotIdx);
+                  }}
+                  aria-label={`Go to slide ${dotIdx + 1}`}
+                  className={`transition-all duration-300 rounded-full cursor-pointer ${
+                    currentIndex === dotIdx
+                      ? "w-7 sm:w-9 h-2 bg-white shadow-sm"
+                      : "w-2 sm:w-2.5 h-2 bg-white/40 hover:bg-white/60"
+                  }`}
+                />
+              ))}
+            </div>
+
+            {/* Prev / Next arrows */}
+            <div className="hidden sm:flex items-center gap-2">
+              <button
+                type="button"
+                onClick={prevSlide}
+                aria-label="Previous slide"
+                className="flex size-10 items-center justify-center rounded-full border border-white/30 bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-colors cursor-pointer"
+              >
+                <ChevronLeft className="size-5" strokeWidth={2} />
+              </button>
+              <button
+                type="button"
+                onClick={nextSlide}
+                aria-label="Next slide"
+                className="flex size-10 items-center justify-center rounded-full border border-white/30 bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-colors cursor-pointer"
+              >
+                <ChevronRight className="size-5" strokeWidth={2} />
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* 4 Quick Action Cards (Elevated Floating Tiles) */}
+        {/* 4 Quick Action Cards */}
         <div className="mt-5 sm:mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {quickActions.map((action) => {
             const Icon = action.icon;
