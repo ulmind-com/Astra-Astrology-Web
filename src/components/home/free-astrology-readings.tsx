@@ -43,7 +43,7 @@ const READINGS_LIST: ReadingCardItem[] = [
   { label: "Vastu", href: "/vastu", Icon: Compass, fg: "text-green-600", bg: "bg-green-100", glow: "from-green-200/40" },
   { label: "Remedies", href: "/astrologers", Icon: Leaf, fg: "text-emerald-600", bg: "bg-emerald-100", glow: "from-emerald-200/40" },
   { label: "Zodiac Signs", href: "/rashi-calculator", Icon: Star, fg: "text-indigo-600", bg: "bg-indigo-100", glow: "from-indigo-200/40" },
-  { label: "Festivals", href: "/daily-horoscope", Icon: Flame, fg: "text-pink-600", bg: "bg-pink-100", glow: "from-pink-200/40" },
+  { label: "Festivals", href: "/festivals", Icon: Flame, fg: "text-pink-600", bg: "bg-pink-100", glow: "from-pink-200/40" },
   { label: "Spirituality", href: "/ai-astrologer", Icon: Hand, fg: "text-violet-600", bg: "bg-violet-100", glow: "from-violet-200/40" },
 ];
 
