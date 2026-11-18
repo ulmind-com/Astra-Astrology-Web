@@ -41,6 +41,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { CartDrawer } from "@/components/shop/CartDrawer";
 import { SacredImageGallery } from "@/components/shop/SacredImageGallery";
 import { CashbackConsultationBridge } from "@/components/shop/CashbackConsultationBridge";
+import { SacredSpecificationsGrid } from "@/components/shop/SacredSpecificationsGrid";
 import { AstraPromiseSection } from "@/components/shop/AstraPromiseSection";
 import { CardTilt } from "@/components/ui/card-tilt";
 import { shopApi, type ShopProduct, type PincodeResult } from "@/lib/api";
@@ -513,41 +514,16 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Astrological Quick Specs Pills */}
-            {(product.ruling_planet || product.deity || product.crystal_type || product.beej_mantra) && (
-              <div className="rounded-2xl border border-stone-200 bg-stone-50/70 p-3.5 space-y-2">
-                <p className="text-[11px] font-bold text-stone-800 uppercase tracking-wider flex items-center gap-1.5">
-                  <Sparkles className="size-3 text-amber-600" />
-                  <span>{isBn ? "বৈদিক ও জ্যোতিষীয় পরিচয়" : "Astrological Specifications"}</span>
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-                  {product.ruling_planet && (
-                    <div className="rounded-xl bg-white border border-stone-200 p-2">
-                      <p className="text-[10px] text-stone-400 font-medium">{isBn ? "অধিপতি গ্রহ" : "Ruling Planet"}</p>
-                      <p className="font-bold text-stone-800 capitalize">{product.ruling_planet}</p>
-                    </div>
-                  )}
-                  {product.deity && (
-                    <div className="rounded-xl bg-white border border-stone-200 p-2">
-                      <p className="text-[10px] text-stone-400 font-medium">{isBn ? "অধিষ্ঠাত্রী দেবতা" : "Deity"}</p>
-                      <p className="font-bold text-stone-800 capitalize">{product.deity}</p>
-                    </div>
-                  )}
-                  {product.crystal_type && (
-                    <div className="rounded-xl bg-white border border-stone-200 p-2">
-                      <p className="text-[10px] text-stone-400 font-medium">{isBn ? "ক্রিস্টাল টাইপ" : "Crystal Type"}</p>
-                      <p className="font-bold text-stone-800 capitalize">{product.crystal_type}</p>
-                    </div>
-                  )}
-                  {product.beej_mantra && (
-                    <div className="rounded-xl bg-white border border-stone-200 p-2 sm:col-span-3">
-                      <p className="text-[10px] text-stone-400 font-medium">{isBn ? "পবিত্র বীজ মন্ত্র" : "Beej Mantra"}</p>
-                      <p className="font-bold text-amber-900 font-serif">{product.beej_mantra}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+            {/* Sacred Vedic & Astrological Specifications Grid */}
+            <SacredSpecificationsGrid
+              rulingPlanet={product.ruling_planet}
+              deity={product.deity}
+              crystalType={product.crystal_type}
+              beejMantra={product.beej_mantra}
+              recommendedRashis={product.recommended_for_rashis}
+              productTitle={product.title}
+              categorySlug={product.category_slug}
+            />
           </div>
         </div>
 
