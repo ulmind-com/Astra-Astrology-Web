@@ -17,6 +17,7 @@ import {
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { useLanguage } from "@/providers/language-provider";
+import { FestivalClipart } from "@/components/festivals/festival-cliparts";
 
 interface FestivalItem {
   name: Record<string, string>;
@@ -379,15 +380,21 @@ export default function FestivalsPage() {
               />
 
               <div>
-                {/* Header: Date + Badge */}
-                <div className="flex items-center justify-between gap-2 mb-3">
-                  <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50/90 border border-amber-200/80 px-2.5 py-1 rounded-full">
-                    <CalendarDays className="size-3 text-amber-600" />
-                    <span>{fest.date[lang]}</span>
+                {/* Header: Clipart + Date & Badge */}
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="relative flex size-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#fffdf5] to-[#fef3c7] p-2 ring-1 ring-[#ebd881] shadow-xs group-hover:scale-105 transition-transform">
+                    <FestivalClipart id={fest.name.en} className="size-full" />
                   </div>
-                  <span className="text-[11px] font-bold text-[#8b5e0a] bg-[#fff6d8] px-2.5 py-0.5 rounded-full border border-amber-300/50">
-                    {fest.badge[lang]}
-                  </span>
+
+                  <div className="flex flex-col items-end gap-1.5">
+                    <span className="text-[11px] font-bold text-[#8b5e0a] bg-[#fff6d8] px-2.5 py-0.5 rounded-full border border-amber-300/50 shadow-2xs">
+                      {fest.badge[lang]}
+                    </span>
+                    <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50/90 border border-amber-200/80 px-2.5 py-1 rounded-full">
+                      <CalendarDays className="size-3 text-amber-600" />
+                      <span>{fest.date[lang]}</span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Festival Name */}
