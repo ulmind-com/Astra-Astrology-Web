@@ -103,6 +103,12 @@ const STATUS_CONFIG: Record<
     badgeClass: "bg-stone-200 text-stone-700 border-stone-400",
     stepIndex: 0,
   },
+  expired: {
+    label_bn: "পেমেন্টের সময়সীমা শেষ",
+    label_en: "Payment Expired",
+    badgeClass: "bg-amber-100 text-amber-900 border-amber-300",
+    stepIndex: 0,
+  },
 };
 
 export default function MyOrdersPage() {
