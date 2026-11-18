@@ -39,6 +39,7 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { CartDrawer } from "@/components/shop/CartDrawer";
+import { SacredImageGallery } from "@/components/shop/SacredImageGallery";
 import { AstraPromiseSection } from "@/components/shop/AstraPromiseSection";
 import { CardTilt } from "@/components/ui/card-tilt";
 import { shopApi, type ShopProduct, type PincodeResult } from "@/lib/api";
@@ -60,7 +61,6 @@ export default function ProductDetailPage() {
   const { addItem, openCart } = useCartStore();
 
   // State
-  const [activeImageIndex, setActiveImageIndex] = React.useState<number>(0);
   const [quantity, setQuantity] = React.useState<number>(1);
   const [activeTab, setActiveTab] = React.useState<"description" | "rituals" | "certificate">("description");
 
@@ -109,21 +109,6 @@ export default function ProductDetailPage() {
   });
 
   const relatedProducts = (relatedData?.items || []).filter((p) => p.id !== product?.id).slice(0, 4);
-
-  // Images list
-  const allImages = React.useMemo(() => {
-    if (!product) return [];
-    const list: string[] = [];
-    if (product.featured_image) list.push(product.featured_image);
-    if (product.images && Array.isArray(product.images)) {
-      product.images.forEach((img) => {
-        if (img && !list.includes(img)) list.push(img);
-      });
-    }
-    return list;
-  }, [product]);
-
-  const activeImage = allImages[activeImageIndex] || product?.featured_image || "";
 
   // Pricing calculations
   const mrp = product?.mrp || 0;
@@ -298,82 +283,18 @@ export default function ProductDetailPage() {
         {/* Main Product Showcase: Left Gallery + Right Purchase Box */}
         {/* ================================================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
-          {/* ================= Left: Image Gallery & 3D Specimen ================= */}
+          {/* ================= Left: Sacred Image Gallery ================= */}
           <div className="lg:col-span-6 space-y-4">
-            {/* Primary Image Viewport */}
-            <div className="relative aspect-square w-full rounded-3xl overflow-hidden bg-stone-100 border-2 border-stone-200/90 shadow-sm group">
-              {activeImage ? (
-                <Image
-                  src={activeImage}
-                  alt={product.title}
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  unoptimized
-                />
-              ) : (
-                <div className="size-full flex items-center justify-center text-stone-300">
-                  <ShoppingBag className="size-16" />
-                </div>
-              )}
-
-              {/* Floating Top Badges */}
-              <div className="absolute top-3.5 left-3.5 flex flex-col gap-1.5 items-start z-10">
-                {discountPercent > 0 && (
-                  <span className="bg-rose-600 text-white text-[10px] font-black px-2.5 py-1 rounded-md shadow-xs uppercase tracking-wide">
-                    {discountPercent}% OFF
-                  </span>
-                )}
-                <span className="inline-flex items-center gap-1 bg-emerald-700 text-emerald-50 text-[10px] font-black px-2.5 py-1 rounded-md shadow-xs">
-                  <Coins className="size-3 text-amber-300" />
-                  <span>100% Cashback</span>
-                </span>
-                {product.is_energized && (
-                  <span className="inline-flex items-center gap-1 bg-amber-900/90 text-amber-200 text-[10px] font-bold px-2.5 py-1 rounded-md shadow-xs backdrop-blur-xs">
-                    <Sparkles className="size-3 text-amber-400" />
-                    <span>{isBn ? "প্রাণ-প্রতিষ্ঠিত" : "Vedic Energized"}</span>
-                  </span>
-                )}
-              </div>
-
-              {/* Top Right Share Button */}
-              <button
-                type="button"
-                onClick={handleShare}
-                aria-label="Share product"
-                className="absolute top-3.5 right-3.5 size-9 rounded-full bg-white/90 backdrop-blur-md border border-stone-200 flex items-center justify-center text-stone-700 hover:text-amber-800 hover:bg-white shadow-xs transition-transform hover:scale-105 cursor-pointer z-10"
-              >
-                <Share2 className="size-4" />
-              </button>
-            </div>
-
-            {/* Thumbnail Strip (if multiple images) */}
-            {allImages.length > 1 && (
-              <div className="flex gap-2.5 overflow-x-auto pb-1">
-                {allImages.map((img, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setActiveImageIndex(idx)}
-                    className={`relative size-18 rounded-2xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
-                      activeImageIndex === idx
-                        ? "border-amber-600 ring-2 ring-amber-400/30 shadow-xs"
-                        : "border-stone-200 hover:border-stone-400 opacity-70 hover:opacity-100"
-                    }`}
-                  >
-                    <Image
-                      src={img}
-                      alt={`${product.title} preview ${idx + 1}`}
-                      fill
-                      sizes="72px"
-                      className="object-cover"
-                      unoptimized
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
+            <SacredImageGallery
+              title={product.title}
+              images={product.images || []}
+              featuredImage={product.featured_image}
+              discountPercent={discountPercent}
+              cashbackPercent={effectiveCashback}
+              isEnergized={product.is_energized}
+              freeGiftBadge={freeGiftBadge}
+              onShare={handleShare}
+            />
 
             {/* Trust Guarantee Micro-Ribbon */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
