@@ -538,6 +538,11 @@ export function LivePincodeLogisticsTracker({
                   }`}
                 >
                   {isBn ? "💵 ক্যাশ অন ডেলিভারি" : "💵 COD"}
+                  {result && !result.cod_available && (
+                    <span className="ml-1 text-[9px] text-rose-400 font-medium">
+                      ({isBn ? "অনুপলব্ধ" : "Off"})
+                    </span>
+                  )}
                 </button>
               </div>
             </div>
@@ -564,8 +569,8 @@ export function LivePincodeLogisticsTracker({
                       </span>
                       <p className="text-[11px] text-stone-600">
                         {isBn
-                          ? `ইনস্ট্যান্ট ${cashbackCoins} টি ওয়ালেট কয়েন রিফান্ড (জ্যোতিষীর সাথে ফ্রি পরামর্শে ব্যবহার্য)`
-                          : `Get ${cashbackCoins} coins refund in wallet for free live astrologer consultation.`}
+                          ? `ডেলিভারির পর নিরাপদভাবে ${cashbackCoins} টি ওয়ালেট কয়েন ক্রেডিট (জ্যোতিষীর সাথে ফ্রি পরামর্শে ব্যবহার্য)`
+                          : `${cashbackCoins} coins safely credited to wallet upon delivery for free live astrologer calls.`}
                       </p>
                     </div>
                   </div>
@@ -628,39 +633,56 @@ export function LivePincodeLogisticsTracker({
                     <Info className="size-4 text-stone-600" />
                     {isBn ? "ক্যাশ অন ডেলিভারি (COD) শর্তাবলী" : "Cash on Delivery (COD) Terms"}
                   </span>
-                  <span className="text-[10px] font-bold text-stone-600 bg-stone-200 px-2 py-0.5 rounded-full">
-                    {isBn ? "নগদ পেমেন্ট সুবিধা" : "Pay Cash on Handover"}
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    result?.cod_available
+                      ? "text-stone-600 bg-stone-200"
+                      : "text-rose-700 bg-rose-100 border border-rose-300"
+                  }`}>
+                    {result?.cod_available
+                      ? (isBn ? "নগদ পেমেন্ট সুবিধা" : "Pay Cash on Handover")
+                      : (isBn ? "বর্তমানে অনুপলব্ধ" : "Currently Disabled")}
                   </span>
                 </div>
 
-                <div className="space-y-2 text-xs">
-                  <div className="flex items-start gap-2 text-stone-700">
-                    <Check className="size-3.5 text-stone-500 shrink-0 mt-0.5" />
+                {!result?.cod_available ? (
+                  <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+                    <AlertCircle className="size-4 shrink-0 text-rose-600" />
                     <span>
                       {isBn
-                        ? "পার্সেল হাতে পাওয়ার পর ডেলিভারি পার্টনারকে নগদ টাকা দেওয়ার সুবিধা।"
-                        : "Pay cash in hand directly to delivery executive upon physical arrival."}
+                        ? "এই মুহূর্তে ক্যাশ অন ডেলিভারি (COD) সাময়িকভাবে বন্ধ আছে। শুধুমাত্র অনলাইন প্রিপেইড পেমেন্ট (UPI, Card, NetBanking) গ্রহণযোগ্য।"
+                        : "Cash on Delivery is currently unavailable. Only online prepaid payment is accepted."}
                     </span>
                   </div>
+                ) : (
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-start gap-2 text-stone-700">
+                      <Check className="size-3.5 text-stone-500 shrink-0 mt-0.5" />
+                      <span>
+                        {isBn
+                          ? "পার্সেল হাতে পাওয়ার পর ডেলিভারি পার্টনারকে নগদ টাকা দেওয়ার সুবিধা।"
+                          : "Pay cash in hand directly to delivery executive upon physical arrival."}
+                      </span>
+                    </div>
 
-                  <div className="flex items-start gap-2 text-rose-700 font-medium">
-                    <X className="size-3.5 text-rose-500 shrink-0 mt-0.5" />
-                    <span>
-                      {isBn
-                        ? `১০০% ওয়ালেট ক্যাশব্যাক অফার প্রযোজ্য নয় (${cashbackCoins} কয়েনের সুযোগ থাকবে না)।`
-                        : `100% Wallet Coin Cashback is NOT applicable (No ${cashbackCoins} coins).`}
-                    </span>
-                  </div>
+                    <div className="flex items-start gap-2 text-rose-700 font-medium">
+                      <X className="size-3.5 text-rose-500 shrink-0 mt-0.5" />
+                      <span>
+                        {isBn
+                          ? `১০০% ওয়ালেট ক্যাশব্যাক অফার প্রযোজ্য নয় (${cashbackCoins} কয়েনের সুযোগ থাকবে না)।`
+                          : `100% Wallet Coin Cashback is NOT applicable (No ${cashbackCoins} coins).`}
+                      </span>
+                    </div>
 
-                  <div className="flex items-start gap-2 text-rose-700 font-medium">
-                    <X className="size-3.5 text-rose-500 shrink-0 mt-0.5" />
-                    <span>
-                      {isBn
-                        ? `ফ্রি সেলিনাইট প্লেট গিফট ও প্রায়োরিটি কাশীর সংকল্প কিউ পাওয়া যাবে না।`
-                        : `Free Selenite Plate gift & VIP temple queue priority are not eligible.`}
-                    </span>
+                    <div className="flex items-start gap-2 text-rose-700 font-medium">
+                      <X className="size-3.5 text-rose-500 shrink-0 mt-0.5" />
+                      <span>
+                        {isBn
+                          ? `ফ্রি সেলিনাইট প্লেট গিফট ও প্রায়োরিটি কাশীর সংকল্প কিউ পাওয়া যাবে না।`
+                          : `Free Selenite Plate gift & VIP temple queue priority are not eligible.`}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <p className="text-[10px] text-amber-800 bg-amber-50 p-2 rounded-lg border border-amber-200">
                   {isBn
