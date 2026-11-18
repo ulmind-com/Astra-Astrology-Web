@@ -21,202 +21,7 @@ import {
   type WebFestivalItem,
 } from "@/lib/api";
 import { FestivalClipart } from "@/components/festivals/festival-cliparts";
-
-interface FestivalItem {
-  name: Record<string, string>;
-  date: Record<string, string>;
-  tithi: Record<string, string>;
-  category: "major" | "vrat" | "jayanti";
-  desc: Record<string, string>;
-  gradient: string;
-  glow: string;
-  badge: Record<string, string>;
-}
-
-const FESTIVALS_2026: FestivalItem[] = [
-  {
-    name: { en: "Makar Sankranti", bn: "মকর সংক্রান্তি", hi: "मकर संक्रांति" },
-    date: { en: "January 14, 2026", bn: "১৪ জানুয়ারি, ২০২৬", hi: "14 जनवरी 2026" },
-    tithi: { en: "Magha Krishna Paksha", bn: "মাঘ কৃষ্ণ পক্ষ", hi: "माघ कृष्ण पक्ष" },
-    category: "major",
-    desc: {
-      en: "Sun's transition into Capricorn (Makara). Auspicious day for holy dip, charity, and harvesting celebrations.",
-      bn: "সূর্যের মকর রাশিতে উত্তরায়ণ প্রবেশ। পুণ্যস্নান, দান এবং পৌষ সংক্রান্তির পিঠেপুলির উৎসব।",
-      hi: "सूर्य का मकर राशि में उत्तरायण प्रवेश। पवित्र स्नान, दान और तिल-गुड़ का पावन पर्व।",
-    },
-    gradient: "from-[#ffb347] to-[#ff8a00]",
-    glow: "rgba(255,138,0,0.3)",
-    badge: { en: "Harvest & Solar", bn: "সূর্য সংক্রান্তি", hi: "सौर पर्व" },
-  },
-  {
-    name: { en: "Saraswati Puja (Vasant Panchami)", bn: "সরস্বতী পূজা (বসন্ত পঞ্চমী)", hi: "सरस्वती पूजा (बसंत पंचमी)" },
-    date: { en: "January 23, 2026", bn: "২৩ জানুয়ারি, ২০২৬", hi: "23 जनवरी 2026" },
-    tithi: { en: "Magha Shukla Panchami", bn: "মাঘ শুক্ল পঞ্চমী", hi: "माघ शुक्ल पंचमी" },
-    category: "major",
-    desc: {
-      en: "Celebration of Goddess Saraswati, learning, arts, and the arrival of the spring season.",
-      bn: "বিদ্যা ও সংগীতের দেবী সরস্বতীর আরাধনা, হাতেখড়ি ও বসন্ত ঋতুর আগমন।",
-      hi: "विद्या, ज्ञान और कला की देवी मां सरस्वती की आराधना और वसंत ऋतु का स्वागत।",
-    },
-    gradient: "from-[#ffd34d] to-[#f5a300]",
-    glow: "rgba(245,163,0,0.34)",
-    badge: { en: "Wisdom & Arts", bn: "বিদ্যা ও জ্ঞান", hi: "विद्या व ज्ञान" },
-  },
-  {
-    name: { en: "Maha Shivaratri", bn: "মহা শিবরাত্রি", hi: "महा शिवरात्रि" },
-    date: { en: "February 16, 2026", bn: "১৬ ফেব্রুয়ারি, ২০২৬", hi: "16 फ़रवरी 2026" },
-    tithi: { en: "Phalguna Krishna Chaturdashi", bn: "ফাল্গুন কৃষ্ণ চতুর্দশী", hi: "फाल्गुन कृष्ण चतुर्दशी" },
-    category: "vrat",
-    desc: {
-      en: "The great night of Lord Shiva. Night-long fasting, Rudrabhishek, and deep spiritual meditation.",
-      bn: "মহাদেব শিবের মহা উপবাস ও ব্রত। চার প্রহরে শিবলিঙ্গে অভিষেক এবং আত্মশুদ্ধি।",
-      hi: "भगवान शिव की महान महारात्रि। निर्जला व्रत, रुद्राभिषेक और चार प्रहर की विशेष पूजा।",
-    },
-    gradient: "from-[#8b7bff] to-[#5a3ff2]",
-    glow: "rgba(90,63,242,0.3)",
-    badge: { en: "Major Vrat", bn: "প্রধান ব্রত", hi: "महाव्रत" },
-  },
-  {
-    name: { en: "Holi & Dol Yatra", bn: "হোলি ও দোলযাত্রা", hi: "होली एवं धुलेंडी" },
-    date: { en: "March 4, 2026", bn: "৪ মার্চ, ২০২৬", hi: "4 मार्च 2026" },
-    tithi: { en: "Phalguna Purnima", bn: "ফাল্গুনী পূর্ণিমা", hi: "फाल्गुन पूर्णिमा" },
-    category: "major",
-    desc: {
-      en: "The festival of colors and love, celebrating Radha-Krishna divine love and the victory of good over evil.",
-      bn: "রঙ ও আনন্দের উৎসব। রাধাকৃষ্ণের দোল পূর্ণিমা ও অশুভের বিনাশে সত্যের জয়।",
-      hi: "रंगों और उल्लास का महापर्व। होलिका दहन, राधा-कृष्ण का रंगोत्सव और सामाजिक समरसता।",
-    },
-    gradient: "from-[#ff6b8b] to-[#e63950]",
-    glow: "rgba(230,57,80,0.32)",
-    badge: { en: "Colors of Joy", bn: "রঙের উৎসব", hi: "रंगोत्सव" },
-  },
-  {
-    name: { en: "Chaitra Navratri & Ram Navami", bn: "বাসন্তী নবরাত্রি ও রাম নবমী", hi: "चैत्र नवरात्रि व राम नवमी" },
-    date: { en: "March 20 – 28, 2026", bn: "২০ – ২৮ মার্চ, ২০২৬", hi: "20 – 28 मार्च 2026" },
-    tithi: { en: "Chaitra Shukla Pratipada to Navami", bn: "চৈত্র শুক্লা প্রতিপদ থেকে নবমী", hi: "चैत्र शुक्ल प्रतिपदा से नवमी" },
-    category: "major",
-    desc: {
-      en: "9 sacred nights dedicated to Goddess Durga and the birth anniversary of Maryada Purushottam Lord Rama.",
-      bn: "মা দুর্গার নয় রূপের আরাধনা এবং শ্রীরামচন্দ্রের জন্মজয়ন্তী মহোৎসব।",
-      hi: "मां दुर्गा के नौ दिव्य स्वरूपों की उपासना और मर्यादा पुरुषोत्तम भगवान श्री राम का जन्मोत्सव।",
-    },
-    gradient: "from-[#ff8fb0] to-[#ff4f8b]",
-    glow: "rgba(255,79,139,0.3)",
-    badge: { en: "9 Holy Nights", bn: "৯ পবিত্র রাত্রি", hi: "नवरात्रि" },
-  },
-  {
-    name: { en: "Hanuman Jayanti", bn: "হনুমান জয়ন্তী", hi: "हनुमान जयंती" },
-    date: { en: "April 2, 2026", bn: "২ এপ্রিল, ২০২৬", hi: "2 अप्रैल 2026" },
-    tithi: { en: "Chaitra Purnima", bn: "চৈত্র পূর্ণিমা", hi: "चैत्र पूर्णिमा" },
-    category: "jayanti",
-    desc: {
-      en: "Birth celebration of Lord Hanuman, the embodiment of devotion, strength, courage, and selfless service.",
-      bn: "বজরংবলী শ্রী হনুমানের জন্ম তিথি। সুন্দরকাণ্ড পাঠ, সিঁদুর অর্পণ ও সংকট মুক্তির প্রার্থনা।",
-      hi: "संकटमोचन श्री हनुमान जी का जन्मोत्सव। सुंदरकांड पाठ, सिंदूर अर्पण और शक्ति संचय।",
-    },
-    gradient: "from-[#ff7043] to-[#d84315]",
-    glow: "rgba(216,67,21,0.32)",
-    badge: { en: "Strength & Devotion", bn: "বীরত্ব ও ভক্তি", hi: "भक्ति व बल" },
-  },
-  {
-    name: { en: "Akshaya Tritiya", bn: "অক্ষয় তৃতীয়া", hi: "अक्षय तृतीया" },
-    date: { en: "April 20, 2026", bn: "২০ এপ্রিল, ২০২৬", hi: "20 अप्रैल 2026" },
-    tithi: { en: "Vaishakha Shukla Tritiya", bn: "বৈশাখ শুক্ল তৃতীয়া", hi: "वैशाख शुक्ल तृतीया" },
-    category: "major",
-    desc: {
-      en: "A self-proven eternal auspicious day. Highest merit for gold purchases, charity, and new ventures.",
-      bn: "অনন্ত ফলদায়ী স্বयंसিদ্ধ অক্ষয় মুহূর্ত। সোনা কেনা, দান ও গৃহপ্রবেশের জন্য সর্বশ্রেষ্ঠ।",
-      hi: "अक्षय पुण्य फल देने वाली स्वयं सिद्ध शुभ तिथि। स्वर्ण क्रय, दान और नए कार्यों का श्रीगणेश।",
-    },
-    gradient: "from-[#ffd34d] to-[#e07b00]",
-    glow: "rgba(224,123,0,0.34)",
-    badge: { en: "Eternal Prosperity", bn: "অক্ষয় সমৃদ্ধি", hi: "अक्षय समृद्धि" },
-  },
-  {
-    name: { en: "Jagannath Rath Yatra", bn: "জগন্নাথ রথযাত্রা", hi: "जगन्नाथ रथ यात्रा" },
-    date: { en: "July 16, 2026", bn: "১৬ জুলাই, ২০২৬", hi: "16 जुलाई 2026" },
-    tithi: { en: "Ashadha Shukla Dwitiya", bn: "আষাঢ় শুক্লা দ্বিতীয়া", hi: "आषाढ़ शुक्ल द्वितीया" },
-    category: "major",
-    desc: {
-      en: "Lord Jagannath, Balabhadra, and Subhadra's journey on grand chariots to Gundicha Temple.",
-      bn: "প্রভু জগন্নাথ, বলভদ্র ও মা সুভদ্রার পুরীর রথযাত্রা এবং মাসির বাড়ি গুন্ডিচায় গমন।",
-      hi: "महाप्रभु जगन्नाथ, बलभद्र व सुभद्रा की भव्य रथयात्रा और मौसी बाड़ी गुंडिचा मंदिर गमन।",
-    },
-    gradient: "from-[#38d39f] to-[#0f9d6e]",
-    glow: "rgba(15,157,110,0.3)",
-    badge: { en: "Divine Chariot", bn: "পবিত্র রথ", hi: "दिव्य रथ" },
-  },
-  {
-    name: { en: "Raksha Bandhan", bn: "রাখীবন্ধন", hi: "रक्षा बंधन" },
-    date: { en: "August 28, 2026", bn: "২৮ আগস্ট, ২০২৬", hi: "28 अगस्त 2026" },
-    tithi: { en: "Shravana Purnima", bn: "শ্রাবণ পূর্ণিমা", hi: "श्रावण पूर्णिमा" },
-    category: "major",
-    desc: {
-      en: "The sacred bond of love and protection between brothers and sisters. Also celebrated as Jhulan Yatra.",
-      bn: "ভাই-বোনের চিরন্তন ভালোবাসা ও সুরক্ষার পবিত্র রাখি উৎসব।",
-      hi: "भाई-बहन के अटूट स्नेह और सुरक्षा का पावन पर्व। रक्षा सूत्र बंधन एवं श्रावणी उपाकर्म।",
-    },
-    gradient: "from-[#6fb1ff] to-[#2b6fe0]",
-    glow: "rgba(43,111,224,0.3)",
-    badge: { en: "Sibling Love", bn: "স্নেহ ও বন্ধন", hi: "स्नेह सूत्र" },
-  },
-  {
-    name: { en: "Krishna Janmashtami", bn: "শ্রীকৃষ্ণ জন্মাষ্টমী", hi: "श्री कृष्ण जन्माष्टमी" },
-    date: { en: "September 4, 2026", bn: "৪ সেপ্টেম্বর, ২০২৬", hi: "4 सितम्बर 2026" },
-    tithi: { en: "Bhadrapada Krishna Ashtami", bn: "ভাদ্র কৃষ্ণ অষ্টমী", hi: "भाद्रपद कृष्ण अष्टमी" },
-    category: "vrat",
-    desc: {
-      en: "The divine advent of Lord Krishna at midnight. Fasting, midnight puja, and Dahi Handi festivities.",
-      bn: "ভগবান শ্রীকৃষ্ণের মধ্যরাতে দিব্য আবির্ভাব। নির্জলা উপবাস, নন্দোৎসব ও ভাগবত কথা।",
-      hi: "भगवान श्री कृष्ण का मध्यरात्रि में प्राकट्य दिवस। व्रत, माखन-मिश्री भोग और दही हांडी उत्सव।",
-    },
-    gradient: "from-[#8b7bff] to-[#5a3ff2]",
-    glow: "rgba(90,63,242,0.3)",
-    badge: { en: "Divine Avatar", bn: "শ্রীকৃষ্ণ আবির্ভাব", hi: "कृष्णावतार" },
-  },
-  {
-    name: { en: "Sharad Navratri & Durga Puja", bn: "শারদীয়া দুর্গাপূজা ও নবরাত্রি", hi: "शारदीय नवरात्रि व दुर्गा पूजा" },
-    date: { en: "October 11 – 20, 2026", bn: "১১ – ২০ অক্টোবর, ২০২৬", hi: "11 – 20 अक्टूबर 2026" },
-    tithi: { en: "Ashwina Shukla Pratipada to Dashami", bn: "আশ্বিন শুক্লা প্রতিপদ থেকে দশমী", hi: "आश्विन शुक्ल प्रतिपदा से दशमी" },
-    category: "major",
-    desc: {
-      en: "Bengal's magnificent Durga Puja & all-India Navratri, culminating in Dussehra (Vijayadashami).",
-      bn: "বাঙালির প্রাণের মহোৎসব দুর্গাপূজা—মহাষষ্ঠী থেকে বিজয়া দশমী। অসুরের ওপর মায়ের জয়।",
-      hi: "महिषासुरमर्दिनी मां दुर्गा की महापूजा और असत्य पर सत्य की विजय का प्रतीक विजयादशमी।",
-    },
-    gradient: "from-[#ff6b8b] to-[#e63950]",
-    glow: "rgba(230,57,80,0.32)",
-    badge: { en: "Grandest Festival", bn: "মহোৎসব", hi: "महापर्व" },
-  },
-  {
-    name: { en: "Diwali & Kali Puja (Lakshmi Puja)", bn: "দীপাবলি ও কালীপূজা", hi: "दीपावली व लक्ष्मी पूजा" },
-    date: { en: "November 8, 2026", bn: "৮ নভেম্বর, ২০২৬", hi: "8 नवम्बर 2026" },
-    tithi: { en: "Kartika Amavasya", bn: "কার্তিক অমাবস্যা", hi: "कार्तिक अमावस्या" },
-    category: "major",
-    desc: {
-      en: "Festival of lights, welcoming Goddess Lakshmi and Lord Ganesha. In Bengal, nighttime Maa Kali adoration.",
-      bn: "আলোর মহা উৎসব দীপাবলি ও নিশারাতে মা কালীর মহাশক্তি আরাধনা।",
-      hi: "प्रकाश पर्व दीपावली। मां लक्ष्मी, गणेश जी एवं कुबेर पूजन तथा अंधकार पर प्रकाश की विजय।",
-    },
-    gradient: "from-[#ffd34d] to-[#f5a300]",
-    glow: "rgba(245,163,0,0.34)",
-    badge: { en: "Festival of Lights", bn: "আলোর উৎসব", hi: "दीपोत्सव" },
-  },
-  {
-    name: { en: "Chhath Puja", bn: "ছট পূজা", hi: "छठ पूजा (सूर्य षष्ठी)" },
-    date: { en: "November 14 – 15, 2026", bn: "১৪ – ১৫ নভেম্বর, ২০২৬", hi: "14 – 15 नवम्बर 2026" },
-    tithi: { en: "Kartika Shukla Shashthi", bn: "কার্তিক শুক্ল ষষ্ঠী", hi: "कार्तिक शुक्ल षष्ठी" },
-    category: "vrat",
-    desc: {
-      en: "Ancient 4-day rigorous Vedic ritual worshipping Sun God (Surya) and Chhathi Maiya for family well-being.",
-      bn: "ভগবান সূর্যদেব ও ষষ্ঠী মায়ের উদ্দেশ্যে নিবেদিত পরম নিষ্ঠার মহা পবিত্র চারদিনের ব্রত।",
-      hi: "सूर्य देव और छठी मइया को समर्पित चार दिवसीय कठिन और सबसे पवित्र लोकपर्व।",
-    },
-    gradient: "from-[#ff7043] to-[#d84315]",
-    glow: "rgba(216,67,21,0.3)",
-    badge: { en: "Sun Worship", bn: "সূর্য উপাসনা", hi: "सूर्य उपासना" },
-  },
-];
+import { VEDIC_FESTIVALS_BY_YEAR } from "@/lib/festivals-data";
 
 const T = {
   en: {
@@ -287,6 +92,45 @@ const T = {
   },
 };
 
+function resolveNextFestival(
+  upcomingData: WebFestivalItem[],
+  calendarData: WebFestivalCalendarResponse | null,
+  selectedYear: number,
+  todayIso: string,
+  nowMs: number,
+) {
+  if (upcomingData && upcomingData.length > 0) return upcomingData[0];
+  if (calendarData?.next_upcoming) return calendarData.next_upcoming;
+  for (const yr of [selectedYear, selectedYear + 1]) {
+    const list = VEDIC_FESTIVALS_BY_YEAR[yr] || [];
+    const upcoming = list.filter((f) => f.dateStr >= todayIso);
+    if (upcoming.length > 0) {
+      const u = upcoming[0];
+      const daysDiff = (new Date(u.dateStr).getTime() - nowMs) / (1000 * 60 * 60 * 24);
+      return {
+        id: u.id,
+        name: u.name,
+        date: u.dateStr,
+        date_formatted: u.date,
+        day_of_week: u.dayOfWeek,
+        tithi: u.tithi,
+        category: u.category,
+        badge: u.badge,
+        accent_color: u.accentColor,
+        muhurat: u.muhurat,
+        shloka: u.shloka,
+        desc: u.desc,
+        rituals: u.rituals,
+        days_remaining: daysDiff,
+        is_today: u.dateStr === todayIso,
+        is_upcoming: true,
+        is_past: false,
+      };
+    }
+  }
+  return null;
+}
+
 export default function FestivalsPage() {
   const { language } = useLanguage();
   const lang = (["en", "bn", "hi"].includes(language) ? language : "en") as
@@ -300,6 +144,8 @@ export default function FestivalsPage() {
   const [activeFilter, setActiveFilter] = React.useState<"all" | "major" | "vrat" | "jayanti">("all");
   const [calendarData, setCalendarData] = React.useState<WebFestivalCalendarResponse | null>(null);
   const [upcomingData, setUpcomingData] = React.useState<WebFestivalItem[]>([]);
+  const [todayIso] = React.useState<string>(() => new Date().toISOString().split("T")[0]);
+  const [nowMs] = React.useState<number>(() => Date.now());
 
   React.useEffect(() => {
     let active = true;
@@ -321,15 +167,14 @@ export default function FestivalsPage() {
   }, [selectedYear]);
 
   // Dynamic next upcoming festival relative to today
-  const nextFestival = React.useMemo(() => {
-    if (upcomingData && upcomingData.length > 0) return upcomingData[0];
-    if (calendarData?.next_upcoming) return calendarData.next_upcoming;
-    return null;
-  }, [upcomingData, calendarData]);
+  const nextFestival = React.useMemo(
+    () => resolveNextFestival(upcomingData, calendarData, selectedYear, todayIso, nowMs),
+    [upcomingData, calendarData, selectedYear, todayIso, nowMs]
+  );
 
-  // Festivals list from backend or fallback
+  // Festivals list from backend with instant year-aware fallback
   const activeList = React.useMemo(() => {
-    if (calendarData?.festivals && calendarData.festivals.length > 0) {
+    if (calendarData?.festivals && calendarData.festivals.length > 0 && calendarData.year === selectedYear) {
       return calendarData.festivals.map((f) => ({
         id: f.id,
         name: f.name,
@@ -347,16 +192,28 @@ export default function FestivalsPage() {
         shloka: f.shloka,
       }));
     }
-    return FESTIVALS_2026.map((f) => ({
-      ...f,
-      id: f.name.en.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-      days_remaining: 0,
-      is_today: false,
-      is_upcoming: true,
-      muhurat: { en: "Auspicious Puja Timings", bn: "শুভ পূজা মুহূর্ত", hi: "शुभ पूजा मुहूर्त" },
-      shloka: "",
-    }));
-  }, [calendarData]);
+    // Instant authentic fallback tailored specifically to selectedYear (never stuck on 2026!)
+    const yearList = VEDIC_FESTIVALS_BY_YEAR[selectedYear] ?? VEDIC_FESTIVALS_BY_YEAR[2026] ?? [];
+    return yearList.map((f) => {
+      const daysDiff = (new Date(f.dateStr).getTime() - nowMs) / (1000 * 60 * 60 * 24);
+      return {
+        id: f.id,
+        name: f.name,
+        date: f.date,
+        tithi: f.tithi,
+        category: f.category,
+        desc: f.desc,
+        gradient: "from-[#ffb347] to-[#ff8a00]",
+        glow: "rgba(255,138,0,0.3)",
+        badge: f.badge,
+        days_remaining: daysDiff,
+        is_today: f.dateStr === todayIso,
+        is_upcoming: f.dateStr >= todayIso,
+        muhurat: f.muhurat,
+        shloka: f.shloka,
+      };
+    });
+  }, [calendarData, selectedYear, todayIso, nowMs]);
 
   const filtered = React.useMemo(() => {
     return activeList.filter((f) => {
