@@ -63,7 +63,7 @@ export const DEFAULT_HERO_BANNERS: ShopHeroBanner[] = [
     cta_text: "SHOP NOW",
     cta_link: "/shop?category=zodiac",
     badge_text: "NEW LAUNCH",
-    image_url: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=1600&q=80",
+    image_url: "/images/banners/banner-zodiac.jpg",
     is_active: true,
   },
   {
@@ -73,7 +73,7 @@ export const DEFAULT_HERO_BANNERS: ShopHeroBanner[] = [
     cta_text: "EXPLORE MALAS",
     cta_link: "/shop?category=karungali",
     badge_text: "PRANA-PRATISHTHIT",
-    image_url: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1600&q=80",
+    image_url: "/images/banners/banner-rudraksha.jpg",
     is_active: true,
   },
   {
@@ -83,7 +83,7 @@ export const DEFAULT_HERO_BANNERS: ShopHeroBanner[] = [
     cta_text: "ORDER NOW",
     cta_link: "/shop?category=bracelets",
     badge_text: "BESTSELLER",
-    image_url: "https://images.unsplash.com/photo-1611591475879-166258f33cf2?auto=format&fit=crop&w=1600&q=80",
+    image_url: "/images/banners/banner-dhanyog.jpg",
     is_active: true,
   },
   {
@@ -93,7 +93,7 @@ export const DEFAULT_HERO_BANNERS: ShopHeroBanner[] = [
     cta_text: "VIEW KARUNGALI",
     cta_link: "/shop?category=karungali",
     badge_text: "DIVINE SHIELD",
-    image_url: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=1600&q=80",
+    image_url: "/images/banners/banner-karungali.jpg",
     is_active: true,
   },
   {
@@ -103,7 +103,7 @@ export const DEFAULT_HERO_BANNERS: ShopHeroBanner[] = [
     cta_text: "CONSULT & BUY",
     cta_link: "/shop?category=zodiac",
     badge_text: "LAB CERTIFIED",
-    image_url: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=1600&q=80",
+    image_url: "/images/banners/banner-gemstones.jpg",
     is_active: true,
   },
 ];

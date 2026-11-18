@@ -52,6 +52,8 @@ import { CartDrawer } from "@/components/shop/CartDrawer";
 import { Product3DModal } from "@/components/shop/Product3DModal";
 import { AstraPromiseSection } from "@/components/shop/AstraPromiseSection";
 import { ShopFaqAccordion } from "@/components/shop/ShopFaqAccordion";
+import { CardTilt } from "@/components/ui/card-tilt";
+import { ShopFilterDrawer } from "@/components/shop/ShopFilterDrawer";
 
 function ShopInner() {
   const { language } = useLanguage();
@@ -235,14 +237,14 @@ function ShopInner() {
       )}
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-12">
-        {/* 2. Hero Section: Large Rounded Carousel Banner */}
+        {/* 2. Hero Section: Large Rounded Carousel Banner (Astrotalk Luxury Style) */}
         <section
-          className="relative overflow-hidden rounded-[28px] sm:rounded-[34px] shadow-2xl bg-stone-900 border border-stone-200/40 select-none group"
+          className="relative overflow-hidden rounded-[26px] sm:rounded-[34px] shadow-xl bg-[#f5ede0] border border-[#e8dfcf] select-none group"
           onMouseEnter={() => setIsHeroPaused(true)}
           onMouseLeave={() => setIsHeroPaused(false)}
         >
           {/* Slide Background Image */}
-          <div className="relative aspect-[16/9] sm:aspect-[21/9] lg:aspect-[2.4/1] w-full min-h-[360px] sm:min-h-[460px]">
+          <div className="relative aspect-[16/10] sm:aspect-[21/9] lg:aspect-[2.35/1] w-full min-h-[380px] sm:min-h-[460px] lg:min-h-[500px]">
             {currentBanner && (
               <Image
                 src={currentBanner.image_url}
@@ -250,48 +252,48 @@ function ShopInner() {
                 fill
                 priority
                 sizes="(max-width: 1280px) 100vw, 1280px"
-                className="object-cover object-center transform transition-transform duration-1000 ease-out group-hover:scale-105"
+                className="object-cover object-center transform transition-transform duration-1000 ease-out group-hover:scale-102"
                 unoptimized
               />
             )}
 
-            {/* Cinematic Gradient Overlays */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/20" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+            {/* Subtle Luxury Warm Gradients for High Readability */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[#fbf8f3]/85 via-[#f8f3ea]/35 to-transparent h-[65%]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
 
             {/* Sacred Faint Horoscope Wheel Background Watermark */}
-            <div className="pointer-events-none absolute -right-20 -top-20 size-96 rounded-full border border-amber-400/10 opacity-30 blur-[1px] animate-spin-slow" />
-            <div className="pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 size-72 rounded-full border border-amber-300/10 opacity-20" />
+            <div className="pointer-events-none absolute left-1/2 -top-24 -translate-x-1/2 size-[520px] rounded-full border border-amber-800/10 opacity-30 blur-[0.5px] animate-spin-slow" />
 
-            {/* Banner Text Content */}
-            <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-14 lg:px-20 max-w-2xl text-white space-y-3 sm:space-y-4">
+            {/* Banner Centered Text Content (Exact Astrotalk Luxury Header) */}
+            <div className="absolute top-6 sm:top-10 lg:top-12 inset-x-0 flex flex-col items-center text-center px-4 sm:px-8 space-y-2.5 sm:space-y-3 z-10">
               {currentBanner?.badge_text && (
-                <div className="inline-flex items-center gap-1.5 self-start px-3 py-1 rounded-full bg-amber-500/20 backdrop-blur-md border border-amber-400/40 text-[11px] font-bold text-amber-200 tracking-wider uppercase">
-                  <Sparkles className="size-3 text-amber-300 animate-pulse" />
+                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#7a4823] text-white shadow-xs text-[10px] sm:text-[11px] font-extrabold tracking-widest uppercase">
+                  <Sparkles className="size-3 text-amber-200" />
                   <span>{currentBanner.badge_text}</span>
                 </div>
               )}
 
-              <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-amber-50 tracking-tight leading-[1.08] drop-shadow-md">
+              <h1 className="font-serif text-2xl sm:text-4xl lg:text-5xl font-black text-[#452b18] tracking-wider uppercase drop-shadow-xs">
                 {currentBanner?.title}
               </h1>
 
-              <div className="flex items-center gap-2 text-amber-400/90 text-sm">
-                <span>✦</span>
-                <div className="h-px w-12 bg-amber-400/40" />
+              <div className="flex items-center justify-center gap-2 text-[#8b5a2b]">
+                <div className="h-px w-8 sm:w-12 bg-[#8b5a2b]/35" />
+                <span className="text-xs">✦</span>
+                <div className="h-px w-8 sm:w-12 bg-[#8b5a2b]/35" />
               </div>
 
-              <p className="text-xs sm:text-base text-stone-200/95 font-medium leading-relaxed max-w-lg drop-shadow-sm">
+              <p className="text-[11px] sm:text-xs lg:text-sm text-[#5d3b24] font-semibold tracking-[0.16em] uppercase max-w-2xl px-2">
                 {currentBanner?.subtitle}
               </p>
 
-              <div className="pt-2">
+              <div className="pt-1.5 sm:pt-2">
                 <Link
                   href={currentBanner?.cta_link || "/shop?category=zodiac"}
-                  className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 rounded-full border-2 border-amber-400/80 bg-amber-500/20 hover:bg-amber-400 hover:text-stone-950 backdrop-blur-md text-amber-100 font-bold text-xs sm:text-sm tracking-widest uppercase transition-all duration-300 shadow-lg cursor-pointer"
+                  className="inline-flex items-center gap-2 px-6 sm:px-8 py-2.5 rounded-full border border-[#8b5a2b] bg-white/70 hover:bg-[#7a4823] text-[#4a2c16] hover:text-white backdrop-blur-xs font-bold text-xs sm:text-[13px] tracking-widest uppercase transition-all duration-300 shadow-xs hover:shadow-md cursor-pointer"
                 >
                   <span>{currentBanner?.cta_text || "SHOP NOW"}</span>
-                  <ArrowRight className="size-4" />
+                  <ArrowRight className="size-3.5" />
                 </Link>
               </div>
             </div>
@@ -301,7 +303,7 @@ function ShopInner() {
               type="button"
               onClick={prevHeroSlide}
               aria-label="Previous slide"
-              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 size-10 sm:size-12 rounded-full bg-black/40 hover:bg-black/75 backdrop-blur-md border border-white/20 text-white flex items-center justify-center opacity-70 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer shadow-lg"
+              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 size-9 sm:size-11 rounded-full bg-white/80 hover:bg-white text-[#4a2c16] border border-[#e5dcce] flex items-center justify-center opacity-80 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer shadow-md z-10"
             >
               <ChevronLeft className="size-5 sm:size-6" />
             </button>
@@ -309,13 +311,13 @@ function ShopInner() {
               type="button"
               onClick={nextHeroSlide}
               aria-label="Next slide"
-              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 size-10 sm:size-12 rounded-full bg-black/40 hover:bg-black/75 backdrop-blur-md border border-white/20 text-white flex items-center justify-center opacity-70 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer shadow-lg"
+              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 size-9 sm:size-11 rounded-full bg-white/80 hover:bg-white text-[#4a2c16] border border-[#e5dcce] flex items-center justify-center opacity-80 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer shadow-md z-10"
             >
               <ChevronRight className="size-5 sm:size-6" />
             </button>
 
-            {/* Bottom-Left Pagination Dots (Matching Astrotalk Screenshot 1) */}
-            <div className="absolute bottom-5 sm:bottom-8 left-6 sm:left-14 flex items-center gap-2 z-10">
+            {/* Bottom-Left Pagination Dots (Exact Astrotalk Screenshot 1) */}
+            <div className="absolute bottom-4 sm:bottom-6 left-5 sm:left-10 flex items-center gap-1.5 z-10 bg-white/50 backdrop-blur-xs px-2.5 py-1.5 rounded-full border border-[#e0d6c4]/60">
               {heroBanners.map((_, idx) => (
                 <button
                   key={idx}
@@ -324,8 +326,8 @@ function ShopInner() {
                   aria-label={`Go to slide ${idx + 1}`}
                   className={`transition-all duration-300 cursor-pointer ${
                     heroSlideIndex === idx
-                      ? "w-8 h-2.5 rounded-full bg-amber-400 shadow-md"
-                      : "size-2.5 rounded-full bg-white/40 hover:bg-white/80"
+                      ? "w-6 h-1.5 rounded-full bg-[#4a2c16] shadow-xs"
+                      : "size-1.5 rounded-full bg-[#4a2c16]/30 hover:bg-[#4a2c16]/70"
                   }`}
                 />
               ))}
