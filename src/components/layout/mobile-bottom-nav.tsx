@@ -14,7 +14,7 @@
  * bar radius changes.
  */
 
-import { CalendarDays, Compass, Home, ScanFace, UserRound } from "lucide-react";
+import { CalendarDays, Compass, Home, ShoppingBag, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
@@ -24,6 +24,15 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+
+type MobileNavItem = {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  isActive: boolean;
+  badge?: string;
+  showAvatar?: boolean;
+};
 
 export function MobileBottomNav() {
   const pathname = usePathname();
@@ -35,21 +44,21 @@ export function MobileBottomNav() {
     pathname.startsWith("/call/") ||
     pathname.startsWith("/ai-astrologer");
 
-  const navItems = React.useMemo(
+  const navItems: MobileNavItem[] = React.useMemo(
     () => [
       { href: "/", label: "Home", icon: Home, isActive: pathname === "/" },
+      {
+        href: "/shop",
+        label: "Shop",
+        icon: ShoppingBag,
+        isActive: pathname.startsWith("/shop"),
+        badge: "Store",
+      },
       {
         href: "/astrologers",
         label: "Astrologers",
         icon: Compass,
         isActive: pathname.startsWith("/astrologers"),
-      },
-      {
-        href: "/face-reading",
-        label: "Face Read",
-        icon: ScanFace,
-        isActive: pathname.startsWith("/face-reading"),
-        badge: "3D",
       },
       {
         href: "/appointments",

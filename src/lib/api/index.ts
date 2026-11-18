@@ -1093,30 +1093,47 @@ export interface ShopProduct {
   review_count: number;
 }
 
+export interface ShopHeroBannerItem {
+  id: string;
+  title: string;
+  subtitle: string;
+  cta_text: string;
+  cta_link: string;
+  badge_text?: string | null;
+  image_url: string;
+  is_active: boolean;
+}
+
+export interface ShopStoreReelItem {
+  id: string;
+  user_handle: string;
+  user_name?: string | null;
+  rating: number;
+  quote: string;
+  thumbnail_url: string;
+  video_url?: string | null;
+  likes_count: string;
+  tagged_product_title?: string | null;
+  tagged_product_price?: number | null;
+  tagged_product_slug?: string | null;
+  is_active: boolean;
+}
+
 export interface ShopBannerSettings {
   announcement_bar_text?: string | null;
   announcement_bar_link?: string | null;
   announcement_bar_active: boolean;
-  marquee_items: string[];
-  hero_banners: {
-    id: string;
-    title: string;
-    subtitle: string;
-    cta_text: string;
-    cta_link: string;
-    badge_text?: string | null;
-    image_url: string;
-    is_active: boolean;
-  }[];
-  cashback_enabled: boolean;
-  cashback_percent: number;
-  free_gift_default_title: string;
-  free_gift_default_value: number;
-  free_gift_default_badge: string;
-  free_shipping_threshold: number;
-  standard_shipping_fee: number;
-  cod_enabled: boolean;
-  reels?: any[];
+  marquee_items?: string[];
+  hero_banners: ShopHeroBannerItem[];
+  cashback_enabled?: boolean;
+  cashback_percent?: number;
+  free_gift_default_title?: string;
+  free_gift_default_value?: number;
+  free_gift_default_badge?: string;
+  free_shipping_threshold?: number;
+  standard_shipping_fee?: number;
+  cod_enabled?: boolean;
+  reels?: ShopStoreReelItem[];
 }
 
 export interface ShopCheckoutPayload {
@@ -1221,6 +1238,9 @@ export interface StockReservationResponse {
 }
 
 export const shopApi = {
+  getBanners: () =>
+    api.get<ShopBannerSettings>(endpoints.shop.banners, { auth: false }),
+
   getCategories: () =>
     api.get<ShopProductCategory[]>(endpoints.shop.categories, { auth: false }),
 
@@ -1266,9 +1286,6 @@ export const shopApi = {
       product_id: productId,
       quantity,
     }),
-
-  getBanners: () =>
-    api.get<ShopBannerSettings>(endpoints.shop.banners, { auth: false }),
 
   checkPincode: (pincode: string) =>
     api.get<PincodeResult>(endpoints.shop.checkPincode(pincode), { auth: false }),
