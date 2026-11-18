@@ -40,6 +40,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { CartDrawer } from "@/components/shop/CartDrawer";
 import { SacredImageGallery } from "@/components/shop/SacredImageGallery";
+import { CashbackConsultationBridge } from "@/components/shop/CashbackConsultationBridge";
 import { AstraPromiseSection } from "@/components/shop/AstraPromiseSection";
 import { CardTilt } from "@/components/ui/card-tilt";
 import { shopApi, type ShopProduct, type PincodeResult } from "@/lib/api";
@@ -374,44 +375,17 @@ export default function ProductDetailPage() {
               </p>
             </div>
 
-            {/* Value Proposition Banners: 100% Cashback & Free Gift */}
-            <div className="space-y-2.5">
-              {/* 100% Wallet Cashback Banner */}
-              <div className="rounded-2xl border border-emerald-300 bg-emerald-50/90 p-3.5 flex items-start gap-3 shadow-xs">
-                <div className="size-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 mt-0.5">
-                  <Coins className="size-4 text-amber-300" />
-                </div>
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-extrabold text-xs sm:text-sm text-emerald-950">
-                      {isBn
-                        ? `১০০% ওয়ালেট ক্যাশব্যাক: ${formatINR(salePrice)} এর সম্পূর্ণ কয়েন ফেরত!`
-                        : `100% Wallet Cashback: Get ${formatINR(salePrice)} Coins back!`}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-emerald-800 leading-tight">
-                    {isBn
-                      ? `প্রিপেইড অর্ডারে ${cashbackCoins} কয়েন সরাসরি আপনার ওয়ালেটে জমা হবে, যা দিয়ে টপ জ্যোতিষীদের সাথে ফ্রি কল/চ্যাট করতে পারবেন।`
-                      : `Get ${cashbackCoins} Astra Coins credited to your consultation wallet upon prepaid order confirmation.`}
-                  </p>
-                </div>
-              </div>
-
-              {/* Free Vedic Gift Banner */}
-              <div className="rounded-2xl border border-amber-300/80 bg-amber-50/80 p-3.5 flex items-start gap-3 shadow-xs">
-                <div className="size-8 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 mt-0.5">
-                  <Gift className="size-4" />
-                </div>
-                <div className="space-y-0.5">
-                  <span className="font-extrabold text-xs sm:text-sm text-amber-950">
-                    {isBn ? "বিনামূল্যে বৈদিক উপহার অন্তর্ভুক্ত" : "Complimentary Vedic Gift Included"}
-                  </span>
-                  <p className="text-[11px] text-amber-900 leading-tight">
-                    🎁 {freeGiftBadge} {isBn ? "প্রতিটি অর্ডারের সাথে সম্পূর্ণ বিনামূল্যে পাঠানো হবে।" : "included free with your order."}
-                  </p>
-                </div>
-              </div>
-            </div>
+            {/* Value Proposition: 100% Wallet Cashback to Astrologer Bridge & Free Gift */}
+            <CashbackConsultationBridge
+              productTitle={product.title}
+              mrp={mrp}
+              salePrice={salePrice}
+              cashbackPercent={effectiveCashback}
+              freeGiftTitle={product.free_gift_title}
+              freeGiftValue={product.free_gift_value}
+              freeGiftBadge={product.free_gift_badge}
+              categorySlug={product.category_slug}
+            />
 
             {/* Pincode Delivery Estimator */}
             <div className="rounded-2xl border border-stone-200 bg-white p-4 space-y-2.5 shadow-xs">
