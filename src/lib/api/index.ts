@@ -802,7 +802,49 @@ export const astrologyApi = {
   /** Get current feature pricing and availability for all astrology tools. */
   featuresPricing: () =>
     api.get<Record<string, FeaturePricingItem>>(endpoints.astrology.featuresPricing, { auth: false }),
+
+  /** Dynamic Vedic Festival Calendar calculated via Swiss Ephemeris. */
+  festivals: (year?: number, category?: string) => {
+    const params = new URLSearchParams();
+    if (year) params.append("year", String(year));
+    if (category && category !== "all") params.append("category", category);
+    const qs = params.toString() ? `?${params.toString()}` : "";
+    return api.get<WebFestivalCalendarResponse>(`${endpoints.astrology.festivals}${qs}`, { auth: false });
+  },
+
+  /** Dynamic Upcoming Vedic Festivals strictly from current date onwards. */
+  upcomingFestivals: (limit = 15) =>
+    api.get<WebFestivalItem[]>(`${endpoints.astrology.upcomingFestivals}?limit=${limit}`, { auth: false }),
 };
+
+export interface WebFestivalItem {
+  id: string;
+  name: Record<string, string>;
+  date: string;
+  date_formatted: Record<string, string>;
+  day_of_week: Record<string, string>;
+  tithi: Record<string, string>;
+  category: "major" | "vrat" | "jayanti";
+  badge: Record<string, string>;
+  accent_color: string;
+  muhurat: Record<string, string>;
+  shloka: string;
+  desc: Record<string, string>;
+  rituals: Record<string, string[]>;
+  days_remaining: number;
+  is_today: boolean;
+  is_upcoming: boolean;
+  is_past: boolean;
+}
+
+export interface WebFestivalCalendarResponse {
+  year: number;
+  total_count: number;
+  next_upcoming: WebFestivalItem | null;
+  festivals: WebFestivalItem[];
+  engine: string;
+  calculated_at: string;
+}
 
 // ------------------------------------------------------------ AI Vedic Astrologer
 export interface AIChatMessage {

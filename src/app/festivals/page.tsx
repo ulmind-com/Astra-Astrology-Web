@@ -10,13 +10,16 @@ import {
   Flame,
   Sun,
   Moon,
-  Star,
-  Heart,
   Search,
 } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { useLanguage } from "@/providers/language-provider";
+import {
+  astrologyApi,
+  type WebFestivalCalendarResponse,
+  type WebFestivalItem,
+} from "@/lib/api";
 
 interface FestivalItem {
   name: Record<string, string>;
@@ -291,11 +294,71 @@ export default function FestivalsPage() {
     | "hi";
   const t = T[lang];
 
+  const [selectedYear, setSelectedYear] = React.useState<number>(2026);
   const [search, setSearch] = React.useState("");
   const [activeFilter, setActiveFilter] = React.useState<"all" | "major" | "vrat" | "jayanti">("all");
+  const [calendarData, setCalendarData] = React.useState<WebFestivalCalendarResponse | null>(null);
+  const [upcomingData, setUpcomingData] = React.useState<WebFestivalItem[]>([]);
+
+  React.useEffect(() => {
+    let active = true;
+    Promise.all([
+      astrologyApi.festivals(selectedYear),
+      astrologyApi.upcomingFestivals(10),
+    ])
+      .then(([cal, up]) => {
+        if (!active) return;
+        setCalendarData(cal);
+        setUpcomingData(up);
+      })
+      .catch((err) => {
+        console.warn("Failed fetching dynamic festivals:", err);
+      });
+    return () => {
+      active = false;
+    };
+  }, [selectedYear]);
+
+  // Dynamic next upcoming festival relative to today
+  const nextFestival = React.useMemo(() => {
+    if (upcomingData && upcomingData.length > 0) return upcomingData[0];
+    if (calendarData?.next_upcoming) return calendarData.next_upcoming;
+    return null;
+  }, [upcomingData, calendarData]);
+
+  // Festivals list from backend or fallback
+  const activeList = React.useMemo(() => {
+    if (calendarData?.festivals && calendarData.festivals.length > 0) {
+      return calendarData.festivals.map((f) => ({
+        id: f.id,
+        name: f.name,
+        date: f.date_formatted,
+        tithi: f.tithi,
+        category: f.category,
+        desc: f.desc,
+        gradient: "from-[#ffb347] to-[#ff8a00]",
+        glow: "rgba(255,138,0,0.3)",
+        badge: f.badge,
+        days_remaining: f.days_remaining,
+        is_today: f.is_today,
+        is_upcoming: f.days_remaining >= 0,
+        muhurat: f.muhurat,
+        shloka: f.shloka,
+      }));
+    }
+    return FESTIVALS_2026.map((f) => ({
+      ...f,
+      id: f.name.en.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+      days_remaining: 0,
+      is_today: false,
+      is_upcoming: true,
+      muhurat: { en: "Auspicious Puja Timings", bn: "শুভ পূজা মুহূর্ত", hi: "शुभ पूजा मुहूर्त" },
+      shloka: "",
+    }));
+  }, [calendarData]);
 
   const filtered = React.useMemo(() => {
-    return FESTIVALS_2026.filter((f) => {
+    return activeList.filter((f) => {
       if (activeFilter !== "all" && f.category !== activeFilter) return false;
       if (!search.trim()) return true;
       const q = search.toLowerCase();
@@ -304,7 +367,7 @@ export default function FestivalsPage() {
       const dt = (f.date[lang] || f.date.en).toLowerCase();
       return n.includes(q) || d.includes(q) || dt.includes(q);
     });
-  }, [search, activeFilter, lang]);
+  }, [activeList, search, activeFilter, lang]);
 
   return (
     <div className="min-h-screen bg-surface-muted/30 text-foreground flex flex-col font-sans pb-24">
@@ -319,13 +382,75 @@ export default function FestivalsPage() {
           </div>
 
           <h1 className="font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-[#1a1208]">
-            {t.title}
+            {lang === "bn"
+              ? `হিন্দু উৎসব ও ব্রত পঞ্জিকা ${selectedYear}`
+              : lang === "hi"
+              ? `हिन्दू त्योहार एवं व्रत कैलेंडर ${selectedYear}`
+              : `Vedic Festival & Vrat Calendar ${selectedYear}`}
           </h1>
 
           <p className="text-sm sm:text-base text-[#6b5f4d] max-w-2xl mx-auto leading-relaxed">
             {t.subtitle}
           </p>
+
+          {/* Dynamic Year Switcher */}
+          <div className="flex items-center justify-center gap-2 pt-2">
+            {[2025, 2026, 2027, 2028].map((yr) => (
+              <button
+                key={yr}
+                type="button"
+                onClick={() => setSelectedYear(yr)}
+                className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all cursor-pointer shadow-2xs flex items-center gap-1.5 ${
+                  selectedYear === yr
+                    ? "bg-amber-600 text-white shadow-sm ring-2 ring-amber-400"
+                    : "bg-white text-[#766545] border border-[#ece0ac] hover:bg-amber-50"
+                }`}
+              >
+                <CalendarDays className="size-3 text-amber-400" />
+                <span>{yr}</span>
+              </button>
+            ))}
+          </div>
         </div>
+
+        {/* Real-time Upcoming Festival Spotlight */}
+        {nextFestival && (
+          <div className="rounded-[24px] border-2 border-amber-400/80 bg-gradient-to-r from-amber-50 via-[#fffbeb] to-amber-100/60 p-5 sm:p-6 shadow-md flex flex-col sm:flex-row items-center justify-between gap-5">
+            <div className="space-y-1.5 text-center sm:text-left">
+              <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-900 font-bold px-3 py-1 text-xs">
+                <Sparkles className="size-3 text-amber-600" />
+                <span>
+                  {nextFestival.days_remaining === 0
+                    ? (lang === "bn" ? "আজকের মহোৎসব" : "TODAY'S FESTIVAL")
+                    : nextFestival.days_remaining === 1
+                    ? (lang === "bn" ? "আগামীকাল" : "TOMORROW")
+                    : nextFestival.days_remaining > 0
+                    ? (lang === "bn" ? `আর মাত্র ${Math.round(nextFestival.days_remaining)} দিন বাকি` : `IN ${Math.round(nextFestival.days_remaining)} DAYS`)
+                    : (lang === "bn" ? "আসন্ন মহোৎসব" : "UPCOMING FESTIVAL")}
+                </span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-[#1a1208]">
+                {nextFestival.name[lang] || nextFestival.name.en}
+              </h2>
+              <p className="text-xs sm:text-sm font-semibold text-amber-800 flex items-center justify-center sm:justify-start gap-1.5">
+                <CalendarDays className="size-3.5 text-amber-600" />
+                <span>{nextFestival.date_formatted?.[lang] || nextFestival.date_formatted?.en || nextFestival.date}</span>
+                <span className="text-amber-400">·</span>
+                <Moon className="size-3.5 text-amber-600" />
+                <span>{nextFestival.tithi?.[lang] || nextFestival.tithi?.en}</span>
+              </p>
+            </div>
+            <div className="text-right shrink-0">
+              <Link
+                href="/daily-horoscope"
+                className="inline-flex items-center gap-2 rounded-full bg-amber-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-amber-700 hover:shadow-md"
+              >
+                <span>{lang === "bn" ? "লাইভ পঞ্চাঙ্গ দেখুন" : "View Live Panchang"}</span>
+                <ArrowRight className="size-3.5" />
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Search & Filter Bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -352,7 +477,7 @@ export default function FestivalsPage() {
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => setActiveFilter(tab.id as any)}
+                onClick={() => setActiveFilter(tab.id as "all" | "major" | "vrat" | "jayanti")}
                 className={`rounded-full px-4 py-2 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-2xs ${
                   activeFilter === tab.id
                     ? "bg-amber-500 text-white shadow-sm"
@@ -383,34 +508,45 @@ export default function FestivalsPage() {
                 <div className="flex items-center justify-between gap-2 mb-3">
                   <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50/90 border border-amber-200/80 px-2.5 py-1 rounded-full">
                     <CalendarDays className="size-3 text-amber-600" />
-                    <span>{fest.date[lang]}</span>
+                    <span>{fest.date[lang] || fest.date.en}</span>
                   </div>
-                  <span className="text-[11px] font-bold text-[#8b5e0a] bg-[#fff6d8] px-2.5 py-0.5 rounded-full border border-amber-300/50">
-                    {fest.badge[lang]}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {fest.days_remaining === 0 ? (
+                      <span className="text-[10px] font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full border border-red-200">
+                        {lang === "bn" ? "আজ" : "Today"}
+                      </span>
+                    ) : fest.days_remaining > 0 ? (
+                      <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300">
+                        {lang === "bn" ? `আর ${Math.round(fest.days_remaining)} দিন` : `In ${Math.round(fest.days_remaining)}d`}
+                      </span>
+                    ) : null}
+                    <span className="text-[11px] font-bold text-[#8b5e0a] bg-[#fff6d8] px-2.5 py-0.5 rounded-full border border-amber-300/50">
+                      {fest.badge[lang] || fest.badge.en}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Festival Name */}
                 <h3 className="text-lg font-black tracking-tight text-[#1a1208] mb-1 group-hover:text-amber-800 transition-colors">
-                  {fest.name[lang]}
+                  {fest.name[lang] || fest.name.en}
                 </h3>
 
                 {/* Tithi subtitle */}
                 <p className="text-[11.5px] font-semibold text-amber-900/70 mb-3 flex items-center gap-1">
                   <Moon className="size-3 text-amber-600" />
-                  <span>{fest.tithi[lang]}</span>
+                  <span>{fest.tithi[lang] || fest.tithi.en}</span>
                 </p>
 
                 {/* Description */}
                 <p className="text-xs text-[#6b5f4d] leading-relaxed mb-4">
-                  {fest.desc[lang]}
+                  {fest.desc[lang] || fest.desc.en}
                 </p>
               </div>
 
               {/* Card Footer */}
               <div className="pt-3 border-t border-[#f2e9b0]/80 flex items-center justify-between text-xs">
                 <span className="text-[11px] font-semibold text-[#8b6a1a]">
-                  {lang === "bn" ? "২০২৬ পঞ্জিকা তিথি" : lang === "hi" ? "2026 पंचांग तिथि" : "2026 Vedic Calendar"}
+                  {lang === "bn" ? `${selectedYear} পঞ্জিকা তিথি` : lang === "hi" ? `${selectedYear} पंचांग तिथि` : `${selectedYear} Vedic Calendar`}
                 </span>
                 <Link
                   href="/daily-horoscope"
