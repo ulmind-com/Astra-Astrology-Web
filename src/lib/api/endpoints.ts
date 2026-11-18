@@ -251,5 +251,12 @@ export const endpoints = {
     certificateHtml: (courseId: string) => `/courses/${courseId}/certificate/html`,
     verifyCertificateHtml: (certificateId: string) => `/courses/certificate/verify/${certificateId}/html`,
   },
+  purohits: {
+    list: "/purohits",
+    detail: (idOrSlug: string) => `/purohits/${idOrSlug}`,
+    book: "/purohits/bookings",
+    myBookings: "/purohits/bookings/mine",
+    roomToken: (bookingId: string) => `/purohits/bookings/${bookingId}/token`,
+  },
 } as const;
 

@@ -1444,5 +1444,99 @@ export const courseApi = {
     `${process.env.NEXT_PUBLIC_API_URL || "https://astra-astrology-backend.onrender.com/api/v1"}${endpoints.courses.verifyCertificateHtml(certificateId)}`,
 };
 
+// ------------------------------------------------------------------ Purohit & Live Puja
+export interface PurohitPujaItem {
+  id: string;
+  puja_name: string;
+  description: string;
+  duration_minutes: number;
+  price_inr: number;
+  samagri_notes?: string | null;
+  is_active: boolean;
+}
+
+export interface PurohitData {
+  id: string;
+  user_id: string;
+  display_name: string;
+  slug: string;
+  title: string;
+  bio?: string | null;
+  avatar_url?: string | null;
+  experience_years: number;
+  languages: string[];
+  city?: string | null;
+  state?: string | null;
+  is_online: boolean;
+  is_verified: boolean;
+  rating: number;
+  total_reviews: number;
+  total_pujas_performed: number;
+  starting_price_inr: number;
+  pujas: PurohitPujaItem[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PujaBookingData {
+  id: string;
+  booking_number: string;
+  user_id: string;
+  user_name: string;
+  user_phone?: string | null;
+  user_email?: string | null;
+  purohit_id: string;
+  purohit_name: string;
+  puja_item_id: string;
+  puja_name: string;
+  puja_duration_minutes: number;
+  amount_inr: number;
+  sankalpa_name: string;
+  sankalpa_gotra: string;
+  sankalpa_wish?: string | null;
+  room_id: string;
+  zego_app_id?: number;
+  zego_token?: string | null;
+  status: "pending" | "confirmed" | "in_progress" | "completed" | "cancelled";
+  payment_status: "pending" | "paid" | "failed" | "refunded";
+  started_at?: string | null;
+  completed_at?: string | null;
+  created_at: string;
+}
+
+export const purohitApi = {
+  list: (params?: {
+    online_only?: boolean;
+    search_puja?: string;
+    language?: string;
+    limit?: number;
+    offset?: number;
+  }) =>
+    api.get<PurohitData[]>(endpoints.purohits.list, {
+      query: params,
+      auth: false,
+    }),
+
+  get: (idOrSlug: string) =>
+    api.get<PurohitData>(endpoints.purohits.detail(idOrSlug), {
+      auth: false,
+    }),
+
+  book: (body: {
+    purohit_id: string;
+    puja_item_id: string;
+    sankalpa_name: string;
+    sankalpa_gotra: string;
+    sankalpa_wish?: string | null;
+  }) => api.post<PujaBookingData>(endpoints.purohits.book, body),
+
+  getMyBookings: () =>
+    api.get<PujaBookingData[]>(endpoints.purohits.myBookings),
+
+  getRoomToken: (bookingId: string) =>
+    api.get<PujaBookingData>(endpoints.purohits.roomToken(bookingId)),
+};
+
+
 
 
