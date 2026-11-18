@@ -18,7 +18,6 @@ import { type ShopProduct } from "@/lib/api";
 import { useCartStore } from "@/lib/stores/use-cart-store";
 import { useLanguage } from "@/providers/language-provider";
 import { CardTilt } from "@/components/ui/card-tilt";
-import { Product3DModal } from "@/components/shop/Product3DModal";
 
 interface Props {
   products: ShopProduct[];
@@ -29,7 +28,6 @@ export function ShopBestsellers({ products }: Props) {
   const { addItem } = useCartStore();
   const [filter, setFilter] = React.useState<string>("all");
   const [addedId, setAddedId] = React.useState<string | null>(null);
-  const [active3DProduct, setActive3DProduct] = React.useState<ShopProduct | null>(null);
 
   if (!products || products.length === 0) {
     return null;
@@ -160,21 +158,6 @@ export function ShopBestsellers({ products }: Props) {
                       )}
                     </div>
 
-                    {/* 3D Interactive Model Trigger Button */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setActive3DProduct(p);
-                      }}
-                      className="absolute top-2.5 right-2.5 inline-flex items-center gap-1 rounded-full bg-stone-900/85 backdrop-blur-xs px-2.5 py-1 text-[10px] font-bold text-amber-300 border border-amber-400/40 hover:bg-stone-900 hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer z-10"
-                      title="Preview 3D Crystal/Gem Model"
-                    >
-                      <Sparkles className="size-3 text-amber-400 animate-pulse" />
-                      <span>3D View</span>
-                    </button>
-
                     {p.is_energized && (
                       <span className="absolute bottom-2.5 left-2.5 inline-flex items-center gap-1 bg-stone-900/85 backdrop-blur-xs text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-500/40">
                         <Flame className="size-2.5 text-amber-400 fill-current" />
@@ -253,16 +236,6 @@ export function ShopBestsellers({ products }: Props) {
         );
       })}
     </div>
-
-    {/* 3D Product Interactive Gem Modal */}
-    {active3DProduct && (
-      <Product3DModal
-        open={Boolean(active3DProduct)}
-        onClose={() => setActive3DProduct(null)}
-        productName={active3DProduct.title}
-        category={active3DProduct.category_slug}
-      />
-    )}
   </div>
 );
 }
