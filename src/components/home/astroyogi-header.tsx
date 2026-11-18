@@ -945,34 +945,23 @@ export function AstroyogiHeader() {
               )}
             </div>
 
-            {/* Direct Shop Navigation Button */}
-            <Link
-              href="/shop"
-              className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/80 bg-gradient-to-r from-amber-50 to-amber-100 hover:from-amber-100 hover:to-amber-200 text-amber-950 font-bold px-2.5 sm:px-3 py-1.5 text-xs shadow-2xs hover:shadow-xs transition-all shrink-0 cursor-pointer"
-              title={language === "bn" ? "অ্যাস্ট্রোমল স্টোরে যান" : language === "hi" ? "एस्ट्रोमॉल स्टोर जाएं" : "Go to AstroMall Shop"}
-            >
-              <ShoppingBag className="size-3.5 text-amber-700" />
-              <span>{language === "bn" ? "শপ" : language === "hi" ? "शॉप" : "Shop"}</span>
-              <span className="hidden sm:inline-block rounded-full bg-amber-500/20 text-amber-900 text-[9px] font-extrabold px-1.5 py-0.2 border border-amber-400/40 uppercase">
-                Store
-              </span>
-            </Link>
-
-            {/* Quick Cart Button with Live Badge */}
-            <button
-              type="button"
-              onClick={openCart}
-              className="relative inline-flex size-9 sm:size-[38px] items-center justify-center rounded-full border border-stone-200 hover:border-amber-400 bg-white hover:bg-amber-50/50 text-stone-700 hover:text-amber-800 transition-all cursor-pointer shrink-0 shadow-2xs"
-              title={language === "bn" ? "কার্ট দেখুন" : language === "hi" ? "कार्ट देखें" : "View Cart"}
-              aria-label="Shopping Cart"
-            >
-              <ShoppingBag className="size-4 sm:size-4.5" />
-              {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-extrabold text-white shadow-xs animate-in zoom-in-75 duration-150">
-                  {cartItemCount > 99 ? "99+" : cartItemCount}
-                </span>
-              )}
-            </button>
+            {/* Cart Button: Appears on Shop pages or whenever items are added */}
+            {(pathname.startsWith("/shop") || cartItemCount > 0) && (
+              <button
+                type="button"
+                onClick={openCart}
+                className="relative inline-flex size-9 sm:size-[38px] items-center justify-center rounded-full border border-stone-200 hover:border-amber-400 bg-white hover:bg-amber-50/50 text-stone-700 hover:text-amber-800 transition-all cursor-pointer shrink-0 shadow-2xs animate-in fade-in duration-200"
+                title={language === "bn" ? "কার্ট দেখুন" : language === "hi" ? "कार्ट देखें" : "View Cart"}
+                aria-label="Shopping Cart"
+              >
+                <ShoppingBag className="size-4 sm:size-4.5" />
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-extrabold text-white shadow-xs animate-in zoom-in-75 duration-150">
+                    {cartItemCount > 99 ? "99+" : cartItemCount}
+                  </span>
+                )}
+              </button>
+            )}
 
             {/* User Profile / Wallet or Sign In */}
             {isSignedIn ? (
