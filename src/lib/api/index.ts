@@ -1217,6 +1217,7 @@ export interface PincodeResult {
   state: string;
   is_serviceable: boolean;
   cod_available: boolean;
+  cod_disabled_reason?: string | null;
   estimated_delivery_days: number;
   estimated_delivery_date: string;
 }
@@ -1287,8 +1288,8 @@ export const shopApi = {
       quantity,
     }),
 
-  checkPincode: (pincode: string) =>
-    api.get<PincodeResult>(endpoints.shop.checkPincode(pincode), { auth: false }),
+  checkPincode: (pincode: string, phone?: string) =>
+    api.get<PincodeResult>(endpoints.shop.checkPincode(pincode, phone), { auth: false }),
 
   checkout: (payload: ShopCheckoutPayload) =>
     api.post<ShopCheckoutResult>(endpoints.shop.checkout, payload, { auth: true }),
