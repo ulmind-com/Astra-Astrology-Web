@@ -6,17 +6,14 @@ import {
   ArrowRight,
   CalendarDays,
   Flame,
-  Heart,
   Moon,
-  PartyPopper,
   Sparkles,
-  Star,
   Sun,
-  type LucideIcon,
 } from "lucide-react";
 import { useLanguage } from "@/providers/language-provider";
+import { FestivalClipart } from "@/components/festivals/festival-cliparts";
 
-interface HomeFestivalItem {
+interface FestivalItem {
   id: string;
   name: Record<string, string>;
   date: Record<string, string>;
@@ -24,11 +21,10 @@ interface HomeFestivalItem {
   category: "major" | "vrat" | "jayanti";
   desc: Record<string, string>;
   badge: Record<string, string>;
-  icon: LucideIcon;
-  iconBg: string;
+  glowColor: string;
 }
 
-const HOME_FESTIVALS: HomeFestivalItem[] = [
+const HOME_FESTIVALS: FestivalItem[] = [
   {
     id: "makar-sankranti",
     name: { en: "Makar Sankranti", bn: "মকর সংক্রান্তি", hi: "मकर संक्रांति" },
@@ -40,9 +36,8 @@ const HOME_FESTIVALS: HomeFestivalItem[] = [
       bn: "সূর্যের মকর রাশিতে উত্তরায়ণ প্রবেশ। পুণ্যস্নান, দান ও পৌষ সংক্রান্তির পিঠেপুলির মহোৎসব।",
       hi: "सूर्य का मकर राशि में उत्तरायण प्रवेश। पवित्र स्नान, दान और तिल-गुड़ का पावन पर्व।",
     },
-    badge: { en: "Harvest & Solar", bn: "সূর্য সংক্রান্তি", hi: "सौर पर्व" },
-    icon: Sun,
-    iconBg: "bg-amber-100 text-amber-700 border-amber-200",
+    badge: { en: "Solar Festival", bn: "সূর্য সংক্রান্তি", hi: "सौर पर्व" },
+    glowColor: "#f59e0b",
   },
   {
     id: "saraswati-puja",
@@ -56,8 +51,7 @@ const HOME_FESTIVALS: HomeFestivalItem[] = [
       hi: "विद्या, ज्ञान और कला की देवी मां सरस्वती की आराधना और वसंत ऋतु का स्वागत।",
     },
     badge: { en: "Wisdom & Arts", bn: "বিদ্যা ও জ্ঞান", hi: "विद्या व ज्ञान" },
-    icon: Sparkles,
-    iconBg: "bg-yellow-100 text-yellow-700 border-yellow-200",
+    glowColor: "#eab308",
   },
   {
     id: "maha-shivaratri",
@@ -71,8 +65,7 @@ const HOME_FESTIVALS: HomeFestivalItem[] = [
       hi: "भगवान शिव की महान महारात्रि। निर्जला व्रत, रुद्राभिषेक और चार प्रहर की विशेष पूजा।",
     },
     badge: { en: "Major Vrat", bn: "প্রধান ব্রত", hi: "महाव्रत" },
-    icon: Flame,
-    iconBg: "bg-indigo-100 text-indigo-700 border-indigo-200",
+    glowColor: "#6366f1",
   },
   {
     id: "holi-dol-yatra",
@@ -86,12 +79,11 @@ const HOME_FESTIVALS: HomeFestivalItem[] = [
       hi: "रंगों और उल्लास का महापर्व। होलिका दहन, राधा-कृष्ण का रंगोत्सव और सामाजिक समरसता।",
     },
     badge: { en: "Colors of Joy", bn: "রঙের উৎসব", hi: "रंगोत्सव" },
-    icon: Heart,
-    iconBg: "bg-rose-100 text-rose-700 border-rose-200",
+    glowColor: "#ec4899",
   },
   {
     id: "pohela-boishakh",
-    name: { en: "Pohela Boishakh (New Year)", bn: "পহেলা বৈশাখ (শুভ নববর্ষ ১৪৩৩)", hi: "पोইলা बैसाख" },
+    name: { en: "Pohela Boishakh (New Year)", bn: "পহেলা বৈশাখ (শুভ নববর্ষ ১৪৩৩)", hi: "पोइলা बैसाख" },
     date: { en: "April 15, 2026", bn: "১৫ এপ্রিল, ২০২৬", hi: "15 अप्रैल 2026" },
     tithi: { en: "Boishakh 1 (Solar Mesha)", bn: "১ বৈশাখ (সৌর মেষ সংক্রান্তি)", hi: "बैसाख संक्रांति" },
     category: "major",
@@ -101,8 +93,7 @@ const HOME_FESTIVALS: HomeFestivalItem[] = [
       hi: "पारंपरिक बंगाली नववर्ष। व्यापारियों का नया बहीखाता आरंभ और लक्ष्मी-गणेश पूजन।",
     },
     badge: { en: "New Year", bn: "শুভ নববর্ষ", hi: "नववर्ष" },
-    icon: Sun,
-    iconBg: "bg-red-100 text-red-700 border-red-200",
+    glowColor: "#e11d48",
   },
   {
     id: "akshaya-tritiya",
@@ -116,8 +107,7 @@ const HOME_FESTIVALS: HomeFestivalItem[] = [
       hi: "स्वर्ण खरीद, नया व्यापार आरंभ और अक्षय फल की प्राप्ति हेतु सर्वोत्तम अबूझ मुहूर्त।",
     },
     badge: { en: "Eternal Muhurat", bn: "অক্ষয় মুহূর্ত", hi: "अबूझ मुहूर्त" },
-    icon: Sparkles,
-    iconBg: "bg-amber-100 text-amber-700 border-amber-200",
+    glowColor: "#f59e0b",
   },
   {
     id: "krishna-janmashtami",
@@ -131,14 +121,13 @@ const HOME_FESTIVALS: HomeFestivalItem[] = [
       hi: "रोहिणी नक्षत्र में भगवान श्री कृष्ण का जन्मोत्सव। रात्रि जागरण, अभिषेक और माखन भोग।",
     },
     badge: { en: "Avatara Jayanti", bn: "অবতার জয়ন্তী", hi: "अवतार जयंती" },
-    icon: Star,
-    iconBg: "bg-sky-100 text-sky-700 border-sky-200",
+    glowColor: "#0284c7",
   },
   {
     id: "durga-puja-dussehra",
     name: { en: "Durga Puja & Dussehra", bn: "শারদীয়া দুর্গাপূজা ও বিজয়া দশমী", hi: "दुर्गा पूजा एवं दशहरा" },
     date: { en: "October 16 – 20, 2026", bn: "১৬ – ২০ অক্টোবর, ২০২৬", hi: "16 – 20 अक्टूबर 2026" },
-    tithi: { en: "Ashwin Shukla Shashthi to Dashami", bn: "আশ্বিন শুক্লা ষষ্ঠী থেকে দশমী", hi: "आश्विन शुक्ल षष्ठी से Dashami" },
+    tithi: { en: "Ashwin Shukla Shashthi to Dashami", bn: "আশ্বিন শুক্লা ষষ্ঠী থেকে দশমী", hi: "आश्विन शुक्ल षष्ठी से दशमी" },
     category: "major",
     desc: {
       en: "Grand celebration of Mahishasuramardini Goddess Durga and victory of good over evil.",
@@ -146,8 +135,7 @@ const HOME_FESTIVALS: HomeFestivalItem[] = [
       hi: "मां दुर्गा का महाउत्सव, शस्त्र पूजन, रामलीला और रावण दहन पर अधर्म पर धर्म की विजय।",
     },
     badge: { en: "Grand Festival", bn: "মহোৎসব", hi: "महापर्व" },
-    icon: PartyPopper,
-    iconBg: "bg-rose-100 text-rose-700 border-rose-200",
+    glowColor: "#dc2626",
   },
   {
     id: "dhanteras-diwali",
@@ -161,8 +149,7 @@ const HOME_FESTIVALS: HomeFestivalItem[] = [
       hi: "प्रकाश पर्व। समुद्र मंथन से प्रकट मां लक्ष्मी, कुबेर और भगवान धन्वंतरि की विशेष आराधना।",
     },
     badge: { en: "Lights & Wealth", bn: "ধনলক্ষ্মী ও দীপাবলি", hi: "दीपावली" },
-    icon: Flame,
-    iconBg: "bg-amber-100 text-amber-700 border-amber-200",
+    glowColor: "#f59e0b",
   },
 ];
 
@@ -181,12 +168,12 @@ export function VedicFestivalsSection() {
       ? "प्रमुख वैदिक पर्व एवं व्रत"
       : "Auspicious Vedic Festivals & Holy Vrats",
     subtitle: isBn
-      ? "পূজা, উপবাস ও মহোৎসবের সঠিক তিথি, শাস্ত্রীয় মাহাত্ম্য ও পালনবিধি।"
+      ? "শাস্ত্রীয় তিথি, ব্রতের নিয়ম ও মহোৎসবের মাহাত্ম্য সহ ২০২৬ সালের সম্পূর্ণ আধ্যাত্মিক নির্দেশিকা।"
       : isHi
-      ? "पूजा, उपवास और महापर्वों की सटीक तिथि, शास्त्रीय महात्म्य एवं विधि।"
-      : "Exact Vedic tithis, dates, significance, and rituals for every major festival.",
+      ? "शास्त्रीय तिथियां, व्रत के नियम और महापर्वों के महात्म्य सहित 2026 की संपूर्ण पंचांग सूची।"
+      : "Precise Vedic lunar tithis, sacred rituals, and fasting rules for every major spiritual celebration in 2026.",
     viewAll: isBn ? "সকল উৎসব ও তিথি দেখুন" : isHi ? "सभी त्योहार देखें" : "View All Festivals",
-    viewTithi: isBn ? "পবিত্র তিথি দেখুন" : isHi ? "तिथि देखें" : "View Tithi",
+    viewTithi: isBn ? "পূর্ণ তিথি দেখুন" : isHi ? "पूरी तिथि देखें" : "View Tithi Details",
     all: isBn ? "সকল উৎসব" : isHi ? "सभी पर्व" : "All Festivals",
     major: isBn ? "প্রধান মহোৎসব" : isHi ? "प्रमुख महापर्व" : "Major Festivals",
     vrat: isBn ? "পবিত্র ব্রত ও উপবাস" : isHi ? "पवित्र व्रत" : "Sacred Vrats",
@@ -204,7 +191,7 @@ export function VedicFestivalsSection() {
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between mb-8">
           <div>
             <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.18em] text-[#c2410c]">
-              <PartyPopper className="size-3.5 text-[#e2561f]" />
+              <Sun className="size-3.5 text-[#e2561f]" />
               {t.badge}
             </span>
             <h2 className="mt-2 text-2xl sm:text-4xl font-extrabold tracking-tight text-[#1a1208]">
@@ -237,7 +224,7 @@ export function VedicFestivalsSection() {
                 key={tab.id}
                 type="button"
                 onClick={() => setFilter(tab.id)}
-                className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all whitespace-nowrap ${
                   active
                     ? "bg-[#fcd404] text-[#1c1304] shadow-xs border border-[#d9af00]"
                     : "bg-white text-[#6b5f4d] border border-stone-200 hover:border-amber-300 hover:bg-[#fffdf5]"
@@ -249,10 +236,9 @@ export function VedicFestivalsSection() {
           })}
         </div>
 
-        {/* 3-Column Luxury Grid with Mobile App Consistent Sacred Icons */}
+        {/* 3-Column Luxury Grid with Handcrafted Spiritual Vector Cliparts */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filtered.map((fest) => {
-            const Icon = fest.icon;
             const name = fest.name[language] || fest.name.en;
             const date = fest.date[language] || fest.date.en;
             const tithi = fest.tithi[language] || fest.tithi.en;
@@ -262,46 +248,50 @@ export function VedicFestivalsSection() {
             return (
               <div
                 key={fest.id}
-                className="group relative flex flex-col justify-between overflow-hidden rounded-[22px] border border-stone-200 bg-white p-5 shadow-[0_6px_20px_-10px_rgba(26,18,8,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-amber-400 hover:shadow-[0_12px_28px_-10px_rgba(245,158,11,0.18)]"
+                className="group relative flex flex-col justify-between overflow-hidden rounded-[24px] border border-[#f0e3aa]/90 bg-gradient-to-b from-white via-white to-[#fffdf5] p-5 shadow-[0_6px_20px_-10px_rgba(26,18,8,0.08)] transition-all duration-300 hover:-translate-y-1.5 hover:border-amber-400 hover:shadow-[0_12px_28px_-10px_rgba(245,158,11,0.22)]"
               >
+                {/* Subtle festive glow orb in background */}
+                <div
+                  className="pointer-events-none absolute -right-10 -top-10 size-36 rounded-full blur-2xl opacity-20 transition-opacity group-hover:opacity-40"
+                  style={{ backgroundColor: fest.glowColor }}
+                />
+
                 <div>
-                  {/* Top Header: Matching Mobile App Card with exact Icon & Badge */}
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="flex items-center gap-3">
-                      {/* Sacred Icon Medallion matching Mobile App */}
-                      <div className={`flex size-11 items-center justify-center rounded-xl border shadow-2xs group-hover:scale-105 transition-transform ${fest.iconBg}`}>
-                        <Icon className="size-5" />
-                      </div>
-                      <div>
-                        <h3 className="text-base font-bold tracking-tight text-[#1a1208] group-hover:text-amber-900 transition-colors line-clamp-1">
-                          {name}
-                        </h3>
-                        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#8b7d63]">
-                          <CalendarDays className="size-3 text-[#d97706]" />
-                          <span>{date}</span>
-                        </div>
-                      </div>
+                  {/* Top Header: Clipart + Badges */}
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <div className="relative flex size-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#fffdf5] to-[#fef3c7] p-2 ring-1 ring-[#ebd881] shadow-xs group-hover:scale-105 transition-transform">
+                      <FestivalClipart id={fest.id} className="size-full" />
                     </div>
 
-                    <span className="shrink-0 rounded-full border border-amber-300/60 bg-[#fff8db] px-2.5 py-0.5 text-[11px] font-bold text-[#8b5e0a]">
-                      {badge}
-                    </span>
+                    <div className="flex flex-col items-end gap-1.5">
+                      <span className="rounded-full border border-amber-300/60 bg-[#fff8db] px-2.5 py-0.5 text-[11px] font-bold text-[#8b5e0a] shadow-2xs">
+                        {badge}
+                      </span>
+                      <div className="flex items-center gap-1 text-[11px] font-semibold text-[#8b7d63]">
+                        <CalendarDays className="size-3 text-amber-600" />
+                        <span>{date}</span>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Tithi Row matching mobile app */}
-                  <div className="mt-2.5 flex items-center gap-1.5 text-xs font-semibold text-amber-900/80">
-                    <Moon className="size-3.5 text-[#d97706]" />
+                  {/* Title & Tithi */}
+                  <h3 className="text-lg font-bold tracking-tight text-[#1a1208] group-hover:text-amber-900 transition-colors line-clamp-1">
+                    {name}
+                  </h3>
+
+                  <div className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-amber-900/80">
+                    <Moon className="size-3 text-amber-600" />
                     <span>{tithi}</span>
                   </div>
 
                   {/* Description */}
-                  <p className="mt-2 text-xs text-[#6b5f4d] leading-relaxed line-clamp-3">
+                  <p className="mt-2.5 text-xs text-[#6b5f4d] leading-relaxed line-clamp-3">
                     {desc}
                   </p>
                 </div>
 
                 {/* Footer Link */}
-                <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between">
+                <div className="mt-5 pt-3 border-t border-[#f2e9b0]/80 flex items-center justify-between">
                   <span className="text-[11px] font-semibold text-[#a08a5e]">
                     {isBn ? "পবিত্র তিথি মহিমা" : isHi ? "पवित्र तिथि महात्म्य" : "Sacred Tithi Ritual"}
                   </span>
