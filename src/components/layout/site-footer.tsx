@@ -215,16 +215,34 @@ export function SiteFooter() {
             </p>
             <ul className="mt-4 space-y-2.5">
               {[
-                language === "bn" ? "রিফান্ড ও বাতিল নীতি" : language === "hi" ? "रिफंड एवं रद्दीकरण नीति" : "Refund & Cancellation Policy",
-                language === "bn" ? "শর্তাবলী" : language === "hi" ? "नियम एवं शर्तें" : "Terms & Conditions",
-                language === "bn" ? "গোপনীয়তা নীতি" : language === "hi" ? "गोपनीयता नीति" : "Privacy Policy",
-                language === "bn" ? "দাবিত্যাগ" : language === "hi" ? "अस्वीकरण" : "Disclaimer",
-                language === "bn" ? "আমাদের সম্পর্কে" : language === "hi" ? "हमारे बारे में" : "About Us",
-                language === "bn" ? "মূল্য নীতি" : language === "hi" ? "मूल्य नीति" : "Pricing Policy",
-              ].map((label) => (
-                <li key={label}>
-                  <Link href="#" className="text-sm text-[#6b5f4d] transition-colors hover:text-[#8b5e0a]">
-                    {label}
+                {
+                  label: language === "bn" ? "গোপনীয়তা নীতি" : language === "hi" ? "गोपनीयता नीति" : "Privacy Policy",
+                  href: "/privacy-policy",
+                },
+                {
+                  label: language === "bn" ? "রিফান্ড ও বাতিল নীতি" : language === "hi" ? "रिफंड एवं रद्दीकरण नीति" : "Refund & Cancellation Policy",
+                  href: "/privacy-policy#section-2",
+                },
+                {
+                  label: language === "bn" ? "শর্তাবলী" : language === "hi" ? "नियम एवं शर्तें" : "Terms & Conditions",
+                  href: "/privacy-policy",
+                },
+                {
+                  label: language === "bn" ? "দাবিত্যাগ" : language === "hi" ? "अस्वीकरण" : "Disclaimer",
+                  href: "/privacy-policy",
+                },
+                {
+                  label: language === "bn" ? "আমাদের সম্পর্কে" : language === "hi" ? "हमारे बारे में" : "About Us",
+                  href: "/support",
+                },
+                {
+                  label: language === "bn" ? "সাহায্য ও সাপোর্ট" : language === "hi" ? "सहायता एवं संपर्क" : "Help & Support",
+                  href: "/support",
+                },
+              ].map((item) => (
+                <li key={item.label}>
+                  <Link href={item.href} className="text-sm text-[#6b5f4d] transition-colors hover:text-[#8b5e0a]">
+                    {item.label}
                   </Link>
                 </li>
               ))}
