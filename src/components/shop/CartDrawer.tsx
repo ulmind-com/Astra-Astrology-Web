@@ -26,6 +26,7 @@ import {
 import { toast } from "sonner";
 import { useCartStore } from "@/lib/stores/use-cart-store";
 import { useLanguage } from "@/providers/language-provider";
+import { CouponOfferSelector } from "@/components/shop/CouponOfferSelector";
 
 export function CartDrawer() {
   const router = useRouter();
@@ -45,8 +46,6 @@ export function CartDrawer() {
     discountAmount,
     setCoupon,
   } = useCartStore();
-
-  const [couponInput, setCouponInput] = React.useState("");
 
   React.useEffect(() => {
     setMounted(true);
@@ -81,26 +80,6 @@ export function CartDrawer() {
   const isFreeShipping = subtotal >= freeShippingThreshold || items.length === 0;
   const shippingFee = isFreeShipping ? 0 : 70;
   const grandTotal = Math.max(0, subtotal - discountAmount + shippingFee);
-
-  const handleApplyCoupon = (e: React.FormEvent) => {
-    e.preventDefault();
-    const code = couponInput.trim().toUpperCase();
-    if (!code) return;
-
-    if (code === "ASTRA100" || code === "ASTRO10") {
-      const disc = Math.round(subtotal * 0.1);
-      setCoupon(code, disc);
-      toast.success(`Coupon ${code} applied! ₹${disc} discount added.`);
-    } else {
-      toast.error("Invalid or expired coupon code.");
-    }
-    setCouponInput("");
-  };
-
-  const handleRemoveCoupon = () => {
-    setCoupon(null, 0);
-    toast.info("Coupon removed");
-  };
 
   const handleProceedToCheckout = () => {
     closeCart();
@@ -382,41 +361,18 @@ export function CartDrawer() {
             {/* ================= Footer & Checkout Area ================= */}
             {items.length > 0 && (
               <div className="border-t border-amber-900/10 bg-white p-5 space-y-3.5 shrink-0 shadow-[0_-8px_24px_rgba(26,18,8,0.06)]">
-                {/* Coupon Code Input */}
-                {!couponCode ? (
-                  <form onSubmit={handleApplyCoupon} className="flex gap-2">
-                    <div className="relative flex-1">
-                      <Tag className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-stone-400" />
-                      <input
-                        type="text"
-                        value={couponInput}
-                        onChange={(e) => setCouponInput(e.target.value)}
-                        placeholder="Coupon code (e.g. ASTRA100)"
-                        className="w-full rounded-xl border border-stone-200 bg-stone-50 pl-8.5 pr-3 py-2 text-xs font-semibold uppercase placeholder:normal-case placeholder:font-normal focus:border-amber-500 focus:bg-white focus:outline-none transition-colors"
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      className="rounded-xl bg-stone-900 px-4 py-2 text-xs font-bold text-white hover:bg-stone-800 transition-colors cursor-pointer"
-                    >
-                      Apply
-                    </button>
-                  </form>
-                ) : (
-                  <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900 font-semibold">
-                    <span className="flex items-center gap-1.5">
-                      <CheckCircle2 className="size-4 text-emerald-600" />
-                      <span>Coupon &apos;{couponCode}&apos; Applied (-₹{discountAmount})</span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={handleRemoveCoupon}
-                      className="text-stone-400 hover:text-stone-700 p-1"
-                    >
-                      <X className="size-3.5" />
-                    </button>
-                  </div>
-                )}
+                {/* Smart Best-Offer Coupon Selector */}
+                <CouponOfferSelector
+                  subtotal={subtotal}
+                  appliedCouponCode={couponCode}
+                  appliedDiscount={discountAmount}
+                  onApplyCoupon={(code, disc) => setCoupon(code, disc)}
+                  onRemoveCoupon={() => {
+                    setCoupon(null, 0);
+                    toast.info(language === "bn" ? "কুপন সরানো হয়েছে" : "Coupon removed");
+                  }}
+                  compact={true}
+                />
 
                 {/* Price Breakdown */}
                 <div className="space-y-1.5 text-xs text-stone-600">

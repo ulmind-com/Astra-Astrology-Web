@@ -1249,6 +1249,38 @@ export interface StockReservationResponse {
   message: string;
 }
 
+export interface ShopCouponRecommendation {
+  code: string;
+  title: string;
+  description?: string | null;
+  discount_type: "percentage" | "flat" | string;
+  discount_value: number;
+  min_order_amount: number;
+  max_discount_amount?: number | null;
+  discount_amount: number;
+  is_applicable: boolean;
+  reason_if_inapplicable?: string | null;
+  is_best_offer: boolean;
+  is_first_order_deal: boolean;
+  expiry_date?: string | null;
+}
+
+export interface ShopCouponRecommendationsResponse {
+  items: ShopCouponRecommendation[];
+  best_coupon_code?: string | null;
+  max_savings: number;
+  user_orders_count: number;
+}
+
+export interface ShopCouponValidateResponse {
+  is_valid: boolean;
+  code: string;
+  discount_amount: number;
+  new_subtotal: number;
+  message: string;
+  coupon?: any;
+}
+
 export const shopApi = {
   getBanners: () =>
     api.get<ShopBannerSettings>(endpoints.shop.banners, { auth: false }),
@@ -1344,6 +1376,20 @@ export const shopApi = {
       }
     );
   },
+
+  validateCoupon: (code: string, subtotal: number) =>
+    api.post<ShopCouponValidateResponse>(
+      endpoints.shop.couponsValidate,
+      { code, subtotal },
+      { auth: false }
+    ),
+
+  getCouponRecommendations: (subtotal: number) =>
+    api.post<ShopCouponRecommendationsResponse>(
+      `${endpoints.shop.couponsRecommendations}?subtotal=${subtotal}`,
+      {},
+      { auth: false }
+    ),
 };
 
 export const courseApi = {

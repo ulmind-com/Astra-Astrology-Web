@@ -31,6 +31,7 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { CartDrawer } from "@/components/shop/CartDrawer";
+import { CouponOfferSelector } from "@/components/shop/CouponOfferSelector";
 import {
   shopApi,
   type PincodeResult,
@@ -127,6 +128,7 @@ export default function CheckoutPage() {
     getBundledGifts,
     couponCode,
     discountAmount,
+    setCoupon,
     clearCart,
   } = useCartStore();
 
@@ -1118,6 +1120,21 @@ export default function CheckoutPage() {
                     ))}
                   </div>
                 )}
+
+                {/* Smart Best-Offer Coupon Selector */}
+                <div className="pt-2">
+                  <CouponOfferSelector
+                    subtotal={subtotal}
+                    appliedCouponCode={couponCode}
+                    appliedDiscount={discountAmount}
+                    onApplyCoupon={(code, disc) => setCoupon(code, disc)}
+                    onRemoveCoupon={() => {
+                      setCoupon(null, 0);
+                      toast.info(isBn ? "কুপন সরানো হয়েছে" : "Coupon removed");
+                    }}
+                    compact={false}
+                  />
+                </div>
 
                 {/* Price breakdown */}
                 <div className="space-y-2 pt-2 border-t border-stone-100">

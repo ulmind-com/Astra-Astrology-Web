@@ -230,6 +230,8 @@ export const endpoints = {
     orderDetail: (orderKey: string) => `/shop/orders/${orderKey}`,
     cancelOrder: (orderKey: string) => `/shop/orders/${orderKey}/cancel`,
     uploadRefundQr: "/shop/upload-refund-qr",
+    couponsValidate: "/shop/coupons/validate",
+    couponsRecommendations: "/shop/coupons/recommendations",
     checkPincode: (pincode: string, phone?: string) =>
       `/shop/pincode/${pincode}${phone ? `?phone=${encodeURIComponent(phone)}` : ""}`,
   },
