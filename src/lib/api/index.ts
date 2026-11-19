@@ -801,19 +801,6 @@ export const astrologyApi = {
       payload,
     ),
 
-  /** Vedic Festivals Calendar for a given year & category with Swiss Ephemeris data */
-  festivals: (year?: number, category?: string) => {
-    const params = new URLSearchParams();
-    if (year) params.append("year", String(year));
-    if (category && category !== "all") params.append("category", category);
-    const queryStr = params.toString() ? `?${params.toString()}` : "";
-    return api.get<FestivalCalendarData>(`${endpoints.astrology.festivals}${queryStr}`, { auth: false });
-  },
-
-  /** Upcoming Vedic Festivals relative to current day */
-  upcomingFestivals: (limit: number = 15) =>
-    api.get<FestivalItemData[]>(`${endpoints.astrology.upcomingFestivals}?limit=${limit}`, { auth: false }),
-
   /** Get current feature pricing and availability for all astrology tools. */
   featuresPricing: () =>
     api.get<Record<string, FeaturePricingItem>>(endpoints.astrology.featuresPricing, { auth: false }),
@@ -824,12 +811,12 @@ export const astrologyApi = {
     if (year) params.append("year", String(year));
     if (category && category !== "all") params.append("category", category);
     const qs = params.toString() ? `?${params.toString()}` : "";
-    return api.get<WebFestivalCalendarResponse>(`${endpoints.astrology.festivals}${qs}`, { auth: false });
+    return api.get<FestivalCalendarData>(`${endpoints.astrology.festivals}${qs}`, { auth: false });
   },
 
   /** Dynamic Upcoming Vedic Festivals strictly from current date onwards. */
   upcomingFestivals: (limit = 15) =>
-    api.get<WebFestivalItem[]>(`${endpoints.astrology.upcomingFestivals}?limit=${limit}`, { auth: false }),
+    api.get<FestivalItemData[]>(`${endpoints.astrology.upcomingFestivals}?limit=${limit}`, { auth: false }),
 };
 
 export interface WebFestivalItem {
