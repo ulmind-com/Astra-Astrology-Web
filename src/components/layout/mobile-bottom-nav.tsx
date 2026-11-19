@@ -38,11 +38,12 @@ export function MobileBottomNav() {
   const pathname = usePathname();
   const { user, isSignedIn } = useAuth();
 
-  // Hide during live consultations and AI Astrologer so the chat has the whole screen.
+  // Hide during live consultations, AI Astrologer, and live puja rooms so they have the whole screen.
   const hidden =
     pathname.startsWith("/chat/") ||
     pathname.startsWith("/call/") ||
-    pathname.startsWith("/ai-astrologer");
+    pathname.startsWith("/ai-astrologer") ||
+    pathname.startsWith("/purohit-booking/");
 
   const navItems: MobileNavItem[] = React.useMemo(
     () => [
