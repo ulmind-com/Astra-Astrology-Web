@@ -292,7 +292,14 @@ function RegisterForm() {
 
       <GoogleButton label="Sign up with Google" onSignedIn={() => router.replace("/account/birth-details")} />
 
-      <p className="mt-6 text-center text-sm text-muted-foreground">
+      <p className="mt-4 text-center text-xs text-muted-foreground">
+        By signing up, you agree to DivinLink&apos;s{" "}
+        <Link href="/privacy" className="underline hover:text-foreground">
+          Privacy Policy
+        </Link>.
+      </p>
+
+      <p className="mt-5 text-center text-sm text-muted-foreground">
         Already have an account?{" "}
         <Link
           href="/login"

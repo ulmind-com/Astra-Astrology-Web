@@ -97,6 +97,12 @@ const STATUS_CONFIG: Record<
     badgeClass: "bg-rose-100 text-rose-900 border-rose-300",
     stepIndex: 0,
   },
+  rto: {
+    label_bn: "পার্সেল ফেরত পাঠানো হয়েছে (RTO)",
+    label_en: "Returned to Origin (RTO)",
+    badgeClass: "bg-rose-100 text-rose-900 border-rose-300",
+    stepIndex: 0,
+  },
   returned: {
     label_bn: "রিটার্ন সম্পন্ন",
     label_en: "Returned",
@@ -141,14 +147,14 @@ export default function MyOrdersPage() {
     if (activeFilter === "all") return orders;
     if (activeFilter === "active") {
       return orders.filter(
-        (o) => !["delivered", "cancelled", "returned"].includes(o.order_status)
+        (o) => !["delivered", "cancelled", "returned", "rto", "expired"].includes(o.order_status)
       );
     }
     if (activeFilter === "delivered") {
       return orders.filter((o) => o.order_status === "delivered");
     }
     if (activeFilter === "cancelled") {
-      return orders.filter((o) => ["cancelled", "returned"].includes(o.order_status));
+      return orders.filter((o) => ["cancelled", "returned", "rto", "expired"].includes(o.order_status));
     }
     return orders;
   }, [orders, activeFilter]);
@@ -192,7 +198,7 @@ export default function MyOrdersPage() {
   // Summary counts
   const totalOrdersCount = orders.length;
   const activeOrdersCount = orders.filter(
-    (o) => !["delivered", "cancelled", "returned"].includes(o.order_status)
+    (o) => !["delivered", "cancelled", "returned", "rto", "expired"].includes(o.order_status)
   ).length;
   const totalCashbackCredited = orders.reduce(
     (acc, o) => acc + (o.cashback_coins_credited || 0),

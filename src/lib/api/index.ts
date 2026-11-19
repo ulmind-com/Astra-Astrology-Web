@@ -817,7 +817,49 @@ export const astrologyApi = {
   /** Get current feature pricing and availability for all astrology tools. */
   featuresPricing: () =>
     api.get<Record<string, FeaturePricingItem>>(endpoints.astrology.featuresPricing, { auth: false }),
+
+  /** Dynamic Vedic Festival Calendar calculated via Swiss Ephemeris. */
+  festivals: (year?: number, category?: string) => {
+    const params = new URLSearchParams();
+    if (year) params.append("year", String(year));
+    if (category && category !== "all") params.append("category", category);
+    const qs = params.toString() ? `?${params.toString()}` : "";
+    return api.get<WebFestivalCalendarResponse>(`${endpoints.astrology.festivals}${qs}`, { auth: false });
+  },
+
+  /** Dynamic Upcoming Vedic Festivals strictly from current date onwards. */
+  upcomingFestivals: (limit = 15) =>
+    api.get<WebFestivalItem[]>(`${endpoints.astrology.upcomingFestivals}?limit=${limit}`, { auth: false }),
 };
+
+export interface WebFestivalItem {
+  id: string;
+  name: Record<string, string>;
+  date: string;
+  date_formatted: Record<string, string>;
+  day_of_week: Record<string, string>;
+  tithi: Record<string, string>;
+  category: "major" | "vrat" | "jayanti";
+  badge: Record<string, string>;
+  accent_color: string;
+  muhurat: Record<string, string>;
+  shloka: string;
+  desc: Record<string, string>;
+  rituals: Record<string, string[]>;
+  days_remaining: number;
+  is_today: boolean;
+  is_upcoming: boolean;
+  is_past: boolean;
+}
+
+export interface WebFestivalCalendarResponse {
+  year: number;
+  total_count: number;
+  next_upcoming: WebFestivalItem | null;
+  festivals: WebFestivalItem[];
+  engine: string;
+  calculated_at: string;
+}
 
 // ------------------------------------------------------------ AI Vedic Astrologer
 export interface AIChatMessage {
@@ -1232,6 +1274,7 @@ export interface PincodeResult {
   state: string;
   is_serviceable: boolean;
   cod_available: boolean;
+  cod_disabled_reason?: string | null;
   estimated_delivery_days: number;
   estimated_delivery_date: string;
 }
@@ -1302,8 +1345,8 @@ export const shopApi = {
       quantity,
     }),
 
-  checkPincode: (pincode: string) =>
-    api.get<PincodeResult>(endpoints.shop.checkPincode(pincode), { auth: false }),
+  checkPincode: (pincode: string, phone?: string) =>
+    api.get<PincodeResult>(endpoints.shop.checkPincode(pincode, phone), { auth: false }),
 
   checkout: (payload: ShopCheckoutPayload) =>
     api.post<ShopCheckoutResult>(endpoints.shop.checkout, payload, { auth: true }),
@@ -1415,6 +1458,100 @@ export const courseApi = {
   getVerifyCertificateHtmlUrl: (certificateId: string) =>
     `${process.env.NEXT_PUBLIC_API_URL || "https://astra-astrology-backend.onrender.com/api/v1"}${endpoints.courses.verifyCertificateHtml(certificateId)}`,
 };
+
+// ------------------------------------------------------------------ Purohit & Live Puja
+export interface PurohitPujaItem {
+  id: string;
+  puja_name: string;
+  description: string;
+  duration_minutes: number;
+  price_inr: number;
+  samagri_notes?: string | null;
+  is_active: boolean;
+}
+
+export interface PurohitData {
+  id: string;
+  user_id: string;
+  display_name: string;
+  slug: string;
+  title: string;
+  bio?: string | null;
+  avatar_url?: string | null;
+  experience_years: number;
+  languages: string[];
+  city?: string | null;
+  state?: string | null;
+  is_online: boolean;
+  is_verified: boolean;
+  rating: number;
+  total_reviews: number;
+  total_pujas_performed: number;
+  starting_price_inr: number;
+  pujas: PurohitPujaItem[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PujaBookingData {
+  id: string;
+  booking_number: string;
+  user_id: string;
+  user_name: string;
+  user_phone?: string | null;
+  user_email?: string | null;
+  purohit_id: string;
+  purohit_name: string;
+  puja_item_id: string;
+  puja_name: string;
+  puja_duration_minutes: number;
+  amount_inr: number;
+  sankalpa_name: string;
+  sankalpa_gotra: string;
+  sankalpa_wish?: string | null;
+  room_id: string;
+  zego_app_id?: number;
+  zego_token?: string | null;
+  status: "pending" | "confirmed" | "in_progress" | "completed" | "cancelled";
+  payment_status: "pending" | "paid" | "failed" | "refunded";
+  started_at?: string | null;
+  completed_at?: string | null;
+  created_at: string;
+}
+
+export const purohitApi = {
+  list: (params?: {
+    online_only?: boolean;
+    search_puja?: string;
+    language?: string;
+    limit?: number;
+    offset?: number;
+  }) =>
+    api.get<PurohitData[]>(endpoints.purohits.list, {
+      query: params,
+      auth: false,
+    }),
+
+  get: (idOrSlug: string) =>
+    api.get<PurohitData>(endpoints.purohits.detail(idOrSlug), {
+      auth: false,
+    }),
+
+  book: (body: {
+    purohit_id: string;
+    puja_item_id: string;
+    sankalpa_name: string;
+    sankalpa_gotra: string;
+    sankalpa_wish?: string | null;
+  }) => api.post<PujaBookingData>(endpoints.purohits.book, body),
+
+  getMyBookings: () =>
+    api.get<PujaBookingData[]>(endpoints.purohits.myBookings),
+
+  getRoomToken: (bookingId: string) =>
+    api.get<PujaBookingData>(endpoints.purohits.roomToken(bookingId)),
+};
+
 
 
 

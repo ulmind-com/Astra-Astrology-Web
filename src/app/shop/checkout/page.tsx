@@ -193,6 +193,42 @@ export default function CheckoutPage() {
 
   // ---- Pincode debounced lookup
   const pincodeTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const lookupPincode = React.useCallback(
+    async (pin: string, phone?: string) => {
+      if (pin.length !== 6) return;
+      setPincodeLoading(true);
+      try {
+        const res = await shopApi.checkPincode(pin, phone || shipping.phone_number);
+        setPincodeResult(res);
+        if (!res.is_serviceable) {
+          setPincodeError(
+            isBn
+              ? "দুঃখিত, এই পিনকোডে ডেলিভারি এই মুহূর্তে উপলব্ধ নয়।"
+              : "Sorry, delivery is not available to this pincode.",
+          );
+        } else {
+          // Auto-fill city/state from pincode
+          setShipping((prev) => ({
+            ...prev,
+            city: res.city || prev.city,
+            state: res.state || prev.state,
+          }));
+          if (!res.cod_available && paymentMethod === "cod") {
+            setPaymentMethod("razorpay");
+          }
+        }
+      } catch {
+        setPincodeError(
+          isBn ? "পিনকোড যাচাই করা যায়নি।" : "Could not verify pincode.",
+        );
+      } finally {
+        setPincodeLoading(false);
+      }
+    },
+    [isBn, paymentMethod, shipping.phone_number],
+  );
+
   const handlePincodeChange = React.useCallback(
     (val: string) => {
       const cleaned = val.replace(/\D/g, "").slice(0, 6);
@@ -203,36 +239,12 @@ export default function CheckoutPage() {
       if (pincodeTimerRef.current) clearTimeout(pincodeTimerRef.current);
 
       if (cleaned.length === 6) {
-        setPincodeLoading(true);
-        pincodeTimerRef.current = setTimeout(async () => {
-          try {
-            const res = await shopApi.checkPincode(cleaned);
-            setPincodeResult(res);
-            if (!res.is_serviceable) {
-              setPincodeError(
-                isBn
-                  ? "দুঃখিত, এই পিনকোডে ডেলিভারি এই মুহূর্তে উপলব্ধ নয়।"
-                  : "Sorry, delivery is not available to this pincode.",
-              );
-            } else {
-              // Auto-fill city/state from pincode
-              setShipping((prev) => ({
-                ...prev,
-                city: res.city || prev.city,
-                state: res.state || prev.state,
-              }));
-            }
-          } catch {
-            setPincodeError(
-              isBn ? "পিনকোড যাচাই করা যায়নি।" : "Could not verify pincode.",
-            );
-          } finally {
-            setPincodeLoading(false);
-          }
+        pincodeTimerRef.current = setTimeout(() => {
+          lookupPincode(cleaned, shipping.phone_number);
         }, 500);
       }
     },
-    [isBn],
+    [lookupPincode, shipping.phone_number],
   );
 
   // ---- Validation
@@ -432,8 +444,17 @@ export default function CheckoutPage() {
     const { name, value } = e.target;
     if (name === "pincode") {
       handlePincodeChange(value);
-    } else if (name === "phone_number" || name === "alternate_phone") {
-      setShipping((prev) => ({ ...prev, [name]: value.replace(/\D/g, "").slice(0, 10) }));
+    } else if (name === "phone_number") {
+      const cleanPhone = value.replace(/\D/g, "").slice(0, 10);
+      setShipping((prev) => ({ ...prev, phone_number: cleanPhone }));
+      if (cleanPhone.length === 10 && shipping.pincode.length === 6) {
+        if (pincodeTimerRef.current) clearTimeout(pincodeTimerRef.current);
+        pincodeTimerRef.current = setTimeout(() => {
+          lookupPincode(shipping.pincode, cleanPhone);
+        }, 300);
+      }
+    } else if (name === "alternate_phone") {
+      setShipping((prev) => ({ ...prev, alternate_phone: value.replace(/\D/g, "").slice(0, 10) }));
     } else {
       setShipping((prev) => ({ ...prev, [name]: value }));
     }
@@ -983,18 +1004,21 @@ export default function CheckoutPage() {
 
                 {/* COD */}
                 <label
-                  className={`flex items-start gap-3 rounded-xl border-2 p-4 cursor-pointer transition-all ${
+                  className={`flex items-start gap-3 rounded-xl border-2 p-4 transition-all ${
                     paymentMethod === "cod"
                       ? "border-stone-500 bg-stone-50 shadow-sm"
                       : "border-stone-200 hover:border-stone-300"
-                  } ${pincodeResult && !pincodeResult.cod_available ? "opacity-50 pointer-events-none" : ""}`}
+                  } ${pincodeResult && !pincodeResult.cod_available ? "opacity-60 cursor-not-allowed bg-stone-50/50" : "cursor-pointer"}`}
                 >
                   <input
                     type="radio"
                     name="payment_method"
                     value="cod"
                     checked={paymentMethod === "cod"}
-                    onChange={() => setPaymentMethod("cod")}
+                    onChange={() => {
+                      if (pincodeResult && !pincodeResult.cod_available) return;
+                      setPaymentMethod("cod");
+                    }}
                     disabled={pincodeResult ? !pincodeResult.cod_available : false}
                     className="mt-1 accent-stone-700"
                   />
@@ -1004,13 +1028,18 @@ export default function CheckoutPage() {
                     </span>
                     <p className="text-xs text-stone-500">
                       {pincodeResult && !pincodeResult.cod_available
-                        ? isBn
-                          ? "এই পিনকোডে COD উপলব্ধ নয়।"
-                          : "COD is not available at this pincode."
+                        ? pincodeResult.cod_disabled_reason || (isBn
+                            ? "এই পিনকোডে COD উপলব্ধ নয়।"
+                            : "COD is not available at this pincode.")
                         : isBn
                         ? "ডেলিভারির সময় নগদ পেমেন্ট করুন। ক্যাশব্যাক প্রযোজ্য নয়।"
                         : "Pay cash on delivery. Cashback not applicable."}
                     </p>
+                    {pincodeResult && !pincodeResult.cod_available && pincodeResult.cod_disabled_reason && (
+                      <div className="mt-2 p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-800 leading-relaxed font-medium">
+                        🛡️ {pincodeResult.cod_disabled_reason}
+                      </div>
+                    )}
                   </div>
                 </label>
               </div>

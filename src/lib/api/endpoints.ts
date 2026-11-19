@@ -231,7 +231,8 @@ export const endpoints = {
     myOrders: "/shop/orders/mine",
     orderDetail: (orderKey: string) => `/shop/orders/${orderKey}`,
     cancelOrder: (orderKey: string) => `/shop/orders/${orderKey}/cancel`,
-    checkPincode: (pincode: string) => `/shop/pincode/${pincode}`,
+    checkPincode: (pincode: string, phone?: string) =>
+      `/shop/pincode/${pincode}${phone ? `?phone=${encodeURIComponent(phone)}` : ""}`,
   },
   courses: {
     list: "/courses",
@@ -249,6 +250,13 @@ export const endpoints = {
     verifyCertificate: (certificateId: string) => `/courses/certificate/verify/${certificateId}`,
     certificateHtml: (courseId: string) => `/courses/${courseId}/certificate/html`,
     verifyCertificateHtml: (certificateId: string) => `/courses/certificate/verify/${certificateId}/html`,
+  },
+  purohits: {
+    list: "/purohits",
+    detail: (idOrSlug: string) => `/purohits/${idOrSlug}`,
+    book: "/purohits/bookings",
+    myBookings: "/purohits/bookings/mine",
+    roomToken: (bookingId: string) => `/purohits/bookings/${bookingId}/token`,
   },
 } as const;
 
