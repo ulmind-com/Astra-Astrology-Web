@@ -298,6 +298,30 @@ function PurohitsDirectoryContent() {
             })}
           </div>
         )}
+
+        {/* ------------------------------------------------------------- */}
+        {/* BECOME A PUROHIT INVITATION BANNER                            */}
+        {/* ------------------------------------------------------------- */}
+        <div className="mt-14 relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 p-8 sm:p-10 text-white shadow-xl shadow-amber-600/20">
+          <div className="relative z-10 max-w-2xl space-y-3">
+            <span className="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-xs text-xs font-bold tracking-wider uppercase">
+              বৈদিক আচার্য নিবন্ধন
+            </span>
+            <h3 className="text-2xl sm:text-3xl font-black">
+              আপনি কি একজন শাস্ত্রজ্ঞ বৈদিক পুরোহিত?
+            </h3>
+            <p className="text-amber-100 text-sm leading-relaxed">
+              সারা দেশের ও প্রবাসী ভক্তদের সাথে সরাসরি অনলাইন লাইভ ভিডিও পূজার মাধ্যমে যুক্ত হন। আপনার পছন্দমতো সময় ও দক্ষিণা নির্ধারণ করে বৈদিক সেবা প্রদান করুন।
+            </p>
+            <div className="pt-2">
+              <Link href="/become-a-purohit">
+                <Button className="bg-white text-amber-950 hover:bg-amber-50 font-black text-xs sm:text-sm px-6 py-3 shadow-lg">
+                  বৈদিক পুরোহিত হিসেবে আবেদন করুন →
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
