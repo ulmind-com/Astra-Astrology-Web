@@ -244,6 +244,11 @@ export const endpoints = {
       `/shop/pincode/${pincode}${phone ? `?phone=${encodeURIComponent(phone)}` : ""}`,
     orderInvoice: (orderKey: string) => `/shop/orders/${orderKey}/invoice`,
     orderInvoiceHtml: (orderKey: string) => `/shop/orders/${orderKey}/invoice/html`,
+    cart: "/shop/cart",
+    cartSync: "/shop/cart/sync",
+    cartItems: "/shop/cart/items",
+    cartItem: (productId: string) => `/shop/cart/items/${productId}`,
+    cartCoupon: "/shop/cart/coupon",
   },
   courses: {
     list: "/courses",
