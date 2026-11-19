@@ -242,6 +242,8 @@ export const endpoints = {
     uploadReviewPhoto: "/shop/reviews/upload-image",
     checkPincode: (pincode: string, phone?: string) =>
       `/shop/pincode/${pincode}${phone ? `?phone=${encodeURIComponent(phone)}` : ""}`,
+    orderInvoice: (orderKey: string) => `/shop/orders/${orderKey}/invoice`,
+    orderInvoiceHtml: (orderKey: string) => `/shop/orders/${orderKey}/invoice/html`,
   },
   courses: {
     list: "/courses",
