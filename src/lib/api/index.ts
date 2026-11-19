@@ -2,6 +2,7 @@
 
 import { api, apiFetch } from "@/lib/api/client";
 import { endpoints } from "@/lib/api/endpoints";
+import { apiBase } from "@/lib/env";
 import type {
   Address,
   FaceReadingAvailability,
@@ -1433,7 +1434,71 @@ export const shopApi = {
       }
     );
   },
+
+  getOrderInvoice: (orderKey: string) =>
+    api.get<OrderInvoiceData>(endpoints.shop.orderInvoice(orderKey), { auth: true }),
+
+  getOrderInvoiceHtmlUrl: (orderKey: string, print = true) =>
+    `${apiBase}${endpoints.shop.orderInvoiceHtml(orderKey)}?print=${print}`,
 };
+
+export interface OrderInvoiceSeller {
+  legal_name: string;
+  trade_name: string;
+  address: string;
+  state: string;
+  state_code: string;
+  phone: string;
+  email: string;
+  website: string;
+  pan: string;
+  gstin: string;
+  is_gst_registered: boolean;
+}
+
+export interface OrderInvoiceBuyer {
+  name: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  gotra?: string | null;
+  sankalpa?: string | null;
+}
+
+export interface OrderInvoiceItem {
+  title: string;
+  sku: string;
+  energization: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  is_free_gift: boolean;
+}
+
+export interface OrderInvoiceData {
+  invoice_number: string;
+  order_id: string;
+  order_key: string;
+  invoice_date: string;
+  created_at: string;
+  payment_method: string;
+  payment_status: string;
+  seller: OrderInvoiceSeller;
+  buyer: OrderInvoiceBuyer;
+  items: OrderInvoiceItem[];
+  subtotal: number;
+  discount_amount: number;
+  shipping_fee: number;
+  tax_rate_percent: number;
+  tax_amount: number;
+  tax_label: string;
+  total_amount: number;
+  invoice_mode: string;
+  footer_notes: string;
+  blessing_note: string;
+}
 
 export interface ProductReviewItem {
   id: string;

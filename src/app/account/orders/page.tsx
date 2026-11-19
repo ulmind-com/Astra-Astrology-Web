@@ -43,6 +43,7 @@ import { ApiError } from "@/lib/api/client";
 import { useLanguage } from "@/providers/language-provider";
 import { useRequireAuth } from "@/providers/auth-provider";
 import { LoadingBlock } from "@/components/ui";
+import { PrintableInvoiceModal } from "@/components/shop/PrintableInvoiceModal";
 
 function formatINR(amount: number) {
   return `₹${amount.toLocaleString("en-IN")}`;
@@ -132,6 +133,9 @@ export default function MyOrdersPage() {
   const [activeFilter, setActiveFilter] = React.useState<FilterTab>("all");
   const [page, setPage] = React.useState(1);
   const [expandedSankalpa, setExpandedSankalpa] = React.useState<Record<string, boolean>>({});
+
+  // Invoice Modal State
+  const [invoiceModalOrder, setInvoiceModalOrder] = React.useState<ShopOrder | null>(null);
 
   // Refund & Cancellation Form State
   const [cancellingOrder, setCancellingOrder] = React.useState<ShopOrder | null>(null);
@@ -1021,6 +1025,17 @@ export default function MyOrdersPage() {
                       <span>{isBn ? "সহায়তা" : "Support"}</span>
                     </a>
 
+                    {/* Official Tax/Retail Invoice Button */}
+                    <button
+                      type="button"
+                      onClick={() => setInvoiceModalOrder(order)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-300 bg-amber-50/80 hover:bg-amber-100 text-amber-900 text-xs font-semibold transition-all shadow-2xs cursor-pointer"
+                      title={isBn ? "জিএসটি চালান / প্রিন্টযোগ্য ইনভয়েস দেখুন" : "View & Print Official Invoice"}
+                    >
+                      <FileText className="size-3.5 text-amber-600" />
+                      <span>{isBn ? "চালান / Invoice" : "Invoice"}</span>
+                    </button>
+
                     {/* Cancel Order Button or Expired Window */}
                     {canCancel && (
                       <button
@@ -1306,6 +1321,16 @@ export default function MyOrdersPage() {
           </div>
         </div>
       )}
+
+      {/* ------------------------------------------------------------------- */}
+      {/* 6. Printable Official Invoice & Packing Slip Modal */}
+      {/* ------------------------------------------------------------------- */}
+      <PrintableInvoiceModal
+        orderKey={invoiceModalOrder?.order_number || invoiceModalOrder?.id || ""}
+        orderNumber={invoiceModalOrder?.order_number || ""}
+        isOpen={!!invoiceModalOrder}
+        onClose={() => setInvoiceModalOrder(null)}
+      />
     </div>
   );
 }
