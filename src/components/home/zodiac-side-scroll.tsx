@@ -280,7 +280,7 @@ export function ZodiacSideScroll() {
                     className={`flex size-14 items-center justify-center rounded-2xl border p-1 shadow-sm transition-transform duration-300 group-hover:scale-110 ${style.symbolBg}`}
                   >
                     <Image
-                      src={`/images/zodiac/modern/${sign.id}.webp`}
+                      src={`/images/zodiac/medallions/${sign.id}.png`}
                       alt={sign.name}
                       width={48}
                       height={48}

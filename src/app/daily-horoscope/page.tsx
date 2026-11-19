@@ -61,18 +61,18 @@ import type {
 
 // 12 Zodiac signs metadata (with modern illustrated colorful icons)
 const ZODIAC_LIST = [
-  { id: "aries", index: 0, en: "Aries", bn: "মেষ", hi: "मेष", sa: "Mesha", symbol: "♈", element: "Fire", ruler: "Mars", icon: "/images/zodiac/modern/aries.webp" },
-  { id: "taurus", index: 1, en: "Taurus", bn: "বৃষ", hi: "वृष", sa: "Vrishabha", symbol: "♉", element: "Earth", ruler: "Venus", icon: "/images/zodiac/modern/taurus.webp" },
-  { id: "gemini", index: 2, en: "Gemini", bn: "মিথুন", hi: "मिथुन", sa: "Mithuna", symbol: "♊", element: "Air", ruler: "Mercury", icon: "/images/zodiac/modern/gemini.webp" },
-  { id: "cancer", index: 3, en: "Cancer", bn: "কর্কট", hi: "कर्क", sa: "Karka", symbol: "♋", element: "Water", ruler: "Moon", icon: "/images/zodiac/modern/cancer.webp" },
-  { id: "leo", index: 4, en: "Leo", bn: "সিংহ", hi: "सिंह", sa: "Simha", symbol: "♌", element: "Fire", ruler: "Sun", icon: "/images/zodiac/modern/leo.webp" },
-  { id: "virgo", index: 5, en: "Virgo", bn: "কন্যা", hi: "कन्या", sa: "Kanya", symbol: "♍", element: "Earth", ruler: "Mercury", icon: "/images/zodiac/modern/virgo.webp" },
-  { id: "libra", index: 6, en: "Libra", bn: "তুলা", hi: "तुला", sa: "Tula", symbol: "♎", element: "Air", ruler: "Venus", icon: "/images/zodiac/modern/libra.webp" },
-  { id: "scorpio", index: 7, en: "Scorpio", bn: "বৃশ্চিক", hi: "वृश्चिक", sa: "Vrishchika", symbol: "♏", element: "Water", ruler: "Mars", icon: "/images/zodiac/modern/scorpio.webp" },
-  { id: "sagittarius", index: 8, en: "Sagittarius", bn: "ধনু", hi: "धनु", sa: "Dhanu", symbol: "♐", element: "Fire", ruler: "Jupiter", icon: "/images/zodiac/modern/sagittarius.webp" },
-  { id: "capricorn", index: 9, en: "Capricorn", bn: "মকর", hi: "मकर", sa: "Makara", symbol: "♑", element: "Earth", ruler: "Saturn", icon: "/images/zodiac/modern/capricorn.webp" },
-  { id: "aquarius", index: 10, en: "Aquarius", bn: "কুম্ভ", hi: "कुम्भ", sa: "Kumbha", symbol: "♒", element: "Air", ruler: "Saturn", icon: "/images/zodiac/modern/aquarius.webp" },
-  { id: "pisces", index: 11, en: "Pisces", bn: "মীন", hi: "मीन", sa: "Meena", symbol: "♓", element: "Water", ruler: "Jupiter", icon: "/images/zodiac/modern/pisces.webp" },
+  { id: "aries", index: 0, en: "Aries", bn: "মেষ", hi: "मेष", sa: "Mesha", symbol: "♈", element: "Fire", ruler: "Mars", icon: "/images/zodiac/medallions/aries.png" },
+  { id: "taurus", index: 1, en: "Taurus", bn: "বৃষ", hi: "वृष", sa: "Vrishabha", symbol: "♉", element: "Earth", ruler: "Venus", icon: "/images/zodiac/medallions/taurus.png" },
+  { id: "gemini", index: 2, en: "Gemini", bn: "মিথুন", hi: "मिथुन", sa: "Mithuna", symbol: "♊", element: "Air", ruler: "Mercury", icon: "/images/zodiac/medallions/gemini.png" },
+  { id: "cancer", index: 3, en: "Cancer", bn: "কর্কট", hi: "कर्क", sa: "Karka", symbol: "♋", element: "Water", ruler: "Moon", icon: "/images/zodiac/medallions/cancer.png" },
+  { id: "leo", index: 4, en: "Leo", bn: "সিংহ", hi: "सिंह", sa: "Simha", symbol: "♌", element: "Fire", ruler: "Sun", icon: "/images/zodiac/medallions/leo.png" },
+  { id: "virgo", index: 5, en: "Virgo", bn: "কন্যা", hi: "कन्या", sa: "Kanya", symbol: "♍", element: "Earth", ruler: "Mercury", icon: "/images/zodiac/medallions/virgo.png" },
+  { id: "libra", index: 6, en: "Libra", bn: "তুলা", hi: "तुला", sa: "Tula", symbol: "♎", element: "Air", ruler: "Venus", icon: "/images/zodiac/medallions/libra.png" },
+  { id: "scorpio", index: 7, en: "Scorpio", bn: "বৃশ্চিক", hi: "वृश्चिक", sa: "Vrishchika", symbol: "♏", element: "Water", ruler: "Mars", icon: "/images/zodiac/medallions/scorpio.png" },
+  { id: "sagittarius", index: 8, en: "Sagittarius", bn: "ধনু", hi: "धनु", sa: "Dhanu", symbol: "♐", element: "Fire", ruler: "Jupiter", icon: "/images/zodiac/medallions/sagittarius.png" },
+  { id: "capricorn", index: 9, en: "Capricorn", bn: "মকর", hi: "मकर", sa: "Makara", symbol: "♑", element: "Earth", ruler: "Saturn", icon: "/images/zodiac/medallions/capricorn.png" },
+  { id: "aquarius", index: 10, en: "Aquarius", bn: "কুম্ভ", hi: "कुम्भ", sa: "Kumbha", symbol: "♒", element: "Air", ruler: "Saturn", icon: "/images/zodiac/medallions/aquarius.png" },
+  { id: "pisces", index: 11, en: "Pisces", bn: "মীন", hi: "मीन", sa: "Meena", symbol: "♓", element: "Water", ruler: "Jupiter", icon: "/images/zodiac/medallions/pisces.png" },
 ];
 
 // Western date ranges per sign — shown on each zodiac card (Astrotalk-style).

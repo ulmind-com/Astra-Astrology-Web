@@ -25,7 +25,7 @@ export const ZODIAC_SIGNS_DATA: ZodiacSignMeta[] = [
     hindiName: "मेष",
     sanskrit: "Mesha",
     dates: "Mar 21 - Apr 19",
-    icon: "/images/zodiac/modern/aries.webp",
+    icon: "/images/zodiac/medallions/aries.png",
     element: "Fire",
   },
   {
@@ -35,7 +35,7 @@ export const ZODIAC_SIGNS_DATA: ZodiacSignMeta[] = [
     hindiName: "वृषभ",
     sanskrit: "Vrishabha",
     dates: "Apr 20 - May 20",
-    icon: "/images/zodiac/modern/taurus.webp",
+    icon: "/images/zodiac/medallions/taurus.png",
     element: "Earth",
   },
   {
@@ -45,7 +45,7 @@ export const ZODIAC_SIGNS_DATA: ZodiacSignMeta[] = [
     hindiName: "मिथुन",
     sanskrit: "Mithuna",
     dates: "May 21 - Jun 21",
-    icon: "/images/zodiac/modern/gemini.webp",
+    icon: "/images/zodiac/medallions/gemini.png",
     element: "Air",
   },
   {
@@ -55,7 +55,7 @@ export const ZODIAC_SIGNS_DATA: ZodiacSignMeta[] = [
     hindiName: "कर्क",
     sanskrit: "Karka",
     dates: "Jun 22 - Jul 22",
-    icon: "/images/zodiac/modern/cancer.webp",
+    icon: "/images/zodiac/medallions/cancer.png",
     element: "Water",
   },
   {
@@ -65,7 +65,7 @@ export const ZODIAC_SIGNS_DATA: ZodiacSignMeta[] = [
     hindiName: "सिंह",
     sanskrit: "Simha",
     dates: "Jul 23 - Aug 22",
-    icon: "/images/zodiac/modern/leo.webp",
+    icon: "/images/zodiac/medallions/leo.png",
     element: "Fire",
   },
   {
@@ -75,7 +75,7 @@ export const ZODIAC_SIGNS_DATA: ZodiacSignMeta[] = [
     hindiName: "कन्या",
     sanskrit: "Kanya",
     dates: "Aug 23 - Sept 22",
-    icon: "/images/zodiac/modern/virgo.webp",
+    icon: "/images/zodiac/medallions/virgo.png",
     element: "Earth",
   },
   {
@@ -85,7 +85,7 @@ export const ZODIAC_SIGNS_DATA: ZodiacSignMeta[] = [
     hindiName: "तुला",
     sanskrit: "Tula",
     dates: "Sept 23 - Oct 23",
-    icon: "/images/zodiac/modern/libra.webp",
+    icon: "/images/zodiac/medallions/libra.png",
     element: "Air",
   },
   {
@@ -95,7 +95,7 @@ export const ZODIAC_SIGNS_DATA: ZodiacSignMeta[] = [
     hindiName: "वृश्चिक",
     sanskrit: "Vrishchika",
     dates: "Oct 24 - Nov 22",
-    icon: "/images/zodiac/modern/scorpio.webp",
+    icon: "/images/zodiac/medallions/scorpio.png",
     element: "Water",
   },
   {
@@ -105,7 +105,7 @@ export const ZODIAC_SIGNS_DATA: ZodiacSignMeta[] = [
     hindiName: "धनु",
     sanskrit: "Dhanu",
     dates: "Nov 23 - Dec 21",
-    icon: "/images/zodiac/modern/sagittarius.webp",
+    icon: "/images/zodiac/medallions/sagittarius.png",
     element: "Fire",
   },
   {
@@ -115,7 +115,7 @@ export const ZODIAC_SIGNS_DATA: ZodiacSignMeta[] = [
     hindiName: "मकर",
     sanskrit: "Makara",
     dates: "Dec 22 - Jan 19",
-    icon: "/images/zodiac/modern/capricorn.webp",
+    icon: "/images/zodiac/medallions/capricorn.png",
     element: "Earth",
   },
   {
@@ -125,7 +125,7 @@ export const ZODIAC_SIGNS_DATA: ZodiacSignMeta[] = [
     hindiName: "कुंभ",
     sanskrit: "Kumbha",
     dates: "Jan 20 - Feb 18",
-    icon: "/images/zodiac/modern/aquarius.webp",
+    icon: "/images/zodiac/medallions/aquarius.png",
     element: "Air",
   },
   {
@@ -135,7 +135,7 @@ export const ZODIAC_SIGNS_DATA: ZodiacSignMeta[] = [
     hindiName: "मीन",
     sanskrit: "Meena",
     dates: "Feb 19 - Mar 20",
-    icon: "/images/zodiac/modern/pisces.webp",
+    icon: "/images/zodiac/medallions/pisces.png",
     element: "Water",
   },
 ];

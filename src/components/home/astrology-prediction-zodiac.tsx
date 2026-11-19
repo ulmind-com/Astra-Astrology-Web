@@ -29,7 +29,7 @@ const ZODIAC_SIGNS: ZodiacSignItem[] = [
     hindiName: "मेष",
     sanskrit: "Mesha",
     dates: "Mar 21 - Apr 19",
-    image: "/images/zodiac/modern/aries.webp",
+    image: "/images/zodiac/medallions/aries.png",
   },
   {
     id: "taurus",
@@ -39,7 +39,7 @@ const ZODIAC_SIGNS: ZodiacSignItem[] = [
     hindiName: "वृषभ",
     sanskrit: "Vrishabha",
     dates: "Apr 20 - May 20",
-    image: "/images/zodiac/modern/taurus.webp",
+    image: "/images/zodiac/medallions/taurus.png",
   },
   {
     id: "gemini",
@@ -49,7 +49,7 @@ const ZODIAC_SIGNS: ZodiacSignItem[] = [
     hindiName: "मिथुन",
     sanskrit: "Mithuna",
     dates: "May 21 - Jun 21",
-    image: "/images/zodiac/modern/gemini.webp",
+    image: "/images/zodiac/medallions/gemini.png",
   },
   {
     id: "cancer",
@@ -59,7 +59,7 @@ const ZODIAC_SIGNS: ZodiacSignItem[] = [
     hindiName: "कर्क",
     sanskrit: "Karka",
     dates: "Jun 22 - Jul 22",
-    image: "/images/zodiac/modern/cancer.webp",
+    image: "/images/zodiac/medallions/cancer.png",
   },
   {
     id: "leo",
@@ -69,7 +69,7 @@ const ZODIAC_SIGNS: ZodiacSignItem[] = [
     hindiName: "सिंह",
     sanskrit: "Simha",
     dates: "Jul 23 - Aug 22",
-    image: "/images/zodiac/modern/leo.webp",
+    image: "/images/zodiac/medallions/leo.png",
   },
   {
     id: "virgo",
@@ -79,7 +79,7 @@ const ZODIAC_SIGNS: ZodiacSignItem[] = [
     hindiName: "कन्या",
     sanskrit: "Kanya",
     dates: "Aug 23 - Sept 22",
-    image: "/images/zodiac/modern/virgo.webp",
+    image: "/images/zodiac/medallions/virgo.png",
   },
   {
     id: "libra",
@@ -89,7 +89,7 @@ const ZODIAC_SIGNS: ZodiacSignItem[] = [
     hindiName: "तुला",
     sanskrit: "Tula",
     dates: "Sept 23 - Oct 23",
-    image: "/images/zodiac/modern/libra.webp",
+    image: "/images/zodiac/medallions/libra.png",
   },
   {
     id: "scorpio",
@@ -99,7 +99,7 @@ const ZODIAC_SIGNS: ZodiacSignItem[] = [
     hindiName: "वृश्चिक",
     sanskrit: "Vrishchika",
     dates: "Oct 24 - Nov 22",
-    image: "/images/zodiac/modern/scorpio.webp",
+    image: "/images/zodiac/medallions/scorpio.png",
   },
   {
     id: "sagittarius",
@@ -109,7 +109,7 @@ const ZODIAC_SIGNS: ZodiacSignItem[] = [
     hindiName: "धनु",
     sanskrit: "Dhanu",
     dates: "Nov 23 - Dec 21",
-    image: "/images/zodiac/modern/sagittarius.webp",
+    image: "/images/zodiac/medallions/sagittarius.png",
   },
   {
     id: "capricorn",
@@ -119,7 +119,7 @@ const ZODIAC_SIGNS: ZodiacSignItem[] = [
     hindiName: "मकर",
     sanskrit: "Makara",
     dates: "Dec 22 - Jan 19",
-    image: "/images/zodiac/modern/capricorn.webp",
+    image: "/images/zodiac/medallions/capricorn.png",
   },
   {
     id: "aquarius",
@@ -129,7 +129,7 @@ const ZODIAC_SIGNS: ZodiacSignItem[] = [
     hindiName: "कुंभ",
     sanskrit: "Kumbha",
     dates: "Jan 20 - Feb 18",
-    image: "/images/zodiac/modern/aquarius.webp",
+    image: "/images/zodiac/medallions/aquarius.png",
   },
   {
     id: "pisces",
@@ -139,7 +139,7 @@ const ZODIAC_SIGNS: ZodiacSignItem[] = [
     hindiName: "मीन",
     sanskrit: "Meena",
     dates: "Feb 19 - Mar 20",
-    image: "/images/zodiac/modern/pisces.webp",
+    image: "/images/zodiac/medallions/pisces.png",
   },
 ];
 
