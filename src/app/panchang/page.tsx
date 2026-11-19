@@ -524,6 +524,106 @@ export default function PanchangPage() {
                     </div>
                   )}
 
+                  {/* ================= VEDIC PANCHAK STATUS CARD ================= */}
+                  {panchang.panchak && (
+                    <div
+                      className={`rounded-3xl border p-6 sm:p-7 shadow-sm space-y-3.5 transition-all ${
+                        panchang.panchak.is_panchak
+                          ? "border-rose-300 bg-gradient-to-r from-rose-50/90 via-white to-red-50/40"
+                          : "border-emerald-300 bg-gradient-to-r from-emerald-50/90 via-white to-teal-50/40"
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div
+                          className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ${
+                            panchang.panchak.is_panchak
+                              ? "bg-rose-100 text-rose-600 ring-2 ring-rose-200"
+                              : "bg-emerald-100 text-emerald-600 ring-2 ring-emerald-200"
+                          }`}
+                        >
+                          {panchang.panchak.is_panchak ? (
+                            <ShieldAlert className="size-6 text-rose-600" />
+                          ) : (
+                            <CheckCircle2 className="size-6 text-emerald-600" />
+                          )}
+                        </div>
+
+                        <div className="flex-1 space-y-1">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                                  panchang.panchak.is_panchak
+                                    ? "bg-rose-200/80 text-rose-900 border border-rose-300"
+                                    : "bg-emerald-200/80 text-emerald-900 border border-emerald-300"
+                                }`}
+                              >
+                                {isBn ? "পঞ্চক বিচার" : isHi ? "पंचक विचार" : "Panchak Status"}
+                              </span>
+                              {panchang.panchak.severity && (
+                                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700 capitalize">
+                                  {panchang.panchak.severity} severity
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <h4
+                            className={`font-display text-lg font-bold ${
+                              panchang.panchak.is_panchak ? "text-rose-900" : "text-emerald-900"
+                            }`}
+                          >
+                            {panchang.panchak.is_panchak
+                              ? isBn
+                                ? `পঞ্চক দোষ সচল: ${panchang.panchak.panchak_type_bn || panchang.panchak.panchak_type}`
+                                : isHi
+                                ? `सक्रिय पंचक: ${panchang.panchak.panchak_type_hi || panchang.panchak.panchak_type}`
+                                : `Active Panchak: ${panchang.panchak.panchak_type}`
+                              : isBn
+                              ? "আজ কোনো পঞ্চক দোষ নেই (সম্পূর্ণ শুভ)"
+                              : isHi
+                              ? "आज कोई पंचक दोष नहीं है (शुभ)"
+                              : "No Panchak Inauspiciousness Today"}
+                          </h4>
+
+                          <p className="text-xs text-slate-600 leading-relaxed">
+                            {panchang.panchak.is_panchak
+                              ? isBn
+                                ? panchang.panchak.description_bn || "ধনিষ্ঠা থেকে রেবতী নক্ষত্র পর্যন্ত এই সময় সতর্ক থাকুন।"
+                                : isHi
+                                ? panchang.panchak.description_hi || panchang.panchak.description
+                                : panchang.panchak.description || "Special Vedic caution required during this 5-nakshatra alignment."
+                              : isBn
+                              ? "সকল প্রকার গৃহনির্মাণ, যাত্রা ও পারিবারিক কর্মের জন্য সময় অনুকূল।"
+                              : isHi
+                              ? "सभी प्रकार के गृह निर्माण, यात्रा व पारिवारिक कार्यों के लिए अनुकूल समय है।"
+                              : "All standard auspicious domestic, travel and ceremonial rites are permitted."}
+                          </p>
+                        </div>
+                      </div>
+
+                      {panchang.panchak.is_panchak && panchang.panchak.prohibited_activities && panchang.panchak.prohibited_activities.length > 0 && (
+                        <div className="pt-2 border-t border-rose-200/80 space-y-2">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-rose-800 flex items-center gap-1.5">
+                            <AlertTriangle className="size-3.5 text-rose-600" />
+                            <span>{isBn ? "বর্জনীয় ৫টি বিশেষ কর্ম:" : isHi ? "वर्जित कार्य:" : "Prohibited Activities:"}</span>
+                          </span>
+                          <div className="flex flex-wrap gap-2">
+                            {panchang.panchak.prohibited_activities.map((act, i) => (
+                              <span
+                                key={i}
+                                className="inline-flex items-center gap-1.5 rounded-xl bg-white border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-900 shadow-2xs"
+                              >
+                                <AlertTriangle className="size-3 text-rose-500" />
+                                <span>{act}</span>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {/* Favorable Chandra Rashis */}
                   {panchang.favorable_chandra_rashis && panchang.favorable_chandra_rashis.length > 0 && (
                     <div className="rounded-3xl border border-amber-900/15 bg-white/95 p-6 shadow-sm space-y-3">

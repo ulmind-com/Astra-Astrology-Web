@@ -3,8 +3,6 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
-  ChevronLeft,
-  ChevronRight,
   Heart,
   MessageSquare,
   Phone,
@@ -312,8 +310,8 @@ export function HeroAstroyogi() {
             ))}
           </div>
 
-          {/* Bottom bar: dots left, arrows right */}
-          <div className="absolute bottom-4 sm:bottom-6 left-6 sm:left-10 right-6 sm:right-10 z-20 flex items-center justify-between">
+          {/* Bottom bar: dot indicators */}
+          <div className="absolute bottom-4 sm:bottom-6 left-6 sm:left-10 z-20 flex items-center">
             {/* Dot indicators */}
             <div className="flex items-center gap-1.5 sm:gap-2">
               {slides.map((_, dotIdx) => (
@@ -332,26 +330,6 @@ export function HeroAstroyogi() {
                   }`}
                 />
               ))}
-            </div>
-
-            {/* Prev / Next arrows */}
-            <div className="hidden sm:flex items-center gap-2">
-              <button
-                type="button"
-                onClick={prevSlide}
-                aria-label="Previous slide"
-                className="flex size-10 items-center justify-center rounded-full border border-white/30 bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-colors cursor-pointer"
-              >
-                <ChevronLeft className="size-5" strokeWidth={2} />
-              </button>
-              <button
-                type="button"
-                onClick={nextSlide}
-                aria-label="Next slide"
-                className="flex size-10 items-center justify-center rounded-full border border-white/30 bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-colors cursor-pointer"
-              >
-                <ChevronRight className="size-5" strokeWidth={2} />
-              </button>
             </div>
           </div>
         </div>

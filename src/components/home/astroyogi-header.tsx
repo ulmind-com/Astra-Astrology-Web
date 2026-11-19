@@ -362,7 +362,7 @@ export function AstroyogiHeader() {
             },
           ],
         },
-        { label: "ফ্রি ভাগ্যফল", href: "/#readings" },
+        { label: "ফ্রি ভাগ্যফল", href: "/free-readings" },
         { label: "লাইভ", href: "/#live-experts", isLive: true },
       ];
     }
@@ -594,7 +594,7 @@ export function AstroyogiHeader() {
             },
           ],
         },
-        { label: "मुफ़्त फलादेश", href: "/#readings" },
+        { label: "मुफ़्त फलादेश", href: "/free-readings" },
         { label: "लाइव", href: "/#live-experts", isLive: true },
       ];
     }
@@ -800,9 +800,9 @@ export function AstroyogiHeader() {
         ],
       },
         {
-          label: "Purohits & Puja",
+          label: "Purohits",
           href: "/purohits",
-          badge: "Live Puja",
+          badge: "Live",
           dropdown: [
             {
               label: "Book Online Vedic Purohit",
@@ -826,7 +826,7 @@ export function AstroyogiHeader() {
             },
           ],
         },
-      { label: "Free Readings", href: "/#readings" },
+      { label: "Free Readings", href: "/free-readings" },
       { label: "Live", href: "/#live-experts", isLive: true },
     ];
   }, [language]);
@@ -854,8 +854,8 @@ export function AstroyogiHeader() {
       )}
     >
       {/* Astrotalk-Style Unified Single Row Navigation Bar */}
-      <div className="mx-auto max-w-[1440px] px-3 sm:px-4 xl:px-4 2xl:px-8">
-        <div className="flex h-16 sm:h-[68px] items-center justify-between gap-1.5 xl:gap-2 2xl:gap-4 overflow-visible">
+      <div className="mx-auto max-w-[1440px] px-2 sm:px-4 xl:px-3 2xl:px-6">
+        <div className="flex h-16 sm:h-[68px] items-center justify-between gap-1 xl:gap-1.5 2xl:gap-3 overflow-visible">
           {/* ================= LEFT: Brand Logo + Name ================= */}
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 whitespace-nowrap">
             {/* Mobile Hamburger Toggle */}
@@ -886,7 +886,7 @@ export function AstroyogiHeader() {
           </div>
 
           {/* ================= CENTER: Single-Row Luxury Navigation Links ================= */}
-          <nav className="hidden xl:flex items-center gap-0.5 2xl:gap-1.5 whitespace-nowrap shrink-0 overflow-visible">
+          <nav className="hidden xl:flex items-center gap-0.5 xl:gap-0.5 2xl:gap-1 whitespace-nowrap shrink-0 overflow-visible">
             {navCategories.map((cat) => {
               const isActive = cat.href === pathname || (cat.label === "Home" && pathname === "/");
               const hasDropdown = Boolean(cat.dropdown && cat.dropdown.length > 0);
@@ -901,7 +901,7 @@ export function AstroyogiHeader() {
                 >
                   <Link
                     href={cat.href}
-                    className={`whitespace-nowrap shrink-0 inline-flex items-center gap-1 px-2 xl:px-2.5 2xl:px-3 py-1.5 rounded-full text-[12.5px] xl:text-[13px] 2xl:text-[14px] font-semibold tracking-normal transition-all duration-150 select-none ${
+                    className={`whitespace-nowrap shrink-0 inline-flex items-center gap-0.5 xl:gap-1 px-1.5 xl:px-2 2xl:px-2.5 py-1.5 rounded-full text-[12px] xl:text-[12.5px] 2xl:text-[13.5px] font-semibold tracking-normal transition-all duration-150 select-none ${
                       isActive
                         ? "text-amber-950 font-bold bg-amber-100/90 shadow-2xs"
                         : "text-stone-700 hover:text-stone-950 hover:bg-stone-100/80"
@@ -1084,12 +1084,11 @@ export function AstroyogiHeader() {
             <Link href="/astrologers" className="shrink-0 group">
               <button
                 type="button"
-                className="group relative inline-flex h-9 sm:h-[38px] items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 px-3 xl:px-3.5 2xl:px-4 text-stone-950 font-semibold text-xs sm:text-[13px] tracking-tight shadow-[0_4px_14px_-2px_rgba(245,158,11,0.55)] hover:shadow-[0_6px_18px_-2px_rgba(245,158,11,0.75)] transition-all hover:scale-[1.02] active:scale-[0.98] border border-amber-300 whitespace-nowrap cursor-pointer leading-normal"
+                className="group relative inline-flex h-9 sm:h-[38px] items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 px-3 xl:px-3.5 2xl:px-4 text-stone-950 font-bold text-xs sm:text-[12.5px] tracking-tight shadow-[0_3px_12px_-2px_rgba(245,158,11,0.5)] hover:shadow-[0_5px_16px_-2px_rgba(245,158,11,0.7)] transition-all hover:scale-[1.02] active:scale-[0.98] border border-amber-300 whitespace-nowrap cursor-pointer leading-none"
               >
-                <span className="leading-normal">{ctaPart1}</span>
-                <span className="hidden 2xl:inline opacity-40 font-light leading-normal">|</span>
-                <span className="hidden 2xl:inline leading-normal">{ctaPart2}</span>
-                <ArrowRight className="size-3.5 stroke-[2] text-stone-900 transition-transform duration-200 group-hover:translate-x-0.5 shrink-0" />
+                <Phone className="size-3 text-stone-950 fill-stone-950/20 shrink-0" />
+                <span className="leading-none">{ctaPart1}</span>
+                <ArrowRight className="size-3 stroke-[2.5] text-stone-900 transition-transform duration-200 group-hover:translate-x-0.5 shrink-0" />
               </button>
             </Link>
           </div>
