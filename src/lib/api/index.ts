@@ -181,6 +181,65 @@ export type DirectoryFilters = {
   limit?: number;
 };
 
+export interface AstrologerApplicationSubmitPayload {
+  full_name: string;
+  email: string;
+  phone: string;
+  otp_code: string;
+  gender?: string | null;
+  age?: number | null;
+  address?: string | null;
+  city: string;
+  state: string;
+  pincode?: string | null;
+  skills: string[];
+  specialisations: string[];
+  experience_years: number;
+  languages: string[];
+  qualifications: string[];
+  bio?: string | null;
+  avatar_url?: string | null;
+  identity_proof_url?: string | null;
+  bank_account_number?: string | null;
+  bank_ifsc?: string | null;
+  bank_account_holder?: string | null;
+  bank_name?: string | null;
+  upi_id?: string | null;
+  pan_card?: string | null;
+}
+
+export interface AstrologerApplicationData {
+  id: string;
+  application_number: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  gender?: string | null;
+  age?: number | null;
+  address?: string | null;
+  city: string;
+  state: string;
+  pincode?: string | null;
+  skills: string[];
+  specialisations: string[];
+  experience_years: number;
+  languages: string[];
+  qualifications: string[];
+  bio?: string | null;
+  avatar_url?: string | null;
+  identity_proof_url?: string | null;
+  bank_account_number?: string | null;
+  bank_ifsc?: string | null;
+  bank_account_holder?: string | null;
+  bank_name?: string | null;
+  upi_id?: string | null;
+  pan_card?: string | null;
+  status: "pending" | "approved" | "rejected";
+  rejection_reason?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export const astrologerApi = {
   quote: (astrologerId: string, mode: ConsultationMode) =>
     api.get<ConsultationQuote>(endpoints.astrologers.quote(astrologerId), {
@@ -238,6 +297,27 @@ export const astrologerApi = {
     api.get<{ is_favorite: boolean; favorites_count: number }>(
       endpoints.astrologers.favorite(slugOrId),
     ),
+
+  sendApplicationOtp: (email: string) =>
+    api.post<{ email: string }>(endpoints.astrologers.applicationSendOtp, { email }, { auth: false }),
+
+  verifyApplicationOtp: (email: string, code: string) =>
+    api.post<{ verified: boolean }>(endpoints.astrologers.applicationVerifyOtp, { email, code }, { auth: false }),
+
+  uploadApplicationDoc: async (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    return apiFetch<{ url: string; public_id: string; format: string }>(
+      endpoints.astrologers.applicationUploadDoc,
+      {
+        method: "POST",
+        body: fd,
+      }
+    );
+  },
+
+  submitApplication: (body: AstrologerApplicationSubmitPayload) =>
+    api.post<AstrologerApplicationData>(endpoints.astrologers.applicationSubmit, body, { auth: false }),
 
   myFavorites: () =>
     api.get<AstrologerPublic[]>(endpoints.astrologers.myFavorites),

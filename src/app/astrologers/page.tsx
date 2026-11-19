@@ -80,6 +80,27 @@ const SIDEBAR_COPY = {
   },
 } as const;
 
+const BANNER_COPY = {
+  en: {
+    badge: "Specialist Onboarding",
+    title: "Are you an experienced Astrologer?",
+    sub: "Join our verified elite panel of Vedic astrologers, Tarot readers, and Numerologists. Reach thousands of daily seekers across India and worldwide with live chat, voice, and video consultations.",
+    btn: "Apply to Join as an Astrologer →",
+  },
+  bn: {
+    badge: "জ্যোতিষী নিবন্ধন",
+    title: "আপনি কি একজন অভিজ্ঞ জ্যোতিষী বা ট্যারো বিশেষজ্ঞ?",
+    sub: "আমাদের শীর্ষ বৈদিক জ্যোতিষী প্যানেলে যোগ দিন। সমগ্র ভারত ও বিশ্বের হাজার হাজার মানুষের সাথে লাইভ চ্যাট, কল ও ভিডিওতে যুক্ত হয়ে পরামর্শ দিন।",
+    btn: "জ্যোতিষী হিসেবে আবেদন করুন →",
+  },
+  hi: {
+    badge: "ज्योतिषी पंजीकरण",
+    title: "क्या आप एक अनुभवी ज्योतिषी या टैरो रीडर हैं?",
+    sub: "हमारे प्रमाणित वैदिक ज्योतिषियों के पैनल में शामिल हों। देश और विदेश के लाखों जातकों के साथ लाइव चैट, कॉल और वीडियो परामर्श से जुड़ें।",
+    btn: "ज्योतिषी के रूप में आवेदन करें →",
+  },
+} as const;
+
 /** Astrotalk-style "Most consulted this week" rail: top astrologers by volume. */
 function TrendingSidebar({
   items,
@@ -217,6 +238,7 @@ function QuickCategories({
 function DirectoryInner() {
   const { language } = useLanguage();
   const t = ASTROLOGERS_I18N[language] || ASTROLOGERS_I18N.en;
+  const bannerCopy = BANNER_COPY[(language as keyof typeof BANNER_COPY) ?? "en"] ?? BANNER_COPY.en;
   const [filters, setFilters] = React.useState<Filters>(EMPTY_FILTERS);
   const [page, setPage] = React.useState(1);
 
@@ -357,6 +379,28 @@ function DirectoryInner() {
             chatLabel={t.chat}
             language={language as keyof typeof SIDEBAR_COPY}
           />
+        </div>
+
+        {/* Astrologer Application Invitation Banner */}
+        <div className="mt-14 relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 p-8 sm:p-10 text-white shadow-xl shadow-amber-600/20">
+          <div className="relative z-10 max-w-2xl space-y-3">
+            <span className="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-xs text-xs font-bold tracking-wider uppercase">
+              {bannerCopy.badge}
+            </span>
+            <h3 className="text-2xl sm:text-3xl font-black">
+              {bannerCopy.title}
+            </h3>
+            <p className="text-amber-100 text-sm leading-relaxed">
+              {bannerCopy.sub}
+            </p>
+            <div className="pt-2">
+              <Link href="/become-an-astrologer">
+                <Button className="bg-white text-amber-950 hover:bg-amber-50 font-black text-xs sm:text-sm px-6 py-3 shadow-lg">
+                  {bannerCopy.btn}
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </main>
 
