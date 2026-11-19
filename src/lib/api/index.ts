@@ -1440,7 +1440,68 @@ export const shopApi = {
 
   getOrderInvoiceHtmlUrl: (orderKey: string, print = true) =>
     `${apiBase}${endpoints.shop.orderInvoiceHtml(orderKey)}?print=${print}`,
+
+  // Persistent Multi-Device Cart Sync Endpoints
+  getCart: () =>
+    api.get<CartOut>(endpoints.shop.cart, { auth: true }),
+
+  syncCart: (items: CartItemIn[], coupon_code?: string | null) =>
+    api.post<CartOut>(endpoints.shop.cartSync, { items, coupon_code }, { auth: true }),
+
+  addCartItem: (product_id: string, quantity = 1, sankalpa?: any) =>
+    api.post<CartOut>(endpoints.shop.cartItems, { product_id, quantity, sankalpa }, { auth: true }),
+
+  updateCartItem: (product_id: string, quantity: number, sankalpa?: any) =>
+    api.patch<CartOut>(endpoints.shop.cartItem(product_id), { quantity, sankalpa }, { auth: true }),
+
+  removeCartItem: (product_id: string) =>
+    api.delete<CartOut>(endpoints.shop.cartItem(product_id), { auth: true }),
+
+  clearCart: () =>
+    api.delete<CartOut>(endpoints.shop.cart, { auth: true }),
+
+  applyCartCoupon: (code: string | null) =>
+    api.post<CartOut>(endpoints.shop.cartCoupon, { code }, { auth: true }),
 };
+
+export interface CartItemIn {
+  product_id: string;
+  quantity: number;
+  sankalpa?: any;
+}
+
+export interface CartItemOut {
+  id: string;
+  slug: string;
+  sku: string;
+  title: string;
+  price: number;
+  mrp: number;
+  image: string;
+  quantity: number;
+  stock_quantity: number;
+  is_in_stock: boolean;
+  free_gift_title?: string | null;
+  free_gift_value?: number | null;
+  free_gift_badge?: string | null;
+  free_gift_image_url?: string | null;
+  cashback_percent: number;
+  sankalpa?: any;
+  line_total: number;
+}
+
+export interface CartOut {
+  items: CartItemOut[];
+  item_count: number;
+  subtotal: number;
+  coupon_code?: string | null;
+  discount_amount: number;
+  coupon_title?: string | null;
+  is_coupon_valid: boolean;
+  cashback_coins: number;
+  free_gifts: Array<{ title: string; value: number; badge?: string; image_url?: string | null }>;
+  updated_at?: string | null;
+}
 
 export interface OrderInvoiceSeller {
   legal_name: string;
