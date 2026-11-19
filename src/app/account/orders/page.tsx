@@ -30,6 +30,10 @@ import {
   Check,
   ArrowRight,
   PhoneCall,
+  Upload,
+  QrCode,
+  CreditCard,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -127,8 +131,32 @@ export default function MyOrdersPage() {
   const [activeFilter, setActiveFilter] = React.useState<FilterTab>("all");
   const [page, setPage] = React.useState(1);
   const [expandedSankalpa, setExpandedSankalpa] = React.useState<Record<string, boolean>>({});
-  const [cancellingOrderId, setCancellingOrderId] = React.useState<string | null>(null);
+
+  // Refund & Cancellation Form State
+  const [cancellingOrder, setCancellingOrder] = React.useState<ShopOrder | null>(null);
   const [cancelModalOpen, setCancelModalOpen] = React.useState<boolean>(false);
+  const [refundUpiId, setRefundUpiId] = React.useState<string>("");
+  const [refundQrFile, setRefundQrFile] = React.useState<File | null>(null);
+  const [refundQrPreview, setRefundQrPreview] = React.useState<string | null>(null);
+  const [cancelReason, setCancelReason] = React.useState<string>("");
+  const [isUploadingQr, setIsUploadingQr] = React.useState<boolean>(false);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  // Fetch Banner Settings for Cancellation Grace Hours & Refund SLA Days
+  const { data: bannerSettings } = useQuery({
+    queryKey: ["shop_banner_settings"],
+    queryFn: async () => {
+      try {
+        return await shopApi.getBanners();
+      } catch {
+        return null;
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const cancellationGraceHours = bannerSettings?.cancellation_grace_hours ?? 24;
+  const refundSlaDays = bannerSettings?.refund_sla_days ?? 3;
 
   // Fetch My Orders
   const { data, isLoading, isError, refetch } = useQuery({
@@ -159,26 +187,93 @@ export default function MyOrdersPage() {
     return orders;
   }, [orders, activeFilter]);
 
+  // Open Cancel Modal
+  const handleOpenCancelModal = (order: ShopOrder) => {
+    setCancellingOrder(order);
+    setRefundUpiId("");
+    setRefundQrFile(null);
+    if (refundQrPreview) {
+      URL.revokeObjectURL(refundQrPreview);
+      setRefundQrPreview(null);
+    }
+    setCancelReason("");
+    setCancelModalOpen(true);
+  };
+
+  const handleQrFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(isBn ? "ফাইলের আকার ৫MB এর কম হতে হবে।" : "File size must be under 5MB.");
+      return;
+    }
+    setRefundQrFile(file);
+    const objectUrl = URL.createObjectURL(file);
+    setRefundQrPreview(objectUrl);
+  };
+
+  const handleRemoveQrFile = () => {
+    setRefundQrFile(null);
+    if (refundQrPreview) {
+      URL.revokeObjectURL(refundQrPreview);
+      setRefundQrPreview(null);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   // Cancel order mutation
   const cancelMutation = useMutation({
-    mutationFn: async (orderId: string) => {
-      return await shopApi.cancelOrder(orderId);
+    mutationFn: async () => {
+      if (!cancellingOrder) return;
+      let qrUrl: string | undefined = undefined;
+      let qrPublicId: string | undefined = undefined;
+
+      const isPrepaid =
+        cancellingOrder.payment_method === "razorpay" ||
+        cancellingOrder.payment_status === "paid";
+
+      if (isPrepaid && refundQrFile) {
+        setIsUploadingQr(true);
+        try {
+          const uploadRes = await shopApi.uploadRefundQr(refundQrFile);
+          qrUrl = uploadRes.url;
+          qrPublicId = uploadRes.public_id;
+        } finally {
+          setIsUploadingQr(false);
+        }
+      }
+
+      return await shopApi.cancelOrder(cancellingOrder.id, {
+        reason: cancelReason.trim() || undefined,
+        upi_id: refundUpiId.trim() || undefined,
+        qr_code_url: qrUrl,
+        qr_code_public_id: qrPublicId,
+      });
     },
     onSuccess: (updated) => {
+      if (!updated) return;
       toast.success(
         isBn
-          ? `অর্ডার #${updated.order_number} সফলভাবে বাতিল করা হয়েছে।`
-          : `Order #${updated.order_number} cancelled successfully.`
+          ? `অর্ডার #${updated.order_number} সফলভাবে বাতিল করা হয়েছে। রিফান্ড প্রক্রিয়া শুরু হয়েছে।`
+          : `Order #${updated.order_number} cancelled. Refund processing initiated.`
       );
       setCancelModalOpen(false);
-      setCancellingOrderId(null);
+      setCancellingOrder(null);
+      setRefundUpiId("");
+      handleRemoveQrFile();
+      setCancelReason("");
       queryClient.invalidateQueries({ queryKey: ["shop_orders_mine"] });
     },
     onError: (err) => {
-      const msg = err instanceof ApiError ? err.message : "অর্ডার বাতিল করা সম্ভব হয়নি।";
+      const msg =
+        err instanceof ApiError
+          ? err.message
+          : isBn
+          ? "অর্ডার বাতিল করা সম্ভব হয়নি।"
+          : "Failed to cancel order.";
       toast.error(msg, { duration: 6000 });
-      setCancelModalOpen(false);
-      setCancellingOrderId(null);
     },
   });
 
@@ -367,8 +462,17 @@ export default function MyOrdersPage() {
               stepIndex: 1,
             };
             const isCancelled = order.order_status === "cancelled";
+            const orderAgeHours =
+              (Date.now() - new Date(order.created_at).getTime()) / (1000 * 3600);
+            const isWithinGrace = orderAgeHours <= cancellationGraceHours;
             const canCancel =
-              !isCancelled && ["placed", "confirmed"].includes(order.order_status);
+              !isCancelled &&
+              ["placed", "confirmed"].includes(order.order_status) &&
+              isWithinGrace;
+            const isCancellationExpired =
+              !isCancelled &&
+              ["placed", "confirmed"].includes(order.order_status) &&
+              !isWithinGrace;
 
             return (
               <div
@@ -534,6 +638,178 @@ export default function MyOrdersPage() {
                         </div>
                       </div>
                     </div>
+                  </div>
+                )}
+
+                {/* ------------------------------------------------------------- */}
+                {/* Cancelled Order Refund Progress Tracker */}
+                {/* ------------------------------------------------------------- */}
+                {isCancelled && (
+                  <div className="rounded-xl border border-rose-200 bg-rose-50/40 p-3 sm:p-4 space-y-3">
+                    <div className="flex items-center justify-between text-xs font-bold text-stone-800">
+                      <span className="flex items-center gap-1.5 text-rose-900">
+                        {order.refund_status === "completed" ? (
+                          <CheckCircle2 className="size-4 text-emerald-600" />
+                        ) : order.payment_method === "razorpay" || order.refund_status === "pending" ? (
+                          <Clock className="size-4 text-amber-600 animate-spin" />
+                        ) : (
+                          <XCircle className="size-4 text-rose-600" />
+                        )}
+                        <span>
+                          {order.refund_status === "completed"
+                            ? isBn
+                              ? "রিফান্ড সফলভাবে সম্পন্ন হয়েছে"
+                              : "Refund Completed Successfully"
+                            : order.payment_method === "razorpay" || order.refund_status === "pending"
+                            ? isBn
+                              ? "টাকা রিফান্ড প্রক্রিয়াধীন (ইন-প্রোগ্রেস)"
+                              : "Refund Processing in Progress"
+                            : isBn
+                            ? "অর্ডার বাতিল সম্পন্ন"
+                            : "Order Cancelled"}
+                        </span>
+                      </span>
+
+                      {(order.payment_method === "razorpay" || order.refund_status) && (
+                        <span
+                          className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border ${
+                            order.refund_status === "completed"
+                              ? "bg-emerald-100 text-emerald-900 border-emerald-300"
+                              : "bg-rose-100 text-rose-900 border-rose-300"
+                          }`}
+                        >
+                          {order.refund_status === "completed"
+                            ? isBn
+                              ? "রিফান্ড ক্রেডিট সম্পন্ন"
+                              : "Refund Credited"
+                            : isBn
+                            ? `প্রক্রিয়াধীন (${order.refund_sla_days || refundSlaDays} কার্যদিবস)`
+                            : `Processing (within ${order.refund_sla_days || refundSlaDays} days)`}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Visual 3-Stage Progress Nodes (For Prepaid Orders) */}
+                    {(order.payment_method === "razorpay" || order.refund_status) ? (
+                      <div className="space-y-3">
+                        <div className="relative pt-2 pb-1">
+                          <div className="grid grid-cols-3 gap-2 relative z-10 text-center">
+                            {/* Node 1: Cancelled */}
+                            <div className="space-y-1">
+                              <div className="size-7 sm:size-8 mx-auto rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shadow-xs">
+                                <Check className="size-3.5" />
+                              </div>
+                              <span className="block text-[9px] sm:text-[10px] font-bold text-stone-800 leading-tight">
+                                {isBn ? "অর্ডার বাতিল" : "Cancelled"}
+                              </span>
+                            </div>
+
+                            {/* Node 2: UPI / QR Verified & In Progress */}
+                            <div className="space-y-1">
+                              <div
+                                className={`size-7 sm:size-8 mx-auto rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                                  order.refund_status === "completed"
+                                    ? "bg-emerald-600 text-white shadow-xs"
+                                    : "bg-amber-500 text-white animate-pulse"
+                                }`}
+                              >
+                                {order.refund_status === "completed" ? (
+                                  <Check className="size-3.5" />
+                                ) : (
+                                  <Clock className="size-3.5" />
+                                )}
+                              </div>
+                              <span className="block text-[9px] sm:text-[10px] font-bold text-stone-800 leading-tight">
+                                {isBn ? "UPI যাচাই ও প্রক্রিয়াধীন" : "UPI Verified & Queued"}
+                              </span>
+                            </div>
+
+                            {/* Node 3: Refund Credited */}
+                            <div className="space-y-1">
+                              <div
+                                className={`size-7 sm:size-8 mx-auto rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                                  order.refund_status === "completed"
+                                    ? "bg-emerald-600 text-white shadow-xs"
+                                    : "bg-stone-200 text-stone-500"
+                                }`}
+                              >
+                                {order.refund_status === "completed" ? (
+                                  <Check className="size-3.5" />
+                                ) : (
+                                  <CreditCard className="size-3.5" />
+                                )}
+                              </div>
+                              <span className="block text-[9px] sm:text-[10px] font-bold text-stone-800 leading-tight">
+                                {isBn ? "টাকা ক্রেডিট সম্পন্ন" : "Refund Credited"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Detailed Card */}
+                        <div
+                          className={`p-3 rounded-xl border text-xs space-y-1.5 ${
+                            order.refund_status === "completed"
+                              ? "bg-emerald-50/80 border-emerald-200 text-emerald-950"
+                              : "bg-amber-50/80 border-amber-200 text-amber-950"
+                          }`}
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                            <span className="font-semibold">
+                              {isBn ? "রিফান্ড যোগ্য মূল্য:" : "Refund Amount:"}{" "}
+                              <b className="font-mono text-sm text-stone-900">
+                                {formatINR(order.refund_amount || order.grand_total)}
+                              </b>
+                            </span>
+                            {order.refund_upi_id && (
+                              <span className="font-mono text-[11px] bg-white px-2 py-0.5 rounded border border-stone-200">
+                                UPI: {order.refund_upi_id}
+                              </span>
+                            )}
+                          </div>
+
+                          {order.refund_status === "completed" ? (
+                            <div className="space-y-1 pt-1 text-[11px] text-emerald-800">
+                              <p>
+                                {isBn
+                                  ? `আপনার ব্যাংক অ্যাকাউন্টে সম্পূর্ণ টাকা রিফান্ড পাঠানো সম্পন্ন হয়েছে।`
+                                  : `Full refund has been credited to your destination bank account.`}
+                              </p>
+                              {order.refund_transaction_id && (
+                                <div className="flex items-center gap-1.5 font-mono">
+                                  <span>UTR / Ref: <b>{order.refund_transaction_id}</b></span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCopy(order.refund_transaction_id!)}
+                                    className="text-emerald-700 hover:text-emerald-900 cursor-pointer p-0.5"
+                                    title="Copy UTR"
+                                  >
+                                    <Copy className="size-3" />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-[11px] text-amber-900 leading-relaxed">
+                              {isBn
+                                ? `আপনার প্রদত্ত UPI আইডি / QR কোডে আগামী ${order.refund_sla_days || refundSlaDays} কার্যদিবসের মধ্যে টাকা রিফান্ড পৌঁছে যাবে। রিফান্ড সম্পূর্ণ হলে আপনার ইমেইলে কনফার্মেশন পাঠানো হবে।`
+                                : `The refund will be credited to your provided UPI within ${order.refund_sla_days || refundSlaDays} business days. You will receive an email confirmation once finalized.`}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-3 rounded-xl bg-white border border-stone-200 text-xs text-stone-600">
+                        <p className="font-semibold text-stone-800">
+                          {isBn ? "অর্ডারটি সফলভাবে বাতিল করা হয়েছে।" : "Order Cancelled"}
+                        </p>
+                        <p className="text-[11px] text-stone-500">
+                          {isBn
+                            ? "এটি ক্যাশ অন ডেলিভারি (COD) অর্ডার হওয়ায় কোনো অগ্রিম টাকা প্রদান করা হয়নি, তাই কোনো রিফান্ডের প্রয়োজন নেই।"
+                            : "Since this was a Cash on Delivery order, no payment was taken and no refund is required."}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -733,19 +1009,29 @@ export default function MyOrdersPage() {
                       <span>{isBn ? "সহায়তা" : "Support"}</span>
                     </a>
 
-                    {/* Cancel Order Button */}
+                    {/* Cancel Order Button or Expired Window */}
                     {canCancel && (
                       <button
                         type="button"
-                        onClick={() => {
-                          setCancellingOrderId(order.id);
-                          setCancelModalOpen(true);
-                        }}
+                        onClick={() => handleOpenCancelModal(order)}
                         className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-semibold transition-all cursor-pointer"
                       >
                         <XCircle className="size-3.5" />
-                        <span>{isBn ? "অর্ডার বাতিল" : "Cancel"}</span>
+                        <span>{isBn ? "অর্ডার বাতিল ও রিফান্ড" : "Cancel & Refund"}</span>
                       </button>
+                    )}
+                    {isCancellationExpired && (
+                      <span
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-stone-100 text-stone-500 text-[11px] font-medium"
+                        title={
+                          isBn
+                            ? `অর্ডার করার ${cancellationGraceHours} ঘণ্টার মধ্যে বাতিলের সময়সীমা উত্তীর্ণ হয়েছে। সহায়তার জন্য সাপোর্টে যোগাযোগ করুন।`
+                            : `Cancellation window of ${cancellationGraceHours}h has elapsed.`
+                        }
+                      >
+                        <Clock className="size-3 text-stone-400" />
+                        <span>{isBn ? "বাতিলের সময় শেষ" : "Cancellation Expired"}</span>
+                      </span>
                     )}
                   </div>
                 </div>
@@ -756,72 +1042,253 @@ export default function MyOrdersPage() {
       )}
 
       {/* ------------------------------------------------------------------- */}
-      {/* 5. Cancellation Confirmation Modal */}
+      {/* 5. Cancellation & Refund Request Modal */}
       {/* ------------------------------------------------------------------- */}
-      {cancelModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-in fade-in">
-          <div className="w-full max-w-md rounded-2xl bg-white p-5 space-y-4 shadow-xl border border-stone-200">
-            <div className="flex items-center gap-3">
-              <div className="size-10 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 shrink-0">
-                <AlertCircle className="size-6" />
+      {cancelModalOpen && cancellingOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-in fade-in overflow-y-auto">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-5 sm:p-6 space-y-4 shadow-xl border border-stone-200 my-8">
+            <div className="flex items-start justify-between gap-3 pb-2 border-b border-stone-100">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600 shrink-0">
+                  <RotateCcw className="size-5" />
+                </div>
+                <div>
+                  <h3 className="font-cinzel text-base font-bold text-stone-900">
+                    {isBn ? "অর্ডার বাতিল ও রিফান্ড আবেদন" : "Cancel Order & Refund Request"}
+                  </h3>
+                  <p className="text-xs text-stone-500">
+                    #{cancellingOrder.order_number} • {formatINR(cancellingOrder.grand_total)}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-cinzel text-base font-bold text-stone-900">
-                  {isBn ? "অর্ডার বাতিল করতে চান?" : "Cancel this order?"}
-                </h3>
-                <p className="text-xs text-stone-500">
-                  {isBn
-                    ? "শিপিংয়ের পূর্বে বাতিল করলে সম্পূর্ণ মূল্য রিফান্ড পাবেন।"
-                    : "Cancelling before dispatch will refund the full amount."}
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1">
-              <p className="font-semibold">
-                {isBn
-                  ? "⚠️ গুরুত্বপূর্ণ নিয়মাবলী:"
-                  : "⚠️ Important Policy:"}
-              </p>
-              <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-amber-800">
-                <li>
-                  {isBn
-                    ? "এই অর্ডারের জন্য সংরক্ষিত ক্যাশব্যাক কয়েন বাতিল হবে।"
-                    : "Reserved cashback coins for this order will be revoked."}
-                </li>
-                <li>
-                  {isBn
-                    ? "যদি আপনি ইতিমধ্যে ক্যাশব্যাক কয়েন কোনো পরামর্শে ব্যবহার করে থাকেন, তবে সরাসরি অর্ডার বাতিল সম্ভব হবে না।"
-                    : "If cashback coins have already been spent on astrologers, online cancellation is strictly locked."}
-                </li>
-              </ul>
-            </div>
-
-            <div className="flex gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => {
                   setCancelModalOpen(false);
-                  setCancellingOrderId(null);
+                  setCancellingOrder(null);
+                  handleRemoveQrFile();
                 }}
-                disabled={cancelMutation.isPending}
-                className="flex-1 py-2.5 rounded-xl border border-stone-300 font-bold text-xs text-stone-700 hover:bg-stone-50 cursor-pointer"
+                className="text-stone-400 hover:text-stone-600 p-1 rounded-lg"
               >
-                {isBn ? "না, ফিরে যান" : "Keep Order"}
+                <XCircle className="size-5" />
               </button>
+            </div>
+
+            {/* SLA Policy Banner */}
+            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1">
+              <p className="font-semibold flex items-center gap-1.5 text-amber-950">
+                <Sparkles className="size-3.5 text-orange-600" />
+                <span>
+                  {isBn
+                    ? `অর্ডার বাতিলের সময়সীমা ও রিফান্ড নীতি (${cancellationGraceHours} ঘণ্টা):`
+                    : `Cancellation Window & Refund SLA (${cancellationGraceHours} Hours):`}
+                </span>
+              </p>
+              <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-amber-900">
+                <li>
+                  {isBn
+                    ? `অর্ডার করার ${cancellationGraceHours} ঘণ্টার মধ্যে বাতিল করলে সম্পূর্ণ অর্থ ${refundSlaDays} কার্যদিবসের মধ্যে আপনার UPI তে ফেরত পাবেন।`
+                    : `Cancelling within ${cancellationGraceHours} hours guarantees full refund to your UPI within ${refundSlaDays} business days.`}
+                </li>
+                <li>
+                  {isBn
+                    ? "এই অর্ডারের জন্য সংরক্ষিত ক্যাশব্যাক কয়েন স্বয়ংক্রিয়ভাবে রিভার্স হবে।"
+                    : "Reserved cashback coins for this order will be automatically reversed."}
+                </li>
+              </ul>
+            </div>
+
+            {/* Refund UPI & QR Section (Only for Paid/Prepaid Orders) */}
+            {(cancellingOrder.payment_method === "razorpay" || cancellingOrder.payment_status === "paid") ? (
+              <div className="space-y-3 pt-1">
+                <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="size-4 text-stone-700" />
+                    <span className="font-bold text-xs text-stone-900">
+                      {isBn
+                        ? "যে অ্যাকাউন্টে রিফান্ড পেতে চান (UPI ID বা QR কোড)"
+                        : "Where should we refund your money? (UPI ID or QR)"}
+                    </span>
+                  </div>
+
+                  {/* UPI ID Input */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-stone-700 block">
+                      {isBn ? "আপনার UPI আইডি লিখুন:" : "Your UPI ID:"}
+                    </label>
+                    <input
+                      type="text"
+                      value={refundUpiId}
+                      onChange={(e) => setRefundUpiId(e.target.value)}
+                      placeholder={isBn ? "যেমন: 9876543210@paytm বা name@okhdfcbank" : "e.g. 9876543210@paytm or yourname@okhdfcbank"}
+                      className="w-full px-3 py-2 text-xs rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="h-px bg-stone-200 flex-1" />
+                    <span className="text-[10px] text-stone-400 uppercase font-bold">
+                      {isBn ? "অথবা" : "OR"}
+                    </span>
+                    <div className="h-px bg-stone-200 flex-1" />
+                  </div>
+
+                  {/* QR Code Upload */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold text-stone-700 block">
+                      {isBn
+                        ? "আপনার UPI অ্যাপের পেমেন্ট QR কোডের স্ক্রিনশট আপলোড করুন:"
+                        : "Upload UPI Payment QR Code Screenshot:"}
+                    </label>
+
+                    {refundQrPreview ? (
+                      <div className="flex items-center gap-3 p-2.5 rounded-lg border border-amber-300 bg-amber-50/50">
+                        <div className="relative size-16 rounded-md overflow-hidden border border-stone-200 bg-white shrink-0">
+                          <Image
+                            src={refundQrPreview}
+                            alt="QR Preview"
+                            fill
+                            className="object-contain"
+                            unoptimized
+                          />
+                        </div>
+                        <div className="flex-1 text-xs">
+                          <p className="font-bold text-stone-800 truncate">
+                            {refundQrFile?.name || "qr_code.png"}
+                          </p>
+                          <p className="text-[10px] text-stone-500">
+                            {(refundQrFile?.size ? (refundQrFile.size / 1024).toFixed(0) : 0)} KB •{" "}
+                            {isBn ? "আপলোডের জন্য প্রস্তুত" : "Ready to upload"}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleRemoveQrFile}
+                          className="p-1.5 text-stone-400 hover:text-rose-600 rounded-md"
+                          title="Remove image"
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div
+                        onClick={() => fileInputRef.current?.click()}
+                        className="p-4 rounded-xl border-2 border-dashed border-stone-300 hover:border-amber-400 bg-white text-center cursor-pointer transition-colors space-y-1"
+                      >
+                        <QrCode className="size-6 text-stone-400 mx-auto" />
+                        <span className="text-xs font-semibold text-stone-700 block">
+                          {isBn ? "QR কোড ছবি নির্বাচন করুন" : "Click to select QR Code screenshot"}
+                        </span>
+                        <span className="text-[10px] text-stone-400 block">
+                          PNG, JPG, WebP (Max 5MB)
+                        </span>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          className="hidden"
+                          onChange={handleQrFileChange}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Reason */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-stone-700 block">
+                    {isBn ? "বাতিলের কারণ (ঐচ্ছিক):" : "Cancellation Reason (Optional):"}
+                  </label>
+                  <input
+                    type="text"
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    placeholder={
+                      isBn
+                        ? "যেমন: ভুলবশত অর্ডার করেছি / অন্য সামগ্রী নেব"
+                        : "e.g. Placed by mistake / Want another item"
+                    }
+                    className="w-full px-3 py-2 text-xs rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                </div>
+              </div>
+            ) : (
+              /* COD cancellation simple confirmation */
+              <div className="p-3.5 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-700 space-y-2">
+                <p>
+                  {isBn
+                    ? "এটি একটি ক্যাশ অন ডেলিভারি (COD) অর্ডার। অর্ডারটি বাতিল করলে কোনো অর্থ রিফান্ডের প্রয়োজন নেই।"
+                    : "This is a Cash on Delivery (COD) order. Cancelling will not require a monetary refund."}
+                </p>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-stone-700 block">
+                    {isBn ? "বাতিলের কারণ (ঐচ্ছিক):" : "Cancellation Reason (Optional):"}
+                  </label>
+                  <input
+                    type="text"
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    placeholder={isBn ? "যেমন: ঠিকানা পরিবর্তন হবে" : "e.g. Address changed"}
+                    className="w-full px-3 py-2 text-xs rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Modal Actions */}
+            <div className="flex gap-2 pt-2 border-t border-stone-100">
               <button
                 type="button"
-                onClick={() => cancellingOrderId && cancelMutation.mutate(cancellingOrderId)}
-                disabled={cancelMutation.isPending}
-                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition-colors cursor-pointer"
+                onClick={() => {
+                  setCancelModalOpen(false);
+                  setCancellingOrder(null);
+                  handleRemoveQrFile();
+                }}
+                disabled={cancelMutation.isPending || isUploadingQr}
+                className="flex-1 py-2.5 rounded-xl border border-stone-300 font-bold text-xs text-stone-700 hover:bg-stone-50 cursor-pointer"
               >
-                {cancelMutation.isPending
-                  ? isBn
-                    ? "বাতিল হচ্ছে..."
-                    : "Cancelling..."
-                  : isBn
-                  ? "হ্যাঁ, বাতিল করুন"
-                  : "Yes, Cancel"}
+                {isBn ? "না, অর্ডার বজায় রাখুন" : "Keep Order"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const isPrepaid =
+                    cancellingOrder.payment_method === "razorpay" ||
+                    cancellingOrder.payment_status === "paid";
+                  if (isPrepaid && !refundUpiId.trim() && !refundQrFile) {
+                    toast.error(
+                      isBn
+                        ? "অনুগ্রহ করে আপনার UPI ID লিখুন অথবা QR কোড আপলোড করুন যাতে আমরা টাকা রিফান্ড করতে পারি।"
+                        : "Please enter your UPI ID or upload your QR code screenshot for the refund."
+                    );
+                    return;
+                  }
+                  cancelMutation.mutate();
+                }}
+                disabled={cancelMutation.isPending || isUploadingQr}
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition-colors cursor-pointer disabled:opacity-60 flex items-center justify-center gap-1.5"
+              >
+                {cancelMutation.isPending || isUploadingQr ? (
+                  <>
+                    <Clock className="size-3.5 animate-spin" />
+                    <span>
+                      {isUploadingQr
+                        ? isBn
+                          ? "QR আপলোড হচ্ছে..."
+                          : "Uploading QR..."
+                        : isBn
+                        ? "বাতিল হচ্ছে..."
+                        : "Cancelling..."}
+                    </span>
+                  </>
+                ) : (
+                  <span>
+                    {isBn
+                      ? "হ্যাঁ, বাতিল ও রিফান্ড আবেদন"
+                      : "Confirm Cancel & Refund"}
+                  </span>
+                )}
               </button>
             </div>
           </div>

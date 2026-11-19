@@ -1133,6 +1133,8 @@ export interface ShopBannerSettings {
   free_shipping_threshold?: number;
   standard_shipping_fee?: number;
   cod_enabled?: boolean;
+  cancellation_grace_hours?: number;
+  refund_sla_days?: number;
   reels?: ShopStoreReelItem[];
 }
 
@@ -1207,6 +1209,15 @@ export interface ShopOrder {
   estimated_delivery_date?: string | null;
   delivered_at?: string | null;
   consecration_certificate_url?: string | null;
+  refund_status?: string | null;
+  refund_amount?: number | null;
+  refund_upi_id?: string | null;
+  refund_qr_code_url?: string | null;
+  refund_requested_at?: string | null;
+  refund_sla_days?: number | null;
+  refund_completed_at?: string | null;
+  refund_transaction_id?: string | null;
+  refund_notes?: string | null;
   status_history: any[];
   created_at: string;
 }
@@ -1311,8 +1322,28 @@ export const shopApi = {
   getOrderDetail: (orderKey: string) =>
     api.get<ShopOrder>(endpoints.shop.orderDetail(orderKey), { auth: true }),
 
-  cancelOrder: (orderKey: string) =>
-    api.post<ShopOrder>(endpoints.shop.cancelOrder(orderKey), {}, { auth: true }),
+  cancelOrder: (
+    orderKey: string,
+    payload?: {
+      reason?: string;
+      upi_id?: string;
+      qr_code_url?: string;
+      qr_code_public_id?: string;
+    }
+  ) =>
+    api.post<ShopOrder>(endpoints.shop.cancelOrder(orderKey), payload || {}, { auth: true }),
+
+  uploadRefundQr: async (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    return apiFetch<{ url: string; public_id: string }>(
+      endpoints.shop.uploadRefundQr,
+      {
+        method: "POST",
+        body: fd,
+      }
+    );
+  },
 };
 
 export const courseApi = {
