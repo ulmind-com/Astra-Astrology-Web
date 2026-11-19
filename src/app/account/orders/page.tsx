@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   Coins,
   Gift,
+  Star,
   ExternalLink,
   Copy,
   ChevronDown,
@@ -848,8 +849,19 @@ export default function MyOrdersPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="font-bold text-xs text-stone-900">
-                          {formatINR(it.line_total || it.unit_sale_price * it.quantity)}
+                        <div className="flex flex-col items-end gap-1.5 shrink-0">
+                          <div className="font-bold text-xs text-stone-900">
+                            {formatINR(it.line_total || it.unit_sale_price * it.quantity)}
+                          </div>
+                          {order.order_status === "delivered" && it.slug && (
+                            <Link
+                              href={`/shop/products/${it.slug}#devotee-reviews`}
+                              className="inline-flex items-center gap-1 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-300 px-2 py-0.5 text-[10px] font-bold text-amber-900 transition-colors"
+                            >
+                              <Star className="size-2.5 fill-amber-500 text-amber-500" />
+                              <span>{isBn ? "রিভিউ লিখুন" : "Write Review"}</span>
+                            </Link>
+                          )}
                         </div>
                       </div>
                     ))}
