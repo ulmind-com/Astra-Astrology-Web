@@ -217,19 +217,19 @@ export function SiteFooter() {
               {[
                 {
                   label: language === "bn" ? "গোপনীয়তা নীতি" : language === "hi" ? "गोपनीयता नीति" : "Privacy Policy",
-                  href: "/privacy-policy",
+                  href: "/privacy",
                 },
                 {
                   label: language === "bn" ? "রিফান্ড ও বাতিল নীতি" : language === "hi" ? "रिफंड एवं रद्दीकरण नीति" : "Refund & Cancellation Policy",
-                  href: "/privacy-policy#section-2",
+                  href: "/privacy#section-2",
                 },
                 {
                   label: language === "bn" ? "শর্তাবলী" : language === "hi" ? "नियम एवं शर्तें" : "Terms & Conditions",
-                  href: "/privacy-policy",
+                  href: "/privacy",
                 },
                 {
                   label: language === "bn" ? "দাবিত্যাগ" : language === "hi" ? "अस्वीकरण" : "Disclaimer",
-                  href: "/privacy-policy",
+                  href: "/privacy",
                 },
                 {
                   label: language === "bn" ? "আমাদের সম্পর্কে" : language === "hi" ? "हमारे बारे में" : "About Us",
