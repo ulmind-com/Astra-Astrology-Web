@@ -271,6 +271,10 @@ export const endpoints = {
     book: "/purohits/bookings",
     myBookings: "/purohits/bookings/mine",
     roomToken: (bookingId: string) => `/purohits/bookings/${bookingId}/token`,
+    applicationSendOtp: "/purohits/applications/send-otp",
+    applicationVerifyOtp: "/purohits/applications/verify-otp",
+    applicationUploadDoc: "/purohits/applications/upload-document",
+    applicationSubmit: "/purohits/applications/submit",
   },
 } as const;
 

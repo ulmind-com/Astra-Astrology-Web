@@ -1774,6 +1774,57 @@ export interface PujaBookingData {
   created_at: string;
 }
 
+export interface PurohitApplicationSubmitPayload {
+  full_name: string;
+  email: string;
+  phone: string;
+  otp_code: string;
+  age?: number | null;
+  address?: string | null;
+  city: string;
+  state: string;
+  pincode?: string | null;
+  vedic_shakha: string;
+  specializations: string[];
+  experience_years: number;
+  languages: string[];
+  bio?: string | null;
+  avatar_url?: string | null;
+  identity_proof_url?: string | null;
+  bank_account_number?: string | null;
+  bank_ifsc?: string | null;
+  bank_account_holder?: string | null;
+  upi_id?: string | null;
+}
+
+export interface PurohitApplicationData {
+  id: string;
+  application_number: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  age?: number | null;
+  address?: string | null;
+  city: string;
+  state: string;
+  pincode?: string | null;
+  vedic_shakha: string;
+  specializations: string[];
+  experience_years: number;
+  languages: string[];
+  bio?: string | null;
+  avatar_url?: string | null;
+  identity_proof_url?: string | null;
+  bank_account_number?: string | null;
+  bank_ifsc?: string | null;
+  bank_account_holder?: string | null;
+  upi_id?: string | null;
+  status: "pending" | "approved" | "rejected";
+  rejection_reason?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export const purohitApi = {
   list: (params?: {
     online_only?: boolean;
@@ -1805,6 +1856,27 @@ export const purohitApi = {
 
   getRoomToken: (bookingId: string) =>
     api.get<PujaBookingData>(endpoints.purohits.roomToken(bookingId)),
+
+  sendApplicationOtp: (email: string) =>
+    api.post<{ email: string }>(endpoints.purohits.applicationSendOtp, { email }, { auth: false }),
+
+  verifyApplicationOtp: (email: string, code: string) =>
+    api.post<{ verified: boolean }>(endpoints.purohits.applicationVerifyOtp, { email, code }, { auth: false }),
+
+  uploadApplicationDoc: async (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    return apiFetch<{ url: string; public_id: string; format: string }>(
+      endpoints.purohits.applicationUploadDoc,
+      {
+        method: "POST",
+        body: fd,
+      }
+    );
+  },
+
+  submitApplication: (body: PurohitApplicationSubmitPayload) =>
+    api.post<PurohitApplicationData>(endpoints.purohits.applicationSubmit, body, { auth: false }),
 };
 
 
