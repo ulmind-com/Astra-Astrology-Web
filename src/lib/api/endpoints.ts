@@ -37,6 +37,10 @@ export const endpoints = {
     galleryImage: (publicId: string) => `/astrologers/me/gallery/${publicId}`,
     favorite: (slugOrId: string) => `/astrologers/${slugOrId}/favorite`,
     myFavorites: "/astrologers/favorites/my",
+    applicationSendOtp: "/astrologers/applications/send-otp",
+    applicationVerifyOtp: "/astrologers/applications/verify-otp",
+    applicationUploadDoc: "/astrologers/applications/upload-document",
+    applicationSubmit: "/astrologers/applications/submit",
   },
 
   wallet: {
@@ -231,8 +235,24 @@ export const endpoints = {
     myOrders: "/shop/orders/mine",
     orderDetail: (orderKey: string) => `/shop/orders/${orderKey}`,
     cancelOrder: (orderKey: string) => `/shop/orders/${orderKey}/cancel`,
+    uploadRefundQr: "/shop/upload-refund-qr",
+    couponsValidate: "/shop/coupons/validate",
+    couponsRecommendations: "/shop/coupons/recommendations",
+    productReviews: (slug: string) => `/shop/products/${slug}/reviews`,
+    productReviewEligibility: (slug: string) => `/shop/products/${slug}/reviews/eligibility`,
+    submitProductReview: (slug: string) => `/shop/products/${slug}/reviews`,
+    updateProductReview: (slug: string) => `/shop/products/${slug}/reviews/mine`,
+    reviewHelpful: (id: string) => `/shop/reviews/${id}/helpful`,
+    uploadReviewPhoto: "/shop/reviews/upload-image",
     checkPincode: (pincode: string, phone?: string) =>
       `/shop/pincode/${pincode}${phone ? `?phone=${encodeURIComponent(phone)}` : ""}`,
+    orderInvoice: (orderKey: string) => `/shop/orders/${orderKey}/invoice`,
+    orderInvoiceHtml: (orderKey: string) => `/shop/orders/${orderKey}/invoice/html`,
+    cart: "/shop/cart",
+    cartSync: "/shop/cart/sync",
+    cartItems: "/shop/cart/items",
+    cartItem: (productId: string) => `/shop/cart/items/${productId}`,
+    cartCoupon: "/shop/cart/coupon",
   },
   courses: {
     list: "/courses",
@@ -257,6 +277,10 @@ export const endpoints = {
     book: "/purohits/bookings",
     myBookings: "/purohits/bookings/mine",
     roomToken: (bookingId: string) => `/purohits/bookings/${bookingId}/token`,
+    applicationSendOtp: "/purohits/applications/send-otp",
+    applicationVerifyOtp: "/purohits/applications/verify-otp",
+    applicationUploadDoc: "/purohits/applications/upload-document",
+    applicationSubmit: "/purohits/applications/submit",
   },
 } as const;
 

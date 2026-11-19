@@ -44,6 +44,7 @@ import { CashbackConsultationBridge } from "@/components/shop/CashbackConsultati
 import { SacredSpecificationsGrid } from "@/components/shop/SacredSpecificationsGrid";
 import { LivePincodeLogisticsTracker } from "@/components/shop/LivePincodeLogisticsTracker";
 import { AstraPromiseSection } from "@/components/shop/AstraPromiseSection";
+import { SacredDevoteeReviews } from "@/components/shop/SacredDevoteeReviews";
 import { CardTilt } from "@/components/ui/card-tilt";
 import { shopApi, type ShopProduct } from "@/lib/api";
 import { useCartStore } from "@/lib/stores/use-cart-store";
@@ -296,14 +297,21 @@ export default function ProductDetailPage() {
           <div className="lg:col-span-6 space-y-5">
             {/* Rating & SKU Header */}
             <div className="flex items-center justify-between gap-2 flex-wrap">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs font-bold text-amber-900">
+              <a
+                href="#devotee-reviews"
+                className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 hover:border-amber-400 px-3 py-1 text-xs font-bold text-amber-900 transition-colors"
+              >
                 <Star className="size-3.5 fill-amber-500 text-amber-500" />
-                <span>{product.average_rating || 5.0}</span>
+                <span>{(product.average_rating || 5.0).toFixed(1)}</span>
                 <span className="text-stone-400 font-normal">|</span>
                 <span className="text-stone-600 font-medium">
-                  {product.review_count || 120}+ {isBn ? "ভক্ত রিভিউ" : "reviews"}
+                  {product.review_count && product.review_count > 0
+                    ? `${product.review_count} ${isBn ? "ভক্ত রিভিউ" : "reviews"}`
+                    : isBn
+                    ? "নতুন প্রতিকার (রিভিউ দিন)"
+                    : "New Remedy (Be first to review)"}
                 </span>
-              </div>
+              </a>
               <span className="text-[11px] font-mono text-stone-500 bg-stone-100 px-2.5 py-0.5 rounded-md">
                 SKU: {product.sku}
               </span>
@@ -599,6 +607,11 @@ export default function ProductDetailPage() {
         {/* DivinLink Sacred Promise Guarantee */}
         {/* ================================================================= */}
         <AstraPromiseSection />
+
+        {/* ================================================================= */}
+        {/* Verified Devotee Reviews & Ratings */}
+        {/* ================================================================= */}
+        <SacredDevoteeReviews product={product} />
 
         {/* ================================================================= */}
         {/* Related / Recommended Remedies Grid */}

@@ -50,6 +50,9 @@ function getFooterColumns(lang: AstrologyLanguage): Column[] {
         links: [
           { href: "/astrologers", label: "সকল জ্যোতিষী" },
           { href: "/ai-astrologer", label: "এআই জ্যোতিষী" },
+          { href: "/become-an-astrologer", label: "জ্যোতিষী আবেদন" },
+          { href: "/purohits", label: "অনলাইন পুরোহিত ও পূজা" },
+          { href: "/become-a-purohit", label: "বৈদিক পুরোহিত আবেদন" },
           { href: "/courses", label: "কোর্স" },
           { href: "/shop", label: "অ্যাস্ট্রো শপ" },
           { href: "/support", label: "সাহায্য ও সহায়তা" },
@@ -94,6 +97,9 @@ function getFooterColumns(lang: AstrologyLanguage): Column[] {
         links: [
           { href: "/astrologers", label: "सभी ज्योतिषी" },
           { href: "/ai-astrologer", label: "एआई ज्योतिषी" },
+          { href: "/become-an-astrologer", label: "ज्योतिषी आवेदन" },
+          { href: "/purohits", label: "ऑनलाइन पुरोहित व पूजा" },
+          { href: "/become-a-purohit", label: "वैदिक पुरोहित आवेदन" },
           { href: "/courses", label: "कोर्स" },
           { href: "/shop", label: "एस्ट्रो शॉप" },
           { href: "/support", label: "सहायता केंद्र" },
@@ -137,6 +143,9 @@ function getFooterColumns(lang: AstrologyLanguage): Column[] {
       links: [
         { href: "/astrologers", label: "All Astrologers" },
         { href: "/ai-astrologer", label: "AI Astrologer" },
+        { href: "/become-an-astrologer", label: "Become an Astrologer" },
+        { href: "/purohits", label: "Online Purohits & Puja" },
+        { href: "/become-a-purohit", label: "Become a Purohit" },
         { href: "/courses", label: "Courses" },
         { href: "/shop", label: "Astro Shop" },
         { href: "/support", label: "Help & Support" },

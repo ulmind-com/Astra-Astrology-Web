@@ -2,6 +2,7 @@
 
 import { api, apiFetch } from "@/lib/api/client";
 import { endpoints } from "@/lib/api/endpoints";
+import { apiBase } from "@/lib/env";
 import type {
   Address,
   FaceReadingAvailability,
@@ -182,6 +183,65 @@ export type DirectoryFilters = {
   limit?: number;
 };
 
+export interface AstrologerApplicationSubmitPayload {
+  full_name: string;
+  email: string;
+  phone: string;
+  otp_code: string;
+  gender?: string | null;
+  age?: number | null;
+  address?: string | null;
+  city: string;
+  state: string;
+  pincode?: string | null;
+  skills: string[];
+  specialisations: string[];
+  experience_years: number;
+  languages: string[];
+  qualifications: string[];
+  bio?: string | null;
+  avatar_url?: string | null;
+  identity_proof_url?: string | null;
+  bank_account_number?: string | null;
+  bank_ifsc?: string | null;
+  bank_account_holder?: string | null;
+  bank_name?: string | null;
+  upi_id?: string | null;
+  pan_card?: string | null;
+}
+
+export interface AstrologerApplicationData {
+  id: string;
+  application_number: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  gender?: string | null;
+  age?: number | null;
+  address?: string | null;
+  city: string;
+  state: string;
+  pincode?: string | null;
+  skills: string[];
+  specialisations: string[];
+  experience_years: number;
+  languages: string[];
+  qualifications: string[];
+  bio?: string | null;
+  avatar_url?: string | null;
+  identity_proof_url?: string | null;
+  bank_account_number?: string | null;
+  bank_ifsc?: string | null;
+  bank_account_holder?: string | null;
+  bank_name?: string | null;
+  upi_id?: string | null;
+  pan_card?: string | null;
+  status: "pending" | "approved" | "rejected";
+  rejection_reason?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export const astrologerApi = {
   quote: (astrologerId: string, mode: ConsultationMode) =>
     api.get<ConsultationQuote>(endpoints.astrologers.quote(astrologerId), {
@@ -239,6 +299,27 @@ export const astrologerApi = {
     api.get<{ is_favorite: boolean; favorites_count: number }>(
       endpoints.astrologers.favorite(slugOrId),
     ),
+
+  sendApplicationOtp: (email: string) =>
+    api.post<{ email: string }>(endpoints.astrologers.applicationSendOtp, { email }, { auth: false }),
+
+  verifyApplicationOtp: (email: string, code: string) =>
+    api.post<{ verified: boolean }>(endpoints.astrologers.applicationVerifyOtp, { email, code }, { auth: false }),
+
+  uploadApplicationDoc: async (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    return apiFetch<{ url: string; public_id: string; format: string }>(
+      endpoints.astrologers.applicationUploadDoc,
+      {
+        method: "POST",
+        body: fd,
+      }
+    );
+  },
+
+  submitApplication: (body: AstrologerApplicationSubmitPayload) =>
+    api.post<AstrologerApplicationData>(endpoints.astrologers.applicationSubmit, body, { auth: false }),
 
   myFavorites: () =>
     api.get<AstrologerPublic[]>(endpoints.astrologers.myFavorites),
@@ -1177,6 +1258,8 @@ export interface ShopBannerSettings {
   free_shipping_threshold?: number;
   standard_shipping_fee?: number;
   cod_enabled?: boolean;
+  cancellation_grace_hours?: number;
+  refund_sla_days?: number;
   reels?: ShopStoreReelItem[];
 }
 
@@ -1251,6 +1334,15 @@ export interface ShopOrder {
   estimated_delivery_date?: string | null;
   delivered_at?: string | null;
   consecration_certificate_url?: string | null;
+  refund_status?: string | null;
+  refund_amount?: number | null;
+  refund_upi_id?: string | null;
+  refund_qr_code_url?: string | null;
+  refund_requested_at?: string | null;
+  refund_sla_days?: number | null;
+  refund_completed_at?: string | null;
+  refund_transaction_id?: string | null;
+  refund_notes?: string | null;
   status_history: any[];
   created_at: string;
 }
@@ -1280,6 +1372,38 @@ export interface StockReservationResponse {
   product_id: string;
   quantity: number;
   message: string;
+}
+
+export interface ShopCouponRecommendation {
+  code: string;
+  title: string;
+  description?: string | null;
+  discount_type: "percentage" | "flat" | string;
+  discount_value: number;
+  min_order_amount: number;
+  max_discount_amount?: number | null;
+  discount_amount: number;
+  is_applicable: boolean;
+  reason_if_inapplicable?: string | null;
+  is_best_offer: boolean;
+  is_first_order_deal: boolean;
+  expiry_date?: string | null;
+}
+
+export interface ShopCouponRecommendationsResponse {
+  items: ShopCouponRecommendation[];
+  best_coupon_code?: string | null;
+  max_savings: number;
+  user_orders_count: number;
+}
+
+export interface ShopCouponValidateResponse {
+  is_valid: boolean;
+  code: string;
+  discount_amount: number;
+  new_subtotal: number;
+  message: string;
+  coupon?: any;
 }
 
 export const shopApi = {
@@ -1355,9 +1479,277 @@ export const shopApi = {
   getOrderDetail: (orderKey: string) =>
     api.get<ShopOrder>(endpoints.shop.orderDetail(orderKey), { auth: true }),
 
-  cancelOrder: (orderKey: string) =>
-    api.post<ShopOrder>(endpoints.shop.cancelOrder(orderKey), {}, { auth: true }),
+  cancelOrder: (
+    orderKey: string,
+    payload?: {
+      reason?: string;
+      upi_id?: string;
+      qr_code_url?: string;
+      qr_code_public_id?: string;
+    }
+  ) =>
+    api.post<ShopOrder>(endpoints.shop.cancelOrder(orderKey), payload || {}, { auth: true }),
+
+  uploadRefundQr: async (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    return apiFetch<{ url: string; public_id: string }>(
+      endpoints.shop.uploadRefundQr,
+      {
+        method: "POST",
+        body: fd,
+      }
+    );
+  },
+
+  validateCoupon: (code: string, subtotal: number) =>
+    api.post<ShopCouponValidateResponse>(
+      endpoints.shop.couponsValidate,
+      { code, subtotal },
+      { auth: false }
+    ),
+
+  getCouponRecommendations: (subtotal: number) =>
+    api.post<ShopCouponRecommendationsResponse>(
+      `${endpoints.shop.couponsRecommendations}?subtotal=${subtotal}`,
+      {},
+      { auth: false }
+    ),
+
+  getProductReviews: (
+    slug: string,
+    params?: { page?: number; limit?: number; rating?: number; sort?: string }
+  ) =>
+    api.get<ProductReviewsResponse>(endpoints.shop.productReviews(slug), {
+      query: params,
+      auth: false,
+    }),
+
+  checkReviewEligibility: (slug: string) =>
+    api.get<ReviewEligibilityResponse>(endpoints.shop.productReviewEligibility(slug), {
+      auth: true,
+    }),
+
+  submitProductReview: (slug: string, body: ProductReviewCreateInput) =>
+    api.post<ProductReviewItem>(endpoints.shop.submitProductReview(slug), body, {
+      auth: true,
+    }),
+
+  updateProductReview: (slug: string, body: ProductReviewUpdateInput) =>
+    api.put<ProductReviewItem>(endpoints.shop.updateProductReview(slug), body, {
+      auth: true,
+    }),
+
+  toggleReviewHelpful: (reviewId: string) =>
+    api.post<{ helpful_count: number; is_helpful_by_me: boolean }>(
+      endpoints.shop.reviewHelpful(reviewId),
+      {},
+      { auth: true }
+    ),
+
+  uploadReviewPhoto: async (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    return apiFetch<{ url: string; public_id: string }>(
+      endpoints.shop.uploadReviewPhoto,
+      {
+        method: "POST",
+        body: fd,
+      }
+    );
+  },
+
+  getOrderInvoice: (orderKey: string) =>
+    api.get<OrderInvoiceData>(endpoints.shop.orderInvoice(orderKey), { auth: true }),
+
+  getOrderInvoiceHtmlUrl: (orderKey: string, print = true) =>
+    `${apiBase}${endpoints.shop.orderInvoiceHtml(orderKey)}?print=${print}`,
+
+  // Persistent Multi-Device Cart Sync Endpoints
+  getCart: () =>
+    api.get<CartOut>(endpoints.shop.cart, { auth: true }),
+
+  syncCart: (items: CartItemIn[], coupon_code?: string | null) =>
+    api.post<CartOut>(endpoints.shop.cartSync, { items, coupon_code }, { auth: true }),
+
+  addCartItem: (product_id: string, quantity = 1, sankalpa?: any) =>
+    api.post<CartOut>(endpoints.shop.cartItems, { product_id, quantity, sankalpa }, { auth: true }),
+
+  updateCartItem: (product_id: string, quantity: number, sankalpa?: any) =>
+    api.patch<CartOut>(endpoints.shop.cartItem(product_id), { quantity, sankalpa }, { auth: true }),
+
+  removeCartItem: (product_id: string) =>
+    api.delete<CartOut>(endpoints.shop.cartItem(product_id), { auth: true }),
+
+  clearCart: () =>
+    api.delete<CartOut>(endpoints.shop.cart, { auth: true }),
+
+  applyCartCoupon: (code: string | null) =>
+    api.post<CartOut>(endpoints.shop.cartCoupon, { code }, { auth: true }),
 };
+
+export interface CartItemIn {
+  product_id: string;
+  quantity: number;
+  sankalpa?: any;
+}
+
+export interface CartItemOut {
+  id: string;
+  slug: string;
+  sku: string;
+  title: string;
+  price: number;
+  mrp: number;
+  image: string;
+  quantity: number;
+  stock_quantity: number;
+  is_in_stock: boolean;
+  free_gift_title?: string | null;
+  free_gift_value?: number | null;
+  free_gift_badge?: string | null;
+  free_gift_image_url?: string | null;
+  cashback_percent: number;
+  sankalpa?: any;
+  line_total: number;
+}
+
+export interface CartOut {
+  items: CartItemOut[];
+  item_count: number;
+  subtotal: number;
+  coupon_code?: string | null;
+  discount_amount: number;
+  coupon_title?: string | null;
+  is_coupon_valid: boolean;
+  cashback_coins: number;
+  free_gifts: Array<{ title: string; value: number; badge?: string; image_url?: string | null }>;
+  updated_at?: string | null;
+}
+
+export interface OrderInvoiceSeller {
+  legal_name: string;
+  trade_name: string;
+  address: string;
+  state: string;
+  state_code: string;
+  phone: string;
+  email: string;
+  website: string;
+  pan: string;
+  gstin: string;
+  is_gst_registered: boolean;
+}
+
+export interface OrderInvoiceBuyer {
+  name: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  gotra?: string | null;
+  sankalpa?: string | null;
+}
+
+export interface OrderInvoiceItem {
+  title: string;
+  sku: string;
+  energization: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  is_free_gift: boolean;
+}
+
+export interface OrderInvoiceData {
+  invoice_number: string;
+  order_id: string;
+  order_key: string;
+  invoice_date: string;
+  created_at: string;
+  payment_method: string;
+  payment_status: string;
+  seller: OrderInvoiceSeller;
+  buyer: OrderInvoiceBuyer;
+  items: OrderInvoiceItem[];
+  subtotal: number;
+  discount_amount: number;
+  shipping_fee: number;
+  tax_rate_percent: number;
+  tax_amount: number;
+  tax_label: string;
+  total_amount: number;
+  invoice_mode: string;
+  footer_notes: string;
+  blessing_note: string;
+}
+
+export interface ProductReviewItem {
+  id: string;
+  product_id: string;
+  product_slug: string;
+  user_id: string;
+  order_id: string;
+  rating: number;
+  title: string | null;
+  comment: string;
+  images: string[];
+  is_verified_buyer: boolean;
+  author_name: string;
+  author_avatar: string | null;
+  helpful_count: number;
+  is_helpful_by_me: boolean;
+  is_hidden: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProductRatingBreakdown {
+  stars_5: number;
+  stars_4: number;
+  stars_3: number;
+  stars_2: number;
+  stars_1: number;
+  stars_5_pct: number;
+  stars_4_pct: number;
+  stars_3_pct: number;
+  stars_2_pct: number;
+  stars_1_pct: number;
+}
+
+export interface ProductReviewsResponse {
+  items: ProductReviewItem[];
+  total: number;
+  average_rating: number;
+  breakdown: ProductRatingBreakdown;
+  page: number;
+  limit: number;
+  pages: number;
+}
+
+export interface ReviewEligibilityResponse {
+  can_review: boolean;
+  already_reviewed: boolean;
+  is_delivered_buyer: boolean;
+  reason?: string | null;
+  existing_review?: ProductReviewItem | null;
+  order_id?: string | null;
+}
+
+export interface ProductReviewCreateInput {
+  rating: number;
+  title?: string;
+  comment: string;
+  images?: string[];
+}
+
+export interface ProductReviewUpdateInput {
+  rating?: number;
+  title?: string;
+  comment?: string;
+  images?: string[];
+}
 
 export const courseApi = {
   getCourses: (params?: {
@@ -1506,6 +1898,57 @@ export interface PujaBookingData {
   created_at: string;
 }
 
+export interface PurohitApplicationSubmitPayload {
+  full_name: string;
+  email: string;
+  phone: string;
+  otp_code: string;
+  age?: number | null;
+  address?: string | null;
+  city: string;
+  state: string;
+  pincode?: string | null;
+  vedic_shakha: string;
+  specializations: string[];
+  experience_years: number;
+  languages: string[];
+  bio?: string | null;
+  avatar_url?: string | null;
+  identity_proof_url?: string | null;
+  bank_account_number?: string | null;
+  bank_ifsc?: string | null;
+  bank_account_holder?: string | null;
+  upi_id?: string | null;
+}
+
+export interface PurohitApplicationData {
+  id: string;
+  application_number: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  age?: number | null;
+  address?: string | null;
+  city: string;
+  state: string;
+  pincode?: string | null;
+  vedic_shakha: string;
+  specializations: string[];
+  experience_years: number;
+  languages: string[];
+  bio?: string | null;
+  avatar_url?: string | null;
+  identity_proof_url?: string | null;
+  bank_account_number?: string | null;
+  bank_ifsc?: string | null;
+  bank_account_holder?: string | null;
+  upi_id?: string | null;
+  status: "pending" | "approved" | "rejected";
+  rejection_reason?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export const purohitApi = {
   list: (params?: {
     online_only?: boolean;
@@ -1537,6 +1980,27 @@ export const purohitApi = {
 
   getRoomToken: (bookingId: string) =>
     api.get<PujaBookingData>(endpoints.purohits.roomToken(bookingId)),
+
+  sendApplicationOtp: (email: string) =>
+    api.post<{ email: string }>(endpoints.purohits.applicationSendOtp, { email }, { auth: false }),
+
+  verifyApplicationOtp: (email: string, code: string) =>
+    api.post<{ verified: boolean }>(endpoints.purohits.applicationVerifyOtp, { email, code }, { auth: false }),
+
+  uploadApplicationDoc: async (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    return apiFetch<{ url: string; public_id: string; format: string }>(
+      endpoints.purohits.applicationUploadDoc,
+      {
+        method: "POST",
+        body: fd,
+      }
+    );
+  },
+
+  submitApplication: (body: PurohitApplicationSubmitPayload) =>
+    api.post<PurohitApplicationData>(endpoints.purohits.applicationSubmit, body, { auth: false }),
 };
 
 
