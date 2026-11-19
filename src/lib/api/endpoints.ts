@@ -232,6 +232,12 @@ export const endpoints = {
     uploadRefundQr: "/shop/upload-refund-qr",
     couponsValidate: "/shop/coupons/validate",
     couponsRecommendations: "/shop/coupons/recommendations",
+    productReviews: (slug: string) => `/shop/products/${slug}/reviews`,
+    productReviewEligibility: (slug: string) => `/shop/products/${slug}/reviews/eligibility`,
+    submitProductReview: (slug: string) => `/shop/products/${slug}/reviews`,
+    updateProductReview: (slug: string) => `/shop/products/${slug}/reviews/mine`,
+    reviewHelpful: (id: string) => `/shop/reviews/${id}/helpful`,
+    uploadReviewPhoto: "/shop/reviews/upload-image",
     checkPincode: (pincode: string, phone?: string) =>
       `/shop/pincode/${pincode}${phone ? `?phone=${encodeURIComponent(phone)}` : ""}`,
   },

@@ -1390,7 +1390,116 @@ export const shopApi = {
       {},
       { auth: false }
     ),
+
+  getProductReviews: (
+    slug: string,
+    params?: { page?: number; limit?: number; rating?: number; sort?: string }
+  ) =>
+    api.get<ProductReviewsResponse>(endpoints.shop.productReviews(slug), {
+      query: params,
+      auth: false,
+    }),
+
+  checkReviewEligibility: (slug: string) =>
+    api.get<ReviewEligibilityResponse>(endpoints.shop.productReviewEligibility(slug), {
+      auth: true,
+    }),
+
+  submitProductReview: (slug: string, body: ProductReviewCreateInput) =>
+    api.post<ProductReviewItem>(endpoints.shop.submitProductReview(slug), body, {
+      auth: true,
+    }),
+
+  updateProductReview: (slug: string, body: ProductReviewUpdateInput) =>
+    api.put<ProductReviewItem>(endpoints.shop.updateProductReview(slug), body, {
+      auth: true,
+    }),
+
+  toggleReviewHelpful: (reviewId: string) =>
+    api.post<{ helpful_count: number; is_helpful_by_me: boolean }>(
+      endpoints.shop.reviewHelpful(reviewId),
+      {},
+      { auth: true }
+    ),
+
+  uploadReviewPhoto: async (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    return apiFetch<{ url: string; public_id: string }>(
+      endpoints.shop.uploadReviewPhoto,
+      {
+        method: "POST",
+        body: fd,
+      }
+    );
+  },
 };
+
+export interface ProductReviewItem {
+  id: string;
+  product_id: string;
+  product_slug: string;
+  user_id: string;
+  order_id: string;
+  rating: number;
+  title: string | null;
+  comment: string;
+  images: string[];
+  is_verified_buyer: boolean;
+  author_name: string;
+  author_avatar: string | null;
+  helpful_count: number;
+  is_helpful_by_me: boolean;
+  is_hidden: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProductRatingBreakdown {
+  stars_5: number;
+  stars_4: number;
+  stars_3: number;
+  stars_2: number;
+  stars_1: number;
+  stars_5_pct: number;
+  stars_4_pct: number;
+  stars_3_pct: number;
+  stars_2_pct: number;
+  stars_1_pct: number;
+}
+
+export interface ProductReviewsResponse {
+  items: ProductReviewItem[];
+  total: number;
+  average_rating: number;
+  breakdown: ProductRatingBreakdown;
+  page: number;
+  limit: number;
+  pages: number;
+}
+
+export interface ReviewEligibilityResponse {
+  can_review: boolean;
+  already_reviewed: boolean;
+  is_delivered_buyer: boolean;
+  reason?: string | null;
+  existing_review?: ProductReviewItem | null;
+  order_id?: string | null;
+}
+
+export interface ProductReviewCreateInput {
+  rating: number;
+  title?: string;
+  comment: string;
+  images?: string[];
+}
+
+export interface ProductReviewUpdateInput {
+  rating?: number;
+  title?: string;
+  comment?: string;
+  images?: string[];
+}
 
 export const courseApi = {
   getCourses: (params?: {
