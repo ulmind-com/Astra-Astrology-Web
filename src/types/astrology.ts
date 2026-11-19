@@ -1804,6 +1804,35 @@ export interface AnnualHoroscopeResponse {
   store_recommendations?: StoreRemedyRecommendation[];
 }
 
+export interface FestivalItemData {
+  id: string;
+  name: Record<string, string>;
+  date: string; // YYYY-MM-DD
+  date_formatted: Record<string, string>;
+  day_of_week: Record<string, string>;
+  tithi: Record<string, string>;
+  category: "major" | "vrat" | "jayanti";
+  badge: Record<string, string>;
+  accent_color: string;
+  muhurat: Record<string, string>;
+  shloka: string;
+  desc: Record<string, string>;
+  rituals: Record<string, string[]>;
+  days_remaining: number;
+  is_today: boolean;
+  is_upcoming: boolean;
+  is_past: boolean;
+}
+
+export interface FestivalCalendarData {
+  year: number;
+  total_count: number;
+  next_upcoming: FestivalItemData | null;
+  festivals: FestivalItemData[];
+  engine: string;
+  calculated_at: string;
+}
+
 export interface StoreRemedyRecommendation {
   id: string;
   title: string;

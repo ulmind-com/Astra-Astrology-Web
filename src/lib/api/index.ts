@@ -28,6 +28,8 @@ import type {
   KundliMatchingResult,
   DailyHoroscopePayload,
   DailyHoroscopeResult,
+  FestivalCalendarData,
+  FestivalItemData,
   AnnualHoroscopeRequest,
   AnnualHoroscopeResponse,
   FeaturePricingItem,
@@ -798,6 +800,19 @@ export const astrologyApi = {
       endpoints.astrology.annualHoroscope,
       payload,
     ),
+
+  /** Vedic Festivals Calendar for a given year & category with Swiss Ephemeris data */
+  festivals: (year?: number, category?: string) => {
+    const params = new URLSearchParams();
+    if (year) params.append("year", String(year));
+    if (category && category !== "all") params.append("category", category);
+    const queryStr = params.toString() ? `?${params.toString()}` : "";
+    return api.get<FestivalCalendarData>(`${endpoints.astrology.festivals}${queryStr}`, { auth: false });
+  },
+
+  /** Upcoming Vedic Festivals relative to current day */
+  upcomingFestivals: (limit: number = 15) =>
+    api.get<FestivalItemData[]>(`${endpoints.astrology.upcomingFestivals}?limit=${limit}`, { auth: false }),
 
   /** Get current feature pricing and availability for all astrology tools. */
   featuresPricing: () =>

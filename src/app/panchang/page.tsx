@@ -1,165 +1,48 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import {
   CalendarDays,
+  Clock,
+  Compass,
+  Sparkles,
   Sun,
   Moon,
-  Sparkles,
-  Star,
-  Clock,
   ArrowRight,
-  Compass,
-  Eye,
-  BookOpen,
+  ShieldAlert,
+  AlertTriangle,
+  CheckCircle2,
+  Phone,
+  Video,
+  Info,
 } from "lucide-react";
-import { SiteHeader } from "@/components/layout/site-header";
+
 import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteHeader } from "@/components/layout/site-header";
+import { LoadingBlock } from "@/components/ui";
+import { astrologyApi } from "@/lib/api";
 import { useLanguage } from "@/providers/language-provider";
+import {
+  SuryaChandraHorizonArc,
+  TithiMoonClipart,
+  NakshatraStarClipart,
+  YogaUnionClipart,
+  KaranaKalashClipart,
+  VaraSunClipart,
+  VedicCompassClipart,
+} from "@/components/astro/panchang-cliparts";
+import { cn } from "@/lib/utils";
+import type { HoraItem, ChoghadiyaItem } from "@/types";
 
-const T = {
-  en: {
-    badge: "Vedic Panchang",
-    title: "Daily Vedic Panchang",
-    subtitle:
-      "The five-limbed Vedic calendar system — know Tithi, Nakshatra, Yoga, Karana & Vara for any day to plan auspicious activities.",
-    whyTitle: "Why Panchang Matters",
-    whyDesc:
-      "Panchang (पंचांग) literally means 'five limbs'. It is the ancient Hindu calendar and almanac that records the five key elements of cosmic time. Every auspicious activity in Vedic tradition — from weddings to business launches — is timed using Panchang data.",
-    elements: [
-      {
-        icon: "Moon",
-        name: "Tithi",
-        desc: "Lunar day — one of 30 tithis in a lunar month. Determines the auspiciousness of activities.",
-      },
-      {
-        icon: "Star",
-        name: "Nakshatra",
-        desc: "Lunar mansion — the Moon's position among 27 star groups. Governs personality and daily fortune.",
-      },
-      {
-        icon: "Compass",
-        name: "Yoga",
-        desc: "Sun-Moon angular combination — one of 27 yogas indicating overall day quality.",
-      },
-      {
-        icon: "Eye",
-        name: "Karana",
-        desc: "Half of a tithi — one of 11 karanas. Used for timing specific short-duration tasks.",
-      },
-      {
-        icon: "CalendarDays",
-        name: "Vara (Day)",
-        desc: "Weekday ruled by a planet — Sunday (Sun), Monday (Moon), Tuesday (Mars), etc.",
-      },
-    ],
-    liveTitle: "Live Panchang Data",
-    liveSub:
-      "Our Daily Horoscope page includes a full live Panchang section with today's Tithi, Nakshatra, Yoga, Karana, Sunrise/Sunset, Rahu Kaal, and Abhijit Muhurat — all calculated in real-time using Swiss Ephemeris.",
-    liveCta: "View Today's Panchang in Daily Horoscope",
-    consultTitle: "Need Personalized Guidance?",
-    consultSub:
-      "Consult our verified Vedic astrologers for muhurat selection, event timing, and personalized Panchang-based advice.",
-    consultCta: "Talk to an Astrologer",
-  },
-  bn: {
-    badge: "বৈদিক পঞ্জিকা",
-    title: "দৈনিক বৈদিক পঞ্জিকা",
-    subtitle:
-      "পঞ্চাঙ্গ — পাঁচটি বৈদিক সময়ের উপাদান। যে কোনো দিনের তিথি, নক্ষত্র, যোগ, করণ ও বার জেনে শুভ কাজের পরিকল্পনা করুন।",
-    whyTitle: "পঞ্জিকা কেন গুরুত্বপূর্ণ",
-    whyDesc:
-      "পঞ্চাঙ্গ (পঞ্জিকা) শব্দের অর্থ 'পাঁচটি অঙ্গ'। এটি প্রাচীন হিন্দু ক্যালেন্ডার যা মহাজাগতিক সময়ের পাঁচটি মূল উপাদান লিপিবদ্ধ করে। বৈদিক ঐতিহ্যে বিবাহ থেকে ব্যবসা শুরু — সবকিছু পঞ্চাঙ্গ অনুসারে নির্ধারিত হয়।",
-    elements: [
-      {
-        icon: "Moon",
-        name: "তিথি",
-        desc: "চান্দ্র দিন — এক চান্দ্র মাসে ৩০টি তিথি। কাজের শুভাশুভ নির্ধারণ করে।",
-      },
-      {
-        icon: "Star",
-        name: "নক্ষত্র",
-        desc: "চন্দ্রের নক্ষত্রে অবস্থান — ২৭টি নক্ষত্রের মধ্যে। ব্যক্তিত্ব ও দৈনিক ভাগ্য নিয়ন্ত্রণ করে।",
-      },
-      {
-        icon: "Compass",
-        name: "যোগ",
-        desc: "সূর্য-চন্দ্রের কৌণিক সংমিশ্রণ — ২৭টি যোগের একটি। দিনের সামগ্রিক মান নির্দেশ করে।",
-      },
-      {
-        icon: "Eye",
-        name: "করণ",
-        desc: "তিথির অর্ধেক — ১১টি করণের একটি। স্বল্পমেয়াদী কাজের সময় নির্ধারণে ব্যবহৃত।",
-      },
-      {
-        icon: "CalendarDays",
-        name: "বার (দিন)",
-        desc: "গ্রহ শাসিত সপ্তাহের দিন — রবি (সূর্য), সোম (চন্দ্র), মঙ্গল (মঙ্গল গ্রহ) ইত্যাদি।",
-      },
-    ],
-    liveTitle: "লাইভ পঞ্চাঙ্গ ডেটা",
-    liveSub:
-      "আমাদের দৈনিক রাশিফল পৃষ্ঠায় আজকের সম্পূর্ণ লাইভ পঞ্চাঙ্গ রয়েছে — তিথি, নক্ষত্র, যোগ, করণ, সূর্যোদয়/সূর্যাস্ত, রাহু কাল ও অভিজিৎ মুহূর্ত — সবকিছু সুইস এফেমেরিস দিয়ে রিয়েল-টাইমে গণনাকৃত।",
-    liveCta: "দৈনিক রাশিফলে আজকের পঞ্চাঙ্গ দেখুন",
-    consultTitle: "ব্যক্তিগত নির্দেশনা প্রয়োজন?",
-    consultSub:
-      "মুহূর্ত নির্বাচন, অনুষ্ঠানের সময় নির্ধারণ ও পঞ্চাঙ্গ-ভিত্তিক পরামর্শের জন্য আমাদের সার্টিফাইড বৈদিক জ্যোতিষীদের সাথে পরামর্শ করুন।",
-    consultCta: "জ্যোতিষীর সাথে কথা বলুন",
-  },
-  hi: {
-    badge: "वैदिक पंचांग",
-    title: "दैनिक वैदिक पंचांग",
-    subtitle:
-      "पंचांग — पांच वैदिक समय तत्व। किसी भी दिन की तिथि, नक्षत्र, योग, करण व वार जानकर शुभ कार्यों की योजना बनाएं।",
-    whyTitle: "पंचांग क्यों महत्वपूर्ण है",
-    whyDesc:
-      "पंचांग शब्द का अर्थ है 'पांच अंग'। यह प्राचीन हिन्दू कैलेंडर है जो ब्रह्मांडीय समय के पांच मुख्य तत्वों को दर्ज करता है। वैदिक परंपरा में विवाह से लेकर व्यापार शुरू करने तक — सब कुछ पंचांग के अनुसार तय होता है।",
-    elements: [
-      {
-        icon: "Moon",
-        name: "तिथि",
-        desc: "चंद्र दिवस — एक चंद्र मास में 30 तिथियां। कार्यों की शुभता निर्धारित करती है।",
-      },
-      {
-        icon: "Star",
-        name: "नक्षत्र",
-        desc: "चंद्रमा की 27 नक्षत्रों में स्थिति। व्यक्तित्व और दैनिक भाग्य को नियंत्रित करता है।",
-      },
-      {
-        icon: "Compass",
-        name: "योग",
-        desc: "सूर्य-चंद्र कोणीय संयोजन — 27 योगों में से एक। दिन की समग्र गुणवत्ता दर्शाता है।",
-      },
-      {
-        icon: "Eye",
-        name: "करण",
-        desc: "तिथि का आधा भाग — 11 करणों में से एक। लघु कार्यों के समय निर्धारण में उपयोगी।",
-      },
-      {
-        icon: "CalendarDays",
-        name: "वार (दिन)",
-        desc: "ग्रह शासित सप्ताह का दिन — रविवार (सूर्य), सोमवार (चंद्र), मंगलवार (मंगल) आदि।",
-      },
-    ],
-    liveTitle: "लाइव पंचांग डेटा",
-    liveSub:
-      "हमारे दैनिक राशिफल पृष्ठ में आज का पूर्ण लाइव पंचांग शामिल है — तिथि, नक्षत्र, योग, करण, सूर्योदय/सूर्यास्त, राहु काल और अभिजित मुहूर्त — सब कुछ स्विस एफेमेरिस से रियल-टाइम में गणित।",
-    liveCta: "दैनिक राशिफल में आज का पंचांग देखें",
-    consultTitle: "व्यक्तिगत मार्गदर्शन चाहिए?",
-    consultSub:
-      "मुहूर्त चयन, कार्यक्रम समय निर्धारण और पंचांग-आधारित सलाह के लिए हमारे प्रमाणित वैदिक ज्योतिषियों से परामर्श करें।",
-    consultCta: "ज्योतिषी से बात करें",
-  },
-};
-
-const ICON_MAP: Record<string, React.ElementType> = {
-  Moon,
-  Star,
-  Compass,
-  Eye,
-  CalendarDays,
-};
+function formatDateToYMD(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
 export default function PanchangPage() {
   const { language } = useLanguage();
@@ -167,103 +50,736 @@ export default function PanchangPage() {
     | "en"
     | "bn"
     | "hi";
-  const t = T[lang];
+
+  const isBn = lang === "bn";
+  const isHi = lang === "hi";
+
+  const todayStr = React.useMemo(() => formatDateToYMD(new Date()), []);
+  const yesterdayStr = React.useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return formatDateToYMD(d);
+  }, []);
+  const tomorrowStr = React.useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return formatDateToYMD(d);
+  }, []);
+
+  const [selectedDate, setSelectedDate] = React.useState<string>(todayStr);
+  const [activeTab, setActiveTab] = React.useState<"limbs" | "horas" | "choghadiya">("limbs");
+  const [horaPeriod, setHoraPeriod] = React.useState<"day" | "night">("day");
+  const [choghadiyaPeriod, setChoghadiyaPeriod] = React.useState<"day" | "night">("day");
+
+  // Real-time backend API query
+  const { data: horoscopeData, isLoading, error } = useQuery({
+    queryKey: ["panchang", "daily", lang, selectedDate],
+    queryFn: () =>
+      astrologyApi.dailyHoroscope({
+        language: lang,
+        date: selectedDate,
+        latitude: 22.5726,
+        longitude: 88.3639,
+        timezone: 5.5,
+      }),
+    staleTime: 1000 * 60 * 15,
+  });
+
+  const panchang = horoscopeData?.panchang;
+  const horas: HoraItem[] = panchang?.horas ?? [];
+  const choghadiya: ChoghadiyaItem[] = panchang?.choghadiya ?? [];
 
   return (
-    <div className="min-h-screen bg-surface-muted/30 text-foreground flex flex-col font-sans pb-24">
+    <div className="min-h-screen bg-[#FDFBF7] text-slate-900 flex flex-col font-sans">
       <SiteHeader />
 
-      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-10 flex-1 w-full space-y-12">
-        {/* Hero */}
-        <div className="mx-auto max-w-3xl text-center space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full bg-amber-100/90 text-amber-950 border border-amber-300 font-bold px-4 py-1.5 text-xs shadow-2xs">
-            <Sparkles className="size-3.5 text-amber-600" />
-            <span>{t.badge}</span>
+      <main className="relative flex-1 w-full pb-28 overflow-hidden">
+        {/* Cosmic Ambient Aura */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -top-36 left-1/2 -translate-x-1/2 w-[1100px] h-[550px] bg-gradient-to-b from-amber-200/40 via-orange-100/25 to-transparent blur-3xl opacity-80" />
+          <div className="absolute top-16 -right-24 w-96 h-96 opacity-[0.04] animate-celestial-spin">
+            <Image
+              src="/images/panchang/zodiac-wheel-gold.webp"
+              alt="Zodiac Chakra"
+              width={384}
+              height={384}
+              className="w-full h-full object-contain"
+            />
           </div>
-
-          <h1 className="font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-[#1a1208]">
-            {t.title}
-          </h1>
-
-          <p className="text-sm sm:text-base text-[#6b5f4d] max-w-2xl mx-auto leading-relaxed">
-            {t.subtitle}
-          </p>
         </div>
 
-        {/* Why Panchang Matters */}
-        <section className="rounded-[24px] border border-[#ece0ac] bg-gradient-to-b from-white to-[#fffdf3] p-6 sm:p-8 shadow-[0_6px_22px_-12px_rgba(26,18,8,0.1)]">
-          <div className="flex items-center gap-2 mb-3">
-            <BookOpen className="size-5 text-amber-600" />
-            <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#1a1208]">
-              {t.whyTitle}
-            </h2>
-          </div>
-          <p className="text-sm text-[#6b5f4d] leading-relaxed">{t.whyDesc}</p>
-        </section>
+        <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
+          {/* Breadcrumb Navigation */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-semibold text-amber-950/80">
+            <div className="flex items-center gap-2">
+              <Link href="/" className="hover:text-amber-700 transition-colors flex items-center gap-1.5">
+                <Compass className="size-3.5 text-amber-600" />
+                <span>Astra Home</span>
+              </Link>
+              <span className="text-amber-900/30">/</span>
+              <span className="text-slate-900 font-bold">
+                {isBn ? "দৈনিক বৈদিক পঞ্জিকা ও পঞ্চাঙ্গ" : "Vedic Daily Panchang"}
+              </span>
+            </div>
 
-        {/* 5 Elements of Panchang */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {t.elements.map((el, idx) => {
-            const Icon = ICON_MAP[el.icon] || Star;
-            return (
-              <div
-                key={idx}
-                className="group rounded-[20px] border border-[#ece0ac] bg-gradient-to-b from-white to-[#fffdf3] p-5 shadow-[0_4px_14px_-6px_rgba(26,18,8,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_28px_-10px_rgba(240,200,50,0.4)]"
-              >
-                <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#ffd34d] to-[#f5a300] text-white shadow-md mb-4">
-                  <Icon className="size-6" />
-                </div>
-                <h3 className="text-base font-bold text-[#1a1208] mb-1.5">
-                  {el.name}
-                </h3>
-                <p className="text-xs text-[#766545] leading-relaxed">
-                  {el.desc}
-                </p>
+            <Link
+              href="/festivals"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 hover:text-amber-950 bg-amber-500/10 border border-amber-500/25 px-3 py-1.5 rounded-xl transition-all"
+            >
+              <CalendarDays className="size-3.5 text-amber-600" />
+              <span>{isBn ? "উৎসব ও ব্রতের পঞ্জিকা দেখুন →" : "View Vedic Festival Calendar →"}</span>
+            </Link>
+          </div>
+
+          {/* Luxury Vedic Cosmic Hero Banner */}
+          <section className="relative overflow-hidden rounded-3xl border border-amber-900/15 bg-gradient-to-br from-[#1A1224] via-[#0D0A17] to-[#08060E] p-6 sm:p-10 text-white shadow-[0_20px_50px_rgba(20,10,35,0.4)]">
+            {/* Background Watermark */}
+            <div className="pointer-events-none absolute -right-16 -bottom-16 w-80 h-80 opacity-15">
+              <Image
+                src="/images/panchang/zodiac-wheel-gold.png"
+                alt="Zodiac Wheel"
+                width={320}
+                height={320}
+                className="w-full h-full object-contain"
+              />
+            </div>
+
+            <div className="relative max-w-2xl space-y-4">
+              <div className="inline-flex items-center gap-2 rounded-full bg-amber-400/15 border border-amber-400/30 px-3.5 py-1 text-xs font-bold text-amber-300 shadow-2xs">
+                <Sparkles className="size-3.5 text-amber-400" />
+                <span>
+                  {isBn
+                    ? "সুইস এফিমেরিস দ্বারা নিখুঁত জ্যোতিষীয় কাল-গণনা"
+                    : isHi
+                    ? "स्विस एफिमेरिस द्वारा प्रामाणिक पंचांग गणना"
+                    : "Swiss Ephemeris Vedic Precision Engine"}
+                </span>
               </div>
-            );
-          })}
-        </div>
 
-        {/* Live Panchang CTA */}
-        <section className="rounded-[24px] border-2 border-amber-300 bg-gradient-to-r from-[#fffbeb] to-[#fff7d1] p-6 sm:p-8 shadow-[0_8px_24px_-10px_rgba(240,200,50,0.35)]">
-          <div className="flex items-center gap-2 mb-3">
-            <Sun className="size-5 text-amber-600" />
-            <h2 className="text-lg sm:text-xl font-serif font-bold text-[#1a1208]">
-              {t.liveTitle}
-            </h2>
+              <h1 className="font-display text-3xl sm:text-5xl font-extrabold tracking-tight text-[#FFF8E7] leading-tight">
+                {isBn
+                  ? "পঞ্চাঙ্গ ও কাল-নির্ণয়"
+                  : isHi
+                  ? "पंचांग व काल निर्णय"
+                  : "Five Limbs of Cosmic Time"}
+              </h1>
+
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+                {isBn
+                  ? "তিথি, নক্ষত্র, যোগ, করণ ও বারের সমন্বয়ে নির্ণিত আজকের সম্পূর্ণ শুভাশুভ সময়সূচী ও মহাজাগতিক দিনচক্র।"
+                  : isHi
+                  ? "तिथि, नक्षत्र, योग, करण व वार का वैदिक समन्वय एवं दैनिक मुहूर्त विचार।"
+                  : "Authentic astronomical coordination of Tithi, Nakshatra, Yoga, Karana & Vara."}
+              </p>
+
+              {/* Real-time Sun & Moon Sign Pills */}
+              {horoscopeData ? (
+                <div className="flex flex-wrap items-center gap-2.5 pt-2">
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-amber-400/20 px-3 py-1 text-xs text-amber-200">
+                    <Sun className="size-3.5 text-amber-400" />
+                    <span>
+                      {isBn ? "সূর্য: " : "Sun: "}
+                      <strong className="text-amber-100 font-bold">{horoscopeData.sun_sign}</strong>
+                    </span>
+                  </div>
+
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-sky-400/20 px-3 py-1 text-xs text-sky-200">
+                    <Moon className="size-3.5 text-sky-400" />
+                    <span>
+                      {isBn ? "চন্দ্র: " : "Moon: "}
+                      <strong className="text-sky-100 font-bold">
+                        {horoscopeData.moon_sign} ({horoscopeData.moon_degree})
+                      </strong>
+                    </span>
+                  </div>
+
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-emerald-400/20 px-3 py-1 text-xs text-emerald-200">
+                    <Clock className="size-3.5 text-emerald-400" />
+                    <span>
+                      {isBn ? "বারাধিপতি: " : "Lord: "}
+                      <strong className="text-emerald-100 font-bold">{horoscopeData.vara_lord}</strong>
+                    </span>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </section>
+
+          {/* Quick Date Selector Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-amber-900/15 bg-white/95 p-3.5 sm:p-4 shadow-sm backdrop-blur-md">
+            <div className="flex items-center gap-2">
+              {[
+                { id: yesterdayStr, label: isBn ? "গতকাল" : isHi ? "कल (बीता)" : "Yesterday" },
+                { id: todayStr, label: isBn ? "আজ" : isHi ? "आज" : "Today" },
+                { id: tomorrowStr, label: isBn ? "আগামীকাল" : isHi ? "कल (आने वाला)" : "Tomorrow" },
+              ].map((d) => {
+                const active = selectedDate === d.id;
+                return (
+                  <button
+                    key={d.id}
+                    type="button"
+                    onClick={() => setSelectedDate(d.id)}
+                    className={cn(
+                      "px-4 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer",
+                      active
+                        ? "bg-gradient-to-r from-[#D97706] to-[#EA580C] text-white border-[#B45309] shadow-xs"
+                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-amber-50 hover:border-amber-300"
+                    )}
+                  >
+                    {d.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Custom Date Picker */}
+            <div className="flex items-center gap-2.5">
+              <span className="text-xs font-bold text-slate-500">
+                {isBn ? "নির্দিষ্ট তারিখ:" : "Custom Date:"}
+              </span>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => {
+                  if (e.target.value) setSelectedDate(e.target.value);
+                }}
+                className="rounded-xl border border-amber-900/15 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 shadow-2xs focus:ring-2 focus:ring-amber-500 focus:outline-hidden"
+              />
+            </div>
           </div>
-          <p className="text-sm text-[#6b5f4d] leading-relaxed mb-5">
-            {t.liveSub}
-          </p>
-          <Link
-            href="/daily-horoscope"
-            className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3 text-sm font-bold text-white shadow-md transition-all hover:bg-amber-600 hover:shadow-lg"
-          >
-            {t.liveCta}
-            <ArrowRight className="size-4" />
-          </Link>
-        </section>
 
-        {/* Consult CTA */}
-        <section className="rounded-[24px] border border-[#ece0ac] bg-white p-6 sm:p-8 shadow-[0_4px_14px_-6px_rgba(26,18,8,0.06)] text-center">
-          <h2 className="text-lg sm:text-xl font-serif font-bold text-[#1a1208] mb-2">
-            {t.consultTitle}
-          </h2>
-          <p className="text-sm text-[#6b5f4d] max-w-lg mx-auto mb-5">
-            {t.consultSub}
-          </p>
-          <Link
-            href="/astrologers"
-            className="inline-flex items-center gap-2 rounded-full border-2 border-amber-400 bg-white px-6 py-3 text-sm font-bold text-[#8b5e0a] shadow-sm transition-all hover:bg-[#fff7d1] hover:shadow-md"
-          >
-            {t.consultCta}
-            <ArrowRight className="size-4" />
-          </Link>
-        </section>
+          {isLoading ? (
+            <div className="py-24 text-center rounded-3xl border border-slate-200 bg-white shadow-sm">
+              <LoadingBlock label={isBn ? "সুইস এফিমেরিস বৈদিক পঞ্চাঙ্গ গণনা করা হচ্ছে…" : "Calculating Swiss Ephemeris Vedic Panchang…"} />
+            </div>
+          ) : error || !panchang ? (
+            <div className="rounded-3xl border border-dashed border-rose-300 bg-rose-50/50 p-10 text-center space-y-3">
+              <AlertTriangle className="size-10 text-rose-500 mx-auto" />
+              <h3 className="font-bold text-rose-950">
+                {isBn ? "পঞ্চাঙ্গ লোড করা সম্ভব হয়নি" : "Unable to load Panchang"}
+              </h3>
+              <p className="text-xs text-rose-800 max-w-md mx-auto">
+                {isBn
+                  ? "সার্ভার সংযোগে সমস্যা হয়েছে। অনুগ্রহ করে কিছুক্ষণ পর পুনরায় চেষ্টা করুন।"
+                  : "Please check your network connection and try again."}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {/* 1. Surya-Chandra Horizon Arc Clipart Card */}
+              <div className="relative overflow-hidden rounded-3xl border border-amber-900/15 bg-white/95 backdrop-blur-md p-6 sm:p-8 shadow-[0_12px_36px_rgba(180,83,9,0.06)] space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="flex size-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
+                      <Sun className="size-4" />
+                    </span>
+                    <h2 className="font-display font-bold text-lg text-slate-900">
+                      {isBn ? "মহাজাগতিক দিনচক্র ও লগ্ন কাল" : "Solar Horizon & Celestial Track"}
+                    </h2>
+                  </div>
+                  <span className="rounded-full bg-amber-100 text-amber-900 font-bold text-xs px-3 py-1">
+                    {horoscopeData.date} ({horoscopeData.day_of_week})
+                  </span>
+                </div>
+
+                {/* Dynamic Celestial Arc Clipart */}
+                <div className="py-2">
+                  <SuryaChandraHorizonArc
+                    sunrise={panchang.sunrise}
+                    sunset={panchang.sunset}
+                    abhijit={panchang.abhijit_muhurat}
+                    rahuKaal={panchang.rahu_kaal}
+                    isBn={isBn}
+                  />
+                </div>
+
+                {/* Quick Muhurat Highlights Row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  {/* Abhijit Muhurat Card */}
+                  <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-50/80 via-white to-emerald-50/40 p-5 space-y-2 shadow-2xs">
+                    <div className="flex items-center gap-2">
+                      <span className="p-1.5 rounded-lg bg-emerald-100 text-emerald-700">
+                        <Sparkles className="size-4" />
+                      </span>
+                      <h3 className="font-bold text-xs uppercase tracking-wider text-emerald-900">
+                        {isBn ? "অভিজিৎ মুহূর্ত (অতি শুভ)" : "Abhijit Muhurat (Auspicious)"}
+                      </h3>
+                    </div>
+                    <p className="font-display text-xl font-black text-emerald-950 tabular-nums">
+                      {panchang.abhijit_muhurat || "11:38 AM – 12:24 PM"}
+                    </p>
+                    <p className="text-xs text-emerald-800">
+                      {isBn
+                        ? "সর্ববিধ শুভকার্য আরম্ভের মহেন্দ্রক্ষণ ও বিজয় মুহূর্ত।"
+                        : "Peak victory window for new ventures, business & spiritual milestones."}
+                    </p>
+                  </div>
+
+                  {/* Rahu Kaal Card */}
+                  <div className="rounded-2xl border border-rose-500/30 bg-gradient-to-br from-rose-50/80 via-white to-rose-50/40 p-5 space-y-2 shadow-2xs">
+                    <div className="flex items-center gap-2">
+                      <span className="p-1.5 rounded-lg bg-rose-100 text-rose-700">
+                        <Clock className="size-4" />
+                      </span>
+                      <h3 className="font-bold text-xs uppercase tracking-wider text-rose-900">
+                        {isBn ? "রাহু কাল (বর্জনীয়)" : "Rahu Kaal (Avoid)"}
+                      </h3>
+                    </div>
+                    <p className="font-display text-xl font-black text-rose-950 tabular-nums">
+                      {panchang.rahu_kaal || "01:30 PM – 03:00 PM"}
+                    </p>
+                    <p className="text-xs text-rose-800">
+                      {isBn
+                        ? "যাত্রা ও আর্থিক চুক্তি সম্পাদন নিষিদ্ধ ও অশুভ।"
+                        : "Avoid major financial decisions, signed contracts, or beginning journeys."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Tab Switcher: 5 Limbs / 24 Horas / Choghadiya */}
+              <div className="flex items-center gap-2 rounded-2xl border border-amber-900/15 bg-white/95 p-1.5 shadow-2xs">
+                {(
+                  [
+                    {
+                      id: "limbs",
+                      label: isBn ? "৫টি বৈদিক অঙ্গ (পঞ্জিকা)" : isHi ? "५ अंग (पंचांग)" : "5 Vedic Limbs",
+                      icon: Sparkles,
+                    },
+                    {
+                      id: "horas",
+                      label: isBn ? "২৪ হোরা চক্র" : isHi ? "२४ होरा चक्र" : "24 Planetary Horas",
+                      icon: Clock,
+                    },
+                    {
+                      id: "choghadiya",
+                      label: isBn ? "চোঘড়িয়া মুহূর্ত" : isHi ? "चौघड़िया मुहूर्त" : "Choghadiya Muhurat",
+                      icon: Compass,
+                    },
+                  ] as const
+                ).map((tab) => {
+                  const active = activeTab === tab.id;
+                  const IconComponent = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveTab(tab.id)}
+                      className={cn(
+                        "flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                        active
+                          ? "bg-gradient-to-r from-[#D97706] to-[#EA580C] text-white shadow-xs"
+                          : "text-slate-700 hover:bg-amber-50"
+                      )}
+                    >
+                      <IconComponent className="size-4" />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* TAB 1: 5 VEDIC LIMBS WITH RICH CLIPARTS */}
+              {activeTab === "limbs" && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* 1. Tithi Card */}
+                    <div className="rounded-3xl border border-amber-900/15 bg-white/95 p-5 sm:p-6 shadow-sm flex items-start gap-4">
+                      <TithiMoonClipart size={64} />
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700">
+                            {isBn ? "১. তিথি · চান্দ্র দিন" : "1. TITHI · LUNAR PHASE"}
+                          </span>
+                          <span className="rounded-full bg-amber-100 text-amber-900 font-bold text-[10px] px-2.5 py-0.5">
+                            {panchang.paksha}
+                          </span>
+                        </div>
+                        <h3 className="font-display text-xl font-bold text-slate-900">
+                          {panchang.tithi}
+                        </h3>
+                        <p className="text-xs text-slate-600 leading-relaxed">
+                          {isBn
+                            ? `${panchang.paksha} তিথির অধিপতি দেবশক্তির আশীর্বাদে শুভ কর্ম সাধিত হয়।`
+                            : `Governed by the lunar cycle in ${panchang.paksha}; auspicious for spiritual focus.`}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* 2. Nakshatra Card */}
+                    <div className="rounded-3xl border border-amber-900/15 bg-white/95 p-5 sm:p-6 shadow-sm flex items-start gap-4">
+                      <NakshatraStarClipart size={64} />
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700">
+                            {isBn ? "২. নক্ষত্র · চন্দ্র নিবাস" : "2. NAKSHATRA · LUNAR MANSION"}
+                          </span>
+                          <span className="rounded-full bg-amber-500/15 text-amber-950 font-bold text-[10px] px-2.5 py-0.5 border border-amber-500/25">
+                            {isBn ? `পদ ${panchang.nakshatra_pada}` : `Pada ${panchang.nakshatra_pada}`}
+                          </span>
+                        </div>
+                        <h3 className="font-display text-xl font-bold text-slate-900">
+                          {panchang.nakshatra}
+                        </h3>
+                        <p className="text-xs text-slate-600 leading-relaxed">
+                          {isBn
+                            ? "২৭ নক্ষত্রের মধ্যে আজকের নক্ষত্র মানসিক স্থৈর্য ও কর্মশক্তি নিয়ন্ত্রণ করে।"
+                            : "Governs subconscious vibration, travel, and personal intuition."}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* 3. Yoga Card */}
+                    <div className="rounded-3xl border border-amber-900/15 bg-white/95 p-5 sm:p-6 shadow-sm flex items-start gap-4">
+                      <YogaUnionClipart size={64} />
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700">
+                            {isBn ? "৩. যোগ · রবি-চন্দ্রের মিলন" : "3. YOGA · SOLAR-LUNAR UNION"}
+                          </span>
+                          <span className="rounded-full bg-slate-100 text-slate-700 font-bold text-[10px] px-2 py-0.5">
+                            {isBn ? "২৭ মহা যোগ" : "27 Vedic Yogas"}
+                          </span>
+                        </div>
+                        <h3 className="font-display text-xl font-bold text-slate-900">
+                          {panchang.yoga}
+                        </h3>
+                        <p className="text-xs text-slate-600 leading-relaxed">
+                          {isBn
+                            ? "সূর্য ও চন্দ্রের দ্রাঘিমাংশের যোগফল থেকে উৎপন্ন শুভাশুভ ফলপ্রসূ যোগ।"
+                            : "Geometric solar-lunar degree sum determining daily cosmic vitality."}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* 4. Karana Card */}
+                    <div className="rounded-3xl border border-amber-900/15 bg-white/95 p-5 sm:p-6 shadow-sm flex items-start gap-4">
+                      <KaranaKalashClipart size={64} />
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700">
+                            {isBn ? "৪. করণ · তিথির অর্ধাংশ" : "4. KARANA · HALF TITHI"}
+                          </span>
+                          <span className="rounded-full bg-slate-100 text-slate-700 font-bold text-[10px] px-2 py-0.5">
+                            {isBn ? "১১ করণ চক্র" : "11 Karana Cycle"}
+                          </span>
+                        </div>
+                        <h3 className="font-display text-xl font-bold text-slate-900">
+                          {panchang.karana}
+                        </h3>
+                        <p className="text-xs text-slate-600 leading-relaxed">
+                          {isBn
+                            ? "তিথির অর্ধেক কাল; তাৎক্ষণিক কার্যসিদ্ধি ও কর্ম উদ্যোগের ফলাফল নির্দেশক।"
+                            : "Half-span of the tithi; dictates immediate executive actions."}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 5. Vara Card (Full Width) */}
+                  <div className="rounded-3xl border border-amber-900/15 bg-white/95 p-5 sm:p-6 shadow-sm flex items-start gap-4">
+                    <VaraSunClipart size={64} />
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700">
+                          {isBn ? "৫. বার · বারাধিপতি গ্রহ" : "5. VARA · PLANETARY RULER"}
+                        </span>
+                        <span className="rounded-full bg-amber-500/15 text-amber-950 font-bold text-[10px] px-2.5 py-0.5 border border-amber-500/25">
+                          {horoscopeData.vara_lord}
+                        </span>
+                      </div>
+                      <h3 className="font-display text-xl font-bold text-slate-900">
+                        {panchang.vara}
+                      </h3>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        {isBn
+                          ? `আজকের দিনের প্রধান নিয়ন্ত্রক গ্রহ ${horoscopeData.vara_lord}। তাঁর প্রভাব আজকের সামগ্রিক শক্তিতে বিদ্যমান।`
+                          : `The principal presiding graha for today is ${horoscopeData.vara_lord}.`}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Disha Shoola With Vedic Compass */}
+                  {panchang.disha_shoola && (
+                    <div className="rounded-3xl border border-rose-200 bg-gradient-to-r from-rose-50/70 via-white to-amber-50/40 p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row items-center gap-6">
+                      <VedicCompassClipart size={100} blockedDirection={panchang.disha_shoola} isBn={isBn} />
+                      <div className="space-y-2 text-center sm:text-left flex-1">
+                        <div className="inline-flex items-center gap-1.5 rounded-full bg-rose-100 text-rose-800 text-[11px] font-bold px-3 py-1">
+                          <Compass className="size-3.5" />
+                          <span>{isBn ? "দিশা শূল সতর্কতা" : "Disha Shoola Alert"}</span>
+                        </div>
+                        <h4 className="font-display font-bold text-lg text-slate-900">
+                          {isBn ? "আজকের বর্জনীয় দিক: " : "Restricted Travel Direction: "}
+                          <span className="text-rose-600 font-black">{panchang.disha_shoola}</span>
+                        </h4>
+                        {panchang.disha_remedy && (
+                          <div className="rounded-2xl bg-white/90 border border-amber-200 p-3.5 text-xs text-amber-950 space-y-1">
+                            <span className="font-bold text-amber-900 block">
+                              {isBn ? "বৈদিক প্রতিবিধান / প্রতিকার:" : "Vedic Remedy Before Travel:"}
+                            </span>
+                            <p className="text-slate-600 leading-relaxed">{panchang.disha_remedy}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Favorable Chandra Rashis */}
+                  {panchang.favorable_chandra_rashis && panchang.favorable_chandra_rashis.length > 0 && (
+                    <div className="rounded-3xl border border-amber-900/15 bg-white/95 p-6 shadow-sm space-y-3">
+                      <h4 className="font-display text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <Sparkles className="size-4 text-amber-600" />
+                        <span>{isBn ? "আজকের অনুকূল চন্দ্র রাশি" : "Favorable Moon Signs Today"}</span>
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        {isBn
+                          ? "গোচর গণনা অনুযায়ী আজকের দিনে নিম্নলিখিত রাশিসমূহের জন্য চন্দ্রবল শুভ ও ফলদায়ী:"
+                          : "Moon transit is exceptionally favorable and fortunate today for the following rashis:"}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                        {panchang.favorable_chandra_rashis.map((rashi, idx) => (
+                          <span
+                            key={idx}
+                            className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-1.5 text-xs font-bold text-amber-950 shadow-2xs"
+                          >
+                            ✨ {rashi}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 2: 24 PLANETARY HORAS */}
+              {activeTab === "horas" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                    <div>
+                      <h3 className="font-display font-bold text-lg text-slate-900">
+                        {isBn ? "২৪ বৈদিক হোরা চক্র" : "24 Planetary Horas Timeline"}
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        {isBn
+                          ? "প্রতিটি হোরা এক ঘণ্টা স্থায়ী এবং নির্দিষ্ট গ্রহাধিপতির প্রভাবে বিশেষ কাজের জন্য শুভ।"
+                          : "Each 1-hour planetary hora is ruled by a celestial graha favoring specific activities."}
+                      </p>
+                    </div>
+
+                    {/* Day / Night Toggle */}
+                    <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1 text-xs font-bold">
+                      <button
+                        type="button"
+                        onClick={() => setHoraPeriod("day")}
+                        className={cn(
+                          "px-3 py-1.5 rounded-lg transition-all cursor-pointer",
+                          horaPeriod === "day"
+                            ? "bg-amber-500 text-white shadow-xs"
+                            : "text-slate-600 hover:text-slate-900"
+                        )}
+                      >
+                        ☀️ {isBn ? "দিবা হোরা" : "Day"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setHoraPeriod("night")}
+                        className={cn(
+                          "px-3 py-1.5 rounded-lg transition-all cursor-pointer",
+                          horaPeriod === "night"
+                            ? "bg-indigo-600 text-white shadow-xs"
+                            : "text-slate-600 hover:text-slate-900"
+                        )}
+                      >
+                        🌙 {isBn ? "রাত্রি হোরা" : "Night"}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                    {horas
+                      .filter((h) => (horaPeriod === "day" ? h.is_day : !h.is_day))
+                      .map((hora) => (
+                        <div
+                          key={hora.hora_index}
+                          className={cn(
+                            "rounded-2xl border p-4 transition-all text-xs space-y-2",
+                            hora.is_auspicious
+                              ? "bg-white border-emerald-300 hover:border-emerald-500 shadow-2xs"
+                              : "bg-white border-amber-200 hover:border-amber-400 shadow-2xs"
+                          )}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono text-[11px] font-bold text-slate-500">
+                              #{hora.hora_number}
+                            </span>
+                            <span
+                              className={cn(
+                                "rounded-full px-2 py-0.5 text-[10px] font-bold",
+                                hora.is_auspicious
+                                  ? "bg-emerald-100 text-emerald-800"
+                                  : "bg-amber-100 text-amber-800"
+                              )}
+                            >
+                              {hora.is_auspicious ? (isBn ? "শুভ" : "Auspicious") : (isBn ? "সাধারণ" : "Neutral")}
+                            </span>
+                          </div>
+
+                          <div className="space-y-0.5">
+                            <p className="font-bold text-sm text-slate-900">
+                              {isBn ? hora.planet_bn : isHi ? hora.planet_hi : hora.planet}
+                              <span className="text-[11px] font-normal text-slate-500 ml-1">
+                                ({hora.planet_sa || hora.planet})
+                              </span>
+                            </p>
+                            <p className="text-[11px] font-mono text-slate-500">
+                              {hora.start_time} – {hora.end_time}
+                            </p>
+                          </div>
+
+                          {hora.best_activities && (
+                            <p className="text-[11px] text-slate-600 pt-1 border-t border-slate-100 leading-relaxed">
+                              {isBn
+                                ? hora.best_activities_bn || hora.best_activities
+                                : isHi
+                                ? hora.best_activities_hi || hora.best_activities
+                                : hora.best_activities}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: CHOGHADIYA MUHURAT */}
+              {activeTab === "choghadiya" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                    <div>
+                      <h3 className="font-display font-bold text-lg text-slate-900">
+                        {isBn ? "১৬ বৈদিক চোঘড়িয়া মুহূর্ত" : "16 Vedic Choghadiya Muhurat"}
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        {isBn
+                          ? "অমৃত, শুভ, লাভ, চর, রোগ, কাল ও উদ্বেগ — তাৎক্ষণিক শুভ কাজ শুরুর বৈদিক নির্দেশিকা।"
+                          : "Amrit, Shubh, Labh, Char, Rog, Kaal & Udveg windows for immediate venture timing."}
+                      </p>
+                    </div>
+
+                    {/* Day / Night Toggle */}
+                    <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1 text-xs font-bold">
+                      <button
+                        type="button"
+                        onClick={() => setChoghadiyaPeriod("day")}
+                        className={cn(
+                          "px-3 py-1.5 rounded-lg transition-all cursor-pointer",
+                          choghadiyaPeriod === "day"
+                            ? "bg-amber-500 text-white shadow-xs"
+                            : "text-slate-600 hover:text-slate-900"
+                        )}
+                      >
+                        ☀️ {isBn ? "দিবা চোঘড়িয়া" : "Day"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setChoghadiyaPeriod("night")}
+                        className={cn(
+                          "px-3 py-1.5 rounded-lg transition-all cursor-pointer",
+                          choghadiyaPeriod === "night"
+                            ? "bg-indigo-600 text-white shadow-xs"
+                            : "text-slate-600 hover:text-slate-900"
+                        )}
+                      >
+                        🌙 {isBn ? "রাত্রি চোঘড়িয়া" : "Night"}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {choghadiya
+                      .filter((c) => (choghadiyaPeriod === "day" ? c.is_day : !c.is_day))
+                      .map((chog) => {
+                        const nameLower = (chog.name || "").toLowerCase();
+                        const isGood =
+                          nameLower.includes("amrit") ||
+                          nameLower.includes("shubh") ||
+                          nameLower.includes("labh");
+                        const isNeutral = nameLower.includes("char");
+
+                        return (
+                          <div
+                            key={chog.period_index}
+                            className={cn(
+                              "rounded-2xl border p-4 transition-all text-xs space-y-2 shadow-2xs",
+                              isGood
+                                ? "bg-white border-emerald-300 hover:border-emerald-500"
+                                : isNeutral
+                                ? "bg-white border-sky-300 hover:border-sky-500"
+                                : "bg-white border-rose-300 hover:border-rose-500"
+                            )}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-sm text-slate-900">
+                                {isBn ? chog.name_bn || chog.name : isHi ? chog.name_hi || chog.name : chog.name}
+                              </span>
+                              <span
+                                className={cn(
+                                  "rounded-full px-2 py-0.5 text-[10px] font-bold",
+                                  isGood
+                                    ? "bg-emerald-100 text-emerald-800"
+                                    : isNeutral
+                                    ? "bg-sky-100 text-sky-800"
+                                    : "bg-rose-100 text-rose-800"
+                                )}
+                              >
+                                {chog.status || (isGood ? (isBn ? "শুভ" : "Auspicious") : isNeutral ? (isBn ? "চর" : "Neutral") : (isBn ? "বর্জনীয়" : "Caution"))}
+                              </span>
+                            </div>
+
+                            <p className="font-mono text-[11px] text-slate-500 font-bold">
+                              {chog.start_time} – {chog.end_time}
+                            </p>
+
+                            {chog.guidance && (
+                              <p className="text-[11px] text-slate-600 pt-1 border-t border-slate-100 leading-relaxed">
+                                {chog.guidance}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+
+              {/* Consultation & Booking CTA */}
+              <div className="rounded-3xl border border-amber-300 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/5 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">
+                <div className="space-y-1.5 max-w-xl">
+                  <h3 className="font-display font-bold text-xl text-amber-950">
+                    {isBn ? "শুভ মুহূর্ত বা ব্যক্তিগত পরামর্শ প্রয়োজন?" : "Need Personalized Muhurat Consultation?"}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-amber-900/80 leading-relaxed">
+                    {isBn
+                      ? "বিবাহ, গৃহপ্রবেশ, নামকরণ বা নতুন ব্যবসার শুভ মুহূর্ত নির্ধারণে আমাদের যাচাইকৃত বৈদিক জ্যোতিষীদের সাথে সরাসরি ১-অন-১ ভিডিও পরামর্শ বুক করুন।"
+                      : "Consult our certified Vedic astrologers for customized wedding dates, Griha Pravesh, business launches, or personalized birth chart analysis."}
+                  </p>
+                </div>
+
+                <Link
+                  href="/appointments"
+                  className="shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#D97706] to-[#EA580C] hover:from-[#B45309] hover:to-[#C2410C] text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all"
+                >
+                  <Video className="size-4" />
+                  <span>{isBn ? "ভিডিও অ্যাপয়েন্টমেন্ট বুক করুন" : "Book Video Consultation"}</span>
+                  <ArrowRight className="size-4" />
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
       </main>
 
       <SiteFooter />
     </div>
   );
 }
-

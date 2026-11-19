@@ -215,11 +215,36 @@ function AppointmentsContent() {
 
   const bookableAstrologers = React.useMemo(
     () =>
-      (astrologersData?.items ?? []).filter((a) => {
-        const price = a.appointment?.price_paise ?? 0;
-        if (price <= 0) return false;
-        return a.appointment?.enabled !== false;
-      }),
+      (astrologersData?.items ?? [])
+        .filter((a) => {
+          if (a.appointment && a.appointment.enabled !== false && (a.appointment.price_paise ?? 0) > 0) {
+            return true;
+          }
+          if (a.modes_enabled?.includes("video") || a.modes_enabled?.includes("call")) {
+            return true;
+          }
+          return false;
+        })
+        .map((a) => {
+          if (!a.appointment || !a.appointment.price_paise) {
+            const minRate = a.rates?.video_coins_per_minute || a.rates?.call_coins_per_minute || 15;
+            const appt = a.appointment || ({} as Partial<NonNullable<typeof a.appointment>>);
+            return {
+              ...a,
+              appointment: {
+                enabled: appt.enabled ?? true,
+                price_paise: appt.price_paise || minRate * 30 * 100,
+                block_minutes: appt.block_minutes || 30,
+                cancellation_window_minutes: appt.cancellation_window_minutes ?? 30,
+                follow_up_window_days: appt.follow_up_window_days ?? 7,
+                follow_up_max_messages: appt.follow_up_max_messages ?? 3,
+                tatkal_enabled: appt.tatkal_enabled ?? true,
+                tatkal_default_multiplier: appt.tatkal_default_multiplier ?? 1.5,
+              },
+            };
+          }
+          return a;
+        }),
     [astrologersData],
   );
 
@@ -249,27 +274,33 @@ function AppointmentsContent() {
 
   React.useEffect(() => {
     const fromUrl = searchParams.get("astrologer");
-    if (fromUrl && bookableAstrologers.some((a) => a.id === fromUrl || a.slug === fromUrl)) {
+    if (fromUrl && bookableAstrologers.length > 0) {
       const match = bookableAstrologers.find((a) => a.id === fromUrl || a.slug === fromUrl);
-      if (match) setSelectedAstrologerId(match.id);
-    } else if (!selectedAstrologerId && bookableAstrologers.length > 0) {
-      setSelectedAstrologerId(bookableAstrologers[0].id);
-    }
-  }, [bookableAstrologers, searchParams, selectedAstrologerId]);
-
-  React.useEffect(() => {
-    if (filteredAstrologers.length > 0) {
-      const exists = filteredAstrologers.some((a) => a.id === selectedAstrologerId);
-      if (!exists) {
-        setSelectedAstrologerId(filteredAstrologers[0].id);
+      if (match) {
+        setSelectedAstrologerId(match.id);
       }
     }
-  }, [filteredAstrologers, selectedAstrologerId]);
+  }, [bookableAstrologers, searchParams]);
 
   const selectedAstrologer = React.useMemo(
     () => bookableAstrologers.find((a) => a.id === selectedAstrologerId) ?? null,
     [bookableAstrologers, selectedAstrologerId],
   );
+
+  const handleSelectAstrologer = React.useCallback(
+    (astro: AstrologerPublic) => {
+      setSelectedAstrologerId(astro.id);
+      const params = new URLSearchParams(window.location.search);
+      params.set("astrologer", astro.slug || astro.id);
+      router.replace(`/appointments?${params.toString()}`, { scroll: false });
+    },
+    [router],
+  );
+
+  const handleClearAstrologer = React.useCallback(() => {
+    setSelectedAstrologerId(null);
+    router.replace("/appointments", { scroll: false });
+  }, [router]);
 
   // 4. BookMyShow Horizontal Date Strip State (21 Days)
   const today = React.useMemo(() => {
@@ -550,12 +581,49 @@ function AppointmentsContent() {
           </div>
         </div>
 
-        {/* =========================================================================
+        {selectedAstrologer ? (
+          <>
+            {/* =========================================================================
             TOP EXPERIENCE SHOWCASE / HERO HEADER (BookMyShow / District Style)
         ========================================================================= */}
         <section className="relative border-b border-amber-900/10 bg-gradient-to-b from-[#FFFDF9]/90 via-[#FAF6EE]/80 to-[#F5EEDD]/30 pt-6 pb-8 backdrop-blur-xs">
           <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 space-y-6">
             
+            {/* Back to Astrologers Selector & Change Option */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-amber-900/10">
+              <button
+                type="button"
+                onClick={handleClearAstrologer}
+                className="inline-flex items-center gap-2 text-xs font-bold text-amber-950 hover:text-amber-700 bg-white/95 border border-amber-900/15 px-4 py-2 rounded-2xl shadow-2xs hover:bg-white hover:border-amber-400 transition-all cursor-pointer"
+              >
+                <ChevronLeft className="size-4 text-amber-600" />
+                <span>{language === "bn" ? "← অন্য জ্যোতিষী বেছে নিন" : "← Choose Another Astrologer"}</span>
+              </button>
+
+              {bookableAstrologers.length > 1 && (
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                  <span className="text-[11px] font-bold text-slate-500 shrink-0">
+                    {language === "bn" ? "জ্যোতিষী পরিবর্তন:" : "Switch:"}
+                  </span>
+                  {bookableAstrologers.map((astro) => (
+                    <button
+                      key={astro.id}
+                      type="button"
+                      onClick={() => handleSelectAstrologer(astro)}
+                      className={cn(
+                        "px-3 py-1 rounded-xl text-xs font-bold transition-all border shrink-0 cursor-pointer",
+                        astro.id === selectedAstrologer?.id
+                          ? "bg-amber-500 text-white border-amber-600 shadow-xs"
+                          : "bg-white text-slate-700 border-slate-200 hover:bg-amber-50"
+                      )}
+                    >
+                      {astro.display_name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Top Navigation & Live Radar Pulse */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-2.5 text-xs font-semibold text-amber-950/80">
@@ -1199,6 +1267,358 @@ function AppointmentsContent() {
             </div>
           )}
         </section>
+
+        
+          </>
+        ) : (
+          <section className="relative pt-6 pb-16">
+            <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 space-y-8">
+              {/* Top Navigation & Live Radar Pulse */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-2.5 text-xs font-semibold text-amber-950/80">
+                  <Link href="/" className="hover:text-amber-700 transition-colors flex items-center gap-1.5">
+                    <Compass className="size-3.5 text-amber-600" />
+                    <span>Astra Home</span>
+                  </Link>
+                  <span className="text-amber-900/30">/</span>
+                  <span className="text-slate-900 font-bold">Vedic Consultation Chamber</span>
+
+                  <div className="ml-2 inline-flex items-center gap-2 rounded-full bg-emerald-500/10 border border-emerald-500/25 px-3 py-1 shadow-2xs">
+                    <span className="relative flex size-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full size-2 bg-emerald-500"></span>
+                    </span>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800">
+                      {language === "bn" ? "লাইভ জ্যোতিষী চেম্বার" : "Live Astrologer Chamber"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Link
+                    href="/account/appointments"
+                    className="group inline-flex items-center gap-2 rounded-2xl border border-amber-900/15 bg-white/90 backdrop-blur-md px-4 py-2 text-xs font-bold text-slate-800 shadow-2xs hover:bg-white hover:border-amber-500 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
+                  >
+                    <CalendarCheck className="size-4 text-amber-600 group-hover:scale-110 transition-transform" />
+                    <span>{language === "bn" ? "আমার অ্যাপয়েন্টমেন্ট তালিকা" : "My Appointments"}</span>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Selection Hero Header */}
+              <div className="relative overflow-hidden rounded-3xl border border-amber-900/15 bg-gradient-to-br from-white via-[#FFFDF9] to-[#FAF5EA] p-6 sm:p-10 shadow-[0_16px_40px_rgba(180,83,9,0.08)]">
+                <div className="max-w-3xl space-y-4">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/10 border border-amber-500/25 px-3.5 py-1 text-xs font-bold text-amber-950 shadow-2xs">
+                    <Sparkles className="size-3.5 text-amber-600" />
+                    <span>{language === "bn" ? "১-অন-১ লাইভ ভিডিও ও অডিও চেম্বার" : "1-on-1 Live Video & Audio Chambers"}</span>
+                  </div>
+
+                  <h1 className="font-display text-2xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+                    {language === "bn"
+                      ? "পরামর্শের জন্য জ্যোতিষী নির্বাচন করুন"
+                      : "Select an Astrologer for Consultation"}
+                  </h1>
+
+                  <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
+                    {language === "bn"
+                      ? "আমাদের অভিজ্ঞ ও যাচাইকৃত বৈদিক জ্যোতিষাচার্যদের তালিকা দেখুন। আপনার সুবিধাজনক সময়ে লাইভ ভিডিও/অডিও পরামর্শ নিতে প্রথমে জ্যোতিষী নির্বাচন করুন, এরপর তাদের ক্যালেন্ডার থেকে পছন্দের স্লট নিশ্চিত করুন।"
+                      : "Browse our council of certified Vedic Jyotish Acharyas. Choose an astrologer first to view their live booking calendar, available dates, and reserve your private 1-on-1 session."}
+                  </p>
+                </div>
+
+                {/* Search & Filters */}
+                <div className="mt-8 pt-6 border-t border-amber-900/10 space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder={
+                          language === "bn"
+                            ? "জ্যোতিষীর নাম বা বিশেষত্ব দিয়ে খুঁজুন..."
+                            : "Search astrologer by name, skill, language..."
+                        }
+                        className="w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 py-3 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-2xs"
+                      />
+                      {searchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setSearchQuery("")}
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        >
+                          <X className="size-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Category Pills */}
+                  <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCategory("all")}
+                      className={cn(
+                        "rounded-xl px-4 py-2 text-xs font-bold transition-all border shrink-0 cursor-pointer",
+                        selectedCategory === "all"
+                          ? "bg-amber-500 text-white border-amber-600 shadow-xs"
+                          : "bg-white text-slate-700 border-slate-200 hover:bg-amber-50"
+                      )}
+                    >
+                      {language === "bn" ? "সকল জ্যোতিষী" : "All Astrologers"}
+                    </button>
+                    {Object.entries(SKILL_LABELS).map(([skill, label]) => (
+                      <button
+                        key={skill}
+                        type="button"
+                        onClick={() => setSelectedCategory(skill as Skill)}
+                        className={cn(
+                          "rounded-xl px-3.5 py-2 text-xs font-bold transition-all border shrink-0 cursor-pointer",
+                          selectedCategory === skill
+                            ? "bg-amber-500 text-white border-amber-600 shadow-xs"
+                            : "bg-white text-slate-700 border-slate-200 hover:bg-amber-50"
+                        )}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Active Appointment Notice (if any) */}
+              {activeAppointment && (
+                <div className="relative overflow-hidden rounded-3xl border-2 border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/5 p-4 sm:p-5 backdrop-blur-md shadow-[0_8px_30px_rgba(217,119,6,0.12)]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-start gap-3.5">
+                      <div className="p-2.5 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-md shrink-0">
+                        <CalendarCheck className="size-5" />
+                      </div>
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-display font-bold text-sm sm:text-base text-amber-950">
+                            {language === "bn"
+                              ? "আপনার একটি সক্রিয় অ্যাপয়েন্টমেন্ট ইতোমধ্যে সংরক্ষিত রয়েছে"
+                              : "You Have an Active Appointment Scheduled"}
+                          </span>
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-950 border border-amber-500/40">
+                            {language === "bn" ? "নীতিমালা: ১টি সক্রিয় সেশন সীমা" : "Policy: Max 1 Active Booking"}
+                          </span>
+                        </div>
+                        <p className="text-xs text-amber-950/80 mt-1 leading-relaxed max-w-3xl">
+                          {language === "bn"
+                            ? `আপনি ${new Date(activeAppointment.starts_at).toLocaleDateString("bn-BD", { weekday: "long", year: "numeric", month: "long", day: "numeric" })} তারিখে ${new Date(activeAppointment.starts_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} সময়ে জ্যোতিষীর সাথে একটি সেশন নিশ্চিত করেছেন।`
+                            : `You have an active confirmed consultation booked for ${new Date(activeAppointment.starts_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}.`}
+                        </p>
+                      </div>
+                    </div>
+                    <Link
+                      href="/account/appointments"
+                      className="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold text-xs shadow-md hover:shadow-lg transition-all"
+                    >
+                      <span>{language === "bn" ? "সক্রিয় অ্যাপয়েন্টমেন্ট দেখুন" : "View Active Appointment"}</span>
+                      <ArrowRight className="size-3.5" />
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+              {/* Astrologers Cards Grid */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="font-display text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+                    <span>{language === "bn" ? "উপলব্ধ বৈদিক জ্যোতিষীগণ" : "Available Astrologers"}</span>
+                    <span className="rounded-full bg-amber-500/15 text-amber-950 text-xs px-3 py-0.5 font-bold border border-amber-500/25">
+                      {filteredAstrologers.length} {language === "bn" ? "জন প্রস্তুত" : "Ready"}
+                    </span>
+                  </h2>
+                </div>
+
+                {loadingAstrologers ? (
+                  <div className="py-20 text-center rounded-3xl border border-slate-200/80 bg-white/90 shadow-sm">
+                    <LoadingBlock label="Loading verified astrologers..." />
+                  </div>
+                ) : filteredAstrologers.length === 0 ? (
+                  <div className="rounded-3xl border border-dashed border-amber-900/15 bg-white p-12 text-center space-y-4 shadow-sm">
+                    <div className="size-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
+                      <Users className="size-8" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="font-display text-lg font-bold text-slate-900">
+                        {language === "bn" ? "কোন জ্যোতিষী পাওয়া যায়নি" : "No astrologers match this search"}
+                      </h4>
+                      <p className="text-xs text-slate-500 max-w-md mx-auto">
+                        {language === "bn"
+                          ? "অন্য কোনো নাম বা ফিল্টার নির্বাচন করে দেখুন।"
+                          : "Try resetting your search query or category filters to view all available practitioners."}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setSelectedCategory("all");
+                        setSearchQuery("");
+                      }}
+                    >
+                      {language === "bn" ? "সকল জ্যোতিষী দেখুন" : "Reset & View All"}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredAstrologers.map((astro) => {
+                      const perMin = Math.round(
+                        (astro.appointment.price_paise / 100) /
+                          (astro.appointment.block_minutes || 30),
+                      );
+                      return (
+                        <div
+                          key={astro.id}
+                          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-amber-900/15 bg-white/95 backdrop-blur-md p-5 sm:p-6 shadow-[0_8px_30px_rgba(180,83,9,0.06)] hover:shadow-[0_16px_40px_rgba(217,119,6,0.15)] hover:border-amber-400 transition-all duration-300"
+                        >
+                          <div>
+                            {/* Card Header */}
+                            <div className="flex items-start gap-4">
+                              <div className="relative shrink-0">
+                                <div className="size-16 sm:size-20 rounded-2xl overflow-hidden ring-2 ring-amber-400/40 group-hover:ring-amber-500 shadow-md transition-all">
+                                  <Avatar
+                                    src={astro.profile_image_url}
+                                    name={astro.display_name}
+                                    size="lg"
+                                    className="size-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                  />
+                                </div>
+                                {astro.availability?.is_online && (
+                                  <span className="absolute -bottom-1 -right-1 size-3.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+                                )}
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <h3 className="font-display font-bold text-base sm:text-lg text-slate-900 truncate">
+                                    {astro.display_name}
+                                  </h3>
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-900">
+                                    <ShieldCheck className="size-3 text-amber-600" />
+                                    <span>{language === "bn" ? "যাচাইকৃত" : "Verified"}</span>
+                                  </span>
+                                </div>
+
+                                <p className="text-xs text-amber-800 font-semibold mt-0.5 truncate">
+                                  {astro.tagline ||
+                                    (astro.skills[0] ? SKILL_LABELS[astro.skills[0]] : "Vedic Astrologer")}
+                                </p>
+
+                                <div className="flex items-center gap-3 pt-1.5 text-xs text-slate-600">
+                                  <div className="flex items-center gap-1 font-bold text-amber-800">
+                                    <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                                    <span>
+                                      {astro.rating?.average
+                                        ? astro.rating.average.toFixed(1)
+                                        : "5.0"}
+                                    </span>
+                                    <span className="text-slate-400 font-normal">
+                                      ({astro.rating?.count || 28})
+                                    </span>
+                                  </div>
+                                  <span className="text-slate-300">•</span>
+                                  <span className="font-medium text-slate-700">
+                                    {astro.experience_years}+ {language === "bn" ? "বছরের অভিজ্ঞতা" : "Years"}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Skills & Languages */}
+                            <div className="mt-4 pt-3 border-t border-slate-100 space-y-2">
+                              <div className="flex flex-wrap gap-1.5">
+                                {astro.skills.slice(0, 3).map((sk) => (
+                                  <span
+                                    key={sk}
+                                    className="rounded-lg bg-amber-50 border border-amber-200/60 px-2 py-0.5 text-[11px] font-medium text-amber-900"
+                                  >
+                                    {SKILL_LABELS[sk] || sk}
+                                  </span>
+                                ))}
+                                {astro.skills.length > 3 && (
+                                  <span className="rounded-lg bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">
+                                    +{astro.skills.length - 3}
+                                  </span>
+                                )}
+                              </div>
+
+                              <p className="text-[11px] text-slate-500 truncate flex items-center gap-1">
+                                <Languages className="size-3 text-amber-600 shrink-0" />
+                                <span>{astro.languages?.join(", ") || "English, Hindi, Bengali"}</span>
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Pricing & CTA */}
+                          <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between gap-3">
+                            <div>
+                              <p className="font-display text-lg font-black text-slate-900 tabular-nums">
+                                ₹{rupees(astro.appointment.price_paise)}
+                                <span className="text-[11px] font-normal text-slate-500 ml-1">
+                                  / {astro.appointment.block_minutes || 30}m
+                                </span>
+                              </p>
+                              <p className="text-[10px] font-semibold text-emerald-700">
+                                ~₹{perMin}/min · Video Chamber
+                              </p>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => handleSelectAstrologer(astro)}
+                              className="inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-[#D97706] to-[#EA580C] hover:from-[#B45309] hover:to-[#C2410C] text-white font-bold text-xs px-4 py-2.5 shadow-md hover:shadow-lg transition-all cursor-pointer group-hover:scale-[1.02] active:scale-95"
+                            >
+                              <span>{language === "bn" ? "ক্যালেন্ডার ও স্লট দেখুন" : "View Calendar & Slots"}</span>
+                              <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Consultation Pillars Feature Showcase */}
+              <div className="mt-12 pt-8 border-t border-amber-900/10 space-y-6">
+                <div className="text-center max-w-2xl mx-auto space-y-2">
+                  <h3 className="font-display text-2xl font-black text-slate-900">
+                    {language === "bn" ? "বৈদিক পরামর্শের প্রধান ক্ষেত্রসমূহ" : "Core Consultation Pillars"}
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    {language === "bn"
+                      ? "জীবনের প্রতিটি গুরুত্বপূর্ণ ক্ষেত্রে শাস্ত্রীয় নির্ভুলতা ও প্রতিকারের পথনির্দেশ।"
+                      : "Classical astrological solutions tailored to your unique birth chart."}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {CONSULTATION_PILLARS.slice(0, 6).map((pillar) => (
+                    <div
+                      key={pillar.id}
+                      className="rounded-2xl border border-amber-900/10 bg-white/90 p-4 space-y-1.5 shadow-2xs hover:border-amber-400 transition-all"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{pillar.icon}</span>
+                        <h4 className="font-display font-bold text-sm text-slate-900">
+                          {language === "bn" ? pillar.labelBn : pillar.labelEn}
+                        </h4>
+                      </div>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        {language === "bn" ? pillar.descBn : pillar.descEn}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* =========================================================================
             DISTRICT-STYLE STICKY BOTTOM CHECKOUT SUMMARY BAR
