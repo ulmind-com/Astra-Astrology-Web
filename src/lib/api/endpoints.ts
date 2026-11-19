@@ -37,6 +37,10 @@ export const endpoints = {
     galleryImage: (publicId: string) => `/astrologers/me/gallery/${publicId}`,
     favorite: (slugOrId: string) => `/astrologers/${slugOrId}/favorite`,
     myFavorites: "/astrologers/favorites/my",
+    applicationSendOtp: "/astrologers/applications/send-otp",
+    applicationVerifyOtp: "/astrologers/applications/verify-otp",
+    applicationUploadDoc: "/astrologers/applications/upload-document",
+    applicationSubmit: "/astrologers/applications/submit",
   },
 
   wallet: {

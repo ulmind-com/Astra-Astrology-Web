@@ -168,6 +168,13 @@ export function AstroyogiHeader() {
               icon: Bot,
               badge: "ফ্রি",
             },
+            {
+              label: "জ্যোতিষী হিসেবে যুক্ত হন",
+              href: "/become-an-astrologer",
+              description: "আমাদের বৈদিক প্যানেলে জ্যোতিষী হিসেবে আবেদন করুন ও জাতকদের পরামর্শ দিন",
+              icon: Award,
+              badge: "আবেদন",
+            },
           ],
         },
         {
@@ -407,6 +414,13 @@ export function AstroyogiHeader() {
               icon: Bot,
               badge: "मुफ़्त",
             },
+            {
+              label: "ज्योतिषी के रूप में जुड़ें",
+              href: "/become-an-astrologer",
+              description: "हमारे वैदिक मंच से ज्योतिषी के रूप में जुड़कर सेवा प्रदान करें",
+              icon: Award,
+              badge: "आवेदन",
+            },
           ],
         },
         {
@@ -645,6 +659,13 @@ export function AstroyogiHeader() {
             description: "Instant Vedic planetary intelligence trained on sacred texts",
             icon: Bot,
             badge: "Free",
+          },
+          {
+            label: "Become an Astrologer",
+            href: "/become-an-astrologer",
+            description: "Apply as a certified Astrologer & consult seekers globally",
+            icon: Award,
+            badge: "Join Us",
           },
         ],
       },
