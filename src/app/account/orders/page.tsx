@@ -147,7 +147,7 @@ export default function MyOrdersPage() {
   const [isUploadingQr, setIsUploadingQr] = React.useState<boolean>(false);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
-  // Fetch Banner Settings for Cancellation Grace Hours & Refund SLA Days
+  // Cancellation Grace Hours & Refund SLA Days (sensible defaults, background synced)
   const { data: bannerSettings } = useQuery({
     queryKey: ["shop_banner_settings"],
     queryFn: async () => {
@@ -157,13 +157,15 @@ export default function MyOrdersPage() {
         return null;
       }
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+    retry: 1,
   });
 
   const cancellationGraceHours = bannerSettings?.cancellation_grace_hours ?? 24;
   const refundSlaDays = bannerSettings?.refund_sla_days ?? 3;
 
-  // Fetch My Orders
+  // Fetch My Orders with fast timeout & single retry
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["shop_orders_mine", page],
     queryFn: async () => {
@@ -171,6 +173,8 @@ export default function MyOrdersPage() {
       return res;
     },
     enabled: ready,
+    staleTime: 30 * 1000,
+    retry: 1,
   });
 
   const orders = data?.items || [];
@@ -298,6 +302,34 @@ export default function MyOrdersPage() {
 
   if (!ready || isLoading) {
     return <LoadingBlock label={isBn ? "আপনার অর্ডার লোড হচ্ছে..." : "Loading your orders..."} />;
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-2xl border border-red-200 bg-red-50/50 p-8 text-center space-y-4">
+        <div className="mx-auto size-12 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+          <AlertCircle className="size-6" />
+        </div>
+        <div className="space-y-1">
+          <h2 className="font-cinzel text-lg font-bold text-stone-900">
+            {isBn ? "অর্ডার লোড করতে সমস্যা হয়েছে" : "Could not load orders"}
+          </h2>
+          <p className="text-xs text-stone-600 max-w-md mx-auto">
+            {isBn
+              ? "সার্ভারের সাথে সংযোগ স্থাপন করতে কিছুটা সময় লাগছে। দয়া করে পুনরায় চেষ্টা করুন।"
+              : "Connecting to the server took longer than expected. Please try again."}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className="inline-flex items-center gap-2 rounded-xl bg-amber-600 hover:bg-amber-700 px-5 py-2.5 text-xs font-bold text-white transition-all shadow-xs cursor-pointer"
+        >
+          <RotateCcw className="size-3.5" />
+          {isBn ? "পুনরায় চেষ্টা করুন" : "Retry"}
+        </button>
+      </div>
+    );
   }
 
   // Summary counts

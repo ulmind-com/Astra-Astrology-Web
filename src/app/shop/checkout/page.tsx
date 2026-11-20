@@ -176,6 +176,8 @@ export default function CheckoutPage() {
   const [orderSuccess, setOrderSuccess] = React.useState<ShopCheckoutResult | null>(null);
   const [activeOrder, setActiveOrder] = React.useState<ShopCheckoutResult | null>(null);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
+  const paymentStartedRef = React.useRef(false);
+  const paymentCompletedRef = React.useRef(false);
 
   // ---- Pre-fill name from auth
   React.useEffect(() => {
@@ -321,6 +323,8 @@ export default function CheckoutPage() {
     }
 
     setIsSubmitting(true);
+    paymentStartedRef.current = false;
+    paymentCompletedRef.current = false;
 
     try {
       const payload: ShopCheckoutPayload = {
@@ -414,6 +418,7 @@ export default function CheckoutPage() {
           razorpay_payment_id: string;
           razorpay_signature: string;
         }) => {
+          paymentStartedRef.current = true;
           try {
             toast.loading(
               isBn ? "পেমেন্ট যাচাই হচ্ছে..." : "Verifying payment...",
@@ -427,6 +432,7 @@ export default function CheckoutPage() {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
             });
+            paymentCompletedRef.current = true;
             clearCart();
             setOrderSuccess(result);
             setActiveOrder(null);
@@ -447,6 +453,7 @@ export default function CheckoutPage() {
                 (checked.payment_status === "paid" ||
                   checked.order_status === "confirmed")
               ) {
+                paymentCompletedRef.current = true;
                 clearCart();
                 setOrderSuccess(result);
                 setActiveOrder(null);
@@ -473,6 +480,10 @@ export default function CheckoutPage() {
         },
         modal: {
           ondismiss: () => {
+            // Guard: If payment was completed or verification started, do NOT abort!
+            if (paymentCompletedRef.current || paymentStartedRef.current) {
+              return;
+            }
             // Immediately inform backend to cancel the uncompleted checkout and release reserved stock
             const orderIdToAbort = result?.order_id;
             if (orderIdToAbort) {
