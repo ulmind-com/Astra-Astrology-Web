@@ -165,7 +165,7 @@ export default function MyOrdersPage() {
   const cancellationGraceHours = bannerSettings?.cancellation_grace_hours ?? 24;
   const refundSlaDays = bannerSettings?.refund_sla_days ?? 3;
 
-  // Fetch My Orders with fast timeout & single retry
+  // Fetch My Orders with resilient 5-minute cache & smooth revalidation
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["shop_orders_mine", page],
     queryFn: async () => {
@@ -173,7 +173,9 @@ export default function MyOrdersPage() {
       return res;
     },
     enabled: ready,
-    staleTime: 30 * 1000,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
     retry: 1,
   });
 
@@ -301,7 +303,66 @@ export default function MyOrdersPage() {
   };
 
   if (!ready || isLoading) {
-    return <LoadingBlock label={isBn ? "আপনার অর্ডার লোড হচ্ছে..." : "Loading your orders..."} />;
+    return (
+      <div className="space-y-6 animate-pulse">
+        {/* Skeleton Header */}
+        <div className="rounded-2xl border border-stone-200 bg-stone-50/70 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="size-9 rounded-xl bg-stone-200" />
+            <div className="space-y-1.5">
+              <div className="h-5 w-48 rounded bg-stone-200" />
+              <div className="h-3 w-64 rounded bg-stone-100" />
+            </div>
+          </div>
+          <div className="h-8 w-28 rounded-xl bg-stone-200 shrink-0" />
+        </div>
+
+        {/* Skeleton Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-xl border border-stone-200 bg-white p-3.5 flex items-center gap-3">
+              <div className="size-10 rounded-xl bg-stone-200" />
+              <div className="space-y-1">
+                <div className="h-3 w-16 rounded bg-stone-200" />
+                <div className="h-4 w-10 rounded bg-stone-300" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Skeleton Tabs */}
+        <div className="flex items-center gap-2 border-b border-stone-200 pb-2">
+          {["সব অর্ডার", "চলমান", "ডেলিভার্ড", "বাতিল"].map((tab, idx) => (
+            <div
+              key={idx}
+              className={`h-7 rounded-lg ${idx === 0 ? "w-20 bg-amber-200" : "w-16 bg-stone-200"}`}
+            />
+          ))}
+        </div>
+
+        {/* Skeleton Order Cards */}
+        {[1, 2].map((i) => (
+          <div key={i} className="rounded-2xl border border-stone-200 bg-white p-5 space-y-4">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-36 rounded bg-stone-200" />
+                <div className="h-5 w-20 rounded-full bg-stone-100" />
+              </div>
+              <div className="h-4 w-20 rounded bg-stone-200" />
+            </div>
+            <div className="flex gap-4">
+              <div className="size-16 rounded-xl bg-stone-200 shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-3/4 rounded bg-stone-200" />
+                <div className="h-3 w-1/2 rounded bg-stone-100" />
+                <div className="h-3 w-1/4 rounded bg-stone-100" />
+              </div>
+            </div>
+            <div className="h-2 w-full rounded bg-stone-100" />
+          </div>
+        ))}
+      </div>
+    );
   }
 
   if (isError) {
