@@ -38,6 +38,8 @@ import { toast } from "sonner";
 import { COPILOT_KEY, useCoPilot } from "@/hooks/use-copilot";
 import { callApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { BTRLifeEventsModal } from "@/components/appointments/BTRLifeEventsModal";
+import { RequestBTRModal } from "@/components/appointments/RequestBTRModal";
 import type {
   CoPilotBirthDetailsInput,
   CoPilotDashaPeriod,
@@ -434,15 +436,21 @@ export function AstroCoPilotDrawer({
   isOpen,
   onClose,
   theme = "light",
+  appointmentId,
+  userRole,
 }: {
   callId: string | null;
   isOpen: boolean;
   onClose: () => void;
   theme?: "light" | "dark";
+  appointmentId?: string | null;
+  userRole?: string;
 }) {
   const isDark = theme === "dark";
   const { data, isLoading, isError, refetch } = useCoPilot(callId, isOpen);
   const [isEditing, setIsEditing] = React.useState(false);
+  const [requestBtrOpen, setRequestBtrOpen] = React.useState(false);
+  const [lifeEventsBtrOpen, setLifeEventsBtrOpen] = React.useState(false);
 
   if (!isOpen || !callId) return null;
 
@@ -841,7 +849,7 @@ export function AstroCoPilotDrawer({
             )}
 
             {/* Bottom In-Chamber Birth Edit CTA */}
-            <div className="pt-1">
+            <div className="pt-1 space-y-2">
               <button
                 type="button"
                 onClick={() => setIsEditing(true)}
@@ -855,10 +863,73 @@ export function AstroCoPilotDrawer({
                 <Edit3 className="size-3.5 text-amber-500" />
                 <span>সঠিক জন্ম বিবরণ সম্পাদনা (Edit Birth Time / Details)</span>
               </button>
+
+              {appointmentId && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setLifeEventsBtrOpen(true)}
+                    className={cn(
+                      "w-full flex items-center justify-center gap-2 rounded-xl py-2 px-3 text-xs font-bold transition-all border shadow-xs cursor-pointer",
+                      isDark
+                        ? "border-amber-500/30 bg-amber-500/10 text-amber-200 hover:bg-amber-500/20"
+                        : "border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100",
+                    )}
+                  >
+                    <Sparkles className="size-3.5 text-amber-500" />
+                    <span>ঐতিহাসিক জীবন ঘটনাবলী ও BTR (Life Events Form)</span>
+                  </button>
+
+                  {(userRole === "astrologer" || userRole === "admin") && (
+                    <button
+                      type="button"
+                      onClick={() => setRequestBtrOpen(true)}
+                      className={cn(
+                        "w-full flex items-center justify-center gap-2 rounded-xl py-2 px-3 text-xs font-bold transition-all border shadow-xs cursor-pointer",
+                        isDark
+                          ? "border-indigo-500/30 bg-indigo-950/40 text-indigo-200 hover:bg-indigo-900/60"
+                          : "border-indigo-300 bg-indigo-50 text-indigo-950 hover:bg-indigo-100",
+                      )}
+                    >
+                      <Clock className="size-3.5 text-indigo-500" />
+                      <span>ক্লায়েন্টকে BTR অনুরোধ পাঠান (Request BTR)</span>
+                    </button>
+                  )}
+                </>
+              )}
             </div>
           </>
         )}
       </div>
+
+      {appointmentId && (
+        <>
+          <RequestBTRModal
+            appointmentId={appointmentId}
+            isOpen={requestBtrOpen}
+            onClose={() => setRequestBtrOpen(false)}
+            onSuccess={() => {
+              void refetch();
+            }}
+          />
+          <BTRLifeEventsModal
+            appointmentId={appointmentId}
+            initialBirthDetails={{
+              date_of_birth: data?.birth_date_str
+                ? data.birth_date_str.split("-").reverse().join("-")
+                : undefined,
+              time_of_birth: data?.birth_time_str,
+              place_of_birth: data?.birth_place_str,
+            }}
+            requestNote={data?.accuracy_note}
+            isOpen={lifeEventsBtrOpen}
+            onClose={() => setLifeEventsBtrOpen(false)}
+            onSuccess={() => {
+              void refetch();
+            }}
+          />
+        </>
+      )}
     </aside>
   );
 }

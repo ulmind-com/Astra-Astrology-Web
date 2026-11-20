@@ -647,6 +647,9 @@ export const appointmentApi = {
     body: { action: "reschedule" | "refund"; new_starts_at?: string; reason?: string },
   ) => api.post<Appointment>(`/appointments/${id}/brahma-pause-action`, body),
 
+  requestBtr: (id: string, note?: string | null) =>
+    api.post<Appointment>(endpoints.appointments.requestBtr(id), { note: note ?? null }),
+
   updateBtr: (
     id: string,
     body: {
@@ -658,7 +661,7 @@ export const appointmentApi = {
       timezone_offset?: number | null;
       notes?: string | null;
     },
-  ) => api.post<Appointment>(`/appointments/${id}/update-btr`, body),
+  ) => api.post<Appointment>(endpoints.appointments.updateBtr(id), body),
 
   extensionAction: (id: string, action: "accept" | "decline") =>
     api.post<Appointment>(`/appointments/${id}/extension/action`, { action }),

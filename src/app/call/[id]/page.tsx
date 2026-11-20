@@ -24,7 +24,7 @@ import { CALL_STATUS_LABELS, formatDuration, isCallLive } from "@/types";
 export default function CallPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { ready } = useRequireAuth();
+  const { ready, user } = useRequireAuth();
 
   const { data, isLoading, error, refetch } = useCall(ready ? id : null);
   const { end } = useCallActions();
@@ -165,6 +165,8 @@ export default function CallPage() {
           isOpen={copilotOpen}
           onClose={() => setCopilotOpen(false)}
           theme={theme}
+          appointmentId={call.appointment_id}
+          userRole={user?.role}
         />
       )}
 

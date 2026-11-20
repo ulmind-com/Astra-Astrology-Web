@@ -38,6 +38,9 @@ import { useLanguage } from "@/providers/language-provider";
 import { APPOINTMENT_STATUS_LABELS, type Appointment, type VedicPrescription } from "@/types";
 import { GoogleCalendarIntegrationCard } from "@/components/appointments/GoogleCalendarIntegrationCard";
 import { BrahmaPauseControlCard } from "@/components/appointments/BrahmaPauseControlCard";
+import { BTRLifeEventsModal } from "@/components/appointments/BTRLifeEventsModal";
+import { RequestBTRModal } from "@/components/appointments/RequestBTRModal";
+import { useAuth } from "@/providers/auth-provider";
 
 const KEY = ["appointments", "mine"] as const;
 
@@ -404,12 +407,17 @@ export default function MyAppointmentsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { language } = useLanguage();
+  const { user } = useAuth();
   const [cancelling, setCancelling] = React.useState<string | null>(null);
   const [joiningChamberId, setJoiningChamberId] = React.useState<string | null>(null);
   const [rescueModalOpen, setRescueModalOpen] = React.useState(false);
   const [rescueAppointment, setRescueAppointment] = React.useState<Appointment | null>(null);
   const [rescueNewTime, setRescueNewTime] = React.useState("");
   const [rescuingId, setRescuingId] = React.useState<string | null>(null);
+
+  // Birth Time Rectification (BTR) state
+  const [btrAppt, setBtrAppt] = React.useState<Appointment | null>(null);
+  const [requestBtrApptId, setRequestBtrApptId] = React.useState<string | null>(null);
 
   const handleBrahmaPauseRefund = async (appointmentId: string) => {
     setRescuingId(appointmentId);
@@ -452,58 +460,6 @@ export default function MyAppointmentsPage() {
       toast.error(err?.message || "Failed to reschedule. Please pick a slot within astrologer's open schedule.");
     } finally {
       setRescuingId(null);
-    }
-  };
-
-  // Birth Time Rectification (BTR) state & handler
-  const [btrAppt, setBtrAppt] = React.useState<Appointment | null>(null);
-  const [btrForm, setBtrForm] = React.useState({
-    birthDate: "",
-    birthTime: "",
-    birthPlace: "",
-    notes: "",
-  });
-  const [updatingBtr, setUpdatingBtr] = React.useState(false);
-
-  const handleOpenBtrModal = (appt: Appointment) => {
-    setBtrAppt(appt);
-    const existing = appt.birth_details || {};
-    setBtrForm({
-      birthDate: existing.date_of_birth || "",
-      birthTime: existing.time_of_birth || "",
-      birthPlace: existing.place_of_birth || "",
-      notes: existing.client_btr_notes || "",
-    });
-  };
-
-  const handleUpdateBtr = async () => {
-    if (!btrAppt || !btrForm.birthDate || !btrForm.birthTime || !btrForm.birthPlace) {
-      toast.error(
-        language === "bn"
-          ? "দয়া করে জন্ম তারিখ, সময় ও স্থান পূরণ করুন।"
-          : "Please provide birth date, exact time, and birth place.",
-      );
-      return;
-    }
-    setUpdatingBtr(true);
-    try {
-      await appointmentApi.updateBtr(btrAppt.id, {
-        birth_date: btrForm.birthDate,
-        birth_time: btrForm.birthTime,
-        birth_place: btrForm.birthPlace,
-        notes: btrForm.notes.trim() || undefined,
-      });
-      void queryClient.invalidateQueries({ queryKey: KEY });
-      setBtrAppt(null);
-      toast.success(
-        language === "bn"
-          ? "সঠিক জন্ম বিবরণ সফলভাবে আপডেট হয়েছে। জ্যোতিষীকে অবগত করা হয়েছে।"
-          : "Exact birth parameters updated successfully. Astrologer notified.",
-      );
-    } catch (err: any) {
-      toast.error(err?.message || "Failed to update birth details.");
-    } finally {
-      setUpdatingBtr(false);
     }
   };
 
@@ -830,11 +786,11 @@ export default function MyAppointmentsPage() {
                     <div className="flex items-center gap-2 pt-1">
                       <Button
                         size="sm"
-                        onClick={() => handleOpenBtrModal(a)}
+                        onClick={() => setBtrAppt(a)}
                         className="bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs shadow-xs"
                       >
                         <Clock className="size-3.5 mr-1.5" />
-                        {language === "bn" ? "সঠিক জন্ম বিবরণ আপডেট করুন" : "Update Exact Birth Details"}
+                        {language === "bn" ? "সঠিক জন্ম বিবরণ ও জীবন ঘটনা আপডেট করুন" : "Update Exact Birth & Life Events"}
                       </Button>
                     </div>
                   </div>
@@ -975,8 +931,32 @@ export default function MyAppointmentsPage() {
                       )}
                     </div>
 
-                    {a.can_cancel && (
-                      <div className="shrink-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="text-xs"
+                        onClick={() => setBtrAppt(a)}
+                      >
+                        <Clock className="size-3.5 mr-1 text-amber-500" />
+                        {a.btr_fulfilled
+                          ? (language === "bn" ? "BTR ও জীবন ঘটনা দেখুন" : "View BTR Events")
+                          : (language === "bn" ? "BTR ও জীবন ঘটনা" : "BTR & Life Events")}
+                      </Button>
+
+                      {user?.role === "astrologer" && !a.btr_fulfilled && (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="text-xs text-indigo-600 hover:text-indigo-700"
+                          onClick={() => setRequestBtrApptId(a.id)}
+                        >
+                          <Clock className="size-3.5 mr-1 text-indigo-500" />
+                          {language === "bn" ? "BTR অনুরোধ পাঠান" : "Request BTR"}
+                        </Button>
+                      )}
+
+                      {a.can_cancel && (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -985,8 +965,8 @@ export default function MyAppointmentsPage() {
                         >
                           {language === "bn" ? "স্লট বাতিল করুন" : "Cancel Appointment"}
                         </Button>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 )}
               </li>
@@ -1068,91 +1048,27 @@ export default function MyAppointmentsPage() {
         </Modal>
       )}
 
-      {/* Birth Time Rectification Modal */}
-      {btrAppt && (
-        <Modal
-          open={Boolean(btrAppt)}
-          onClose={() => setBtrAppt(null)}
-          title={language === "bn" ? "সঠিক জন্ম বিবরণ আপডেট করুন (BTR)" : "Update Exact Birth Parameters"}
-        >
-          <div className="space-y-4 text-xs">
-            <p className="text-muted-foreground leading-relaxed">
-              {language === "bn"
-                ? "বৈদিক জ্যোতিষে লগ্ন প্রান্তিক ও নবাংশ ডি৯ নির্ভুলতার জন্য সঠিক জন্ম সময় ও স্থান অত্যন্ত জরুরি।"
-                : "Exact birth time ensures mathematically precise planetary degrees and divisional charts."}
-            </p>
+      {/* Birth Time Rectification (BTR) & Life Events Modal */}
+      <BTRLifeEventsModal
+        appointment={btrAppt}
+        isOpen={Boolean(btrAppt)}
+        onClose={() => setBtrAppt(null)}
+        language={language}
+        onSuccess={() => {
+          void queryClient.invalidateQueries({ queryKey: KEY });
+        }}
+      />
 
-            <div className="space-y-3">
-              <div>
-                <label className="block font-semibold text-foreground mb-1">
-                  {language === "bn" ? "জন্ম তারিখ *" : "Date of Birth *"}
-                </label>
-                <input
-                  type="date"
-                  value={btrForm.birthDate}
-                  onChange={(e) => setBtrForm((f) => ({ ...f, birthDate: e.target.value }))}
-                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-foreground mb-1">
-                  {language === "bn" ? "সঠিক জন্ম সময় (মিনিট সহ) *" : "Exact Birth Time (HH:MM AM/PM) *"}
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. 05:42 AM or 17:42"
-                  value={btrForm.birthTime}
-                  onChange={(e) => setBtrForm((f) => ({ ...f, birthTime: e.target.value }))}
-                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-foreground mb-1">
-                  {language === "bn" ? "জন্ম স্থান (শহর, জেলা, দেশ) *" : "Place of Birth *"}
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Kolkata, West Bengal, India"
-                  value={btrForm.birthPlace}
-                  onChange={(e) => setBtrForm((f) => ({ ...f, birthPlace: e.target.value }))}
-                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-foreground mb-1">
-                  {language === "bn" ? "যাচাই সংক্রান্ত নোট (ঐচ্ছিক)" : "Verification Notes (Optional)"}
-                </label>
-                <input
-                  type="text"
-                  placeholder={language === "bn" ? "যেমন: হাসপাতাল সার্টিফিকেট বা পরিবারের কোষ্ঠি অনুযায়ী" : "e.g. Verified from hospital discharge slip"}
-                  value={btrForm.notes}
-                  onChange={(e) => setBtrForm((f) => ({ ...f, notes: e.target.value }))}
-                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
-              <Button variant="ghost" size="sm" onClick={() => setBtrAppt(null)}>
-                {language === "bn" ? "বাতিল" : "Cancel"}
-              </Button>
-              <Button
-                size="sm"
-                disabled={updatingBtr || !btrForm.birthDate || !btrForm.birthTime || !btrForm.birthPlace}
-                onClick={handleUpdateBtr}
-                className="bg-sky-600 hover:bg-sky-700 text-white font-semibold"
-              >
-                {updatingBtr
-                  ? (language === "bn" ? "আপডেট হচ্ছে..." : "Updating...")
-                  : (language === "bn" ? "জন্ম বিবরণ সংরক্ষণ করুন" : "Save Rectified Details")}
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
+      {/* Astrologer Request BTR Modal */}
+      <RequestBTRModal
+        appointmentId={requestBtrApptId}
+        isOpen={Boolean(requestBtrApptId)}
+        onClose={() => setRequestBtrApptId(null)}
+        language={language}
+        onSuccess={() => {
+          void queryClient.invalidateQueries({ queryKey: KEY });
+        }}
+      />
     </div>
   );
 }
