@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { astrologyApi } from "@/lib/api";
 import { useLanguage } from "@/providers/language-provider";
@@ -227,38 +228,26 @@ export function AstrologyPredictionZodiac() {
   const { language } = useLanguage();
   const [tab, setTab] = React.useState<RangeTab>("today");
   const [activeIndex, setActiveIndex] = React.useState<number>(0); // Aries default (or user preference)
-  const [data, setData] = React.useState<DailyHoroscopeResult | null>(null);
-  const [loading, setLoading] = React.useState<boolean>(true);
 
   const selectedDate = React.useMemo(() => {
     const t = RANGE_TABS.find((r) => r.id === tab) ?? RANGE_TABS[0];
     return dateFromOffset(t.offset);
   }, [tab]);
 
-  React.useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    astrologyApi
-      .dailyHoroscope({
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ["dailyHoroscope", formatDateToYMD(selectedDate), language],
+    queryFn: () =>
+      astrologyApi.dailyHoroscope({
         date: formatDateToYMD(selectedDate),
-        language: "en",
+        language: language === "bn" || language === "hi" ? language : "en",
         latitude: 22.5726,
         longitude: 88.3639,
         timezone: 5.5,
-      })
-      .then((res) => {
-        if (!cancelled) setData(res);
-      })
-      .catch((err) => {
-        console.error("Home daily horoscope error:", err);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedDate]);
+      }),
+    staleTime: 5 * 60_000,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+  });
 
   const activeMeta = ZODIAC_SIGNS[activeIndex] || ZODIAC_SIGNS[0];
   const activeSign: DailySignHoroscope | undefined =

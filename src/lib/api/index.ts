@@ -577,7 +577,7 @@ export const appointmentApi = {
     api.get<Record<string, any>>(`/appointments/${id}/karmic-vault`),
 
   getCertificateHtmlUrl: (id: string) =>
-    `${process.env.NEXT_PUBLIC_API_URL || "https://api.divinlink.com"}/api/v1/appointments/${id}/certificate/html`,
+    `${apiBase}/appointments/${id}/certificate/html`,
 
   verifyCertificate: (id: string) =>
     api.get<{
@@ -1835,10 +1835,10 @@ export const courseApi = {
     }),
 
   getCertificateHtmlUrl: (courseId: string) =>
-    `${process.env.NEXT_PUBLIC_API_URL || "https://astra-astrology-backend.onrender.com/api/v1"}${endpoints.courses.certificateHtml(courseId)}`,
+    `${apiBase}${endpoints.courses.certificateHtml(courseId)}`,
 
   getVerifyCertificateHtmlUrl: (certificateId: string) =>
-    `${process.env.NEXT_PUBLIC_API_URL || "https://astra-astrology-backend.onrender.com/api/v1"}${endpoints.courses.verifyCertificateHtml(certificateId)}`,
+    `${apiBase}${endpoints.courses.verifyCertificateHtml(certificateId)}`,
 };
 
 // ------------------------------------------------------------------ Purohit & Live Puja

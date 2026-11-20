@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { courseApi } from "@/lib/api";
+import { env } from "@/lib/env";
 import { CourseCertificate } from "@/types";
 
 export default function CourseCertificateVerificationPage() {
@@ -148,7 +149,7 @@ export default function CourseCertificateVerificationPage() {
 
   const isTampered = cert && cert.is_signature_valid === false;
   const rawHtmlDownloadUrl = cert
-    ? `${process.env.NEXT_PUBLIC_API_URL || "https://astra-astrology-backend.onrender.com/api/v1"}/courses/certificate/verify/${cert.certificate_id}/html${sigToken ? `?sig=${sigToken}` : ""}`
+    ? `${env.apiUrl}${env.apiPrefix}/courses/certificate/verify/${cert.certificate_id}/html${sigToken ? `?sig=${sigToken}` : ""}`
     : "";
 
   return (

@@ -21,16 +21,24 @@ function read(name: string, value: string | undefined, fallback: string): string
  * here, the browser would call the visitor's own localhost and every request
  * would fail. Set NEXT_PUBLIC_API_URL to override it (local backend, staging).
  */
-const DEPLOYED_API_URL = "https://astra-astrology-backend.onrender.com";
+export const DEPLOYED_API_URL = "https://astra-astrology-backend.onrender.com";
 
 function getResolvedApiUrl(): string {
-  const configured = read(
-    "NEXT_PUBLIC_API_URL",
-    process.env.NEXT_PUBLIC_API_URL,
-    DEPLOYED_API_URL,
-  ).replace(/\/+$/, "");
+  const rawConfigured = process.env.NEXT_PUBLIC_API_URL || DEPLOYED_API_URL;
+  const configured = rawConfigured.replace(/\/+$/, "");
 
-  // Safety net: If loaded in a browser on a live website (not localhost),
+  // Production URL Guard: In production builds (or deployed on Vercel),
+  // NEVER allow localhost/127.0.0.1 on either server or client.
+  const isProd =
+    process.env.NODE_ENV === "production" ||
+    process.env.VERCEL === "1" ||
+    process.env.NEXT_PUBLIC_VERCEL_ENV === "production";
+
+  if (isProd && (configured.includes("localhost") || configured.includes("127.0.0.1"))) {
+    return DEPLOYED_API_URL;
+  }
+
+  // Safety net on client: If loaded in a browser on a live website (not localhost),
   // never send API requests to localhost/127.0.0.1.
   if (typeof window !== "undefined") {
     const host = window.location.hostname;
