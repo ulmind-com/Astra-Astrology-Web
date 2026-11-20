@@ -59,3 +59,23 @@ export const env = {
 } as const;
 
 export const apiBase = `${env.apiUrl}${env.apiPrefix}`;
+
+/**
+ * Returns the effective API base URL.
+ * In browser on live production hosts (like divinlink.com or Vercel preview domains),
+ * uses the same-origin `${window.location.origin}${env.apiPrefix}` which rewrites through Next.js
+ * directly to the backend. This eliminates CORS preflight latency, bypasses Brave Shields blocks,
+ * and maintains resilient connection pooling.
+ * Falls back to `apiBase` on localhost and during SSR.
+ */
+export function getClientApiBase(): string {
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    const isLocal = host === "localhost" || host === "127.0.0.1" || host.endsWith(".local");
+    if (!isLocal) {
+      return `${window.location.origin}${env.apiPrefix}`;
+    }
+  }
+  return apiBase;
+}
+

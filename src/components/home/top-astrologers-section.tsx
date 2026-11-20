@@ -16,7 +16,7 @@ import type { PaginatedAstrologers } from "@/types";
  * Used as immediate pre-hydration initialData so the user never sees stuck skeletons,
  * even during backend cold starts on Render.
  */
-const INITIAL_TOP_ASTROLOGERS: PaginatedAstrologers = {
+export const INITIAL_TOP_ASTROLOGERS: PaginatedAstrologers = {
   items: [
     {
       id: "6ad44745a1cdbe669c81d0b4",

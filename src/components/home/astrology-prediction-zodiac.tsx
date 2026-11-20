@@ -8,6 +8,9 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { astrologyApi } from "@/lib/api";
 import { useLanguage } from "@/providers/language-provider";
 import type { DailyHoroscopeResult, DailySignHoroscope } from "@/types";
+import initialHoroscopeData from "./initial-horoscope.json";
+
+export const INITIAL_DAILY_HOROSCOPE = initialHoroscopeData as unknown as DailyHoroscopeResult;
 
 interface ZodiacSignItem {
   id: string;
@@ -307,6 +310,7 @@ export function AstrologyPredictionZodiac() {
         longitude: 88.3639,
         timezone: 5.5,
       }),
+    initialData: INITIAL_DAILY_HOROSCOPE,
     staleTime: 5 * 60_000,
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
@@ -562,7 +566,10 @@ export function AstrologyPredictionZodiac() {
             {/* Right: Score Meters */}
             <div className="flex flex-col justify-center gap-4 rounded-2xl bg-amber-50/40 border border-amber-900/10 p-5">
               {meters.map((m) => {
-                const score = Math.max(0, Math.min(100, (activeSign?.[m.key] as number) ?? 75));
+                const score = Math.max(
+                  0,
+                  Math.min(100, (activeSign?.[m.key] as number) ?? (activeSign?.overall_score ?? 78))
+                );
                 return (
                   <div key={m.key}>
                     <div className="flex items-center justify-between text-xs">

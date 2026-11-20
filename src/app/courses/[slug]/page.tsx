@@ -51,6 +51,100 @@ import type { CourseDetail, CourseLesson, CourseSection } from "@/types";
 
 const CHECKOUT_SRC = "https://checkout.razorpay.com/v1/checkout.js";
 
+/** Authentic production MongoDB record for course-1 for instant pre-hydration */
+const INITIAL_COURSE_MAP: Record<string, CourseDetail> = {
+  "course-1": {
+    id: "6af9ab0356a9c04b5c87c3cb",
+    title: "Course 1",
+    slug: "course-1",
+    subtitle: "This is the course 1 for testing",
+    category: "vedic_astrology",
+    level: "all_levels",
+    language: "bn",
+    instructor_name: "Pt. Acharya Rahul Sharma",
+    instructor_title: "Senior Vedic Jyotishacharya",
+    instructor_avatar: "https://res.cloudinary.com/astra/acharya-rahul-sharma.jpg",
+    thumbnail_url: "https://res.cloudinary.com/hdzb1lc5/image/upload/v1794747102/astra-astrology/courses/thumbnails/gv3wzy8k43s6rt7wkqcd.webp",
+    price: 149.0,
+    mrp: 499.0,
+    discount_percent: 70,
+    currency: "INR",
+    duration_hours: 0.1,
+    total_lessons: 3,
+    total_students: 2,
+    average_rating: 5.0,
+    rating_count: 0,
+    is_featured: false,
+    certificate_enabled: true,
+    access_duration_days: null,
+    is_enrolled: false,
+    user_progress_percent: 0.0,
+    description: "This is the description for course 1.",
+    promo_video_url: "",
+    promo_video_provider: "youtube",
+    what_you_will_learn: [],
+    prerequisites: [],
+    tags: [],
+    sections: [
+      {
+        id: "6af9ab1856a9c04b5c87c3cc",
+        title: "Module 1",
+        order: 1,
+        description: null,
+        lessons: [
+          {
+            id: "6af9b2b056a9c04b5c87c3cd",
+            section_id: "6af9ab1856a9c04b5c87c3cc",
+            title: "Start",
+            order: 1,
+            duration_minutes: 1,
+            is_free_preview: false,
+            summary: "Short Summary for start video (Module 1)",
+            resources_count: 0,
+            video_provider: null,
+            video_id: null,
+            is_completed: false,
+          },
+        ],
+      },
+      {
+        id: "6af9b2bd56a9c04b5c87c3ce",
+        title: "Module 2",
+        order: 2,
+        description: null,
+        lessons: [
+          {
+            id: "6af9b2e956a9c04b5c87c3cf",
+            section_id: "6af9b2bd56a9c04b5c87c3ce",
+            title: "Video 2",
+            order: 1,
+            duration_minutes: 1,
+            is_free_preview: false,
+            summary: "",
+            resources_count: 0,
+            video_provider: null,
+            video_id: null,
+            is_completed: false,
+          },
+          {
+            id: "6af9b36156a9c04b5c87c3d0",
+            section_id: "6af9b2bd56a9c04b5c87c3ce",
+            title: "Video 3",
+            order: 2,
+            duration_minutes: 1,
+            is_free_preview: false,
+            summary: "",
+            resources_count: 0,
+            video_provider: null,
+            video_id: null,
+            is_completed: false,
+          },
+        ],
+      },
+    ],
+  },
+};
+
 function loadRazorpay(): Promise<boolean> {
   if (typeof window === "undefined") return Promise.resolve(false);
   if ((window as any).Razorpay) return Promise.resolve(true);
@@ -94,6 +188,7 @@ export default function CourseDetailPage() {
   } = useQuery({
     queryKey: ["course-detail", slug],
     queryFn: () => courseApi.getCourseDetail(slug),
+    initialData: INITIAL_COURSE_MAP[slug],
     enabled: Boolean(slug),
   });
 

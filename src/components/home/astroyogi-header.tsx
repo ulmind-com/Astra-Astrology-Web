@@ -69,7 +69,7 @@ export function AstroyogiHeader() {
   const pathname = usePathname();
   const { user, isSignedIn } = useAuth();
   const { language, setLanguage } = useLanguage();
-  const { data: walletData } = useWallet(Boolean(isSignedIn));
+  const { data: walletData, isLoading: walletLoading } = useWallet(Boolean(isSignedIn));
   const coinsBalance = walletData?.wallet?.balance_coins;
   const { openCart, getItemCount } = useCartStore();
   const cartItemCount = getItemCount();
@@ -1096,7 +1096,11 @@ export function AstroyogiHeader() {
                 >
                   <Coins className="size-3.5 text-amber-600 shrink-0" />
                   <span className="tabular-nums">
-                    {coinsBalance !== undefined ? formatCoins(coinsBalance) : "—"}
+                    {coinsBalance !== undefined
+                      ? formatCoins(coinsBalance)
+                      : walletLoading
+                      ? "..."
+                      : "0"}
                   </span>
                 </Link>
                 <Link

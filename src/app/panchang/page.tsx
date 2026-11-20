@@ -24,6 +24,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { LoadingBlock } from "@/components/ui";
 import { astrologyApi } from "@/lib/api";
+import { INITIAL_DAILY_HOROSCOPE } from "@/components/home/astrology-prediction-zodiac";
 import { useLanguage } from "@/providers/language-provider";
 import {
   SuryaChandraHorizonArc,
@@ -71,7 +72,7 @@ export default function PanchangPage() {
   const [horaPeriod, setHoraPeriod] = React.useState<"day" | "night">("day");
   const [choghadiyaPeriod, setChoghadiyaPeriod] = React.useState<"day" | "night">("day");
 
-  // Real-time backend API query
+  // Real-time backend API query with pre-hydrated Swiss Ephemeris data for today
   const { data: horoscopeData, isLoading, error } = useQuery({
     queryKey: ["panchang", "daily", lang, selectedDate],
     queryFn: () =>
@@ -82,6 +83,7 @@ export default function PanchangPage() {
         longitude: 88.3639,
         timezone: 5.5,
       }),
+    initialData: selectedDate === todayStr ? INITIAL_DAILY_HOROSCOPE : undefined,
     staleTime: 1000 * 60 * 15,
   });
 

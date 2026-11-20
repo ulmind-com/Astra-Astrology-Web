@@ -47,6 +47,7 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { astrologyApi, astrologerApi } from "@/lib/api";
+import { INITIAL_TOP_ASTROLOGERS } from "@/components/home/top-astrologers-section";
 import { parseProfileBirthDetails } from "@/lib/birth-details";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { fireCelestialConfetti } from "@/components/ui/confetti";
@@ -174,6 +175,7 @@ function AstrologerMatchmakingCard({
   const { data: astrologersData, isLoading } = useQuery({
     queryKey: ["astrologers", { matchmaking_sidebar: true, limit: 6 }],
     queryFn: () => astrologerApi.list({ limit: 6 }),
+    initialData: INITIAL_TOP_ASTROLOGERS,
     staleTime: 5 * 60_000,
     refetchOnWindowFocus: false,
   });
