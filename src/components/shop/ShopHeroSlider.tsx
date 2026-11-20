@@ -27,63 +27,13 @@ export function ShopHeroSlider({ banners }: Props) {
 
   const defaultBanners: BannerItem[] = [
     {
-      id: "b-rudraksha",
-      badge_text: "DIVINLINK × SACRED RUDRAKSHA",
-      title: "Sacred Nepali Siddh Rudraksha",
-      subtitle: "100% lab-certified 1 to 14 Mukhi divine beads consecrated with Maha Mrityunjaya Vedic rituals.",
-      cta_text: "Shop Now",
+      id: "banner-1",
+      badge_text: "100% AUTHENTIC & LAB CERTIFIED",
+      title: "Sacred Certified Nepali Rudraksha",
+      subtitle: "Consecrated with Vedic Pran-Pratishtha by Vedic Pandits for spiritual protection & prosperity.",
+      cta_text: "Explore Rudraksha",
       cta_link: "/shop?category=rudraksha",
-      image_url: "/images/banners/banner-rudraksha.jpg",
-      is_active: true,
-    },
-    {
-      id: "b-zodiac",
-      badge_text: "DIVINLINK × ZODIAC",
-      title: "Wear Your Zodiac Collection",
-      subtitle: "Discover India's finest 925 sterling silver zodiac rings infused with authentic planetary gemstone energies.",
-      cta_text: "Shop Now",
-      cta_link: "/shop?category=zodiac",
-      image_url: "/images/banners/banner-zodiac.jpg",
-      is_active: true,
-    },
-    {
-      id: "b-rudraksha",
-      badge_text: "DIVINE RUDRAKSHA × VARANASI",
-      title: "Sacred Nepali Siddh Rudraksha",
-      subtitle: "100% lab-certified 1 to 14 Mukhi divine beads consecrated with Maha Mrityunjaya Vedic rituals.",
-      cta_text: "Shop Now",
-      cta_link: "/shop?category=rudraksha",
-      image_url: "/images/banners/banner-rudraksha.jpg",
-      is_active: true,
-    },
-    {
-      id: "b-dhanyog",
-      badge_text: "DHAN YOG × ABUNDANCE",
-      title: "Super Dhan Yog Abundance Band",
-      subtitle: "Attract wealth, dissolve debt & activate Lakshmi vibrations with certified Pyrite, Tiger's Eye & Citrine.",
-      cta_text: "Shop Now",
-      cta_link: "/shop?category=bracelets",
-      image_url: "/images/banners/banner-dhanyog.jpg",
-      is_active: true,
-    },
-    {
-      id: "b-karungali",
-      badge_text: "KARUNGALI × TOTAL SHIELD",
-      title: "Original Karungali Ebony Mala",
-      subtitle: "Pure black ebony wood beads energized for negative energy protection, evil eye defense & planetary peace.",
-      cta_text: "Shop Now",
-      cta_link: "/shop?category=karungali",
-      image_url: "/images/banners/banner-karungali-landscape.jpg",
-      is_active: true,
-    },
-    {
-      id: "b-gemstones",
-      badge_text: "GOVT. LAB CERTIFIED RATNA",
-      title: "Pran-Pratishthit Natural Gemstones",
-      subtitle: "Unheated, untreated Yellow Sapphire, Blue Sapphire, Emerald & Red Coral with certificate of authenticity.",
-      cta_text: "Shop Now",
-      cta_link: "/shop?category=gemstones",
-      image_url: "/images/banners/banner-gemstones-landscape.jpg",
+      image_url: "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=1200&q=80",
       is_active: true,
     },
   ];
@@ -227,21 +177,23 @@ export function ShopHeroSlider({ banners }: Props) {
           </div>
 
           {/* Bottom-Left Slide Indicator Dots (Exact Astrotalk Screenshot: Active Dark Pill + Dots) */}
-          <div className="absolute bottom-5 sm:bottom-7 left-6 sm:left-12 flex items-center gap-2 z-20">
-            {slides.map((_, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setCurrent(idx)}
-                aria-label={`Go to slide ${idx + 1}`}
-                className={`transition-all duration-300 cursor-pointer ${
-                  current === idx
-                    ? "w-7 sm:w-8 h-2 rounded-full bg-stone-900 shadow-sm border border-black/10"
-                    : "size-2 rounded-full bg-stone-900/35 hover:bg-stone-900/70"
-                }`}
-              />
-            ))}
-          </div>
+          {slides.length > 1 && (
+            <div className="absolute bottom-5 sm:bottom-7 left-6 sm:left-12 flex items-center gap-2 z-20">
+              {slides.map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setCurrent(idx)}
+                  aria-label={`Go to slide ${idx + 1}`}
+                  className={`transition-all duration-300 cursor-pointer ${
+                    current === idx
+                      ? "w-7 sm:w-8 h-2 rounded-full bg-stone-900 shadow-sm border border-black/10"
+                      : "size-2 rounded-full bg-stone-900/35 hover:bg-stone-900/70"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
 
           {/* Bottom-Right Circular Frosted Glass Navigation Arrows (Exact Astrotalk Screenshot) */}
           {slides.length > 1 && (

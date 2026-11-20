@@ -28,6 +28,7 @@ import {
   Radio,
   ScanFace,
   ScrollText,
+  ShieldCheck,
   ShoppingBag,
   Sparkles,
   Star,
@@ -49,6 +50,9 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
 import { formatCoins, type AstrologyLanguage } from "@/types";
+import { useQuery } from "@tanstack/react-query";
+import { shopApi, type ShopProductCategory } from "@/lib/api";
+import initialCategoriesData from "@/lib/initial-shop-categories.json";
 
 interface NavDropdownItem {
   label: string;
@@ -135,7 +139,87 @@ export function AstroyogiHeader() {
     setLangDropdownOpen(false);
   }, [pathname]);
 
+  // Fetch real-time active categories with 0ms pre-hydration
+  const { data: dynamicCategories = (initialCategoriesData as any) } = useQuery<ShopProductCategory[]>({
+    queryKey: ["shop_public_categories"],
+    queryFn: async () => {
+      try {
+        const res = await shopApi.getCategories();
+        return res && res.length > 0 ? res : (initialCategoriesData as any);
+      } catch {
+        return initialCategoriesData as any;
+      }
+    },
+    initialData: initialCategoriesData as any,
+    staleTime: 1000 * 60 * 30,
+  });
+
   const navCategories = React.useMemo<NavCategory[]>(() => {
+    // Dynamically build category dropdown items matching Kundli-style
+    const shopDropdownItems: NavDropdownItem[] = (dynamicCategories || []).map((c: any) => {
+      const slug = (c.slug || "").toLowerCase();
+      let icon = ShoppingBag;
+      if (slug.includes("rudraksh")) icon = Sparkles;
+      else if (slug.includes("zodiac")) icon = Moon;
+      else if (slug.includes("bracelet") || slug.includes("ring")) icon = Gem;
+      else if (slug.includes("karungali")) icon = ShieldCheck;
+      else if (slug.includes("vastu") || slug.includes("home")) icon = Compass;
+
+      let label = c.name;
+      let description = c.description || "";
+      if (language === "bn") {
+        if (slug === "rudraksh") {
+          label = "রুদ্রাক্ষ (Rudraksh)";
+          description = "শীর্ষ মানের ল্যাব সার্টিফাইড পবিত্র রুদ্রাক্ষ";
+        } else if (slug === "zodiac") {
+          label = "রাশি কালেকশন (Zodiac Collection)";
+          description = "৯২৫ রূপার রাশি রিং ও গ্রহরত্ন তাবিজ গহনা";
+        } else if (slug === "bracelets") {
+          label = "ব্রেসলেট ও আংটি (Bracelets & Rings)";
+          description = "ধন যোগ অ্যাবান্ডেন্স ব্যান্ড, পায়রাইট আংটি ও ক্রিস্টাল";
+        } else if (slug === "rudraksha") {
+          label = "সিদ্ধ নেপালি রুদ্রাক্ষ (Nepali Rudraksha)";
+          description = "১-১৪ মুখী কাশীর মহাদেবের প্রাণ-প্রতিষ্ঠিত রুদ্রাক্ষ";
+        } else if (slug === "karungali") {
+          label = "আসল করুঙ্গলি (Original Karungali)";
+          description = "কালো আবলুস কাঠের মালা ও ব্রেসলেট নজরদোষ সুরক্ষায়";
+        } else if (slug === "vastu-home") {
+          label = "বাস্তু ও গৃহ শান্তি (Vastu & Home)";
+          description = "শ্রীযন্ত্র, মরোক্কান সেলিনাইট টাওয়ার ও গৃহশান্তি প্রতিকার";
+        }
+      } else if (language === "hi") {
+        if (slug === "rudraksh") {
+          label = "रुद्राक्ष (Rudraksh)";
+          description = "उच्च गुणवत्ता एवं लैब प्रमाणित पवित्र रुद्राक्ष";
+        } else if (slug === "zodiac") {
+          label = "राशि कलेक्शन (Zodiac Collection)";
+          description = "925 शुद्ध चांदी राशि रिंग्स एवं रत्न आभूषण";
+        } else if (slug === "bracelets") {
+          label = "कंगन और अंगूठियां (Bracelets & Rings)";
+          description = "धन योग समृद्धि बैंड, पाइराइट रिंग्स व ब्रेसलेट";
+        } else if (slug === "rudraksha") {
+          label = "सिद्ध नेपाली रुद्राक्ष (Nepali Rudraksha)";
+          description = "1 से 14 मुखी काशी प्राण-प्रतिष्ठित हिमालयी रुद्राक्ष";
+        } else if (slug === "karungali") {
+          label = "ओरिजिनल करुंगली (Original Karungali)";
+          description = "शुद्ध काली आबनूस लकड़ी माला व कड़ा सुरक्षा हेतु";
+        } else if (slug === "vastu-home") {
+          label = "वास्तु एवं गृह शांति (Vastu & Home)";
+          description = "श्री यंत्र, सेलेनाइट चार्जिंग टॉवर व वास्तु उपाय";
+        }
+      }
+
+      const count = c.product_count ?? 0;
+      const countLabel = language === "bn" ? `${count}টি সামগ্রী` : language === "hi" ? `${count} आइटम` : `${count} items`;
+
+      return {
+        label,
+        href: `/shop?category=${c.slug}#products`,
+        description: description || countLabel,
+        icon,
+        badge: countLabel,
+      };
+    });
     if (language === "bn") {
       return [
         {
@@ -295,36 +379,7 @@ export function AstroyogiHeader() {
         {
           label: "শপ",
           href: "/shop",
-          dropdown: [
-            {
-              label: "অ্যাস্ট্রোমল স্টোর (সমস্ত প্রতিকার)",
-              href: "/shop",
-              description: "কাশীর পুরোহিতদের দ্বারা প্রাণ-প্রতিষ্ঠিত রত্ন, রুদ্রাক্ষ ও কবচ",
-              icon: ShoppingBag,
-              badge: "১০০% ক্যাশব্যাক",
-            },
-            {
-              label: "সিদ্ধ নেপালি রুদ্রাক্ষ",
-              href: "/shop?category=rudraksha",
-              description: "১-১৪ মুখী প্রাকৃতিক ও ল্যাব সার্টিফাইড শনি ও মহামৃত্যুঞ্জয় রুদ্রাক্ষ",
-              icon: Sparkles,
-              badge: "ল্যাব সার্টিফাইড",
-            },
-            {
-              label: "খাঁটি রত্ন ও ক্রিস্টাল",
-              href: "/shop?category=gemstones",
-              description: "নীলম, রক্তপ্রবাল, পান্না ও ধন আকর্ষক প্রাকৃতিক পায়রাইট",
-              icon: Gem,
-              badge: "ন্যাচারাল",
-            },
-            {
-              label: "রাশি ব্রেসলেট ও সেলিনাইট",
-              href: "/shop?category=crystal_bracelet",
-              description: "১২ রাশির পবিত্র ক্রিস্টাল ব্রেসলেট ও সাথে ফ্রি ₹৭২৯ সেলিনাইট প্লেট",
-              icon: Gift,
-              badge: "ফ্রি প্লেট",
-            },
-          ],
+          dropdown: shopDropdownItems,
         },
         {
           label: "এআই রিডিং",
@@ -574,36 +629,7 @@ export function AstroyogiHeader() {
         {
           label: "शॉप",
           href: "/shop",
-          dropdown: [
-            {
-              label: "एस्ट्रोमॉल स्टोर (सभी उपाय)",
-              href: "/shop",
-              description: "काशी के विद्वानों द्वारा प्राण-प्रतिष्ठित रत्न, रुद्राक्ष एवं यंत्र",
-              icon: ShoppingBag,
-              badge: "100% कैशबैक",
-            },
-            {
-              label: "सिद्ध नेपाली रुद्राक्ष",
-              href: "/shop?category=rudraksha",
-              description: "1-14 मुखी प्राकृतिक एवं लैब प्रमाणित शनि व महामृत्युंजय रुद्राक्ष",
-              icon: Sparkles,
-              badge: "सर्टिफाइड",
-            },
-            {
-              label: "असली रत्न एवं क्रिस्टल",
-              href: "/shop?category=gemstones",
-              description: "नीलम, मूंगा, पन्ना व धन आकर्षित प्राकृतिक पायराइट",
-              icon: Gem,
-              badge: "नेचुरल",
-            },
-            {
-              label: "राशि ब्रेसलेट व सेलेनाइट",
-              href: "/shop?category=crystal_bracelet",
-              description: "12 राशियों के पवित्र क्रिस्टल ब्रेसलेट व साथ में फ्री ₹729 सेलेनाइट प्लेट",
-              icon: Gift,
-              badge: "फ्री प्लेट",
-            },
-          ],
+          dropdown: shopDropdownItems,
         },
         {
           label: "एआई रीडिंग",
@@ -853,36 +879,7 @@ export function AstroyogiHeader() {
       {
         label: "Shop",
         href: "/shop",
-        dropdown: [
-          {
-            label: "AstroMall Store (All Remedies)",
-            href: "/shop",
-            description: "Kashi-energized lab-certified gemstones, rudraksha & yantras",
-            icon: ShoppingBag,
-            badge: "100% Cashback",
-          },
-          {
-            label: "Energized Nepali Rudraksha",
-            href: "/shop?category=rudraksha",
-            description: "1-14 Mukhi authentic & certified spiritual beads",
-            icon: Sparkles,
-            badge: "Certified",
-          },
-          {
-            label: "Natural Gemstones & Pyrite",
-            href: "/shop?category=gemstones",
-            description: "Natural blue sapphire, coral, emerald & wealth pyrites",
-            icon: Gem,
-            badge: "Natural",
-          },
-          {
-            label: "Zodiac Bracelets & Selenite",
-            href: "/shop?category=crystal_bracelet",
-            description: "12 Zodiac energized bracelets + Free ₹729 Selenite charging plate",
-            icon: Gift,
-            badge: "Free Plate",
-          },
-        ],
+        dropdown: shopDropdownItems,
       },
       {
         label: "AI Reading",
@@ -971,7 +968,7 @@ export function AstroyogiHeader() {
       { label: "Free Readings", href: "/free-readings" },
       { label: "Live", href: "/#live-experts", isLive: true },
     ];
-  }, [language]);
+  }, [language, dynamicCategories]);
 
   const ctaPart1 =
     language === "bn"
