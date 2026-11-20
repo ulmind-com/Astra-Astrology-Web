@@ -49,6 +49,7 @@ import { toast } from "sonner";
 
 import { AiAvatar } from "@/components/ai/ai-avatar";
 import { AiMarkdown } from "@/components/ai/ai-markdown";
+import { CelestialZodiacHalo } from "@/components/astro/celestial-zodiac-halo";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Button } from "@/components/ui";
 import { useAuth } from "@/providers/auth-provider";
@@ -986,26 +987,24 @@ export default function AIAstrologerPage() {
           {/* Welcome Screen / Hero Cards (Shown only on fresh session) */}
           {isFreshConversation && (
             <div className="my-auto py-6 text-center fade-in">
-              {/* Celestial Orbit Emblem with Rotating Gold Zodiac Wheel */}
-              <div className="relative mx-auto mb-5 flex size-28 items-center justify-center">
-                {/* Rotating zodiac wheel in background */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/zodiac-wheel-gold.webp"
-                  alt=""
-                  aria-hidden="true"
-                  className="pointer-events-none absolute size-[220px] sm:size-[260px] select-none opacity-[0.22] mix-blend-multiply animate-spin [animation-duration:120s] motion-reduce:animate-none"
+              {/* Celestial Orbit Emblem with Royal Perfectly Centered Vector Zodiac Halo */}
+              <div className="relative mx-auto mb-6 flex size-28 items-center justify-center">
+                {/* Royal Mathematically-Balanced Rotating Zodiac Halo */}
+                <CelestialZodiacHalo
+                  size={240}
+                  className="absolute"
+                  speedSeconds={75}
                 />
 
-                <span className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-400/25 via-gold-400/15 to-transparent animate-pulse blur-md" />
+                <span className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-400/30 via-gold-400/20 to-transparent animate-pulse blur-lg" />
 
-                <div className="relative flex size-20 items-center justify-center rounded-3xl bg-gradient-to-tr from-amber-500 via-amber-600 to-amber-700 p-0.5 shadow-[0_8px_36px_rgba(217,119,6,0.38)] ring-2 ring-amber-300/80 transition-transform hover:scale-105 duration-300">
+                <div className="relative z-10 flex size-20 items-center justify-center rounded-3xl bg-gradient-to-tr from-amber-500 via-amber-600 to-amber-700 p-0.5 shadow-[0_10px_40px_rgba(217,119,6,0.45)] ring-2 ring-amber-300 transition-transform hover:scale-105 duration-300">
                   <Image
                     src="/logo.png"
                     alt="Mandala Emblem"
                     width={72}
                     height={72}
-                    className="size-full object-contain"
+                    className="size-full object-contain drop-shadow-md"
                     priority
                   />
                 </div>

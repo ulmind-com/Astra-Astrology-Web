@@ -169,9 +169,16 @@ async function send(path: string, options: Options): Promise<Sent> {
 
   let response: Response;
   const primaryUrl = buildUrl(path, query);
+  const timeoutSignal =
+    rest.signal ??
+    (typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function"
+      ? AbortSignal.timeout(10000)
+      : undefined);
+
   try {
     response = await fetch(primaryUrl, {
       ...rest,
+      signal: timeoutSignal,
       method,
       headers,
       body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
@@ -182,6 +189,10 @@ async function send(path: string, options: Options): Promise<Sent> {
       try {
         response = await fetch(buildUrl(path, query, true), {
           ...rest,
+          signal:
+            typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function"
+              ? AbortSignal.timeout(10000)
+              : undefined,
           method,
           headers,
           body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),

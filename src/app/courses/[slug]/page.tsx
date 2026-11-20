@@ -436,7 +436,7 @@ export default function CourseDetailPage() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading && !course) {
     return (
       <div className="flex min-h-screen flex-col bg-background">
         <SiteHeader />
