@@ -1420,7 +1420,7 @@ export const shopApi = {
 
   verifyPayment: (payload: {
     order_id: string;
-    razorpay_order_id: string;
+    razorpay_order_id?: string | null;
     razorpay_payment_id: string;
     razorpay_signature: string;
   }) =>
