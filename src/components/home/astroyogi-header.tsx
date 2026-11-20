@@ -8,6 +8,7 @@ import {
   Bot,
   CalendarDays,
   ChevronDown,
+  Clock,
   Coins,
   Compass,
   Flame,
@@ -229,6 +230,39 @@ export function AstroyogiHeader() {
               href: "/kp-calculator",
               description: "কৃষ্ণমূর্তি পদ্ধতি সাব-লর্ড ও কাস্প হিসাব",
               icon: Orbit,
+            },
+          ],
+        },
+        {
+          label: "পঞ্জিকা ও উৎসব",
+          href: "/festivals",
+          badge: "২০২৬",
+          dropdown: [
+            {
+              label: "উৎসব ও ব্রত পঞ্জিকা ২০২৬",
+              href: "/festivals",
+              description: "সনাতন হিন্দু উৎসব, ব্রত, একাদশী, অমাবস্যা ও পূর্ণিমা সূচী",
+              icon: Flame,
+              badge: "২০২৬",
+            },
+            {
+              label: "আজকের পঞ্চাঙ্গ ও কাল-নির্ণয়",
+              href: "/panchang",
+              description: "সুইস এফিমেরিস ভিত্তিক তিথি, নক্ষত্র, যোগ, করণ ও বারের সমন্বয়",
+              icon: Compass,
+              badge: "আজ",
+            },
+            {
+              label: "১৬ বৈদিক চোঘড়িয়া মুহূর্ত",
+              href: "/panchang?tab=choghadiya",
+              description: "অমৃত, শুভ, লাভ সহ জরুরি কর্ম শুরুর প্রশস্ত সময়সূচী",
+              icon: Clock,
+            },
+            {
+              label: "শুভ মুহূর্ত নির্দেশিকা",
+              href: "/muhurat",
+              description: "বিবাহ, গৃহপ্রবেশ, বাহন ক্রয় ও শুভ উদ্যোগের লগ্ন",
+              icon: Star,
             },
           ],
         },
@@ -479,6 +513,39 @@ export function AstroyogiHeader() {
           ],
         },
         {
+          label: "पंचांग व व्रत",
+          href: "/festivals",
+          badge: "2026",
+          dropdown: [
+            {
+              label: "उत्सव व व्रत पंचांग 2026",
+              href: "/festivals",
+              description: "सनातन हिन्दू त्यौहार, व्रत, एकादशी, पूर्णिमा व अमावस्या",
+              icon: Flame,
+              badge: "2026",
+            },
+            {
+              label: "दैनिक वैदिक पंचांग",
+              href: "/panchang",
+              description: "प्रामाणिक तिथि, नक्षत्र, योग, करण व सूर्योदय-सूर्यास्त",
+              icon: Compass,
+              badge: "आज",
+            },
+            {
+              label: "चौघड़िया मुहूर्त",
+              href: "/panchang?tab=choghadiya",
+              description: "अमृत, शुभ, लाभ आदि तात्कालिक कार्य सिद्धि मुहूर्त",
+              icon: Clock,
+            },
+            {
+              label: "शुभ मुहूर्त",
+              href: "/muhurat",
+              description: "विवाह, गृह प्रवेश, वाहन क्रय एवं व्यापार आरंभ लग्न",
+              icon: Star,
+            },
+          ],
+        },
+        {
           label: "कोर्स",
           href: "/courses",
           dropdown: [
@@ -725,6 +792,39 @@ export function AstroyogiHeader() {
         ],
       },
       {
+        label: "Panchang & Festivals",
+        href: "/festivals",
+        badge: "2026",
+        dropdown: [
+          {
+            label: "Festivals & Vrat Almanac 2026",
+            href: "/festivals",
+            description: "Complete Hindu festival calendar, Ekadashi, Purnima & Amavasya",
+            icon: Flame,
+            badge: "2026",
+          },
+          {
+            label: "Daily Vedic Panchang",
+            href: "/panchang",
+            description: "Swiss Ephemeris Tithi, Nakshatra, Yoga, Karana & Day Lord",
+            icon: Compass,
+            badge: "Today",
+          },
+          {
+            label: "16 Choghadiya Muhurat",
+            href: "/panchang?tab=choghadiya",
+            description: "Amrit, Shubh, Labh windows for immediate venture timing",
+            icon: Clock,
+          },
+          {
+            label: "Shubh Muhurat Guide",
+            href: "/muhurat",
+            description: "Auspicious timings for weddings, Griha Pravesh & purchases",
+            icon: Star,
+          },
+        ],
+      },
+      {
         label: "Courses",
         href: "/courses",
         dropdown: [
@@ -943,6 +1043,7 @@ export function AstroyogiHeader() {
                 >
                   <Link
                     href={cat.href}
+                    onClick={() => setHoveredCategory(null)}
                     className={`whitespace-nowrap shrink-0 inline-flex items-center gap-0.5 xl:gap-1 px-1.5 xl:px-2 2xl:px-2.5 py-1.5 rounded-full text-[12px] xl:text-[12.5px] 2xl:text-[13.5px] font-semibold tracking-normal transition-all duration-150 select-none ${
                       isActive
                         ? "text-amber-950 font-bold bg-amber-100/90 shadow-2xs"
@@ -985,6 +1086,7 @@ export function AstroyogiHeader() {
                               <Link
                                 key={item.label}
                                 href={item.href}
+                                onClick={() => setHoveredCategory(null)}
                                 className="group/item flex items-start gap-3 rounded-xl p-2.5 transition-colors hover:bg-amber-50/80"
                               >
                                 <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-800 group-hover/item:bg-amber-200 transition-colors">

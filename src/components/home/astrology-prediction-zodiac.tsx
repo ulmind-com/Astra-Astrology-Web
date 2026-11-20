@@ -9,8 +9,10 @@ import { astrologyApi } from "@/lib/api";
 import { useLanguage } from "@/providers/language-provider";
 import type { DailyHoroscopeResult, DailySignHoroscope } from "@/types";
 import initialHoroscopeData from "./initial-horoscope.json";
+import initialTabHoroscopes from "./initial-horoscopes-tabs.json";
 
 export const INITIAL_DAILY_HOROSCOPE = initialHoroscopeData as unknown as DailyHoroscopeResult;
+const TAB_DATA_MAP = initialTabHoroscopes as unknown as Record<string, DailyHoroscopeResult>;
 
 interface ZodiacSignItem {
   id: string;
@@ -300,8 +302,10 @@ export function AstrologyPredictionZodiac() {
     return dateFromOffset(t.offset);
   }, [tab]);
 
+  const tabInitialData = TAB_DATA_MAP[tab] ?? INITIAL_DAILY_HOROSCOPE;
+
   const { data, isLoading: loading } = useQuery({
-    queryKey: ["dailyHoroscope", formatDateToYMD(selectedDate), language],
+    queryKey: ["dailyHoroscope", formatDateToYMD(selectedDate), language, tab],
     queryFn: () =>
       astrologyApi.dailyHoroscope({
         date: formatDateToYMD(selectedDate),
@@ -310,8 +314,9 @@ export function AstrologyPredictionZodiac() {
         longitude: 88.3639,
         timezone: 5.5,
       }),
-    initialData: INITIAL_DAILY_HOROSCOPE,
-    staleTime: 5 * 60_000,
+    initialData: tabInitialData,
+    placeholderData: (previousData) => previousData,
+    staleTime: 60_000,
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });

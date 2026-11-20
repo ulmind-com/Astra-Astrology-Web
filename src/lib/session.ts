@@ -16,6 +16,7 @@ const ACCESS = "astra.access_token";
 const REFRESH = "astra.refresh_token";
 const EXPIRES = "astra.expires_at";
 const USER = "astra.user";
+const COINS = "astra.coins";
 
 const isBrowser = () => typeof window !== "undefined";
 
@@ -92,10 +93,22 @@ export const session = {
     announce();
   },
 
+  get coins(): number | null {
+    const raw = read(COINS);
+    if (raw === null || raw === undefined) return null;
+    const num = Number(raw);
+    return Number.isFinite(num) ? num : null;
+  },
+
+  saveCoins(coins: number) {
+    write(COINS, String(coins));
+    announce();
+  },
+
   clear() {
     if (!isBrowser()) return;
     try {
-      [ACCESS, REFRESH, EXPIRES, USER].forEach((k) => window.localStorage.removeItem(k));
+      [ACCESS, REFRESH, EXPIRES, USER, COINS].forEach((k) => window.localStorage.removeItem(k));
     } catch {
       /* nothing to do */
     }

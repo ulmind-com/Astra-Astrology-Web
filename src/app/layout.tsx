@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from "next";
+import * as React from "react";
 import { Cinzel, Cinzel_Decorative, Geist_Mono, Poppins } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "sonner";
 
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
+import { RouteProgressBar } from "@/components/layout/route-progress-bar";
 import { ReviewPrompt } from "@/components/reviews/review-prompt";
 import { AuthProvider } from "@/providers/auth-provider";
 import { LanguageProvider } from "@/providers/language-provider";
@@ -71,6 +73,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <RealtimeProvider>
               <AuthProvider signInPath="/login">
                 <LanguageProvider>
+                  <React.Suspense fallback={null}>
+                    <RouteProgressBar />
+                  </React.Suspense>
                   {children}
                   <ReviewPrompt />
                   <MobileBottomNav />

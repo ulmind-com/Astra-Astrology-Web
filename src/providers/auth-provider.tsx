@@ -63,7 +63,13 @@ export function AuthProvider({
 
   // Trust the cached user for the first paint, then confirm it with the API.
   React.useEffect(() => {
-    setUser(session.user);
+    const cached = session.user;
+    if (cached) {
+      setUser(cached);
+      setLoading(false);
+    } else if (!session.accessToken) {
+      setLoading(false);
+    }
     void refresh();
   }, [refresh]);
 
@@ -114,5 +120,5 @@ export function useRequireAuth(options?: { roles?: UserRole[]; signInPath?: stri
   }, [user, loading, roles, router, signInPath]);
 
   const allowed = Boolean(user) && (!roles || (user ? roles.includes(user.role) : false));
-  return { user, ready: !loading && allowed };
+  return { user, ready: allowed || (!loading && allowed) };
 }
