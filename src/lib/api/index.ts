@@ -57,6 +57,8 @@ import type {
   AvailabilityUpdate,
   Call,
   CallSession,
+  CoPilotBirthDetailsInput,
+  CoPilotSummary,
   Chat,
   ChatSession,
   ConsultationMode,
@@ -390,6 +392,12 @@ export const callApi = {
 
   extend: (id: string, extra_minutes: number) =>
     api.post<Call>(endpoints.calls.extend(id), { extra_minutes }),
+
+  copilot: (id: string, language?: string) =>
+    api.get<CoPilotSummary>(endpoints.calls.copilot(id), { query: language ? { language } : {} }),
+
+  updateCopilotBirthDetails: (id: string, payload: CoPilotBirthDetailsInput, language?: string) =>
+    api.post<CoPilotSummary>(endpoints.calls.copilotBirthDetails(id), payload, { query: language ? { language } : {} }),
 
   history: (params: { page?: number; limit?: number } = {}) =>
     api.get<{ items: Call[]; meta: PageMeta }>(endpoints.calls.history, { query: params }),
