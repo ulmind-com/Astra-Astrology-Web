@@ -1462,6 +1462,9 @@ export const shopApi = {
   checkout: (payload: ShopCheckoutPayload) =>
     api.post<ShopCheckoutResult>(endpoints.shop.checkout, payload, { auth: true }),
 
+  abortCheckout: (orderId: string) =>
+    api.post<{ success: boolean; aborted: boolean }>(endpoints.shop.abortCheckout(orderId), {}, { auth: true }),
+
   verifyPayment: (payload: {
     order_id: string;
     razorpay_order_id?: string | null;
