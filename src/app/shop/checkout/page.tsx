@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { useQuery } from "@tanstack/react-query";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { CartDrawer } from "@/components/shop/CartDrawer";
@@ -125,7 +126,6 @@ export default function CheckoutPage() {
     items,
     getSubtotal,
     getCashbackCoins,
-    getBundledGifts,
     couponCode,
     discountAmount,
     setCoupon,
@@ -187,11 +187,31 @@ export default function CheckoutPage() {
     }
   }, [user, shipping.recipient_name]);
 
+  // ---- Store settings (shipping + threshold-based complimentary gift)
+  const { data: shopSettings } = useQuery({
+    queryKey: ["shop_public_banners"],
+    queryFn: () => shopApi.getBanners(),
+    staleTime: 5 * 60 * 1000,
+  });
+
   // ---- Computed
   const subtotal = getSubtotal();
   const cashbackCoins = getCashbackCoins();
-  const freeGifts = getBundledGifts();
-  const shippingFee = subtotal >= 499 ? 0 : 70;
+  const freeShippingThreshold = shopSettings?.free_shipping_threshold ?? 499;
+  const standardShippingFee = shopSettings?.standard_shipping_fee ?? 70;
+  const giftMinValue = shopSettings?.free_gift_min_cart_value ?? 499;
+  const giftEnabled = shopSettings?.free_gift_enabled !== false;
+  const freeGifts =
+    giftEnabled && shopSettings?.free_gift_default_title && subtotal >= giftMinValue
+      ? [
+          {
+            title: shopSettings.free_gift_default_title,
+            value: shopSettings.free_gift_default_value ?? 0,
+            badge: shopSettings.free_gift_default_badge,
+          },
+        ]
+      : [];
+  const shippingFee = subtotal >= freeShippingThreshold ? 0 : standardShippingFee;
   const grandTotal = subtotal - discountAmount + shippingFee;
 
   // ---- Pincode debounced lookup
@@ -1154,12 +1174,12 @@ export default function CheckoutPage() {
                       {isBn ? "ফ্রি উপহার অন্তর্ভুক্ত:" : "Free Vedic Gifts Included:"}
                     </p>
                     {freeGifts.map((g, i) => (
-                      <p key={i} className="text-xs text-amber-900 pl-4">
-                        🎁 {g.title}{" "}
-                        <span className="text-[10px] text-emerald-700 font-bold">
-                          FREE (Worth {formatINR(g.value)})
+                      <div key={i} className="flex items-center justify-between gap-2 pl-4">
+                        <span className="text-xs text-amber-900">{g.title}</span>
+                        <span className="shrink-0 rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white">
+                          FREE · {formatINR(g.value)}
                         </span>
-                      </p>
+                      </div>
                     ))}
                   </div>
                 )}

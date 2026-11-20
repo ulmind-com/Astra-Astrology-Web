@@ -24,6 +24,8 @@ import {
   Truck,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { shopApi } from "@/lib/api";
 import { useCartStore } from "@/lib/stores/use-cart-store";
 import { useLanguage } from "@/providers/language-provider";
 import { CouponOfferSelector } from "@/components/shop/CouponOfferSelector";
@@ -41,7 +43,6 @@ export function CartDrawer() {
     removeItem,
     getSubtotal,
     getCashbackCoins,
-    getBundledGifts,
     couponCode,
     discountAmount,
     setCoupon,
@@ -72,11 +73,28 @@ export function CartDrawer() {
   }, [isOpen, closeCart]);
 
   const subtotal = getSubtotal();
-  const freeShippingThreshold = 499;
+  // Store settings drive shipping + the threshold-based complimentary gift (no hardcoded promo).
+  const { data: shopSettings } = useQuery({
+    queryKey: ["shop_public_banners"],
+    queryFn: () => shopApi.getBanners(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const freeShippingThreshold = shopSettings?.free_shipping_threshold ?? 499;
+  const giftMinValue = shopSettings?.free_gift_min_cart_value ?? 499;
+  const giftEnabled = shopSettings?.free_gift_enabled !== false;
+  const bundledGifts =
+    giftEnabled && shopSettings?.free_gift_default_title && subtotal >= giftMinValue
+      ? [
+          {
+            title: shopSettings.free_gift_default_title,
+            value: shopSettings.free_gift_default_value ?? 0,
+            badge: shopSettings.free_gift_default_badge,
+          },
+        ]
+      : [];
   const progressPercent = Math.min(100, Math.round((subtotal / freeShippingThreshold) * 100));
   const remainingForFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
   const cashbackCoins = getCashbackCoins();
-  const bundledGifts = getBundledGifts();
   const isFreeShipping = subtotal >= freeShippingThreshold || items.length === 0;
   const shippingFee = isFreeShipping ? 0 : 70;
   const grandTotal = Math.max(0, subtotal - discountAmount + shippingFee);

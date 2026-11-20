@@ -105,9 +105,11 @@ export const useCartStore = create<CartStore>()(
         set((state) => {
           const existingIndex = state.items.findIndex((item) => item.id === product.id);
           const effectiveCashback = product.cashback_percent ?? 100;
-          const giftTitle = product.free_gift_title || "Raw Selenite Charging Plate";
-          const giftVal = product.free_gift_value || 729;
-          const giftBadge = product.free_gift_badge || "FREE Raw Selenite Plate worth ₹729";
+          // Per-item gift comes only from the product (no hardcoded promo). The
+          // threshold-based complimentary gift is resolved from store settings.
+          const giftTitle = product.free_gift_title ?? null;
+          const giftVal = product.free_gift_value ?? null;
+          const giftBadge = product.free_gift_badge ?? null;
 
           if (existingIndex > -1) {
             const updatedItems = [...state.items];

@@ -1252,9 +1252,12 @@ export interface ShopBannerSettings {
   hero_banners: ShopHeroBannerItem[];
   cashback_enabled?: boolean;
   cashback_percent?: number;
+  free_gift_enabled?: boolean;
+  free_gift_min_cart_value?: number;
   free_gift_default_title?: string;
   free_gift_default_value?: number;
   free_gift_default_badge?: string;
+  free_gift_default_image_url?: string | null;
   free_shipping_threshold?: number;
   standard_shipping_fee?: number;
   cod_enabled?: boolean;
