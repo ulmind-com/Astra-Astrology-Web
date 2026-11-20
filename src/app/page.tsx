@@ -25,6 +25,7 @@ import { CoursesSection } from "@/components/home/courses-section";
 import { FirstChatFreeModal } from "@/components/home/first-chat-free-modal";
 import { FreeAstrologyReadings } from "@/components/home/free-astrology-readings";
 import { HeroAstroyogi } from "@/components/home/hero-astroyogi";
+import { ToolRail } from "@/components/home/tool-rail";
 import { OurServicesSection } from "@/components/home/our-services-section";
 import { TopAstrologersSection } from "@/components/home/top-astrologers-section";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -161,6 +162,9 @@ export default function HomePage() {
       <main className="min-h-screen bg-white">
         {/* 1. HERO BANNER & QUICK ACTION TILES */}
         <HeroAstroyogi />
+
+        {/* 1b. 21-TOOL GOLDEN CIRCULAR RAIL (Matching Mobile App) */}
+        <ToolRail />
 
         {/* 2. TOP ONLINE ASTROLOGERS */}
         <TopAstrologersSection />

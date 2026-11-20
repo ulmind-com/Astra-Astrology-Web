@@ -190,8 +190,8 @@ export function AstroyogiHeader() {
             },
             {
               label: "বর্ষফল ২০২৬",
-              href: "/daily-horoscope",
-              description: "প্রেম, ক্যারিয়ার, অর্থ ও স্বাস্থ্যের বার্ষিক ভবিষ্যৎবাণী",
+              href: "/annual-horoscope",
+              description: "প্রেম, ক্যারিয়ার, অর্থ ও স্বাস্থ্যের বার্ষিক ভবিষ্যৎবাণী ও লাল কিতাব মহাউপায়",
               icon: Sun,
             },
             {
