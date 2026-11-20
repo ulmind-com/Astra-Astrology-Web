@@ -39,38 +39,6 @@ interface CashbackConsultationBridgeProps {
   categorySlug?: string | null;
 }
 
-// Fallback verified astrologers if API returns 0 or offline
-const FALLBACK_ASTROLOGERS = [
-  {
-    id: "rudraksha-acharya-1",
-    display_name: "আচার্য দেবব্রত শর্মা",
-    display_name_en: "Acharya Devabrata Sharma",
-    title_bn: "রুদ্রাক্ষ ও গ্রহদোষ বিশেষজ্ঞ",
-    title_en: "Rudraksha & Dosha Specialist",
-    profile_image_url:
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=160&auto=format&fit=crop&q=80",
-    experience_years: 18,
-    rating: { average: 4.95, count: 2430 },
-    rates: { call_coins_per_minute: 15, chat_coins_per_minute: 10, video_coins_per_minute: 25 },
-    is_online: true,
-    slug: "acharya-devabrata-sharma",
-  },
-  {
-    id: "gemology-expert-2",
-    display_name: "ড. রূপালী ভট্টাচার্য",
-    display_name_en: "Dr. Rupali Bhattacharya",
-    title_bn: "রত্ন ও কুন্ডলী বিশেষজ্ঞ",
-    title_en: "Gemology & Kundli Expert",
-    profile_image_url:
-      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&auto=format&fit=crop&q=80",
-    experience_years: 14,
-    rating: { average: 4.9, count: 1890 },
-    rates: { call_coins_per_minute: 18, chat_coins_per_minute: 12, video_coins_per_minute: 30 },
-    is_online: true,
-    slug: "dr-rupali-bhattacharya",
-  },
-];
-
 function formatINR(n: number) {
   return `₹${Math.round(n).toLocaleString("en-IN")}`;
 }
@@ -524,54 +492,20 @@ export function CashbackConsultationBridge({
                 );
               })
             ) : (
-              // Curated Fallback Astrologers for 100% Reliability
-              FALLBACK_ASTROLOGERS.map((astro) => (
-                <div
-                  key={astro.id}
-                  className="group rounded-2xl bg-white/5 hover:bg-white/10 border border-emerald-500/30 hover:border-amber-400/50 p-3 flex items-center gap-3 transition-all duration-200"
+              <div className="col-span-full rounded-2xl bg-white/5 border border-emerald-500/30 p-4 text-center space-y-2">
+                <p className="text-xs text-stone-200">
+                  {isBn
+                    ? "আমাদের প্যানেলের সকল যাচাইকৃত জ্যোতিষীদের সাথে সরাসরি কথা বলুন বা চ্যাট করুন।"
+                    : "Connect directly with our panel of certified Vedic Acharyas & Jyotish experts."}
+                </p>
+                <Link
+                  href="/astrologers"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-stone-950 font-bold px-4 py-2 text-xs shadow-md transition-all"
                 >
-                  <div className="relative shrink-0">
-                    <Avatar
-                      src={astro.profile_image_url}
-                      name={isBn ? astro.display_name : astro.display_name_en}
-                      size="md"
-                      className="ring-2 ring-amber-400/50 size-12"
-                    />
-                    <span className="absolute -bottom-0.5 -right-0.5 flex size-3">
-                      <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                      <span className="relative inline-flex size-3 rounded-full bg-emerald-500 border border-stone-900" />
-                    </span>
-                  </div>
-
-                  <div className="flex-1 min-w-0 space-y-0.5">
-                    <div className="flex items-center gap-1.5">
-                      <h5 className="font-bold text-xs text-white truncate group-hover:text-amber-200 transition-colors">
-                        {isBn ? astro.display_name : astro.display_name_en}
-                      </h5>
-                      <CheckCircle2 className="size-3 text-emerald-400 shrink-0" />
-                    </div>
-                    <p className="text-[10px] text-stone-300 truncate">
-                      {isBn ? astro.title_bn : astro.title_en}
-                    </p>
-                    <div className="flex items-center gap-2 text-[10px] text-stone-400">
-                      <span className="text-amber-300 font-bold">★ {astro.rating.average}</span>
-                      <span>•</span>
-                      <span>{astro.experience_years}+ {isBn ? "বছর" : "yrs"}</span>
-                      <span>•</span>
-                      <span className="text-emerald-300 font-medium">
-                        {astro.rates.call_coins_per_minute} {isBn ? "কয়েন/মি." : "c/min"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <Link
-                    href={`/astrologers`}
-                    className="shrink-0 rounded-xl bg-amber-500/20 hover:bg-amber-500 text-amber-200 hover:text-stone-950 border border-amber-400/40 px-2.5 py-1.5 text-[11px] font-bold transition-all text-center"
-                  >
-                    {isBn ? "পরামর্শ" : "Consult"}
-                  </Link>
-                </div>
-              ))
+                  <span>{isBn ? "সকল জ্যোতিষী দেখুন" : "View All Astrologers"}</span>
+                  <ArrowRight className="size-3.5" />
+                </Link>
+              </div>
             )}
           </div>
 

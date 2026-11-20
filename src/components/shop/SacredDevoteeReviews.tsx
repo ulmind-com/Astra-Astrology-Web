@@ -106,7 +106,7 @@ export function SacredDevoteeReviews({ product }: SacredDevoteeReviewsProps) {
 
   const reviews = reviewData?.items || [];
   const totalReviews = reviewData?.total || 0;
-  const avgRating = reviewData?.average_rating || product.average_rating || 5.0;
+  const avgRating = totalReviews > 0 ? (reviewData?.average_rating || product.average_rating || 0) : 0;
   const breakdown = reviewData?.breakdown;
   const totalPages = reviewData?.pages || 1;
 
@@ -278,7 +278,7 @@ export function SacredDevoteeReviews({ product }: SacredDevoteeReviewsProps) {
           <div className="md:col-span-4 text-center md:text-left space-y-1.5 md:border-r border-amber-900/10 md:pr-6">
             <div className="flex items-baseline justify-center md:justify-start gap-2">
               <span className="font-cinzel text-4xl sm:text-5xl font-black text-amber-950">
-                {avgRating.toFixed(1)}
+                {totalReviews > 0 ? avgRating.toFixed(1) : "—"}
               </span>
               <span className="text-stone-400 text-lg font-bold">/ 5.0</span>
             </div>
@@ -289,7 +289,7 @@ export function SacredDevoteeReviews({ product }: SacredDevoteeReviewsProps) {
                 <Star
                   key={s}
                   className={`size-4 ${
-                    s <= Math.round(avgRating)
+                    totalReviews > 0 && s <= Math.round(avgRating)
                       ? "text-amber-500 fill-amber-500"
                       : "text-stone-200 fill-stone-100"
                   }`}

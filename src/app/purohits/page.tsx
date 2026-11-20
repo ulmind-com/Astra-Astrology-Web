@@ -231,7 +231,7 @@ function PurohitsDirectoryContent() {
                       <div className="flex items-center gap-1">
                         <Star className="size-3.5 fill-amber-400 text-amber-500" />
                         <span className="font-bold text-stone-800 dark:text-stone-200">
-                          {purohit.rating ? purohit.rating.toFixed(1) : "5.0"}
+                          {purohit.rating && purohit.rating > 0 ? purohit.rating.toFixed(1) : "নতুন"}
                         </span>
                       </div>
                       <span>•</span>

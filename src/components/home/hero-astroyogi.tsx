@@ -24,8 +24,8 @@ const DEFAULT_SLIDES: HeroSlide[] = [
     description: "Talk to India's top Vedic astrologers & tarot readers for instant relationship clarity.",
     cta_text: "Consult for FREE",
     cta_link: "/astrologers",
-    badge_text: "India's Best Astrology Platform",
-    badge_rating: "4.9/5",
+    badge_text: "Top Vedic Jyotish Acharyas",
+    badge_rating: "Certified",
     image_url: "/images/hero/hero-couple-exploring.png",
   },
   {
@@ -35,8 +35,8 @@ const DEFAULT_SLIDES: HeroSlide[] = [
     description: "Accurate planetary calculations, dosha analysis, and personalized remedies by Vedic experts.",
     cta_text: "Generate Free Kundli",
     cta_link: "/kundli",
-    badge_text: "100% Free & Accurate Kundli",
-    badge_rating: "500k+ Created",
+    badge_text: "100% Free Janam Kundli",
+    badge_rating: "Swiss Ephemeris",
     image_url: "/images/hero/hero-parchment-kundli.png",
   },
   {
@@ -46,8 +46,8 @@ const DEFAULT_SLIDES: HeroSlide[] = [
     description: "Detailed 36-Gun Milan, Manglik Dosha report & life-long harmony analysis for bride & groom.",
     cta_text: "Match Kundli Now",
     cta_link: "/kundli-matching",
-    badge_text: "Trusted Matchmaking",
-    badge_rating: "36 Gunas Score",
+    badge_text: "Vedic Ashtakoot Matchmaking",
+    badge_rating: "36 Gunas",
     image_url: "/images/hero/hero-indian-wedding.png",
   },
   {
@@ -57,8 +57,8 @@ const DEFAULT_SLIDES: HeroSlide[] = [
     description: "Explore heart, head & life lines with interactive real-time 3D hand visualization.",
     cta_text: "Start Palm Reading",
     cta_link: "/palm-reading",
-    badge_text: "Next-Gen 3D Biometrics",
-    badge_rating: "99% Precision",
+    badge_text: "Vedic Hastarekha Biometrics",
+    badge_rating: "3D Palmistry",
     image_url: "/images/hero/hero-mint-mandala.png",
   },
   {

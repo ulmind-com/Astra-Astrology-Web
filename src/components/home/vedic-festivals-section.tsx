@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import React, { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
   CalendarDays,
@@ -12,6 +13,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/providers/language-provider";
 import { FestivalClipart } from "@/components/festivals/festival-cliparts";
+import { astrologyApi, type WebFestivalItem } from "@/lib/api";
 
 interface FestivalItem {
   id: string;
@@ -179,10 +181,30 @@ export function VedicFestivalsSection() {
     vrat: isBn ? "পবিত্র ব্রত ও উপবাস" : isHi ? "पवित्र व्रत" : "Sacred Vrats",
   };
 
-  const filtered = useMemo(() => {
-    if (filter === "all") return HOME_FESTIVALS;
-    return HOME_FESTIVALS.filter((f) => f.category === filter);
-  }, [filter]);
+  const currentYear = useMemo(() => new Date().getFullYear(), []);
+  const { data: festivalData } = useQuery({
+    queryKey: ["festivals", "calendar", currentYear, filter],
+    queryFn: () => astrologyApi.festivals(currentYear, filter === "all" ? undefined : filter),
+    staleTime: 1000 * 60 * 30,
+  });
+
+  const liveFestivals = festivalData?.festivals ?? [];
+  const displayFestivals = useMemo(() => {
+    if (liveFestivals.length > 0) {
+      return liveFestivals.slice(0, 6).map((fest: WebFestivalItem) => ({
+        id: fest.id,
+        name: fest.name,
+        date: fest.date_formatted || { en: fest.date, bn: fest.date, hi: fest.date },
+        tithi: fest.tithi,
+        category: fest.category,
+        desc: fest.desc,
+        badge: fest.badge,
+        glowColor: fest.accent_color || "#f59e0b",
+      }));
+    }
+    const base = filter === "all" ? HOME_FESTIVALS : HOME_FESTIVALS.filter((f) => f.category === filter);
+    return base.slice(0, 6);
+  }, [liveFestivals, filter]);
 
   return (
     <section className="relative overflow-hidden bg-transparent py-12 sm:py-16 border-b border-stone-200/80">
@@ -238,7 +260,7 @@ export function VedicFestivalsSection() {
 
         {/* 3-Column Luxury Grid with Handcrafted Spiritual Vector Cliparts */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filtered.map((fest) => {
+          {displayFestivals.map((fest) => {
             const name = fest.name[language] || fest.name.en;
             const date = fest.date[language] || fest.date.en;
             const tithi = fest.tithi[language] || fest.tithi.en;

@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { type ShopProduct } from "@/lib/api";
 import { useCartStore } from "@/lib/stores/use-cart-store";
 import { useLanguage } from "@/providers/language-provider";
-import { BESTSELLER_PRODUCTS, type BestsellerProduct } from "@/lib/shop-data";
 
 interface Props {
   products?: ShopProduct[];
@@ -28,32 +27,30 @@ export function ShopBestsellers({ products = [] }: Props) {
     { id: "karungali", label: "Karungali" },
   ];
 
-  // Convert raw DB products to Bestseller format or use curated high-fidelity fallbacks
+  // Map real database products to Bestseller display items (Zero Dummy Data)
   const displayItems = React.useMemo(() => {
-    if (products && products.length > 0) {
-      return products.map((p) => ({
-        id: p.id,
-        title: p.title,
-        slug: p.slug,
-        category: (p.category_slug?.includes("zodiac")
-          ? "zodiac"
-          : p.category_slug?.includes("bracelet") || p.title.toLowerCase().includes("ring")
-          ? "bracelets"
-          : p.category_slug?.includes("karungali") || p.category_slug?.includes("rudraksha")
-          ? "karungali"
-          : p.category_slug?.includes("vastu") || p.category_slug?.includes("yantra")
-          ? "vastu-home"
-          : "bracelets") as any,
-        category_label: p.category_type || p.category_slug || "Astro Remedy",
-        badge: p.free_gift_badge ? "FREE" : undefined,
-        sale_price: p.sale_price,
-        mrp: p.mrp,
-        discount_percent: p.discount_percent || Math.round(((p.mrp - p.sale_price) / p.mrp) * 100),
-        image: p.featured_image || "/images/banners/banner-zodiac.jpg",
-        description: p.short_description || "",
-      }));
-    }
-    return BESTSELLER_PRODUCTS;
+    if (!products || products.length === 0) return [];
+    return products.map((p) => ({
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      category: (p.category_slug?.includes("zodiac")
+        ? "zodiac"
+        : p.category_slug?.includes("bracelet") || p.title.toLowerCase().includes("ring")
+        ? "bracelets"
+        : p.category_slug?.includes("karungali") || p.category_slug?.includes("rudraksha")
+        ? "karungali"
+        : p.category_slug?.includes("vastu") || p.category_slug?.includes("yantra")
+        ? "vastu-home"
+        : "bracelets") as any,
+      category_label: p.category_type || p.category_slug || "Astro Remedy",
+      badge: p.free_gift_badge ? "FREE" : undefined,
+      sale_price: p.sale_price,
+      mrp: p.mrp,
+      discount_percent: p.discount_percent || (p.mrp > p.sale_price ? Math.round(((p.mrp - p.sale_price) / p.mrp) * 100) : 0),
+      image: p.featured_image || (p.images && p.images[0]) || "/images/banners/banner-zodiac.jpg",
+      description: p.short_description || "",
+    }));
   }, [products]);
 
   const filtered = displayItems.filter((p) => {
@@ -65,37 +62,11 @@ export function ShopBestsellers({ products = [] }: Props) {
     e.preventDefault();
     e.stopPropagation();
 
-    const shopProd: ShopProduct = {
-      id: item.id,
-      slug: item.slug,
-      sku: `ASTRA-${item.id.slice(0, 8).toUpperCase()}`,
-      title: item.title,
-      mrp: item.mrp,
-      sale_price: item.sale_price,
-      discount_percent: item.discount_percent,
-      featured_image: item.image,
-      images: [item.image],
-      stock_quantity: 15,
-      in_stock: true,
-      category_id: item.category,
-      category_slug: item.category,
-      category_type: item.category_label,
-      short_description: item.description,
-      detailed_description: item.description,
-      benefits: ["100% Authentic", "Vedic Consecrated"],
-      life_pillars: ["career", "finance"],
-      is_active: true,
-      is_featured: true,
-      is_energized: true,
-      average_rating: 4.9,
-      review_count: 50,
-      cashback_percent: 100,
-      free_gift_title: "Raw Selenite Charging Plate",
-      free_gift_value: 729,
-      free_gift_badge: "FREE Raw Selenite Plate worth ₹729",
-    };
+    // Find actual product object from real API items
+    const realProd = products.find((p) => p.id === item.id);
+    if (!realProd) return;
+    addItem(realProd, 1);
 
-    addItem(shopProd, 1);
     setAddedId(item.id);
     toast.success(
       language === "bn"
@@ -104,6 +75,10 @@ export function ShopBestsellers({ products = [] }: Props) {
     );
     setTimeout(() => setAddedId(null), 1500);
   };
+
+  if (!products || products.length === 0) {
+    return null;
+  }
 
   return (
     <section className="space-y-6 select-none">
