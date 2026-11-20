@@ -391,6 +391,10 @@ if (typeof window !== "undefined") {
   let lastSyncAt = 0;
   const handleTabFocus = () => {
     const now = Date.now();
+    // Do not abruptly refresh cart if visitor is on the checkout page actively completing a payment
+    if (typeof window !== "undefined" && window.location.pathname.includes("/checkout")) {
+      return;
+    }
     // Throttle focus refreshes to once every 10 seconds to save bandwidth
     if (session.isSignedIn && !document.hidden && now - lastSyncAt > 10000) {
       lastSyncAt = now;
