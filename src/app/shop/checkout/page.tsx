@@ -174,6 +174,7 @@ export default function CheckoutPage() {
   const [pincodeError, setPincodeError] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [orderSuccess, setOrderSuccess] = React.useState<ShopCheckoutResult | null>(null);
+  const [activeOrder, setActiveOrder] = React.useState<ShopCheckoutResult | null>(null);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
 
   // ---- Pre-fill name from auth
@@ -334,11 +335,13 @@ export default function CheckoutPage() {
       };
 
       const result = await shopApi.checkout(payload);
+      setActiveOrder(result);
 
       // ---- COD: immediate success
       if (paymentMethod === "cod") {
         clearCart();
         setOrderSuccess(result);
+        setActiveOrder(null);
         confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
         toast.success(
           isBn
@@ -356,6 +359,7 @@ export default function CheckoutPage() {
             : "Could not get payment gateway order ID.",
         );
         setIsSubmitting(false);
+        setActiveOrder(null);
         return;
       }
 
@@ -367,6 +371,7 @@ export default function CheckoutPage() {
             : "Failed to load payment gateway. Check your connection.",
         );
         setIsSubmitting(false);
+        setActiveOrder(null);
         return;
       }
 
@@ -385,7 +390,7 @@ export default function CheckoutPage() {
         },
         theme: { color: "#b45309" },
         handler: async (response: {
-          razorpay_order_id: string;
+          razorpay_order_id?: string;
           razorpay_payment_id: string;
           razorpay_signature: string;
         }) => {
@@ -394,14 +399,17 @@ export default function CheckoutPage() {
               isBn ? "পেমেন্ট যাচাই হচ্ছে..." : "Verifying payment...",
               { id: "rzp-verify" },
             );
+            const rzpOrderId =
+              response.razorpay_order_id || result.razorpay_order_id || "";
             await shopApi.verifyPayment({
               order_id: result.order_id,
-              razorpay_order_id: response.razorpay_order_id,
+              razorpay_order_id: rzpOrderId,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
             });
             clearCart();
             setOrderSuccess(result);
+            setActiveOrder(null);
             confetti({ particleCount: 150, spread: 90, origin: { y: 0.5 } });
             toast.success(
               isBn
@@ -409,13 +417,37 @@ export default function CheckoutPage() {
                 : "✅ Payment confirmed! 100% cashback coins will be credited.",
               { id: "rzp-verify" },
             );
-          } catch {
-            toast.error(
-              isBn
+          } catch (err: any) {
+            console.error("[ShopCheckout] Payment verification error:", err);
+            // Fallback check: Did the webhook or backend already confirm it?
+            try {
+              const checked = await shopApi.getOrderDetail(result.order_id);
+              if (
+                checked &&
+                (checked.payment_status === "paid" ||
+                  checked.order_status === "confirmed")
+              ) {
+                clearCart();
+                setOrderSuccess(result);
+                setActiveOrder(null);
+                toast.success(
+                  isBn
+                    ? "✅ পেমেন্ট নিশ্চিত হয়েছে! অর্ডার প্রক্রিয়াধীন।"
+                    : "✅ Payment confirmed! Your order is being processed.",
+                  { id: "rzp-verify" },
+                );
+                return;
+              }
+            } catch {
+              // Ignore fallback check failure and surface primary error
+            }
+
+            const errMsg =
+              err?.message ||
+              (isBn
                 ? "পেমেন্ট যাচাই ব্যর্থ। সাপোর্টে যোগাযোগ করুন।"
-                : "Payment verification failed. Please contact support.",
-              { id: "rzp-verify" },
-            );
+                : "Payment verification failed. Please contact support.");
+            toast.error(errMsg, { id: "rzp-verify", duration: 6000 });
             setIsSubmitting(false);
           }
         },
@@ -425,6 +457,7 @@ export default function CheckoutPage() {
               isBn ? "পেমেন্ট বাতিল করা হয়েছে।" : "Payment was cancelled.",
             );
             setIsSubmitting(false);
+            setActiveOrder(null);
           },
         },
       });
@@ -436,6 +469,7 @@ export default function CheckoutPage() {
         (isBn ? "অর্ডার প্লেস করা যায়নি।" : "Could not place order.");
       toast.error(msg);
       setIsSubmitting(false);
+      setActiveOrder(null);
     }
   };
 
@@ -587,7 +621,7 @@ export default function CheckoutPage() {
   // =========================================================================
   // 🛒 EMPTY CART VIEW
   // =========================================================================
-  if (items.length === 0) {
+  if (items.length === 0 && !orderSuccess && !isSubmitting && !activeOrder) {
     return (
       <>
         <SiteHeader />
