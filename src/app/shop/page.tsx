@@ -18,8 +18,6 @@ import {
   Gift,
   ArrowRight,
   RotateCcw,
-  Play,
-  Heart,
   Share2,
   X,
 } from "lucide-react";
@@ -40,7 +38,6 @@ import { AstraPromiseSection } from "@/components/shop/AstraPromiseSection";
 import { ShopFaqAccordion } from "@/components/shop/ShopFaqAccordion";
 import { CardTilt } from "@/components/ui/card-tilt";
 import { ShopFilterDrawer } from "@/components/shop/ShopFilterDrawer";
-import { CUSTOMER_REELS, type CustomerReel } from "@/lib/shop-data";
 
 function ShopInner() {
   const { language } = useLanguage();
@@ -53,8 +50,6 @@ function ShopInner() {
   const [selectedCategory, setSelectedCategory] = React.useState<string>(initialCategory);
   const [selectedPurpose, setSelectedPurpose] = React.useState<string>(initialPurpose);
   const [searchTerm, setSearchTerm] = React.useState<string>("");
-  const [activeReelModal, setActiveReelModal] = React.useState<CustomerReel | null>(null);
-  const [likedReels, setLikedReels] = React.useState<Record<string, boolean>>({});
 
   const { openCart, getItemCount } = useCartStore();
   const cartItemCount = getItemCount();
@@ -118,11 +113,6 @@ function ShopInner() {
     ? rawProducts.filter((p) => p.purpose_tags?.includes(selectedPurpose))
     : rawProducts;
 
-  const customerReels: CustomerReel[] =
-    (bannerSettings as any)?.reels && (bannerSettings as any).reels.length > 0
-      ? (bannerSettings as any).reels
-      : CUSTOMER_REELS;
-
   const resetAllFilters = () => {
     setSelectedPlanet("");
     setSelectedCategory("");
@@ -164,94 +154,7 @@ function ShopInner() {
         {/* 6. Promotional 100% Wallet Cashback Strip */}
         <CashbackPromoBanner />
 
-        {/* 7. Loved by You, Shared by You: Video Reels Section */}
-        <section className="rounded-3xl bg-[#1c140e] text-white p-6 sm:p-10 space-y-8 border border-amber-500/20 shadow-2xl">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-amber-900/40 pb-5">
-            <div className="space-y-1.5">
-              <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-amber-400">
-                <Sparkles className="size-3.5" />
-                <span>COMMUNITY STORIES</span>
-              </div>
-              <h2 className="font-serif text-2xl sm:text-4xl font-black text-amber-50 tracking-tight">
-                Loved by You, Shared by You
-              </h2>
-              <p className="text-xs sm:text-sm text-stone-300">
-                Real customer unboxings, temple consecrations, and life transformation stories.
-              </p>
-            </div>
-            <span className="text-xs text-amber-300 font-semibold uppercase tracking-wider">
-              ✦ 100% Verified Devotee Reviews
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
-            {customerReels.map((reel) => {
-              const isLiked = likedReels[reel.id];
-              return (
-                <div
-                  key={reel.id}
-                  className="group relative rounded-2xl overflow-hidden aspect-[9/16] bg-stone-900 border border-amber-500/20 shadow-md hover:border-amber-400 hover:shadow-xl transition-all duration-300 flex flex-col justify-between p-3 select-none"
-                >
-                  <Image
-                    src={reel.thumbnail_url}
-                    alt={reel.user_name}
-                    fill
-                    sizes="(max-width: 640px) 50vw, 20vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    unoptimized
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/40 group-hover:via-black/20 transition-all" />
-
-                  {/* Play Button Overlay */}
-                  <button
-                    type="button"
-                    onClick={() => setActiveReelModal(reel)}
-                    className="absolute inset-0 flex items-center justify-center cursor-pointer z-10"
-                    aria-label={`Play story from ${reel.user_name}`}
-                  >
-                    <div className="size-11 sm:size-13 rounded-full bg-amber-500/90 text-stone-950 flex items-center justify-center pl-0.5 shadow-xl group-hover:scale-110 group-hover:bg-amber-400 transition-all duration-300">
-                      <Play className="size-5 sm:size-6 fill-current" />
-                    </div>
-                  </button>
-
-                  {/* Top user tag */}
-                  <div className="relative z-10 flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-amber-200 drop-shadow-sm truncate max-w-[110px]">
-                      {reel.user_handle}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setLikedReels((prev) => ({ ...prev, [reel.id]: !prev[reel.id] }));
-                      }}
-                      className="text-white hover:text-rose-400 p-1 transition-colors cursor-pointer"
-                    >
-                      <Heart className={`size-4 ${isLiked ? "fill-rose-500 text-rose-500" : ""}`} />
-                    </button>
-                  </div>
-
-                  {/* Bottom product title & quote */}
-                  <div className="relative z-10 space-y-1">
-                    <p className="text-[11px] text-stone-200 line-clamp-2 italic drop-shadow-sm leading-tight">
-                      &ldquo;{reel.quote}&rdquo;
-                    </p>
-                    <div className="pt-1 border-t border-white/10 flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-amber-300 truncate max-w-[100px]">
-                        ₹{reel.tagged_product_price.toLocaleString("en-IN")}
-                      </span>
-                      <span className="text-[9px] text-stone-300 bg-black/40 px-1.5 py-0.5 rounded">
-                        {reel.likes_count}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* 8. Main Catalog Grid with Search & Filters */}
+        {/* 7. Main Catalog Grid with Search & Filters */}
         <section id="all-products" className="space-y-6 pt-4">
           <div className="space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -476,74 +379,6 @@ function ShopInner() {
             ₹{useCartStore.getState().getSubtotal().toLocaleString("en-IN")}
           </span>
         </button>
-      )}
-
-      {/* Video Reel Player Modal */}
-      {activeReelModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in">
-          <div className="relative w-full max-w-sm rounded-3xl overflow-hidden bg-stone-950 text-white shadow-2xl border border-stone-800 space-y-4 p-4">
-            <div className="flex items-center justify-between pb-2 border-b border-stone-800">
-              <div className="flex items-center gap-2">
-                <div className="size-7 rounded-full bg-amber-500 text-black font-bold text-xs flex items-center justify-center">
-                  ✦
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-white block">{activeReelModal.user_handle}</span>
-                  <span className="text-[10px] text-stone-400">{activeReelModal.user_name}</span>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveReelModal(null)}
-                className="text-stone-400 hover:text-white p-1 rounded-md cursor-pointer"
-              >
-                <X className="size-5" />
-              </button>
-            </div>
-
-            {/* Video preview / player */}
-            <div className="relative aspect-[9/14] w-full rounded-2xl overflow-hidden bg-black border border-stone-800">
-              <video
-                src={activeReelModal.video_url}
-                poster={activeReelModal.thumbnail_url}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="size-full object-cover"
-              />
-            </div>
-
-            <p className="text-xs text-stone-300 italic px-1">
-              &ldquo;{activeReelModal.quote}&rdquo;
-            </p>
-
-            {/* Tagged product banner */}
-            <div className="rounded-xl bg-stone-900 border border-stone-800 p-3 flex items-center justify-between gap-3">
-              <div>
-                <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider block">
-                  Tagged Sacred Item
-                </span>
-                <span className="text-xs font-bold text-white block truncate max-w-[180px]">
-                  {activeReelModal.tagged_product_title}
-                </span>
-                <span className="text-xs font-black text-amber-300">
-                  ₹{activeReelModal.tagged_product_price.toLocaleString("en-IN")}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  toast.success(`Opening ${activeReelModal.tagged_product_title}`);
-                  setActiveReelModal(null);
-                }}
-                className="px-3 py-1.5 rounded-lg bg-amber-500 text-black font-bold text-xs hover:bg-amber-400 transition-colors cursor-pointer"
-              >
-                Shop Now
-              </button>
-            </div>
-          </div>
-        </div>
       )}
 
       <SiteFooter />

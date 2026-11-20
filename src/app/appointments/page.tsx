@@ -785,8 +785,10 @@ function AppointmentsContent() {
                         <span className="text-amber-400">•</span>
                         <span className="flex items-center gap-1 font-bold text-amber-800">
                           <Star className="size-4 fill-amber-400 text-amber-400" />
-                          <span>{selectedAstrologer.rating?.average ? selectedAstrologer.rating.average.toFixed(1) : "5.0"}</span>
-                          <span className="text-slate-400 font-normal">({selectedAstrologer.rating?.count || 28} verified sessions)</span>
+                          <span>{selectedAstrologer.rating?.average && selectedAstrologer.rating.average > 0 ? selectedAstrologer.rating.average.toFixed(1) : "Verified"}</span>
+                          {selectedAstrologer.rating?.count ? (
+                            <span className="text-slate-400 font-normal">({selectedAstrologer.rating.count} {language === "bn" ? "পরামর্শ" : "sessions"})</span>
+                          ) : null}
                         </span>
                       </p>
 
@@ -1513,13 +1515,15 @@ function AppointmentsContent() {
                                   <div className="flex items-center gap-1 font-bold text-amber-800">
                                     <Star className="size-3.5 fill-amber-400 text-amber-400" />
                                     <span>
-                                      {astro.rating?.average
+                                      {astro.rating?.average && astro.rating.average > 0
                                         ? astro.rating.average.toFixed(1)
-                                        : "5.0"}
+                                        : "Verified"}
                                     </span>
-                                    <span className="text-slate-400 font-normal">
-                                      ({astro.rating?.count || 28})
-                                    </span>
+                                    {astro.rating?.count ? (
+                                      <span className="text-slate-400 font-normal">
+                                        ({astro.rating.count})
+                                      </span>
+                                    ) : null}
                                   </div>
                                   <span className="text-slate-300">•</span>
                                   <span className="font-medium text-slate-700">

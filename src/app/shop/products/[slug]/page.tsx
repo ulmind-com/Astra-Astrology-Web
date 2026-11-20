@@ -301,16 +301,20 @@ export default function ProductDetailPage() {
                 href="#devotee-reviews"
                 className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 hover:border-amber-400 px-3 py-1 text-xs font-bold text-amber-900 transition-colors"
               >
-                <Star className="size-3.5 fill-amber-500 text-amber-500" />
-                <span>{(product.average_rating || 5.0).toFixed(1)}</span>
-                <span className="text-stone-400 font-normal">|</span>
-                <span className="text-stone-600 font-medium">
-                  {product.review_count && product.review_count > 0
-                    ? `${product.review_count} ${isBn ? "ভক্ত রিভিউ" : "reviews"}`
-                    : isBn
-                    ? "নতুন প্রতিকার (রিভিউ দিন)"
-                    : "New Remedy (Be first to review)"}
-                </span>
+                {product.review_count && product.review_count > 0 ? (
+                  <>
+                    <Star className="size-3.5 fill-amber-500 text-amber-500" />
+                    <span>{(product.average_rating || 5.0).toFixed(1)}</span>
+                    <span className="text-stone-400 font-normal">|</span>
+                    <span className="text-stone-600 font-medium">
+                      {product.review_count} {isBn ? "ভক্ত রিভিউ" : "reviews"}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-amber-800 font-semibold">
+                    {isBn ? "নতুন প্রতিকার (প্রথম রিভিউ দিন)" : "New Remedy (Be first to review)"}
+                  </span>
+                )}
               </a>
               <span className="text-[11px] font-mono text-stone-500 bg-stone-100 px-2.5 py-0.5 rounded-md">
                 SKU: {product.sku}

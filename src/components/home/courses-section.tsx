@@ -17,8 +17,9 @@ function money(currency: string, value: number): string {
 
 function CourseCard({ course }: { course: CourseListItem }) {
   const href = `/courses/${course.slug}`;
-  const rating = course.rating_count > 0 ? course.average_rating.toFixed(1) : "5.0";
-  const ratingCount = course.rating_count > 0 ? course.rating_count : course.total_students || 120;
+  const hasRating = course.rating_count > 0;
+  const rating = hasRating ? course.average_rating.toFixed(1) : null;
+  const ratingCount = course.rating_count > 0 ? course.rating_count : course.total_students > 0 ? course.total_students : 0;
 
   return (
     <CardTilt className="h-full">
@@ -63,11 +64,17 @@ function CourseCard({ course }: { course: CourseListItem }) {
           <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#8b5e0a]">
             {course.category?.replace(/_/g, " ")}
           </span>
-          <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1a1208] tabular-nums">
-            <Star className="size-3.5 fill-[#f5b301] text-[#f5b301]" />
-            {rating}
-            <span className="font-normal text-[#a08a5e]">({ratingCount}+)</span>
-          </span>
+          {hasRating ? (
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1a1208] tabular-nums">
+              <Star className="size-3.5 fill-[#f5b301] text-[#f5b301]" />
+              {rating}
+              <span className="font-normal text-[#a08a5e]">({ratingCount})</span>
+            </span>
+          ) : (
+            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+              Vedic Certified
+            </span>
+          )}
         </div>
 
         <h3 className="mt-2 line-clamp-1 font-display text-base font-bold text-[#1a1208] transition-colors group-hover:text-brand-900">

@@ -208,9 +208,9 @@ export default function PurohitDetailPage() {
                   <div className="flex items-center gap-1">
                     <Star className="size-3.5 fill-amber-400 text-amber-500" />
                     <span className="font-bold text-stone-900 dark:text-white">
-                      {purohit.rating ? purohit.rating.toFixed(1) : "5.0"}
+                      {purohit.rating && purohit.rating > 0 ? purohit.rating.toFixed(1) : "নতুন"}
                     </span>
-                    <span>({purohit.total_reviews || 12} রিভিউ)</span>
+                    <span>({purohit.total_reviews ?? 0} রিভিউ)</span>
                   </div>
                   <span>•</span>
                   <span>{purohit.experience_years} বছরের অভিজ্ঞতা</span>

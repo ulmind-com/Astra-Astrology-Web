@@ -27,19 +27,18 @@ export function ShopHeroSlider({ banners }: Props) {
 
   const defaultBanners: BannerItem[] = [
     {
-      id: "b-lumus",
-      badge_text: "LUMUS × ASTROTALK",
-      title: "Discover India's First Crystal-Infused Perfumes",
-      subtitle: "Where every fragrance meets the energy of crystals.",
+      id: "b-rudraksha",
+      badge_text: "DIVINLINK × SACRED RUDRAKSHA",
+      title: "Sacred Nepali Siddh Rudraksha",
+      subtitle: "100% lab-certified 1 to 14 Mukhi divine beads consecrated with Maha Mrityunjaya Vedic rituals.",
       cta_text: "Shop Now",
-      cta_link: "/shop?category=perfumes",
-      image_url: "/images/banners/banner-lumus-clean.jpg",
-      hide_text_overlay: true,
+      cta_link: "/shop?category=rudraksha",
+      image_url: "/images/banners/banner-rudraksha.jpg",
       is_active: true,
     },
     {
       id: "b-zodiac",
-      badge_text: "ASTRA × ZODIAC",
+      badge_text: "DIVINLINK × ZODIAC",
       title: "Wear Your Zodiac Collection",
       subtitle: "Discover India's finest 925 sterling silver zodiac rings infused with authentic planetary gemstone energies.",
       cta_text: "Shop Now",
