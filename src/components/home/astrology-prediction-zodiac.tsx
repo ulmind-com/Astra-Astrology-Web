@@ -153,6 +153,12 @@ const RANGE_TABS: { id: RangeTab; label: string; offset: number }[] = [
   { id: "month", label: "Month", offset: 30 },
 ];
 
+const RANGE_TAB_LABELS: Record<string, Record<RangeTab, string>> = {
+  bn: { today: "আজ", tomorrow: "আগামীকাল", week: "সাপ্তাহিক", month: "মাসিক" },
+  hi: { today: "आज", tomorrow: "कल", week: "साप्ताहिक", month: "मासिक" },
+  en: { today: "Today", tomorrow: "Tomorrow", week: "Weekly", month: "Monthly" },
+};
+
 function formatDateToYMD(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -166,8 +172,20 @@ function dateFromOffset(offset: number): Date {
   return d;
 }
 
-// Map a 0-100 score to a short verdict word.
-function scoreVerdict(score: number, scale: "strength" | "level"): string {
+// Map a 0-100 score to a localized verdict word.
+function scoreVerdict(score: number, scale: "strength" | "level", lang: string): string {
+  if (lang === "bn") {
+    if (score >= 78) return "উত্তম";
+    if (score >= 60) return "স্থিতিশীল";
+    if (score >= 42) return "মাঝারি";
+    return "সতর্ক";
+  }
+  if (lang === "hi") {
+    if (score >= 78) return "उत्तम";
+    if (score >= 60) return "अनुकूल";
+    if (score >= 42) return "मध्यम";
+    return "सतर्क";
+  }
   if (scale === "strength") {
     if (score >= 78) return "Strong";
     if (score >= 60) return "Steady";
@@ -180,15 +198,43 @@ function scoreVerdict(score: number, scale: "strength" | "level"): string {
   return "Low";
 }
 
-function moodFromScores(sign?: DailySignHoroscope): { emoji: string; label: string } {
-  if (!sign) return { emoji: "✨", label: "Balanced" };
+function moodFromScores(sign?: DailySignHoroscope, lang: string = "en"): { emoji: string; label: string } {
+  if (!sign) {
+    return {
+      emoji: "✨",
+      label: lang === "bn" ? "ভারসাম্যপূর্ণ" : lang === "hi" ? "संतुलित" : "Balanced",
+    };
+  }
   const love = sign.love_score ?? 0;
   const overall = sign.overall_score ?? 0;
-  if (love >= 78) return { emoji: "😍", label: "Romantic" };
-  if (overall >= 75) return { emoji: "😄", label: "Upbeat" };
-  if (overall >= 60) return { emoji: "🙂", label: "Hopeful" };
-  if (overall >= 45) return { emoji: "😌", label: "Calm" };
-  return { emoji: "🧘", label: "Reserved" };
+  if (love >= 78) {
+    return {
+      emoji: "😍",
+      label: lang === "bn" ? "রোমান্টিক" : lang === "hi" ? "रोमांटिक" : "Romantic",
+    };
+  }
+  if (overall >= 75) {
+    return {
+      emoji: "😄",
+      label: lang === "bn" ? "উচ্ছ্বসিত" : lang === "hi" ? "उत्साही" : "Upbeat",
+    };
+  }
+  if (overall >= 60) {
+    return {
+      emoji: "🙂",
+      label: lang === "bn" ? "আশাবাদী" : lang === "hi" ? "आशावादी" : "Hopeful",
+    };
+  }
+  if (overall >= 45) {
+    return {
+      emoji: "😌",
+      label: lang === "bn" ? "শান্ত" : lang === "hi" ? "शांत" : "Calm",
+    };
+  }
+  return {
+    emoji: "🧘",
+    label: lang === "bn" ? "ধৈর্যশীল" : lang === "hi" ? "संयमित" : "Reserved",
+  };
 }
 
 const COLOR_MAP: Record<string, string> = {
@@ -212,17 +258,34 @@ function resolveColor(raw?: string): string {
   return "#d946ef";
 }
 
-const METERS: {
-  key: keyof Pick<DailySignHoroscope, "love_score" | "career_score" | "health_score" | "finance_score">;
-  label: string;
-  scale: "strength" | "level";
-  bar: string;
-}[] = [
-  { key: "love_score", label: "Love", scale: "strength", bar: "from-rose-400 to-red-500" },
-  { key: "career_score", label: "Career", scale: "strength", bar: "from-amber-300 to-orange-400" },
-  { key: "health_score", label: "Health", scale: "level", bar: "from-emerald-300 to-green-500" },
-  { key: "finance_score", label: "Money", scale: "level", bar: "from-orange-300 to-amber-500" },
-];
+const METER_CONFIG: Record<
+  string,
+  {
+    key: keyof Pick<DailySignHoroscope, "love_score" | "career_score" | "health_score" | "finance_score">;
+    label: string;
+    scale: "strength" | "level";
+    bar: string;
+  }[]
+> = {
+  bn: [
+    { key: "love_score", label: "প্রেম ও সম্পর্ক", scale: "strength", bar: "from-rose-400 to-red-500" },
+    { key: "career_score", label: "কর্ম ও ব্যবসা", scale: "strength", bar: "from-amber-300 to-orange-400" },
+    { key: "health_score", label: "সুস্বাস্থ্য", scale: "level", bar: "from-emerald-300 to-green-500" },
+    { key: "finance_score", label: "অর্থ ও লাভ", scale: "level", bar: "from-orange-300 to-amber-500" },
+  ],
+  hi: [
+    { key: "love_score", label: "प्रेम व संबंध", scale: "strength", bar: "from-rose-400 to-red-500" },
+    { key: "career_score", label: "करियर व व्यवसाय", scale: "strength", bar: "from-amber-300 to-orange-400" },
+    { key: "health_score", label: "स्वास्थ्य", scale: "level", bar: "from-emerald-300 to-green-500" },
+    { key: "finance_score", label: "धन व लाभ", scale: "level", bar: "from-orange-300 to-amber-500" },
+  ],
+  en: [
+    { key: "love_score", label: "Love & Romance", scale: "strength", bar: "from-rose-400 to-red-500" },
+    { key: "career_score", label: "Career & Business", scale: "strength", bar: "from-amber-300 to-orange-400" },
+    { key: "health_score", label: "Health & Vitality", scale: "level", bar: "from-emerald-300 to-green-500" },
+    { key: "finance_score", label: "Money & Wealth", scale: "level", bar: "from-orange-300 to-amber-500" },
+  ],
+};
 
 export function AstrologyPredictionZodiac() {
   const { language } = useLanguage();
@@ -253,15 +316,18 @@ export function AstrologyPredictionZodiac() {
   const activeSign: DailySignHoroscope | undefined =
     data?.signs?.find((s) => s.sign_index === activeIndex) || data?.signs?.[activeIndex];
 
-  const mood = moodFromScores(activeSign);
+  const mood = moodFromScores(activeSign, language);
   const swatch = resolveColor(activeSign?.lucky_color);
+  const tabLabels = RANGE_TAB_LABELS[language] || RANGE_TAB_LABELS.en;
+  const meters = METER_CONFIG[language] || METER_CONFIG.en;
 
   const datePill = React.useMemo(() => {
-    const label = RANGE_TABS.find((r) => r.id === tab)?.label ?? "Today";
+    const label = tabLabels[tab] ?? (language === "bn" ? "আজ" : language === "hi" ? "आज" : "Today");
     const d = selectedDate;
-    const nice = d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    const locale = language === "bn" ? "bn-IN" : language === "hi" ? "hi-IN" : "en-GB";
+    const nice = d.toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" });
     return `${label} · ${nice}`;
-  }, [tab, selectedDate]);
+  }, [tab, selectedDate, language, tabLabels]);
 
   return (
     <section className="relative overflow-hidden border-b border-stone-200/80 bg-white py-12 sm:py-16 select-none">
@@ -304,7 +370,7 @@ export function AstrologyPredictionZodiac() {
                       : "text-stone-700 hover:text-amber-800 hover:bg-white"
                   }`}
                 >
-                  {r.label}
+                  {tabLabels[r.id]}
                 </button>
               );
             })}
@@ -350,12 +416,12 @@ export function AstrologyPredictionZodiac() {
                     selected ? "text-amber-700 font-bold" : "text-stone-900 group-hover:text-amber-600"
                   }`}
                 >
-                  {sign.name}
+                  {language === "bn" ? sign.bengaliName : language === "hi" ? sign.hindiName : sign.name}
                 </span>
 
-                {/* Date Range (Exact InstaAstro Screenshot Style) */}
+                {/* Subtitle / Dates */}
                 <span className="text-[10px] sm:text-[11px] text-stone-500 font-medium mt-0.5 whitespace-nowrap">
-                  {sign.dates}
+                  {language === "bn" ? sign.name : sign.dates}
                 </span>
               </button>
             );
@@ -379,9 +445,15 @@ export function AstrologyPredictionZodiac() {
               </div>
               <div>
                 <div className="flex items-baseline gap-2">
-                  <h3 className="text-xl sm:text-2xl font-bold text-[#1a1208]">{activeMeta.name}</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-[#1a1208]">
+                    {language === "bn"
+                      ? `${activeMeta.bengaliName} (${activeMeta.name})`
+                      : language === "hi"
+                      ? `${activeMeta.hindiName} (${activeMeta.sanskrit})`
+                      : activeMeta.name}
+                  </h3>
                   <span className="text-sm font-semibold text-amber-700">
-                    {language === "bn" ? activeMeta.bengaliName : activeMeta.sanskrit}
+                    {language === "bn" ? activeMeta.sanskrit : activeMeta.dates}
                   </span>
                 </div>
                 <p className="mt-0.5 text-xs font-medium text-stone-500">{activeMeta.dates}</p>
@@ -396,7 +468,13 @@ export function AstrologyPredictionZodiac() {
                 href={`/daily-horoscope/${activeMeta.id}`}
                 className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 hover:bg-amber-600 px-4 py-1.5 text-xs font-bold text-white shadow-xs transition-transform hover:scale-105"
               >
-                <span>Read Full Horoscope</span>
+                <span>
+                  {language === "bn"
+                    ? "সম্পূর্ণ রাশিফল পড়ুন"
+                    : language === "hi"
+                    ? "पूरा राशिफल पढ़ें"
+                    : "Read Full Horoscope"}
+                </span>
                 <ArrowRight className="size-3.5" />
               </Link>
             </div>
@@ -408,30 +486,46 @@ export function AstrologyPredictionZodiac() {
             <div className="space-y-5">
               <p className="text-sm sm:text-base font-medium leading-relaxed text-stone-800">
                 {loading && !activeSign
-                  ? "Calculating planetary transits for your rashi…"
+                  ? language === "bn"
+                    ? "গ্রহের গোচর ও শুভ ফলাফল গণনা করা হচ্ছে…"
+                    : language === "hi"
+                    ? "ग्रह गोचर एवं शुभ परिणाम की गणना हो रही है…"
+                    : "Calculating planetary transits for your rashi…"
                   : activeSign?.summary ||
-                    "Cosmic energies favor productive focus and positive interactions today. Balance ambition with gentle mindfulness."}
+                    (language === "bn"
+                      ? "আজ চন্দ্রের শুভ গোচরে কর্ম ও অর্থ ভাগ্য সুদৃঢ় হবে। আত্মবিশ্বাস রাখুন ও সংকল্পবদ্ধ হয়ে কাজ করুন।"
+                      : language === "hi"
+                      ? "आज चंद्रमा के शुभ गोचर से कार्य एवं आर्थिक स्थिति मजबूत रहेगी। सकारात्मक सोच बनाए रखें।"
+                      : "Cosmic energies favor productive focus and positive interactions today. Balance ambition with gentle mindfulness.")}
               </p>
 
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[#6b5f4d] pt-2">
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="font-semibold text-stone-500">Mood:</span>
+                  <span className="font-semibold text-stone-500">
+                    {language === "bn" ? "মনোভাব:" : language === "hi" ? "मनोदशा:" : "Mood:"}
+                  </span>
                   <span className="font-bold text-[#1a1208]">
                     {mood.emoji} {mood.label}
                   </span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="font-semibold text-stone-500">Lucky #:</span>
+                  <span className="font-semibold text-stone-500">
+                    {language === "bn" ? "শুভ সংখ্যা:" : language === "hi" ? "शुभ अंक:" : "Lucky #:"}
+                  </span>
                   <span className="font-bold text-[#1a1208]">{activeSign?.lucky_number ?? "7"}</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="font-semibold text-stone-500">Lucky Color:</span>
+                  <span className="font-semibold text-stone-500">
+                    {language === "bn" ? "শুভ রং:" : language === "hi" ? "शुभ रंग:" : "Lucky Color:"}
+                  </span>
                   <span
                     className="inline-block size-4 rounded-full ring-1 ring-black/15 shadow-2xs"
                     style={{ backgroundColor: swatch }}
                     title={activeSign?.lucky_color || undefined}
                   />
-                  <span className="font-medium text-stone-700 capitalize">{activeSign?.lucky_color || "Gold"}</span>
+                  <span className="font-medium text-stone-700 capitalize">
+                    {activeSign?.lucky_color || (language === "bn" ? "সোনালী" : "Gold")}
+                  </span>
                 </span>
               </div>
 
@@ -440,7 +534,13 @@ export function AstrologyPredictionZodiac() {
                   href={`/daily-horoscope/${activeMeta.id}`}
                   className="inline-flex items-center gap-2 rounded-full bg-stone-900 hover:bg-stone-800 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all hover:scale-[1.02]"
                 >
-                  <span>Detailed 12-Month Forecast</span>
+                  <span>
+                    {language === "bn"
+                      ? "১২ মাসের বিস্তারিত ভাগ্যফল"
+                      : language === "hi"
+                      ? "12 महीने का विस्तृत फलादेश"
+                      : "Detailed 12-Month Forecast"}
+                  </span>
                   <ArrowRight className="size-3.5" />
                 </Link>
                 <Link
@@ -448,21 +548,27 @@ export function AstrologyPredictionZodiac() {
                   className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white hover:bg-stone-50 px-5 py-2.5 text-xs sm:text-sm font-semibold text-stone-800 shadow-2xs transition-colors"
                 >
                   <Sparkles className="size-3.5 text-amber-500" />
-                  <span>Talk to an Astrologer</span>
+                  <span>
+                    {language === "bn"
+                      ? "জ্যোতিষীর সাথে কথা বলুন"
+                      : language === "hi"
+                      ? "ज्योतिषी से बात करें"
+                      : "Talk to an Astrologer"}
+                  </span>
                 </Link>
               </div>
             </div>
 
             {/* Right: Score Meters */}
             <div className="flex flex-col justify-center gap-4 rounded-2xl bg-amber-50/40 border border-amber-900/10 p-5">
-              {METERS.map((m) => {
+              {meters.map((m) => {
                 const score = Math.max(0, Math.min(100, (activeSign?.[m.key] as number) ?? 75));
                 return (
                   <div key={m.key}>
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-bold uppercase tracking-wider text-stone-600">{m.label}</span>
                       <span className="font-bold text-stone-900">
-                        {activeSign ? scoreVerdict(score, m.scale) : "Good"} ({score}%)
+                        {activeSign ? scoreVerdict(score, m.scale, language) : (language === "bn" ? "উত্তম" : language === "hi" ? "उत्तम" : "Good")} ({score}%)
                       </span>
                     </div>
                     <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-amber-200/50">

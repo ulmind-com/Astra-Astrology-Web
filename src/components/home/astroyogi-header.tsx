@@ -144,7 +144,7 @@ export function AstroyogiHeader() {
             {
               label: "জ্যোতিষীর সাথে কল",
               href: "/astrologers",
-              description: "৫০০+ ভেরিফাইড জ্যোতিষীর সাথে সরাসরি ভয়েস কলে কথা বলুন",
+              description: "ভেরিফাইড শীর্ষ জ্যোতিষীদের সাথে সরাসরি ভয়েস কলে কথা বলুন",
               icon: Phone,
               badge: "তাৎক্ষণিক",
             },
@@ -390,7 +390,7 @@ export function AstroyogiHeader() {
             {
               label: "ज्योतिषी से कॉल करें",
               href: "/astrologers",
-              description: "500+ सत्यापित ज्योतिषाचार्यों से सीधे फोन पर बात करें",
+              description: "सत्यापित शीर्ष ज्योतिषाचार्यों से सीधे फोन पर बात करें",
               icon: Phone,
               badge: "तुरंत",
             },
@@ -636,7 +636,7 @@ export function AstroyogiHeader() {
           {
             label: "Talk to Astrologer",
             href: "/astrologers",
-            description: "Instant voice consultation with 500+ verified Vedic experts",
+            description: "Instant voice consultation with verified Vedic experts",
             icon: Phone,
             badge: "Instant",
           },
