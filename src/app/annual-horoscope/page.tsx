@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import QRCode from "qrcode";
 import {
   Scroll,
@@ -60,6 +61,7 @@ const FOCUS_AREAS = [
 ] as const;
 
 export default function AnnualHoroscopePage() {
+  const router = useRouter();
   const { language } = useLanguage();
   const lang = (["en", "bn", "hi"].includes(language) ? language : "en") as AstrologyLanguage;
   const { isSignedIn } = useAuth();
@@ -143,6 +145,18 @@ export default function AnnualHoroscopePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isSignedIn) {
+      toast.error(
+        lang === "bn"
+          ? "বর্ষফল সনদ গণনার জন্য অনুগ্রহ করে সাইন ইন করুন।"
+          : lang === "hi"
+          ? "वर्षफल प्रमाणपत्र हेतु कृपया साइन इन करें।"
+          : "Please sign in to generate your Annual Varshphal Dossier."
+      );
+      router.push("/login?redirect=/annual-horoscope");
+      return;
+    }
 
     if (!clientName.trim()) {
       toast.error(
