@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Flame, ShieldCheck, Gem, Sparkles, CheckCircle2 } from "lucide-react";
+import { Flame, ShieldCheck, Gem, Sparkles, CheckCircle2, Coins } from "lucide-react";
 import { useLanguage } from "@/providers/language-provider";
 
 export function AstraPromiseSection() {
@@ -40,13 +40,13 @@ export function AstraPromiseSection() {
     },
     {
       num: "04",
-      title_bn: "১০০% ওয়ালেট ক্যাশব্যাক ও নিখরচায় উপহার",
-      title_en: "100% Wallet Cashback & Free Gifts",
+      title_bn: "১০০% ওয়ালেট ক্যাশব্যাক সুবিধা",
+      title_en: "100% Wallet Consultation Cashback",
       desc_bn:
-        "প্রিপেইড অর্ডারে পুরো টাকা ওয়ালেটে ফেরত এবং প্রতিটি রাশিফল ব্রেসলেটের সাথে বিনামূল্যে দেওয়া হয় ₹৭২৯ মূল্যের Raw Selenite Plate।",
+        "প্রিপেইড অর্ডারে প্রদেয় সম্পূর্ণ মূল্য ওয়ালেটে কয়েন হিসেবে ফেরত দেওয়া হয়, যা দিয়ে যেকোনো সময় শীর্ষ জ্যোতিষীদের সাথে ফ্রি লাইভ পরামর্শ করা যায়।",
       desc_en:
-        "Get 100% cashback credited to your consultation wallet, plus free Raw Selenite Charging Plate worth ₹729 with zodiac items.",
-      icon: Sparkles,
+        "Get 100% of your prepaid order value back as wallet consultation coins to consult with top verified astrologers for free.",
+      icon: Coins,
     },
   ];
 

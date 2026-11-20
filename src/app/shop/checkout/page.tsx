@@ -201,18 +201,7 @@ export default function CheckoutPage() {
   const cashbackCoins = getCashbackCoins();
   const freeShippingThreshold = shopSettings?.free_shipping_threshold ?? 499;
   const standardShippingFee = shopSettings?.standard_shipping_fee ?? 70;
-  const giftMinValue = shopSettings?.free_gift_min_cart_value ?? 499;
-  const giftEnabled = shopSettings?.free_gift_enabled !== false;
-  const freeGifts =
-    giftEnabled && shopSettings?.free_gift_default_title && subtotal >= giftMinValue
-      ? [
-          {
-            title: shopSettings.free_gift_default_title,
-            value: shopSettings.free_gift_default_value ?? 0,
-            badge: shopSettings.free_gift_default_badge,
-          },
-        ]
-      : [];
+  const freeGifts: Array<{ title: string; value: number; badge?: string | null }> = [];
   const shippingFee = subtotal >= freeShippingThreshold ? 0 : standardShippingFee;
   const grandTotal = subtotal - discountAmount + shippingFee;
 
@@ -615,24 +604,6 @@ export default function CheckoutPage() {
                 </div>
               )}
             </div>
-
-            {/* Free gifts */}
-            {orderSuccess.free_gifts && orderSuccess.free_gifts.length > 0 && (
-              <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 text-left">
-                <p className="text-xs font-bold text-amber-800 flex items-center gap-1 mb-2">
-                  <Gift className="size-3.5 text-amber-600" />
-                  {isBn ? "আপনার ফ্রি উপহার:" : "Your Free Gifts:"}
-                </p>
-                {orderSuccess.free_gifts.map((g: any, i: number) => (
-                  <p key={i} className="text-sm text-amber-900">
-                    🎁 {g.title || g.badge}{" "}
-                    {g.value ? (
-                      <span className="text-xs text-amber-700">(Worth {formatINR(g.value)})</span>
-                    ) : null}
-                  </p>
-                ))}
-              </div>
-            )}
 
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
@@ -1176,24 +1147,6 @@ export default function CheckoutPage() {
                     </div>
                   ))}
                 </div>
-
-                {/* Free gifts */}
-                {freeGifts.length > 0 && (
-                  <div className="rounded-xl bg-amber-50/70 border border-amber-200/60 p-3 space-y-1.5">
-                    <p className="text-[11px] font-bold text-amber-800 flex items-center gap-1">
-                      <Gift className="size-3 text-amber-600" />
-                      {isBn ? "ফ্রি উপহার অন্তর্ভুক্ত:" : "Free Vedic Gifts Included:"}
-                    </p>
-                    {freeGifts.map((g, i) => (
-                      <div key={i} className="flex items-center justify-between gap-2 pl-4">
-                        <span className="text-xs text-amber-900">{g.title}</span>
-                        <span className="shrink-0 rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white">
-                          FREE · {formatINR(g.value)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
 
                 {/* Smart Best-Offer Coupon Selector */}
                 <div className="pt-2">

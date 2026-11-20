@@ -250,7 +250,6 @@ function ShopInner() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
               {products.map((p) => {
                 const discount = p.discount_percent || Math.round(((p.mrp - p.sale_price) / p.mrp) * 100);
-                const freeGiftBadge = p.free_gift_badge || "FREE Raw Selenite Plate worth ₹729";
 
                 return (
                   <CardTilt key={p.id} className="h-full">
@@ -289,16 +288,10 @@ function ShopInner() {
                           </div>
                         </div>
 
-                        {/* Gift Badge */}
-                        <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 flex items-center gap-1.5 text-[9px] font-bold text-amber-900 truncate">
-                          <Gift className="size-2.5 text-amber-600 shrink-0" />
-                          <span className="truncate">{freeGiftBadge}</span>
-                        </div>
-
                         {/* Title */}
                         <Link
                           href={`/shop/products/${p.slug}`}
-                          className="font-bold text-xs text-stone-900 line-clamp-2 hover:text-amber-700 transition-colors block"
+                          className="font-bold text-xs text-stone-900 line-clamp-2 hover:text-amber-700 transition-colors block pt-1"
                         >
                           {p.title}
                         </Link>

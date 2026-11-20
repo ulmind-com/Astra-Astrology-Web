@@ -910,26 +910,10 @@ export default function MyOrdersPage() {
                 </div>
 
                 {/* ------------------------------------------------------------- */}
-                {/* Free Gifts & Cashback Rewards */}
+                {/* 100% Wallet Cashback Rewards */}
                 {/* ------------------------------------------------------------- */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                  {/* Complimentary Gifts */}
-                  {order.free_gifts && order.free_gifts.length > 0 && (
-                    <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-2.5 space-y-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1">
-                        <Gift className="size-3.5 text-amber-600" />
-                        {isBn ? "বিনামূল্যে প্রাপ্ত উপহার:" : "Free Sacred Gifts:"}
-                      </span>
-                      {order.free_gifts.map((g: any, i: number) => (
-                        <p key={i} className="text-xs font-semibold text-amber-950">
-                          🎁 {g.title || g.badge}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* 100% Wallet Cashback Status */}
-                  {order.cashback_coins_eligible > 0 && (
+                {order.cashback_coins_eligible > 0 && (
+                  <div className="text-xs">
                     <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-2.5 space-y-1">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1">
                         <Coins className="size-3.5 text-emerald-600" />
@@ -954,8 +938,8 @@ export default function MyOrdersPage() {
                         </p>
                       )}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 {/* ------------------------------------------------------------- */}
                 {/* Devotee Vedic Sankalpa Card (Expandable) */}

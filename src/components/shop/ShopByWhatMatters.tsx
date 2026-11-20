@@ -248,8 +248,8 @@ export function ShopByWhatMatters({ onSelectFilter }: Props) {
                 </span>
               </div>
               <p className="text-[11px] text-stone-500 truncate">{r.stone}</p>
-              <div className="mt-2 text-[10px] text-emerald-700 font-bold">
-                + Free Selenite Plate ₹729
+              <div className="mt-2 text-[10px] text-amber-700 font-bold">
+                ১০০% প্রাণ-প্রতিষ্ঠিত
               </div>
             </button>
           ))}

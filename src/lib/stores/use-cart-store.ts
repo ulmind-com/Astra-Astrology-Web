@@ -345,19 +345,7 @@ export const useCartStore = create<CartStore>()(
         );
       },
 
-      getBundledGifts: () => {
-        const gifts: { title: string; value: number; badge?: string }[] = [];
-        get().items.forEach((item) => {
-          if (item.free_gift_title && !gifts.some((g) => g.title === item.free_gift_title)) {
-            gifts.push({
-              title: item.free_gift_title,
-              value: item.free_gift_value || 729,
-              badge: item.free_gift_badge || undefined,
-            });
-          }
-        });
-        return gifts;
-      },
+      getBundledGifts: () => [],
     }),
     {
       name: "astra_shop_cart_storage",

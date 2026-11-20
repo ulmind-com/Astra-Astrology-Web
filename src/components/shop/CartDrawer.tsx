@@ -80,18 +80,6 @@ export function CartDrawer() {
     staleTime: 5 * 60 * 1000,
   });
   const freeShippingThreshold = shopSettings?.free_shipping_threshold ?? 499;
-  const giftMinValue = shopSettings?.free_gift_min_cart_value ?? 499;
-  const giftEnabled = shopSettings?.free_gift_enabled !== false;
-  const bundledGifts =
-    giftEnabled && shopSettings?.free_gift_default_title && subtotal >= giftMinValue
-      ? [
-          {
-            title: shopSettings.free_gift_default_title,
-            value: shopSettings.free_gift_default_value ?? 0,
-            badge: shopSettings.free_gift_default_badge,
-          },
-        ]
-      : [];
   const progressPercent = Math.min(100, Math.round((subtotal / freeShippingThreshold) * 100));
   const remainingForFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
   const cashbackCoins = getCashbackCoins();
@@ -302,16 +290,6 @@ export function CartDrawer() {
                             )}
                           </div>
 
-                          {/* Free Gift Tag */}
-                          {item.free_gift_title && (
-                            <div className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-200/80">
-                              <Gift className="size-3 text-amber-600 shrink-0" />
-                              <span className="truncate">
-                                {item.free_gift_badge || `Includes ${item.free_gift_title}`}
-                              </span>
-                            </div>
-                          )}
-
                           {/* Sankalpa Indicator */}
                           {item.sankalpa?.devotee_name && (
                             <div className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-emerald-800">
@@ -352,27 +330,6 @@ export function CartDrawer() {
                     </div>
                   );
                 })
-              )}
-
-              {/* Free Bundled Gifts Card */}
-              {bundledGifts.length > 0 && items.length > 0 && (
-                <div className="rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 via-orange-50/40 to-amber-50/60 p-3.5 space-y-2">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-950">
-                    <Sparkles className="size-4 text-amber-600 shrink-0" />
-                    <span>Complimentary Sacred Gifts Included:</span>
-                  </div>
-                  {bundledGifts.map((gift, gIdx) => (
-                    <div
-                      key={gIdx}
-                      className="flex items-center justify-between rounded-xl border border-amber-200/90 bg-white/90 p-2 text-xs"
-                    >
-                      <span className="font-semibold text-stone-800">{gift.title}</span>
-                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
-                        FREE (Worth ₹{gift.value})
-                      </span>
-                    </div>
-                  ))}
-                </div>
               )}
             </div>
 

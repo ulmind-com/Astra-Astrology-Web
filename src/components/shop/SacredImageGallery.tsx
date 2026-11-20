@@ -68,8 +68,8 @@ export function SacredImageGallery({
       { bn: "প্রধান দর্শন", en: "Sacred Specimen" },
       { bn: "প্রাকৃতিক খাঁজ ও মুখ", en: "Natural Clefts & Texture" },
       { bn: "ল্যাব সিলমোহর", en: "Lab Certificate" },
-      { bn: "ফ্রি সেলিনাইট প্লেট", en: "Free Selenite Plate" },
-      { bn: "পবিত্র উপহার বক্স", en: "Sacred Gift Box" },
+      { bn: "পবিত্র বৈদিক প্যাকেজিং", en: "Vedic Sacred Packaging" },
+      { bn: "পবিত্র সুরক্ষা বক্স", en: "Sacred Protective Box" },
     ];
 
     return rawList.map((url, idx) => {
@@ -78,10 +78,10 @@ export function SacredImageGallery({
 
       if (lower.includes("cert") || lower.includes("lab")) {
         tag = { bn: "ল্যাব সিলমোহর", en: "Lab Certificate" };
-      } else if (lower.includes("selenite") || lower.includes("gift") || lower.includes("plate")) {
-        tag = { bn: "ফ্রি সেলিনাইট প্লেট", en: "Free Selenite Plate" };
+      } else if (lower.includes("selenite") || lower.includes("plate")) {
+        tag = { bn: "পবিত্র বৈদিক প্যাকেজিং", en: "Vedic Sacred Packaging" };
       } else if (lower.includes("box") || lower.includes("package")) {
-        tag = { bn: "পবিত্র উপহার বক্স", en: "Sacred Gift Box" };
+        tag = { bn: "পবিত্র সুরক্ষা বক্স", en: "Sacred Protective Box" };
       }
 
       return {

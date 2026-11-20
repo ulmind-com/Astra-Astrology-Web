@@ -27,7 +27,7 @@ export function ShopCategoryPills() {
       icon: Sparkles,
       color: "from-amber-500 to-yellow-600",
       link: "/shop?purpose=zodiac",
-      badge: "Free Selenite",
+      badge: "Energized",
     },
     {
       id: "wealth",
