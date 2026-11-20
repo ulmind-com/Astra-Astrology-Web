@@ -647,6 +647,37 @@ export const appointmentApi = {
 
   sendFollowUpMessage: (id: string, text: string) =>
     api.post<Appointment>(`/appointments/${id}/follow-up/message`, { text }),
+
+  getGoogleCalendarAuthUrl: (redirectUri?: string) =>
+    api.get<{ configured: boolean; auth_url: string; mode: string; message: string }>(
+      endpoints.appointments.googleCalendar.authUrl,
+      { query: redirectUri ? { redirect_uri: redirectUri } : undefined }
+    ),
+
+  googleCalendarCallback: (code: string, redirectUri?: string) =>
+    api.post<{ connected: boolean; email: string; mode: string; message: string }>(
+      endpoints.appointments.googleCalendar.callback,
+      { code, redirect_uri: redirectUri }
+    ),
+
+  syncGoogleCalendar: () =>
+    api.post<{ connected: boolean; email: string; busy_count: number; message: string }>(
+      endpoints.appointments.googleCalendar.sync,
+      {}
+    ),
+
+  disconnectGoogleCalendar: () =>
+    api.post<{ connected: boolean }>(endpoints.appointments.googleCalendar.disconnect, {}),
+
+  getGoogleCalendarStatus: () =>
+    api.get<{
+      connected: boolean;
+      email: string | null;
+      sync_enabled: boolean;
+      last_synced_at: string | null;
+      busy_count: number;
+      busy_intervals: Array<{ starts_at: string; ends_at: string; title: string; source: string; is_external: boolean }>;
+    }>(endpoints.appointments.googleCalendar.status),
 };
 
 // ----------------------------------------------------------------- reviews

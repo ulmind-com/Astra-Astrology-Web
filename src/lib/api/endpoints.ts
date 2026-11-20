@@ -90,6 +90,13 @@ export const endpoints = {
     myWindows: "/appointments/me/windows",
     myWindow: (id: string) => `/appointments/me/windows/${id}`,
     mySchedule: "/appointments/me/schedule",
+    googleCalendar: {
+      authUrl: "/appointments/google-calendar/auth-url",
+      callback: "/appointments/google-calendar/callback",
+      sync: "/appointments/google-calendar/sync",
+      disconnect: "/appointments/google-calendar/disconnect",
+      status: "/appointments/google-calendar/status",
+    },
   },
 
   palmReading: {

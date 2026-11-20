@@ -36,6 +36,7 @@ import { ApiError } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/providers/language-provider";
 import { APPOINTMENT_STATUS_LABELS, type Appointment, type VedicPrescription } from "@/types";
+import { GoogleCalendarIntegrationCard } from "@/components/appointments/GoogleCalendarIntegrationCard";
 
 const KEY = ["appointments", "mine"] as const;
 
@@ -566,6 +567,9 @@ export default function MyAppointmentsPage() {
           </Button>
         </Link>
       </header>
+
+      {/* Two-Way Google Calendar 2-Way Sync Integration */}
+      <GoogleCalendarIntegrationCard />
 
       {isLoading ? (
         <LoadingBlock label="Loading appointments..." />
