@@ -10,7 +10,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "deploy": "vercel --prod --yes"
+    "deploy": "npx vercel --prod --yes"
   },
   "dependencies": {
     "@arivedha/astro-icons": "^0.1.2",
