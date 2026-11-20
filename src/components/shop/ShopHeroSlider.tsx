@@ -126,17 +126,8 @@ export function ShopHeroSlider({ banners }: Props) {
     setTouchEndX(null);
   };
 
-  // Trust items for the ticker strip directly below hero slider (exact Astrotalk design)
-  const trustItems = [
-    "7-Day Easy Returns",
-    "Energised by Top Astrologers",
-    "100% Natural & Authentic",
-    "Certified by Govt. Labs",
-    "100% Cashback On All Prepaid Orders",
-  ];
-
   return (
-    <div className="w-full space-y-3 sm:space-y-4">
+    <div className="w-full">
       {/* 1. Main Hero Carousel Container (Exact Astrotalk Screenshot Layout) */}
       <section
         className="relative w-full overflow-hidden rounded-[24px] sm:rounded-[32px] md:rounded-[36px] shadow-2xl bg-[#faf6f0] border border-amber-900/10 select-none group"
@@ -163,18 +154,18 @@ export function ShopHeroSlider({ banners }: Props) {
                   className="relative w-full h-full shrink-0 flex-none overflow-hidden select-none"
                   aria-hidden={!isCurrent}
                 >
-                  {/* Background Image */}
+                  {/* Background Image - Positioned right to preserve product artwork */}
                   <Image
                     src={slide.image_url}
                     alt={slide.title}
                     fill
                     priority={idx < 2}
                     sizes="(max-width: 1280px) 100vw, 1280px"
-                    className="object-cover object-center transform transition-transform duration-1000 ease-out group-hover:scale-102"
+                    className="object-cover object-right sm:object-center lg:object-right transform transition-transform duration-1000 ease-out group-hover:scale-102"
                     unoptimized
                   />
 
-                  {/* Pre-designed Graphic Banner (like Lumus Perfumes from Screenshot) */}
+                  {/* Pre-designed Graphic Banner */}
                   {slide.hide_text_overlay ? (
                     <Link
                       href={slide.cta_link || "/shop"}
@@ -184,11 +175,11 @@ export function ShopHeroSlider({ banners }: Props) {
                   ) : (
                     /* Dynamic Astrotalk Left-and-Right Split Layout */
                     <>
-                      {/* Soft Left Vignette Gradient for Ultra-Crisp Typography Legibility */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-transparent pointer-events-none" />
+                      {/* Deep Left Vignette Gradient for Ultra-Crisp Legibility */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-transparent pointer-events-none" />
 
-                      {/* Left Side Content Block */}
-                      <div className="absolute inset-0 flex flex-col justify-center px-7 sm:px-12 lg:px-16 max-w-xl text-white space-y-3 sm:space-y-4 z-10 pointer-events-none">
+                      {/* Left Side Content Block - Constrained to prevent right-side overlap */}
+                      <div className="absolute inset-y-0 left-0 flex flex-col justify-center px-6 sm:px-10 lg:px-14 max-w-sm sm:max-w-md lg:max-w-lg text-white space-y-2.5 sm:space-y-4 z-10 pointer-events-none">
                         {/* Luxury Eyebrow: LUMUS × ASTROTALK */}
                         {slide.badge_text && (
                           <div className="inline-flex items-center gap-1.5 self-start text-xs sm:text-sm font-medium tracking-[0.22em] text-white/95 uppercase drop-shadow-sm">
@@ -275,33 +266,6 @@ export function ShopHeroSlider({ banners }: Props) {
           )}
         </div>
       </section>
-
-      {/* 2. Dark Trust Badge Strip Directly Below Hero Slider (Exact Astrotalk Screenshot Match) */}
-      <div className="w-full rounded-xl sm:rounded-2xl bg-[#141414] text-white py-3 sm:py-3.5 px-4 shadow-md overflow-hidden select-none border border-stone-800">
-        {/* Desktop View: Centered Horizontal Row */}
-        <div className="hidden lg:flex items-center justify-center gap-6 xl:gap-8 text-xs sm:text-[13px] font-medium tracking-wide">
-          {trustItems.map((item, idx) => (
-            <div key={idx} className="flex items-center gap-2.5">
-              <span className="text-amber-400 font-bold text-sm">✦</span>
-              <span className="text-stone-100">{item}</span>
-            </div>
-          ))}
-          <div className="flex items-center gap-2.5">
-            <span className="text-amber-400 font-bold text-sm">✦</span>
-            <span className="text-stone-100">{trustItems[0]}</span>
-          </div>
-        </div>
-
-        {/* Mobile & Tablet View: Smooth Continuous Auto-Marquee */}
-        <div className="flex lg:hidden w-max animate-marquee space-x-6 items-center whitespace-nowrap text-xs font-medium tracking-wide">
-          {[...trustItems, ...trustItems, ...trustItems].map((item, idx) => (
-            <div key={idx} className="flex items-center gap-2">
-              <span className="text-amber-400 font-bold text-xs">✦</span>
-              <span className="text-stone-100">{item}</span>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

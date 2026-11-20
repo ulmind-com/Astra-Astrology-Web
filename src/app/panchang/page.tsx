@@ -75,7 +75,11 @@ export default function PanchangPage() {
   const [choghadiyaPeriod, setChoghadiyaPeriod] = React.useState<"day" | "night">("day");
 
   const tabDataMap = initialTabHoroscopes as unknown as Record<string, typeof INITIAL_DAILY_HOROSCOPE>;
-  const dateInitialData = tabDataMap[selectedDate] ?? (selectedDate === todayStr ? INITIAL_DAILY_HOROSCOPE : undefined);
+  const dateInitialData =
+    tabDataMap[selectedDate] ??
+    (selectedDate === tomorrowStr ? tabDataMap["tomorrow"] ?? tabDataMap["2026-11-21"] : undefined) ??
+    (selectedDate === yesterdayStr ? tabDataMap["yesterday"] ?? tabDataMap["2026-11-19"] : undefined) ??
+    (selectedDate === todayStr ? INITIAL_DAILY_HOROSCOPE : undefined);
 
   // Real-time backend API query with pre-hydrated Swiss Ephemeris data for instant switching
   const { data: horoscopeData, isLoading, error } = useQuery({
@@ -93,7 +97,7 @@ export default function PanchangPage() {
     staleTime: 1000 * 60 * 15,
   });
 
-  const panchang = horoscopeData?.panchang;
+  const panchang = horoscopeData?.panchang ?? dateInitialData?.panchang ?? INITIAL_DAILY_HOROSCOPE.panchang;
   const horas: HoraItem[] = panchang?.horas ?? [];
   const choghadiya: ChoghadiyaItem[] = panchang?.choghadiya ?? [];
 

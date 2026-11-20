@@ -143,6 +143,75 @@ const INITIAL_COURSE_MAP: Record<string, CourseDetail> = {
       },
     ],
   },
+  "demo-course-2": {
+    id: "6af9b3c056a9c04b5c87c3d1",
+    title: "Demo Course 2",
+    slug: "demo-course-2",
+    subtitle: "Subtitle for Demo Course 2",
+    category: "lal_kitab",
+    level: "all_levels",
+    language: "bn",
+    instructor_name: "Pt. Acharya Rahul Sharma",
+    instructor_title: "Senior Vedic Jyotishacharya",
+    instructor_avatar: "https://res.cloudinary.com/astra/acharya-rahul-sharma.jpg",
+    thumbnail_url: "https://res.cloudinary.com/hdzb1lc5/image/upload/v1794749371/astra-astrology/courses/thumbnails/ec8mqnhyj7onuxx0a6i6.webp",
+    price: 1499.0,
+    mrp: 4999.0,
+    discount_percent: 70,
+    currency: "INR",
+    duration_hours: 0,
+    total_lessons: 2,
+    total_students: 3,
+    average_rating: 5.0,
+    rating_count: 0,
+    is_featured: false,
+    certificate_enabled: true,
+    access_duration_days: null,
+    is_enrolled: false,
+    user_progress_percent: 0.0,
+    description: "",
+    promo_video_url: "",
+    promo_video_provider: "youtube",
+    what_you_will_learn: [],
+    prerequisites: [],
+    tags: [],
+    sections: [
+      {
+        id: "6af9b3d156a9c04b5c87c3d2",
+        title: "Module 1",
+        order: 1,
+        description: null,
+        lessons: [
+          {
+            id: "6af9b3f356a9c04b5c87c3d3",
+            section_id: "6af9b3d156a9c04b5c87c3d2",
+            title: "Start",
+            order: 1,
+            duration_minutes: 1,
+            is_free_preview: false,
+            summary: "",
+            resources_count: 0,
+            video_provider: null,
+            video_id: null,
+            is_completed: false,
+          },
+          {
+            id: "6af9b41456a9c04b5c87c3d4",
+            section_id: "6af9b3d156a9c04b5c87c3d2",
+            title: "Video 2",
+            order: 2,
+            duration_minutes: 1,
+            is_free_preview: false,
+            summary: "",
+            resources_count: 0,
+            video_provider: null,
+            video_id: null,
+            is_completed: false,
+          },
+        ],
+      },
+    ],
+  },
 };
 
 function loadRazorpay(): Promise<boolean> {
@@ -170,7 +239,9 @@ export default function CourseDetailPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user, isSignedIn } = useAuth();
-  const slug = String(params.slug);
+  const rawSlug = (params as any)?.slug;
+  const slug = (Array.isArray(rawSlug) ? rawSlug[0] : rawSlug) || "";
+  const initialCourse = slug ? INITIAL_COURSE_MAP[slug] : undefined;
 
   const [expandedSections, setExpandedSections] = React.useState<Record<string, boolean>>({});
   const [previewLesson, setPreviewLesson] = React.useState<CourseLesson | null>(null);
@@ -188,8 +259,10 @@ export default function CourseDetailPage() {
   } = useQuery({
     queryKey: ["course-detail", slug],
     queryFn: () => courseApi.getCourseDetail(slug),
-    initialData: INITIAL_COURSE_MAP[slug],
+    initialData: initialCourse,
+    placeholderData: (prev) => prev ?? initialCourse,
     enabled: Boolean(slug),
+    staleTime: 1000 * 60 * 15,
   });
 
   // Fetch tokenized stream for free preview lesson (Dynamic Bunny library ID & token signed by backend)

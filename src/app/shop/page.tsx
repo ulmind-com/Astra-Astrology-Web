@@ -38,6 +38,9 @@ import { AstraPromiseSection } from "@/components/shop/AstraPromiseSection";
 import { ShopFaqAccordion } from "@/components/shop/ShopFaqAccordion";
 import { CardTilt } from "@/components/ui/card-tilt";
 import { ShopFilterDrawer } from "@/components/shop/ShopFilterDrawer";
+import { ShopTrustMarquee } from "@/components/shop/ShopTrustMarquee";
+import initialProductsData from "@/lib/initial-shop-products.json";
+import initialCategoriesData from "@/lib/initial-shop-categories.json";
 
 function ShopInner() {
   const { language } = useLanguage();
@@ -60,7 +63,7 @@ function ShopInner() {
     if (initialPurpose) setSelectedPurpose(initialPurpose);
   }, [initialPlanet, initialCategory, initialPurpose]);
 
-  // Fetch Public Banners
+  // Fetch Public Banners with instant caching
   const { data: bannerSettings } = useQuery<ShopBannerSettings | null>({
     queryKey: ["shop_public_banners"],
     queryFn: async () => {
@@ -71,10 +74,11 @@ function ShopInner() {
         return null;
       }
     },
+    staleTime: 1000 * 60 * 15,
   });
 
-  // Fetch Public Products
-  const { data: serverProductData, isLoading } = useQuery({
+  // Fetch Public Products with 0ms pre-hydration
+  const { data: serverProductData, isLoading, isFetching } = useQuery({
     queryKey: ["shop_public_products", selectedPlanet, selectedCategory, searchTerm],
     queryFn: async () => {
       try {
@@ -86,28 +90,37 @@ function ShopInner() {
         });
         return res;
       } catch {
-        return { items: [], total: 0 };
+        return initialProductsData as any;
       }
     },
+    initialData:
+      !selectedPlanet && !selectedCategory && !searchTerm
+        ? (initialProductsData as any)
+        : undefined,
+    placeholderData: (prev) => prev ?? (initialProductsData as any),
+    staleTime: 1000 * 60 * 10,
   });
 
-  // Fetch Public Categories
-  const { data: categories = [] } = useQuery<ShopProductCategory[]>({
+  // Fetch Public Categories with 0ms pre-hydration
+  const { data: categories = (initialCategoriesData as any) } = useQuery<ShopProductCategory[]>({
     queryKey: ["shop_public_categories"],
     queryFn: async () => {
       try {
         const res = await shopApi.getCategories();
-        return res;
+        return res && res.length > 0 ? res : (initialCategoriesData as any);
       } catch {
-        return [];
+        return initialCategoriesData as any;
       }
     },
+    initialData: initialCategoriesData as any,
+    placeholderData: (prev) => prev ?? (initialCategoriesData as any),
+    staleTime: 1000 * 60 * 30,
   });
 
   const rawProducts: ShopProduct[] =
     serverProductData && serverProductData.items && Array.isArray(serverProductData.items)
       ? serverProductData.items
-      : [];
+      : ((initialProductsData as any)?.items || []);
 
   const products: ShopProduct[] = selectedPurpose
     ? rawProducts.filter((p) => p.purpose_tags?.includes(selectedPurpose))
@@ -124,7 +137,7 @@ function ShopInner() {
 
   return (
     <div className="min-h-screen bg-[#faf6f0] text-stone-900 selection:bg-amber-200 selection:text-amber-950 font-sans">
-      {/* 1. Top Announcement Bar (Exact Astrotalk Screenshot Position) */}
+      {/* 1. Top Announcement Bar */}
       <ShopAnnouncementMarquee
         announcementText={bannerSettings?.announcement_bar_text}
         announcementLink={bannerSettings?.announcement_bar_link}
@@ -133,14 +146,21 @@ function ShopInner() {
       <SiteHeader />
       <CartDrawer />
 
+      {/* 2. Continuous Scrolling Reassurance Bar (Directly Under Navbar!) */}
+      <ShopTrustMarquee />
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-10 sm:space-y-14">
-        {/* 2. Hero Section: Exact Astrotalk Luxury Carousel + Trust Strip */}
+        {/* 3. Hero Section: Luxury Carousel */}
         <ShopHeroSlider banners={bannerSettings?.hero_banners} />
 
-        {/* 3. Category Quick Filter Strip */}
-        <ShopCategoryPills />
+        {/* 4. Category Quick Filter Strip (Dynamic exact 6 categories from Admin Panel) */}
+        <ShopCategoryPills
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+        />
 
-        {/* 4. Shop By What Matters (Life Purpose, Planets, Crystals) */}
+        {/* 5. Shop By What Matters (Life Purpose, Planets, Crystals) */}
         <ShopByWhatMatters
           onSelectFilter={(type, value) => {
             if (type === "purpose") setSelectedPurpose(value);
@@ -148,7 +168,7 @@ function ShopInner() {
           }}
         />
 
-        {/* 5. Most Loved By Customers (Bestsellers Section) */}
+        {/* 6. Most Loved By Customers (Bestsellers Section) */}
         <ShopBestsellers products={rawProducts} />
 
         {/* 6. Promotional 100% Wallet Cashback Strip */}
@@ -171,6 +191,7 @@ function ShopInner() {
 
               <div className="flex items-center gap-2">
                 <ShopFilterDrawer
+                  categories={categories}
                   selectedPlanet={selectedPlanet}
                   selectedCategory={selectedCategory}
                   selectedPurpose={selectedPurpose}
@@ -217,7 +238,7 @@ function ShopInner() {
           </div>
 
           {/* Grid */}
-          {isLoading ? (
+          {isLoading && products.length === 0 ? (
             <div className="py-20 text-center space-y-3">
               <RotateCcw className="size-8 text-amber-600 animate-spin mx-auto" />
               <p className="text-xs text-stone-500 font-medium">

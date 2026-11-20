@@ -4,7 +4,10 @@ import * as React from "react";
 import { Drawer } from "vaul";
 import { Filter, X, Check, Sparkles, RotateCcw } from "lucide-react";
 
+import type { ShopProductCategory } from "@/lib/api";
+
 interface ShopFilterDrawerProps {
+  categories?: ShopProductCategory[];
   selectedCategory: string;
   onSelectCategory: (val: string) => void;
   selectedPlanet: string;
@@ -37,15 +40,17 @@ const PURPOSES = [
   { id: "health", bn: "স্বাস্থ্য ও মানসিক শান্তি", en: "Health & Peace" },
 ];
 
-const CATEGORIES = [
-  { id: "rudraksha", bn: "সিদ্ধ রুদ্রাক্ষ (Rudraksha)", en: "Rudraksha" },
-  { id: "gemstones", bn: "ন্যাচারাল রত্ন (Gemstones)", en: "Gemstones" },
-  { id: "crystal_bracelet", bn: "ক্রিস্টাল ব্রেসলেট (Bracelets)", en: "Bracelets" },
-  { id: "yantra", bn: "সিদ্ধ যন্ত্র ও কবচ (Yantra)", en: "Yantras" },
-  { id: "pyrite", bn: "পায়রাইট রিং ও সামগ্রী", en: "Pyrite" },
+const DEFAULT_CATEGORIES = [
+  { id: "rudraksh", bn: "রুদ্রাক্ষ", en: "Rudraksh" },
+  { id: "zodiac", bn: "রাশি কালেকশন", en: "Zodiac Collection" },
+  { id: "bracelets", bn: "ব্রেসলেট ও আংটি", en: "Bracelets & Rings" },
+  { id: "rudraksha", bn: "নেপালি রুদ্রাক্ষ", en: "Nepali Rudraksha" },
+  { id: "karungali", bn: "আসল করুঙ্গালি", en: "Original Karungali" },
+  { id: "vastu-home", bn: "বাস্তু ও গৃহ সামগ্রী", en: "Vastu & Home" },
 ];
 
 export function ShopFilterDrawer({
+  categories,
   selectedCategory,
   onSelectCategory,
   selectedPlanet,
@@ -57,6 +62,17 @@ export function ShopFilterDrawer({
   language = "bn",
 }: ShopFilterDrawerProps) {
   const [open, setOpen] = React.useState(false);
+
+  const activeCategories = React.useMemo(() => {
+    if (categories && categories.length > 0) {
+      return categories.map((c) => ({
+        id: c.slug,
+        bn: c.name,
+        en: c.name,
+      }));
+    }
+    return DEFAULT_CATEGORIES;
+  }, [categories]);
 
   return (
     <Drawer.Root open={open} onOpenChange={setOpen}>
@@ -113,7 +129,7 @@ export function ShopFilterDrawer({
                 {language === "bn" ? "ক্যাটাগরি (Category)" : "Category"}
               </h5>
               <div className="flex flex-wrap gap-2">
-                {CATEGORIES.map((cat) => {
+                {activeCategories.map((cat) => {
                   const isSelected = selectedCategory === cat.id;
                   return (
                     <button
