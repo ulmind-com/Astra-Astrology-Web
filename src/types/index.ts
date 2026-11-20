@@ -70,11 +70,19 @@ export type AstrologerPublic = Omit<S["AstrologerPublic"], "appointment"> & {
   banner_image_url?: string | null;
   service_duration?: ServiceDurationStats | null;
   appointment: AppointmentCard;
+  is_on_brahma_pause?: boolean;
+  brahma_pause_until?: string | null;
+  brahma_pause_reason?: string | null;
+  brahma_pause_activated_at?: string | null;
 };
 export type AstrologerProfile = Omit<S["AstrologerProfile"], "appointment"> & {
   banner_image_url?: string | null;
   service_duration?: ServiceDurationStats | null;
   appointment: AppointmentCard;
+  is_on_brahma_pause?: boolean;
+  brahma_pause_until?: string | null;
+  brahma_pause_reason?: string | null;
+  brahma_pause_activated_at?: string | null;
 };
 export type AstrologerCreate = S["AstrologerCreate"];
 export type AstrologerCreated = S["AstrologerCreated"];

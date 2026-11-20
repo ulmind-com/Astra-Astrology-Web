@@ -37,6 +37,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/providers/language-provider";
 import { APPOINTMENT_STATUS_LABELS, type Appointment, type VedicPrescription } from "@/types";
 import { GoogleCalendarIntegrationCard } from "@/components/appointments/GoogleCalendarIntegrationCard";
+import { BrahmaPauseControlCard } from "@/components/appointments/BrahmaPauseControlCard";
 
 const KEY = ["appointments", "mine"] as const;
 
@@ -571,6 +572,9 @@ export default function MyAppointmentsPage() {
       {/* Two-Way Google Calendar 2-Way Sync Integration */}
       <GoogleCalendarIntegrationCard />
 
+      {/* Astrologer Emergency Break & Seeker Auto-Rescue Engine */}
+      <BrahmaPauseControlCard />
+
       {isLoading ? (
         <LoadingBlock label="Loading appointments..." />
       ) : !data?.length ? (
@@ -748,8 +752,8 @@ export default function MyAppointmentsPage() {
                           </h4>
                           <p className="mt-0.5 text-[11px] text-muted-foreground leading-relaxed">
                             {language === "bn"
-                              ? `জ্যোতিষী জরুরি ব্যক্তিগত বা আধ্যাত্মিক বিরতিতে আছেন${a.brahma_pause_reason ? ` ("${a.brahma_pause_reason}")` : ""}। আপনার সুবিধার্থে দুটি বিকল্প রাখা হয়েছে—কোনো অতিরিক্ত ফি ছাড়া নতুন সময় বেছে নিন অথবা তাৎক্ষণিক ১০০% সম্পূর্ণ রিফান্ড গ্রহণ করুন:`
-                              : `The astrologer has activated an emergency pause${a.brahma_pause_reason ? ` ("${a.brahma_pause_reason}")` : ""}. Please choose an option below:`}
+                              ? `আপনার জ্যোতিষী বর্তমানে একটি জরুরি ব্রহ্মা পজে আছেন${a.brahma_pause_reason ? ` ("${a.brahma_pause_reason}")` : ""}। আপনি কি অন্য স্লটে ফ্রিতে রিশিডিউল করতে চান নাকি ১০০% ইনস্ট্যান্ট রিফান্ড চান?`
+                              : `Your astrologer is currently on an emergency Brahma Pause${a.brahma_pause_reason ? ` ("${a.brahma_pause_reason}")` : ""}. Would you like to reschedule for free to another slot or receive a 100% instant refund?`}
                           </p>
                         </div>
                       </div>
@@ -771,7 +775,7 @@ export default function MyAppointmentsPage() {
                         className="bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs shadow-xs"
                       >
                         <CalendarDays className="size-3.5 mr-1.5" />
-                        {language === "bn" ? "বিনামূল্যে নতুন সময় বেছে নিন" : "Free Reschedule"}
+                        {language === "bn" ? "1-Click Free Reschedule (ফ্রিতে রিশিডিউল)" : "1-Click Free Reschedule"}
                       </Button>
 
                       <Button
@@ -783,7 +787,7 @@ export default function MyAppointmentsPage() {
                       >
                         {rescuingId === a.id
                           ? (language === "bn" ? "প্রসেস হচ্ছে..." : "Refunding...")
-                          : (language === "bn" ? "১০০% তাৎক্ষণিক সম্পূর্ণ রিফান্ড নিন" : "Instant 100% Full Refund")}
+                          : (language === "bn" ? "100% Instant Refund (তাৎক্ষণিক রিফান্ড)" : "100% Instant Refund")}
                       </Button>
                     </div>
 

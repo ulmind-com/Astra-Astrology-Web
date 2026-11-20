@@ -624,6 +624,16 @@ export const appointmentApi = {
       minutes: number;
     }>(`/appointments/${id}/chamber`, {}),
 
+  activateBrahmaPause: (body: { duration_hours: number; reason?: string | null }) =>
+    api.post<{
+      pause_until: string;
+      affected_appointments_count: number;
+      reason?: string | null;
+    }>(endpoints.appointments.brahmaPause, body),
+
+  resumeBrahmaPause: () =>
+    api.post<{ message: string }>(endpoints.appointments.brahmaPauseResume, {}),
+
   brahmaPauseAction: (
     id: string,
     body: { action: "reschedule" | "refund"; new_starts_at?: string; reason?: string },

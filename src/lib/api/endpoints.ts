@@ -90,6 +90,9 @@ export const endpoints = {
     myWindows: "/appointments/me/windows",
     myWindow: (id: string) => `/appointments/me/windows/${id}`,
     mySchedule: "/appointments/me/schedule",
+    brahmaPause: "/appointments/brahma-pause",
+    brahmaPauseResume: "/appointments/brahma-pause/resume",
+    brahmaPauseAction: (id: string) => `/appointments/${id}/brahma-pause-action`,
     googleCalendar: {
       authUrl: "/appointments/google-calendar/auth-url",
       callback: "/appointments/google-calendar/callback",

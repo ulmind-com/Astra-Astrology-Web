@@ -374,6 +374,16 @@ function AppointmentsContent() {
     enabled: Boolean(selectedAstrologer?.id),
   });
 
+  const isAstrologerOnPause = Boolean(
+    (selectedAstrologer?.brahma_pause_until &&
+      new Date(selectedAstrologer.brahma_pause_until).getTime() > Date.now()) ||
+      dayView?.is_on_brahma_pause
+  );
+  const pauseUntil =
+    selectedAstrologer?.brahma_pause_until || dayView?.brahma_pause_until;
+  const pauseReason =
+    selectedAstrologer?.brahma_pause_reason || dayView?.brahma_pause_reason;
+
   // Calculate available start times & enrich with Vedic Muhurat
   const rawSlots = React.useMemo(() => {
     if (!dayView) return [];
@@ -839,6 +849,34 @@ function AppointmentsContent() {
                     </div>
                   </div>
                 </div>
+
+                {/* Brahma Pause Seeker Alert Banner */}
+                {isAstrologerOnPause && (
+                  <div className="mt-4 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/20 p-4 text-xs shadow-xs space-y-1.5 animate-in fade-in">
+                    <div className="flex items-start gap-3">
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white font-bold text-sm shadow-xs">
+                        🕊️
+                      </span>
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="font-display font-bold text-sm text-stone-900">
+                            {language === "bn"
+                              ? "জ্যোতিষী বর্তমানে জরুরি ব্রহ্ম বিরতিতে (Brahma Pause) আছেন"
+                              : "Astrologer is on Emergency Brahma Pause"}
+                          </h4>
+                          <span className="rounded-full bg-amber-600 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
+                            {language === "bn" ? "জরুরি বিরতি" : "Emergency Break"}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-stone-700 leading-relaxed font-medium">
+                          {language === "bn"
+                            ? `পণ্ডিতজি জরুরি ব্যক্তিগত বা আধ্যাত্মিক কারণে সাময়িক বিরতিতে আছেন${pauseReason ? ` ("${pauseReason}")` : ""}। পুনরায় সক্রিয় হবেন: ${pauseUntil ? new Date(pauseUntil).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" }) : "শীঘ্রই"}। এই বিরতিকালীন স্লটগুলো স্বয়ংক্রিয়ভাবে শিল্ডেড রাখা হয়েছে, আপনি বিরতির পরের উন্মুক্ত স্লট বেছে নিতে পারেন।`
+                            : `The astrologer has activated an emergency pause${pauseReason ? ` ("${pauseReason}")` : ""}. Resuming schedule around ${pauseUntil ? new Date(pauseUntil).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" }) : "soon"}. Slots during this period are shielded; please select an open slot after this pause.`}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : null}
           </div>
