@@ -9,7 +9,8 @@
     "tunnel": "node scripts/dev-mobile-tunnel.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy": "vercel --prod --yes"
   },
   "dependencies": {
     "@arivedha/astro-icons": "^0.1.2",
