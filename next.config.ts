@@ -29,6 +29,14 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: "/api/v1/:path*",
+        destination: "https://astra-astrology-backend.onrender.com/api/v1/:path*",
+      },
+    ];
+  },
   async redirects() {
     return [
       {
