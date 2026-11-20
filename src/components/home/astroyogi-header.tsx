@@ -59,6 +59,7 @@ interface NavDropdownItem {
   href: string;
   description: string;
   icon: React.ComponentType<{ className?: string }>;
+  iconUrl?: string | null;
   badge?: string;
 }
 
@@ -217,6 +218,7 @@ export function AstroyogiHeader() {
         href: `/shop?category=${c.slug}#products`,
         description: description || countLabel,
         icon,
+        iconUrl: c.icon_url || null,
         badge: countLabel,
       };
     });
@@ -1074,7 +1076,12 @@ export function AstroyogiHeader() {
 
                   {/* Dropdown Menu Popup */}
                   {hasDropdown && isHovered && (
-                    <div className="absolute left-0 top-full pt-1.5 z-50 w-80 animate-in fade-in slide-in-from-top-2 duration-150">
+                    <div
+                      className={cn(
+                        "absolute left-0 top-full pt-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150",
+                        cat.href === "/shop" ? "w-[420px] sm:w-[440px]" : "w-80"
+                      )}
+                    >
                       <div className="overflow-hidden rounded-2xl border border-amber-200/90 bg-white p-2 shadow-[0_18px_45px_-10px_rgba(26,18,8,0.18)] ring-1 ring-black/5">
                         <div className="space-y-1">
                           {cat.dropdown?.map((item) => {
@@ -1084,23 +1091,34 @@ export function AstroyogiHeader() {
                                 key={item.label}
                                 href={item.href}
                                 onClick={() => setHoveredCategory(null)}
-                                className="group/item flex items-start gap-3 rounded-xl p-2.5 transition-colors hover:bg-amber-50/80"
+                                className="group/item flex items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-amber-50/80"
                               >
-                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-800 group-hover/item:bg-amber-200 transition-colors">
-                                  <Icon className="size-4.5" />
+                                <div className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-800 group-hover/item:bg-amber-200 transition-colors overflow-hidden border border-amber-200/80 shadow-2xs">
+                                  {item.iconUrl ? (
+                                    <Image
+                                      src={item.iconUrl}
+                                      alt={item.label}
+                                      fill
+                                      sizes="40px"
+                                      className="object-cover"
+                                      unoptimized
+                                    />
+                                  ) : (
+                                    <Icon className="size-5" />
+                                  )}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="font-bold text-xs text-stone-900 group-hover/item:text-amber-800">
+                                  <div className="flex items-center justify-between gap-2.5">
+                                    <span className="font-bold text-xs sm:text-[13px] text-stone-900 group-hover/item:text-amber-800 truncate">
                                       {item.label}
                                     </span>
                                     {item.badge && (
-                                      <span className="rounded-full bg-amber-100 text-amber-900 text-[9px] font-bold px-1.5 py-0.2 border border-amber-300/60">
+                                      <span className="shrink-0 rounded-full bg-amber-100 text-amber-950 text-[10px] font-bold px-2 py-0.5 border border-amber-300/80 whitespace-nowrap shadow-2xs">
                                         {item.badge}
                                       </span>
                                     )}
                                   </div>
-                                  <p className="mt-0.5 text-[11px] text-stone-500 leading-snug line-clamp-2">
+                                  <p className="mt-0.5 text-[11px] text-stone-500 leading-snug line-clamp-1">
                                     {item.description}
                                   </p>
                                 </div>
@@ -1320,10 +1338,17 @@ export function AstroyogiHeader() {
                                     key={sub.label}
                                     href={sub.href}
                                     onClick={() => setMobileMenuOpen(false)}
-                                    className="flex items-center gap-2.5 py-2 px-2.5 rounded-lg text-xs font-semibold text-stone-700 hover:bg-amber-50"
+                                    className="flex items-center justify-between py-2 px-2.5 rounded-lg text-xs font-semibold text-stone-700 hover:bg-amber-50"
                                   >
-                                    <Icon className="size-4 text-amber-600" />
-                                    <span>{sub.label}</span>
+                                    <div className="flex items-center gap-2.5 min-w-0">
+                                      <Icon className="size-4 text-amber-600 shrink-0" />
+                                      <span className="truncate">{sub.label}</span>
+                                    </div>
+                                    {sub.badge && (
+                                      <span className="shrink-0 text-[10px] font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300/60 whitespace-nowrap">
+                                        {sub.badge}
+                                      </span>
+                                    )}
                                   </Link>
                                 );
                               })}

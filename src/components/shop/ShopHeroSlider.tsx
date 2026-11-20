@@ -36,6 +36,16 @@ export function ShopHeroSlider({ banners }: Props) {
       image_url: "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=1200&q=80",
       is_active: true,
     },
+    {
+      id: "banner-2",
+      badge_text: "925 STERLING SILVER & CERTIFIED",
+      title: "Sacred Zodiac Collection",
+      subtitle: "Handcrafted 925 sterling silver zodiac rings & planetary talisman jewelry.",
+      cta_text: "Explore Zodiac",
+      cta_link: "/shop?category=zodiac",
+      image_url: "https://images.unsplash.com/photo-1599707367072-cd6ada2bc375?auto=format&fit=crop&w=1200&q=80",
+      is_active: true,
+    },
   ];
 
   const slides = banners && banners.length > 0 ? banners.filter((b) => b.is_active) : defaultBanners;

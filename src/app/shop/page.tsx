@@ -212,7 +212,7 @@ function ShopInner() {
         return null;
       }
     },
-    staleTime: 1000 * 60 * 15,
+    staleTime: 1000 * 30,
   });
 
   // Fetch Public Categories with 0ms pre-hydration
