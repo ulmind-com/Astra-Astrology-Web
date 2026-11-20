@@ -453,8 +453,17 @@ export default function CheckoutPage() {
         },
         modal: {
           ondismiss: () => {
+            // Immediately inform backend to cancel the uncompleted checkout and release reserved stock
+            const orderIdToAbort = result?.order_id;
+            if (orderIdToAbort) {
+              shopApi.abortCheckout(orderIdToAbort).catch((abortErr) => {
+                console.warn("[ShopCheckout] Background abort failed:", abortErr);
+              });
+            }
             toast.info(
-              isBn ? "পেমেন্ট বাতিল করা হয়েছে।" : "Payment was cancelled.",
+              isBn
+                ? "পেমেন্ট বাতিল হয়েছে। আপনার কার্টের সামগ্রী সংরক্ষিত আছে, আপনি পুনরায় চেষ্টা করতে পারেন বা COD বেছে নিতে পারেন।"
+                : "Payment was not completed. Your cart items are preserved, you can retry or choose Cash on Delivery.",
             );
             setIsSubmitting(false);
             setActiveOrder(null);

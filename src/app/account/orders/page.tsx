@@ -177,19 +177,24 @@ export default function MyOrdersPage() {
 
   // Filter orders
   const filteredOrders = React.useMemo(() => {
-    if (activeFilter === "all") return orders;
+    // Only display legitimate orders (either verified paid prepaid or valid Cash on Delivery)
+    const validOrders = orders.filter(
+      (o) => o.payment_status === "paid" || o.payment_method === "cod"
+    );
+
+    if (activeFilter === "all") return validOrders;
     if (activeFilter === "active") {
-      return orders.filter(
+      return validOrders.filter(
         (o) => !["delivered", "cancelled", "returned", "rto", "expired"].includes(o.order_status)
       );
     }
     if (activeFilter === "delivered") {
-      return orders.filter((o) => o.order_status === "delivered");
+      return validOrders.filter((o) => o.order_status === "delivered");
     }
     if (activeFilter === "cancelled") {
-      return orders.filter((o) => ["cancelled", "returned", "rto", "expired"].includes(o.order_status));
+      return validOrders.filter((o) => ["cancelled", "returned", "rto", "expired"].includes(o.order_status));
     }
-    return orders;
+    return validOrders;
   }, [orders, activeFilter]);
 
   // Open Cancel Modal

@@ -231,6 +231,7 @@ export const endpoints = {
     reserveStock: "/shop/reserve-stock",
     releaseStock: "/shop/release-stock",
     checkout: "/shop/checkout",
+    abortCheckout: (orderId: string) => `/shop/checkout/${orderId}/abort`,
     verifyPayment: "/shop/verify-payment",
     myOrders: "/shop/orders/mine",
     orderDetail: (orderKey: string) => `/shop/orders/${orderKey}`,
