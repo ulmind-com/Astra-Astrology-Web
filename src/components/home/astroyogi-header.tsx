@@ -468,7 +468,6 @@ export function AstroyogiHeader() {
           ],
         },
         { label: "ফ্রি ভাগ্যফল", href: "/free-readings" },
-        { label: "লাইভ", href: "/#live-experts", isLive: true },
       ];
     }
 
@@ -718,7 +717,6 @@ export function AstroyogiHeader() {
           ],
         },
         { label: "मुफ़्त फलादेश", href: "/free-readings" },
-        { label: "लाइव", href: "/#live-experts", isLive: true },
       ];
     }
 
@@ -968,7 +966,6 @@ export function AstroyogiHeader() {
           ],
         },
       { label: "Free Readings", href: "/free-readings" },
-      { label: "Live", href: "/#live-experts", isLive: true },
     ];
   }, [language, dynamicCategories]);
 

@@ -31,7 +31,7 @@ function PurohitsDirectoryContent() {
   const [onlineOnly, setOnlineOnly] = React.useState(initialOnlineOnly);
   const [selectedLanguage, setSelectedLanguage] = React.useState<string>("all");
 
-  const { data: purohits = [], isLoading, refetch, isFetching } = useQuery({
+  const { data: purohits = [], isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ["purohits_list", onlineOnly, searchPuja, selectedLanguage],
     queryFn: async () => {
       const res = await purohitApi.list({
@@ -41,6 +41,8 @@ function PurohitsDirectoryContent() {
       });
       return (res as any)?.data || (Array.isArray(res) ? res : []);
     },
+    placeholderData: (prev) => prev,
+    staleTime: 5 * 60 * 1000,
   });
 
   const onlineCount = React.useMemo(() => {
@@ -142,7 +144,22 @@ function PurohitsDirectoryContent() {
       {/* PUROHITS LISTING GRID                                         */}
       {/* ------------------------------------------------------------- */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-10">
-        {isLoading ? (
+        {error && purohits.length === 0 ? (
+          <Card className="p-8 text-center border-rose-300 dark:border-rose-900 bg-rose-50/40 dark:bg-rose-950/20 max-w-lg mx-auto space-y-3">
+            <h3 className="text-base font-bold text-rose-950 dark:text-rose-200">সার্ভার থেকে পুরোহিত তথ্য লোড করা যায়নি</h3>
+            <p className="text-xs text-rose-800 dark:text-rose-300">
+              সার্ভারের সাথে সংযোগ স্থাপন করতে কিছুটা বিলম্ব হচ্ছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              className="mt-2 font-bold text-xs"
+            >
+              পুনরায় চেষ্টা করুন
+            </Button>
+          </Card>
+        ) : isLoading ? (
           <div className="py-20">
             <LoadingBlock label="বৈদিক পুরোহিতদের তালিকা লোড হচ্ছে..." />
           </div>
