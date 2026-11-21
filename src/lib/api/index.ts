@@ -43,6 +43,9 @@ import type {
   Appointment,
   PrivateInviteLink,
   ValidatePrivateInviteResponse,
+  AuspiciousTransitInfo,
+  AuspiciousTransitSurgePayload,
+  AuspiciousTransitSurgeResult,
   WhiteboardData,
   WhiteboardStroke,
   AddressInput,
@@ -590,6 +593,20 @@ export const appointmentApi = {
 
   deletePrivateLink: (id: string) =>
     api.delete<{ message: string }>(endpoints.appointments.privateLink(id)),
+
+  getAuspiciousTransit: (on?: string) =>
+    api.get<AuspiciousTransitInfo>(endpoints.appointments.auspiciousTransit(on), {
+      auth: false,
+    }),
+
+  activateAuspiciousSurge: (body: AuspiciousTransitSurgePayload) =>
+    api.post<AuspiciousTransitSurgeResult>(endpoints.appointments.activateAuspiciousSurge, body),
+
+  deactivateAuspiciousSurge: (day: string) =>
+    api.post<{ message: string; success: boolean; windows_affected_count: number }>(
+      endpoints.appointments.deactivateAuspiciousSurge,
+      { day },
+    ),
 
   synergy: (astrologer_id: string, dob?: string | null) =>
     api.get<Record<string, any>>(`/appointments/synergy`, {

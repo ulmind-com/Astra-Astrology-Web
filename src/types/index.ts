@@ -571,6 +571,50 @@ export interface ValidatePrivateInviteResponse {
   uses_remaining: number;
 }
 
+export interface AuspiciousTransitInfo {
+  date: string;
+  is_auspicious_transit_day: boolean;
+  event_key?: string | null;
+  event_name_bn?: string | null;
+  event_name_en?: string | null;
+  recommended_multiplier: number;
+  surge_multipliers: number[];
+  demand_factor: string;
+  remedy_focus_bn?: string | null;
+  remedy_focus_en?: string | null;
+  spiritual_reason_bn?: string | null;
+  spiritual_reason_en?: string | null;
+  tithi_index?: number;
+  tithi_num?: number;
+  paksha_bn?: string;
+  paksha_en?: string;
+}
+
+export interface AuspiciousTransitSurgePayload {
+  day: string;
+  multiplier: number;
+  custom_title?: string;
+  open_surge_window?: boolean;
+  from_time?: string;
+  to_time?: string;
+}
+
+export interface AuspiciousTransitSurgeResult {
+  success: boolean;
+  day: string;
+  is_auspicious_transit_day: boolean;
+  event_key?: string | null;
+  event_name_bn?: string | null;
+  event_name_en?: string | null;
+  multiplier: number;
+  custom_title?: string | null;
+  windows_affected_count: number;
+  spiritual_reason_bn?: string | null;
+  remedy_focus_bn?: string | null;
+  demand_factor: string;
+  message: string;
+}
+
 export interface WhiteboardStrokePoint {
   x: number;
   y: number;

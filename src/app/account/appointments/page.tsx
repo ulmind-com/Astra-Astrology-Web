@@ -37,6 +37,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/providers/language-provider";
 import { APPOINTMENT_STATUS_LABELS, type Appointment, type VedicPrescription } from "@/types";
 import { GoogleCalendarIntegrationCard } from "@/components/appointments/GoogleCalendarIntegrationCard";
+import { AuspiciousDaySurgeCard } from "@/components/appointments/AuspiciousDaySurgeCard";
 import { BrahmaPauseControlCard } from "@/components/appointments/BrahmaPauseControlCard";
 import { BTRLifeEventsModal } from "@/components/appointments/BTRLifeEventsModal";
 import { RequestBTRModal } from "@/components/appointments/RequestBTRModal";
@@ -692,6 +693,9 @@ export default function MyAppointmentsPage() {
         <>
           {/* Two-Way Google Calendar 2-Way Sync Integration */}
           <GoogleCalendarIntegrationCard />
+
+          {/* Auspicious Transit Tatkal Surge Pricing (Amavasya, Purnima, Pradosh, Grahan) */}
+          <AuspiciousDaySurgeCard />
 
           {/* Astrologer Emergency Break & Seeker Auto-Rescue Engine */}
           <BrahmaPauseControlCard />

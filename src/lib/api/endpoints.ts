@@ -103,6 +103,9 @@ export const endpoints = {
     privateLink: (id: string) => `/appointments/me/private-links/${id}`,
     validatePrivateLink: (code: string) => `/appointments/private-links/${code}/validate`,
     verifyPrivatePasscode: (code: string) => `/appointments/private-links/${code}/verify-passcode`,
+    auspiciousTransit: (on?: string) => `/appointments/auspicious-transit${on ? `?on=${encodeURIComponent(on)}` : ""}`,
+    activateAuspiciousSurge: "/appointments/me/auspicious-transit-surge",
+    deactivateAuspiciousSurge: "/appointments/me/auspicious-transit-surge/deactivate",
     googleCalendar: {
       authUrl: "/appointments/google-calendar/auth-url",
       callback: "/appointments/google-calendar/callback",
