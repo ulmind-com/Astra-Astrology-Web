@@ -972,6 +972,25 @@ export type CoupleMatchResult = {
   harmonizing_advice_hi: string;
 };
 
+export interface BlacklistedClient {
+  user_id: string;
+  name: string;
+  email_masked?: string | null;
+  phone_masked?: string | null;
+  avatar_url?: string | null;
+  blacklisted_at?: string | null;
+  last_reason?: string | null;
+  notes?: string | null;
+  total_reports: number;
+}
+
+export interface RedFlagPayload {
+  reason: string;
+  notes?: string | null;
+  blacklist_client?: boolean;
+  terminate_call?: boolean;
+}
+
 export * from "./astrology";
 export * from "./palm-reading";
 export * from "./course";

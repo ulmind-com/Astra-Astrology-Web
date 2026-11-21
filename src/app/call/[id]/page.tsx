@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, Coins, Compass, Moon, Phone, PhoneOff, Sparkles, Sun, Video } from "lucide-react";
+import { Clock, Coins, Compass, Moon, Phone, PhoneOff, ShieldAlert, Sparkles, Sun, Video } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import * as React from "react";
@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { AstroCoPilotDrawer } from "@/components/call/astro-copilot-drawer";
 import { CallRoom } from "@/components/call/call-room";
 import { CosmicWhiteboard } from "@/components/call/cosmic-whiteboard";
+import { RedFlagModal } from "@/components/call/red-flag-modal";
 import { OutOfCoins, SessionMeter } from "@/components/consult/session-meter";
 import { Alert, Avatar, Button, LoadingBlock, Modal } from "@/components/ui";
 import { useCall, useCallActions, useCallHeartbeat, useCallTimer } from "@/hooks/use-call";
@@ -54,6 +55,12 @@ export default function CallPage() {
 
   const [whiteboardOpen, setWhiteboardOpen] = React.useState(false);
   const [copilotOpen, setCopilotOpen] = React.useState(false);
+  const [redFlagOpen, setRedFlagOpen] = React.useState(false);
+
+  const isAstrologer =
+    user?.role === "astrologer" ||
+    user?.id === call?.astrologer_user_id ||
+    user?.role === "admin";
 
   // Theme State (Supports Ultra Pro Light & Dark)
   const [theme, setTheme] = React.useState<"light" | "dark">(() => {
@@ -170,6 +177,21 @@ export default function CallPage() {
         />
       )}
 
+      {connected && isAstrologer && (
+        <RedFlagModal
+          isOpen={redFlagOpen}
+          onClose={() => setRedFlagOpen(false)}
+          callId={id}
+          appointmentId={call.appointment_id}
+          clientName={call.peer?.name}
+          theme={theme}
+          onSuccess={() => {
+            hangUp();
+            router.replace("/account/appointments?tab=blacklist");
+          }}
+        />
+      )}
+
       {/* ------------------------------------------------- connected chrome */}
       {connected && call.billing && (
         <div className="pointer-events-auto absolute inset-x-0 top-16 z-10 px-3">
@@ -266,6 +288,19 @@ export default function CallPage() {
               <Sparkles className="size-3.5 mr-1 text-amber-400" />
               Cosmic Whiteboard
             </Button>
+
+            {isAstrologer && (
+              <Button
+                size="sm"
+                onClick={() => setRedFlagOpen(true)}
+                className="bg-red-600/90 hover:bg-red-600 text-white border border-red-500/50 shadow-sm text-xs font-bold"
+                title="Report misconduct, capture fee and blacklist client"
+              >
+                <ShieldAlert className="size-3.5 mr-1 text-white animate-pulse" />
+                <span className="hidden sm:inline">Report Abuse</span>
+              </Button>
+            )}
+
             <Button
               size="sm"
               onClick={hangUp}

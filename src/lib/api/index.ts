@@ -5,6 +5,8 @@ import { endpoints } from "@/lib/api/endpoints";
 import { apiBase } from "@/lib/env";
 import type {
   Address,
+  BlacklistedClient,
+  RedFlagPayload,
   FaceReadingAvailability,
   FaceReading,
   FaceScanResponse,
@@ -404,6 +406,9 @@ export const callApi = {
 
   history: (params: { page?: number; limit?: number } = {}) =>
     api.get<{ items: Call[]; meta: PageMeta }>(endpoints.calls.history, { query: params }),
+
+  redFlag: (id: string, body: RedFlagPayload) =>
+    api.post<Call>(endpoints.calls.redFlag(id), body),
 };
 
 // ------------------------------------------------------------------ milan
@@ -714,6 +719,15 @@ export const appointmentApi = {
 
   sendFollowUpMessage: (id: string, text: string) =>
     api.post<Appointment>(endpoints.appointments.sendFollowUpMessage(id), { text }),
+
+  redFlag: (id: string, body: RedFlagPayload) =>
+    api.post<Appointment>(endpoints.appointments.redFlag(id), body),
+
+  getMyBlacklist: () =>
+    api.get<BlacklistedClient[]>(endpoints.appointments.myBlacklist),
+
+  unblockClient: (clientUserId: string) =>
+    api.post<{ message: string }>(endpoints.appointments.unblockClient(clientUserId), {}),
 
   getGoogleCalendarAuthUrl: (redirectUri?: string) =>
     api.get<{ configured: boolean; auth_url: string; mode: string; message: string }>(

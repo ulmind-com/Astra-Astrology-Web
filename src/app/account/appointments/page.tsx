@@ -13,6 +13,7 @@ import {
   Gem,
   Lock,
   MessageSquare,
+  ShieldAlert,
   ShieldCheck,
   Sparkles,
   Video,
@@ -42,6 +43,7 @@ import { BrahmaPauseControlCard } from "@/components/appointments/BrahmaPauseCon
 import { BTRLifeEventsModal } from "@/components/appointments/BTRLifeEventsModal";
 import { RequestBTRModal } from "@/components/appointments/RequestBTRModal";
 import { PrivateLinksManager } from "@/components/appointments/PrivateLinksManager";
+import { BlockedSeekersCard } from "@/components/appointments/BlockedSeekersCard";
 import { useAuth } from "@/providers/auth-provider";
 
 const KEY = ["appointments", "mine"] as const;
@@ -477,9 +479,10 @@ export default function MyAppointmentsPage() {
     user?.role === "admin" ||
     user?.role === "super_admin";
 
-  const [selectedTab, setSelectedTab] = React.useState<"appointments" | "private-links">(() => {
+  const [selectedTab, setSelectedTab] = React.useState<"appointments" | "private-links" | "blacklist">(() => {
     if (typeof window !== "undefined") {
       const sp = new URLSearchParams(window.location.search);
+      if (sp.get("tab") === "blacklist") return "blacklist";
       if (sp.get("tab") === "private-links") return "private-links";
     }
     return "appointments";
@@ -684,10 +687,33 @@ export default function MyAppointmentsPage() {
             <Lock className="size-3.5" />
             <span>{language === "bn" ? "ভিআইপি প্রাইভেট লিংক" : "Private Links"}</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedTab("blacklist");
+              if (typeof window !== "undefined") {
+                const url = new URL(window.location.href);
+                url.searchParams.set("tab", "blacklist");
+                window.history.replaceState({}, "", url.toString());
+              }
+            }}
+            className={cn(
+              "flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer",
+              selectedTab === "blacklist"
+                ? "bg-red-600 text-white shadow-xs"
+                : "bg-surface-muted text-muted-foreground hover:bg-surface hover:text-foreground border border-border/50"
+            )}
+          >
+            <ShieldAlert className="size-3.5" />
+            <span>{language === "bn" ? "ব্লক করা ক্লায়েন্ট (Blocked Seekers)" : "Blocked Seekers"}</span>
+          </button>
         </div>
       )}
 
-      {selectedTab === "private-links" ? (
+      {selectedTab === "blacklist" ? (
+        <BlockedSeekersCard language={language} />
+      ) : selectedTab === "private-links" ? (
         <PrivateLinksManager />
       ) : (
         <>

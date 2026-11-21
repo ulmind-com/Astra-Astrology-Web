@@ -63,6 +63,7 @@ export const endpoints = {
     heartbeat: (id: string) => `/calls/${id}/heartbeat`,
     copilot: (id: string) => `/calls/${id}/copilot`,
     copilotBirthDetails: (id: string) => `/calls/${id}/copilot/birth-details`,
+    redFlag: (id: string) => `/calls/${id}/red-flag`,
   },
 
   milan: {
@@ -97,6 +98,9 @@ export const endpoints = {
     brahmaPauseAction: (id: string) => `/appointments/${id}/brahma-pause-action`,
     requestBtr: (id: string) => `/appointments/${id}/request-btr`,
     updateBtr: (id: string) => `/appointments/${id}/update-btr`,
+    redFlag: (id: string) => `/appointments/${id}/red-flag`,
+    myBlacklist: "/appointments/me/blacklist",
+    unblockClient: (clientUserId: string) => `/appointments/me/blacklist/${encodeURIComponent(clientUserId)}/unblock`,
     issueFollowUpPass: (id: string) => `/appointments/${id}/follow-up/issue`,
     sendFollowUpMessage: (id: string) => `/appointments/${id}/follow-up/message`,
     myPrivateLinks: "/appointments/me/private-links",

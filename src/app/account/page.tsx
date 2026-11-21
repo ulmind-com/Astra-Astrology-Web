@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, Check, Globe, Languages, Sparkles, Trash2, Package, ArrowRight } from "lucide-react";
+import { Camera, Check, Globe, Languages, Sparkles, Trash2, Package, ArrowRight, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { toast } from "sonner";
@@ -200,6 +200,38 @@ export default function ProfilePage() {
           <ArrowRight className="size-3.5" />
         </Link>
       </div>
+
+      {/* Astrologer Blocked Seekers Quick Card */}
+      {profile.role === "astrologer" && (
+        <div className="rounded-2xl border border-red-300/80 bg-linear-to-r from-red-50 via-white to-stone-50 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="size-10 rounded-xl bg-red-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <ShieldAlert className="size-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-stone-900 flex items-center gap-2">
+                <span>{language === "bn" ? "অবরুদ্ধ ক্লায়েন্টদের তালিকা" : "Blocked Seekers & Blacklist"}</span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-300">
+                  Trust & Safety
+                </span>
+              </h3>
+              <p className="text-xs text-stone-500">
+                {language === "bn"
+                  ? "যেসব ক্লায়েন্টকে আপনি অশালীন আচরণের জন্য রেড-ফ্ল্যাগ বা অবরুদ্ধ করেছেন তাদের পরিচালনা করুন"
+                  : "Review seekers blocked from scheduling with you or unblock mistakenly flagged accounts"}
+              </p>
+            </div>
+          </div>
+
+          <Link
+            href="/account/appointments?tab=blacklist"
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-xs shrink-0"
+          >
+            <span>{language === "bn" ? "ব্ল্যাকলিস্ট দেখুন" : "Manage Blacklist"}</span>
+            <ArrowRight className="size-3.5" />
+          </Link>
+        </div>
+      )}
 
       {/* --------------------------------------------------------- details */}
       <form onSubmit={onSubmit}>
