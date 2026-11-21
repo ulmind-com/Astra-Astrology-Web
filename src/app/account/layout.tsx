@@ -1,6 +1,8 @@
 "use client";
 
+import * as React from "react";
 import {
+  Banknote,
   CalendarDays,
   CalendarHeart,
   Flame,
@@ -19,9 +21,9 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { LoadingBlock } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import { useRequireAuth } from "@/providers/auth-provider";
+import { useAuth, useRequireAuth } from "@/providers/auth-provider";
 
-const NAV = [
+const BASE_NAV = [
   { href: "/account", label: "Profile", icon: UserRound },
   { href: "/account/orders", label: "My Orders", icon: Package },
   { href: "/account/purohit-bookings", label: "Puja Bookings", icon: Flame },
@@ -36,8 +38,27 @@ const NAV = [
 
 export default function AccountLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { user } = useAuth();
   // Held until the session is confirmed, so a protected page never flashes.
   const { ready } = useRequireAuth();
+
+  const isProfessional = user?.role === "astrologer" || (user?.role as string) === "purohit" || pathname.startsWith("/account/earnings");
+
+  const navItems = React.useMemo(() => {
+    if (isProfessional) {
+      const items = [...BASE_NAV];
+      // Insert Earnings & Payouts right after Wallet
+      const walletIdx = items.findIndex((i) => i.href === "/account/wallet");
+      const earningItem = { href: "/account/earnings", label: "Earnings & Payouts", icon: Banknote };
+      if (walletIdx !== -1) {
+        items.splice(walletIdx + 1, 0, earningItem);
+      } else {
+        items.push(earningItem);
+      }
+      return items;
+    }
+    return BASE_NAV;
+  }, [isProfessional]);
 
   return (
     <>
@@ -51,7 +72,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
             <nav className="w-full min-w-0 md:sticky md:top-24 md:self-start">
               <div className="relative -mx-4 px-4 sm:mx-0 sm:px-0 overflow-hidden sm:overflow-visible">
                 <ul className="flex gap-2 overflow-x-auto pb-3 pt-1 scrollbar-none md:flex-col md:overflow-visible md:p-0 md:gap-1.5">
-                  {NAV.map((item) => {
+                  {navItems.map((item) => {
                     const active = pathname === item.href;
                     return (
                       <li key={item.href} className="shrink-0 md:w-full">

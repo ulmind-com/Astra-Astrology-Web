@@ -2,9 +2,14 @@
 
 import { api, apiFetch } from "@/lib/api/client";
 import { endpoints } from "@/lib/api/endpoints";
-import { apiBase } from "@/lib/env";
+import { apiBase, env } from "@/lib/env";
 import type {
   Address,
+  AstrologerEarningsBalance,
+  AstrologerPayoutRecord,
+  BankDetailsUpdate,
+  EarningRow,
+  EarningsSummary,
   BlacklistedClient,
   RedFlagPayload,
   FaceReadingAvailability,
@@ -75,6 +80,7 @@ import type {
   OtpSentResult,
   PageMeta,
   PaginatedAstrologers,
+  PaginatedResult,
   ProfileUpdate,
   RechargeOptions,
   Skill,
@@ -2125,6 +2131,61 @@ export const purohitApi = {
   submitApplication: (body: PurohitApplicationSubmitPayload) =>
     api.post<PurohitApplicationData>(endpoints.purohits.applicationSubmit, body, { auth: false }),
 };
+
+// ------------------------------------------------------------------- earnings & payouts
+export const earningsApi = {
+  summary: () => api.get<EarningsSummary>("/earnings/summary"),
+
+  balance: () => api.get<AstrologerEarningsBalance>("/earnings/balance"),
+
+  paginated: (params: {
+    page?: number;
+    limit?: number;
+    mode?: string;
+    search?: string;
+    window?: string;
+  }) =>
+    api.get<PaginatedResult<EarningRow>>("/earnings/paginated", {
+      query: {
+        page: params.page ?? 1,
+        limit: params.limit ?? 10,
+        mode: params.mode || undefined,
+        search: params.search || undefined,
+        window: params.window || undefined,
+      },
+    }),
+
+  requestPayout: (body: {
+    amount_paise: number;
+    payout_method: string;
+    bank_name?: string;
+    account_holder_name?: string;
+    account_number?: string;
+    ifsc?: string;
+    upi_id?: string;
+  }) => api.post<AstrologerPayoutRecord>("/earnings/payout-request", body),
+
+  myPayouts: (limit = 50) =>
+    api.get<AstrologerPayoutRecord[]>("/earnings/payouts", { query: { limit } }),
+
+  updateBankDetails: (body: BankDetailsUpdate) =>
+    api.patch<{ saved: boolean; bank_name?: string; upi_id?: string; upi_qr_url?: string }>("/earnings/bank-details", body),
+
+  uploadUpiQr: (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    return apiFetch<{ success: boolean; data: { upi_qr_url: string; upi_qr_public_id: string } }>(
+      `${env.apiUrl}${env.apiPrefix}/earnings/upi-qr`,
+      {
+        method: "POST",
+        body: fd,
+      }
+    ).then((res) => res.data);
+  },
+
+  deleteUpiQr: () => api.delete<{ deleted: boolean }>("/earnings/upi-qr"),
+};
+
 
 
 
