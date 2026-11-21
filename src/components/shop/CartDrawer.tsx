@@ -256,7 +256,7 @@ export function CartDrawer() {
                         <div>
                           <div className="flex items-start justify-between gap-1.5">
                             <Link
-                              href={`/shop/products/${item.slug}`}
+                              href={`/shop/products/${encodeURIComponent(item.slug || item.id)}`}
                               onClick={closeCart}
                               className="font-bold text-xs text-stone-900 leading-snug line-clamp-2 hover:text-amber-700 transition-colors"
                             >

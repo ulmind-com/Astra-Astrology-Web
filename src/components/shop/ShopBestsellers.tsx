@@ -126,7 +126,7 @@ export function ShopBestsellers({ products = [] }: Props) {
               <div className="space-y-3">
                 {/* Image Box */}
                 <Link
-                  href={`/shop/products/${product.slug}`}
+                  href={`/shop/products/${encodeURIComponent(product.slug || product.id)}`}
                   className="relative aspect-square w-full rounded-xl overflow-hidden bg-[#f7f5ed] block cursor-pointer"
                 >
                   <Image
@@ -154,7 +154,7 @@ export function ShopBestsellers({ products = [] }: Props) {
                     {product.category_label || "Astro Product"}
                   </span>
                   <Link
-                    href={`/shop/products/${product.slug}`}
+                    href={`/shop/products/${encodeURIComponent(product.slug || product.id)}`}
                     className="text-sm font-bold text-stone-900 line-clamp-1 hover:text-amber-700 transition-colors block"
                   >
                     {product.title}

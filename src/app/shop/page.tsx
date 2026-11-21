@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
   Sparkles,
@@ -78,16 +78,30 @@ function getCategoryLocalizedName(cat: ShopProductCategory, language: string) {
 }
 
 function ProductCard({ p, language }: { p: ShopProduct; language: string }) {
+  const router = useRouter();
   const discount = p.discount_percent || Math.round(((p.mrp - p.sale_price) / p.mrp) * 100);
   const freeGiftBadge = p.free_gift_badge || "FREE Raw Selenite Plate worth ₹729";
+  const productSlugOrId = p.slug || p.id;
+  const productHref = `/shop/products/${encodeURIComponent(productSlugOrId)}`;
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // If clicked on a button or inside a button, don't trigger card navigation
+    if ((e.target as HTMLElement).closest("button")) {
+      return;
+    }
+    router.push(productHref);
+  };
 
   return (
     <CardTilt key={p.id} className="h-full">
-      <div className="h-full rounded-3xl border-2 border-stone-200/90 bg-white p-3.5 shadow-xs hover:border-amber-400 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
+      <div
+        onClick={handleCardClick}
+        className="h-full rounded-3xl border-2 border-stone-200/90 bg-white p-3.5 shadow-xs hover:border-amber-400 hover:shadow-lg transition-all duration-300 flex flex-col justify-between group cursor-pointer"
+      >
         <div className="space-y-2.5">
           {/* Image */}
           <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-stone-100 border border-stone-100">
-            <Link href={`/shop/products/${p.slug}`}>
+            <Link href={productHref} onClick={(e) => e.stopPropagation()}>
               {p.featured_image ? (
                 <Image
                   src={p.featured_image}
@@ -105,7 +119,7 @@ function ProductCard({ p, language }: { p: ShopProduct; language: string }) {
             </Link>
 
             {/* Badges */}
-            <div className="absolute top-2 left-2 flex flex-col gap-1 items-start">
+            <div className="absolute top-2 left-2 flex flex-col gap-1 items-start pointer-events-none">
               {discount > 0 && (
                 <span className="bg-rose-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow-xs">
                   {discount}% OFF
@@ -126,7 +140,8 @@ function ProductCard({ p, language }: { p: ShopProduct; language: string }) {
 
           {/* Title */}
           <Link
-            href={`/shop/products/${p.slug}`}
+            href={productHref}
+            onClick={(e) => e.stopPropagation()}
             className="font-bold text-xs sm:text-sm text-stone-900 line-clamp-2 hover:text-amber-700 transition-colors block leading-snug"
           >
             {p.title}
@@ -157,14 +172,16 @@ function ProductCard({ p, language }: { p: ShopProduct; language: string }) {
 
           <div className="grid grid-cols-2 gap-2">
             <Link
-              href={`/shop/products/${p.slug}`}
-              className="py-2 px-2 rounded-xl border border-stone-200 text-stone-700 font-bold text-[11px] hover:bg-stone-50 transition-colors text-center flex items-center justify-center"
+              href={productHref}
+              onClick={(e) => e.stopPropagation()}
+              className="py-2 px-2 rounded-xl border border-stone-200 text-stone-700 font-bold text-[11px] hover:bg-stone-50 transition-colors text-center flex items-center justify-center cursor-pointer"
             >
-              {language === "bn" ? "বিস্তারিত" : language === "hi" ? "विवरण" : "Details"}
+              {language === "bn" ? "বিস্তারিত" : language === "hi" ? "विवরণ" : "Details"}
             </Link>
             <button
               type="button"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 useCartStore.getState().addItem(p, 1);
                 toast.success(`${p.title} added to cart! Free gift included.`);
               }}
