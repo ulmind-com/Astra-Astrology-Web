@@ -24,6 +24,8 @@ import {
   Truck,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { shopApi } from "@/lib/api";
 import { useCartStore } from "@/lib/stores/use-cart-store";
 import { useLanguage } from "@/providers/language-provider";
 import { CouponOfferSelector } from "@/components/shop/CouponOfferSelector";
@@ -41,7 +43,6 @@ export function CartDrawer() {
     removeItem,
     getSubtotal,
     getCashbackCoins,
-    getBundledGifts,
     couponCode,
     discountAmount,
     setCoupon,
@@ -72,11 +73,16 @@ export function CartDrawer() {
   }, [isOpen, closeCart]);
 
   const subtotal = getSubtotal();
-  const freeShippingThreshold = 499;
+  // Store settings drive shipping + the threshold-based complimentary gift (no hardcoded promo).
+  const { data: shopSettings } = useQuery({
+    queryKey: ["shop_public_banners"],
+    queryFn: () => shopApi.getBanners(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const freeShippingThreshold = shopSettings?.free_shipping_threshold ?? 499;
   const progressPercent = Math.min(100, Math.round((subtotal / freeShippingThreshold) * 100));
   const remainingForFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
   const cashbackCoins = getCashbackCoins();
-  const bundledGifts = getBundledGifts();
   const isFreeShipping = subtotal >= freeShippingThreshold || items.length === 0;
   const shippingFee = isFreeShipping ? 0 : 70;
   const grandTotal = Math.max(0, subtotal - discountAmount + shippingFee);
@@ -284,16 +290,6 @@ export function CartDrawer() {
                             )}
                           </div>
 
-                          {/* Free Gift Tag */}
-                          {item.free_gift_title && (
-                            <div className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-200/80">
-                              <Gift className="size-3 text-amber-600 shrink-0" />
-                              <span className="truncate">
-                                {item.free_gift_badge || `Includes ${item.free_gift_title}`}
-                              </span>
-                            </div>
-                          )}
-
                           {/* Sankalpa Indicator */}
                           {item.sankalpa?.devotee_name && (
                             <div className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-emerald-800">
@@ -334,27 +330,6 @@ export function CartDrawer() {
                     </div>
                   );
                 })
-              )}
-
-              {/* Free Bundled Gifts Card */}
-              {bundledGifts.length > 0 && items.length > 0 && (
-                <div className="rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 via-orange-50/40 to-amber-50/60 p-3.5 space-y-2">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-950">
-                    <Sparkles className="size-4 text-amber-600 shrink-0" />
-                    <span>Complimentary Sacred Gifts Included:</span>
-                  </div>
-                  {bundledGifts.map((gift, gIdx) => (
-                    <div
-                      key={gIdx}
-                      className="flex items-center justify-between rounded-xl border border-amber-200/90 bg-white/90 p-2 text-xs"
-                    >
-                      <span className="font-semibold text-stone-800">{gift.title}</span>
-                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
-                        FREE (Worth ₹{gift.value})
-                      </span>
-                    </div>
-                  ))}
-                </div>
               )}
             </div>
 

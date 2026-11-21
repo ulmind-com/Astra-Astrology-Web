@@ -579,20 +579,6 @@ export function LivePincodeLogisticsTracker({
                     <Check className="size-4 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
                       <span className="font-bold text-stone-900">
-                        {isBn ? "বিনামূল্যে উপহার:" : "Free Sacred Gift:"}
-                      </span>
-                      <p className="text-[11px] text-stone-600">
-                        {isBn
-                          ? `₹${giftWorth} মূল্যের ${freeGiftTitle} সম্পূর্ণ ফ্রি`
-                          : `Free ${freeGiftTitle} worth ₹${giftWorth} included.`}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-2 bg-white/90 p-2 rounded-lg border border-emerald-200">
-                    <Check className="size-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-bold text-stone-900">
                         {isBn ? "ফ্রি এক্সপ্রেস শিপিং:" : "Zero Delivery Fee:"}
                       </span>
                       <p className="text-[11px] text-stone-600">
@@ -677,8 +663,8 @@ export function LivePincodeLogisticsTracker({
                       <X className="size-3.5 text-rose-500 shrink-0 mt-0.5" />
                       <span>
                         {isBn
-                          ? `ফ্রি সেলিনাইট প্লেট গিফট ও প্রায়োরিটি কাশীর সংকল্প কিউ পাওয়া যাবে না।`
-                          : `Free Selenite Plate gift & VIP temple queue priority are not eligible.`}
+                          ? `কাশীর সংকল্প ও প্রায়োরিটি ডেলিভারি কিউ প্রযোজ্য নয়।`
+                          : `VIP temple queue priority and instant dispatch are not eligible.`}
                       </span>
                     </div>
                   </div>
@@ -686,8 +672,8 @@ export function LivePincodeLogisticsTracker({
 
                 <p className="text-[10px] text-amber-800 bg-amber-50 p-2 rounded-lg border border-amber-200">
                   {isBn
-                    ? "💡 পরামর্শ: ১০০% ক্যাশব্যাক ও ফ্রি উপহার উপভোগ করতে চেকআউট পেজে UPI বা অনলাইন প্রিপেইড বেছে নেওয়ার পরামর্শ দেওয়া হচ্ছে।"
-                    : "💡 Tip: Choose online Prepaid at checkout to unlock 100% cashback coins and the free Selenite gift!"}
+                    ? "💡 পরামর্শ: ১০০% ক্যাশব্যাক উপভোগ করতে চেকআউট পেজে UPI বা অনলাইন প্রিপেইড বেছে নেওয়ার পরামর্শ দেওয়া হচ্ছে।"
+                    : "💡 Tip: Choose online Prepaid at checkout to unlock 100% cashback coins!"}
                 </p>
               </div>
             )}

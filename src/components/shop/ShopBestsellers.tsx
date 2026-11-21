@@ -44,7 +44,7 @@ export function ShopBestsellers({ products = [] }: Props) {
         ? "vastu-home"
         : "bracelets") as any,
       category_label: p.category_type || p.category_slug || "Astro Remedy",
-      badge: p.free_gift_badge ? "FREE" : undefined,
+      badge: p.discount_percent && p.discount_percent > 0 ? `${p.discount_percent}% OFF` : undefined,
       sale_price: p.sale_price,
       mrp: p.mrp,
       discount_percent: p.discount_percent || (p.mrp > p.sale_price ? Math.round(((p.mrp - p.sale_price) / p.mrp) * 100) : 0),

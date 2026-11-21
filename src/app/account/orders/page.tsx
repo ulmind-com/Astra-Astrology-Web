@@ -147,7 +147,7 @@ export default function MyOrdersPage() {
   const [isUploadingQr, setIsUploadingQr] = React.useState<boolean>(false);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
-  // Fetch Banner Settings for Cancellation Grace Hours & Refund SLA Days
+  // Cancellation Grace Hours & Refund SLA Days (sensible defaults, background synced)
   const { data: bannerSettings } = useQuery({
     queryKey: ["shop_banner_settings"],
     queryFn: async () => {
@@ -157,13 +157,15 @@ export default function MyOrdersPage() {
         return null;
       }
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+    retry: 1,
   });
 
   const cancellationGraceHours = bannerSettings?.cancellation_grace_hours ?? 24;
   const refundSlaDays = bannerSettings?.refund_sla_days ?? 3;
 
-  // Fetch My Orders
+  // Fetch My Orders with resilient 5-minute cache & smooth revalidation
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["shop_orders_mine", page],
     queryFn: async () => {
@@ -171,6 +173,10 @@ export default function MyOrdersPage() {
       return res;
     },
     enabled: ready,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
+    retry: 1,
   });
 
   const orders = data?.items || [];
@@ -297,7 +303,94 @@ export default function MyOrdersPage() {
   };
 
   if (!ready || isLoading) {
-    return <LoadingBlock label={isBn ? "আপনার অর্ডার লোড হচ্ছে..." : "Loading your orders..."} />;
+    return (
+      <div className="space-y-6 animate-pulse">
+        {/* Skeleton Header */}
+        <div className="rounded-2xl border border-stone-200 bg-stone-50/70 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="size-9 rounded-xl bg-stone-200" />
+            <div className="space-y-1.5">
+              <div className="h-5 w-48 rounded bg-stone-200" />
+              <div className="h-3 w-64 rounded bg-stone-100" />
+            </div>
+          </div>
+          <div className="h-8 w-28 rounded-xl bg-stone-200 shrink-0" />
+        </div>
+
+        {/* Skeleton Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-xl border border-stone-200 bg-white p-3.5 flex items-center gap-3">
+              <div className="size-10 rounded-xl bg-stone-200" />
+              <div className="space-y-1">
+                <div className="h-3 w-16 rounded bg-stone-200" />
+                <div className="h-4 w-10 rounded bg-stone-300" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Skeleton Tabs */}
+        <div className="flex items-center gap-2 border-b border-stone-200 pb-2">
+          {["সব অর্ডার", "চলমান", "ডেলিভার্ড", "বাতিল"].map((tab, idx) => (
+            <div
+              key={idx}
+              className={`h-7 rounded-lg ${idx === 0 ? "w-20 bg-amber-200" : "w-16 bg-stone-200"}`}
+            />
+          ))}
+        </div>
+
+        {/* Skeleton Order Cards */}
+        {[1, 2].map((i) => (
+          <div key={i} className="rounded-2xl border border-stone-200 bg-white p-5 space-y-4">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-36 rounded bg-stone-200" />
+                <div className="h-5 w-20 rounded-full bg-stone-100" />
+              </div>
+              <div className="h-4 w-20 rounded bg-stone-200" />
+            </div>
+            <div className="flex gap-4">
+              <div className="size-16 rounded-xl bg-stone-200 shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-3/4 rounded bg-stone-200" />
+                <div className="h-3 w-1/2 rounded bg-stone-100" />
+                <div className="h-3 w-1/4 rounded bg-stone-100" />
+              </div>
+            </div>
+            <div className="h-2 w-full rounded bg-stone-100" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-2xl border border-red-200 bg-red-50/50 p-8 text-center space-y-4">
+        <div className="mx-auto size-12 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+          <AlertCircle className="size-6" />
+        </div>
+        <div className="space-y-1">
+          <h2 className="font-cinzel text-lg font-bold text-stone-900">
+            {isBn ? "অর্ডার লোড করতে সমস্যা হয়েছে" : "Could not load orders"}
+          </h2>
+          <p className="text-xs text-stone-600 max-w-md mx-auto">
+            {isBn
+              ? "সার্ভারের সাথে সংযোগ স্থাপন করতে কিছুটা সময় লাগছে। দয়া করে পুনরায় চেষ্টা করুন।"
+              : "Connecting to the server took longer than expected. Please try again."}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className="inline-flex items-center gap-2 rounded-xl bg-amber-600 hover:bg-amber-700 px-5 py-2.5 text-xs font-bold text-white transition-all shadow-xs cursor-pointer"
+        >
+          <RotateCcw className="size-3.5" />
+          {isBn ? "পুনরায় চেষ্টা করুন" : "Retry"}
+        </button>
+      </div>
+    );
   }
 
   // Summary counts
@@ -878,26 +971,10 @@ export default function MyOrdersPage() {
                 </div>
 
                 {/* ------------------------------------------------------------- */}
-                {/* Free Gifts & Cashback Rewards */}
+                {/* 100% Wallet Cashback Rewards */}
                 {/* ------------------------------------------------------------- */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                  {/* Complimentary Gifts */}
-                  {order.free_gifts && order.free_gifts.length > 0 && (
-                    <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-2.5 space-y-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1">
-                        <Gift className="size-3.5 text-amber-600" />
-                        {isBn ? "বিনামূল্যে প্রাপ্ত উপহার:" : "Free Sacred Gifts:"}
-                      </span>
-                      {order.free_gifts.map((g: any, i: number) => (
-                        <p key={i} className="text-xs font-semibold text-amber-950">
-                          🎁 {g.title || g.badge}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* 100% Wallet Cashback Status */}
-                  {order.cashback_coins_eligible > 0 && (
+                {order.cashback_coins_eligible > 0 && (
+                  <div className="text-xs">
                     <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-2.5 space-y-1">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1">
                         <Coins className="size-3.5 text-emerald-600" />
@@ -922,8 +999,8 @@ export default function MyOrdersPage() {
                         </p>
                       )}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 {/* ------------------------------------------------------------- */}
                 {/* Devotee Vedic Sankalpa Card (Expandable) */}

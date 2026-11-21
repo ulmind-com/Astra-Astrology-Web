@@ -5,6 +5,8 @@ import { endpoints } from "@/lib/api/endpoints";
 import { apiBase } from "@/lib/env";
 import type {
   Address,
+  BlacklistedClient,
+  RedFlagPayload,
   FaceReadingAvailability,
   FaceReading,
   FaceScanResponse,
@@ -43,6 +45,9 @@ import type {
   Appointment,
   PrivateInviteLink,
   ValidatePrivateInviteResponse,
+  AuspiciousTransitInfo,
+  AuspiciousTransitSurgePayload,
+  AuspiciousTransitSurgeResult,
   WhiteboardData,
   WhiteboardStroke,
   AddressInput,
@@ -57,6 +62,8 @@ import type {
   AvailabilityUpdate,
   Call,
   CallSession,
+  CoPilotBirthDetailsInput,
+  CoPilotSummary,
   Chat,
   ChatSession,
   ConsultationMode,
@@ -391,8 +398,17 @@ export const callApi = {
   extend: (id: string, extra_minutes: number) =>
     api.post<Call>(endpoints.calls.extend(id), { extra_minutes }),
 
+  copilot: (id: string, language?: string) =>
+    api.get<CoPilotSummary>(endpoints.calls.copilot(id), { query: language ? { language } : {} }),
+
+  updateCopilotBirthDetails: (id: string, payload: CoPilotBirthDetailsInput, language?: string) =>
+    api.post<CoPilotSummary>(endpoints.calls.copilotBirthDetails(id), payload, { query: language ? { language } : {} }),
+
   history: (params: { page?: number; limit?: number } = {}) =>
     api.get<{ items: Call[]; meta: PageMeta }>(endpoints.calls.history, { query: params }),
+
+  redFlag: (id: string, body: RedFlagPayload) =>
+    api.post<Call>(endpoints.calls.redFlag(id), body),
 };
 
 // ------------------------------------------------------------------ milan
@@ -564,6 +580,39 @@ export const appointmentApi = {
       { auth: false }
     ),
 
+  createPrivateLink: (body: {
+    title: string;
+    client_name?: string;
+    client_email?: string;
+    passcode?: string;
+    custom_price_paise?: number;
+    discount_percent?: number;
+    is_tatkal?: boolean;
+    max_uses?: number;
+    expires_in_hours?: number;
+    notes?: string;
+  }) => api.post<PrivateInviteLink>(endpoints.appointments.myPrivateLinks, body),
+
+  getMyPrivateLinks: () =>
+    api.get<PrivateInviteLink[]>(endpoints.appointments.myPrivateLinks),
+
+  deletePrivateLink: (id: string) =>
+    api.delete<{ message: string }>(endpoints.appointments.privateLink(id)),
+
+  getAuspiciousTransit: (on?: string) =>
+    api.get<AuspiciousTransitInfo>(endpoints.appointments.auspiciousTransit(on), {
+      auth: false,
+    }),
+
+  activateAuspiciousSurge: (body: AuspiciousTransitSurgePayload) =>
+    api.post<AuspiciousTransitSurgeResult>(endpoints.appointments.activateAuspiciousSurge, body),
+
+  deactivateAuspiciousSurge: (day: string) =>
+    api.post<{ message: string; success: boolean; windows_affected_count: number }>(
+      endpoints.appointments.deactivateAuspiciousSurge,
+      { day },
+    ),
+
   synergy: (astrologer_id: string, dob?: string | null) =>
     api.get<Record<string, any>>(`/appointments/synergy`, {
       query: { astrologer_id, ...(dob ? { dob } : {}) },
@@ -624,10 +673,23 @@ export const appointmentApi = {
       minutes: number;
     }>(`/appointments/${id}/chamber`, {}),
 
+  activateBrahmaPause: (body: { duration_hours: number; reason?: string | null }) =>
+    api.post<{
+      pause_until: string;
+      affected_appointments_count: number;
+      reason?: string | null;
+    }>(endpoints.appointments.brahmaPause, body),
+
+  resumeBrahmaPause: () =>
+    api.post<{ message: string }>(endpoints.appointments.brahmaPauseResume, {}),
+
   brahmaPauseAction: (
     id: string,
     body: { action: "reschedule" | "refund"; new_starts_at?: string; reason?: string },
   ) => api.post<Appointment>(`/appointments/${id}/brahma-pause-action`, body),
+
+  requestBtr: (id: string, note?: string | null) =>
+    api.post<Appointment>(endpoints.appointments.requestBtr(id), { note: note ?? null }),
 
   updateBtr: (
     id: string,
@@ -640,13 +702,63 @@ export const appointmentApi = {
       timezone_offset?: number | null;
       notes?: string | null;
     },
-  ) => api.post<Appointment>(`/appointments/${id}/update-btr`, body),
+  ) => api.post<Appointment>(endpoints.appointments.updateBtr(id), body),
 
   extensionAction: (id: string, action: "accept" | "decline") =>
     api.post<Appointment>(`/appointments/${id}/extension/action`, { action }),
 
+  issueFollowUpPass: (
+    id: string,
+    body?: {
+      window_days?: number;
+      window_hours?: number;
+      max_messages?: number;
+      notes?: string | null;
+    }
+  ) => api.post<Appointment>(endpoints.appointments.issueFollowUpPass(id), body || {}),
+
   sendFollowUpMessage: (id: string, text: string) =>
-    api.post<Appointment>(`/appointments/${id}/follow-up/message`, { text }),
+    api.post<Appointment>(endpoints.appointments.sendFollowUpMessage(id), { text }),
+
+  redFlag: (id: string, body: RedFlagPayload) =>
+    api.post<Appointment>(endpoints.appointments.redFlag(id), body),
+
+  getMyBlacklist: () =>
+    api.get<BlacklistedClient[]>(endpoints.appointments.myBlacklist),
+
+  unblockClient: (clientUserId: string) =>
+    api.post<{ message: string }>(endpoints.appointments.unblockClient(clientUserId), {}),
+
+  getGoogleCalendarAuthUrl: (redirectUri?: string) =>
+    api.get<{ configured: boolean; auth_url: string; mode: string; message: string }>(
+      endpoints.appointments.googleCalendar.authUrl,
+      { query: redirectUri ? { redirect_uri: redirectUri } : undefined }
+    ),
+
+  googleCalendarCallback: (code: string, redirectUri?: string) =>
+    api.post<{ connected: boolean; email: string; mode: string; message: string }>(
+      endpoints.appointments.googleCalendar.callback,
+      { code, redirect_uri: redirectUri }
+    ),
+
+  syncGoogleCalendar: () =>
+    api.post<{ connected: boolean; email: string; busy_count: number; message: string }>(
+      endpoints.appointments.googleCalendar.sync,
+      {}
+    ),
+
+  disconnectGoogleCalendar: () =>
+    api.post<{ connected: boolean }>(endpoints.appointments.googleCalendar.disconnect, {}),
+
+  getGoogleCalendarStatus: () =>
+    api.get<{
+      connected: boolean;
+      email: string | null;
+      sync_enabled: boolean;
+      last_synced_at: string | null;
+      busy_count: number;
+      busy_intervals: Array<{ starts_at: string; ends_at: string; title: string; source: string; is_external: boolean }>;
+    }>(endpoints.appointments.googleCalendar.status),
 };
 
 // ----------------------------------------------------------------- reviews
@@ -1252,9 +1364,12 @@ export interface ShopBannerSettings {
   hero_banners: ShopHeroBannerItem[];
   cashback_enabled?: boolean;
   cashback_percent?: number;
+  free_gift_enabled?: boolean;
+  free_gift_min_cart_value?: number;
   free_gift_default_title?: string;
   free_gift_default_value?: number;
   free_gift_default_badge?: string;
+  free_gift_default_image_url?: string | null;
   free_shipping_threshold?: number;
   standard_shipping_fee?: number;
   cod_enabled?: boolean;

@@ -13,6 +13,7 @@ import {
   Gem,
   Lock,
   MessageSquare,
+  ShieldAlert,
   ShieldCheck,
   Sparkles,
   Video,
@@ -36,6 +37,14 @@ import { ApiError } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/providers/language-provider";
 import { APPOINTMENT_STATUS_LABELS, type Appointment, type VedicPrescription } from "@/types";
+import { GoogleCalendarIntegrationCard } from "@/components/appointments/GoogleCalendarIntegrationCard";
+import { AuspiciousDaySurgeCard } from "@/components/appointments/AuspiciousDaySurgeCard";
+import { BrahmaPauseControlCard } from "@/components/appointments/BrahmaPauseControlCard";
+import { BTRLifeEventsModal } from "@/components/appointments/BTRLifeEventsModal";
+import { RequestBTRModal } from "@/components/appointments/RequestBTRModal";
+import { PrivateLinksManager } from "@/components/appointments/PrivateLinksManager";
+import { BlockedSeekersCard } from "@/components/appointments/BlockedSeekersCard";
+import { useAuth } from "@/providers/auth-provider";
 
 const KEY = ["appointments", "mine"] as const;
 
@@ -240,22 +249,31 @@ Notes: ${prescription.astrologer_notes || "None"}`;
 function VedicRemedyFollowUpCard({
   appointment,
   language,
+  currentUser,
   onMessageSent,
 }: {
   appointment: Appointment;
   language: "bn" | "hi" | "en";
+  currentUser?: any;
   onMessageSent: () => void;
 }) {
   const [questionText, setQuestionText] = React.useState("");
   const [sending, setSending] = React.useState(false);
 
+  const isAstrologer =
+    currentUser?.role === "astrologer" || currentUser?.id === appointment.astrologer_user_id;
+
   const isExpired = appointment.follow_up_expires_at
     ? new Date() > new Date(appointment.follow_up_expires_at)
     : false;
-  const maxMessages = appointment.follow_up_max_messages || 3;
+  const maxMessages = appointment.follow_up_max_messages || 2;
   const usedMessages = appointment.follow_up_messages_used || 0;
   const remainingQuestions = Math.max(0, maxMessages - usedMessages);
   const isExhausted = remainingQuestions <= 0;
+
+  const remainingHours = appointment.follow_up_expires_at
+    ? Math.max(0, Math.ceil((new Date(appointment.follow_up_expires_at).getTime() - Date.now()) / (3600 * 1000)))
+    : 24;
 
   const handleSend = async () => {
     if (!questionText.trim()) return;
@@ -264,39 +282,48 @@ function VedicRemedyFollowUpCard({
       await appointmentApi.sendFollowUpMessage(appointment.id, questionText.trim());
       setQuestionText("");
       toast.success(
-        language === "bn"
-          ? "পণ্ডিতজীর কাছে প্রতিকার স্পষ্টীকরণ প্রশ্ন পাঠানো হয়েছে!"
-          : "Remedy clarification question sent to Panditji!"
+        isAstrologer
+          ? (language === "bn" ? "ক্লায়েন্টের কাছে উত্তর পাঠানো হয়েছে!" : "Answer delivered to client!")
+          : (language === "bn"
+              ? "পণ্ডিতজীর কাছে প্রতিকার স্পষ্টীকরণ প্রশ্ন পাঠানো হয়েছে!"
+              : "Remedy clarification question sent to Panditji!")
       );
       onMessageSent();
     } catch (err: any) {
-      toast.error(err?.message || "Failed to submit follow-up question.");
+      toast.error(err?.message || "Failed to submit follow-up message.");
     } finally {
       setSending(false);
     }
   };
 
   return (
-    <div className="mt-4 rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-500/5 via-indigo-500/10 to-purple-500/5 p-4 sm:p-5 shadow-xs">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-indigo-500/20">
+    <div className="mt-4 rounded-2xl border-2 border-emerald-500/40 bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-emerald-500/10 p-4 sm:p-5 shadow-xs">
+      {/* Header Banner & Green Badge */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-emerald-500/20">
         <div className="flex items-center gap-2.5">
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-bold">
-            <Sparkles className="size-4" />
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30">
+            <Sparkles className="size-4.5 text-emerald-600 dark:text-emerald-400" />
           </div>
           <div>
-            <h4 className="font-display font-bold text-sm text-foreground flex items-center gap-2">
-              <span>
+            <div className="flex flex-wrap items-center gap-2">
+              <h4 className="font-display font-bold text-sm text-foreground">
                 {language === "bn"
-                  ? "সৌজন্যমূলক রেমিডি ফলো-আপ উইন্ডো"
+                  ? "পরিপূরক রেমিডি স্পষ্টীকরণ পাস"
                   : language === "hi"
                   ? "निःशुल्क उपाय स्पष्टीकरण पास"
-                  : "Complimentary Remedy Clarification Pass"}
+                  : "Complimentary Remedy Clarification"}
+              </h4>
+              {/* Requested Green Badge */}
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 text-white px-2.5 py-0.5 text-[10px] font-bold shadow-xs">
+                <span className="size-1.5 rounded-full bg-white animate-pulse" />
+                <span>
+                  {remainingHours <= 24
+                    ? (language === "bn" ? "মেয়াদ ২৪ ঘণ্টা (Valid for 24h)" : "Complimentary Remedy Clarification (Valid for 24h)")
+                    : (language === "bn" ? `মেয়াদ ${Math.ceil(remainingHours / 24)} দিন` : `Valid for ${Math.ceil(remainingHours / 24)}d`)}
+                </span>
               </span>
-              <span className="rounded-md bg-indigo-500/20 px-2 py-0.5 text-[10px] font-bold text-indigo-800 dark:text-indigo-200">
-                {appointment.follow_up_window_days || 7} Days Free
-              </span>
-            </h4>
-            <p className="text-[10px] text-muted-foreground">
+            </div>
+            <p className="text-[10.5px] text-muted-foreground mt-0.5">
               {language === "bn"
                 ? "প্রেসক্রিপশন বুঝতে সমস্যা হলে (রত্ন ধারণের দিন, মন্ত্র জপের নিয়ম ইত্যাদি) সরাসরি পণ্ডিতজীকে প্রশ্ন করুন।"
                 : "Ask Panditji quick clarification questions regarding your prescribed remedies or sacred mantras."}
@@ -309,12 +336,12 @@ function VedicRemedyFollowUpCard({
             <span className="rounded-lg bg-rose-500/10 border border-rose-500/20 px-2.5 py-1 text-[11px] font-bold text-rose-700 dark:text-rose-300">
               {language === "bn" ? "মেয়াদ উত্তীর্ণ (Expired)" : "Expired"}
             </span>
-          ) : isExhausted ? (
+          ) : isExhausted && !isAstrologer ? (
             <span className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 text-[11px] font-bold text-amber-800 dark:text-amber-300">
               {language === "bn" ? "কোটা সমাপ্ত (All questions used)" : "All questions used"}
             </span>
           ) : (
-            <span className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+            <span className="rounded-lg bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 text-[11px] font-bold text-emerald-800 dark:text-emerald-200">
               {remainingQuestions} {language === "bn" ? "টি প্রশ্ন বাকি" : "Questions left"}
             </span>
           )}
@@ -322,33 +349,56 @@ function VedicRemedyFollowUpCard({
       </div>
 
       {appointment.follow_up_expires_at && !isExpired && (
-        <p className="text-[11px] text-indigo-900 dark:text-indigo-200 font-medium mt-2 flex items-center justify-between">
-          <span>{language === "bn" ? "পাস মেয়াদ:" : "Pass Expiry:"} {new Date(appointment.follow_up_expires_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
-          <span>{usedMessages}/{maxMessages} {language === "bn" ? "প্রশ্ন ব্যবহৃত" : "Used"}</span>
-        </p>
+        <div className="text-[11px] text-emerald-900 dark:text-emerald-200 font-medium mt-2.5 flex items-center justify-between bg-emerald-500/10 rounded-xl px-3 py-1.5 border border-emerald-500/20">
+          <span className="flex items-center gap-1.5">
+            <Clock className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>
+              {language === "bn" ? "অবশিষ্ট সময়:" : "Time Remaining:"}{" "}
+              <strong className="text-emerald-800 dark:text-emerald-100">
+                {remainingHours <= 24 ? `${remainingHours} ঘণ্টা (hours)` : `${Math.ceil(remainingHours / 24)} দিন (days)`}
+              </strong>
+            </span>
+          </span>
+          <span>
+            {usedMessages}/{maxMessages} {language === "bn" ? "প্রশ্ন ব্যবহৃত" : "questions used"}
+          </span>
+        </div>
       )}
 
       {/* Messages Thread */}
       {appointment.follow_up_thread && appointment.follow_up_thread.length > 0 && (
-        <div className="mt-3 space-y-2 rounded-xl bg-card/80 p-3 border border-indigo-500/20 max-h-56 overflow-y-auto">
+        <div className="mt-3 space-y-2.5 rounded-xl bg-card/90 p-3.5 border border-emerald-500/20 max-h-60 overflow-y-auto">
           {appointment.follow_up_thread.map((msg) => {
             const isSeeker = msg.sender_role === "user";
             return (
               <div
                 key={msg.id}
                 className={cn(
-                  "rounded-xl p-2.5 text-xs max-w-[88%]",
+                  "rounded-2xl p-3 text-xs max-w-[88%] shadow-2xs",
                   isSeeker
-                    ? "ml-auto bg-indigo-600 text-white"
-                    : "mr-auto bg-surface-muted text-foreground border border-border"
+                    ? "ml-auto bg-emerald-600 text-white rounded-br-xs"
+                    : "mr-auto bg-surface border border-emerald-500/30 text-foreground rounded-bl-xs"
                 )}
               >
-                <div className={cn(
-                  "flex items-center justify-between gap-2 text-[10px] mb-1 font-bold",
-                  isSeeker ? "text-indigo-200" : "text-muted-foreground"
-                )}>
-                  <span>{isSeeker ? (language === "bn" ? "আপনি (Seeker)" : "You") : (language === "bn" ? "পণ্ডিতজী (Panditji)" : msg.sender_name)}</span>
-                  <span>{new Date(msg.sent_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                <div
+                  className={cn(
+                    "flex items-center justify-between gap-2 text-[10px] mb-1 font-bold",
+                    isSeeker ? "text-emerald-100" : "text-emerald-700 dark:text-emerald-300"
+                  )}
+                >
+                  <span className="flex items-center gap-1">
+                    {isSeeker ? (
+                      language === "bn" ? "👤 আপনি (Seeker)" : "👤 You"
+                    ) : (
+                      <>
+                        <Sparkles className="size-3 text-amber-500" />
+                        <span>{language === "bn" ? "পণ্ডিতজী (Panditji)" : msg.sender_name}</span>
+                      </>
+                    )}
+                  </span>
+                  <span className="opacity-80">
+                    {new Date(msg.sent_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  </span>
                 </div>
                 <p className="whitespace-pre-line leading-relaxed">{msg.text}</p>
               </div>
@@ -357,16 +407,20 @@ function VedicRemedyFollowUpCard({
         </div>
       )}
 
-      {/* Question submission input */}
-      {!isExpired && !isExhausted && (
-        <div className="mt-3 space-y-1.5">
+      {/* Question / Reply Submission Input */}
+      {(!isExpired && (!isExhausted || isAstrologer)) ? (
+        <div className="mt-3.5 space-y-2">
           <div className="flex gap-2">
             <input
               type="text"
               placeholder={
-                language === "bn"
-                  ? "পণ্ডিতজীকে প্রতিকার বিষয়ে প্রশ্ন লিখুন (e.g. রত্নটি কোন আঙুলে এবং কোন দিন পরব?)..."
-                  : "Ask Panditji a clarification question about your remedies..."
+                isAstrologer
+                  ? (language === "bn"
+                      ? "ক্লায়েন্টকে প্রতিকার নির্দেশিকা বা উত্তর লিখুন..."
+                      : "Write remedy guidance or answer to client...")
+                  : (language === "bn"
+                      ? "পণ্ডিতজীকে প্রতিকার বিষয়ে প্রশ্ন লিখুন (e.g. রত্নটি কোন আঙুলে এবং কোন দিন পরব?)..."
+                      : "Ask Panditji a clarification question about your remedies...")
               }
               value={questionText}
               onChange={(e) => setQuestionText(e.target.value)}
@@ -376,22 +430,39 @@ function VedicRemedyFollowUpCard({
                   void handleSend();
                 }
               }}
-              className="flex-1 rounded-xl border border-indigo-300 dark:border-indigo-700 bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="flex-1 rounded-xl border-2 border-emerald-400 dark:border-emerald-600 bg-background px-3.5 py-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
             />
             <Button
               size="sm"
               disabled={sending || !questionText.trim()}
               onClick={handleSend}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shrink-0"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shrink-0 px-4 py-2.5 rounded-xl shadow-xs cursor-pointer"
             >
-              {sending ? (language === "bn" ? "পাঠানো হচ্ছে..." : "Sending...") : (language === "bn" ? "প্রশ্ন পাঠান" : "Ask Question")}
+              {sending
+                ? (language === "bn" ? "পাঠানো হচ্ছে..." : "Sending...")
+                : isAstrologer
+                ? (language === "bn" ? "উত্তর পাঠান" : "Send Answer")
+                : (language === "bn" ? "প্রশ্ন পাঠান" : "Ask Question")}
             </Button>
           </div>
-          <p className="text-[10px] text-muted-foreground italic">
-            {language === "bn"
-              ? "* এটি আপনার সেশনের অন্তর্ভুক্ত সৌজন্যমূলক ফলো-আপ সুবিধা, এর জন্য কোনো কয়েন কাটা হবে না।"
-              : "* 100% complimentary follow-up — zero coins deducted from your wallet."}
+          <p className="text-[10.5px] text-muted-foreground italic flex items-center gap-1">
+            <ShieldCheck className="size-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>
+              {language === "bn"
+                ? "১০০% পরিপূরক ফলো-আপ সুবিধা — আপনার ওয়ালেট থেকে কোনো কয়েন কাটা হবে না।"
+                : "100% complimentary follow-up — zero coins deducted from your wallet."}
+            </span>
           </p>
+        </div>
+      ) : (
+        <div className="mt-3 p-3 rounded-xl bg-muted/60 border border-border text-center text-xs text-muted-foreground">
+          {isExpired
+            ? (language === "bn"
+                ? "এই সেশনের ২৪ ঘণ্টার পরিপূরক স্পষ্টীকরণ উইন্ডো সমাপ্ত হয়েছে।"
+                : "The complimentary clarification window for this consultation has closed.")
+            : (language === "bn"
+                ? "আপনি আপনার নির্ধারিত পরিপূরক প্রশ্নের কোটা সম্পন্ন করেছেন।"
+                : "You have used all complimentary questions for this consultation.")}
         </div>
       )}
     </div>
@@ -402,12 +473,61 @@ export default function MyAppointmentsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { language } = useLanguage();
+  const { user } = useAuth();
+  const isAstrologerUser =
+    user?.role === "astrologer" ||
+    user?.role === "admin" ||
+    user?.role === "super_admin";
+
+  const [selectedTab, setSelectedTab] = React.useState<"appointments" | "private-links" | "blacklist">(() => {
+    if (typeof window !== "undefined") {
+      const sp = new URLSearchParams(window.location.search);
+      if (sp.get("tab") === "blacklist") return "blacklist";
+      if (sp.get("tab") === "private-links") return "private-links";
+    }
+    return "appointments";
+  });
+
   const [cancelling, setCancelling] = React.useState<string | null>(null);
   const [joiningChamberId, setJoiningChamberId] = React.useState<string | null>(null);
   const [rescueModalOpen, setRescueModalOpen] = React.useState(false);
   const [rescueAppointment, setRescueAppointment] = React.useState<Appointment | null>(null);
   const [rescueNewTime, setRescueNewTime] = React.useState("");
   const [rescuingId, setRescuingId] = React.useState<string | null>(null);
+
+  // Complimentary Follow-up Pass issuance state
+  const [issuingPassAppointment, setIssuingPassAppointment] = React.useState<Appointment | null>(null);
+  const [passHours, setPassHours] = React.useState<number>(24);
+  const [passMaxMessages, setPassMaxMessages] = React.useState<number>(2);
+  const [passNotes, setPassNotes] = React.useState<string>("");
+  const [issuingPass, setIssuingPass] = React.useState<boolean>(false);
+
+  const handleIssuePass = async () => {
+    if (!issuingPassAppointment) return;
+    setIssuingPass(true);
+    try {
+      await appointmentApi.issueFollowUpPass(issuingPassAppointment.id, {
+        window_hours: passHours,
+        max_messages: passMaxMessages,
+        notes: passNotes.trim() || undefined,
+      });
+      toast.success(
+        language === "bn"
+          ? "ক্লায়েন্টকে পরিপূরক ফলো-আপ পাস সফলভাবে ইস্যু করা হয়েছে!"
+          : "Complimentary remedy clarification pass issued successfully!"
+      );
+      setIssuingPassAppointment(null);
+      void queryClient.invalidateQueries({ queryKey: KEY });
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to issue follow-up pass.");
+    } finally {
+      setIssuingPass(false);
+    }
+  };
+
+  // Birth Time Rectification (BTR) state
+  const [btrAppt, setBtrAppt] = React.useState<Appointment | null>(null);
+  const [requestBtrApptId, setRequestBtrApptId] = React.useState<string | null>(null);
 
   const handleBrahmaPauseRefund = async (appointmentId: string) => {
     setRescuingId(appointmentId);
@@ -450,58 +570,6 @@ export default function MyAppointmentsPage() {
       toast.error(err?.message || "Failed to reschedule. Please pick a slot within astrologer's open schedule.");
     } finally {
       setRescuingId(null);
-    }
-  };
-
-  // Birth Time Rectification (BTR) state & handler
-  const [btrAppt, setBtrAppt] = React.useState<Appointment | null>(null);
-  const [btrForm, setBtrForm] = React.useState({
-    birthDate: "",
-    birthTime: "",
-    birthPlace: "",
-    notes: "",
-  });
-  const [updatingBtr, setUpdatingBtr] = React.useState(false);
-
-  const handleOpenBtrModal = (appt: Appointment) => {
-    setBtrAppt(appt);
-    const existing = appt.birth_details || {};
-    setBtrForm({
-      birthDate: existing.date_of_birth || "",
-      birthTime: existing.time_of_birth || "",
-      birthPlace: existing.place_of_birth || "",
-      notes: existing.client_btr_notes || "",
-    });
-  };
-
-  const handleUpdateBtr = async () => {
-    if (!btrAppt || !btrForm.birthDate || !btrForm.birthTime || !btrForm.birthPlace) {
-      toast.error(
-        language === "bn"
-          ? "দয়া করে জন্ম তারিখ, সময় ও স্থান পূরণ করুন।"
-          : "Please provide birth date, exact time, and birth place.",
-      );
-      return;
-    }
-    setUpdatingBtr(true);
-    try {
-      await appointmentApi.updateBtr(btrAppt.id, {
-        birth_date: btrForm.birthDate,
-        birth_time: btrForm.birthTime,
-        birth_place: btrForm.birthPlace,
-        notes: btrForm.notes.trim() || undefined,
-      });
-      void queryClient.invalidateQueries({ queryKey: KEY });
-      setBtrAppt(null);
-      toast.success(
-        language === "bn"
-          ? "সঠিক জন্ম বিবরণ সফলভাবে আপডেট হয়েছে। জ্যোতিষীকে অবগত করা হয়েছে।"
-          : "Exact birth parameters updated successfully. Astrologer notified.",
-      );
-    } catch (err: any) {
-      toast.error(err?.message || "Failed to update birth details.");
-    } finally {
-      setUpdatingBtr(false);
     }
   };
 
@@ -567,6 +635,97 @@ export default function MyAppointmentsPage() {
         </Link>
       </header>
 
+      {/* Astrologer Portal Navigation Tabs */}
+      {isAstrologerUser && (
+        <div className="flex items-center gap-2 border-b border-border/80 pb-3">
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedTab("appointments");
+              if (typeof window !== "undefined") {
+                const url = new URL(window.location.href);
+                url.searchParams.delete("tab");
+                window.history.replaceState({}, "", url.toString());
+              }
+            }}
+            className={cn(
+              "flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer",
+              selectedTab === "appointments"
+                ? "bg-brand-600 text-white shadow-xs"
+                : "bg-surface-muted text-muted-foreground hover:bg-surface hover:text-foreground border border-border/50"
+            )}
+          >
+            <CalendarDays className="size-3.5" />
+            <span>{language === "bn" ? "পরামর্শ সেশন ও বুকিং" : "Consultations & Schedule"}</span>
+            <span
+              className={cn(
+                "rounded-full px-1.5 py-0.2 text-[10px] font-black",
+                selectedTab === "appointments" ? "bg-white/20 text-white" : "bg-muted text-foreground"
+              )}
+            >
+              {data?.length ?? 0}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedTab("private-links");
+              if (typeof window !== "undefined") {
+                const url = new URL(window.location.href);
+                url.searchParams.set("tab", "private-links");
+                window.history.replaceState({}, "", url.toString());
+              }
+            }}
+            className={cn(
+              "flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer",
+              selectedTab === "private-links"
+                ? "bg-amber-600 text-white shadow-xs"
+                : "bg-surface-muted text-muted-foreground hover:bg-surface hover:text-foreground border border-border/50"
+            )}
+          >
+            <Lock className="size-3.5" />
+            <span>{language === "bn" ? "ভিআইপি প্রাইভেট লিংক" : "Private Links"}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedTab("blacklist");
+              if (typeof window !== "undefined") {
+                const url = new URL(window.location.href);
+                url.searchParams.set("tab", "blacklist");
+                window.history.replaceState({}, "", url.toString());
+              }
+            }}
+            className={cn(
+              "flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer",
+              selectedTab === "blacklist"
+                ? "bg-red-600 text-white shadow-xs"
+                : "bg-surface-muted text-muted-foreground hover:bg-surface hover:text-foreground border border-border/50"
+            )}
+          >
+            <ShieldAlert className="size-3.5" />
+            <span>{language === "bn" ? "ব্লক করা ক্লায়েন্ট (Blocked Seekers)" : "Blocked Seekers"}</span>
+          </button>
+        </div>
+      )}
+
+      {selectedTab === "blacklist" ? (
+        <BlockedSeekersCard language={language} />
+      ) : selectedTab === "private-links" ? (
+        <PrivateLinksManager />
+      ) : (
+        <>
+          {/* Two-Way Google Calendar 2-Way Sync Integration */}
+          <GoogleCalendarIntegrationCard />
+
+          {/* Auspicious Transit Tatkal Surge Pricing (Amavasya, Purnima, Pradosh, Grahan) */}
+          <AuspiciousDaySurgeCard />
+
+          {/* Astrologer Emergency Break & Seeker Auto-Rescue Engine */}
+          <BrahmaPauseControlCard />
+
       {isLoading ? (
         <LoadingBlock label="Loading appointments..." />
       ) : !data?.length ? (
@@ -617,13 +776,33 @@ export default function MyAppointmentsPage() {
                   <div className="flex items-center gap-3.5">
                     <Avatar src={a.peer?.avatar_url} name={a.peer?.name} size="lg" />
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-display font-bold text-base text-foreground">
                           {a.peer?.name ?? "Astrologer"}
                         </p>
                         <Badge tone={a.status === "booked" ? "green" : "neutral"}>
                           {APPOINTMENT_STATUS_LABELS[a.status]}
                         </Badge>
+                        {(a.follow_up_pass_active || (a.follow_up_pass_enabled && a.follow_up_expires_at && new Date(a.follow_up_expires_at) > new Date())) && (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 shadow-2xs">
+                            <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <span>
+                              {(() => {
+                                const remainingHours = a.follow_up_expires_at
+                                  ? Math.max(0, Math.ceil((new Date(a.follow_up_expires_at).getTime() - Date.now()) / (3600 * 1000)))
+                                  : 24;
+                                if (language === "bn") {
+                                  return remainingHours <= 24
+                                    ? "Complimentary Remedy Clarification (Valid for 24h)"
+                                    : `পরিপূরক রেমিডি স্পষ্টীকরণ পাস (${Math.ceil(remainingHours / 24)} দিন বাকি)`;
+                                }
+                                return remainingHours <= 24
+                                  ? "Complimentary Remedy Clarification (Valid for 24h)"
+                                  : `Complimentary Remedy Clarification (Valid for ${Math.ceil(remainingHours / 24)}d)`;
+                              })()}
+                            </span>
+                          </span>
+                        )}
                       </div>
 
                       <p className="mt-1 text-xs text-muted-foreground flex flex-wrap items-center gap-2">
@@ -744,8 +923,8 @@ export default function MyAppointmentsPage() {
                           </h4>
                           <p className="mt-0.5 text-[11px] text-muted-foreground leading-relaxed">
                             {language === "bn"
-                              ? `জ্যোতিষী জরুরি ব্যক্তিগত বা আধ্যাত্মিক বিরতিতে আছেন${a.brahma_pause_reason ? ` ("${a.brahma_pause_reason}")` : ""}। আপনার সুবিধার্থে দুটি বিকল্প রাখা হয়েছে—কোনো অতিরিক্ত ফি ছাড়া নতুন সময় বেছে নিন অথবা তাৎক্ষণিক ১০০% সম্পূর্ণ রিফান্ড গ্রহণ করুন:`
-                              : `The astrologer has activated an emergency pause${a.brahma_pause_reason ? ` ("${a.brahma_pause_reason}")` : ""}. Please choose an option below:`}
+                              ? `আপনার জ্যোতিষী বর্তমানে একটি জরুরি ব্রহ্মা পজে আছেন${a.brahma_pause_reason ? ` ("${a.brahma_pause_reason}")` : ""}। আপনি কি অন্য স্লটে ফ্রিতে রিশিডিউল করতে চান নাকি ১০০% ইনস্ট্যান্ট রিফান্ড চান?`
+                              : `Your astrologer is currently on an emergency Brahma Pause${a.brahma_pause_reason ? ` ("${a.brahma_pause_reason}")` : ""}. Would you like to reschedule for free to another slot or receive a 100% instant refund?`}
                           </p>
                         </div>
                       </div>
@@ -767,7 +946,7 @@ export default function MyAppointmentsPage() {
                         className="bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs shadow-xs"
                       >
                         <CalendarDays className="size-3.5 mr-1.5" />
-                        {language === "bn" ? "বিনামূল্যে নতুন সময় বেছে নিন" : "Free Reschedule"}
+                        {language === "bn" ? "1-Click Free Reschedule (ফ্রিতে রিশিডিউল)" : "1-Click Free Reschedule"}
                       </Button>
 
                       <Button
@@ -779,7 +958,7 @@ export default function MyAppointmentsPage() {
                       >
                         {rescuingId === a.id
                           ? (language === "bn" ? "প্রসেস হচ্ছে..." : "Refunding...")
-                          : (language === "bn" ? "১০০% তাৎক্ষণিক সম্পূর্ণ রিফান্ড নিন" : "Instant 100% Full Refund")}
+                          : (language === "bn" ? "100% Instant Refund (তাৎক্ষণিক রিফান্ড)" : "100% Instant Refund")}
                       </Button>
                     </div>
 
@@ -822,11 +1001,11 @@ export default function MyAppointmentsPage() {
                     <div className="flex items-center gap-2 pt-1">
                       <Button
                         size="sm"
-                        onClick={() => handleOpenBtrModal(a)}
+                        onClick={() => setBtrAppt(a)}
                         className="bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs shadow-xs"
                       >
                         <Clock className="size-3.5 mr-1.5" />
-                        {language === "bn" ? "সঠিক জন্ম বিবরণ আপডেট করুন" : "Update Exact Birth Details"}
+                        {language === "bn" ? "সঠিক জন্ম বিবরণ ও জীবন ঘটনা আপডেট করুন" : "Update Exact Birth & Life Events"}
                       </Button>
                     </div>
                   </div>
@@ -919,12 +1098,35 @@ export default function MyAppointmentsPage() {
                 )}
 
                 {/* Complimentary Remedy Follow-up Window */}
-                {Boolean(a.follow_up_pass_enabled) && (
+                {(Boolean(a.follow_up_pass_active) || Boolean(a.follow_up_pass_enabled)) && (
                   <VedicRemedyFollowUpCard
                     appointment={a}
                     language={language}
+                    currentUser={user}
                     onMessageSent={() => void queryClient.invalidateQueries({ queryKey: KEY })}
                   />
+                )}
+
+                {/* Astrologer Issue Follow-up Pass Action */}
+                {(user?.role === "astrologer" || user?.id === a.astrologer_user_id) && a.status === "completed" && (
+                  <div className="mt-3 flex justify-end">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setPassHours(24);
+                        setPassMaxMessages(2);
+                        setPassNotes("");
+                        setIssuingPassAppointment(a);
+                      }}
+                      className="border-emerald-500/40 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-500/10 text-xs font-bold"
+                    >
+                      <Sparkles className="size-3.5 mr-1.5 text-emerald-600" />
+                      {a.follow_up_pass_enabled
+                        ? (language === "bn" ? "ফলো-আপ পাস বৃদ্ধি / পরিবর্তন করুন" : "Extend / Adjust Follow-Up Pass")
+                        : (language === "bn" ? "২৪ ঘণ্টার ফলো-আপ পাস ইস্যু করুন" : "Issue 24h Remedy Follow-Up Pass")}
+                    </Button>
+                  </div>
                 )}
 
                 {/* Missed Consultation (Client No-Show) Alert */}
@@ -967,8 +1169,32 @@ export default function MyAppointmentsPage() {
                       )}
                     </div>
 
-                    {a.can_cancel && (
-                      <div className="shrink-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="text-xs"
+                        onClick={() => setBtrAppt(a)}
+                      >
+                        <Clock className="size-3.5 mr-1 text-amber-500" />
+                        {a.btr_fulfilled
+                          ? (language === "bn" ? "BTR ও জীবন ঘটনা দেখুন" : "View BTR Events")
+                          : (language === "bn" ? "BTR ও জীবন ঘটনা" : "BTR & Life Events")}
+                      </Button>
+
+                      {user?.role === "astrologer" && !a.btr_fulfilled && (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="text-xs text-indigo-600 hover:text-indigo-700"
+                          onClick={() => setRequestBtrApptId(a.id)}
+                        >
+                          <Clock className="size-3.5 mr-1 text-indigo-500" />
+                          {language === "bn" ? "BTR অনুরোধ পাঠান" : "Request BTR"}
+                        </Button>
+                      )}
+
+                      {a.can_cancel && (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -977,8 +1203,8 @@ export default function MyAppointmentsPage() {
                         >
                           {language === "bn" ? "স্লট বাতিল করুন" : "Cancel Appointment"}
                         </Button>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 )}
               </li>
@@ -1060,90 +1286,118 @@ export default function MyAppointmentsPage() {
         </Modal>
       )}
 
-      {/* Birth Time Rectification Modal */}
-      {btrAppt && (
+      {/* Birth Time Rectification (BTR) & Life Events Modal */}
+      <BTRLifeEventsModal
+        appointment={btrAppt}
+        isOpen={Boolean(btrAppt)}
+        onClose={() => setBtrAppt(null)}
+        language={language}
+        onSuccess={() => {
+          void queryClient.invalidateQueries({ queryKey: KEY });
+        }}
+      />
+
+      {/* Astrologer Request BTR Modal */}
+      <RequestBTRModal
+        appointmentId={requestBtrApptId}
+        isOpen={Boolean(requestBtrApptId)}
+        onClose={() => setRequestBtrApptId(null)}
+        language={language}
+        onSuccess={() => {
+          void queryClient.invalidateQueries({ queryKey: KEY });
+        }}
+      />
+
+      {/* Astrologer Issue Follow-Up Pass Modal */}
+      {issuingPassAppointment && (
         <Modal
-          open={Boolean(btrAppt)}
-          onClose={() => setBtrAppt(null)}
-          title={language === "bn" ? "সঠিক জন্ম বিবরণ আপডেট করুন (BTR)" : "Update Exact Birth Parameters"}
+          open={Boolean(issuingPassAppointment)}
+          onClose={() => setIssuingPassAppointment(null)}
+          title={
+            language === "bn"
+              ? "পরিপূরক রেমিডি স্পষ্টীকরণ পাস ইস্যু করুন"
+              : "Issue Complimentary Remedy Follow-Up Pass"
+          }
         >
           <div className="space-y-4 text-xs">
             <p className="text-muted-foreground leading-relaxed">
               {language === "bn"
-                ? "বৈদিক জ্যোতিষে লগ্ন প্রান্তিক ও নবাংশ ডি৯ নির্ভুলতার জন্য সঠিক জন্ম সময় ও স্থান অত্যন্ত জরুরি।"
-                : "Exact birth time ensures mathematically precise planetary degrees and divisional charts."}
+                ? "পরামর্শ অধিবেশন শেষে ক্লায়েন্টকে নির্ধারিত সময়ের জন্য কোনো ফি ছাড়াই ১ বা ২টি প্রতিকার স্পষ্টীকরণ প্রশ্ন করার অনুমতি প্রদান করুন।"
+                : "Grant seeker permission to ask 1 or 2 complimentary remedy clarification queries within a specified grace window."}
             </p>
 
-            <div className="space-y-3">
-              <div>
-                <label className="block font-semibold text-foreground mb-1">
-                  {language === "bn" ? "জন্ম তারিখ *" : "Date of Birth *"}
-                </label>
-                <input
-                  type="date"
-                  value={btrForm.birthDate}
-                  onChange={(e) => setBtrForm((f) => ({ ...f, birthDate: e.target.value }))}
-                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500"
-                />
-              </div>
+            <div className="space-y-1.5">
+              <label className="font-semibold text-foreground">
+                {language === "bn" ? "পাসের সময়সীমা (ঘণ্টায়)" : "Active Window (Hours)"}
+              </label>
+              <select
+                value={passHours}
+                onChange={(e) => setPassHours(Number(e.target.value))}
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                <option value={24}>{language === "bn" ? "২৪ ঘণ্টা (প্রস্তাবিত)" : "24 Hours (Standard)"}</option>
+                <option value={48}>{language === "bn" ? "৪৮ ঘণ্টা (২ দিন)" : "48 Hours (2 Days)"}</option>
+                <option value={72}>{language === "bn" ? "৭২ ঘণ্টা (৩ দিন)" : "72 Hours (3 Days)"}</option>
+                <option value={168}>{language === "bn" ? "৭ দিন (১ সপ্তাহ)" : "7 Days (1 Week)"}</option>
+              </select>
+            </div>
 
-              <div>
-                <label className="block font-semibold text-foreground mb-1">
-                  {language === "bn" ? "সঠিক জন্ম সময় (মিনিট সহ) *" : "Exact Birth Time (HH:MM AM/PM) *"}
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. 05:42 AM or 17:42"
-                  value={btrForm.birthTime}
-                  onChange={(e) => setBtrForm((f) => ({ ...f, birthTime: e.target.value }))}
-                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500"
-                />
-              </div>
+            <div className="space-y-1.5">
+              <label className="font-semibold text-foreground">
+                {language === "bn" ? "সর্বোচ্চ অনুমোদিত প্রশ্ন" : "Maximum Allowed Clarifications"}
+              </label>
+              <select
+                value={passMaxMessages}
+                onChange={(e) => setPassMaxMessages(Number(e.target.value))}
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                <option value={1}>{language === "bn" ? "১টি প্রশ্ন" : "1 Question"}</option>
+                <option value={2}>{language === "bn" ? "২টি প্রশ্ন (স্ট্যান্ডার্ড)" : "2 Questions (Standard)"}</option>
+                <option value={3}>{language === "bn" ? "৩টি প্রশ্ন" : "3 Questions"}</option>
+                <option value={5}>{language === "bn" ? "৫টি প্রশ্ন" : "5 Questions"}</option>
+              </select>
+            </div>
 
-              <div>
-                <label className="block font-semibold text-foreground mb-1">
-                  {language === "bn" ? "জন্ম স্থান (শহর, জেলা, দেশ) *" : "Place of Birth *"}
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Kolkata, West Bengal, India"
-                  value={btrForm.birthPlace}
-                  onChange={(e) => setBtrForm((f) => ({ ...f, birthPlace: e.target.value }))}
-                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-foreground mb-1">
-                  {language === "bn" ? "যাচাই সংক্রান্ত নোট (ঐচ্ছিক)" : "Verification Notes (Optional)"}
-                </label>
-                <input
-                  type="text"
-                  placeholder={language === "bn" ? "যেমন: হাসপাতাল সার্টিফিকেট বা পরিবারের কোষ্ঠি অনুযায়ী" : "e.g. Verified from hospital discharge slip"}
-                  value={btrForm.notes}
-                  onChange={(e) => setBtrForm((f) => ({ ...f, notes: e.target.value }))}
-                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500"
-                />
-              </div>
+            <div className="space-y-1.5">
+              <label className="font-semibold text-foreground">
+                {language === "bn" ? "জ্যোতিষীর বিশেষ বার্তা বা নোট (ঐচ্ছিক)" : "Special Note or Directives (Optional)"}
+              </label>
+              <textarea
+                value={passNotes}
+                onChange={(e) => setPassNotes(e.target.value)}
+                placeholder={
+                  language === "bn"
+                    ? "যেমন: রত্ন ধারণের নিয়ম বা মহামৃত্যুঞ্জয় জপ সংক্রান্ত যেকোনো প্রশ্নের উত্তর দেওয়া হবে।"
+                    : "e.g. Feel free to ask about gem energization or recitation rituals."
+                }
+                rows={3}
+                className="w-full rounded-xl border border-border bg-background p-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="ghost" size="sm" onClick={() => setBtrAppt(null)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIssuingPassAppointment(null)}
+              >
                 {language === "bn" ? "বাতিল" : "Cancel"}
               </Button>
               <Button
                 size="sm"
-                disabled={updatingBtr || !btrForm.birthDate || !btrForm.birthTime || !btrForm.birthPlace}
-                onClick={handleUpdateBtr}
-                className="bg-sky-600 hover:bg-sky-700 text-white font-semibold"
+                disabled={issuingPass}
+                onClick={handleIssuePass}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
               >
-                {updatingBtr
-                  ? (language === "bn" ? "আপডেট হচ্ছে..." : "Updating...")
-                  : (language === "bn" ? "জন্ম বিবরণ সংরক্ষণ করুন" : "Save Rectified Details")}
+                {issuingPass
+                  ? (language === "bn" ? "ইস্যু করা হচ্ছে..." : "Issuing...")
+                  : (language === "bn" ? "পাস সক্রিয় করুন" : "Activate Pass")}
               </Button>
             </div>
           </div>
         </Modal>
+      )}
+        </>
       )}
     </div>
   );

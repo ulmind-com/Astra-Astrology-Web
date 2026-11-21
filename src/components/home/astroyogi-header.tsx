@@ -1079,7 +1079,7 @@ export function AstroyogiHeader() {
                     <div
                       className={cn(
                         "absolute left-0 top-full pt-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150",
-                        cat.href === "/shop" ? "w-[420px] sm:w-[440px]" : "w-80"
+                        cat.href === "/shop" ? "w-[440px] sm:w-[470px]" : "w-80"
                       )}
                     >
                       <div className="overflow-hidden rounded-2xl border border-amber-200/90 bg-white p-2 shadow-[0_18px_45px_-10px_rgba(26,18,8,0.18)] ring-1 ring-black/5">
@@ -1093,7 +1093,7 @@ export function AstroyogiHeader() {
                                 onClick={() => setHoveredCategory(null)}
                                 className="group/item flex items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-amber-50/80"
                               >
-                                <div className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-800 group-hover/item:bg-amber-200 transition-colors overflow-hidden border border-amber-200/80 shadow-2xs">
+                                <div className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-100/90 text-amber-800 group-hover/item:bg-amber-200 transition-colors overflow-hidden border border-amber-200 shadow-2xs">
                                   {item.iconUrl ? (
                                     <Image
                                       src={item.iconUrl}
@@ -1108,8 +1108,8 @@ export function AstroyogiHeader() {
                                   )}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <div className="flex items-center justify-between gap-2.5">
-                                    <span className="font-bold text-xs sm:text-[13px] text-stone-900 group-hover/item:text-amber-800 truncate">
+                                  <div className="flex items-center justify-between gap-3">
+                                    <span className="font-bold text-xs sm:text-[13px] text-stone-900 group-hover/item:text-amber-800 leading-tight">
                                       {item.label}
                                     </span>
                                     {item.badge && (

@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { useQuery } from "@tanstack/react-query";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { CartDrawer } from "@/components/shop/CartDrawer";
@@ -125,7 +126,6 @@ export default function CheckoutPage() {
     items,
     getSubtotal,
     getCashbackCoins,
-    getBundledGifts,
     couponCode,
     discountAmount,
     setCoupon,
@@ -176,6 +176,8 @@ export default function CheckoutPage() {
   const [orderSuccess, setOrderSuccess] = React.useState<ShopCheckoutResult | null>(null);
   const [activeOrder, setActiveOrder] = React.useState<ShopCheckoutResult | null>(null);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
+  const paymentStartedRef = React.useRef(false);
+  const paymentCompletedRef = React.useRef(false);
 
   // ---- Pre-fill name from auth
   React.useEffect(() => {
@@ -187,11 +189,20 @@ export default function CheckoutPage() {
     }
   }, [user, shipping.recipient_name]);
 
+  // ---- Store settings (shipping + threshold-based complimentary gift)
+  const { data: shopSettings } = useQuery({
+    queryKey: ["shop_public_banners"],
+    queryFn: () => shopApi.getBanners(),
+    staleTime: 5 * 60 * 1000,
+  });
+
   // ---- Computed
   const subtotal = getSubtotal();
   const cashbackCoins = getCashbackCoins();
-  const freeGifts = getBundledGifts();
-  const shippingFee = subtotal >= 499 ? 0 : 70;
+  const freeShippingThreshold = shopSettings?.free_shipping_threshold ?? 499;
+  const standardShippingFee = shopSettings?.standard_shipping_fee ?? 70;
+  const freeGifts: Array<{ title: string; value: number; badge?: string | null }> = [];
+  const shippingFee = subtotal >= freeShippingThreshold ? 0 : standardShippingFee;
   const grandTotal = subtotal - discountAmount + shippingFee;
 
   // ---- Pincode debounced lookup
@@ -301,6 +312,8 @@ export default function CheckoutPage() {
     }
 
     setIsSubmitting(true);
+    paymentStartedRef.current = false;
+    paymentCompletedRef.current = false;
 
     try {
       const payload: ShopCheckoutPayload = {
@@ -394,6 +407,7 @@ export default function CheckoutPage() {
           razorpay_payment_id: string;
           razorpay_signature: string;
         }) => {
+          paymentStartedRef.current = true;
           try {
             toast.loading(
               isBn ? "পেমেন্ট যাচাই হচ্ছে..." : "Verifying payment...",
@@ -407,6 +421,7 @@ export default function CheckoutPage() {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
             });
+            paymentCompletedRef.current = true;
             clearCart();
             setOrderSuccess(result);
             setActiveOrder(null);
@@ -427,6 +442,7 @@ export default function CheckoutPage() {
                 (checked.payment_status === "paid" ||
                   checked.order_status === "confirmed")
               ) {
+                paymentCompletedRef.current = true;
                 clearCart();
                 setOrderSuccess(result);
                 setActiveOrder(null);
@@ -453,6 +469,10 @@ export default function CheckoutPage() {
         },
         modal: {
           ondismiss: () => {
+            // Guard: If payment was completed or verification started, do NOT abort!
+            if (paymentCompletedRef.current || paymentStartedRef.current) {
+              return;
+            }
             // Immediately inform backend to cancel the uncompleted checkout and release reserved stock
             const orderIdToAbort = result?.order_id;
             if (orderIdToAbort) {
@@ -584,24 +604,6 @@ export default function CheckoutPage() {
                 </div>
               )}
             </div>
-
-            {/* Free gifts */}
-            {orderSuccess.free_gifts && orderSuccess.free_gifts.length > 0 && (
-              <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 text-left">
-                <p className="text-xs font-bold text-amber-800 flex items-center gap-1 mb-2">
-                  <Gift className="size-3.5 text-amber-600" />
-                  {isBn ? "আপনার ফ্রি উপহার:" : "Your Free Gifts:"}
-                </p>
-                {orderSuccess.free_gifts.map((g: any, i: number) => (
-                  <p key={i} className="text-sm text-amber-900">
-                    🎁 {g.title || g.badge}{" "}
-                    {g.value ? (
-                      <span className="text-xs text-amber-700">(Worth {formatINR(g.value)})</span>
-                    ) : null}
-                  </p>
-                ))}
-              </div>
-            )}
 
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
@@ -1145,24 +1147,6 @@ export default function CheckoutPage() {
                     </div>
                   ))}
                 </div>
-
-                {/* Free gifts */}
-                {freeGifts.length > 0 && (
-                  <div className="rounded-xl bg-amber-50/70 border border-amber-200/60 p-3 space-y-1.5">
-                    <p className="text-[11px] font-bold text-amber-800 flex items-center gap-1">
-                      <Gift className="size-3 text-amber-600" />
-                      {isBn ? "ফ্রি উপহার অন্তর্ভুক্ত:" : "Free Vedic Gifts Included:"}
-                    </p>
-                    {freeGifts.map((g, i) => (
-                      <p key={i} className="text-xs text-amber-900 pl-4">
-                        🎁 {g.title}{" "}
-                        <span className="text-[10px] text-emerald-700 font-bold">
-                          FREE (Worth {formatINR(g.value)})
-                        </span>
-                      </p>
-                    ))}
-                  </div>
-                )}
 
                 {/* Smart Best-Offer Coupon Selector */}
                 <div className="pt-2">

@@ -157,7 +157,7 @@ async function refreshSession(): Promise<boolean> {
 type Sent = { response: Response; payload: unknown };
 
 async function send(path: string, options: Options): Promise<Sent> {
-  const { method = "GET", body, query, auth = true, ...rest } = options;
+  const { method = "GET", body, query, auth = true, signal: callerSignal, ...rest } = options;
 
   const headers = new Headers(rest.headers);
   const isFormData = body instanceof FormData;
@@ -169,32 +169,33 @@ async function send(path: string, options: Options): Promise<Sent> {
 
   let response: Response;
   const primaryUrl = buildUrl(path, query);
-  const timeoutSignal =
-    rest.signal ??
-    (typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function"
-      ? AbortSignal.timeout(10000)
-      : undefined);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  if (callerSignal) {
+    if (callerSignal.aborted) {
+      controller.abort();
+    } else {
+      callerSignal.addEventListener("abort", () => controller.abort(), { once: true });
+    }
+  }
 
   try {
     response = await fetch(primaryUrl, {
       ...rest,
-      signal: timeoutSignal,
       method,
       headers,
+      signal: controller.signal,
       body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
     });
-  } catch {
+  } catch (err: any) {
     // If same-origin proxy failed, attempt direct fallback to apiBase
-    if (typeof window !== "undefined" && !primaryUrl.startsWith(apiBase)) {
+    if (typeof window !== "undefined" && !primaryUrl.startsWith(apiBase) && !controller.signal.aborted) {
       try {
         response = await fetch(buildUrl(path, query, true), {
           ...rest,
-          signal:
-            typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function"
-              ? AbortSignal.timeout(10000)
-              : undefined,
           method,
           headers,
+          signal: controller.signal,
           body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
         });
       } catch {
@@ -205,12 +206,22 @@ async function send(path: string, options: Options): Promise<Sent> {
         );
       }
     } else {
+      const aborted = err instanceof Error && err.name === "AbortError";
+      if (aborted && !callerSignal?.aborted) {
+        throw new ApiError(
+          "The server took too long to respond. Please try again.",
+          0,
+          "timeout",
+        );
+      }
       throw new ApiError(
         "Could not reach the server. Check your connection and try again.",
         0,
         "network_error",
       );
     }
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   if (response.status === 204) return { response, payload: null };
@@ -225,22 +236,39 @@ async function send(path: string, options: Options): Promise<Sent> {
 }
 
 /**
- * One request, with a single retry after refreshing an expired token.
+ * One request, with a single retry after refreshing an expired token,
+ * or retrying a transient database/gateway blip (503 / 502 / 504).
  *
- * The retry only happens for a request that carried a token in the first
+ * The token retry only happens for a request that carried a token in the first
  * place, and only once — a loop here would hammer the API on every page.
  */
 async function sendWithRefresh(path: string, options: Options): Promise<Sent> {
-  const sent = await send(path, options);
-  const { response } = sent;
+  let sent = await send(path, options);
+  let { response } = sent;
   const auth = options.auth ?? true;
+
+  // Transient failover / 503 / 502 / 504 auto-retry:
+  // If the server was temporarily waking up or had a 1-second replica set primary re-election,
+  // retry once after an 800ms backoff before showing an error.
+  const is503 = response.status === 503;
+  const isGateway = response.status === 502 || response.status === 504;
+  const code = (sent.payload as ApiErrorBody | null)?.error_code;
+  const method = options.method ?? "GET";
+  const isSafeMethod = method === "GET";
+
+  if ((isSafeMethod && (is503 || isGateway)) || code === "database_unavailable") {
+    await new Promise((r) => setTimeout(r, 800));
+    sent = await send(path, options);
+    response = sent.response;
+    if (response.ok) return sent;
+  }
 
   if (response.ok || response.status !== 401 || !auth) return sent;
 
-  const code = (sent.payload as ApiErrorBody | null)?.error_code;
+  const errCode = (sent.payload as ApiErrorBody | null)?.error_code;
   // A wrong password is not a stale session, and neither is a locked lesson
   // viewed by someone who never signed in.
-  if (code && CREDENTIAL_CODES.has(code)) return sent;
+  if (errCode && CREDENTIAL_CODES.has(errCode)) return sent;
   if (!session.refreshToken) return sent;
 
   const refreshed = await refreshSession();

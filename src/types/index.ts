@@ -70,11 +70,19 @@ export type AstrologerPublic = Omit<S["AstrologerPublic"], "appointment"> & {
   banner_image_url?: string | null;
   service_duration?: ServiceDurationStats | null;
   appointment: AppointmentCard;
+  is_on_brahma_pause?: boolean;
+  brahma_pause_until?: string | null;
+  brahma_pause_reason?: string | null;
+  brahma_pause_activated_at?: string | null;
 };
 export type AstrologerProfile = Omit<S["AstrologerProfile"], "appointment"> & {
   banner_image_url?: string | null;
   service_duration?: ServiceDurationStats | null;
   appointment: AppointmentCard;
+  is_on_brahma_pause?: boolean;
+  brahma_pause_until?: string | null;
+  brahma_pause_reason?: string | null;
+  brahma_pause_activated_at?: string | null;
 };
 export type AstrologerCreate = S["AstrologerCreate"];
 export type AstrologerCreated = S["AstrologerCreated"];
@@ -417,8 +425,11 @@ export type Appointment = Omit<S["AppointmentOut"], "peer"> & {
   extension_status?: "none" | "pending" | "accepted" | "declined" | "expired";
   extension_total_extended_minutes?: number;
   follow_up_pass_enabled?: boolean;
+  follow_up_pass_active?: boolean;
   follow_up_window_days?: number;
   follow_up_expires_at?: string | null;
+  astrologer_user_id?: string | null;
+  astrologer_id?: string | null;
   follow_up_max_messages?: number;
   follow_up_messages_used?: number;
   follow_up_granted_at?: string | null;
@@ -558,6 +569,50 @@ export interface ValidatePrivateInviteResponse {
   discount_percent?: number | null;
   expires_at?: string | null;
   uses_remaining: number;
+}
+
+export interface AuspiciousTransitInfo {
+  date: string;
+  is_auspicious_transit_day: boolean;
+  event_key?: string | null;
+  event_name_bn?: string | null;
+  event_name_en?: string | null;
+  recommended_multiplier: number;
+  surge_multipliers: number[];
+  demand_factor: string;
+  remedy_focus_bn?: string | null;
+  remedy_focus_en?: string | null;
+  spiritual_reason_bn?: string | null;
+  spiritual_reason_en?: string | null;
+  tithi_index?: number;
+  tithi_num?: number;
+  paksha_bn?: string;
+  paksha_en?: string;
+}
+
+export interface AuspiciousTransitSurgePayload {
+  day: string;
+  multiplier: number;
+  custom_title?: string;
+  open_surge_window?: boolean;
+  from_time?: string;
+  to_time?: string;
+}
+
+export interface AuspiciousTransitSurgeResult {
+  success: boolean;
+  day: string;
+  is_auspicious_transit_day: boolean;
+  event_key?: string | null;
+  event_name_bn?: string | null;
+  event_name_en?: string | null;
+  multiplier: number;
+  custom_title?: string | null;
+  windows_affected_count: number;
+  spiritual_reason_bn?: string | null;
+  remedy_focus_bn?: string | null;
+  demand_factor: string;
+  message: string;
 }
 
 export interface WhiteboardStrokePoint {
@@ -917,6 +972,26 @@ export type CoupleMatchResult = {
   harmonizing_advice_hi: string;
 };
 
+export interface BlacklistedClient {
+  user_id: string;
+  name: string;
+  email_masked?: string | null;
+  phone_masked?: string | null;
+  avatar_url?: string | null;
+  blacklisted_at?: string | null;
+  last_reason?: string | null;
+  notes?: string | null;
+  total_reports: number;
+}
+
+export interface RedFlagPayload {
+  reason: string;
+  notes?: string | null;
+  blacklist_client?: boolean;
+  terminate_call?: boolean;
+}
+
 export * from "./astrology";
 export * from "./palm-reading";
 export * from "./course";
+export * from "./copilot";

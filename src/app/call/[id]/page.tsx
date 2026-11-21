@@ -1,13 +1,15 @@
 "use client";
 
-import { Clock, Coins, Moon, Phone, PhoneOff, Sparkles, Sun, Video } from "lucide-react";
+import { Clock, Coins, Compass, Moon, Phone, PhoneOff, ShieldAlert, Sparkles, Sun, Video } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import * as React from "react";
 import { toast } from "sonner";
 
+import { AstroCoPilotDrawer } from "@/components/call/astro-copilot-drawer";
 import { CallRoom } from "@/components/call/call-room";
 import { CosmicWhiteboard } from "@/components/call/cosmic-whiteboard";
+import { RedFlagModal } from "@/components/call/red-flag-modal";
 import { OutOfCoins, SessionMeter } from "@/components/consult/session-meter";
 import { Alert, Avatar, Button, LoadingBlock, Modal } from "@/components/ui";
 import { useCall, useCallActions, useCallHeartbeat, useCallTimer } from "@/hooks/use-call";
@@ -23,7 +25,7 @@ import { CALL_STATUS_LABELS, formatDuration, isCallLive } from "@/types";
 export default function CallPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { ready } = useRequireAuth();
+  const { ready, user } = useRequireAuth();
 
   const { data, isLoading, error, refetch } = useCall(ready ? id : null);
   const { end } = useCallActions();
@@ -52,6 +54,13 @@ export default function CallPage() {
   const canAfford = balanceCoins >= neededCoins;
 
   const [whiteboardOpen, setWhiteboardOpen] = React.useState(false);
+  const [copilotOpen, setCopilotOpen] = React.useState(false);
+  const [redFlagOpen, setRedFlagOpen] = React.useState(false);
+
+  const isAstrologer =
+    user?.role === "astrologer" ||
+    user?.id === call?.astrologer_user_id ||
+    user?.role === "admin";
 
   // Theme State (Supports Ultra Pro Light & Dark)
   const [theme, setTheme] = React.useState<"light" | "dark">(() => {
@@ -157,6 +166,32 @@ export default function CallPage() {
         />
       )}
 
+      {connected && (
+        <AstroCoPilotDrawer
+          callId={id}
+          isOpen={copilotOpen}
+          onClose={() => setCopilotOpen(false)}
+          theme={theme}
+          appointmentId={call.appointment_id}
+          userRole={user?.role}
+        />
+      )}
+
+      {connected && isAstrologer && (
+        <RedFlagModal
+          isOpen={redFlagOpen}
+          onClose={() => setRedFlagOpen(false)}
+          callId={id}
+          appointmentId={call.appointment_id}
+          clientName={call.peer?.name}
+          theme={theme}
+          onSuccess={() => {
+            hangUp();
+            router.replace("/account/appointments?tab=blacklist");
+          }}
+        />
+      )}
+
       {/* ------------------------------------------------- connected chrome */}
       {connected && call.billing && (
         <div className="pointer-events-auto absolute inset-x-0 top-16 z-10 px-3">
@@ -222,6 +257,23 @@ export default function CallPage() {
 
             <Button
               size="sm"
+              onClick={() => setCopilotOpen((v) => !v)}
+              className={cn(
+                "text-xs font-bold transition-all shadow-sm",
+                copilotOpen
+                  ? "bg-amber-400 text-slate-950 border border-amber-300 ring-2 ring-amber-400/50"
+                  : theme === "dark"
+                    ? "bg-amber-950/70 hover:bg-amber-900 text-amber-200 border border-amber-500/40"
+                    : "bg-white/95 hover:bg-[#fff7d6] text-amber-900 border border-[#ecd57c] shadow-xs",
+              )}
+              title="Open live Astro Co-Pilot cheat-sheet"
+            >
+              <Compass className="size-3.5 mr-1 text-amber-500" />
+              Astro Co-Pilot
+            </Button>
+
+            <Button
+              size="sm"
               onClick={() => setWhiteboardOpen((v) => !v)}
               className={cn(
                 "text-xs font-bold transition-all shadow-sm",
@@ -236,6 +288,19 @@ export default function CallPage() {
               <Sparkles className="size-3.5 mr-1 text-amber-400" />
               Cosmic Whiteboard
             </Button>
+
+            {isAstrologer && (
+              <Button
+                size="sm"
+                onClick={() => setRedFlagOpen(true)}
+                className="bg-red-600/90 hover:bg-red-600 text-white border border-red-500/50 shadow-sm text-xs font-bold"
+                title="Report misconduct, capture fee and blacklist client"
+              >
+                <ShieldAlert className="size-3.5 mr-1 text-white animate-pulse" />
+                <span className="hidden sm:inline">Report Abuse</span>
+              </Button>
+            )}
+
             <Button
               size="sm"
               onClick={hangUp}

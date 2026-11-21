@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -201,7 +203,7 @@ function ShopInner() {
     if (initialPurpose) setSelectedPurpose(initialPurpose);
   }, [initialPlanet, initialCategory, initialPurpose]);
 
-  // Fetch Public Banners with instant caching
+  // Fetch Public Banners with instant caching & pre-hydration
   const { data: bannerSettings } = useQuery<ShopBannerSettings | null>({
     queryKey: ["shop_public_banners"],
     queryFn: async () => {
@@ -212,6 +214,30 @@ function ShopInner() {
         return null;
       }
     },
+    initialData: {
+      hero_banners: [
+        {
+          id: "banner-1",
+          badge_text: "100% Authentic & Lab Certified",
+          title: "Sacred Certified Nepali Rudraksha",
+          subtitle: "Consecrated with Vedic Pran-Pratishtha by Vedic Pandits for spiritual protection & prosperity.",
+          cta_text: "Explore Rudraksha",
+          cta_link: "/shop?category=rudraksha",
+          image_url: "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=1200&q=80",
+          is_active: true,
+        },
+        {
+          id: "banner-2",
+          badge_text: "925 Sterling Silver & Certified",
+          title: "Sacred Zodiac Collection",
+          subtitle: "Handcrafted 925 sterling silver zodiac rings & planetary talisman jewelry.",
+          cta_text: "Explore Zodiac",
+          cta_link: "/shop?category=zodiac",
+          image_url: "https://images.unsplash.com/photo-1599707367072-cd6ada2bc375?auto=format&fit=crop&w=1200&q=80",
+          is_active: true,
+        },
+      ] as any,
+    } as any,
     staleTime: 1000 * 30,
   });
 

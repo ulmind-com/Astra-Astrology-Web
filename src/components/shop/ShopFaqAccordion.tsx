@@ -22,10 +22,10 @@ export function ShopFaqAccordion() {
       a_en: "During checkout, you can enter the devotee's Name, Gotra and Date of Birth. Vedic priests on the banks of Varanasi invoke these details in an authentic Sankalpa ritual, chanting consecrated mantras before securely packing the item.",
     },
     {
-      q_bn: "বিনামূল্যে দেওয়া Raw Selenite Plate-এর কাজ কী?",
-      q_en: "What is the purpose of the FREE Raw Selenite Plate?",
-      a_bn: "সেলিনাইট হলো এমন একটি স্বয়ংসিদ্ধ আধ্যাত্মিক ক্রিস্টাল যা নেতিবাচক শক্তি শোষণ করে অন্য যেকোনো ক্রিস্টাল বা রুদ্রাক্ষকে চার্জ ও পরিচ্ছন্ন করে। আপনার রাশি ব্রেসলেট বা ক্রিস্টালটি প্রতি রাতে এই প্লেটের উপর রেখে দিলে তার আধ্যাত্মিক শক্তি নিত্য জাগ্রত থাকে।",
-      a_en: "Selenite is a high-vibrational cleansing mineral that purifies and recharges other crystals and sacred beads. Simply place your crystal or zodiac bracelet on the Selenite plate overnight to recharge its positive aura.",
+      q_bn: "প্রতিকার বা রত্ন-ক্রিস্টাল কীভাবে ঘরে বসে নিত্য রিচার্জ ও শুদ্ধ রাখা যায়?",
+      q_en: "How can I cleanse and recharge my sacred crystal at home?",
+      a_bn: "অমাবস্যা বা পূর্ণিমার রাতে প্রতিকারটি চাঁদের স্নিগ্ধ আলোয় রেখে দিলে অথবা গঙ্গাজল ও ধূপের পবিত্র ধোঁয়ায় স্পর্শ করালে তার নেতিবাচক শক্তি দূর হয়ে শুভ শক্তির প্রবাহ অটুট থাকে। সেলিনাইট প্লেট বা তামার পাত্রেও এটি পবিত্রভাবে সংরক্ষণ করা যায়।",
+      a_en: "Exposing your sacred crystal or rudraksha beads to overnight moonlight on Full Moon nights, or gently wafting sacred incense smoke around them cleanses accumulated energies and keeps their spiritual vibrations resonant.",
     },
     {
       q_bn: "আমি কি সরকারি ল্যাব টেস্ট সার্টিফিকেট পাব?",

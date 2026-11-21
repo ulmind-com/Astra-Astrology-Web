@@ -115,7 +115,7 @@ export default function ProductDetailPage() {
     product?.discount_percent ||
     (mrp > salePrice ? Math.round(((mrp - salePrice) / mrp) * 100) : 0);
   const savings = mrp > salePrice ? mrp - salePrice : 0;
-  const freeGiftBadge = product?.free_gift_badge || "FREE Raw Selenite Plate worth ₹729";
+  const freeGiftBadge = product?.free_gift_badge || "";
   const effectiveCashback = product?.cashback_percent ?? 100;
   const cashbackCoins = Math.round(salePrice * (effectiveCashback / 100));
 
@@ -551,20 +551,20 @@ export default function ProductDetailPage() {
                   {product.wear_instructions ||
                     (isBn
                       ? "১. শুভ তিথি বা সোমবার/মঙ্গলবার প্রাতঃকালে স্নান সেরে শুদ্ধ বস্ত্র পরিধান করুন।\n২. গঙ্গাজল অথবা কাঁচা দুধে ধুয়ে শিবলিঙ্গ বা ইষ্টদেবতার চরণে স্পর্শ করান।\n৩. প্রদীপ ও ধূপ জ্বালিয়ে ১০৮ বার বীজ মন্ত্র জপ করে ধারণ করুন।\n৪. রাতে ঘুমানোর সময় বা অপবিত্র স্থানে যাওয়ার সময় খুলে রাখা শ্রেয়।"
-                      : "1. Bathe and wear clean clothes on an auspicious morning (Monday/Tuesday).\n2. Purify with Gangajal or raw milk and offer prayers to Lord Shiva or your Ishta Devata.\n3. Chant the Beej Mantra 108 times before wearing.\n4. Store safely on the complimentary Selenite plate when not in use.")}
+                      : "1. Bathe and wear clean clothes on an auspicious morning (Monday/Tuesday).\n2. Purify with Gangajal or raw milk and offer prayers to Lord Shiva or your Ishta Devata.\n3. Chant the Beej Mantra 108 times before wearing.\n4. Store safely in a clean sacred pouch or altar when not in use.")}
                 </p>
               </div>
 
-              {/* Recharging with Selenite */}
+              {/* Cleansing & Purity Maintenance */}
               <div className="rounded-2xl bg-amber-50/60 border border-amber-200 p-4 space-y-2">
                 <h5 className="font-bold text-xs text-amber-950 flex items-center gap-1.5">
-                  <Gift className="size-3.5 text-amber-700" />
-                  <span>{isBn ? "ফ্রি সেলিনাইট প্লেটে রিচার্জ করার নিয়ম" : "Recharging with Your Free Selenite Plate"}</span>
+                  <Sparkles className="size-3.5 text-amber-700" />
+                  <span>{isBn ? "প্রতিকার পবিত্র ও জাগ্রত রাখার নিয়ম" : "Maintaining Sacred Purity & Divine Energy"}</span>
                 </h5>
                 <p className="text-xs text-stone-600">
                   {isBn
-                    ? "আপনার অর্ডারের সাথে পাওয়া ফ্রি Raw Selenite Charging Plate-টির উপরে প্রতি অমাবস্যা ও পূর্ণিমার রাতে প্রতিকারটি রেখে দিলে এর নেতিবাচক শক্তি দূর হয় এবং ইতিবাচক তেজ পুনঃস্থাপিত হয়।"
-                    : "Place your sacred crystal or rudraksha on the included Raw Selenite Plate overnight during Full Moon / Amavasya to cleanse negative energies and recharge divine potency."}
+                    ? "প্রতি অমাবস্যা ও পূর্ণিমার রাতে প্রতিকারটি পূর্ণিমার চাঁদের আলোয় রেখে দিলে অথবা গঙ্গাজল ও ধূপ-দীপের পবিত্র ধোঁয়ায় স্পর্শ করালে এর নেতিবাচক শক্তি দূর হয় এবং ইতিবাচক তেজ পুনঃস্থাপিত হয়।"
+                    : "Place your sacred crystal or rudraksha under overnight Full Moon light or cleanse with Gangajal and sacred incense smoke to dispel stagnant energies and sustain divine resonance."}
                 </p>
               </div>
             </div>

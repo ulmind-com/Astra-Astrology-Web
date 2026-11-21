@@ -58,7 +58,7 @@ export function CashbackConsultationBridge({
 
   // If cashback is explicitly disabled (0%) by admin and no free gift, do not show
   const effectiveCashback = cashbackPercent ?? 100;
-  if (effectiveCashback === 0 && (!freeGiftValue || freeGiftValue <= 0)) {
+  if (effectiveCashback === 0) {
     return null;
   }
 
@@ -69,11 +69,10 @@ export function CashbackConsultationBridge({
   // Cashback coins calculation
   const cashbackCoins = Math.round(salePrice * (effectiveCashback / 100));
 
-  // Free gift info
-  const hasFreeGift = freeGiftValue !== undefined && freeGiftValue !== null ? freeGiftValue > 0 : true;
-  const giftVal = hasFreeGift ? (freeGiftValue ?? 729) : 0;
-  const giftTitle =
-    freeGiftTitle || (isBn ? "প্রাকৃতিক সেলিনাইট চার্জিং প্লেট" : "Raw Selenite Charging Plate");
+  // Free gift info (only enabled if explicitly provided with positive value)
+  const hasFreeGift = Boolean(freeGiftTitle && freeGiftValue && freeGiftValue > 0);
+  const giftVal = hasFreeGift ? (freeGiftValue ?? 0) : 0;
+  const giftTitle = freeGiftTitle || "";
 
   // Fetch real verified astrologers
   const { data: astrologersData } = useQuery({
@@ -104,7 +103,7 @@ export function CashbackConsultationBridge({
 
   // Tangible Package Breakdown Values
   const remedyOriginalValue = mrp > salePrice ? mrp : salePrice;
-  const totalBundleValue = remedyOriginalValue + giftVal + cashbackCoins;
+  const totalBundleValue = remedyOriginalValue + (hasFreeGift ? giftVal : 0) + cashbackCoins;
   const netBundleSavings = totalBundleValue - salePrice;
   const totalSavingsPercent = Math.round((netBundleSavings / totalBundleValue) * 100);
 
@@ -220,7 +219,7 @@ export function CashbackConsultationBridge({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+          <div className={`grid grid-cols-1 ${hasFreeGift ? "md:grid-cols-3" : "md:grid-cols-2"} gap-2.5`}>
             {/* Item 1: The Consecrated Remedy */}
             <div className="rounded-2xl bg-white/5 hover:bg-white/10 border border-emerald-500/20 p-3.5 space-y-2 transition-colors">
               <div className="flex items-center justify-between">
@@ -245,36 +244,38 @@ export function CashbackConsultationBridge({
               </div>
             </div>
 
-            {/* Item 2: Free Gift (Selenite Plate) */}
-            <div className="rounded-2xl bg-white/5 hover:bg-white/10 border border-amber-500/20 p-3.5 space-y-2 transition-colors">
-              <div className="flex items-center justify-between">
-                <span className="size-7 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold text-sm">
-                  🎁
-                </span>
-                <div className="text-right">
-                  {giftVal > 0 && (
-                    <span className="text-[10px] text-stone-400 line-through mr-1.5">
-                      {formatINR(giftVal)}
-                    </span>
-                  )}
-                  <span className="text-xs font-bold text-emerald-400 bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-500/40">
-                    {isBn ? "ফ্রি / ₹০" : "FREE"}
+            {/* Item 2: Free Gift (Optional if configured) */}
+            {hasFreeGift && (
+              <div className="rounded-2xl bg-white/5 hover:bg-white/10 border border-amber-500/20 p-3.5 space-y-2 transition-colors">
+                <div className="flex items-center justify-between">
+                  <span className="size-7 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold text-sm">
+                    🎁
                   </span>
+                  <div className="text-right">
+                    {giftVal > 0 && (
+                      <span className="text-[10px] text-stone-400 line-through mr-1.5">
+                        {formatINR(giftVal)}
+                      </span>
+                    )}
+                    <span className="text-xs font-bold text-emerald-400 bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-500/40">
+                      {isBn ? "ফ্রি / ₹০" : "FREE"}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <p className="font-bold text-xs text-white line-clamp-1">{giftTitle}</p>
+                  <p className="text-[11px] text-emerald-200/70 mt-0.5">
+                    {isBn
+                      ? "প্রতিকারের শক্তি আজীবন রিচার্জ ও জাগ্রত রাখার জন্য।"
+                      : "Maintains & recharges sacred crystallographic energy."}
+                  </p>
+                </div>
+                <div className="inline-flex items-center gap-1 text-[10px] text-amber-300 font-medium">
+                  <Gift className="size-3" />
+                  <span>{freeGiftBadge || (isBn ? `মূল্য ${formatINR(giftVal)} (উপহার)` : `Worth ${formatINR(giftVal)}`)}</span>
                 </div>
               </div>
-              <div>
-                <p className="font-bold text-xs text-white line-clamp-1">{giftTitle}</p>
-                <p className="text-[11px] text-emerald-200/70 mt-0.5">
-                  {isBn
-                    ? "প্রতিকারের শক্তি আজীবন রিচার্জ ও জাগ্রত রাখার জন্য।"
-                    : "Maintains & recharges sacred crystallographic energy."}
-                </p>
-              </div>
-              <div className="inline-flex items-center gap-1 text-[10px] text-amber-300 font-medium">
-                <Gift className="size-3" />
-                <span>{freeGiftBadge || (isBn ? `মূল্য ${formatINR(giftVal)} (উপহার)` : `Worth ${formatINR(giftVal)}`)}</span>
-              </div>
-            </div>
+            )}
 
             {/* Item 3: Free Consultation Coins */}
             <div className="rounded-2xl bg-white/5 hover:bg-white/10 border border-amber-400/30 p-3.5 space-y-2 transition-colors relative overflow-hidden">
