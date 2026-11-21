@@ -40,6 +40,7 @@ import { GoogleCalendarIntegrationCard } from "@/components/appointments/GoogleC
 import { BrahmaPauseControlCard } from "@/components/appointments/BrahmaPauseControlCard";
 import { BTRLifeEventsModal } from "@/components/appointments/BTRLifeEventsModal";
 import { RequestBTRModal } from "@/components/appointments/RequestBTRModal";
+import { PrivateLinksManager } from "@/components/appointments/PrivateLinksManager";
 import { useAuth } from "@/providers/auth-provider";
 
 const KEY = ["appointments", "mine"] as const;
@@ -470,6 +471,19 @@ export default function MyAppointmentsPage() {
   const queryClient = useQueryClient();
   const { language } = useLanguage();
   const { user } = useAuth();
+  const isAstrologerUser =
+    user?.role === "astrologer" ||
+    user?.role === "admin" ||
+    user?.role === "super_admin";
+
+  const [selectedTab, setSelectedTab] = React.useState<"appointments" | "private-links">(() => {
+    if (typeof window !== "undefined") {
+      const sp = new URLSearchParams(window.location.search);
+      if (sp.get("tab") === "private-links") return "private-links";
+    }
+    return "appointments";
+  });
+
   const [cancelling, setCancelling] = React.useState<string | null>(null);
   const [joiningChamberId, setJoiningChamberId] = React.useState<string | null>(null);
   const [rescueModalOpen, setRescueModalOpen] = React.useState(false);
@@ -617,11 +631,70 @@ export default function MyAppointmentsPage() {
         </Link>
       </header>
 
-      {/* Two-Way Google Calendar 2-Way Sync Integration */}
-      <GoogleCalendarIntegrationCard />
+      {/* Astrologer Portal Navigation Tabs */}
+      {isAstrologerUser && (
+        <div className="flex items-center gap-2 border-b border-border/80 pb-3">
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedTab("appointments");
+              if (typeof window !== "undefined") {
+                const url = new URL(window.location.href);
+                url.searchParams.delete("tab");
+                window.history.replaceState({}, "", url.toString());
+              }
+            }}
+            className={cn(
+              "flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer",
+              selectedTab === "appointments"
+                ? "bg-brand-600 text-white shadow-xs"
+                : "bg-surface-muted text-muted-foreground hover:bg-surface hover:text-foreground border border-border/50"
+            )}
+          >
+            <CalendarDays className="size-3.5" />
+            <span>{language === "bn" ? "পরামর্শ সেশন ও বুকিং" : "Consultations & Schedule"}</span>
+            <span
+              className={cn(
+                "rounded-full px-1.5 py-0.2 text-[10px] font-black",
+                selectedTab === "appointments" ? "bg-white/20 text-white" : "bg-muted text-foreground"
+              )}
+            >
+              {data?.length ?? 0}
+            </span>
+          </button>
 
-      {/* Astrologer Emergency Break & Seeker Auto-Rescue Engine */}
-      <BrahmaPauseControlCard />
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedTab("private-links");
+              if (typeof window !== "undefined") {
+                const url = new URL(window.location.href);
+                url.searchParams.set("tab", "private-links");
+                window.history.replaceState({}, "", url.toString());
+              }
+            }}
+            className={cn(
+              "flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer",
+              selectedTab === "private-links"
+                ? "bg-amber-600 text-white shadow-xs"
+                : "bg-surface-muted text-muted-foreground hover:bg-surface hover:text-foreground border border-border/50"
+            )}
+          >
+            <Lock className="size-3.5" />
+            <span>{language === "bn" ? "ভিআইপি প্রাইভেট লিংক" : "Private Links"}</span>
+          </button>
+        </div>
+      )}
+
+      {selectedTab === "private-links" ? (
+        <PrivateLinksManager />
+      ) : (
+        <>
+          {/* Two-Way Google Calendar 2-Way Sync Integration */}
+          <GoogleCalendarIntegrationCard />
+
+          {/* Astrologer Emergency Break & Seeker Auto-Rescue Engine */}
+          <BrahmaPauseControlCard />
 
       {isLoading ? (
         <LoadingBlock label="Loading appointments..." />
@@ -1293,6 +1366,8 @@ export default function MyAppointmentsPage() {
             </div>
           </div>
         </Modal>
+      )}
+        </>
       )}
     </div>
   );

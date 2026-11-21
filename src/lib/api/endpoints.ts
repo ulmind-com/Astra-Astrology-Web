@@ -99,6 +99,10 @@ export const endpoints = {
     updateBtr: (id: string) => `/appointments/${id}/update-btr`,
     issueFollowUpPass: (id: string) => `/appointments/${id}/follow-up/issue`,
     sendFollowUpMessage: (id: string) => `/appointments/${id}/follow-up/message`,
+    myPrivateLinks: "/appointments/me/private-links",
+    privateLink: (id: string) => `/appointments/me/private-links/${id}`,
+    validatePrivateLink: (code: string) => `/appointments/private-links/${code}/validate`,
+    verifyPrivatePasscode: (code: string) => `/appointments/private-links/${code}/verify-passcode`,
     googleCalendar: {
       authUrl: "/appointments/google-calendar/auth-url",
       callback: "/appointments/google-calendar/callback",

@@ -572,6 +572,25 @@ export const appointmentApi = {
       { auth: false }
     ),
 
+  createPrivateLink: (body: {
+    title: string;
+    client_name?: string;
+    client_email?: string;
+    passcode?: string;
+    custom_price_paise?: number;
+    discount_percent?: number;
+    is_tatkal?: boolean;
+    max_uses?: number;
+    expires_in_hours?: number;
+    notes?: string;
+  }) => api.post<PrivateInviteLink>(endpoints.appointments.myPrivateLinks, body),
+
+  getMyPrivateLinks: () =>
+    api.get<PrivateInviteLink[]>(endpoints.appointments.myPrivateLinks),
+
+  deletePrivateLink: (id: string) =>
+    api.delete<{ message: string }>(endpoints.appointments.privateLink(id)),
+
   synergy: (astrologer_id: string, dob?: string | null) =>
     api.get<Record<string, any>>(`/appointments/synergy`, {
       query: { astrologer_id, ...(dob ? { dob } : {}) },
