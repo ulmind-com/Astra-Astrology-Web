@@ -436,7 +436,6 @@ export function AstroyogiHeader() {
         {
           label: "অনলাইন পূজা",
           href: "/purohits",
-          badge: "লাইভ",
           dropdown: [
             {
               label: "অনলাইন পুরোহিত বুকিং",
@@ -685,7 +684,6 @@ export function AstroyogiHeader() {
         {
           label: "ऑनलाइन पूजा",
           href: "/purohits",
-          badge: "लाइव",
           dropdown: [
             {
               label: "ऑनलाइन पुरोहित बुकिंग",
@@ -934,7 +932,6 @@ export function AstroyogiHeader() {
         {
           label: "Purohits",
           href: "/purohits",
-          badge: "Live",
           dropdown: [
             {
               label: "Book Online Vedic Purohit",
