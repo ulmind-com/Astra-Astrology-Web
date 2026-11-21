@@ -245,22 +245,31 @@ Notes: ${prescription.astrologer_notes || "None"}`;
 function VedicRemedyFollowUpCard({
   appointment,
   language,
+  currentUser,
   onMessageSent,
 }: {
   appointment: Appointment;
   language: "bn" | "hi" | "en";
+  currentUser?: any;
   onMessageSent: () => void;
 }) {
   const [questionText, setQuestionText] = React.useState("");
   const [sending, setSending] = React.useState(false);
 
+  const isAstrologer =
+    currentUser?.role === "astrologer" || currentUser?.id === appointment.astrologer_user_id;
+
   const isExpired = appointment.follow_up_expires_at
     ? new Date() > new Date(appointment.follow_up_expires_at)
     : false;
-  const maxMessages = appointment.follow_up_max_messages || 3;
+  const maxMessages = appointment.follow_up_max_messages || 2;
   const usedMessages = appointment.follow_up_messages_used || 0;
   const remainingQuestions = Math.max(0, maxMessages - usedMessages);
   const isExhausted = remainingQuestions <= 0;
+
+  const remainingHours = appointment.follow_up_expires_at
+    ? Math.max(0, Math.ceil((new Date(appointment.follow_up_expires_at).getTime() - Date.now()) / (3600 * 1000)))
+    : 24;
 
   const handleSend = async () => {
     if (!questionText.trim()) return;
@@ -269,39 +278,48 @@ function VedicRemedyFollowUpCard({
       await appointmentApi.sendFollowUpMessage(appointment.id, questionText.trim());
       setQuestionText("");
       toast.success(
-        language === "bn"
-          ? "পণ্ডিতজীর কাছে প্রতিকার স্পষ্টীকরণ প্রশ্ন পাঠানো হয়েছে!"
-          : "Remedy clarification question sent to Panditji!"
+        isAstrologer
+          ? (language === "bn" ? "ক্লায়েন্টের কাছে উত্তর পাঠানো হয়েছে!" : "Answer delivered to client!")
+          : (language === "bn"
+              ? "পণ্ডিতজীর কাছে প্রতিকার স্পষ্টীকরণ প্রশ্ন পাঠানো হয়েছে!"
+              : "Remedy clarification question sent to Panditji!")
       );
       onMessageSent();
     } catch (err: any) {
-      toast.error(err?.message || "Failed to submit follow-up question.");
+      toast.error(err?.message || "Failed to submit follow-up message.");
     } finally {
       setSending(false);
     }
   };
 
   return (
-    <div className="mt-4 rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-500/5 via-indigo-500/10 to-purple-500/5 p-4 sm:p-5 shadow-xs">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-indigo-500/20">
+    <div className="mt-4 rounded-2xl border-2 border-emerald-500/40 bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-emerald-500/10 p-4 sm:p-5 shadow-xs">
+      {/* Header Banner & Green Badge */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-emerald-500/20">
         <div className="flex items-center gap-2.5">
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-bold">
-            <Sparkles className="size-4" />
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30">
+            <Sparkles className="size-4.5 text-emerald-600 dark:text-emerald-400" />
           </div>
           <div>
-            <h4 className="font-display font-bold text-sm text-foreground flex items-center gap-2">
-              <span>
+            <div className="flex flex-wrap items-center gap-2">
+              <h4 className="font-display font-bold text-sm text-foreground">
                 {language === "bn"
-                  ? "সৌজন্যমূলক রেমিডি ফলো-আপ উইন্ডো"
+                  ? "পরিপূরক রেমিডি স্পষ্টীকরণ পাস"
                   : language === "hi"
                   ? "निःशुल्क उपाय स्पष्टीकरण पास"
-                  : "Complimentary Remedy Clarification Pass"}
+                  : "Complimentary Remedy Clarification"}
+              </h4>
+              {/* Requested Green Badge */}
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 text-white px-2.5 py-0.5 text-[10px] font-bold shadow-xs">
+                <span className="size-1.5 rounded-full bg-white animate-pulse" />
+                <span>
+                  {remainingHours <= 24
+                    ? (language === "bn" ? "মেয়াদ ২৪ ঘণ্টা (Valid for 24h)" : "Complimentary Remedy Clarification (Valid for 24h)")
+                    : (language === "bn" ? `মেয়াদ ${Math.ceil(remainingHours / 24)} দিন` : `Valid for ${Math.ceil(remainingHours / 24)}d`)}
+                </span>
               </span>
-              <span className="rounded-md bg-indigo-500/20 px-2 py-0.5 text-[10px] font-bold text-indigo-800 dark:text-indigo-200">
-                {appointment.follow_up_window_days || 7} Days Free
-              </span>
-            </h4>
-            <p className="text-[10px] text-muted-foreground">
+            </div>
+            <p className="text-[10.5px] text-muted-foreground mt-0.5">
               {language === "bn"
                 ? "প্রেসক্রিপশন বুঝতে সমস্যা হলে (রত্ন ধারণের দিন, মন্ত্র জপের নিয়ম ইত্যাদি) সরাসরি পণ্ডিতজীকে প্রশ্ন করুন।"
                 : "Ask Panditji quick clarification questions regarding your prescribed remedies or sacred mantras."}
@@ -314,12 +332,12 @@ function VedicRemedyFollowUpCard({
             <span className="rounded-lg bg-rose-500/10 border border-rose-500/20 px-2.5 py-1 text-[11px] font-bold text-rose-700 dark:text-rose-300">
               {language === "bn" ? "মেয়াদ উত্তীর্ণ (Expired)" : "Expired"}
             </span>
-          ) : isExhausted ? (
+          ) : isExhausted && !isAstrologer ? (
             <span className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 text-[11px] font-bold text-amber-800 dark:text-amber-300">
               {language === "bn" ? "কোটা সমাপ্ত (All questions used)" : "All questions used"}
             </span>
           ) : (
-            <span className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+            <span className="rounded-lg bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 text-[11px] font-bold text-emerald-800 dark:text-emerald-200">
               {remainingQuestions} {language === "bn" ? "টি প্রশ্ন বাকি" : "Questions left"}
             </span>
           )}
@@ -327,33 +345,56 @@ function VedicRemedyFollowUpCard({
       </div>
 
       {appointment.follow_up_expires_at && !isExpired && (
-        <p className="text-[11px] text-indigo-900 dark:text-indigo-200 font-medium mt-2 flex items-center justify-between">
-          <span>{language === "bn" ? "পাস মেয়াদ:" : "Pass Expiry:"} {new Date(appointment.follow_up_expires_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
-          <span>{usedMessages}/{maxMessages} {language === "bn" ? "প্রশ্ন ব্যবহৃত" : "Used"}</span>
-        </p>
+        <div className="text-[11px] text-emerald-900 dark:text-emerald-200 font-medium mt-2.5 flex items-center justify-between bg-emerald-500/10 rounded-xl px-3 py-1.5 border border-emerald-500/20">
+          <span className="flex items-center gap-1.5">
+            <Clock className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>
+              {language === "bn" ? "অবশিষ্ট সময়:" : "Time Remaining:"}{" "}
+              <strong className="text-emerald-800 dark:text-emerald-100">
+                {remainingHours <= 24 ? `${remainingHours} ঘণ্টা (hours)` : `${Math.ceil(remainingHours / 24)} দিন (days)`}
+              </strong>
+            </span>
+          </span>
+          <span>
+            {usedMessages}/{maxMessages} {language === "bn" ? "প্রশ্ন ব্যবহৃত" : "questions used"}
+          </span>
+        </div>
       )}
 
       {/* Messages Thread */}
       {appointment.follow_up_thread && appointment.follow_up_thread.length > 0 && (
-        <div className="mt-3 space-y-2 rounded-xl bg-card/80 p-3 border border-indigo-500/20 max-h-56 overflow-y-auto">
+        <div className="mt-3 space-y-2.5 rounded-xl bg-card/90 p-3.5 border border-emerald-500/20 max-h-60 overflow-y-auto">
           {appointment.follow_up_thread.map((msg) => {
             const isSeeker = msg.sender_role === "user";
             return (
               <div
                 key={msg.id}
                 className={cn(
-                  "rounded-xl p-2.5 text-xs max-w-[88%]",
+                  "rounded-2xl p-3 text-xs max-w-[88%] shadow-2xs",
                   isSeeker
-                    ? "ml-auto bg-indigo-600 text-white"
-                    : "mr-auto bg-surface-muted text-foreground border border-border"
+                    ? "ml-auto bg-emerald-600 text-white rounded-br-xs"
+                    : "mr-auto bg-surface border border-emerald-500/30 text-foreground rounded-bl-xs"
                 )}
               >
-                <div className={cn(
-                  "flex items-center justify-between gap-2 text-[10px] mb-1 font-bold",
-                  isSeeker ? "text-indigo-200" : "text-muted-foreground"
-                )}>
-                  <span>{isSeeker ? (language === "bn" ? "আপনি (Seeker)" : "You") : (language === "bn" ? "পণ্ডিতজী (Panditji)" : msg.sender_name)}</span>
-                  <span>{new Date(msg.sent_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                <div
+                  className={cn(
+                    "flex items-center justify-between gap-2 text-[10px] mb-1 font-bold",
+                    isSeeker ? "text-emerald-100" : "text-emerald-700 dark:text-emerald-300"
+                  )}
+                >
+                  <span className="flex items-center gap-1">
+                    {isSeeker ? (
+                      language === "bn" ? "👤 আপনি (Seeker)" : "👤 You"
+                    ) : (
+                      <>
+                        <Sparkles className="size-3 text-amber-500" />
+                        <span>{language === "bn" ? "পণ্ডিতজী (Panditji)" : msg.sender_name}</span>
+                      </>
+                    )}
+                  </span>
+                  <span className="opacity-80">
+                    {new Date(msg.sent_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  </span>
                 </div>
                 <p className="whitespace-pre-line leading-relaxed">{msg.text}</p>
               </div>
@@ -362,16 +403,20 @@ function VedicRemedyFollowUpCard({
         </div>
       )}
 
-      {/* Question submission input */}
-      {!isExpired && !isExhausted && (
-        <div className="mt-3 space-y-1.5">
+      {/* Question / Reply Submission Input */}
+      {(!isExpired && (!isExhausted || isAstrologer)) ? (
+        <div className="mt-3.5 space-y-2">
           <div className="flex gap-2">
             <input
               type="text"
               placeholder={
-                language === "bn"
-                  ? "পণ্ডিতজীকে প্রতিকার বিষয়ে প্রশ্ন লিখুন (e.g. রত্নটি কোন আঙুলে এবং কোন দিন পরব?)..."
-                  : "Ask Panditji a clarification question about your remedies..."
+                isAstrologer
+                  ? (language === "bn"
+                      ? "ক্লায়েন্টকে প্রতিকার নির্দেশিকা বা উত্তর লিখুন..."
+                      : "Write remedy guidance or answer to client...")
+                  : (language === "bn"
+                      ? "পণ্ডিতজীকে প্রতিকার বিষয়ে প্রশ্ন লিখুন (e.g. রত্নটি কোন আঙুলে এবং কোন দিন পরব?)..."
+                      : "Ask Panditji a clarification question about your remedies...")
               }
               value={questionText}
               onChange={(e) => setQuestionText(e.target.value)}
@@ -381,22 +426,39 @@ function VedicRemedyFollowUpCard({
                   void handleSend();
                 }
               }}
-              className="flex-1 rounded-xl border border-indigo-300 dark:border-indigo-700 bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="flex-1 rounded-xl border-2 border-emerald-400 dark:border-emerald-600 bg-background px-3.5 py-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
             />
             <Button
               size="sm"
               disabled={sending || !questionText.trim()}
               onClick={handleSend}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shrink-0"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shrink-0 px-4 py-2.5 rounded-xl shadow-xs cursor-pointer"
             >
-              {sending ? (language === "bn" ? "পাঠানো হচ্ছে..." : "Sending...") : (language === "bn" ? "প্রশ্ন পাঠান" : "Ask Question")}
+              {sending
+                ? (language === "bn" ? "পাঠানো হচ্ছে..." : "Sending...")
+                : isAstrologer
+                ? (language === "bn" ? "উত্তর পাঠান" : "Send Answer")
+                : (language === "bn" ? "প্রশ্ন পাঠান" : "Ask Question")}
             </Button>
           </div>
-          <p className="text-[10px] text-muted-foreground italic">
-            {language === "bn"
-              ? "* এটি আপনার সেশনের অন্তর্ভুক্ত সৌজন্যমূলক ফলো-আপ সুবিধা, এর জন্য কোনো কয়েন কাটা হবে না।"
-              : "* 100% complimentary follow-up — zero coins deducted from your wallet."}
+          <p className="text-[10.5px] text-muted-foreground italic flex items-center gap-1">
+            <ShieldCheck className="size-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>
+              {language === "bn"
+                ? "১০০% পরিপূরক ফলো-আপ সুবিধা — আপনার ওয়ালেট থেকে কোনো কয়েন কাটা হবে না।"
+                : "100% complimentary follow-up — zero coins deducted from your wallet."}
+            </span>
           </p>
+        </div>
+      ) : (
+        <div className="mt-3 p-3 rounded-xl bg-muted/60 border border-border text-center text-xs text-muted-foreground">
+          {isExpired
+            ? (language === "bn"
+                ? "এই সেশনের ২৪ ঘণ্টার পরিপূরক স্পষ্টীকরণ উইন্ডো সমাপ্ত হয়েছে।"
+                : "The complimentary clarification window for this consultation has closed.")
+            : (language === "bn"
+                ? "আপনি আপনার নির্ধারিত পরিপূরক প্রশ্নের কোটা সম্পন্ন করেছেন।"
+                : "You have used all complimentary questions for this consultation.")}
         </div>
       )}
     </div>
@@ -414,6 +476,36 @@ export default function MyAppointmentsPage() {
   const [rescueAppointment, setRescueAppointment] = React.useState<Appointment | null>(null);
   const [rescueNewTime, setRescueNewTime] = React.useState("");
   const [rescuingId, setRescuingId] = React.useState<string | null>(null);
+
+  // Complimentary Follow-up Pass issuance state
+  const [issuingPassAppointment, setIssuingPassAppointment] = React.useState<Appointment | null>(null);
+  const [passHours, setPassHours] = React.useState<number>(24);
+  const [passMaxMessages, setPassMaxMessages] = React.useState<number>(2);
+  const [passNotes, setPassNotes] = React.useState<string>("");
+  const [issuingPass, setIssuingPass] = React.useState<boolean>(false);
+
+  const handleIssuePass = async () => {
+    if (!issuingPassAppointment) return;
+    setIssuingPass(true);
+    try {
+      await appointmentApi.issueFollowUpPass(issuingPassAppointment.id, {
+        window_hours: passHours,
+        max_messages: passMaxMessages,
+        notes: passNotes.trim() || undefined,
+      });
+      toast.success(
+        language === "bn"
+          ? "ক্লায়েন্টকে পরিপূরক ফলো-আপ পাস সফলভাবে ইস্যু করা হয়েছে!"
+          : "Complimentary remedy clarification pass issued successfully!"
+      );
+      setIssuingPassAppointment(null);
+      void queryClient.invalidateQueries({ queryKey: KEY });
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to issue follow-up pass.");
+    } finally {
+      setIssuingPass(false);
+    }
+  };
 
   // Birth Time Rectification (BTR) state
   const [btrAppt, setBtrAppt] = React.useState<Appointment | null>(null);
@@ -581,13 +673,33 @@ export default function MyAppointmentsPage() {
                   <div className="flex items-center gap-3.5">
                     <Avatar src={a.peer?.avatar_url} name={a.peer?.name} size="lg" />
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-display font-bold text-base text-foreground">
                           {a.peer?.name ?? "Astrologer"}
                         </p>
                         <Badge tone={a.status === "booked" ? "green" : "neutral"}>
                           {APPOINTMENT_STATUS_LABELS[a.status]}
                         </Badge>
+                        {(a.follow_up_pass_active || (a.follow_up_pass_enabled && a.follow_up_expires_at && new Date(a.follow_up_expires_at) > new Date())) && (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 shadow-2xs">
+                            <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <span>
+                              {(() => {
+                                const remainingHours = a.follow_up_expires_at
+                                  ? Math.max(0, Math.ceil((new Date(a.follow_up_expires_at).getTime() - Date.now()) / (3600 * 1000)))
+                                  : 24;
+                                if (language === "bn") {
+                                  return remainingHours <= 24
+                                    ? "Complimentary Remedy Clarification (Valid for 24h)"
+                                    : `পরিপূরক রেমিডি স্পষ্টীকরণ পাস (${Math.ceil(remainingHours / 24)} দিন বাকি)`;
+                                }
+                                return remainingHours <= 24
+                                  ? "Complimentary Remedy Clarification (Valid for 24h)"
+                                  : `Complimentary Remedy Clarification (Valid for ${Math.ceil(remainingHours / 24)}d)`;
+                              })()}
+                            </span>
+                          </span>
+                        )}
                       </div>
 
                       <p className="mt-1 text-xs text-muted-foreground flex flex-wrap items-center gap-2">
@@ -883,12 +995,35 @@ export default function MyAppointmentsPage() {
                 )}
 
                 {/* Complimentary Remedy Follow-up Window */}
-                {Boolean(a.follow_up_pass_enabled) && (
+                {(Boolean(a.follow_up_pass_active) || Boolean(a.follow_up_pass_enabled)) && (
                   <VedicRemedyFollowUpCard
                     appointment={a}
                     language={language}
+                    currentUser={user}
                     onMessageSent={() => void queryClient.invalidateQueries({ queryKey: KEY })}
                   />
+                )}
+
+                {/* Astrologer Issue Follow-up Pass Action */}
+                {(user?.role === "astrologer" || user?.id === a.astrologer_user_id) && a.status === "completed" && (
+                  <div className="mt-3 flex justify-end">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setPassHours(24);
+                        setPassMaxMessages(2);
+                        setPassNotes("");
+                        setIssuingPassAppointment(a);
+                      }}
+                      className="border-emerald-500/40 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-500/10 text-xs font-bold"
+                    >
+                      <Sparkles className="size-3.5 mr-1.5 text-emerald-600" />
+                      {a.follow_up_pass_enabled
+                        ? (language === "bn" ? "ফলো-আপ পাস বৃদ্ধি / পরিবর্তন করুন" : "Extend / Adjust Follow-Up Pass")
+                        : (language === "bn" ? "২৪ ঘণ্টার ফলো-আপ পাস ইস্যু করুন" : "Issue 24h Remedy Follow-Up Pass")}
+                    </Button>
+                  </div>
                 )}
 
                 {/* Missed Consultation (Client No-Show) Alert */}
@@ -1069,6 +1204,96 @@ export default function MyAppointmentsPage() {
           void queryClient.invalidateQueries({ queryKey: KEY });
         }}
       />
+
+      {/* Astrologer Issue Follow-Up Pass Modal */}
+      {issuingPassAppointment && (
+        <Modal
+          open={Boolean(issuingPassAppointment)}
+          onClose={() => setIssuingPassAppointment(null)}
+          title={
+            language === "bn"
+              ? "পরিপূরক রেমিডি স্পষ্টীকরণ পাস ইস্যু করুন"
+              : "Issue Complimentary Remedy Follow-Up Pass"
+          }
+        >
+          <div className="space-y-4 text-xs">
+            <p className="text-muted-foreground leading-relaxed">
+              {language === "bn"
+                ? "পরামর্শ অধিবেশন শেষে ক্লায়েন্টকে নির্ধারিত সময়ের জন্য কোনো ফি ছাড়াই ১ বা ২টি প্রতিকার স্পষ্টীকরণ প্রশ্ন করার অনুমতি প্রদান করুন।"
+                : "Grant seeker permission to ask 1 or 2 complimentary remedy clarification queries within a specified grace window."}
+            </p>
+
+            <div className="space-y-1.5">
+              <label className="font-semibold text-foreground">
+                {language === "bn" ? "পাসের সময়সীমা (ঘণ্টায়)" : "Active Window (Hours)"}
+              </label>
+              <select
+                value={passHours}
+                onChange={(e) => setPassHours(Number(e.target.value))}
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                <option value={24}>{language === "bn" ? "২৪ ঘণ্টা (প্রস্তাবিত)" : "24 Hours (Standard)"}</option>
+                <option value={48}>{language === "bn" ? "৪৮ ঘণ্টা (২ দিন)" : "48 Hours (2 Days)"}</option>
+                <option value={72}>{language === "bn" ? "৭২ ঘণ্টা (৩ দিন)" : "72 Hours (3 Days)"}</option>
+                <option value={168}>{language === "bn" ? "৭ দিন (১ সপ্তাহ)" : "7 Days (1 Week)"}</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="font-semibold text-foreground">
+                {language === "bn" ? "সর্বোচ্চ অনুমোদিত প্রশ্ন" : "Maximum Allowed Clarifications"}
+              </label>
+              <select
+                value={passMaxMessages}
+                onChange={(e) => setPassMaxMessages(Number(e.target.value))}
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                <option value={1}>{language === "bn" ? "১টি প্রশ্ন" : "1 Question"}</option>
+                <option value={2}>{language === "bn" ? "২টি প্রশ্ন (স্ট্যান্ডার্ড)" : "2 Questions (Standard)"}</option>
+                <option value={3}>{language === "bn" ? "৩টি প্রশ্ন" : "3 Questions"}</option>
+                <option value={5}>{language === "bn" ? "৫টি প্রশ্ন" : "5 Questions"}</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="font-semibold text-foreground">
+                {language === "bn" ? "জ্যোতিষীর বিশেষ বার্তা বা নোট (ঐচ্ছিক)" : "Special Note or Directives (Optional)"}
+              </label>
+              <textarea
+                value={passNotes}
+                onChange={(e) => setPassNotes(e.target.value)}
+                placeholder={
+                  language === "bn"
+                    ? "যেমন: রত্ন ধারণের নিয়ম বা মহামৃত্যুঞ্জয় জপ সংক্রান্ত যেকোনো প্রশ্নের উত্তর দেওয়া হবে।"
+                    : "e.g. Feel free to ask about gem energization or recitation rituals."
+                }
+                rows={3}
+                className="w-full rounded-xl border border-border bg-background p-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIssuingPassAppointment(null)}
+              >
+                {language === "bn" ? "বাতিল" : "Cancel"}
+              </Button>
+              <Button
+                size="sm"
+                disabled={issuingPass}
+                onClick={handleIssuePass}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+              >
+                {issuingPass
+                  ? (language === "bn" ? "ইস্যু করা হচ্ছে..." : "Issuing...")
+                  : (language === "bn" ? "পাস সক্রিয় করুন" : "Activate Pass")}
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

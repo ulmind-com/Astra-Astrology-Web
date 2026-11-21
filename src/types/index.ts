@@ -425,8 +425,11 @@ export type Appointment = Omit<S["AppointmentOut"], "peer"> & {
   extension_status?: "none" | "pending" | "accepted" | "declined" | "expired";
   extension_total_extended_minutes?: number;
   follow_up_pass_enabled?: boolean;
+  follow_up_pass_active?: boolean;
   follow_up_window_days?: number;
   follow_up_expires_at?: string | null;
+  astrologer_user_id?: string | null;
+  astrologer_id?: string | null;
   follow_up_max_messages?: number;
   follow_up_messages_used?: number;
   follow_up_granted_at?: string | null;

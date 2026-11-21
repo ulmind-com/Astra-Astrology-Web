@@ -97,6 +97,8 @@ export const endpoints = {
     brahmaPauseAction: (id: string) => `/appointments/${id}/brahma-pause-action`,
     requestBtr: (id: string) => `/appointments/${id}/request-btr`,
     updateBtr: (id: string) => `/appointments/${id}/update-btr`,
+    issueFollowUpPass: (id: string) => `/appointments/${id}/follow-up/issue`,
+    sendFollowUpMessage: (id: string) => `/appointments/${id}/follow-up/message`,
     googleCalendar: {
       authUrl: "/appointments/google-calendar/auth-url",
       callback: "/appointments/google-calendar/callback",

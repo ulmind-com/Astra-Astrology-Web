@@ -666,8 +666,18 @@ export const appointmentApi = {
   extensionAction: (id: string, action: "accept" | "decline") =>
     api.post<Appointment>(`/appointments/${id}/extension/action`, { action }),
 
+  issueFollowUpPass: (
+    id: string,
+    body?: {
+      window_days?: number;
+      window_hours?: number;
+      max_messages?: number;
+      notes?: string | null;
+    }
+  ) => api.post<Appointment>(endpoints.appointments.issueFollowUpPass(id), body || {}),
+
   sendFollowUpMessage: (id: string, text: string) =>
-    api.post<Appointment>(`/appointments/${id}/follow-up/message`, { text }),
+    api.post<Appointment>(endpoints.appointments.sendFollowUpMessage(id), { text }),
 
   getGoogleCalendarAuthUrl: (redirectUri?: string) =>
     api.get<{ configured: boolean; auth_url: string; mode: string; message: string }>(
