@@ -2005,6 +2005,7 @@ export interface PujaBookingData {
   amount_inr: number;
   sankalpa_name: string;
   sankalpa_gotra: string;
+  sankalpa_nakshatra?: string | null;
   sankalpa_wish?: string | null;
   room_id: string;
   zego_app_id?: number;
@@ -2090,6 +2091,7 @@ export const purohitApi = {
     puja_item_id: string;
     sankalpa_name: string;
     sankalpa_gotra: string;
+    sankalpa_nakshatra?: string | null;
     sankalpa_wish?: string | null;
   }) => api.post<PujaBookingData>(endpoints.purohits.book, body),
 
@@ -2098,6 +2100,9 @@ export const purohitApi = {
 
   getRoomToken: (bookingId: string) =>
     api.get<PujaBookingData>(endpoints.purohits.roomToken(bookingId)),
+
+  completeBooking: (bookingId: string) =>
+    api.post<PujaBookingData>(`/purohits/bookings/${bookingId}/complete`),
 
   sendApplicationOtp: (email: string) =>
     api.post<{ email: string }>(endpoints.purohits.applicationSendOtp, { email }, { auth: false }),
