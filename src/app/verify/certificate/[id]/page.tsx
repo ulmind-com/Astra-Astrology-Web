@@ -418,7 +418,7 @@ export default function CourseCertificateVerificationPage() {
         </div>
       )}
 
-      {/* Verified Certificate Canvas — Exact Match Vedic Vision Reference Design */}
+      {/* Verified Certificate Canvas — Exact Match DivinLink Reference Design */}
       {!loading && cert && (
         <div id="gurukul-printable-certificate" className="certificate-page-wrap mx-auto max-w-[1000px] w-full [container-type:inline-size]">
           <div
@@ -568,7 +568,7 @@ export default function CourseCertificateVerificationPage() {
                     fontSize: "clamp(6px, 1.0cqi, 10px)",
                   }}
                 >
-                  VEDIC VISION
+                  DIVINLINK
                 </div>
               </div>
             </div>
