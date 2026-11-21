@@ -41,6 +41,7 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { astrologyApi, astrologerApi } from "@/lib/api";
+import { INITIAL_TOP_ASTROLOGERS } from "@/components/home/top-astrologers-section";
 import {
   BirthPlaceField,
   type SelectedPlace,
@@ -201,6 +202,7 @@ function AstrologerSidebarCard({
   const { data: astrologersData, isLoading } = useQuery({
     queryKey: ["astrologers", { kundli_sidebar: true, limit: 6 }],
     queryFn: () => astrologerApi.list({ limit: 6 }),
+    initialData: INITIAL_TOP_ASTROLOGERS,
     staleTime: 5 * 60_000,
     refetchOnWindowFocus: false,
   });

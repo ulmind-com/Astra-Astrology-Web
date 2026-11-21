@@ -29,6 +29,14 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: "/api/v1/:path*",
+        destination: "https://astra-astrology-backend.onrender.com/api/v1/:path*",
+      },
+    ];
+  },
   async redirects() {
     return [
       {
@@ -39,6 +47,81 @@ const nextConfig: NextConfig = {
       {
         source: "/horoscope",
         destination: "/daily-horoscope",
+        permanent: true,
+      },
+      {
+        source: "/tools/annual-horoscope",
+        destination: "/annual-horoscope",
+        permanent: true,
+      },
+      {
+        source: "/tools/muhurat",
+        destination: "/muhurat",
+        permanent: true,
+      },
+      {
+        source: "/tools/panchang",
+        destination: "/panchang",
+        permanent: true,
+      },
+      {
+        source: "/tools/festivals",
+        destination: "/festivals",
+        permanent: true,
+      },
+      {
+        source: "/tools/kundli",
+        destination: "/kundli",
+        permanent: true,
+      },
+      {
+        source: "/tools/matching",
+        destination: "/kundli-matching",
+        permanent: true,
+      },
+      {
+        source: "/tools/dasha",
+        destination: "/dasha-calculator",
+        permanent: true,
+      },
+      {
+        source: "/tools/rashi",
+        destination: "/rashi-calculator",
+        permanent: true,
+      },
+      {
+        source: "/tools/nakshatra",
+        destination: "/nakshatra-calculator",
+        permanent: true,
+      },
+      {
+        source: "/tools/kp",
+        destination: "/kp-calculator",
+        permanent: true,
+      },
+      {
+        source: "/tools/numerology",
+        destination: "/numerology",
+        permanent: true,
+      },
+      {
+        source: "/tools/vastu",
+        destination: "/vastu",
+        permanent: true,
+      },
+      {
+        source: "/tools/ai-astrologer",
+        destination: "/ai-astrologer",
+        permanent: true,
+      },
+      {
+        source: "/reading/palm",
+        destination: "/palm-reading",
+        permanent: true,
+      },
+      {
+        source: "/reading/face",
+        destination: "/face-reading",
         permanent: true,
       },
     ];

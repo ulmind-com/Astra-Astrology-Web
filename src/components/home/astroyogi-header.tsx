@@ -8,6 +8,7 @@ import {
   Bot,
   CalendarDays,
   ChevronDown,
+  Clock,
   Coins,
   Compass,
   Flame,
@@ -27,6 +28,7 @@ import {
   Radio,
   ScanFace,
   ScrollText,
+  ShieldCheck,
   ShoppingBag,
   Sparkles,
   Star,
@@ -48,12 +50,16 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
 import { formatCoins, type AstrologyLanguage } from "@/types";
+import { useQuery } from "@tanstack/react-query";
+import { shopApi, type ShopProductCategory } from "@/lib/api";
+import initialCategoriesData from "@/lib/initial-shop-categories.json";
 
 interface NavDropdownItem {
   label: string;
   href: string;
   description: string;
   icon: React.ComponentType<{ className?: string }>;
+  iconUrl?: string | null;
   badge?: string;
 }
 
@@ -69,7 +75,7 @@ export function AstroyogiHeader() {
   const pathname = usePathname();
   const { user, isSignedIn } = useAuth();
   const { language, setLanguage } = useLanguage();
-  const { data: walletData } = useWallet(Boolean(isSignedIn));
+  const { data: walletData, isLoading: walletLoading } = useWallet(Boolean(isSignedIn));
   const coinsBalance = walletData?.wallet?.balance_coins;
   const { openCart, getItemCount } = useCartStore();
   const cartItemCount = getItemCount();
@@ -134,7 +140,88 @@ export function AstroyogiHeader() {
     setLangDropdownOpen(false);
   }, [pathname]);
 
+  // Fetch real-time active categories with 0ms pre-hydration
+  const { data: dynamicCategories = (initialCategoriesData as any) } = useQuery<ShopProductCategory[]>({
+    queryKey: ["shop_public_categories"],
+    queryFn: async () => {
+      try {
+        const res = await shopApi.getCategories();
+        return res && res.length > 0 ? res : (initialCategoriesData as any);
+      } catch {
+        return initialCategoriesData as any;
+      }
+    },
+    initialData: initialCategoriesData as any,
+    staleTime: 1000 * 60 * 30,
+  });
+
   const navCategories = React.useMemo<NavCategory[]>(() => {
+    // Dynamically build category dropdown items matching Kundli-style
+    const shopDropdownItems: NavDropdownItem[] = (dynamicCategories || []).map((c: any) => {
+      const slug = (c.slug || "").toLowerCase();
+      let icon = ShoppingBag;
+      if (slug.includes("rudraksh")) icon = Sparkles;
+      else if (slug.includes("zodiac")) icon = Moon;
+      else if (slug.includes("bracelet") || slug.includes("ring")) icon = Gem;
+      else if (slug.includes("karungali")) icon = ShieldCheck;
+      else if (slug.includes("vastu") || slug.includes("home")) icon = Compass;
+
+      let label = c.name;
+      let description = c.description || "";
+      if (language === "bn") {
+        if (slug === "rudraksh") {
+          label = "রুদ্রাক্ষ (Rudraksh)";
+          description = "শীর্ষ মানের ল্যাব সার্টিফাইড পবিত্র রুদ্রাক্ষ";
+        } else if (slug === "zodiac") {
+          label = "রাশি কালেকশন (Zodiac Collection)";
+          description = "৯২৫ রূপার রাশি রিং ও গ্রহরত্ন তাবিজ গহনা";
+        } else if (slug === "bracelets") {
+          label = "ব্রেসলেট ও আংটি (Bracelets & Rings)";
+          description = "ধন যোগ অ্যাবান্ডেন্স ব্যান্ড, পায়রাইট আংটি ও ক্রিস্টাল";
+        } else if (slug === "rudraksha") {
+          label = "সিদ্ধ নেপালি রুদ্রাক্ষ (Nepali Rudraksha)";
+          description = "১-১৪ মুখী কাশীর মহাদেবের প্রাণ-প্রতিষ্ঠিত রুদ্রাক্ষ";
+        } else if (slug === "karungali") {
+          label = "আসল করুঙ্গলি (Original Karungali)";
+          description = "কালো আবলুস কাঠের মালা ও ব্রেসলেট নজরদোষ সুরক্ষায়";
+        } else if (slug === "vastu-home") {
+          label = "বাস্তু ও গৃহ শান্তি (Vastu & Home)";
+          description = "শ্রীযন্ত্র, মরোক্কান সেলিনাইট টাওয়ার ও গৃহশান্তি প্রতিকার";
+        }
+      } else if (language === "hi") {
+        if (slug === "rudraksh") {
+          label = "रुद्राक्ष (Rudraksh)";
+          description = "उच्च गुणवत्ता एवं लैब प्रमाणित पवित्र रुद्राक्ष";
+        } else if (slug === "zodiac") {
+          label = "राशि कलेक्शन (Zodiac Collection)";
+          description = "925 शुद्ध चांदी राशि रिंग्स एवं रत्न आभूषण";
+        } else if (slug === "bracelets") {
+          label = "कंगन और अंगूठियां (Bracelets & Rings)";
+          description = "धन योग समृद्धि बैंड, पाइराइट रिंग्स व ब्रेसलेट";
+        } else if (slug === "rudraksha") {
+          label = "सिद्ध नेपाली रुद्राक्ष (Nepali Rudraksha)";
+          description = "1 से 14 मुखी काशी प्राण-प्रतिष्ठित हिमालयी रुद्राक्ष";
+        } else if (slug === "karungali") {
+          label = "ओरिजिनल करुंगली (Original Karungali)";
+          description = "शुद्ध काली आबनूस लकड़ी माला व कड़ा सुरक्षा हेतु";
+        } else if (slug === "vastu-home") {
+          label = "वास्तु एवं गृह शांति (Vastu & Home)";
+          description = "श्री यंत्र, सेलेनाइट चार्जिंग टॉवर व वास्तु उपाय";
+        }
+      }
+
+      const count = c.product_count ?? 0;
+      const countLabel = language === "bn" ? `${count}টি সামগ্রী` : language === "hi" ? `${count} आइटम` : `${count} items`;
+
+      return {
+        label,
+        href: `/shop?category=${c.slug}#products`,
+        description: description || countLabel,
+        icon,
+        iconUrl: c.icon_url || null,
+        badge: countLabel,
+      };
+    });
     if (language === "bn") {
       return [
         {
@@ -144,7 +231,7 @@ export function AstroyogiHeader() {
             {
               label: "জ্যোতিষীর সাথে কল",
               href: "/astrologers",
-              description: "৫০০+ ভেরিফাইড জ্যোতিষীর সাথে সরাসরি ভয়েস কলে কথা বলুন",
+              description: "ভেরিফাইড শীর্ষ জ্যোতিষীদের সাথে সরাসরি ভয়েস কলে কথা বলুন",
               icon: Phone,
               badge: "তাৎক্ষণিক",
             },
@@ -189,8 +276,8 @@ export function AstroyogiHeader() {
             },
             {
               label: "বর্ষফল ২০২৬",
-              href: "/daily-horoscope",
-              description: "প্রেম, ক্যারিয়ার, অর্থ ও স্বাস্থ্যের বার্ষিক ভবিষ্যৎবাণী",
+              href: "/annual-horoscope",
+              description: "প্রেম, ক্যারিয়ার, অর্থ ও স্বাস্থ্যের বার্ষিক ভবিষ্যৎবাণী ও লাল কিতাব মহাউপায়",
               icon: Sun,
             },
             {
@@ -233,6 +320,39 @@ export function AstroyogiHeader() {
           ],
         },
         {
+          label: "পঞ্জিকা ও উৎসব",
+          href: "/festivals",
+          badge: "২০২৬",
+          dropdown: [
+            {
+              label: "উৎসব ও ব্রত পঞ্জিকা ২০২৬",
+              href: "/festivals",
+              description: "সনাতন হিন্দু উৎসব, ব্রত, একাদশী, অমাবস্যা ও পূর্ণিমা সূচী",
+              icon: Flame,
+              badge: "২০২৬",
+            },
+            {
+              label: "আজকের পঞ্চাঙ্গ ও কাল-নির্ণয়",
+              href: "/panchang",
+              description: "সুইস এফিমেরিস ভিত্তিক তিথি, নক্ষত্র, যোগ, করণ ও বারের সমন্বয়",
+              icon: Compass,
+              badge: "আজ",
+            },
+            {
+              label: "১৬ বৈদিক চোঘড়িয়া মুহূর্ত",
+              href: "/panchang?tab=choghadiya",
+              description: "অমৃত, শুভ, লাভ সহ জরুরি কর্ম শুরুর প্রশস্ত সময়সূচী",
+              icon: Clock,
+            },
+            {
+              label: "শুভ মুহূর্ত নির্দেশিকা",
+              href: "/muhurat",
+              description: "বিবাহ, গৃহপ্রবেশ, বাহন ক্রয় ও শুভ উদ্যোগের লগ্ন",
+              icon: Star,
+            },
+          ],
+        },
+        {
           label: "কোর্স",
           href: "/courses",
           dropdown: [
@@ -261,36 +381,7 @@ export function AstroyogiHeader() {
         {
           label: "শপ",
           href: "/shop",
-          dropdown: [
-            {
-              label: "অ্যাস্ট্রোমল স্টোর (সমস্ত প্রতিকার)",
-              href: "/shop",
-              description: "কাশীর পুরোহিতদের দ্বারা প্রাণ-প্রতিষ্ঠিত রত্ন, রুদ্রাক্ষ ও কবচ",
-              icon: ShoppingBag,
-              badge: "১০০% ক্যাশব্যাক",
-            },
-            {
-              label: "সিদ্ধ নেপালি রুদ্রাক্ষ",
-              href: "/shop?category=rudraksha",
-              description: "১-১৪ মুখী প্রাকৃতিক ও ল্যাব সার্টিফাইড শনি ও মহামৃত্যুঞ্জয় রুদ্রাক্ষ",
-              icon: Sparkles,
-              badge: "ল্যাব সার্টিফাইড",
-            },
-            {
-              label: "খাঁটি রত্ন ও ক্রিস্টাল",
-              href: "/shop?category=gemstones",
-              description: "নীলম, রক্তপ্রবাল, পান্না ও ধন আকর্ষক প্রাকৃতিক পায়রাইট",
-              icon: Gem,
-              badge: "ন্যাচারাল",
-            },
-            {
-              label: "রাশি ব্রেসলেট ও সেলিনাইট",
-              href: "/shop?category=crystal_bracelet",
-              description: "১২ রাশির পবিত্র ক্রিস্টাল ব্রেসলেট ও সাথে ফ্রি ₹৭২৯ সেলিনাইট প্লেট",
-              icon: Gift,
-              badge: "ফ্রি প্লেট",
-            },
-          ],
+          dropdown: shopDropdownItems,
         },
         {
           label: "এআই রিডিং",
@@ -390,7 +481,7 @@ export function AstroyogiHeader() {
             {
               label: "ज्योतिषी से कॉल करें",
               href: "/astrologers",
-              description: "500+ सत्यापित ज्योतिषाचार्यों से सीधे फोन पर बात करें",
+              description: "सत्यापित शीर्ष ज्योतिषाचार्यों से सीधे फोन पर बात करें",
               icon: Phone,
               badge: "तुरंत",
             },
@@ -479,6 +570,39 @@ export function AstroyogiHeader() {
           ],
         },
         {
+          label: "पंचांग व व्रत",
+          href: "/festivals",
+          badge: "2026",
+          dropdown: [
+            {
+              label: "उत्सव व व्रत पंचांग 2026",
+              href: "/festivals",
+              description: "सनातन हिन्दू त्यौहार, व्रत, एकादशी, पूर्णिमा व अमावस्या",
+              icon: Flame,
+              badge: "2026",
+            },
+            {
+              label: "दैनिक वैदिक पंचांग",
+              href: "/panchang",
+              description: "प्रामाणिक तिथि, नक्षत्र, योग, करण व सूर्योदय-सूर्यास्त",
+              icon: Compass,
+              badge: "आज",
+            },
+            {
+              label: "चौघड़िया मुहूर्त",
+              href: "/panchang?tab=choghadiya",
+              description: "अमृत, शुभ, लाभ आदि तात्कालिक कार्य सिद्धि मुहूर्त",
+              icon: Clock,
+            },
+            {
+              label: "शुभ मुहूर्त",
+              href: "/muhurat",
+              description: "विवाह, गृह प्रवेश, वाहन क्रय एवं व्यापार आरंभ लग्न",
+              icon: Star,
+            },
+          ],
+        },
+        {
           label: "कोर्स",
           href: "/courses",
           dropdown: [
@@ -507,36 +631,7 @@ export function AstroyogiHeader() {
         {
           label: "शॉप",
           href: "/shop",
-          dropdown: [
-            {
-              label: "एस्ट्रोमॉल स्टोर (सभी उपाय)",
-              href: "/shop",
-              description: "काशी के विद्वानों द्वारा प्राण-प्रतिष्ठित रत्न, रुद्राक्ष एवं यंत्र",
-              icon: ShoppingBag,
-              badge: "100% कैशबैक",
-            },
-            {
-              label: "सिद्ध नेपाली रुद्राक्ष",
-              href: "/shop?category=rudraksha",
-              description: "1-14 मुखी प्राकृतिक एवं लैब प्रमाणित शनि व महामृत्युंजय रुद्राक्ष",
-              icon: Sparkles,
-              badge: "सर्टिफाइड",
-            },
-            {
-              label: "असली रत्न एवं क्रिस्टल",
-              href: "/shop?category=gemstones",
-              description: "नीलम, मूंगा, पन्ना व धन आकर्षित प्राकृतिक पायराइट",
-              icon: Gem,
-              badge: "नेचुरल",
-            },
-            {
-              label: "राशि ब्रेसलेट व सेलेनाइट",
-              href: "/shop?category=crystal_bracelet",
-              description: "12 राशियों के पवित्र क्रिस्टल ब्रेसलेट व साथ में फ्री ₹729 सेलेनाइट प्लेट",
-              icon: Gift,
-              badge: "फ्री प्लेट",
-            },
-          ],
+          dropdown: shopDropdownItems,
         },
         {
           label: "एआई रीडिंग",
@@ -636,7 +731,7 @@ export function AstroyogiHeader() {
           {
             label: "Talk to Astrologer",
             href: "/astrologers",
-            description: "Instant voice consultation with 500+ verified Vedic experts",
+            description: "Instant voice consultation with verified Vedic experts",
             icon: Phone,
             badge: "Instant",
           },
@@ -725,6 +820,39 @@ export function AstroyogiHeader() {
         ],
       },
       {
+        label: "Panchang & Festivals",
+        href: "/festivals",
+        badge: "2026",
+        dropdown: [
+          {
+            label: "Festivals & Vrat Almanac 2026",
+            href: "/festivals",
+            description: "Complete Hindu festival calendar, Ekadashi, Purnima & Amavasya",
+            icon: Flame,
+            badge: "2026",
+          },
+          {
+            label: "Daily Vedic Panchang",
+            href: "/panchang",
+            description: "Swiss Ephemeris Tithi, Nakshatra, Yoga, Karana & Day Lord",
+            icon: Compass,
+            badge: "Today",
+          },
+          {
+            label: "16 Choghadiya Muhurat",
+            href: "/panchang?tab=choghadiya",
+            description: "Amrit, Shubh, Labh windows for immediate venture timing",
+            icon: Clock,
+          },
+          {
+            label: "Shubh Muhurat Guide",
+            href: "/muhurat",
+            description: "Auspicious timings for weddings, Griha Pravesh & purchases",
+            icon: Star,
+          },
+        ],
+      },
+      {
         label: "Courses",
         href: "/courses",
         dropdown: [
@@ -753,36 +881,7 @@ export function AstroyogiHeader() {
       {
         label: "Shop",
         href: "/shop",
-        dropdown: [
-          {
-            label: "AstroMall Store (All Remedies)",
-            href: "/shop",
-            description: "Kashi-energized lab-certified gemstones, rudraksha & yantras",
-            icon: ShoppingBag,
-            badge: "100% Cashback",
-          },
-          {
-            label: "Energized Nepali Rudraksha",
-            href: "/shop?category=rudraksha",
-            description: "1-14 Mukhi authentic & certified spiritual beads",
-            icon: Sparkles,
-            badge: "Certified",
-          },
-          {
-            label: "Natural Gemstones & Pyrite",
-            href: "/shop?category=gemstones",
-            description: "Natural blue sapphire, coral, emerald & wealth pyrites",
-            icon: Gem,
-            badge: "Natural",
-          },
-          {
-            label: "Zodiac Energy Bracelets",
-            href: "/shop?category=crystal_bracelet",
-            description: "12 Zodiac energized bracelets for health, wealth & planetary balance",
-            icon: Sparkles,
-            badge: "Energized",
-          },
-        ],
+        dropdown: shopDropdownItems,
       },
       {
         label: "AI Reading",
@@ -871,7 +970,7 @@ export function AstroyogiHeader() {
       { label: "Free Readings", href: "/free-readings" },
       { label: "Live", href: "/#live-experts", isLive: true },
     ];
-  }, [language]);
+  }, [language, dynamicCategories]);
 
   const ctaPart1 =
     language === "bn"
@@ -943,6 +1042,7 @@ export function AstroyogiHeader() {
                 >
                   <Link
                     href={cat.href}
+                    onClick={() => setHoveredCategory(null)}
                     className={`whitespace-nowrap shrink-0 inline-flex items-center gap-0.5 xl:gap-1 px-1.5 xl:px-2 2xl:px-2.5 py-1.5 rounded-full text-[12px] xl:text-[12.5px] 2xl:text-[13.5px] font-semibold tracking-normal transition-all duration-150 select-none ${
                       isActive
                         ? "text-amber-950 font-bold bg-amber-100/90 shadow-2xs"
@@ -976,7 +1076,12 @@ export function AstroyogiHeader() {
 
                   {/* Dropdown Menu Popup */}
                   {hasDropdown && isHovered && (
-                    <div className="absolute left-0 top-full pt-1.5 z-50 w-80 animate-in fade-in slide-in-from-top-2 duration-150">
+                    <div
+                      className={cn(
+                        "absolute left-0 top-full pt-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150",
+                        cat.href === "/shop" ? "w-[440px] sm:w-[470px]" : "w-80"
+                      )}
+                    >
                       <div className="overflow-hidden rounded-2xl border border-amber-200/90 bg-white p-2 shadow-[0_18px_45px_-10px_rgba(26,18,8,0.18)] ring-1 ring-black/5">
                         <div className="space-y-1">
                           {cat.dropdown?.map((item) => {
@@ -985,23 +1090,35 @@ export function AstroyogiHeader() {
                               <Link
                                 key={item.label}
                                 href={item.href}
-                                className="group/item flex items-start gap-3 rounded-xl p-2.5 transition-colors hover:bg-amber-50/80"
+                                onClick={() => setHoveredCategory(null)}
+                                className="group/item flex items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-amber-50/80"
                               >
-                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-800 group-hover/item:bg-amber-200 transition-colors">
-                                  <Icon className="size-4.5" />
+                                <div className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-100/90 text-amber-800 group-hover/item:bg-amber-200 transition-colors overflow-hidden border border-amber-200 shadow-2xs">
+                                  {item.iconUrl ? (
+                                    <Image
+                                      src={item.iconUrl}
+                                      alt={item.label}
+                                      fill
+                                      sizes="40px"
+                                      className="object-cover"
+                                      unoptimized
+                                    />
+                                  ) : (
+                                    <Icon className="size-5" />
+                                  )}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="font-bold text-xs text-stone-900 group-hover/item:text-amber-800">
+                                  <div className="flex items-center justify-between gap-3">
+                                    <span className="font-bold text-xs sm:text-[13px] text-stone-900 group-hover/item:text-amber-800 leading-tight">
                                       {item.label}
                                     </span>
                                     {item.badge && (
-                                      <span className="rounded-full bg-amber-100 text-amber-900 text-[9px] font-bold px-1.5 py-0.2 border border-amber-300/60">
+                                      <span className="shrink-0 rounded-full bg-amber-100 text-amber-950 text-[10px] font-bold px-2 py-0.5 border border-amber-300/80 whitespace-nowrap shadow-2xs">
                                         {item.badge}
                                       </span>
                                     )}
                                   </div>
-                                  <p className="mt-0.5 text-[11px] text-stone-500 leading-snug line-clamp-2">
+                                  <p className="mt-0.5 text-[11px] text-stone-500 leading-snug line-clamp-1">
                                     {item.description}
                                   </p>
                                 </div>
@@ -1096,7 +1213,11 @@ export function AstroyogiHeader() {
                 >
                   <Coins className="size-3.5 text-amber-600 shrink-0" />
                   <span className="tabular-nums">
-                    {coinsBalance !== undefined ? formatCoins(coinsBalance) : "—"}
+                    {coinsBalance !== undefined
+                      ? formatCoins(coinsBalance)
+                      : walletLoading
+                      ? "..."
+                      : "0"}
                   </span>
                 </Link>
                 <Link
@@ -1217,10 +1338,17 @@ export function AstroyogiHeader() {
                                     key={sub.label}
                                     href={sub.href}
                                     onClick={() => setMobileMenuOpen(false)}
-                                    className="flex items-center gap-2.5 py-2 px-2.5 rounded-lg text-xs font-semibold text-stone-700 hover:bg-amber-50"
+                                    className="flex items-center justify-between py-2 px-2.5 rounded-lg text-xs font-semibold text-stone-700 hover:bg-amber-50"
                                   >
-                                    <Icon className="size-4 text-amber-600" />
-                                    <span>{sub.label}</span>
+                                    <div className="flex items-center gap-2.5 min-w-0">
+                                      <Icon className="size-4 text-amber-600 shrink-0" />
+                                      <span className="truncate">{sub.label}</span>
+                                    </div>
+                                    {sub.badge && (
+                                      <span className="shrink-0 text-[10px] font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300/60 whitespace-nowrap">
+                                        {sub.badge}
+                                      </span>
+                                    )}
                                   </Link>
                                 );
                               })}

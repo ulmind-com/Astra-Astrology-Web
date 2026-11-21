@@ -115,7 +115,7 @@ export default function PurohitDetailPage() {
     });
   };
 
-  if (isLoading) {
+  if (isLoading && !purohit) {
     return (
       <div className="min-h-screen py-24 flex items-center justify-center">
         <LoadingBlock label="পুরোহিতের প্রোফাইল ও পূজার তালিকা লোড হচ্ছে..." />

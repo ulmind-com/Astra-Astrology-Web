@@ -32,7 +32,7 @@ export const HEADER_NAV_TRANSLATIONS: Record<
         dropdown: [
           {
             label: "Talk to Astrologers",
-            description: "Connect instantly via call or chat with 500+ vetted astrologers",
+            description: "Connect instantly via call or chat with verified astrologers",
             badge: "Instant",
           },
           {
@@ -137,7 +137,7 @@ export const HEADER_NAV_TRANSLATIONS: Record<
         dropdown: [
           {
             label: "জ্যোতিষীর সাথে কথা বলুন",
-            description: "৫০০+ অভিজ্ঞ ও ভেরিফাইড জ্যোতিষীর সাথে কল বা চ্যাটে সরাসরি যুক্ত হন",
+            description: "অভিজ্ঞ ও ভেরিফাইড জ্যোতিষীদের সাথে কল বা চ্যাটে সরাসরি যুক্ত হন",
             badge: "তাৎক্ষণিক",
           },
           {
@@ -242,7 +242,7 @@ export const HEADER_NAV_TRANSLATIONS: Record<
         dropdown: [
           {
             label: "ज्योतिषी से बात करें",
-            description: "500+ सत्यापित ज्योतिषियों से कॉल या चैट पर तुरंत जुड़ें",
+            description: "सत्यापित ज्योतिषियों से कॉल या चैट पर तुरंत जुड़ें",
             badge: "त्वरित",
           },
           {

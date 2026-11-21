@@ -6,7 +6,8 @@ import { toast } from "sonner";
 
 import { walletApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
-import type { CreateOrderResponse, TransactionReason } from "@/types";
+import { session } from "@/lib/session";
+import type { CreateOrderResponse, TransactionReason, WalletSummary } from "@/types";
 
 export const WALLET_KEY = ["wallet"] as const;
 export const WALLET_TXNS_KEY = ["wallet", "transactions"] as const;
@@ -51,8 +52,23 @@ function loadCheckout(): Promise<void> {
 export function useWallet(enabled = true) {
   return useQuery({
     queryKey: WALLET_KEY,
-    queryFn: walletApi.summary,
+    queryFn: async () => {
+      const data = await walletApi.summary();
+      if (data?.wallet?.balance_coins !== undefined) {
+        session.saveCoins(data.wallet.balance_coins);
+      }
+      return data;
+    },
+    initialData: () => {
+      const c = session.coins;
+      if (c === null) return undefined;
+      return {
+        wallet: { balance_coins: c, is_frozen: false },
+        recent: [],
+      } as WalletSummary;
+    },
     enabled,
+    staleTime: 30_000,
   });
 }
 

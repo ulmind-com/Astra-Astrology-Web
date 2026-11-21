@@ -220,11 +220,54 @@ export function HeroAstroyogi() {
   };
 
   return (
-    <section className="relative bg-white pt-4 pb-6 sm:pt-6 sm:pb-10">
+    <section className="relative overflow-hidden bg-[#0a080d] sm:bg-gradient-to-b sm:from-[#060508] sm:via-[#0c0a12] sm:to-[#08070b] pt-4 pb-6 sm:pt-6 sm:pb-10 border-b border-amber-500/15">
+      {/* Left rotating celestial zodiac chakra */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/zodiac-chakra.png"
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-24 sm:-left-36 md:-left-44 lg:-left-56 top-1/2 -translate-y-1/2 size-[360px] sm:size-[480px] md:size-[600px] lg:size-[720px] select-none opacity-20 sm:opacity-25 mix-blend-screen filter drop-shadow-[0_0_35px_rgba(245,192,0,0.2)] animate-[spin_120s_linear_infinite_reverse] motion-reduce:animate-none"
+      />
+
+      {/* Right rotating celestial gold zodiac wheel */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/zodiac-wheel-gold.webp"
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-24 sm:-right-36 md:-right-44 lg:-right-56 top-1/2 -translate-y-1/2 size-[360px] sm:size-[480px] md:size-[600px] lg:size-[720px] select-none opacity-20 sm:opacity-25 mix-blend-screen filter drop-shadow-[0_0_35px_rgba(245,192,0,0.2)] animate-spin [animation-duration:120s] motion-reduce:animate-none"
+      />
+
+      {/* Subtle celestial stars and ambient cosmic radial glow */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(245,192,0,0.09)_0%,rgba(194,65,12,0.04)_40%,transparent_70%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-40 mix-blend-screen"
+        style={{
+          backgroundImage: `radial-gradient(1.5px 1.5px at 8% 18%, rgba(255,255,255,0.8) 50%, transparent 100%),
+            radial-gradient(1px 1px at 22% 35%, rgba(253,224,71,0.7) 50%, transparent 100%),
+            radial-gradient(1.5px 1.5px at 38% 12%, rgba(255,255,255,0.7) 50%, transparent 100%),
+            radial-gradient(2px 2px at 52% 28%, rgba(253,224,71,0.9) 50%, transparent 100%),
+            radial-gradient(1px 1px at 68% 15%, rgba(255,255,255,0.6) 50%, transparent 100%),
+            radial-gradient(1.5px 1.5px at 82% 32%, rgba(253,224,71,0.8) 50%, transparent 100%),
+            radial-gradient(1.5px 1.5px at 93% 20%, rgba(255,255,255,0.8) 50%, transparent 100%),
+            radial-gradient(1px 1px at 15% 75%, rgba(255,255,255,0.6) 50%, transparent 100%),
+            radial-gradient(2px 2px at 30% 88%, rgba(253,224,71,0.7) 50%, transparent 100%),
+            radial-gradient(1.5px 1.5px at 45% 72%, rgba(255,255,255,0.7) 50%, transparent 100%),
+            radial-gradient(1px 1px at 60% 85%, rgba(253,224,71,0.6) 50%, transparent 100%),
+            radial-gradient(1.5px 1.5px at 75% 78%, rgba(255,255,255,0.8) 50%, transparent 100%),
+            radial-gradient(2px 2px at 88% 82%, rgba(253,224,71,0.8) 50%, transparent 100%)`,
+        }}
+      />
+
       <div className="relative z-10 mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
-        {/* Hero Slider */}
+        {/* Hero Slider with Crisp White Frame (Matching Reference Design) */}
         <div
-          className="relative group/slider overflow-hidden rounded-2xl sm:rounded-3xl shadow-lg"
+          className="relative group/slider overflow-hidden rounded-2xl sm:rounded-3xl border-2 sm:border-[3px] border-white/95 shadow-[0_20px_55px_-12px_rgba(0,0,0,0.85),0_0_35px_rgba(245,192,0,0.18)]"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
           onTouchStart={handleTouchStart}
@@ -342,10 +385,10 @@ export function HeroAstroyogi() {
               <Link
                 key={action.title}
                 href={action.href}
-                className="group flex items-center justify-between rounded-2xl border border-amber-400/35 bg-white/95 px-4 sm:px-6 py-4 sm:py-4.5 shadow-[0_8px_25px_-6px_rgba(0,0,0,0.65)] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-[#fcd404] hover:shadow-[0_12px_28px_-10px_rgba(245,199,0,0.6)]"
+                className="group flex items-center justify-between rounded-2xl border border-amber-400/40 bg-white/95 px-4 sm:px-6 py-4 sm:py-4.5 shadow-[0_10px_30px_-8px_rgba(0,0,0,0.7)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#fcd404] hover:shadow-[0_14px_35px_-8px_rgba(245,199,0,0.55)]"
               >
                 <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="flex size-11 sm:size-12 shrink-0 items-center justify-center rounded-full bg-[#ffea75]/60 text-[#8b5e0a] border border-[#f5d947]/70 shadow-sm transition-transform duration-300 group-hover:scale-105 group-hover:bg-[#ffea75]">
+                  <div className="flex size-11 sm:size-12 shrink-0 items-center justify-center rounded-full bg-[#ffea75]/70 text-[#8b5e0a] border border-[#f5d947]/90 shadow-sm transition-transform duration-300 group-hover:scale-105 group-hover:bg-[#ffea75]">
                     <Icon className="size-5 sm:size-5.5" strokeWidth={2} />
                   </div>
                   <div className="flex flex-col min-w-0">

@@ -19,6 +19,7 @@ function getFooterColumns(lang: AstrologyLanguage): Column[] {
         title: "রাশিফল ও পঞ্চাঙ্গ",
         links: [
           { href: "/daily-horoscope", label: "দৈনিক রাশিফল" },
+          { href: "/annual-horoscope", label: "বার্ষিক বর্ষফল" },
           { href: "/panchang", label: "আজকের পঞ্চাঙ্গ" },
           { href: "/muhurat", label: "শুভ মুহূর্ত" },
           { href: "/festivals", label: "উৎসব ও তিথি" },
@@ -66,6 +67,7 @@ function getFooterColumns(lang: AstrologyLanguage): Column[] {
         title: "राशिफल एवं पंचांग",
         links: [
           { href: "/daily-horoscope", label: "दैनिक राशिफल" },
+          { href: "/annual-horoscope", label: "वार्षिक वर्षफल" },
           { href: "/panchang", label: "आज का पंचांग" },
           { href: "/muhurat", label: "शुभ मुहूर्त" },
           { href: "/festivals", label: "त्योहार एवं तिथि" },
@@ -112,6 +114,7 @@ function getFooterColumns(lang: AstrologyLanguage): Column[] {
       title: "Horoscope & Panchang",
       links: [
         { href: "/daily-horoscope", label: "Daily Horoscope" },
+        { href: "/annual-horoscope", label: "Annual Varshphal" },
         { href: "/panchang", label: "Today's Panchang" },
         { href: "/muhurat", label: "Shubh Muhurat" },
         { href: "/festivals", label: "Festivals & Tithi" },

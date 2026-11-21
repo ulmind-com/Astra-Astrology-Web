@@ -27,63 +27,23 @@ export function ShopHeroSlider({ banners }: Props) {
 
   const defaultBanners: BannerItem[] = [
     {
-      id: "b-rudraksha",
-      badge_text: "DIVINLINK × SACRED RUDRAKSHA",
-      title: "Sacred Nepali Siddh Rudraksha",
-      subtitle: "100% lab-certified 1 to 14 Mukhi divine beads consecrated with Maha Mrityunjaya Vedic rituals.",
-      cta_text: "Shop Now",
+      id: "banner-1",
+      badge_text: "100% AUTHENTIC & LAB CERTIFIED",
+      title: "Sacred Certified Nepali Rudraksha",
+      subtitle: "Consecrated with Vedic Pran-Pratishtha by Vedic Pandits for spiritual protection & prosperity.",
+      cta_text: "Explore Rudraksha",
       cta_link: "/shop?category=rudraksha",
-      image_url: "/images/banners/banner-rudraksha.jpg",
+      image_url: "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=1200&q=80",
       is_active: true,
     },
     {
-      id: "b-zodiac",
-      badge_text: "DIVINLINK × ZODIAC",
-      title: "Wear Your Zodiac Collection",
-      subtitle: "Discover India's finest 925 sterling silver zodiac rings infused with authentic planetary gemstone energies.",
-      cta_text: "Shop Now",
+      id: "banner-2",
+      badge_text: "925 STERLING SILVER & CERTIFIED",
+      title: "Sacred Zodiac Collection",
+      subtitle: "Handcrafted 925 sterling silver zodiac rings & planetary talisman jewelry.",
+      cta_text: "Explore Zodiac",
       cta_link: "/shop?category=zodiac",
-      image_url: "/images/banners/banner-zodiac.jpg",
-      is_active: true,
-    },
-    {
-      id: "b-rudraksha",
-      badge_text: "DIVINE RUDRAKSHA × VARANASI",
-      title: "Sacred Nepali Siddh Rudraksha",
-      subtitle: "100% lab-certified 1 to 14 Mukhi divine beads consecrated with Maha Mrityunjaya Vedic rituals.",
-      cta_text: "Shop Now",
-      cta_link: "/shop?category=rudraksha",
-      image_url: "/images/banners/banner-rudraksha.jpg",
-      is_active: true,
-    },
-    {
-      id: "b-dhanyog",
-      badge_text: "DHAN YOG × ABUNDANCE",
-      title: "Super Dhan Yog Abundance Band",
-      subtitle: "Attract wealth, dissolve debt & activate Lakshmi vibrations with certified Pyrite, Tiger's Eye & Citrine.",
-      cta_text: "Shop Now",
-      cta_link: "/shop?category=bracelets",
-      image_url: "/images/banners/banner-dhanyog.jpg",
-      is_active: true,
-    },
-    {
-      id: "b-karungali",
-      badge_text: "KARUNGALI × TOTAL SHIELD",
-      title: "Original Karungali Ebony Mala",
-      subtitle: "Pure black ebony wood beads energized for negative energy protection, evil eye defense & planetary peace.",
-      cta_text: "Shop Now",
-      cta_link: "/shop?category=karungali",
-      image_url: "/images/banners/banner-karungali-landscape.jpg",
-      is_active: true,
-    },
-    {
-      id: "b-gemstones",
-      badge_text: "GOVT. LAB CERTIFIED RATNA",
-      title: "Pran-Pratishthit Natural Gemstones",
-      subtitle: "Unheated, untreated Yellow Sapphire, Blue Sapphire, Emerald & Red Coral with certificate of authenticity.",
-      cta_text: "Shop Now",
-      cta_link: "/shop?category=gemstones",
-      image_url: "/images/banners/banner-gemstones-landscape.jpg",
+      image_url: "https://images.unsplash.com/photo-1599707367072-cd6ada2bc375?auto=format&fit=crop&w=1200&q=80",
       is_active: true,
     },
   ];
@@ -126,17 +86,8 @@ export function ShopHeroSlider({ banners }: Props) {
     setTouchEndX(null);
   };
 
-  // Trust items for the ticker strip directly below hero slider (exact Astrotalk design)
-  const trustItems = [
-    "7-Day Easy Returns",
-    "Energised by Top Astrologers",
-    "100% Natural & Authentic",
-    "Certified by Govt. Labs",
-    "100% Cashback On All Prepaid Orders",
-  ];
-
   return (
-    <div className="w-full space-y-3 sm:space-y-4">
+    <div className="w-full">
       {/* 1. Main Hero Carousel Container (Exact Astrotalk Screenshot Layout) */}
       <section
         className="relative w-full overflow-hidden rounded-[24px] sm:rounded-[32px] md:rounded-[36px] shadow-2xl bg-[#faf6f0] border border-amber-900/10 select-none group"
@@ -163,18 +114,18 @@ export function ShopHeroSlider({ banners }: Props) {
                   className="relative w-full h-full shrink-0 flex-none overflow-hidden select-none"
                   aria-hidden={!isCurrent}
                 >
-                  {/* Background Image */}
+                  {/* Background Image - Positioned right to preserve product artwork */}
                   <Image
                     src={slide.image_url}
                     alt={slide.title}
                     fill
                     priority={idx < 2}
                     sizes="(max-width: 1280px) 100vw, 1280px"
-                    className="object-cover object-center transform transition-transform duration-1000 ease-out group-hover:scale-102"
+                    className="object-cover object-right sm:object-center lg:object-right transform transition-transform duration-1000 ease-out group-hover:scale-102"
                     unoptimized
                   />
 
-                  {/* Pre-designed Graphic Banner (like Lumus Perfumes from Screenshot) */}
+                  {/* Pre-designed Graphic Banner */}
                   {slide.hide_text_overlay ? (
                     <Link
                       href={slide.cta_link || "/shop"}
@@ -184,11 +135,11 @@ export function ShopHeroSlider({ banners }: Props) {
                   ) : (
                     /* Dynamic Astrotalk Left-and-Right Split Layout */
                     <>
-                      {/* Soft Left Vignette Gradient for Ultra-Crisp Typography Legibility */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-transparent pointer-events-none" />
+                      {/* Deep Left Vignette Gradient for Ultra-Crisp Legibility */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-transparent pointer-events-none" />
 
-                      {/* Left Side Content Block */}
-                      <div className="absolute inset-0 flex flex-col justify-center px-7 sm:px-12 lg:px-16 max-w-xl text-white space-y-3 sm:space-y-4 z-10 pointer-events-none">
+                      {/* Left Side Content Block - Constrained to prevent right-side overlap */}
+                      <div className="absolute inset-y-0 left-0 flex flex-col justify-center px-6 sm:px-10 lg:px-14 max-w-sm sm:max-w-md lg:max-w-lg text-white space-y-2.5 sm:space-y-4 z-10 pointer-events-none">
                         {/* Luxury Eyebrow: LUMUS × ASTROTALK */}
                         {slide.badge_text && (
                           <div className="inline-flex items-center gap-1.5 self-start text-xs sm:text-sm font-medium tracking-[0.22em] text-white/95 uppercase drop-shadow-sm">
@@ -236,21 +187,23 @@ export function ShopHeroSlider({ banners }: Props) {
           </div>
 
           {/* Bottom-Left Slide Indicator Dots (Exact Astrotalk Screenshot: Active Dark Pill + Dots) */}
-          <div className="absolute bottom-5 sm:bottom-7 left-6 sm:left-12 flex items-center gap-2 z-20">
-            {slides.map((_, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setCurrent(idx)}
-                aria-label={`Go to slide ${idx + 1}`}
-                className={`transition-all duration-300 cursor-pointer ${
-                  current === idx
-                    ? "w-7 sm:w-8 h-2 rounded-full bg-stone-900 shadow-sm border border-black/10"
-                    : "size-2 rounded-full bg-stone-900/35 hover:bg-stone-900/70"
-                }`}
-              />
-            ))}
-          </div>
+          {slides.length > 1 && (
+            <div className="absolute bottom-5 sm:bottom-7 left-6 sm:left-12 flex items-center gap-2 z-20">
+              {slides.map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setCurrent(idx)}
+                  aria-label={`Go to slide ${idx + 1}`}
+                  className={`transition-all duration-300 cursor-pointer ${
+                    current === idx
+                      ? "w-7 sm:w-8 h-2 rounded-full bg-stone-900 shadow-sm border border-black/10"
+                      : "size-2 rounded-full bg-stone-900/35 hover:bg-stone-900/70"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
 
           {/* Bottom-Right Circular Frosted Glass Navigation Arrows (Exact Astrotalk Screenshot) */}
           {slides.length > 1 && (
@@ -275,33 +228,6 @@ export function ShopHeroSlider({ banners }: Props) {
           )}
         </div>
       </section>
-
-      {/* 2. Dark Trust Badge Strip Directly Below Hero Slider (Exact Astrotalk Screenshot Match) */}
-      <div className="w-full rounded-xl sm:rounded-2xl bg-[#141414] text-white py-3 sm:py-3.5 px-4 shadow-md overflow-hidden select-none border border-stone-800">
-        {/* Desktop View: Centered Horizontal Row */}
-        <div className="hidden lg:flex items-center justify-center gap-6 xl:gap-8 text-xs sm:text-[13px] font-medium tracking-wide">
-          {trustItems.map((item, idx) => (
-            <div key={idx} className="flex items-center gap-2.5">
-              <span className="text-amber-400 font-bold text-sm">✦</span>
-              <span className="text-stone-100">{item}</span>
-            </div>
-          ))}
-          <div className="flex items-center gap-2.5">
-            <span className="text-amber-400 font-bold text-sm">✦</span>
-            <span className="text-stone-100">{trustItems[0]}</span>
-          </div>
-        </div>
-
-        {/* Mobile & Tablet View: Smooth Continuous Auto-Marquee */}
-        <div className="flex lg:hidden w-max animate-marquee space-x-6 items-center whitespace-nowrap text-xs font-medium tracking-wide">
-          {[...trustItems, ...trustItems, ...trustItems].map((item, idx) => (
-            <div key={idx} className="flex items-center gap-2">
-              <span className="text-amber-400 font-bold text-xs">✦</span>
-              <span className="text-stone-100">{item}</span>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

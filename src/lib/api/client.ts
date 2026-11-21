@@ -10,7 +10,7 @@
  * visitor, which on a gated page read as "you are not enrolled".
  */
 
-import { apiBase } from "@/lib/env";
+import { apiBase, getClientApiBase } from "@/lib/env";
 import { endpoints } from "@/lib/api/endpoints";
 import { session } from "@/lib/session";
 import type { ApiEnvelope, ApiErrorBody, TokenPair, ValidationDetail } from "@/types";
@@ -92,8 +92,9 @@ type Options = Omit<RequestInit, "body" | "method"> & {
   auth?: boolean;
 };
 
-function buildUrl(path: string, query?: Query): string {
-  const url = new URL(`${apiBase}${path.startsWith("/") ? path : `/${path}`}`);
+function buildUrl(path: string, query?: Query, forceDirectBase = false): string {
+  const base = forceDirectBase ? apiBase : getClientApiBase();
+  const url = new URL(`${base}${path.startsWith("/") ? path : `/${path}`}`);
   if (query) {
     for (const [key, value] of Object.entries(query)) {
       if (value !== undefined && value !== null && value !== "") {
@@ -167,6 +168,7 @@ async function send(path: string, options: Options): Promise<Sent> {
   }
 
   let response: Response;
+  const primaryUrl = buildUrl(path, query);
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   if (callerSignal) {
@@ -178,7 +180,7 @@ async function send(path: string, options: Options): Promise<Sent> {
   }
 
   try {
-    response = await fetch(buildUrl(path, query), {
+    response = await fetch(primaryUrl, {
       ...rest,
       method,
       headers,
@@ -186,19 +188,38 @@ async function send(path: string, options: Options): Promise<Sent> {
       body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
     });
   } catch (err: any) {
-    const aborted = err instanceof Error && err.name === "AbortError";
-    if (aborted && !callerSignal?.aborted) {
+    // If same-origin proxy failed, attempt direct fallback to apiBase
+    if (typeof window !== "undefined" && !primaryUrl.startsWith(apiBase) && !controller.signal.aborted) {
+      try {
+        response = await fetch(buildUrl(path, query, true), {
+          ...rest,
+          method,
+          headers,
+          signal: controller.signal,
+          body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
+        });
+      } catch {
+        throw new ApiError(
+          "Could not reach the server. Check your connection and try again.",
+          0,
+          "network_error",
+        );
+      }
+    } else {
+      const aborted = err instanceof Error && err.name === "AbortError";
+      if (aborted && !callerSignal?.aborted) {
+        throw new ApiError(
+          "The server took too long to respond. Please try again.",
+          0,
+          "timeout",
+        );
+      }
       throw new ApiError(
-        "The server took too long to respond. Please try again.",
+        "Could not reach the server. Check your connection and try again.",
         0,
-        "timeout",
+        "network_error",
       );
     }
-    throw new ApiError(
-      "Could not reach the server. Check your connection and try again.",
-      0,
-      "network_error",
-    );
   } finally {
     clearTimeout(timeoutId);
   }

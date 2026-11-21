@@ -8,7 +8,7 @@
  * way; it just stops being invisible while it happens.
  */
 
-import { apiBase } from "@/lib/env";
+import { apiBase, getClientApiBase } from "@/lib/env";
 import { session } from "@/lib/session";
 
 export type AiStreamEvent =
@@ -58,7 +58,8 @@ export async function* askAstrologer(
   body: AskBody,
   signal?: AbortSignal,
 ): AsyncGenerator<AiStreamEvent> {
-  const response = await fetch(`${apiBase}/ai-astrologer/chat/stream`, {
+  const base = getClientApiBase();
+  const response = await fetch(`${base}/ai-astrologer/chat/stream`, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify(body),
@@ -196,7 +197,8 @@ export async function transcribe(audio: Blob): Promise<string> {
   const token = session.accessToken;
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const response = await fetch(`${apiBase}/ai-astrologer/transcribe`, {
+  const base = getClientApiBase();
+  const response = await fetch(`${base}/ai-astrologer/transcribe`, {
     method: "POST",
     headers,
     body: form,

@@ -165,7 +165,7 @@ export default function ProductDetailPage() {
   // ---------------------------------------------------------------------------
   // Loading & 404 Not Found States
   // ---------------------------------------------------------------------------
-  if (isLoading) {
+  if (isLoading && !product) {
     return (
       <>
         <SiteHeader />

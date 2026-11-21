@@ -24,6 +24,8 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { LoadingBlock } from "@/components/ui";
 import { astrologyApi } from "@/lib/api";
+import { INITIAL_DAILY_HOROSCOPE } from "@/components/home/astrology-prediction-zodiac";
+import initialTabHoroscopes from "@/components/home/initial-horoscopes-tabs.json";
 import { useLanguage } from "@/providers/language-provider";
 import {
   SuryaChandraHorizonArc,
@@ -34,6 +36,7 @@ import {
   VaraSunClipart,
   VedicCompassClipart,
 } from "@/components/astro/panchang-cliparts";
+import { CelestialZodiacHalo } from "@/components/astro/celestial-zodiac-halo";
 import { cn } from "@/lib/utils";
 import type { HoraItem, ChoghadiyaItem } from "@/types";
 
@@ -71,7 +74,14 @@ export default function PanchangPage() {
   const [horaPeriod, setHoraPeriod] = React.useState<"day" | "night">("day");
   const [choghadiyaPeriod, setChoghadiyaPeriod] = React.useState<"day" | "night">("day");
 
-  // Real-time backend API query
+  const tabDataMap = initialTabHoroscopes as unknown as Record<string, typeof INITIAL_DAILY_HOROSCOPE>;
+  const dateInitialData =
+    tabDataMap[selectedDate] ??
+    (selectedDate === tomorrowStr ? tabDataMap["tomorrow"] ?? tabDataMap["2026-11-21"] : undefined) ??
+    (selectedDate === yesterdayStr ? tabDataMap["yesterday"] ?? tabDataMap["2026-11-19"] : undefined) ??
+    (selectedDate === todayStr ? INITIAL_DAILY_HOROSCOPE : undefined);
+
+  // Real-time backend API query with pre-hydrated Swiss Ephemeris data for instant switching
   const { data: horoscopeData, isLoading, error } = useQuery({
     queryKey: ["panchang", "daily", lang, selectedDate],
     queryFn: () =>
@@ -82,10 +92,12 @@ export default function PanchangPage() {
         longitude: 88.3639,
         timezone: 5.5,
       }),
+    initialData: dateInitialData,
+    placeholderData: (previousData) => previousData ?? dateInitialData ?? INITIAL_DAILY_HOROSCOPE,
     staleTime: 1000 * 60 * 15,
   });
 
-  const panchang = horoscopeData?.panchang;
+  const panchang = horoscopeData?.panchang ?? dateInitialData?.panchang ?? INITIAL_DAILY_HOROSCOPE.panchang;
   const horas: HoraItem[] = panchang?.horas ?? [];
   const choghadiya: ChoghadiyaItem[] = panchang?.choghadiya ?? [];
 
@@ -97,14 +109,8 @@ export default function PanchangPage() {
         {/* Cosmic Ambient Aura */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -top-36 left-1/2 -translate-x-1/2 w-[1100px] h-[550px] bg-gradient-to-b from-amber-200/40 via-orange-100/25 to-transparent blur-3xl opacity-80" />
-          <div className="absolute top-16 -right-24 w-96 h-96 opacity-[0.04] animate-celestial-spin">
-            <Image
-              src="/images/panchang/zodiac-wheel-gold.webp"
-              alt="Zodiac Chakra"
-              width={384}
-              height={384}
-              className="w-full h-full object-contain"
-            />
+          <div className="absolute top-16 -right-24 w-96 h-96 opacity-10">
+            <CelestialZodiacHalo size={384} speedSeconds={90} />
           </div>
         </div>
 
@@ -248,11 +254,11 @@ export default function PanchangPage() {
             </div>
           </div>
 
-          {isLoading ? (
+          {isLoading && !panchang ? (
             <div className="py-24 text-center rounded-3xl border border-slate-200 bg-white shadow-sm">
               <LoadingBlock label={isBn ? "সুইস এফিমেরিস বৈদিক পঞ্চাঙ্গ গণনা করা হচ্ছে…" : "Calculating Swiss Ephemeris Vedic Panchang…"} />
             </div>
-          ) : error || !panchang ? (
+          ) : (error && !panchang) || !panchang ? (
             <div className="rounded-3xl border border-dashed border-rose-300 bg-rose-50/50 p-10 text-center space-y-3">
               <AlertTriangle className="size-10 text-rose-500 mx-auto" />
               <h3 className="font-bold text-rose-950">
