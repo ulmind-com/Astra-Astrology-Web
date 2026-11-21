@@ -424,7 +424,7 @@ export default function CourseCertificateVerificationPage() {
           <div
             className="certificate-canvas relative w-full aspect-[1000/523] rounded-xl overflow-hidden select-none bg-[#FAF8F5] shadow-2xl border border-amber-900/10"
             style={{
-              backgroundImage: "url('/images/certificate-template.png')",
+              backgroundImage: "url('/images/certificate-template.png?v=divinlink-v2')",
               backgroundSize: "100% 100%",
               backgroundPosition: "center center",
               backgroundRepeat: "no-repeat",
