@@ -84,6 +84,8 @@ export interface CourseEnrollment {
   certificate_issued: boolean;
   certificate_id?: string | null;
   certificate_url?: string | null;
+  invoice_number?: string | null;
+  invoice_url?: string | null;
 }
 
 export interface LessonStreamData {

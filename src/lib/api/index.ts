@@ -1960,6 +1960,12 @@ export const courseApi = {
 
   getVerifyCertificateHtmlUrl: (certificateId: string) =>
     `${apiBase}${endpoints.courses.verifyCertificateHtml(certificateId)}`,
+
+  getInvoiceHtmlUrl: (courseId: string) =>
+    `${apiBase}/api/v1/courses/${courseId}/invoice/html`,
+
+  getOrderInvoiceHtmlUrl: (orderId: string) =>
+    `${apiBase}/api/v1/courses/orders/${orderId}/invoice/html`,
 };
 
 // ------------------------------------------------------------------ Purohit & Live Puja
