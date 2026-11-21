@@ -257,6 +257,7 @@ function DirectoryInner() {
     // Keeps the previous page on screen while the next one loads.
     placeholderData: (previous) => previous,
     staleTime: 5 * 60 * 1000,
+    retry: 2,
   });
 
   function applyFilters(next: Filters) {

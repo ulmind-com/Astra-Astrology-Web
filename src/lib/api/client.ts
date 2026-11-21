@@ -170,8 +170,13 @@ async function send(path: string, options: Options): Promise<Sent> {
   let response: Response;
   const primaryUrl = buildUrl(path, query);
   const controller = new AbortController();
-  // Generous 45s bounded timeout to comfortably absorb cold-starts and planetary ephemeris calculations
-  const timeoutId = setTimeout(() => controller.abort(), 45000);
+  let timedOut = false;
+  // Generous 60s bounded timeout to comfortably absorb cold-starts and planetary ephemeris calculations
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, 60000);
+
   if (callerSignal) {
     if (callerSignal.aborted) {
       controller.abort();
@@ -189,6 +194,12 @@ async function send(path: string, options: Options): Promise<Sent> {
       body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
     });
   } catch (err: any) {
+    // If caller intentionally cancelled (TanStack Query navigation, debounced input, unmount),
+    // rethrow directly so React Query cancels cleanly without raising an error alert!
+    if (callerSignal?.aborted) {
+      throw err;
+    }
+
     // If direct backend call fails with a network error, attempt fallback to same-origin proxy
     const isDirect = primaryUrl.startsWith(apiBase);
     const fallbackBase = isDirect && typeof window !== "undefined"
@@ -212,9 +223,11 @@ async function send(path: string, options: Options): Promise<Sent> {
           signal: controller.signal,
           body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
         });
-      } catch {
-        const aborted = err instanceof Error && err.name === "AbortError";
-        if (aborted && !callerSignal?.aborted) {
+      } catch (fallbackErr: any) {
+        if (callerSignal?.aborted) {
+          throw fallbackErr;
+        }
+        if (timedOut) {
           throw new ApiError(
             "The server took too long to respond. Please try again.",
             0,
@@ -228,8 +241,7 @@ async function send(path: string, options: Options): Promise<Sent> {
         );
       }
     } else {
-      const aborted = err instanceof Error && err.name === "AbortError";
-      if (aborted && !callerSignal?.aborted) {
+      if (timedOut) {
         throw new ApiError(
           "The server took too long to respond. Please try again.",
           0,
@@ -272,9 +284,12 @@ async function sendWithRefresh(path: string, options: Options): Promise<Sent> {
   try {
     sent = await send(path, options);
   } catch (err) {
+    if (options.signal?.aborted) {
+      throw err;
+    }
     if (isSafeMethod && err instanceof ApiError && (err.code === "timeout" || err.code === "network_error")) {
-      // Cold-start / wake-up resilient retry: wait 1s and retry once before surfacing error
-      await new Promise((r) => setTimeout(r, 1000));
+      // Cold-start / wake-up resilient retry: wait 1.2s and retry once before surfacing error
+      await new Promise((r) => setTimeout(r, 1200));
       sent = await send(path, options);
     } else {
       throw err;

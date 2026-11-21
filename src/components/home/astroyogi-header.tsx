@@ -1073,7 +1073,7 @@ export function AstroyogiHeader() {
                     <div
                       className={cn(
                         "absolute left-0 top-full pt-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150",
-                        cat.href === "/shop" ? "w-[440px] sm:w-[470px]" : "w-80"
+                        cat.href === "/shop" ? "w-[440px] sm:w-[480px] max-w-[calc(100vw-24px)]" : "w-80"
                       )}
                     >
                       <div className="overflow-hidden rounded-2xl border border-amber-200/90 bg-white p-2 shadow-[0_18px_45px_-10px_rgba(26,18,8,0.18)] ring-1 ring-black/5">
@@ -1102,12 +1102,12 @@ export function AstroyogiHeader() {
                                   )}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <div className="flex items-center justify-between gap-3">
-                                    <span className="font-bold text-xs sm:text-[13px] text-stone-900 group-hover/item:text-amber-800 leading-tight">
+                                  <div className="flex items-center justify-between gap-2.5 min-w-0">
+                                    <span className="font-bold text-xs sm:text-[13px] text-stone-900 group-hover/item:text-amber-800 leading-tight truncate">
                                       {item.label}
                                     </span>
                                     {item.badge && (
-                                      <span className="shrink-0 rounded-full bg-amber-100 text-amber-950 text-[10px] font-bold px-2 py-0.5 border border-amber-300/80 whitespace-nowrap shadow-2xs">
+                                      <span className="shrink-0 rounded-full bg-amber-100 text-amber-950 text-[10px] font-bold px-2 py-0.5 border border-amber-300/80 whitespace-nowrap shadow-2xs ml-auto">
                                         {item.badge}
                                       </span>
                                     )}

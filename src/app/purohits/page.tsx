@@ -39,10 +39,11 @@ function PurohitsDirectoryContent() {
         search_puja: searchPuja.trim() || undefined,
         language: selectedLanguage !== "all" ? selectedLanguage : undefined,
       });
-      return (res as any)?.data || (Array.isArray(res) ? res : []);
+      return Array.isArray(res) ? res : ((res as any)?.data || []);
     },
     placeholderData: (prev) => prev,
     staleTime: 5 * 60 * 1000,
+    retry: 2,
   });
 
   const onlineCount = React.useMemo(() => {

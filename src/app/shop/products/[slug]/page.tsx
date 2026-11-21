@@ -502,20 +502,24 @@ export default function ProductDetailPage() {
               freeGiftTitle={product.free_gift_title}
               freeGiftValue={product.free_gift_value}
             />
-
-            {/* Value Proposition: 100% Wallet Cashback to Astrologer Bridge */}
-            <CashbackConsultationBridge
-              productTitle={product.title}
-              mrp={mrp}
-              salePrice={salePrice}
-              cashbackPercent={effectiveCashback}
-              freeGiftTitle={product.free_gift_title}
-              freeGiftValue={product.free_gift_value}
-              freeGiftBadge={product.free_gift_badge}
-              categorySlug={product.category_slug}
-            />
           </div>
         </div>
+
+        {/* ================================================================= */}
+        {/* Full-Width Section: 100% Wallet Cashback to Astrologer Bridge     */}
+        {/* ================================================================= */}
+        <section className="space-y-4">
+          <CashbackConsultationBridge
+            productTitle={product.title}
+            mrp={mrp}
+            salePrice={salePrice}
+            cashbackPercent={effectiveCashback}
+            freeGiftTitle={product.free_gift_title}
+            freeGiftValue={product.free_gift_value}
+            freeGiftBadge={product.free_gift_badge}
+            categorySlug={product.category_slug}
+          />
+        </section>
 
         {/* ================================================================= */}
         {/* Full-Width Section: Sacred Vedic & Astrological Specifications */}
