@@ -42,7 +42,7 @@ import { CartDrawer } from "@/components/shop/CartDrawer";
 import { SacredImageGallery } from "@/components/shop/SacredImageGallery";
 import { CashbackConsultationBridge } from "@/components/shop/CashbackConsultationBridge";
 import { SacredSpecificationsGrid } from "@/components/shop/SacredSpecificationsGrid";
-import { LivePincodeLogisticsTracker } from "@/components/shop/LivePincodeLogisticsTracker";
+import { ProductPincodeEstimator } from "@/components/shop/ProductPincodeEstimator";
 import { AstraPromiseSection } from "@/components/shop/AstraPromiseSection";
 import { SacredDevoteeReviews } from "@/components/shop/SacredDevoteeReviews";
 import { CardTilt } from "@/components/ui/card-tilt";
@@ -369,14 +369,6 @@ export default function ProductDetailPage() {
               categorySlug={product.category_slug}
             />
 
-            {/* Live Pincode & Real-Time Logistics Tracker */}
-            <LivePincodeLogisticsTracker
-              salePrice={salePrice}
-              cashbackPercent={effectiveCashback}
-              freeGiftTitle={product.free_gift_title}
-              freeGiftValue={product.free_gift_value}
-            />
-
             {/* Quantity Stepper & Primary CTAs */}
             <div className="space-y-3 pt-2">
               <div className="flex items-center gap-4">
@@ -435,6 +427,14 @@ export default function ProductDetailPage() {
                   <span>{isBn ? "এখনই কিনুন (সরাসরি চেকআউট)" : "Buy Now (Fast Checkout)"}</span>
                 </button>
               </div>
+
+              {/* Pincode Delivery Estimator directly beneath Add to Cart & Buy Now */}
+              <ProductPincodeEstimator
+                salePrice={salePrice}
+                cashbackPercent={effectiveCashback}
+                freeGiftTitle={product.free_gift_title}
+                freeGiftValue={product.free_gift_value}
+              />
             </div>
 
             {/* Sacred Vedic & Astrological Specifications Grid */}
