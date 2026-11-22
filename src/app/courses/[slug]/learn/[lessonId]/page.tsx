@@ -56,7 +56,7 @@ export default function LessonClassroomPage() {
   const slug = String(params.slug);
   const lessonId = String(params.lessonId);
 
-  const [activeTab, setActiveTab] = React.useState<"notes" | "resources" | "jigyasa">("notes");
+  const [activeTab, setActiveTab] = React.useState<"overview" | "curriculum" | "jigyasa" | "notes">("overview");
   const [qaSort, setQaSort] = React.useState<"newest" | "timestamp" | "upvotes">("newest");
   const [isAskingQuestion, setIsAskingQuestion] = React.useState(false);
   const [qTitle, setQTitle] = React.useState("");
@@ -333,7 +333,10 @@ export default function LessonClassroomPage() {
   }, []);
 
   const toggleSection = (id: string) => {
-    setExpandedSections((prev) => ({ ...prev, [id]: !prev[id] }));
+    setExpandedSections((prev) => ({
+      ...prev,
+      [id]: prev[id] === undefined ? false : !prev[id],
+    }));
   };
 
   const handleMarkComplete = React.useCallback(async () => {
@@ -832,209 +835,355 @@ export default function LessonClassroomPage() {
             </div>
           </div>
 
-          {/* Tabs: Notes & Resources */}
+          {/* Tabs: Overview | Curriculum | Q&A Forum | Notes */}
           <div className="flex-1 p-6">
-            <div className="flex items-center gap-4 border-b border-border/60 pb-2">
+            <div className="flex items-center gap-2 sm:gap-6 border-b border-border/60 pb-2 overflow-x-auto no-scrollbar">
               <button
                 type="button"
-                onClick={() => setActiveTab("notes")}
-                className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider pb-1 transition-colors ${
-                  activeTab === "notes"
+                onClick={() => setActiveTab("overview")}
+                className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider pb-1 whitespace-nowrap transition-colors ${
+                  activeTab === "overview"
                     ? "border-b-2 border-brand-600 text-brand-600"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <FileText className="size-4" />
-                <span>Lesson Notes</span>
+                <BookOpen className="size-4" />
+                <span>Overview</span>
               </button>
 
               <button
                 type="button"
-                onClick={() => setActiveTab("resources")}
-                className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider pb-1 transition-colors ${
-                  activeTab === "resources"
+                onClick={() => setActiveTab("curriculum")}
+                className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider pb-1 whitespace-nowrap transition-colors ${
+                  activeTab === "curriculum"
                     ? "border-b-2 border-brand-600 text-brand-600"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <Download className="size-4" />
-                <span>Study Resources ({streamData?.resources?.length ?? 0})</span>
+                <ListVideo className="size-4" />
+                <span>Curriculum</span>
+                {course?.total_lessons ? (
+                  <span className="rounded-full bg-brand-500/10 px-1.5 py-0.2 text-[10px] font-semibold text-brand-600">
+                    {course.total_lessons}
+                  </span>
+                ) : null}
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab("jigyasa")}
-                className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider pb-1 transition-colors ${
+                className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider pb-1 whitespace-nowrap transition-colors ${
                   activeTab === "jigyasa"
                     ? "border-b-2 border-brand-600 text-brand-600"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <MessageSquareQuote className="size-4" />
-                <span>গুরুকুল জিজ্ঞাসা ({questions.length})</span>
+                <span>Q&A Forum ({questions.length})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("notes")}
+                className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider pb-1 whitespace-nowrap transition-colors ${
+                  activeTab === "notes"
+                    ? "border-b-2 border-brand-600 text-brand-600"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <FileText className="size-4" />
+                <span>Notes & Study</span>
+                {personalNotes.trim() && (
+                  <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
+                )}
               </button>
             </div>
 
             <div className="mt-5">
-              {activeTab === "notes" ? (
-                <div className="space-y-4">
-                  {/* Notes Sub-Navigation: Master Notes vs Personal Notebook */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/50 pb-3">
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setNotesSubTab("master")}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                          notesSubTab === "master"
-                            ? "bg-brand-500/15 text-brand-600 border border-brand-500/30 shadow-2xs"
-                            : "text-muted-foreground hover:text-foreground hover:bg-surface-muted"
-                        }`}
-                      >
-                        <BookOpen className="size-3.5" />
-                        <span>আচার্যের পাঠ নোট (Lecture Notes)</span>
-                      </button>
+              {/* TAB 1: OVERVIEW */}
+              {activeTab === "overview" && (
+                <div className="space-y-6 animate-in fade-in-50 duration-200">
+                  {/* Lesson Meta Banner */}
+                  <div className="rounded-2xl border border-border/80 bg-surface p-5 shadow-2xs space-y-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/50 pb-3">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-xs text-brand-600 font-semibold">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-brand-500/10 px-2.5 py-0.5 text-[11px]">
+                            {currentLesson?.sectionTitle || "Module"}
+                          </span>
+                          {currentLesson?.duration_minutes ? (
+                            <span className="inline-flex items-center gap-1 text-muted-foreground">
+                              <Clock className="size-3" />
+                              {currentLesson.duration_minutes} মিনিট লেকচার
+                            </span>
+                          ) : null}
+                        </div>
+                        <h3 className="font-serif text-lg font-bold text-foreground">
+                          {currentLesson?.title || course?.title}
+                        </h3>
+                      </div>
 
-                      <button
-                        type="button"
-                        onClick={() => setNotesSubTab("personal")}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                          notesSubTab === "personal"
-                            ? "bg-amber-500/15 text-amber-600 border border-amber-500/30 shadow-2xs"
-                            : "text-muted-foreground hover:text-foreground hover:bg-surface-muted"
-                        }`}
-                      >
-                        <Edit3 className="size-3.5" />
-                        <span>আমার ব্যক্তিগত খাতা (My Notebook)</span>
-                        {personalNotes.trim() && (
-                          <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
+                      <div className="flex items-center gap-2">
+                        {currentLesson?.is_completed ? (
+                          <Badge tone="green" className="gap-1 text-xs">
+                            <CheckCircle2 className="size-3.5" />
+                            <span>সম্পন্ন (Completed)</span>
+                          </Badge>
+                        ) : (
+                          <Badge tone="gold" className="gap-1 text-xs">
+                            <Clock className="size-3.5" />
+                            <span>চলমান (In Progress)</span>
+                          </Badge>
                         )}
-                      </button>
+
+                        {isFreePreview && (
+                          <Badge tone="brand" className="text-[11px]">
+                            Free Preview
+                          </Badge>
+                        )}
+                      </div>
                     </div>
 
-                    {notesSubTab === "personal" && (
-                      <div className="flex items-center gap-2">
-                        {notesSavedStatus && (
-                          <span className="text-[10px] font-mono text-emerald-600 font-semibold animate-in fade-in">
-                            {notesSavedStatus}
+                    {/* Lesson Description or Summary */}
+                    {currentLesson?.summary ? (
+                      <div className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
+                        {currentLesson.summary}
+                      </div>
+                    ) : course?.description ? (
+                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                        {course.description}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground italic">
+                        এই লেসনের জন্য কোনো অতিরিক্ত ভূমিকা দেওয়া হয়নি। ভিডিও লেকচারটি মনোযোগ দিয়ে দেখুন।
+                      </p>
+                    )}
+
+                    {/* Downloadable Resources attached to this lesson */}
+                    {streamData?.resources && streamData.resources.length > 0 && (
+                      <div className="pt-3 border-t border-border/50 space-y-2.5">
+                        <div className="flex items-center justify-between text-xs font-bold text-foreground">
+                          <span className="flex items-center gap-1.5">
+                            <Download className="size-3.5 text-brand-600" />
+                            <span>এই লেসনের স্টাডি রিসোর্স ও ওয়ার্কশিট ({streamData.resources.length})</span>
                           </span>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={handleInsertTimestampToNotes}
-                          className="gap-1 text-[11px] h-8 px-2.5 text-amber-600 border-amber-500/30 hover:bg-amber-500/10"
-                          title="ভিডিওর বর্তমান মিনিট ও সেকেন্ড নোটে যুক্ত করুন"
-                        >
-                          <Clock className="size-3" />
-                          <span>+ টাইম ট্যাগ</span>
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={handleDownloadNotes}
-                          className="gap-1 text-[11px] h-8 px-2.5"
-                          title="নোটবুক ডাউনলোড করুন"
-                        >
-                          <Download className="size-3" />
-                          <span>ডাউনলোড</span>
-                        </Button>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                          {streamData.resources.map((res, idx) => (
+                            <a
+                              key={idx}
+                              href={res.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center justify-between rounded-xl border border-border bg-surface-muted/40 p-3 transition-colors hover:border-brand-500/50 hover:bg-surface-muted"
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <FileText className="size-4 text-brand-600 shrink-0" />
+                                <div className="min-w-0">
+                                  <p className="truncate text-xs font-bold text-foreground">{res.title}</p>
+                                  <span className="text-[10px] uppercase text-muted-foreground font-mono">
+                                    {res.type}
+                                  </span>
+                                </div>
+                              </div>
+                              <Download className="size-3.5 text-muted-foreground shrink-0" />
+                            </a>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
 
-                  {notesSubTab === "master" ? (
-                    <div>
-                      {streamData?.notes_markdown ? (
-                        <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-line text-muted-foreground leading-relaxed p-4 rounded-2xl bg-surface border border-border/70 shadow-2xs">
-                          {streamData.notes_markdown}
-                        </div>
-                      ) : (
-                        <div className="rounded-2xl border border-dashed border-border/80 p-8 text-center bg-surface/40">
-                          <BookOpen className="size-10 text-muted-foreground/30 mx-auto mb-2" />
-                          <p className="text-xs text-muted-foreground italic">
-                            এই লেসনে আচার্য কর্তৃক কোনো অফিশিয়াল পাঠ নোট যুক্ত করা হয়নি। ভিডিও লেকচারটি মনোযোগ দিয়ে দেখুন।
-                          </p>
-                        </div>
-                      )}
+                  {/* What You'll Learn in this Course */}
+                  {course?.what_you_will_learn && course.what_you_will_learn.length > 0 && (
+                    <div className="rounded-2xl border border-border/80 bg-surface p-5 shadow-2xs space-y-3">
+                      <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
+                        <Sparkles className="size-4 text-brand-600" />
+                        <span>কোর্সের মূল শিখনীয় বিষয়সমূহ (Key Learnings)</span>
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        {course.what_you_will_learn.map((item, i) => (
+                          <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                            <CheckCircle2 className="size-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                            <span>{item}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  ) : (
-                    /* Personal Study Notebook */
-                    <div className="space-y-3 animate-in fade-in-50 duration-200">
-                      <div className="rounded-2xl border border-border/80 bg-surface p-4 shadow-soft space-y-3">
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span className="font-semibold text-foreground flex items-center gap-1.5">
-                            <Sparkles className="size-3.5 text-amber-500" />
-                            ব্যক্তিগত স্টাডি ভল্ট (Private Notebook)
-                          </span>
-                          <span className="text-[11px] font-mono">
-                            {personalNotes.length} অক্ষর • অটো-সেভড
-                          </span>
-                        </div>
+                  )}
 
-                        <textarea
-                          rows={8}
-                          value={personalNotes}
-                          onChange={(e) => handleSavePersonalNotes(e.target.value)}
-                          placeholder="এই লেসনের গুরুত্বপূর্ণ জ্যোতিষ সূত্র, শ্লোক বা আপনার নিজস্ব উপলব্ধি এখানে লিখে রাখুন... (যেমন: [⏱️ 02:15] ৭ম ভাবে শনি থাকলে যা যা খেয়াল রাখতে হবে...)"
-                          className="w-full rounded-xl border border-border bg-background/60 p-3.5 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/10 resize-y leading-relaxed font-sans"
+                  {/* Instructor Profile Card */}
+                  {course && (
+                    <div className="rounded-2xl border border-border/80 bg-surface p-5 shadow-2xs space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
+                          <GraduationCap className="size-4 text-brand-600" />
+                          <span>প্রশিক্ষক পরিচিতি (Instructor Profile)</span>
+                        </h4>
+                        <span className="rounded-full bg-brand-500/10 px-2 py-0.5 text-[10px] font-bold text-brand-600">
+                          বৈদিক গুরুকুল ফ্যাকাল্টি
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3.5 pt-1">
+                        <Avatar
+                          src={course.instructor_avatar}
+                          name={course.instructor_name}
+                          className="size-12 rounded-xl text-sm font-bold shadow-2xs"
                         />
-
-                        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px] text-muted-foreground border-t border-border/40">
-                          <span className="italic">
-                            💡 টিপ: ভিডিও চলাকালীন "+ টাইম ট্যাগ" বাটনে ক্লিক করলে বর্তমান সেকেন্ড সরাসরি নোটে বসে যাবে।
-                          </span>
-                          {personalNotes && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (confirm("আপনি কি নিশ্চিতভাবে এই লেসনের ব্যক্তিগত নোট মুছে ফেলতে চান?")) {
-                                  handleSavePersonalNotes("");
-                                }
-                              }}
-                              className="text-red-500 hover:underline flex items-center gap-1 text-[11px]"
-                            >
-                              <Trash2 className="size-3" />
-                              <span>নোট মুছুন</span>
-                            </button>
-                          )}
+                        <div className="min-w-0">
+                          <h5 className="text-sm font-bold text-foreground">{course.instructor_name}</h5>
+                          <p className="text-xs text-brand-600 font-medium">{course.instructor_title}</p>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            অভিজ্ঞ জ্যোতিষাচার্য ও শাস্ত্রীয় গবেষক • Astra Gurukul
+                          </p>
                         </div>
                       </div>
                     </div>
                   )}
-                </div>
-              ) : activeTab === "resources" ? (
-                <div>
-                  {!streamData?.resources || streamData.resources.length === 0 ? (
-                    <p className="text-xs text-muted-foreground italic">
-                      No downloadable resources attached to this lesson.
-                    </p>
-                  ) : (
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      {streamData.resources.map((res, idx) => (
-                        <a
-                          key={idx}
-                          href={res.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-between rounded-xl border border-border bg-surface p-3.5 transition-colors hover:border-brand-500/40"
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <FileText className="size-4 text-brand-600" />
-                            <div>
-                              <p className="text-xs font-bold text-foreground">{res.title}</p>
-                              <span className="text-[10px] uppercase text-muted-foreground">
-                                {res.type}
-                              </span>
-                            </div>
-                          </div>
-                          <Download className="size-4 text-muted-foreground" />
-                        </a>
-                      ))}
+
+                  {/* Next Lesson Preview Banner */}
+                  {nextLesson && (
+                    <div className="rounded-2xl border border-brand-500/30 bg-brand-500/5 p-4 flex flex-wrap items-center justify-between gap-3">
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] uppercase font-bold text-brand-600 tracking-wider">
+                          পরবর্তী লেকচার (Up Next)
+                        </span>
+                        <p className="text-xs font-bold text-foreground">{nextLesson.title}</p>
+                        <span className="text-[11px] text-muted-foreground">
+                          {nextLesson.duration_minutes} মিনিট • {nextLesson.sectionTitle}
+                        </span>
+                      </div>
+
+                      <Link
+                        href={`/courses/${slug}/learn/${nextLesson.id}`}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-soft hover:bg-brand-700 transition-colors"
+                      >
+                        <span>পরের লেসনে যান</span>
+                        <ChevronRight className="size-4" />
+                      </Link>
                     </div>
                   )}
                 </div>
-              ) : (
-                /* GURUKUL JIGYASA (Q&A FORUM) TAB */
+              )}
+
+              {/* TAB 2: CURRICULUM */}
+              {activeTab === "curriculum" && (
+                <div className="space-y-4 animate-in fade-in-50 duration-200">
+                  {/* Progress Bar & Header */}
+                  <div className="rounded-2xl border border-border/80 bg-surface p-4 shadow-2xs space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-foreground flex items-center gap-2">
+                        <ListVideo className="size-4 text-brand-600" />
+                        <span>কোর্স পাঠ্যক্রম (Full Curriculum Syllabus)</span>
+                      </span>
+                      <span className="font-mono font-semibold text-brand-600">
+                        {flattenedLessons.filter((l) => l.is_completed).length} / {flattenedLessons.length} সম্পন্ন ({course?.user_progress_percent || 0}%)
+                      </span>
+                    </div>
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-surface-muted">
+                      <div
+                        className="h-full bg-brand-600 transition-all duration-300 rounded-full"
+                        style={{ width: `${course?.user_progress_percent || 0}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Section Accordions */}
+                  <div className="space-y-3">
+                    {course?.sections?.map((section: CourseSection, sIdx: number) => {
+                      const isExpanded = expandedSections[section.id] !== false;
+                      const completedInSection = section.lessons.filter((l) => l.is_completed).length;
+
+                      return (
+                        <div
+                          key={section.id}
+                          className="rounded-2xl border border-border/80 bg-surface overflow-hidden shadow-2xs"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => toggleSection(section.id)}
+                            className="flex w-full items-center justify-between bg-surface-muted/50 px-4 py-3 text-left hover:bg-surface-muted transition-colors"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <ChevronDown
+                                className={`size-4 text-muted-foreground shrink-0 transition-transform duration-200 ${
+                                  isExpanded ? "rotate-180" : ""
+                                }`}
+                              />
+                              <span className="truncate text-xs font-bold text-foreground">
+                                অধ্যায় {sIdx + 1}: {section.title}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0 text-xs">
+                              <span className="text-[11px] text-muted-foreground font-mono">
+                                {completedInSection}/{section.lessons.length} সম্পন্ন
+                              </span>
+                            </div>
+                          </button>
+
+                          {isExpanded && (
+                            <div className="divide-y divide-border/40">
+                              {section.lessons.map((lesson: CourseLesson, lIdx: number) => {
+                                const isCurrent = lesson.id === lessonId;
+                                return (
+                                  <Link
+                                    key={lesson.id}
+                                    href={`/courses/${slug}/learn/${lesson.id}`}
+                                    className={`flex items-center justify-between gap-3 px-4 py-3 text-xs transition-colors ${
+                                      isCurrent
+                                        ? "bg-brand-500/10 border-l-4 border-brand-600 text-brand-600 font-semibold"
+                                        : "hover:bg-surface-muted text-foreground"
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-3 min-w-0">
+                                      <div className="shrink-0">
+                                        {lesson.is_completed ? (
+                                          <CheckCircle2 className="size-4 text-emerald-600" />
+                                        ) : isCurrent ? (
+                                          <PlayCircle className="size-4 text-brand-600 animate-pulse" />
+                                        ) : (
+                                          <Circle className="size-3.5 text-muted-foreground/60" />
+                                        )}
+                                      </div>
+                                      <div className="min-w-0">
+                                        <p className="truncate leading-snug">
+                                          {sIdx + 1}.{lIdx + 1} {lesson.title}
+                                        </p>
+                                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
+                                          {lesson.duration_minutes > 0 && (
+                                            <span>{lesson.duration_minutes} মিনিট</span>
+                                          )}
+                                          {lesson.is_free_preview && (
+                                            <span className="text-amber-600 font-medium">Free Preview</span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 shrink-0">
+                                      {isCurrent ? (
+                                        <span className="rounded-full bg-brand-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-2xs">
+                                          চলমান
+                                        </span>
+                                      ) : (
+                                        <ChevronRight className="size-3.5 text-muted-foreground/60" />
+                                      )}
+                                    </div>
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: Q&A FORUM (GURUKUL JIGYASA) */}
+              {activeTab === "jigyasa" && (
                 <div className="space-y-6">
                   {/* Top Bar: Title, Sort & Ask Button */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/50 pb-4">
@@ -1400,6 +1549,135 @@ export default function LessonClassroomPage() {
                           )}
                         </div>
                       ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 4: NOTES */}
+              {activeTab === "notes" && (
+                <div className="space-y-4">
+                  {/* Notes Sub-Navigation: Master Notes vs Personal Notebook */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/50 pb-3">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setNotesSubTab("master")}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                          notesSubTab === "master"
+                            ? "bg-brand-500/15 text-brand-600 border border-brand-500/30 shadow-2xs"
+                            : "text-muted-foreground hover:text-foreground hover:bg-surface-muted"
+                        }`}
+                      >
+                        <BookOpen className="size-3.5" />
+                        <span>আচার্যের পাঠ নোট (Lecture Notes)</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setNotesSubTab("personal")}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                          notesSubTab === "personal"
+                            ? "bg-amber-500/15 text-amber-600 border border-amber-500/30 shadow-2xs"
+                            : "text-muted-foreground hover:text-foreground hover:bg-surface-muted"
+                        }`}
+                      >
+                        <Edit3 className="size-3.5" />
+                        <span>আমার ব্যক্তিগত খাতা (My Notebook)</span>
+                        {personalNotes.trim() && (
+                          <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
+                        )}
+                      </button>
+                    </div>
+
+                    {notesSubTab === "personal" && (
+                      <div className="flex items-center gap-2">
+                        {notesSavedStatus && (
+                          <span className="text-[10px] font-mono text-emerald-600 font-semibold animate-in fade-in">
+                            {notesSavedStatus}
+                          </span>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleInsertTimestampToNotes}
+                          className="gap-1 text-[11px] h-8 px-2.5 text-amber-600 border-amber-500/30 hover:bg-amber-500/10"
+                          title="ভিডিওর বর্তমান মিনিট ও সেকেন্ড নোটে যুক্ত করুন"
+                        >
+                          <Clock className="size-3" />
+                          <span>+ টাইম ট্যাগ</span>
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleDownloadNotes}
+                          className="gap-1 text-[11px] h-8 px-2.5"
+                          title="নোটবুক ডাউনলোড করুন"
+                        >
+                          <Download className="size-3" />
+                          <span>ডাউনলোড</span>
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  {notesSubTab === "master" ? (
+                    <div>
+                      {streamData?.notes_markdown ? (
+                        <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-line text-muted-foreground leading-relaxed p-4 rounded-2xl bg-surface border border-border/70 shadow-2xs">
+                          {streamData.notes_markdown}
+                        </div>
+                      ) : (
+                        <div className="rounded-2xl border border-dashed border-border/80 p-8 text-center bg-surface/40">
+                          <BookOpen className="size-10 text-muted-foreground/30 mx-auto mb-2" />
+                          <p className="text-xs text-muted-foreground italic">
+                            এই লেসনে আচার্য কর্তৃক কোনো অফিশিয়াল পাঠ নোট যুক্ত করা হয়নি। ভিডিও লেকচারটি মনোযোগ দিয়ে দেখুন।
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    /* Personal Study Notebook */
+                    <div className="space-y-3 animate-in fade-in-50 duration-200">
+                      <div className="rounded-2xl border border-border/80 bg-surface p-4 shadow-soft space-y-3">
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span className="font-semibold text-foreground flex items-center gap-1.5">
+                            <Sparkles className="size-3.5 text-amber-500" />
+                            ব্যক্তিগত স্টাডি ভল্ট (Private Notebook)
+                          </span>
+                          <span className="text-[11px] font-mono">
+                            {personalNotes.length} অক্ষর • অটো-সেভড
+                          </span>
+                        </div>
+
+                        <textarea
+                          rows={8}
+                          value={personalNotes}
+                          onChange={(e) => handleSavePersonalNotes(e.target.value)}
+                          placeholder="এই লেসনের গুরুত্বপূর্ণ জ্যোতিষ সূত্র, শ্লোক বা আপনার নিজস্ব উপলব্ধি এখানে লিখে রাখুন... (যেমন: [⏱️ 02:15] ৭ম ভাবে শনি থাকলে যা যা খেয়াল রাখতে হবে...)"
+                          className="w-full rounded-xl border border-border bg-background/60 p-3.5 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/10 resize-y leading-relaxed font-sans"
+                        />
+
+                        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px] text-muted-foreground border-t border-border/40">
+                          <span className="italic">
+                            💡 টিপ: ভিডিও চলাকালীন "+ টাইম ট্যাগ" বাটনে ক্লিক করলে বর্তমান সেকেন্ড সরাসরি নোটে বসে যাবে।
+                          </span>
+                          {personalNotes && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (confirm("আপনি কি নিশ্চিতভাবে এই লেসনের ব্যক্তিগত নোট মুছে ফেলতে চান?")) {
+                                  handleSavePersonalNotes("");
+                                }
+                              }}
+                              className="text-red-500 hover:underline flex items-center gap-1 text-[11px]"
+                            >
+                              <Trash2 className="size-3" />
+                              <span>নোট মুছুন</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
