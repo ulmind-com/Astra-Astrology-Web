@@ -32,6 +32,25 @@ export interface PalmTranslations {
   leftHand: string;
   rightHand: string;
 
+  scanModeSingle: string;
+  scanModeDual: string;
+  dualScanTitle: string;
+  dualScanSubtitle: string;
+  leftHandTitle: string;
+  leftHandSub: string;
+  rightHandTitle: string;
+  rightHandSub: string;
+  primaryHandLabel: string;
+  dominantRight: string;
+  dominantLeft: string;
+  uploadLeftHand: string;
+  uploadRightHand: string;
+  dualScanBtn: string;
+  dualScanningText: string;
+  bothHandsRequiredError: string;
+  handSelectedSuccess: string;
+  changePhoto: string;
+
   rejectedTitle: string;
   notCharged: string;
 
@@ -115,6 +134,26 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
     handDetected: "হাত শনাক্ত হয়েছে",
     leftHand: "বাম হাত",
     rightHand: "ডান হাত",
+
+    scanModeSingle: "একক হস্ত স্ক্যান (Single Hand)",
+    scanModeDual: "উভয় হাত কর্ম-বিবর্তন স্ক্যান (Dual-Hand Synastry)",
+    dualScanTitle: "দ্বি-হস্ত সামুদ্রিক বিচার: প্রারব্ধ বনাম পুরুষার্থ",
+    dualScanSubtitle:
+      "বাম হাত নির্দেশ করে আপনার প্রারব্ধ (জন্মগত সংস্কার ও সঞ্চিত কর্ম) এবং ডান হাত নির্দেশ করে পুরুষার্থ (বর্তমান উদ্যোগ ও ক্রিয়মাণ কর্ম)। উভয় হাতের ছবি একসাথে স্ক্যান করে কর্মের রূপান্তর ও ফলাফল বিশ্লেষণ করুন।",
+    leftHandTitle: "বাম হাত — প্রারব্ধ (Inborn Potential)",
+    leftHandSub: "বংশগত আশীর্বাদ, অন্তর্দৃষ্টি, সহজাত মেধা ও সঞ্চিত কর্ম",
+    rightHandTitle: "ডান হাত — পুরুষার্থ (Active Manifestation)",
+    rightHandSub: "বর্তমান কর্মপ্রচেষ্টা, স্বোপার্জিত ভাগ্য ও আত্মনিয়ন্ত্রণ",
+    primaryHandLabel: "প্রধান সক্রিয় বা কর্মক্ষম হাত কোনটি?",
+    dominantRight: "ডান হাত (ডানহাতি ব্যক্তিদের জন্য স্বাভাবিক)",
+    dominantLeft: "বাম হাত (বাঁহাতি ব্যক্তিদের জন্য স্বাভাবিক)",
+    uploadLeftHand: "বাম হাতের স্পষ্ট ছবি নির্বাচন করুন",
+    uploadRightHand: "ডান হাতের স্পষ্ট ছবি নির্বাচন করুন",
+    dualScanBtn: "উভয় হাত কর্ম-বিবর্তন মূল্যায়ন করুন",
+    dualScanningText: "উভয় হাতের রেখা, পর্বত ও কর্মের রূপান্তর বিশ্লেষণ করা হচ্ছে…",
+    bothHandsRequiredError: "অনুগ্রহ করে বাঁ হাত এবং ডান হাত উভয়ের ছবি আপলোড করুন।",
+    handSelectedSuccess: "ছবি সফলভাবে নির্বাচিত হয়েছে",
+    changePhoto: "ছবি পরিবর্তন করুন",
 
     rejectedTitle: "ছবিটি সঠিকভাবে পড়া সম্ভব হয়নি",
     notCharged: "আপনার কোনো কয়েন কাটা হয়নি।",
@@ -282,6 +321,26 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
     leftHand: "बायाँ हाथ",
     rightHand: "दायाँ हाथ",
 
+    scanModeSingle: "एकल हाथ स्कैन (Single Hand)",
+    scanModeDual: "उभय हस्त कर्म-विकास स्कैन (Dual-Hand Synastry)",
+    dualScanTitle: "द्वि-हस्त सामुद्रिक विचार: प्रारब्ध बनाम पुरुषार्थ",
+    dualScanSubtitle:
+      "बायां हाथ आपके प्रारब्ध (जन्मजात संस्कार व संचित कर्म) को दर्शाता है और दायां हाथ पुरुषार्थ (वर्तमान कर्म व इच्छाशक्ति) को। दोनों हाथों को स्कैन कर कर्म द्वारा भाग्य के विकास का सटीक आकलन करें।",
+    leftHandTitle: "बायां हाथ — प्रारब्ध (Inborn Potential)",
+    leftHandSub: "पैतृक आशीर्वाद, गहरी अंतर्दृष्टि और संचित कर्म का संकलन",
+    rightHandTitle: "दायां हाथ — पुरुषार्थ (Active Manifestation)",
+    rightHandSub: "वर्तमान परिश्रम, स्वनिर्मित भाग्योदय एवं इच्छाशक्ति",
+    primaryHandLabel: "आपका मुख्य सक्रिय हाथ कौन सा है?",
+    dominantRight: "दायां हाथ (अधिकांश दाएं हाथ से कार्य करने वालों के लिए)",
+    dominantLeft: "बायां हाथ (बाएं हाथ से कार्य करने वालों के लिए)",
+    uploadLeftHand: "बाएं हाथ की स्पष्ट फोटो चुनें",
+    uploadRightHand: "दाएं हाथ की स्पष्ट फोटो चुनें",
+    dualScanBtn: "उभय हस्त कर्म-विकास मूल्यांकन करें",
+    dualScanningText: "दोनों हाथों की रेखाओं व कर्म-रूपांतरण का विश्लेषण जारी है…",
+    bothHandsRequiredError: "कृपया बाएं और दाएं दोनों हाथों की फोटो अपलोड करें।",
+    handSelectedSuccess: "फोटो सफलतापूर्वक चुनी गई",
+    changePhoto: "फोटो बदलें",
+
     rejectedTitle: "फोटो स्पष्ट रूप से नहीं पढ़ी जा सकी",
     notCharged: "आपके कोई सिक्के नहीं काटे गए हैं।",
 
@@ -447,6 +506,26 @@ export const PALM_TRANSLATIONS: Record<PalmLanguage, PalmTranslations> = {
     handDetected: "Hand detected",
     leftHand: "Left hand",
     rightHand: "Right hand",
+
+    scanModeSingle: "Single Hand Scan",
+    scanModeDual: "Bilateral Dual-Hand Synastry",
+    dualScanTitle: "Dual-Hand Bilateral Synastry: Prarabdha vs Purushartha",
+    dualScanSubtitle:
+      "The Left Hand reveals your inborn Prarabdha blueprint (ancestral endowments & Sanchita Karma), while the Right Hand reflects active Purushartha (free will, career self-mastery & Kriyamana Karma). Scan both together to calculate your Karma Evolution score.",
+    leftHandTitle: "Left Hand — Prarabdha (Inborn Blueprint)",
+    leftHandSub: "Ancestral endowments, innate intuition & Sanchita Karma",
+    rightHandTitle: "Right Hand — Purushartha (Active Free Will)",
+    rightHandSub: "Personal enterprise, conscious will & Kriyamana Karma",
+    primaryHandLabel: "Which is your dominant active hand?",
+    dominantRight: "Right Hand (Default for right-handed persons)",
+    dominantLeft: "Left Hand (For left-handed persons)",
+    uploadLeftHand: "Upload Left Palm Photo",
+    uploadRightHand: "Upload Right Palm Photo",
+    dualScanBtn: "Analyze Bilateral Karma Evolution",
+    dualScanningText: "Analyzing bilateral lines, mounts & conscious karmic transformation…",
+    bothHandsRequiredError: "Please upload photos of both your left and right palms.",
+    handSelectedSuccess: "Photo selected successfully",
+    changePhoto: "Change photo",
 
     rejectedTitle: "That photo could not be read",
     notCharged: "You have not been charged.",

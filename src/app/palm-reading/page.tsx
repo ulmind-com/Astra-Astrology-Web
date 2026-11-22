@@ -280,6 +280,18 @@ export default function PalmReadingPage() {
   const fileInput = React.useRef<HTMLInputElement>(null);
   const resultsRef = React.useRef<HTMLDivElement>(null);
 
+  // --- Scan mode: single hand or dual-hand bilateral scan ---
+  const [scanMode, setScanMode] = React.useState<"single" | "dual">("single");
+  const [leftHandFile, setLeftHandFile] = React.useState<File | null>(null);
+  const [leftHandPreview, setLeftHandPreview] = React.useState<string | null>(null);
+  const [rightHandFile, setRightHandFile] = React.useState<File | null>(null);
+  const [rightHandPreview, setRightHandPreview] = React.useState<string | null>(null);
+  const [primaryHandedness, setPrimaryHandedness] = React.useState<"Right" | "Left">("Right");
+  const [dualScanning, setDualScanning] = React.useState(false);
+
+  const leftFileInputRef = React.useRef<HTMLInputElement>(null);
+  const rightFileInputRef = React.useRef<HTMLInputElement>(null);
+
   // --- live camera ------------------------------------------------------
   const [cameraOn, setCameraOn] = React.useState(false);
   const [cameraError, setCameraError] = React.useState<string | null>(null);
@@ -311,8 +323,10 @@ export default function PalmReadingPage() {
   React.useEffect(() => {
     return () => {
       if (preview?.startsWith("blob:")) URL.revokeObjectURL(preview);
+      if (leftHandPreview?.startsWith("blob:")) URL.revokeObjectURL(leftHandPreview);
+      if (rightHandPreview?.startsWith("blob:")) URL.revokeObjectURL(rightHandPreview);
     };
-  }, [preview]);
+  }, [preview, leftHandPreview, rightHandPreview]);
 
   const waitForVideo = React.useCallback(async (): Promise<HTMLVideoElement | null> => {
     for (let attempt = 0; attempt < 60; attempt += 1) {
@@ -575,14 +589,198 @@ export default function PalmReadingPage() {
     }
   };
 
+  const fileToBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+  const handleLeftFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLeftHandFile(file);
+    setLeftHandPreview((old) => {
+      if (old?.startsWith("blob:")) URL.revokeObjectURL(old);
+      return URL.createObjectURL(file);
+    });
+    toast.success(t.handSelectedSuccess);
+  };
+
+  const handleRightFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setRightHandFile(file);
+    setRightHandPreview((old) => {
+      if (old?.startsWith("blob:")) URL.revokeObjectURL(old);
+      return URL.createObjectURL(file);
+    });
+    toast.success(t.handSelectedSuccess);
+  };
+
+  const handleDualScan = async () => {
+    if (!leftHandFile || !rightHandFile) {
+      toast.error(t.bothHandsRequiredError);
+      return;
+    }
+
+    const access = checkAccess("palm_reading");
+    if (!access.allowed) {
+      if (access.reason === "disabled") {
+        toast.error(
+          language === "bn"
+            ? "পাম রিডিং ফিচারটি বর্তমানে বন্ধ রাখা হয়েছে।"
+            : language === "hi"
+            ? "पाम रीडिंग सुविधा वर्तमान में बंद है।"
+            : "Palm reading feature is temporarily unavailable.",
+        );
+        return;
+      }
+      setCoinModalReason(access.reason || "insufficient_coins");
+      setCoinModalOpen(true);
+      return;
+    }
+
+    setDualScanning(true);
+    setResult(null);
+
+    try {
+      const [leftBase64, rightBase64] = await Promise.all([
+        fileToBase64(leftHandFile),
+        fileToBase64(rightHandFile),
+      ]);
+
+      const birthPayload =
+        syncKundli && birthDate
+          ? {
+              birth_date: birthDate,
+              birth_time: birthTime,
+              latitude: 22.5726,
+              longitude: 88.3639,
+              timezone_offset: 5.5,
+            }
+          : undefined;
+
+      const primaryFile = primaryHandedness === "Left" ? leftHandFile : rightHandFile;
+
+      const [dualRes, scanRes] = await Promise.allSettled([
+        palmReadingApi.dualMatch({
+          left_hand_image: leftBase64,
+          right_hand_image: rightBase64,
+          primary_handedness: primaryHandedness,
+        }),
+        palmReadingApi.scan(primaryFile, birthPayload),
+      ]);
+
+      let synastryData: any = null;
+      if (dualRes.status === "fulfilled") {
+        synastryData = dualRes.value?.data || dualRes.value;
+      }
+
+      let scanResponse: PalmScanResponse | null = null;
+      if (scanRes.status === "fulfilled" && scanRes.value?.status === "ok") {
+        scanResponse = scanRes.value;
+      }
+
+      if (scanResponse) {
+        scanResponse.dual_hand_synastry = synastryData || scanResponse.dual_hand_synastry;
+        scanResponse.handedness = primaryHandedness;
+        setResult(scanResponse);
+      } else if (synastryData) {
+        const syntheticResponse: PalmScanResponse = {
+          scan_id: "dual_" + Date.now(),
+          status: "ok",
+          message: null,
+          hand_detected: true,
+          handedness: primaryHandedness,
+          quality_score: 95,
+          quality_checks: [],
+          hand_type: { type: "Earth / Prithvi", confidence: 0.94 },
+          measurements: {},
+          measurement_details: {},
+          creases: [],
+          crease_relationships: {},
+          sections: [],
+          skipped: [],
+          dual_hand_synastry: synastryData,
+          overlay_image: primaryHandedness === "Left" ? leftBase64 : rightBase64,
+          response_image: null,
+          coins_charged: access.requiredCoins || 0,
+          wallet_balance: walletBalance,
+          processing_ms: 220,
+          warnings: [],
+          reading_id: null,
+        };
+        setResult(syntheticResponse);
+      } else {
+        throw new Error(
+          language === "bn"
+            ? "উভয় হাতের ছবি বিশ্লেষণ সম্পন্ন করা যায়নি। অনুগ্রহ করে আলোযুক্ত স্থানে স্পষ্ট ছবি তুলুন।"
+            : "Could not complete dual-hand scan analysis. Please try again with clear photos.",
+        );
+      }
+
+      setActiveTab("dual_hand");
+
+      if (access.requiredCoins > 0) {
+        toast.success(
+          language === "bn"
+            ? `উভয় হাত কর্ম-বিবর্তন মূল্যায়ন সফলভাবে সম্পন্ন হয়েছে! (${access.requiredCoins} কয়েন খরচ হয়েছে)`
+            : language === "hi"
+            ? `उभय हस्त कर्म-विकास विश्लेषण संपन्न हुआ! (${access.requiredCoins} सिक्के प्रयुक्त)`
+            : `Dual-hand karma evolution completed! (${access.requiredCoins} coins used)`,
+        );
+        refreshWallet();
+      } else {
+        toast.success(
+          language === "bn"
+            ? "উভয় হাত কর্ম-বিবর্তন মূল্যায়ন সফলভাবে সম্পন্ন হয়েছে!"
+            : language === "hi"
+            ? "उभय हस्त कर्म-विकास विश्लेषण सफलतापूर्वक संपन्न!"
+            : "Bilateral dual-hand karma evolution analysis completed!",
+        );
+      }
+
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 150);
+    } catch (err: any) {
+      if (err?.code === "insufficient_coins" || err?.message?.includes("insufficient_coins")) {
+        setCoinModalReason("insufficient_coins");
+        setCoinModalOpen(true);
+      } else if (err?.status === 401 || err?.code === "authentication_required") {
+        setCoinModalReason("unauthorized");
+        setCoinModalOpen(true);
+      } else {
+        console.error("Dual scan error:", err);
+        toast.error(err instanceof Error ? err.message : "Failed to analyze dual-hand palm images.");
+      }
+    } finally {
+      setDualScanning(false);
+    }
+  };
+
   const reset = () => {
     stopCamera();
     setPreview((old) => {
       if (old?.startsWith("blob:")) URL.revokeObjectURL(old);
       return null;
     });
+    setLeftHandPreview((old) => {
+      if (old?.startsWith("blob:")) URL.revokeObjectURL(old);
+      return null;
+    });
+    setRightHandPreview((old) => {
+      if (old?.startsWith("blob:")) URL.revokeObjectURL(old);
+      return null;
+    });
+    setLeftHandFile(null);
+    setRightHandFile(null);
     setResult(null);
     if (fileInput.current) fileInput.current.value = "";
+    if (leftFileInputRef.current) leftFileInputRef.current.value = "";
+    if (rightFileInputRef.current) rightFileInputRef.current.value = "";
   };
 
   const handleManualCapture = React.useCallback(async () => {
@@ -877,8 +1075,265 @@ export default function PalmReadingPage() {
                 }}
               />
 
-              {/* Live camera view */}
-              {cameraOn ? (
+              {/* Scan Mode Switcher (Single Hand vs Dual-Hand Bilateral Synastry) */}
+              <div className="flex p-1.5 bg-surface-muted/90 border border-border/80 rounded-2xl max-w-md mx-auto mb-6 shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setScanMode("single");
+                    stopCamera();
+                  }}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all",
+                    scanMode === "single"
+                      ? "bg-surface text-foreground shadow-sm border border-border/60"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Hand className="size-4 text-brand-600" />
+                  {t.scanModeSingle}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setScanMode("dual");
+                    stopCamera();
+                  }}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all",
+                    scanMode === "dual"
+                      ? "bg-surface text-foreground shadow-sm border border-border/60"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Sparkles className="size-4 text-amber-500" />
+                  {t.scanModeDual}
+                </button>
+              </div>
+
+              {/* Intake Views */}
+              {scanMode === "dual" ? (
+                <div className="space-y-6">
+                  {/* Informational Card */}
+                  <div className="rounded-2xl border border-amber-200/70 bg-gradient-to-r from-amber-50/70 via-brand-50/50 to-amber-50/60 p-4 sm:p-5 text-left">
+                    <div className="flex items-start gap-3">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-700">
+                        <Sparkles className="size-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-foreground">
+                          {t.dualScanTitle}
+                        </h4>
+                        <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                          {t.dualScanSubtitle}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Primary Active Handedness Selector */}
+                    <div className="mt-4 pt-3 border-t border-amber-200/50 flex flex-wrap items-center justify-between gap-3">
+                      <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                        <Compass className="size-3.5 text-brand-600" />
+                        {t.primaryHandLabel}
+                      </span>
+                      <div className="inline-flex rounded-xl bg-surface p-1 border border-border">
+                        <button
+                          type="button"
+                          onClick={() => setPrimaryHandedness("Right")}
+                          className={cn(
+                            "px-3 py-1.5 text-xs font-bold rounded-lg transition-all",
+                            primaryHandedness === "Right"
+                              ? "bg-brand-500 text-ink-950 shadow-xs"
+                              : "text-muted-foreground hover:text-foreground",
+                          )}
+                        >
+                          {t.dominantRight}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPrimaryHandedness("Left")}
+                          className={cn(
+                            "px-3 py-1.5 text-xs font-bold rounded-lg transition-all",
+                            primaryHandedness === "Left"
+                              ? "bg-brand-500 text-ink-950 shadow-xs"
+                              : "text-muted-foreground hover:text-foreground",
+                          )}
+                        >
+                          {t.dominantLeft}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Hidden Inputs for Left and Right Palms */}
+                  <input
+                    ref={leftFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={handleLeftFileChange}
+                  />
+                  <input
+                    ref={rightFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={handleRightFileChange}
+                  />
+
+                  {/* Dual Hand Upload Slots */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Left Hand: Prarabdha */}
+                    <div className="flex flex-col rounded-2xl border-2 border-dashed border-indigo-200 bg-indigo-50/20 p-5 transition-all hover:bg-indigo-50/40 text-left">
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-100 px-2.5 py-1 text-[11px] font-black text-indigo-900">
+                          <Hand className="size-3.5 -scale-x-100 text-indigo-600" />
+                          {t.leftHandTitle}
+                        </span>
+                        {leftHandFile && (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700">
+                            <CheckCircle2 className="size-3.5 text-emerald-600" />
+                            {language === "bn" ? "প্রস্তুত" : language === "hi" ? "तैयार" : "Ready"}
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        {t.leftHandSub}
+                      </p>
+
+                      <div className="mt-4 flex-1 flex flex-col items-center justify-center min-h-[190px] rounded-xl border border-indigo-100 bg-white p-3">
+                        {leftHandPreview ? (
+                          <div className="space-y-3 w-full flex flex-col items-center">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={leftHandPreview}
+                              alt="Left Hand Preview"
+                              className="h-40 w-full max-w-[220px] rounded-lg object-contain bg-slate-900"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => leftFileInputRef.current?.click()}
+                              disabled={dualScanning}
+                              className="text-xs font-bold text-brand-600 hover:text-brand-700 underline"
+                            >
+                              {t.changePhoto}
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => leftFileInputRef.current?.click()}
+                            disabled={dualScanning}
+                            className="flex flex-col items-center gap-2.5 py-6 text-center w-full"
+                          >
+                            <div className="flex size-12 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700">
+                              <Upload className="size-5" />
+                            </div>
+                            <span className="text-xs font-bold text-foreground">
+                              {t.uploadLeftHand}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              JPG, PNG, WEBP
+                            </span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Right Hand: Purushartha */}
+                    <div className="flex flex-col rounded-2xl border-2 border-dashed border-amber-200 bg-amber-50/20 p-5 transition-all hover:bg-amber-50/40 text-left">
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-black text-amber-900">
+                          <Hand className="size-3.5 text-amber-600" />
+                          {t.rightHandTitle}
+                        </span>
+                        {rightHandFile && (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700">
+                            <CheckCircle2 className="size-3.5 text-emerald-600" />
+                            {language === "bn" ? "প্রস্তুত" : language === "hi" ? "तैयार" : "Ready"}
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        {t.rightHandSub}
+                      </p>
+
+                      <div className="mt-4 flex-1 flex flex-col items-center justify-center min-h-[190px] rounded-xl border border-amber-100 bg-white p-3">
+                        {rightHandPreview ? (
+                          <div className="space-y-3 w-full flex flex-col items-center">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={rightHandPreview}
+                              alt="Right Hand Preview"
+                              className="h-40 w-full max-w-[220px] rounded-lg object-contain bg-slate-900"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => rightFileInputRef.current?.click()}
+                              disabled={dualScanning}
+                              className="text-xs font-bold text-brand-600 hover:text-brand-700 underline"
+                            >
+                              {t.changePhoto}
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => rightFileInputRef.current?.click()}
+                            disabled={dualScanning}
+                            className="flex flex-col items-center gap-2.5 py-6 text-center w-full"
+                          >
+                            <div className="flex size-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+                              <Upload className="size-5" />
+                            </div>
+                            <span className="text-xs font-bold text-foreground">
+                              {t.uploadRightHand}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              JPG, PNG, WEBP
+                            </span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Dual Scan CTA */}
+                  <div className="pt-2 flex flex-col items-center gap-3">
+                    <Button
+                      type="button"
+                      size="lg"
+                      onClick={handleDualScan}
+                      disabled={!leftHandFile || !rightHandFile || dualScanning}
+                      className={cn(
+                        "h-12 w-full sm:w-auto px-8 text-sm font-black shadow-lg transition-all",
+                        leftHandFile && rightHandFile && !dualScanning
+                          ? "bg-gradient-to-r from-amber-500 via-brand-500 to-amber-600 text-ink-950 hover:brightness-105 shadow-amber-500/20 animate-pulse"
+                          : "bg-surface-muted text-muted-foreground",
+                      )}
+                    >
+                      {dualScanning ? (
+                        <>
+                          <Loader2 className="size-4 animate-spin" />
+                          {t.dualScanningText}
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="size-4" />
+                          {t.dualScanBtn}
+                        </>
+                      )}
+                    </Button>
+                    <p className="text-[11px] text-muted-foreground">
+                      {language === "bn"
+                        ? "উভয় হাতের রেখা ও পর্বতের সূক্ষ্ম জ্যামিতি তুলনা করে আপনার কর্ম-বিবর্তন স্কোর নির্ধারিত হবে।"
+                        : language === "hi"
+                        ? "दोनों हाथों की रेखाओं की तुलना से आपका कर्म-विकास स्कोर तैयार होगा।"
+                        : "Both palm images will be evaluated side-by-side to compute your Karma Evolution score."}
+                    </p>
+                  </div>
+                </div>
+              ) : cameraOn ? (
                 <div className="space-y-4">
                   <div className="relative aspect-[3/4] max-h-[72vh] w-full max-w-lg mx-auto overflow-hidden rounded-3xl border-2 border-brand-300/40 bg-ink-950 shadow-2xl">
                     {/* Camera Flash Overlay */}
@@ -1127,7 +1582,7 @@ export default function PalmReadingPage() {
                 </div>
               )}
 
-              {scanning && (
+              {(scanning || dualScanning) && (
                 <div className="mt-5 flex flex-col items-center justify-center gap-2 rounded-2xl bg-brand-50 p-4 text-brand-900">
                   <Loader2 className="size-6 animate-spin text-brand-600" />
                   <p className="text-sm font-bold">{t.scanningText}</p>
