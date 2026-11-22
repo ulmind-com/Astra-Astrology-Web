@@ -391,7 +391,7 @@ function CourseCard({ course }: { course: CourseListItem }) {
           </div>
 
           {/* Meta stats */}
-          <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+          <div className="mt-3 flex flex-wrap items-center gap-2.5 text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
               <Clock className="size-3.5 text-muted-foreground" />
               <span>{course.duration_hours} hrs</span>
@@ -399,6 +399,14 @@ function CourseCard({ course }: { course: CourseListItem }) {
             <div className="flex items-center gap-1">
               <BookOpen className="size-3.5 text-muted-foreground" />
               <span>{course.total_lessons} lessons</span>
+            </div>
+            <div className="flex items-center gap-1 font-medium text-amber-700 dark:text-amber-400">
+              <Sparkles className="size-3.5 text-amber-500" />
+              <span>
+                {course.access_duration_days
+                  ? `${course.access_duration_days} Days Access`
+                  : "Lifetime Access"}
+              </span>
             </div>
             {course.certificate_enabled && (
               <div className="flex items-center gap-1 text-emerald-600 font-medium">

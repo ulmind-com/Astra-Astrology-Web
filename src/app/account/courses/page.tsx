@@ -149,6 +149,11 @@ function EnrolledCourseCard({ item }: { item: CourseEnrollment }) {
                 ) : (
                   <span className="rounded-md bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-400">
                     Valid until {new Date(item.expires_at).toLocaleDateString()}
+                    {(() => {
+                      const diffMs = new Date(item.expires_at).getTime() - Date.now();
+                      const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+                      return daysLeft > 0 ? ` (${daysLeft} day${daysLeft > 1 ? "s" : ""} left)` : "";
+                    })()}
                   </span>
                 )
               ) : (
