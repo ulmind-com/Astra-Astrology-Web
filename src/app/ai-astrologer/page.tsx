@@ -987,20 +987,21 @@ export default function AIAstrologerPage() {
           {/* Welcome Screen / Hero Cards (Shown only on fresh session) */}
           {isFreshConversation && (
             <div className="my-auto py-6 text-center fade-in">
-              {/* Rotating Sacred Logo Emblem with Royal Golden Glow */}
+              {/* Sacred Logo Emblem with Luminous Golden Aura Glow */}
               <div className="relative mx-auto mb-6 flex size-28 items-center justify-center">
-                {/* Luminous Warm Yellow / Dark Yellow Radiant Glow */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-500 to-amber-600 blur-2xl opacity-60 animate-pulse pointer-events-none" />
-                <div className="absolute -inset-2 rounded-full bg-yellow-400/20 blur-xl pointer-events-none" />
+                {/* Luminous Warm Yellow Radiant Glow (No hard circle boundary) */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-400/50 via-yellow-400/60 to-amber-500/40 blur-2xl pointer-events-none" />
+                <div className="absolute -inset-3 rounded-full bg-yellow-300/30 blur-xl pointer-events-none" />
+                <div className="absolute size-20 rounded-full bg-amber-400/35 blur-md pointer-events-none" />
 
-                {/* Rotating Circular Ring with Final DivinLink Logo */}
-                <div className="relative z-10 flex size-26 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500/20 via-yellow-500/30 to-amber-600/20 p-2 shadow-[0_0_50px_rgba(245,158,11,0.65)] ring-2 ring-amber-400/50 backdrop-blur-xs">
+                {/* Static Logo - No rotation, No hard circular boundary */}
+                <div className="relative z-10 flex size-24 sm:size-26 items-center justify-center">
                   <Image
                     src="/logo.png"
                     alt="DivinLink Emblem"
-                    width={88}
-                    height={88}
-                    className="size-full object-contain animate-[spin_20s_linear_infinite] drop-shadow-[0_4px_16px_rgba(217,119,6,0.45)]"
+                    width={96}
+                    height={96}
+                    className="size-full object-contain drop-shadow-[0_4px_20px_rgba(245,158,11,0.5)]"
                     priority
                   />
                 </div>

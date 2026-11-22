@@ -74,6 +74,16 @@ interface NavCategory {
   dropdown?: NavDropdownItem[];
 }
 
+function GoldCoinIcon({ className = "size-3.5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="10" className="fill-amber-400 stroke-amber-600" strokeWidth="1.5" />
+      <circle cx="12" cy="12" r="7.2" className="fill-yellow-300 stroke-amber-500/80" strokeWidth="1" strokeDasharray="1.5 1.5" />
+      <path d="M12 7v10M9.5 9.5h5a1.8 1.8 0 0 1 0 3.6h-5" stroke="#78350f" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function AstroyogiHeader() {
   const pathname = usePathname();
   const { user, isSignedIn, signOut } = useAuth();
@@ -1275,8 +1285,9 @@ export function AstroyogiHeader() {
                               {language === "bn" ? "ওয়ালেট কয়েন" : language === "hi" ? "वॉलेट कॉइन" : "Wallet Transactions"}
                             </span>
                           </div>
-                          <span className="text-xs font-bold text-amber-900 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300/80 tabular-nums shadow-2xs">
-                            🪙 {coinsBalance !== undefined ? formatCoins(coinsBalance) : walletLoading ? "..." : "0"}
+                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-950 bg-amber-100/90 px-2.5 py-0.5 rounded-full border border-amber-300/80 tabular-nums shadow-2xs">
+                            <GoldCoinIcon className="size-3.5 shrink-0" />
+                            <span>{coinsBalance !== undefined ? formatCoins(coinsBalance) : walletLoading ? "..." : "0"}</span>
                           </span>
                         </Link>
 
@@ -1509,9 +1520,9 @@ export function AstroyogiHeader() {
                     <Link
                       href="/account/wallet"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 font-bold"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 font-bold"
                     >
-                      <span>🪙</span>
+                      <GoldCoinIcon className="size-3.5 shrink-0" />
                       <span>{coinsBalance !== undefined ? formatCoins(coinsBalance) : walletLoading ? "..." : "0"}</span>
                     </Link>
                   </div>
