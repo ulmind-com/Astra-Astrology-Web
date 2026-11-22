@@ -1227,13 +1227,12 @@ export function AstroyogiHeader() {
                     <div className="absolute right-0 top-full mt-2.5 z-50 w-72 rounded-3xl border border-stone-200 bg-white p-3 shadow-[0_20px_50px_rgba(26,18,8,0.18)] animate-in fade-in zoom-in-95 duration-150 ring-1 ring-black/5">
                       {/* User Header Profile Card */}
                       <div className="flex items-center gap-3 p-2 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-200/50">
-                        <div className="size-11 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-500 flex items-center justify-center text-white font-extrabold text-base shadow-sm shrink-0 overflow-hidden border border-amber-300">
-                          {user?.avatar_url ? (
-                            <Image src={user.avatar_url} alt="Profile" width={44} height={44} className="size-full object-cover" />
-                          ) : (
-                            (user?.full_name || user?.first_name || "User")[0]?.toUpperCase() || "U"
-                          )}
-                        </div>
+                        <Avatar
+                          src={user?.avatar_url}
+                          name={user?.full_name || user?.first_name || "User"}
+                          size="md"
+                          className="size-11 border-2 border-amber-400 shadow-sm shrink-0"
+                        />
                         <div className="min-w-0 flex-1">
                           <h4 className="font-bold text-sm text-stone-900 truncate leading-tight">
                             {user?.full_name || user?.first_name || "User"}
@@ -1496,9 +1495,17 @@ export function AstroyogiHeader() {
               {isSignedIn ? (
                 <div className="pt-2 border-t border-stone-200/60 space-y-2">
                   <div className="flex items-center justify-between px-1 text-xs">
-                    <span className="font-semibold text-stone-700 truncate max-w-[180px]">
-                      {user?.full_name || user?.first_name || (language === "bn" ? "ব্যবহারকারী" : language === "hi" ? "यूज़र" : "User")}
-                    </span>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Avatar
+                        src={user?.avatar_url}
+                        name={user?.full_name || user?.first_name || "User"}
+                        size="sm"
+                        className="size-7 border border-amber-300 shrink-0"
+                      />
+                      <span className="font-semibold text-stone-700 truncate max-w-[130px]">
+                        {user?.full_name || user?.first_name || (language === "bn" ? "ব্যবহারকারী" : language === "hi" ? "यूज़र" : "User")}
+                      </span>
+                    </div>
                     <Link
                       href="/account/wallet"
                       onClick={() => setMobileMenuOpen(false)}

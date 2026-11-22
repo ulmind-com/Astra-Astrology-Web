@@ -24,9 +24,17 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
-    // Profile pictures, course thumbnails, and galleries served from Cloudinary.
+    // Profile pictures, Google OAuth avatars, course thumbnails, and CDN galleries.
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" },
+      { protocol: "https", hostname: "*.googleusercontent.com", pathname: "/**" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com", pathname: "/**" },
+      { protocol: "https", hostname: "lh4.googleusercontent.com", pathname: "/**" },
+      { protocol: "https", hostname: "lh5.googleusercontent.com", pathname: "/**" },
+      { protocol: "https", hostname: "lh6.googleusercontent.com", pathname: "/**" },
+      { protocol: "https", hostname: "*.gravatar.com", pathname: "/**" },
+      { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
+      { protocol: "https", hostname: "astra-astrology-backend.onrender.com", pathname: "/**" },
     ],
   },
   async rewrites() {
