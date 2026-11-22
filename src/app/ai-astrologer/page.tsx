@@ -983,30 +983,28 @@ export default function AIAstrologerPage() {
         {/* ===================================================================
             Chat Message Stream (Dynamic Viewport Scroller)
             =================================================================== */}
-        <div className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-y-auto px-4 py-4 sm:px-6 [scrollbar-width:thin]">
+        <div className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-y-auto px-4 py-4 sm:px-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {/* Welcome Screen / Hero Cards (Shown only on fresh session) */}
           {isFreshConversation && (
             <div className="my-auto py-6 text-center fade-in">
-              {/* Celestial Orbit Emblem with Royal Perfectly Centered Vector Zodiac Halo */}
+              {/* Rotating Sacred Logo Emblem with Royal Golden Glow */}
               <div className="relative mx-auto mb-6 flex size-28 items-center justify-center">
-                {/* Royal Mathematically-Balanced Rotating Zodiac Halo */}
-                <CelestialZodiacHalo
-                  size={240}
-                  className="absolute"
-                  speedSeconds={75}
-                />
+                {/* Luminous Warm Yellow / Dark Yellow Radiant Glow */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-500 to-amber-600 blur-2xl opacity-60 animate-pulse pointer-events-none" />
+                <div className="absolute -inset-2 rounded-full bg-yellow-400/20 blur-xl pointer-events-none" />
 
-                <span className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-400/30 via-gold-400/20 to-transparent animate-pulse blur-lg" />
-
-                <div className="relative z-10 flex size-20 items-center justify-center rounded-3xl bg-gradient-to-tr from-amber-500 via-amber-600 to-amber-700 p-0.5 shadow-[0_10px_40px_rgba(217,119,6,0.45)] ring-2 ring-amber-300 transition-transform hover:scale-105 duration-300">
-                  <Image
-                    src="/logo.png"
-                    alt="Mandala Emblem"
-                    width={72}
-                    height={72}
-                    className="size-full object-contain drop-shadow-md"
-                    priority
-                  />
+                {/* Rotating Circular Ring with Original DivinLink Logo */}
+                <div className="relative z-10 flex size-24 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 via-yellow-500 to-amber-600 p-1 shadow-[0_0_40px_rgba(245,158,11,0.6)] ring-4 ring-amber-300/60">
+                  <div className="size-full rounded-full bg-white dark:bg-stone-900 p-2.5 flex items-center justify-center overflow-hidden shadow-inner">
+                    <Image
+                      src="/logo.png"
+                      alt="DivinLink Emblem"
+                      width={80}
+                      height={80}
+                      className="size-full object-contain animate-[spin_20s_linear_infinite]"
+                      priority
+                    />
+                  </div>
                 </div>
               </div>
 

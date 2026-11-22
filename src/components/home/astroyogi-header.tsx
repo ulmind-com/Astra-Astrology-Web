@@ -11,6 +11,7 @@ import {
   Clock,
   Coins,
   Compass,
+  FileText,
   Flame,
   Gem,
   Gift,
@@ -20,8 +21,10 @@ import {
   HeartHandshake,
   Hourglass,
   Layers,
+  LogOut,
   Menu,
   MessageCircle,
+  MessageSquare,
   Moon,
   Orbit,
   Phone,
@@ -73,7 +76,7 @@ interface NavCategory {
 
 export function AstroyogiHeader() {
   const pathname = usePathname();
-  const { user, isSignedIn } = useAuth();
+  const { user, isSignedIn, signOut } = useAuth();
   const { language, setLanguage } = useLanguage();
   const { data: walletData, isLoading: walletLoading } = useWallet(Boolean(isSignedIn));
   const coinsBalance = walletData?.wallet?.balance_coins;
@@ -84,6 +87,7 @@ export function AstroyogiHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [mobileExpandedSection, setMobileExpandedSection] = React.useState<string | null>(null);
   const [langDropdownOpen, setLangDropdownOpen] = React.useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = React.useState(false);
 
   // The drawer is portalled to <body>, so it must only render after mount
   // (document is unavailable during SSR).
@@ -121,7 +125,7 @@ export function AstroyogiHeader() {
   }, []);
 
   // Keep the header visible whenever a menu is open, so it never hides mid-use.
-  const anyMenuOpen = mobileMenuOpen || langDropdownOpen || Boolean(hoveredCategory);
+  const anyMenuOpen = mobileMenuOpen || langDropdownOpen || profileDropdownOpen || Boolean(hoveredCategory);
 
   // Lock the page behind the open drawer, and restore on close.
   React.useEffect(() => {
@@ -138,6 +142,7 @@ export function AstroyogiHeader() {
     setMobileMenuOpen(false);
     setHoveredCategory(null);
     setLangDropdownOpen(false);
+    setProfileDropdownOpen(false);
   }, [pathname]);
 
   // Fetch real-time active categories with 0ms pre-hydration
@@ -816,7 +821,7 @@ export function AstroyogiHeader() {
         ],
       },
       {
-        label: "Panchang & Festivals",
+        label: "Panchang",
         href: "/festivals",
         badge: "2026",
         dropdown: [
@@ -989,7 +994,7 @@ export function AstroyogiHeader() {
       )}
     >
       {/* Astrotalk-Style Unified Single Row Navigation Bar */}
-      <div className="mx-auto max-w-[1440px] px-2 sm:px-4 xl:px-3 2xl:px-6">
+      <div className="mx-auto max-w-[1600px] w-full px-2 sm:px-4 xl:px-3 2xl:px-6">
         <div className="flex h-16 sm:h-[68px] items-center justify-between gap-1 xl:gap-1.5 2xl:gap-3 overflow-visible">
           {/* ================= LEFT: Brand Logo + Name ================= */}
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 whitespace-nowrap">
@@ -1198,25 +1203,15 @@ export function AstroyogiHeader() {
               </button>
             )}
 
-            {/* User Profile / Wallet or Sign In */}
+            {/* User Profile Dropdown or Sign In */}
             {isSignedIn ? (
-              <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
-                <Link
-                  href="/account/wallet"
-                  className="flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-950 hover:bg-amber-100 transition-colors shrink-0"
-                >
-                  <Coins className="size-3.5 text-amber-600 shrink-0" />
-                  <span className="tabular-nums">
-                    {coinsBalance !== undefined
-                      ? formatCoins(coinsBalance)
-                      : walletLoading
-                      ? "..."
-                      : "0"}
-                  </span>
-                </Link>
-                <Link
-                  href="/account"
-                  className="flex size-8 sm:size-9 items-center justify-center rounded-full border border-amber-400/80 overflow-hidden shrink-0"
+              <div className="relative shrink-0 whitespace-nowrap">
+                <button
+                  type="button"
+                  onClick={() => setProfileDropdownOpen((v) => !v)}
+                  className="flex size-8.5 sm:size-9 items-center justify-center rounded-full border-2 border-amber-400 hover:border-amber-500 overflow-hidden shrink-0 shadow-2xs hover:scale-105 transition-all cursor-pointer ring-2 ring-amber-100"
+                  aria-expanded={profileDropdownOpen}
+                  aria-label="User account menu"
                 >
                   <Avatar
                     src={user?.avatar_url}
@@ -1224,7 +1219,116 @@ export function AstroyogiHeader() {
                     size="sm"
                     className="size-full"
                   />
-                </Link>
+                </button>
+
+                {profileDropdownOpen && (
+                  <>
+                    <div className="fixed inset-0 z-30" onClick={() => setProfileDropdownOpen(false)} />
+                    <div className="absolute right-0 top-full mt-2.5 z-50 w-72 rounded-3xl border border-stone-200 bg-white p-3 shadow-[0_20px_50px_rgba(26,18,8,0.18)] animate-in fade-in zoom-in-95 duration-150 ring-1 ring-black/5">
+                      {/* User Header Profile Card */}
+                      <div className="flex items-center gap-3 p-2 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-200/50">
+                        <div className="size-11 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-500 flex items-center justify-center text-white font-extrabold text-base shadow-sm shrink-0 overflow-hidden border border-amber-300">
+                          {user?.avatar_url ? (
+                            <Image src={user.avatar_url} alt="Profile" width={44} height={44} className="size-full object-cover" />
+                          ) : (
+                            (user?.full_name || user?.first_name || "User")[0]?.toUpperCase() || "U"
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-bold text-sm text-stone-900 truncate leading-tight">
+                            {user?.full_name || user?.first_name || "User"}
+                          </h4>
+                          <p className="text-[11px] text-stone-500 truncate mt-0.5">
+                            {user?.email || (user as { phone_number?: string })?.phone_number || (language === "bn" ? "অ্যাস্ট্রা ভক্ত" : language === "hi" ? "एस्ट्रा भक्त" : "Astra Devotee")}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="my-2 border-t border-stone-100" />
+
+                      {/* 4 Profile-related menu items */}
+                      <div className="space-y-1">
+                        {/* Notifications */}
+                        <Link
+                          href="/account"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center gap-3 p-2.5 rounded-2xl hover:bg-stone-50 text-stone-700 hover:text-stone-950 transition-colors group cursor-pointer"
+                        >
+                          <div className="size-8 rounded-xl bg-stone-100 flex items-center justify-center text-stone-600 group-hover:bg-amber-100 group-hover:text-amber-800 transition-colors">
+                            <Bell className="size-4" />
+                          </div>
+                          <span className="text-xs font-semibold">
+                            {language === "bn" ? "বিজ্ঞপ্তি" : language === "hi" ? "सूचनाएं" : "Notifications"}
+                          </span>
+                        </Link>
+
+                        {/* Wallet Transactions / Coins (Dynamic live balance) */}
+                        <Link
+                          href="/account/wallet"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-amber-50/80 text-stone-700 hover:text-amber-950 transition-colors group cursor-pointer"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="size-8 rounded-xl bg-amber-100 flex items-center justify-center text-amber-800 group-hover:bg-amber-200 transition-colors">
+                              <Coins className="size-4 text-amber-600" />
+                            </div>
+                            <span className="text-xs font-semibold">
+                              {language === "bn" ? "ওয়ালেট কয়েন" : language === "hi" ? "वॉलेट कॉइन" : "Wallet Transactions"}
+                            </span>
+                          </div>
+                          <span className="text-xs font-bold text-amber-900 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300/80 tabular-nums shadow-2xs">
+                            🪙 {coinsBalance !== undefined ? formatCoins(coinsBalance) : walletLoading ? "..." : "0"}
+                          </span>
+                        </Link>
+
+                        {/* Order History */}
+                        <Link
+                          href="/account/orders"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center gap-3 p-2.5 rounded-2xl hover:bg-stone-50 text-stone-700 hover:text-stone-950 transition-colors group cursor-pointer"
+                        >
+                          <div className="size-8 rounded-xl bg-stone-100 flex items-center justify-center text-stone-600 group-hover:bg-amber-100 group-hover:text-amber-800 transition-colors">
+                            <FileText className="size-4" />
+                          </div>
+                          <span className="text-xs font-semibold">
+                            {language === "bn" ? "অর্ডারের ইতিহাস" : language === "hi" ? "ऑर्डर इतिहास" : "Order History"}
+                          </span>
+                        </Link>
+
+                        {/* Customer Support Chat */}
+                        <Link
+                          href="/support"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center gap-3 p-2.5 rounded-2xl hover:bg-stone-50 text-stone-700 hover:text-stone-950 transition-colors group cursor-pointer"
+                        >
+                          <div className="size-8 rounded-xl bg-stone-100 flex items-center justify-center text-stone-600 group-hover:bg-amber-100 group-hover:text-amber-800 transition-colors">
+                            <MessageSquare className="size-4" />
+                          </div>
+                          <span className="text-xs font-semibold">
+                            {language === "bn" ? "কাস্টমার সাপোর্ট চ্যাট" : language === "hi" ? "कस्टमर सपोर्ट चैट" : "Customer Support Chat"}
+                          </span>
+                        </Link>
+                      </div>
+
+                      <div className="my-2 border-t border-stone-100" />
+
+                      {/* Logout Button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setProfileDropdownOpen(false);
+                          signOut();
+                        }}
+                        className="w-full flex items-center gap-3 p-2.5 rounded-2xl hover:bg-rose-50 text-rose-600 font-bold transition-colors group cursor-pointer text-xs"
+                      >
+                        <div className="size-8 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600 group-hover:bg-rose-200 transition-colors">
+                          <LogOut className="size-4 text-rose-600" />
+                        </div>
+                        <span>{language === "bn" ? "লগআউট" : language === "hi" ? "लॉग आउट" : "Logout"}</span>
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             ) : (
               <Link href="/login" className="hidden sm:inline-flex shrink-0">
@@ -1389,7 +1493,34 @@ export function AstroyogiHeader() {
                   <ArrowRight className="size-4 stroke-[2.5]" />
                 </button>
               </Link>
-              {!isSignedIn && (
+              {isSignedIn ? (
+                <div className="pt-2 border-t border-stone-200/60 space-y-2">
+                  <div className="flex items-center justify-between px-1 text-xs">
+                    <span className="font-semibold text-stone-700 truncate max-w-[180px]">
+                      {user?.full_name || user?.first_name || (language === "bn" ? "ব্যবহারকারী" : language === "hi" ? "यूज़र" : "User")}
+                    </span>
+                    <Link
+                      href="/account/wallet"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 font-bold"
+                    >
+                      <span>🪙</span>
+                      <span>{coinsBalance !== undefined ? formatCoins(coinsBalance) : walletLoading ? "..." : "0"}</span>
+                    </Link>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      signOut();
+                    }}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-rose-200 bg-rose-50/70 text-rose-600 font-semibold text-sm py-2 hover:bg-rose-100 transition-colors"
+                  >
+                    <LogOut className="size-4 stroke-[2]" />
+                    <span>{language === "bn" ? "লগআউট" : language === "hi" ? "लॉग आउट" : "Logout"}</span>
+                  </button>
+                </div>
+              ) : (
                 <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
                   <button
                     type="button"

@@ -42,6 +42,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { Alert, Button, EmptyState, Pagination, Reveal } from "@/components/ui";
 import { astrologerApi, type DirectoryFilters as ApiFilters } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
+import { INITIAL_TOP_ASTROLOGERS } from "@/components/home/top-astrologers-section";
 import type { ConsultationMode, Skill } from "@/types";
 import { useLanguage } from "@/providers/language-provider";
 import { ASTROLOGERS_I18N } from "@/lib/astrologers-translations";
@@ -250,10 +251,25 @@ function DirectoryInner() {
   }, [filters.search]);
 
   const query = toQuery({ ...filters, search: debouncedSearch }, page);
+  const isDefaultQuery =
+    page === 1 &&
+    !debouncedSearch &&
+    !filters.skill &&
+    !filters.language &&
+    !filters.mode &&
+    !filters.online_only &&
+    !filters.featured_only &&
+    !filters.min_experience &&
+    !filters.max_rate;
 
-  const { data, isLoading, isFetching, error, refetch } = useQuery({
+  const { data = (isDefaultQuery ? INITIAL_TOP_ASTROLOGERS : undefined), isLoading, isFetching, error, refetch } = useQuery({
     queryKey: ["astrologers", query],
-    queryFn: () => astrologerApi.list(query),
+    queryFn: async () => {
+      const res = await astrologerApi.list(query);
+      if (res?.items && res.items.length > 0) return res;
+      return isDefaultQuery ? INITIAL_TOP_ASTROLOGERS : res;
+    },
+    initialData: isDefaultQuery ? INITIAL_TOP_ASTROLOGERS : undefined,
     // Keeps the previous page on screen while the next one loads.
     placeholderData: (previous) => previous,
     staleTime: 5 * 60 * 1000,
