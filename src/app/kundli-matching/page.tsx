@@ -884,9 +884,9 @@ export default function KundliMatchingPage() {
         </div>
 
         {/* =========================================================================
-            2. HERO SECTION: Compact, sleek, with rotating faint zodiac circle in background
+            2. HERO SECTION: Compact, sleek, with rotating faint zodiac circle in background & Milan Emblem
         ========================================================================= */}
-        <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-r from-amber-50/50 via-white to-amber-50/30 px-4 sm:px-6 py-4 shadow-2xs">
+        <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-r from-amber-50/50 via-white to-amber-50/30 px-4 sm:px-6 py-3.5 shadow-2xs">
           {/* Faint rotating zodiac wheel in background */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -896,34 +896,53 @@ export default function KundliMatchingPage() {
             className="pointer-events-none absolute -right-12 -top-16 size-[280px] sm:size-[360px] select-none opacity-[0.14] mix-blend-multiply animate-spin [animation-duration:120s] motion-reduce:animate-none"
           />
 
-          <div className="relative z-10 max-w-2xl space-y-1.5">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold text-stone-900 tracking-tight leading-tight">
-              {t.heroTitle}{" "}
-              <span className="text-amber-800 font-serif font-bold">{t.heroHighlight}</span>
-            </h1>
+          <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Left Content: Title, Description & Pricing */}
+            <div className="space-y-1.5 flex-1 min-w-0">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold text-stone-900 tracking-tight leading-tight">
+                {t.heroTitle}{" "}
+                <span className="text-amber-800 font-serif font-bold">{t.heroHighlight}</span>
+              </h1>
 
-            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-              {t.heroDescription}
-              {expandedHero && (
-                <span className="block mt-1.5 text-stone-600 leading-relaxed">
-                  {t.heroDescriptionExpanded}
-                </span>
-              )}
-              <button
-                type="button"
-                onClick={() => setExpandedHero(!expandedHero)}
-                className="ml-1.5 font-bold text-amber-700 hover:text-amber-900 hover:underline inline-flex items-center cursor-pointer"
-              >
-                {expandedHero ? t.readLess : t.readMore}
-              </button>
-            </p>
+              <div className="text-xs sm:text-sm text-stone-600 leading-relaxed max-w-2xl">
+                <p className={expandedHero ? "" : "line-clamp-2 sm:line-clamp-none"}>
+                  {t.heroDescription}
+                </p>
+                {expandedHero && (
+                  <p className="fade-in pt-1 text-stone-600 leading-relaxed">
+                    {t.heroDescriptionExpanded}
+                  </p>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setExpandedHero(!expandedHero)}
+                  className="inline-flex items-center gap-1 font-bold text-amber-700 hover:text-amber-800 transition-colors cursor-pointer text-[11px] pt-0.5"
+                >
+                  {expandedHero ? t.readLess : t.readMore}
+                </button>
+              </div>
 
-            <div className="pt-1.5">
-              <FeatureCoinBadge
-                feature={matchingFeature}
-                walletBalance={walletBalance}
-                language={language}
-              />
+              <div className="pt-1.5">
+                <FeatureCoinBadge
+                  feature={matchingFeature}
+                  walletBalance={walletBalance}
+                  language={language}
+                />
+              </div>
+            </div>
+
+            {/* Right: Kundli Milan Heart Puzzle Compatibility Emblem on top of the rotating wheel */}
+            <div className="shrink-0 flex items-center justify-center relative">
+              <div className="relative flex items-center justify-center">
+                {/* Soft warm aura */}
+                <div className="absolute inset-0 rounded-full bg-amber-400/20 blur-xl scale-95 pointer-events-none" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/kundli-milan-puzzle-emblem.png"
+                  alt="Kundli Milan Compatibility Emblem"
+                  className="relative z-10 size-[100px] sm:size-[120px] object-contain drop-shadow-[0_6px_18px_rgba(217,119,6,0.22)] select-none transition-transform duration-300 hover:scale-105"
+                />
+              </div>
             </div>
           </div>
         </div>
