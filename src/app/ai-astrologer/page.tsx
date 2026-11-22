@@ -993,18 +993,16 @@ export default function AIAstrologerPage() {
                 <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-500 to-amber-600 blur-2xl opacity-60 animate-pulse pointer-events-none" />
                 <div className="absolute -inset-2 rounded-full bg-yellow-400/20 blur-xl pointer-events-none" />
 
-                {/* Rotating Circular Ring with Original DivinLink Logo */}
-                <div className="relative z-10 flex size-24 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 via-yellow-500 to-amber-600 p-1 shadow-[0_0_40px_rgba(245,158,11,0.6)] ring-4 ring-amber-300/60">
-                  <div className="size-full rounded-full bg-white dark:bg-stone-900 p-2.5 flex items-center justify-center overflow-hidden shadow-inner">
-                    <Image
-                      src="/logo.png"
-                      alt="DivinLink Emblem"
-                      width={80}
-                      height={80}
-                      className="size-full object-contain animate-[spin_20s_linear_infinite]"
-                      priority
-                    />
-                  </div>
+                {/* Rotating Circular Ring with Final DivinLink Logo */}
+                <div className="relative z-10 flex size-26 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500/20 via-yellow-500/30 to-amber-600/20 p-2 shadow-[0_0_50px_rgba(245,158,11,0.65)] ring-2 ring-amber-400/50 backdrop-blur-xs">
+                  <Image
+                    src="/logo.png"
+                    alt="DivinLink Emblem"
+                    width={88}
+                    height={88}
+                    className="size-full object-contain animate-[spin_20s_linear_infinite] drop-shadow-[0_4px_16px_rgba(217,119,6,0.45)]"
+                    priority
+                  />
                 </div>
               </div>
 
