@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   GraduationCap,
   PlayCircle,
+  Receipt,
   RefreshCw,
   Sparkles,
 } from "lucide-react";
@@ -222,6 +223,17 @@ function EnrolledCourseCard({ item }: { item: CourseEnrollment }) {
                 <span>View Gurukul Certificate</span>
               </Link>
             )}
+
+            <a
+              href={courseApi.getInvoiceHtmlUrl(item.course_id)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 bg-surface-muted/60 px-3.5 py-2 text-xs font-semibold text-foreground/80 hover:bg-surface-muted hover:text-foreground shadow-xs transition-all"
+              title="Official Tax Invoice & Enrollment Receipt (Bill of Supply)"
+            >
+              <Receipt className="size-4 text-brand-600 dark:text-brand-400" />
+              <span>{item.invoice_number ? `Invoice #${item.invoice_number}` : "Tax Invoice"}</span>
+            </a>
           </div>
         </div>
       </div>

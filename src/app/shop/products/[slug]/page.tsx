@@ -42,7 +42,7 @@ import { CartDrawer } from "@/components/shop/CartDrawer";
 import { SacredImageGallery } from "@/components/shop/SacredImageGallery";
 import { CashbackConsultationBridge } from "@/components/shop/CashbackConsultationBridge";
 import { SacredSpecificationsGrid } from "@/components/shop/SacredSpecificationsGrid";
-import { LivePincodeLogisticsTracker } from "@/components/shop/LivePincodeLogisticsTracker";
+import { ProductPincodeEstimator } from "@/components/shop/ProductPincodeEstimator";
 import { AstraPromiseSection } from "@/components/shop/AstraPromiseSection";
 import { SacredDevoteeReviews } from "@/components/shop/SacredDevoteeReviews";
 import { CardTilt } from "@/components/ui/card-tilt";
@@ -493,15 +493,15 @@ export default function ProductDetailPage() {
                   {freeGiftBadge || (isBn ? "সাথে ফ্রি উপহার: খাঁটি সেলিনাইট ক্রিস্টাল প্লেট (মূল্য ₹৭২৯)" : "Includes Free Gift: Selenite Plate")}
                 </span>
               </div>
-            </div>
 
-            {/* Live Pincode & Real-Time Logistics Tracker */}
-            <LivePincodeLogisticsTracker
-              salePrice={salePrice}
-              cashbackPercent={effectiveCashback}
-              freeGiftTitle={product.free_gift_title}
-              freeGiftValue={product.free_gift_value}
-            />
+              {/* Pincode Delivery Estimator directly beneath Add to Cart & Buy Now */}
+              <ProductPincodeEstimator
+                salePrice={salePrice}
+                cashbackPercent={effectiveCashback}
+                freeGiftTitle={product.free_gift_title}
+                freeGiftValue={product.free_gift_value}
+              />
+            </div>
           </div>
         </div>
 

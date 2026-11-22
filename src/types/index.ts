@@ -31,7 +31,7 @@ export type TokenPair = S["TokenPair"];
 export type UserPublic = S["UserPublic"];
 export type OtpSentResult = S["OtpSentResult"];
 export type EmailAvailability = S["EmailAvailability"];
-export type UserRole = S["UserRole"];
+export type UserRole = S["UserRole"] | "purohit";
 export type AccountStatus = S["AccountStatus"];
 export type AuthProvider = S["AuthProvider"];
 
@@ -153,6 +153,7 @@ export const MARITAL_LABELS: Record<MaritalStatus, string> = {
 export const ROLE_LABELS: Record<UserRole, string> = {
   user: "User",
   astrologer: "Astrologer",
+  purohit: "Purohit",
   admin: "Admin",
   super_admin: "Super Admin",
 };
@@ -353,9 +354,81 @@ export type ConsultationQuote = S["ConsultationQuote"];
 export type SessionBilling = S["SessionBilling"];
 export type EarningsSummary = S["EarningsSummary"];
 export type EarningsBucket = S["EarningsBucket"];
-export type EarningRow = S["EarningRow"];
+export type EarningRow = Omit<S["EarningRow"], "mode"> & {
+  mode: string;
+  user_id?: string | null;
+  user_name?: string | null;
+  user_avatar?: string | null;
+  user_image_url?: string | null;
+  coins_charged?: number | null;
+  gross_paise?: number | null;
+};
 export type AdminEarningRow = S["AdminEarningRow"];
 export type AdminEarningsSummary = S["AdminEarningsSummary"];
+
+export interface PaginatedResult<T> {
+  items: T[];
+  meta: PageMeta;
+}
+
+export interface AstrologerEarningsBalance {
+  total_earned_paise: number;
+  total_settled_paise: number;
+  total_pending_paise: number;
+  withdrawable_balance_paise: number;
+  min_payout_amount_paise: number;
+  payout_method?: "bank_transfer" | "upi" | null;
+  bank_name?: string | null;
+  account_holder_name?: string | null;
+  account_number_last4?: string | null;
+  ifsc?: string | null;
+  upi_id?: string | null;
+  upi_qr_url?: string | null;
+  upi_qr_public_id?: string | null;
+  pan_card?: string | null;
+  has_bank_details: boolean;
+  beneficiary_type?: "astrologer" | "purohit";
+  beneficiary_name?: string | null;
+}
+
+export interface AstrologerPayoutRecord {
+  id: string;
+  astrologer_id?: string | null;
+  purohit_id?: string | null;
+  beneficiary_type?: "astrologer" | "purohit";
+  beneficiary_name?: string | null;
+  astrologer_name?: string | null;
+  amount_paise: number;
+  tds_percent: number;
+  tds_paise: number;
+  net_payable_paise: number;
+  payout_method: "bank_transfer" | "upi";
+  bank_name?: string | null;
+  account_holder_name?: string | null;
+  account_number_last4?: string | null;
+  account_number_masked?: string | null;
+  ifsc?: string | null;
+  upi_id?: string | null;
+  upi_qr_url?: string | null;
+  status: "pending" | "approved" | "settled" | "rejected";
+  utr_number?: string | null;
+  admin_notes?: string | null;
+  rejection_reason?: string | null;
+  requested_at: string;
+  approved_at?: string | null;
+  settled_at?: string | null;
+  rejected_at?: string | null;
+}
+
+export interface BankDetailsUpdate {
+  account_holder_name?: string | null;
+  account_number?: string | null;
+  ifsc?: string | null;
+  bank_name?: string | null;
+  upi_id?: string | null;
+  upi_qr_url?: string | null;
+  pan_card?: string | null;
+}
 
 /** Earnings are money, so they are paise — never coins. */
 export function formatEarning(paise: number): string {

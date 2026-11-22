@@ -30,6 +30,7 @@ import {
   ScrollText,
   Send,
   Share2,
+  ShieldAlert,
   ShieldCheck,
   Sparkles,
   Square,
@@ -114,6 +115,19 @@ const UI_STRINGS = {
     disclaimer:
       "অ্যাস্ট্রা এআই প্রাচীন বৈদিক শাস্ত্র ও প্রামাণিক গণনা প্রয়োগ করে। জটিল প্রতিকার ও রত্নধারণের জন্য আমাদের অভিজ্ঞ জ্যোতিষীদের সাথেও সরাসরি পরামর্শ করতে পারেন।",
     popularTopics: "জনপ্রিয় শাস্ত্রীয় বিষয়সমূহ:",
+    purgeMemory: "কসমিক মেমোরি পার্জ",
+    purgeMemoryTooltip: "এআই স্মৃতি ও অতীত কথোপকথন স্থায়ীভাবে মুছে ফেলুন (গোপনীয়তা রক্ষা)",
+    purgeModalTitle: "এআই কসমিক মেমোরি স্থায়ীভাবে মুছে ফেলুন",
+    purgeModalSubtitle: "ব্যক্তিগত গোপনীয়তা রক্ষা ও অতীতের কথোপকথন ডিলিট",
+    purgeModalDesc: "আপনি কি নিশ্চিত যে এআই জ্যোতিষীর স্মৃতি থেকে আপনার অতীত কথোপকথন, ব্যক্তিগত তথ্য ও গণনার ইতিহাস স্থায়ীভাবে মুছে ফেলতে চান? এটি তাত্ক্ষণিকভাবে সার্ভার থেকে ডিলিট হবে এবং আপনার গোপনীয়তা ১০০% সুরক্ষিত থাকবে।",
+    purgeModalConfirm: "হ্যাঁ, মেমোরি মুছে ফেলুন",
+    purgeSuccess: "এআই কসমিক মেমোরি ও কথোপকথন সফলভাবে মুছে ফেলা হয়েছে!",
+    recording: "ভয়েস রেকর্ড হচ্ছে…",
+    recordingCancel: "বাতিল",
+    recordingDone: "সম্পন্ন ও টেক্সট তৈরি",
+    transcribing: "ভয়েস টেক্সটে রূপান্তর হচ্ছে…",
+    transcriptionSuccess: "ভয়েস সফলভাবে টেক্সটে রূপান্তর হয়েছে!",
+    dislikeChips: ["গণনায় অমিল বা ভুল", "প্রতিকার বা রত্ন অস্পষ্ট", "শাস্ত্রীয় সূত্রের ঘাটতি", "অসম্পূর্ণ উত্তর"],
   },
   en: {
     title: "Astra AI Vedic Astrologer",
@@ -156,6 +170,19 @@ const UI_STRINGS = {
     disclaimer:
       "AI guidance applies authentic classical Vedic astrological principles. For personalized gemstones and pooja remedies, consult our verified astrologers.",
     popularTopics: "Popular Vedic Topics:",
+    purgeMemory: "Purge Cosmic Memory",
+    purgeMemoryTooltip: "Permanently erase AI memory and past conversations (Privacy Protection)",
+    purgeModalTitle: "Purge Cosmic AI Memory",
+    purgeModalSubtitle: "Privacy protection and permanent erasure of conversation logs",
+    purgeModalDesc: "Are you sure you want to permanently erase all past astrological conversations, stored profile facts, and memory from the AI? This action is irreversible and ensures 100% privacy protection.",
+    purgeModalConfirm: "Yes, Purge Memory",
+    purgeSuccess: "Cosmic memory and conversation history permanently purged!",
+    recording: "Recording audio…",
+    recordingCancel: "Cancel",
+    recordingDone: "Done & Transcribe",
+    transcribing: "Transcribing speech to text…",
+    transcriptionSuccess: "Voice successfully converted to text!",
+    dislikeChips: ["Inaccurate Calculation", "Unclear Remedy / Gemstone", "Missing Scriptural Proof", "Incomplete Answer"],
   },
   hi: {
     title: "एस्ट्रा एआई वैदिक ज्योतिषी",
@@ -198,6 +225,19 @@ const UI_STRINGS = {
     disclaimer:
       "एआई प्राचीन वैदिक शास्त्र एवं खगोलीय सूत्रों के आधार पर मार्गदर्शन प्रदान करता है। विशेष रत्न एवं अनुष्ठान के लिए हमारे प्रमाणित ज्योतिषियों से भी परामर्श लें।",
     popularTopics: "लोकप्रिय वैदिक विषय:",
+    purgeMemory: "कॉस्मिक मेमोरी हटाएं",
+    purgeMemoryTooltip: "एआई मेमोरी और पिछली बातचीत स्थायी रूप से मिटाएं (गोपनीयता)",
+    purgeModalTitle: "एआई कॉस्मिक मेमोरी स्थायी रूप से मिटाएं",
+    purgeModalSubtitle: "गोपनीयता सुरक्षा और सभी पूर्व बातचीत को हटाना",
+    purgeModalDesc: "क्या आप एआई ज्योतिषी की मेमोरी से अपनी पिछली बातचीत, व्यक्तिगत विवरण और इतिहास स्थायी रूप से मिटाना चाहते हैं? यह क्रिया स्थायी है और आपकी गोपनीयता पूरी तरह सुरक्षित रहेगी।",
+    purgeModalConfirm: "हाँ, मेमोरी हटाएं",
+    purgeSuccess: "कॉस्मिक मेमोरी और बातचीत सफलतापूर्वक मिटा दी गई!",
+    recording: "रिकॉर्डिंग जारी है…",
+    recordingCancel: "रद्द करें",
+    recordingDone: "पूर्ण व टेक्स्ट बनाएं",
+    transcribing: "आवाज को पाठ में बदला जा रहा है…",
+    transcriptionSuccess: "आवाज सफलतापूर्वक पाठ में बदल दी गई!",
+    dislikeChips: ["गणना में त्रुटि", "उपाय/रत्न अस्पष्ट", "शास्त्रीय प्रमाण की कमी", "अधूरा उत्तर"],
   },
 };
 
@@ -372,6 +412,12 @@ const WELCOME_MESSAGES = {
   },
 };
 
+function formatDuration(sec: number): string {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
 export default function AIAstrologerPage() {
   const { user, isSignedIn } = useAuth();
   const { language, setLanguage } = useLanguage();
@@ -382,8 +428,14 @@ export default function AIAstrologerPage() {
   const [statusLine, setStatusLine] = React.useState<string | null>(null);
   const streamRef = React.useRef<AbortController | null>(null);
   const [recording, setRecording] = React.useState(false);
+  const [recordingDuration, setRecordingDuration] = React.useState(0);
+  const recordingTimerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
   const [transcribing, setTranscribing] = React.useState(false);
   const recorderRef = React.useRef<Recorder | null>(null);
+
+  // Purge memory state
+  const [showPurgeModal, setShowPurgeModal] = React.useState(false);
+  const [purgingMemory, setPurgingMemory] = React.useState(false);
 
   // Session & Messages state
   const [sessionId, setSessionId] = React.useState<string>("");
@@ -586,51 +638,134 @@ export default function AIAstrologerPage() {
     }
   }
 
-  async function toggleVoiceRecording() {
-    if (loading || transcribing) return;
+  // Cleanup timer & audio stream on unmount
+  React.useEffect(() => {
+    return () => {
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+      if (recorderRef.current) recorderRef.current.cancel();
+    };
+  }, []);
 
-    if (recording) {
-      // Stop recording
-      const recorder = recorderRef.current;
+  async function handlePurgeMemory() {
+    setPurgingMemory(true);
+    try {
+      await aiAstrologerApi.purgeMemory(sessionId);
+      const newId = `sess_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      setSessionId(newId);
+      localStorage.setItem("astra_ai_session_id", newId);
+      const welcome = WELCOME_MESSAGES[language] || WELCOME_MESSAGES.bn;
+      setMessages([
+        {
+          role: "assistant",
+          content: welcome.content,
+          timestamp: new Date().toISOString(),
+          suggested_followups: welcome.suggested_followups,
+        },
+      ]);
+      setFeedbackGiven({});
+      setShowPurgeModal(false);
+      toast.success(t.purgeSuccess);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to purge AI memory.");
+    } finally {
+      setPurgingMemory(false);
+    }
+  }
+
+  const cancelVoiceRecording = React.useCallback(() => {
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+    if (recorderRef.current) {
+      recorderRef.current.cancel();
       recorderRef.current = null;
-      setRecording(false);
-      if (!recorder) return;
+    }
+    setRecording(false);
+    setRecordingDuration(0);
+    toast.info(
+      language === "bn"
+        ? "ভয়েস রেকর্ডিং বাতিল করা হয়েছে।"
+        : language === "hi"
+        ? "वॉइस रिकॉर्डिंग रद्द की गई।"
+        : "Voice recording cancelled.",
+    );
+  }, [language]);
 
-      setTranscribing(true);
-      try {
-        const audio = await recorder.stop();
-        if (audio.size < 1200) return;
-        const text = await transcribe(audio);
-        setInputQuery((prev) => (prev ? `${prev} ${text}` : text));
-      } catch (err: unknown) {
-        toast.error(err instanceof Error ? err.message : "Could not transcribe audio.");
-      } finally {
-        setTranscribing(false);
-      }
-    } else {
-      // Start recording
-      if (!canRecord()) {
-        toast.error(
+  const stopVoiceRecording = React.useCallback(async () => {
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+    const recorder = recorderRef.current;
+    recorderRef.current = null;
+    setRecording(false);
+    setRecordingDuration(0);
+
+    if (!recorder) return;
+    setTranscribing(true);
+
+    try {
+      const audio = await recorder.stop();
+      if (audio.size < 1200) {
+        toast.info(
           language === "bn"
-            ? "এই ব্রাউজারে ভয়েস রেকর্ডিং সাপোর্ট নেই।"
+            ? "রেকর্ডিং খুব ছোট ছিল, অনুগ্রহ করে আবার বলুন।"
             : language === "hi"
-            ? "इस ब्राउज़र में वॉइस रिकॉर्डिंग उपलब्ध नहीं है।"
-            : "Voice recording is not supported in this browser.",
+            ? "रिकॉर्डिंग बहुत छोटी थी, कृपया पुनः बोलें।"
+            : "Recording was too short, please speak again.",
         );
         return;
       }
-      try {
-        recorderRef.current = await startRecording();
-        setRecording(true);
-      } catch {
-        toast.error(
-          language === "bn"
-            ? "মাইক্রোফোন ব্যবহারের অনুমতি দিন।"
-            : language === "hi"
-            ? "कृपया माइक्रोफ़ोन की अनुमति दें।"
-            : "Please allow microphone access.",
-        );
+      const text = await transcribe(audio);
+      if (text) {
+        setInputQuery((prev) => (prev ? `${prev} ${text}` : text));
+        toast.success(t.transcriptionSuccess);
+        inputRef.current?.focus();
       }
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Could not transcribe audio.");
+    } finally {
+      setTranscribing(false);
+    }
+  }, [language, t.transcriptionSuccess]);
+
+  async function startVoiceRecording() {
+    if (loading || transcribing || recording) return;
+
+    if (!canRecord()) {
+      toast.error(
+        language === "bn"
+          ? "এই ব্রাউজারে ভয়েস রেকর্ডিং সাপোর্ট নেই।"
+          : language === "hi"
+          ? "इस ब्राउज़र में वॉइस रिकॉर्डिंग उपलब्ध नहीं है।"
+          : "Voice recording is not supported in this browser.",
+      );
+      return;
+    }
+    try {
+      recorderRef.current = await startRecording();
+      setRecording(true);
+      setRecordingDuration(0);
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingDuration((prev) => prev + 1);
+      }, 1000);
+    } catch {
+      toast.error(
+        language === "bn"
+          ? "মাইক্রোফোন ব্যবহারের অনুমতি দিন।"
+          : language === "hi"
+          ? "कृपया माइक्रोफ़ोन की अनुमति दें।"
+          : "Please allow microphone access.",
+      );
+    }
+  }
+
+  function toggleVoiceRecording() {
+    if (recording) {
+      void stopVoiceRecording();
+    } else {
+      void startVoiceRecording();
     }
   }
 
@@ -800,6 +935,7 @@ export default function AIAstrologerPage() {
         user_query: prevUserMsg?.content || "User Query",
         ai_response: msg.content,
         rating: 1,
+        message_index: msgIndex,
       })
       .then(() => toast.success(t.feedbackPositive))
       .catch(() => {});
@@ -823,6 +959,7 @@ export default function AIAstrologerPage() {
         ai_response: msg.content,
         rating: -1,
         feedback_reason: dislikeReason.trim(),
+        message_index: msgIndex,
       })
       .then(() => {
         toast.info(
@@ -919,6 +1056,19 @@ export default function AIAstrologerPage() {
                     : t.linkKundli}
                 </span>
                 {birthDate && <span className="text-[10px] text-emerald-600 font-bold">✓</span>}
+              </button>
+
+              {/* Purge Cosmic Memory (Privacy) Button */}
+              <button
+                type="button"
+                onClick={() => setShowPurgeModal(true)}
+                title={t.purgeMemoryTooltip}
+                className="group flex min-h-9 items-center gap-1.5 rounded-xl border border-rose-200/80 bg-rose-50/60 px-2 sm:px-2.5 py-1.5 text-xs font-semibold text-rose-700 shadow-2xs press transition-all hover:border-rose-300 hover:bg-rose-100/70 cursor-pointer"
+              >
+                <ShieldAlert className="size-3.5 text-rose-600 transition-transform group-hover:scale-110" />
+                <span className="hidden md:inline text-[11px] font-bold">
+                  {t.purgeMemory}
+                </span>
               </button>
 
               {/* Sound Toggle Button */}
@@ -1213,27 +1363,33 @@ export default function AIAstrologerPage() {
                             type="button"
                             onClick={() => handleFeedback(idx, 1)}
                             disabled={feedbackGiven[idx] !== undefined}
-                            className={`p-1.5 rounded-lg press transition-colors cursor-pointer ${
+                            className={`flex items-center gap-1 px-2 py-1 rounded-lg press transition-colors cursor-pointer ${
                               feedbackGiven[idx] === 1
-                                ? "text-emerald-600 bg-emerald-50"
+                                ? "text-emerald-700 bg-emerald-100 ring-1 ring-emerald-300 font-bold"
                                 : "text-slate-400 hover:bg-emerald-50 hover:text-emerald-600"
-                            }`}
+                            } disabled:pointer-events-none`}
                             title="Helpful"
                           >
                             <ThumbsUp className="size-3.5" />
+                            {feedbackGiven[idx] === 1 && (
+                              <span className="text-[10px] text-emerald-700 font-bold">✓</span>
+                            )}
                           </button>
                           <button
                             type="button"
                             onClick={() => handleFeedback(idx, -1)}
                             disabled={feedbackGiven[idx] !== undefined}
-                            className={`p-1.5 rounded-lg press transition-colors cursor-pointer ${
+                            className={`flex items-center gap-1 px-2 py-1 rounded-lg press transition-colors cursor-pointer ${
                               feedbackGiven[idx] === -1
-                                ? "text-rose-600 bg-rose-50"
+                                ? "text-rose-700 bg-rose-100 ring-1 ring-rose-300 font-bold"
                                 : "text-slate-400 hover:bg-rose-50 hover:text-rose-600"
-                            }`}
+                            } disabled:pointer-events-none`}
                             title="Needs improvement"
                           >
                             <ThumbsDown className="size-3.5" />
+                            {feedbackGiven[idx] === -1 && (
+                              <span className="text-[10px] text-rose-700 font-bold">✕</span>
+                            )}
                           </button>
                         </div>
                       </div>
@@ -1279,70 +1435,105 @@ export default function AIAstrologerPage() {
               </div>
             )}
 
-            {/* Input Form */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSendMessage();
-              }}
-              className="relative flex items-center gap-2 rounded-2xl border border-stone-200/90 hover:border-amber-300/80 bg-white p-1.5 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.06)] transition-all focus-within:border-amber-400 focus-within:shadow-[0_4px_20px_-4px_rgba(217,119,6,0.15)] outline-none"
-            >
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder={t.placeholder}
-                value={inputQuery}
-                onChange={(e) => setInputQuery(e.target.value)}
-                disabled={loading}
-                enterKeyHint="send"
-                autoComplete="off"
-                style={{ outline: "none", boxShadow: "none" }}
-                className="no-focus-ring min-w-0 flex-1 bg-transparent px-3 py-2.5 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 border-none outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 shadow-none ring-0 disabled:opacity-60"
-              />
+            {/* Input Form & Voice Recording Bar */}
+            {recording ? (
+              <div className="flex w-full items-center justify-between gap-3 rounded-2xl border border-rose-300 bg-gradient-to-r from-rose-50 via-white to-rose-50 p-2 sm:px-4 sm:py-2.5 shadow-sm">
+                {/* Left: Pulsing Red Recording Indicator + Timer */}
+                <div className="flex items-center gap-2.5">
+                  <span className="relative flex size-3">
+                    <span className="absolute inline-flex size-full animate-ping rounded-full bg-rose-400 opacity-75" />
+                    <span className="relative inline-flex size-3 rounded-full bg-rose-600" />
+                  </span>
+                  <span className="font-mono text-xs sm:text-sm font-bold text-rose-700">
+                    {formatDuration(recordingDuration)}
+                  </span>
+                  <span className="hidden sm:inline text-xs font-semibold text-rose-900">
+                    {t.recording}
+                  </span>
+                </div>
 
-              {/* Voice Record Toggle Button */}
-              <button
-                type="button"
-                onClick={toggleVoiceRecording}
-                disabled={loading || transcribing}
-                aria-label={t.holdToSpeak}
-                title={recording ? t.listening : t.holdToSpeak}
-                className={`no-focus-ring outline-none focus:outline-none focus-visible:outline-none flex size-10 shrink-0 items-center justify-center rounded-xl press transition-all cursor-pointer ${
-                  recording
-                    ? "bg-rose-500 text-white animate-pulse shadow-md scale-105"
-                    : "bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200/60"
-                } disabled:opacity-50`}
-              >
-                {transcribing ? (
-                  <Loader2 className="size-4 animate-spin text-amber-700" />
-                ) : recording ? (
-                  <Square className="size-4 fill-current" />
-                ) : (
-                  <Mic className="size-4" />
-                )}
-              </button>
+                {/* Center: Animated Equalizer Waveform */}
+                <div className="flex items-center gap-1 px-2">
+                  <span className="h-2 w-1 rounded-full bg-rose-400 animate-pulse [animation-duration:0.6s]" />
+                  <span className="h-4 w-1 rounded-full bg-rose-500 animate-pulse [animation-duration:0.4s]" />
+                  <span className="h-6 w-1 rounded-full bg-rose-600 animate-pulse [animation-duration:0.8s]" />
+                  <span className="h-3 w-1 rounded-full bg-rose-500 animate-pulse [animation-duration:0.5s]" />
+                  <span className="h-5 w-1 rounded-full bg-rose-400 animate-pulse [animation-duration:0.7s]" />
+                </div>
 
-              {/* Send Button */}
-              <button
-                type="submit"
-                disabled={!inputQuery.trim() || loading}
-                className="no-focus-ring outline-none focus:outline-none focus-visible:outline-none flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-[#fcd404] hover:bg-[#ebd500] text-stone-950 font-bold px-5 text-xs sm:text-sm shadow-xs press transition-all active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
-              >
-                {loading ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  <Send className="size-3.5" />
-                )}
-                <span className="hidden sm:inline">{t.send}</span>
-              </button>
-            </form>
+                {/* Right: Cancel & Stop/Done Buttons */}
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={cancelVoiceRecording}
+                    className="flex h-8 sm:h-9 items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 sm:px-3 text-xs font-medium text-slate-600 shadow-2xs hover:bg-slate-100 hover:text-slate-800 press transition-colors cursor-pointer"
+                  >
+                    <X className="size-3.5 text-slate-500" />
+                    <span>{t.recordingCancel}</span>
+                  </button>
 
-            {/* Voice Active Alert */}
-            {recording && (
-              <div className="mt-2 flex items-center justify-center gap-2 text-center text-xs font-bold text-rose-600 animate-pulse">
-                <span className="size-2 rounded-full bg-rose-500" />
-                <span>{t.listening}</span>
+                  <button
+                    type="button"
+                    onClick={() => void stopVoiceRecording()}
+                    className="flex h-8 sm:h-9 items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 px-3 sm:px-4 text-xs font-bold text-white shadow-xs hover:from-emerald-700 hover:to-emerald-800 press transition-all cursor-pointer"
+                  >
+                    <Check className="size-3.5" />
+                    <span>{t.recordingDone}</span>
+                  </button>
+                </div>
               </div>
+            ) : transcribing ? (
+              <div className="flex w-full items-center justify-center gap-2.5 rounded-2xl border border-amber-300 bg-amber-50/70 p-3 text-xs font-bold text-amber-900 shadow-2xs">
+                <Loader2 className="size-4 animate-spin text-amber-700" />
+                <span>{t.transcribing}</span>
+              </div>
+            ) : (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSendMessage();
+                }}
+                className="relative flex items-center gap-2 rounded-2xl border border-stone-200/90 hover:border-amber-300/80 bg-white p-1.5 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.06)] transition-all focus-within:border-amber-400 focus-within:shadow-[0_4px_20px_-4px_rgba(217,119,6,0.15)] outline-none"
+              >
+                <input
+                  ref={inputRef}
+                  type="text"
+                  placeholder={t.placeholder}
+                  value={inputQuery}
+                  onChange={(e) => setInputQuery(e.target.value)}
+                  disabled={loading}
+                  enterKeyHint="send"
+                  autoComplete="off"
+                  style={{ outline: "none", boxShadow: "none" }}
+                  className="no-focus-ring min-w-0 flex-1 bg-transparent px-3 py-2.5 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 border-none outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 shadow-none ring-0 disabled:opacity-60"
+                />
+
+                {/* Voice Record Toggle Button */}
+                <button
+                  type="button"
+                  onClick={toggleVoiceRecording}
+                  disabled={loading || transcribing}
+                  aria-label={t.holdToSpeak}
+                  title={t.holdToSpeak}
+                  className="no-focus-ring outline-none focus:outline-none focus-visible:outline-none flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200/60 press transition-all cursor-pointer disabled:opacity-50"
+                >
+                  <Mic className="size-4" />
+                </button>
+
+                {/* Send Button */}
+                <button
+                  type="submit"
+                  disabled={!inputQuery.trim() || loading}
+                  className="no-focus-ring outline-none focus:outline-none focus-visible:outline-none flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-[#fcd404] hover:bg-[#ebd500] text-stone-950 font-bold px-5 text-xs sm:text-sm shadow-xs press transition-all active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+                >
+                  {loading ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Send className="size-3.5" />
+                  )}
+                  <span className="hidden sm:inline">{t.send}</span>
+                </button>
+              </form>
             )}
 
             {/* Footer Disclaimer */}
@@ -1476,6 +1667,22 @@ export default function AIAstrologerPage() {
                 {t.dislikeDesc}
               </p>
 
+              {/* Quick suggestion chips */}
+              {t.dislikeChips && t.dislikeChips.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {t.dislikeChips.map((chip, cIdx) => (
+                    <button
+                      key={cIdx}
+                      type="button"
+                      onClick={() => setDislikeReason((prev) => (prev ? `${prev}, ${chip}` : chip))}
+                      className="rounded-full border border-amber-200 bg-amber-50/70 px-2.5 py-1 text-[11px] font-medium text-amber-900 hover:bg-amber-100 press transition-colors cursor-pointer"
+                    >
+                      + {chip}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <textarea
                 rows={3}
                 placeholder={t.dislikePlaceholder}
@@ -1499,6 +1706,68 @@ export default function AIAstrologerPage() {
                   className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-bold text-xs shadow-xs cursor-pointer"
                 >
                   {t.submitFeedback}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ===================================================================
+            Purge Cosmic Memory Confirmation Modal (Privacy Protection)
+            =================================================================== */}
+        {showPurgeModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs fade-in">
+            <div className="w-full max-w-md rounded-3xl border border-rose-200 bg-white p-5 sm:p-6 shadow-2xl space-y-4 pop-in">
+              <div className="flex items-start justify-between border-b border-rose-100 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-tr from-rose-500 to-rose-600 text-white shadow-xs">
+                    <ShieldAlert className="size-5" />
+                  </span>
+                  <div>
+                    <h3 className="font-display text-base font-bold text-slate-900">
+                      {t.purgeModalTitle}
+                    </h3>
+                    <p className="text-[11px] text-rose-600 font-medium">
+                      {t.purgeModalSubtitle}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowPurgeModal(false)}
+                  disabled={purgingMemory}
+                  className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 press transition-colors cursor-pointer"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+
+              <p className="text-xs text-slate-600 leading-relaxed">
+                {t.purgeModalDesc}
+              </p>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowPurgeModal(false)}
+                  disabled={purgingMemory}
+                  className="text-xs cursor-pointer"
+                >
+                  {t.cancel}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handlePurgeMemory}
+                  disabled={purgingMemory}
+                  className="bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white font-bold text-xs shadow-xs cursor-pointer"
+                >
+                  {purgingMemory ? (
+                    <Loader2 className="size-3.5 animate-spin mr-1.5" />
+                  ) : (
+                    <Trash2 className="size-3.5 mr-1.5" />
+                  )}
+                  <span>{t.purgeModalConfirm}</span>
                 </Button>
               </div>
             </div>
