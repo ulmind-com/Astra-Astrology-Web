@@ -45,6 +45,9 @@ const POPULAR_PINCODES = [
   { code: "799001", city_bn: "আগরতলা", city_en: "Agartala" },
 ];
 
+// In-Memory Fast Cache for Instant Lookup (<10ms)
+const PINCODE_CACHE = new Map<string, PincodeResult>();
+
 // Offline / Fallback City Map for instant reliability
 const FALLBACK_STATE_MAP: Record<string, { city_bn: string; city_en: string; state_bn: string; state_en: string }> = {
   "11": { city_bn: "নতুন দিল্লি", city_en: "New Delhi", state_bn: "দিল্লি", state_en: "Delhi" },
@@ -86,6 +89,7 @@ export function LivePincodeLogisticsTracker({
   const [error, setError] = React.useState<string | null>(null);
   const [selectedPayTab, setSelectedPayTab] = React.useState<"prepaid" | "cod">("prepaid");
   const [showGuaranteeModal, setShowGuaranteeModal] = React.useState<boolean>(false);
+  const [showDetailedRoadmap, setShowDetailedRoadmap] = React.useState<boolean>(false);
 
   // Cashback coins calculation
   const effectiveCashback = cashbackPercent ?? 100;
@@ -184,7 +188,7 @@ export function LivePincodeLogisticsTracker({
     }
   }, []);
 
-  // Fast Pincode Verification Function
+  // Fast Pincode Verification Function with Instant Cache and Race Timeout
   const performCheck = async (pinToTest: string, showToastError = true) => {
     const clean = pinToTest.replace(/\D/g, "").slice(0, 6);
     if (clean.length !== 6) {
@@ -194,11 +198,58 @@ export function LivePincodeLogisticsTracker({
       return;
     }
 
+    // 1. Instant Cache Hit (<5ms)
+    if (PINCODE_CACHE.has(clean)) {
+      const cached = PINCODE_CACHE.get(clean)!;
+      setResult(cached);
+      setError(
+        cached.is_serviceable
+          ? null
+          : isBn
+          ? "দুঃখিত, এই নির্দিষ্ট পিনকোডে আপাতত কোনো পার্সেল সার্ভিস সক্রিয় নেই।"
+          : "Sorry, delivery is temporarily not serviceable to this PIN code."
+      );
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
+    // 2. Prepare Instant Fallback Result so UI responds in milliseconds
+    const prefix = clean.slice(0, 2);
+    const fallbackInfo = FALLBACK_STATE_MAP[prefix] || {
+      city_bn: "আপনার এলাকা",
+      city_en: "Your Area",
+      state_bn: "ভারত",
+      state_en: "India",
+    };
+    const estDays = ["70", "71", "21", "22", "11", "40", "56"].includes(prefix) ? 3 : 4;
+    const fallbackDate = new Date();
+    fallbackDate.setDate(fallbackDate.getDate() + estDays);
+
+    const fallbackResult: PincodeResult = {
+      pincode: clean,
+      city: isBn ? fallbackInfo.city_bn : fallbackInfo.city_en,
+      state: isBn ? fallbackInfo.state_bn : fallbackInfo.state_en,
+      is_serviceable: true,
+      cod_available: true,
+      estimated_delivery_days: estDays,
+      estimated_delivery_date: fallbackDate.toLocaleDateString("en-IN", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+      }),
+    };
+
     try {
-      const res = await shopApi.checkPincode(clean);
+      // 3. Race backend API against a 1200ms timeout
+      const apiPromise = shopApi.checkPincode(clean);
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout")), 1200)
+      );
+      const res = await Promise.race([apiPromise, timeoutPromise]);
+      PINCODE_CACHE.set(clean, res);
       setResult(res);
       if (typeof window !== "undefined") {
         localStorage.setItem("divinlink_shop_pincode", clean);
@@ -212,30 +263,7 @@ export function LivePincodeLogisticsTracker({
       }
     } catch {
       // Resilient local fallback so users never face blank/broken states
-      const prefix = clean.slice(0, 2);
-      const fallbackInfo = FALLBACK_STATE_MAP[prefix] || {
-        city_bn: "আপনার এলাকা",
-        city_en: "Your Area",
-        state_bn: "ভারত",
-        state_en: "India",
-      };
-      const estDays = ["70", "71", "21", "22", "11", "40", "56"].includes(prefix) ? 3 : 4;
-      const fallbackDate = new Date();
-      fallbackDate.setDate(fallbackDate.getDate() + estDays);
-
-      const fallbackResult: PincodeResult = {
-        pincode: clean,
-        city: isBn ? fallbackInfo.city_bn : fallbackInfo.city_en,
-        state: isBn ? fallbackInfo.state_bn : fallbackInfo.state_en,
-        is_serviceable: true,
-        cod_available: true,
-        estimated_delivery_days: estDays,
-        estimated_delivery_date: fallbackDate.toLocaleDateString("en-IN", {
-          weekday: "short",
-          day: "numeric",
-          month: "short",
-        }),
-      };
+      PINCODE_CACHE.set(clean, fallbackResult);
       setResult(fallbackResult);
       if (typeof window !== "undefined") {
         localStorage.setItem("divinlink_shop_pincode", clean);
@@ -407,17 +435,34 @@ export function LivePincodeLogisticsTracker({
                   {result.city}, {result.state} ({result.pincode})
                 </span>
                 <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md border border-emerald-200">
-                  {isBn ? "এক্সপ্রেস সার্ভিস সক্রিয়" : "Express Active"}
+                  {isBn ? "এক্সপ্রেস সক্রিয়" : "Express Active"}
                 </span>
               </div>
             </div>
-            <div className="text-[11px] text-emerald-800 font-bold shrink-0">
-              {isBn ? `পৌঁছাবে ${dates.estDays} দিনে` : `In ${dates.estDays} Days`}
+            <div className="flex items-center gap-2">
+              <div className="text-[11px] text-emerald-800 font-bold shrink-0">
+                {isBn ? `পৌঁছাবে ${dates.estDays} দিনে` : `In ${dates.estDays} Days`}
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowDetailedRoadmap(!showDetailedRoadmap)}
+                className="text-[10px] font-bold text-amber-900 hover:text-amber-950 bg-amber-100/90 hover:bg-amber-200/90 border border-amber-300 px-2 py-0.5 rounded-md transition-colors cursor-pointer"
+              >
+                {showDetailedRoadmap
+                  ? isBn
+                    ? "সংক্ষেপ করুন ▲"
+                    : "Collapse ▲"
+                  : isBn
+                  ? "রুট ও COD দেখুন ▼"
+                  : "View Route & COD ▼"}
+              </button>
             </div>
           </div>
 
-          {/* 3-Step Visual Sacred Timeline */}
-          <div className="relative pl-6 sm:pl-8 space-y-4 before:absolute before:left-3 sm:before:left-4 before:top-2 before:bottom-3 before:w-0.5 before:bg-linear-to-b before:from-amber-400 via-orange-400 to-emerald-500">
+          {showDetailedRoadmap && (
+            <>
+              {/* 3-Step Visual Sacred Timeline */}
+              <div className="relative pl-6 sm:pl-8 space-y-4 before:absolute before:left-3 sm:before:left-4 before:top-2 before:bottom-3 before:w-0.5 before:bg-linear-to-b before:from-amber-400 via-orange-400 to-emerald-500 animate-in fade-in duration-200">
             {/* Step 1: Kashi Consecration (Today) */}
             <div className="relative group">
               <div className="absolute -left-6 sm:-left-8 top-0.5 size-6 sm:size-8 rounded-full bg-linear-to-tr from-amber-600 to-orange-500 text-white flex items-center justify-center shadow-md border-2 border-white">
@@ -678,6 +723,8 @@ export function LivePincodeLogisticsTracker({
               </div>
             )}
           </div>
+            </>
+          )}
 
           {/* ------------------------------------------------------------------- */}
           {/* 5. Unboxing & Vedic Packaging Trust Micro-Pillars */}

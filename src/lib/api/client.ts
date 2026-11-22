@@ -170,7 +170,13 @@ async function send(path: string, options: Options): Promise<Sent> {
   let response: Response;
   const primaryUrl = buildUrl(path, query);
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  let timedOut = false;
+  // Generous 60s bounded timeout to comfortably absorb cold-starts and planetary ephemeris calculations
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, 60000);
+
   if (callerSignal) {
     if (callerSignal.aborted) {
       controller.abort();
@@ -188,17 +194,46 @@ async function send(path: string, options: Options): Promise<Sent> {
       body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
     });
   } catch (err: any) {
-    // If same-origin proxy failed, attempt direct fallback to apiBase
-    if (typeof window !== "undefined" && !primaryUrl.startsWith(apiBase) && !controller.signal.aborted) {
+    // If caller intentionally cancelled (TanStack Query navigation, debounced input, unmount),
+    // rethrow directly so React Query cancels cleanly without raising an error alert!
+    if (callerSignal?.aborted) {
+      throw err;
+    }
+
+    // If direct backend call fails with a network error, attempt fallback to same-origin proxy
+    const isDirect = primaryUrl.startsWith(apiBase);
+    const fallbackBase = isDirect && typeof window !== "undefined"
+      ? `${window.location.origin}/api/v1`
+      : apiBase;
+
+    if (typeof window !== "undefined" && !controller.signal.aborted) {
       try {
-        response = await fetch(buildUrl(path, query, true), {
+        const fallbackUrl = new URL(`${fallbackBase}${path.startsWith("/") ? path : `/${path}`}`);
+        if (query) {
+          for (const [key, value] of Object.entries(query)) {
+            if (value !== undefined && value !== null && value !== "") {
+              fallbackUrl.searchParams.set(key, String(value));
+            }
+          }
+        }
+        response = await fetch(fallbackUrl.toString(), {
           ...rest,
           method,
           headers,
           signal: controller.signal,
           body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
         });
-      } catch {
+      } catch (fallbackErr: any) {
+        if (callerSignal?.aborted) {
+          throw fallbackErr;
+        }
+        if (timedOut) {
+          throw new ApiError(
+            "The server took too long to respond. Please try again.",
+            0,
+            "timeout",
+          );
+        }
         throw new ApiError(
           "Could not reach the server. Check your connection and try again.",
           0,
@@ -206,8 +241,7 @@ async function send(path: string, options: Options): Promise<Sent> {
         );
       }
     } else {
-      const aborted = err instanceof Error && err.name === "AbortError";
-      if (aborted && !callerSignal?.aborted) {
+      if (timedOut) {
         throw new ApiError(
           "The server took too long to respond. Please try again.",
           0,
@@ -243,7 +277,25 @@ async function send(path: string, options: Options): Promise<Sent> {
  * place, and only once — a loop here would hammer the API on every page.
  */
 async function sendWithRefresh(path: string, options: Options): Promise<Sent> {
-  let sent = await send(path, options);
+  const method = options.method ?? "GET";
+  const isSafeMethod = method === "GET";
+  let sent: Sent;
+
+  try {
+    sent = await send(path, options);
+  } catch (err) {
+    if (options.signal?.aborted) {
+      throw err;
+    }
+    if (isSafeMethod && err instanceof ApiError && (err.code === "timeout" || err.code === "network_error")) {
+      // Cold-start / wake-up resilient retry: wait 1.2s and retry once before surfacing error
+      await new Promise((r) => setTimeout(r, 1200));
+      sent = await send(path, options);
+    } else {
+      throw err;
+    }
+  }
+
   let { response } = sent;
   const auth = options.auth ?? true;
 
@@ -253,8 +305,6 @@ async function sendWithRefresh(path: string, options: Options): Promise<Sent> {
   const is503 = response.status === 503;
   const isGateway = response.status === 502 || response.status === 504;
   const code = (sent.payload as ApiErrorBody | null)?.error_code;
-  const method = options.method ?? "GET";
-  const isSafeMethod = method === "GET";
 
   if ((isSafeMethod && (is503 || isGateway)) || code === "database_unavailable") {
     await new Promise((r) => setTimeout(r, 800));

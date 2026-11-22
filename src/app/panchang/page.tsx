@@ -97,7 +97,11 @@ export default function PanchangPage() {
     staleTime: 1000 * 60 * 15,
   });
 
-  const panchang = horoscopeData?.panchang ?? dateInitialData?.panchang ?? INITIAL_DAILY_HOROSCOPE.panchang;
+  const panchang =
+    horoscopeData?.panchang ??
+    dateInitialData?.panchang ??
+    tabDataMap["today"]?.panchang ??
+    INITIAL_DAILY_HOROSCOPE.panchang;
   const horas: HoraItem[] = panchang?.horas ?? [];
   const choghadiya: ChoghadiyaItem[] = panchang?.choghadiya ?? [];
 
@@ -258,7 +262,7 @@ export default function PanchangPage() {
             <div className="py-24 text-center rounded-3xl border border-slate-200 bg-white shadow-sm">
               <LoadingBlock label={isBn ? "সুইস এফিমেরিস বৈদিক পঞ্চাঙ্গ গণনা করা হচ্ছে…" : "Calculating Swiss Ephemeris Vedic Panchang…"} />
             </div>
-          ) : (error && !panchang) || !panchang ? (
+          ) : error && !panchang ? (
             <div className="rounded-3xl border border-dashed border-rose-300 bg-rose-50/50 p-10 text-center space-y-3">
               <AlertTriangle className="size-10 text-rose-500 mx-auto" />
               <h3 className="font-bold text-rose-950">

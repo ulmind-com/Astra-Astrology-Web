@@ -19,8 +19,13 @@ export function Avatar({
   className?: string;
 }) {
   const [failed, setFailed] = React.useState(false);
+
+  React.useEffect(() => {
+    setFailed(false);
+  }, [src]);
+
   const px = SIZES[size];
-  const showImage = Boolean(src) && !failed;
+  const showImage = Boolean(src && src.trim() !== "") && !failed;
   // When the caller sizes the Avatar through className (e.g. "size-full" to fill
   // a wrapper), don't pin a fixed width/height — the inline style would override
   // the class and crop the image. `size` then only scales the initials fallback.
@@ -30,22 +35,22 @@ export function Avatar({
     <span
       className={cn(
         "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full",
-        "bg-gradient-to-br from-brand-200/70 to-brand-100/80",
-        "font-semibold text-ink-800 ring-1 ring-brand-500/35",
-        "shadow-soft",
+        "bg-gradient-to-tr from-amber-500 to-yellow-500",
+        "font-bold text-white ring-1 ring-amber-300/80",
+        "shadow-xs select-none",
         className,
       )}
-      style={fillsParent ? { fontSize: px * 0.36 } : { width: px, height: px, fontSize: px * 0.36 }}
+      style={fillsParent ? { fontSize: px * 0.38 } : { width: px, height: px, fontSize: px * 0.38 }}
     >
       {showImage ? (
-        <Image
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
           src={src!}
-          alt={name ?? "Profile picture"}
-          width={px}
-          height={px}
+          alt=""
           className="size-full object-cover"
           onError={() => setFailed(true)}
-          unoptimized
+          loading="eager"
+          referrerPolicy="no-referrer"
         />
       ) : (
         initials(name)

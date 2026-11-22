@@ -3,53 +3,50 @@ import Link from "next/link";
 import { Year } from "@/components/ui";
 import { UlmindCredit } from "@/components/ulmind-credit";
 
-const POINTS = [
-  "Your birth details, saved once and reused by every reading",
-  "Verified astrologers, filtered by skill and language",
-  "Pay by the minute — no subscription",
-];
-
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid min-h-dvh lg:grid-cols-2">
-      {/* The pitch, kept off small screens where it would push the form down. */}
-      <aside className="bg-stars relative hidden flex-col justify-between overflow-hidden bg-cosmos p-12 lg:flex">
-        <div className="pointer-events-none absolute inset-0" aria-hidden>
-          <span className="orb animate-float-slow absolute -right-20 top-10 size-64 opacity-75" />
-          <span className="orb-gold orb absolute left-10 bottom-32 size-10 opacity-85" />
+      {/* The pitch artwork panel, kept off small screens where it would push the form down. */}
+      <aside className="relative hidden flex-col justify-between overflow-hidden p-8 xl:p-12 lg:flex select-none">
+        {/* Background Image: Meditating Guru with Golden Mandala Halo */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/meditating-guru.png"
+            alt="Meditating Guru with Golden Mandala Halo"
+            fill
+            priority
+            className="object-cover object-center"
+          />
+          {/* Gentle top and bottom vignetting only to ensure logo and credit are crisp, while the meditating guru artwork remains 100% bright and clearly visible */}
+          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/45 via-black/15 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none" />
         </div>
-        <Link href="/" className="relative flex items-center gap-2 font-semibold text-brand-950">
-          <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-soft">
+
+        {/* Top: Brand Logo + Name */}
+        <Link href="/" className="relative z-10 flex items-center gap-3 font-semibold text-white group w-fit">
+          <span className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-black/30 border border-white/20 ring-1 ring-amber-400/40 backdrop-blur-md shadow-lg group-hover:scale-105 transition-transform">
             <Image
               src="/logo.png"
               alt="DivinLink"
-              width={36}
-              height={36}
-              className="size-full object-contain"
+              width={38}
+              height={38}
+              className="size-full object-contain p-0.5"
               priority
             />
           </span>
-          <span className="font-display tracking-wide">DivinLink</span>
+          <span className="font-display tracking-wide text-2xl font-bold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+            DivinLink
+          </span>
         </Link>
 
-        <div className="relative">
-          <h2 className="glow-text max-w-sm font-display text-3xl font-bold leading-tight text-brand-950">
-            The sky has been keeping notes since the day you were born.
-          </h2>
-          <ul className="mt-8 space-y-3">
-            {POINTS.map((point) => (
-              <li key={point} className="flex gap-3 text-sm text-ink-600">
-                <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-gold-400" />
-                {point}
-              </li>
-            ))}
-          </ul>
-        </div>
+        {/* Middle: Empty spacer so the Meditating Guru artwork is 100% unobstructed */}
+        <div className="flex-1" />
 
-        <div className="relative space-y-4">
-          <UlmindCredit />
-          <p className="text-xs text-ink-500">
-            © <Year /> DivinLink
+        {/* Bottom: Ulmind Credit + Copyright */}
+        <div className="relative z-10 space-y-2.5">
+          <UlmindCredit className="bg-black/50 border-white/20 text-white backdrop-blur-md shadow-lg hover:border-amber-400/50" />
+          <p className="text-xs text-white/80 drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)] font-medium">
+            © <Year /> DivinLink. Verified Vedic Consultation Platform.
           </p>
         </div>
       </aside>

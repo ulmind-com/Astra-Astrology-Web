@@ -65,6 +65,7 @@ export function CashbackConsultationBridge({
   // Interactive consultation calculator mode
   const [activeMode, setActiveMode] = React.useState<"call" | "chat" | "video">("call");
   const [showHowItWorks, setShowHowItWorks] = React.useState<boolean>(false);
+  const [showDetails, setShowDetails] = React.useState<boolean>(false);
 
   // Cashback coins calculation
   const cashbackCoins = Math.round(salePrice * (effectiveCashback / 100));
@@ -203,9 +204,36 @@ export function CashbackConsultationBridge({
           </div>
         )}
 
-        {/* ================================================================= */}
-        {/* 2. Interactive Real-Value Bundle Calculator */}
-        {/* ================================================================= */}
+        {/* Quick Value & Astrologer Consultation Summary Bar */}
+        <div className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-900/40 border border-emerald-500/30 text-xs">
+          <div className="flex items-center gap-2 min-w-0">
+            <Coins className="size-4 text-amber-300 shrink-0 animate-pulse" />
+            <span className="text-emerald-100 font-medium truncate text-[11px] sm:text-xs">
+              {isBn
+                ? `${cashbackCoins} কয়েন ফেরত (~${freeCallMinutes} মিনিট শীর্ষ জ্যোতিষীদের সাথে ফ্রি পরামর্শ)`
+                : `${cashbackCoins} coins bonus (~${freeCallMinutes} mins free live consultation)`}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowDetails(!showDetails)}
+            className="text-[10px] font-bold text-amber-300 hover:text-white bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded-md border border-amber-300/30 transition-colors shrink-0 ml-2 cursor-pointer"
+          >
+            {showDetails
+              ? isBn
+                ? "সংক্ষেপ করুন ▲"
+                : "Collapse ▲"
+              : isBn
+              ? "ক্যাশব্যাক ও জ্যোতিষী তালিকা ▼"
+              : "View Astrologers & Details ▼"}
+          </button>
+        </div>
+
+        {showDetails && (
+          <>
+            {/* ================================================================= */}
+            {/* 2. Interactive Real-Value Bundle Calculator */}
+            {/* ================================================================= */}
         <div className="space-y-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <span className="text-xs font-bold text-emerald-200 uppercase tracking-wider flex items-center gap-1.5">
@@ -510,21 +538,23 @@ export function CashbackConsultationBridge({
             )}
           </div>
 
-          {/* Reassurance Footer */}
-          <div className="flex items-center justify-between flex-wrap gap-2 pt-1 text-[11px] text-stone-400">
-            <span className="flex items-center gap-1.5 text-emerald-300">
-              <CheckCircle2 className="size-3.5 text-emerald-400" />
-              <span>
-                {isBn
-                  ? "প্রিপেইড ডেলিভারির সাথে সাথেই কয়েন ওয়ালেটে যুক্ত হবে"
-                  : "Coins automatically available immediately on prepaid delivery"}
+            {/* Reassurance Footer */}
+            <div className="flex items-center justify-between flex-wrap gap-2 pt-1 text-[11px] text-stone-400">
+              <span className="flex items-center gap-1.5 text-emerald-300">
+                <CheckCircle2 className="size-3.5 text-emerald-400" />
+                <span>
+                  {isBn
+                    ? "প্রিপেইড ডেলিভারির সাথে সাথেই কয়েন ওয়ালেটে যুক্ত হবে"
+                    : "Coins automatically available immediately on prepaid delivery"}
+                </span>
               </span>
-            </span>
-            <span className="text-stone-400">
-              {isBn ? "যেকোনো সাহায্য: সাপোর্ট টিমের সাথে কথা বলুন" : "24/7 Vedic Customer Support"}
-            </span>
+              <span className="text-stone-400">
+                {isBn ? "যেকোনো সাহায্য: সাপোর্ট টিমের সাথে কথা বলুন" : "24/7 Vedic Customer Support"}
+              </span>
+            </div>
           </div>
-        </div>
+          </>
+        )}
       </div>
     </section>
   );

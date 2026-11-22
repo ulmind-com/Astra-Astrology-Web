@@ -1133,28 +1133,25 @@ export default function AIAstrologerPage() {
         {/* ===================================================================
             Chat Message Stream (Dynamic Viewport Scroller)
             =================================================================== */}
-        <div className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-y-auto px-4 py-4 sm:px-6 [scrollbar-width:thin]">
+        <div className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-y-auto px-4 py-4 sm:px-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {/* Welcome Screen / Hero Cards (Shown only on fresh session) */}
           {isFreshConversation && (
             <div className="my-auto py-6 text-center fade-in">
-              {/* Celestial Orbit Emblem with Royal Perfectly Centered Vector Zodiac Halo */}
+              {/* Sacred Logo Emblem with Luminous Golden Aura Glow */}
               <div className="relative mx-auto mb-6 flex size-28 items-center justify-center">
-                {/* Royal Mathematically-Balanced Rotating Zodiac Halo */}
-                <CelestialZodiacHalo
-                  size={240}
-                  className="absolute"
-                  speedSeconds={75}
-                />
+                {/* Luminous Warm Yellow Radiant Glow (No hard circle boundary) */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-400/50 via-yellow-400/60 to-amber-500/40 blur-2xl pointer-events-none" />
+                <div className="absolute -inset-3 rounded-full bg-yellow-300/30 blur-xl pointer-events-none" />
+                <div className="absolute size-20 rounded-full bg-amber-400/35 blur-md pointer-events-none" />
 
-                <span className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-400/30 via-gold-400/20 to-transparent animate-pulse blur-lg" />
-
-                <div className="relative z-10 flex size-20 items-center justify-center rounded-3xl bg-gradient-to-tr from-amber-500 via-amber-600 to-amber-700 p-0.5 shadow-[0_10px_40px_rgba(217,119,6,0.45)] ring-2 ring-amber-300 transition-transform hover:scale-105 duration-300">
+                {/* Static Logo - No rotation, No hard circular boundary */}
+                <div className="relative z-10 flex size-24 sm:size-26 items-center justify-center">
                   <Image
                     src="/logo.png"
-                    alt="Mandala Emblem"
-                    width={72}
-                    height={72}
-                    className="size-full object-contain drop-shadow-md"
+                    alt="DivinLink Emblem"
+                    width={96}
+                    height={96}
+                    className="size-full object-contain drop-shadow-[0_4px_20px_rgba(245,158,11,0.5)]"
                     priority
                   />
                 </div>

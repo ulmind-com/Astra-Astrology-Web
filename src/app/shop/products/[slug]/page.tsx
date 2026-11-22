@@ -60,7 +60,11 @@ export default function ProductDetailPage() {
   const { language } = useLanguage();
   const isBn = language === "bn";
 
-  const slug = typeof params?.slug === "string" ? params.slug : Array.isArray(params?.slug) ? params.slug[0] : "";
+  const rawSlug = typeof params?.slug === "string" ? params.slug : Array.isArray(params?.slug) ? params.slug[0] : "";
+  let slug = rawSlug;
+  try {
+    slug = decodeURIComponent(rawSlug);
+  } catch {}
 
   const { addItem, openCart } = useCartStore();
 
@@ -68,7 +72,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = React.useState<number>(1);
   const [activeTab, setActiveTab] = React.useState<"description" | "rituals" | "certificate">("description");
 
-  // Fetch product detail from API
+  // Fetch product detail from API with resilient fallback
   const {
     data: product,
     isLoading,
@@ -79,12 +83,27 @@ export default function ProductDetailPage() {
       if (!slug) return null;
       try {
         const res = await shopApi.getProductDetail(slug);
-        return res;
+        if (res && (res.id || res.title)) return res;
       } catch (err) {
-        console.error("Failed to fetch product detail:", err);
-        return null;
+        console.warn("Direct getProductDetail failed, attempting fallback:", err);
       }
+      try {
+        const catalog = await shopApi.getProducts({ limit: 100 });
+        const cleanSlug = slug.toLowerCase().trim();
+        const match = (catalog.items || []).find(
+          (item) =>
+            item.slug?.toLowerCase() === cleanSlug ||
+            item.id === slug ||
+            item.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") === cleanSlug
+        );
+        if (match) return match;
+      } catch (err2) {
+        console.warn("Catalog fallback search failed:", err2);
+      }
+      return null;
     },
+    staleTime: 5 * 60 * 1000,
+    retry: 2,
     enabled: Boolean(slug),
   });
 
@@ -270,31 +289,78 @@ export default function ProductDetailPage() {
 
             {/* Trust Guarantee Micro-Ribbon */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
-              <div className="rounded-2xl border border-stone-200 bg-white p-2.5 text-center space-y-1">
+              <div className="rounded-2xl border border-stone-200 bg-white p-2.5 text-center space-y-1 shadow-2xs">
                 <ShieldCheck className="size-4 text-emerald-600 mx-auto" />
                 <p className="text-[10px] font-bold text-stone-800">{isBn ? "১০০% খাঁটি" : "100% Genuine"}</p>
                 <p className="text-[9px] text-stone-500">{isBn ? "প্রাকৃতিক উপাদান" : "Lab Certified"}</p>
               </div>
-              <div className="rounded-2xl border border-stone-200 bg-white p-2.5 text-center space-y-1">
+              <div className="rounded-2xl border border-stone-200 bg-white p-2.5 text-center space-y-1 shadow-2xs">
                 <Flame className="size-4 text-amber-600 mx-auto" />
                 <p className="text-[10px] font-bold text-stone-800">{isBn ? "প্রাণ-প্রতিষ্ঠিত" : "Consecrated"}</p>
                 <p className="text-[9px] text-stone-500">{isBn ? "কাশীর পুরোহিত দ্বারা" : "Kashi Pandits"}</p>
               </div>
-              <div className="rounded-2xl border border-stone-200 bg-white p-2.5 text-center space-y-1">
+              <div className="rounded-2xl border border-stone-200 bg-white p-2.5 text-center space-y-1 shadow-2xs">
                 <Truck className="size-4 text-blue-600 mx-auto" />
                 <p className="text-[10px] font-bold text-stone-800">{isBn ? "ফ্রি ডেলিভারি" : "Free Shipping"}</p>
                 <p className="text-[9px] text-stone-500">{isBn ? "₹৪৯৯ এর উপরে" : "Orders > ₹499"}</p>
               </div>
-              <div className="rounded-2xl border border-stone-200 bg-white p-2.5 text-center space-y-1">
+              <div className="rounded-2xl border border-stone-200 bg-white p-2.5 text-center space-y-1 shadow-2xs">
                 <RefreshCw className="size-4 text-purple-600 mx-auto" />
                 <p className="text-[10px] font-bold text-stone-800">{isBn ? "সুরক্ষিত প্যাকেজিং" : "Safe Transit"}</p>
                 <p className="text-[9px] text-stone-500">{isBn ? "ক্ষতিহীন রিপ্লেসমেন্ট" : "Transit Insured"}</p>
               </div>
             </div>
+
+            {/* QR Code Authenticity & Kashi Consecration Card */}
+            <div className="rounded-2xl border border-amber-300/80 bg-gradient-to-r from-amber-50/70 via-stone-50 to-white p-3.5 sm:p-4 shadow-xs space-y-2.5">
+              <div className="flex items-center gap-3">
+                <div className="size-16 rounded-xl bg-white border border-stone-200 p-1.5 shadow-2xs shrink-0 flex flex-col items-center justify-center relative overflow-hidden">
+                  {/* Visual QR Code Representation */}
+                  <div className="size-full bg-stone-900 rounded-sm p-1 flex flex-col justify-between">
+                    <div className="flex justify-between">
+                      <div className="size-3 bg-white rounded-xs flex items-center justify-center">
+                        <div className="size-1.5 bg-stone-900" />
+                      </div>
+                      <div className="size-3 bg-white rounded-xs flex items-center justify-center">
+                        <div className="size-1.5 bg-stone-900" />
+                      </div>
+                    </div>
+                    <div className="flex justify-center items-center">
+                      <Sparkles className="size-2.5 text-amber-300 animate-spin" />
+                    </div>
+                    <div className="flex justify-between">
+                      <div className="size-3 bg-white rounded-xs flex items-center justify-center">
+                        <div className="size-1.5 bg-stone-900" />
+                      </div>
+                      <div className="size-1.5 bg-amber-400 rounded-full" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-1 min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-xs font-bold text-stone-900">
+                      {isBn ? "QR কোড দিয়ে আসল প্রতিকার যাচাই" : "Scan QR for 100% Authenticity"}
+                    </span>
+                    <span className="text-[9px] font-extrabold text-emerald-800 bg-emerald-100 px-1.5 py-0.2 rounded border border-emerald-300">
+                      ✓ {isBn ? "ল্যাব ভেরিফায়েড" : "Lab Verified"}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-stone-600 leading-snug">
+                    {isBn
+                      ? "প্রতিটি পার্সেলের বাক্সে থাকবে সরকারি ল্যাব সার্টিফাইড হলোগ্রাফিক কিউআর কোড সিলমোহর।"
+                      : "Each parcel comes with a govt-approved lab certified holographic tamper-evident seal."}
+                  </p>
+                  <p className="text-[10px] font-mono text-amber-900 font-semibold">
+                    {isBn ? "সার্টিফিকেট আইডি:" : "Cert ID:"} #{product.sku || "ASTR-7089"} • {isBn ? "কাশীর প্রাণ-প্রতিষ্ঠা" : "Kashi Energized"}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* ================= Right: Product Information & Purchase Box ================= */}
-          <div className="lg:col-span-6 space-y-5">
+          <div className="lg:col-span-6 space-y-4">
             {/* Rating & SKU Header */}
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <a
@@ -322,7 +388,7 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Product Title */}
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <h1 className="font-cinzel text-2xl sm:text-3xl font-bold text-stone-900 leading-tight">
                 {product.title}
               </h1>
@@ -334,7 +400,7 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Price Box */}
-            <div className="rounded-2xl border border-amber-200/80 bg-gradient-to-r from-amber-50/70 via-stone-50 to-white p-4 space-y-2">
+            <div className="rounded-2xl border border-amber-200/80 bg-gradient-to-r from-amber-50/70 via-stone-50 to-white p-3.5 sm:p-4 space-y-2">
               <div className="flex items-baseline gap-3 flex-wrap">
                 <span className="font-extrabold text-2xl sm:text-3xl text-stone-950">
                   {formatINR(salePrice)}
@@ -352,55 +418,47 @@ export default function ProductDetailPage() {
               </div>
               <p className="text-[11px] text-stone-500">
                 {isBn
-                  ? "সকল কর অন্তর্ভুক্ত • ₹৪৯৯+ অর্ডারে ফ্রি ডেলিভারি"
+                  ? "সকল কর অন্তর্ভুক্ত • ₹৪৯৯+ অর্ডারে ফ্রি এক্সপ্রেস ডেলিভারি"
                   : "Inclusive of all taxes • Free express shipping on orders over ₹499"}
               </p>
             </div>
 
-            {/* Value Proposition: 100% Wallet Cashback to Astrologer Bridge & Free Gift */}
-            <CashbackConsultationBridge
-              productTitle={product.title}
-              mrp={mrp}
-              salePrice={salePrice}
-              cashbackPercent={effectiveCashback}
-              freeGiftTitle={product.free_gift_title}
-              freeGiftValue={product.free_gift_value}
-              freeGiftBadge={product.free_gift_badge}
-              categorySlug={product.category_slug}
-            />
-
-            {/* Quantity Stepper & Primary CTAs */}
-            <div className="space-y-3 pt-2">
-              <div className="flex items-center gap-4">
-                <span className="text-xs font-bold text-stone-700">{isBn ? "পরিমাণ:" : "Quantity:"}</span>
-                <div className="inline-flex items-center rounded-xl border border-stone-300 bg-white shadow-xs">
-                  <button
-                    type="button"
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    disabled={quantity <= 1}
-                    className="p-2 text-stone-600 hover:text-amber-800 disabled:opacity-30 transition-colors cursor-pointer"
-                  >
-                    <Minus className="size-3.5" />
-                  </button>
-                  <span className="w-9 text-center font-bold text-xs text-stone-900">{quantity}</span>
-                  <button
-                    type="button"
-                    onClick={() => setQuantity((q) => Math.min(product.stock_quantity || 10, q + 1))}
-                    disabled={quantity >= (product.stock_quantity || 10)}
-                    className="p-2 text-stone-600 hover:text-amber-800 disabled:opacity-30 transition-colors cursor-pointer"
-                  >
-                    <Plus className="size-3.5" />
-                  </button>
+            {/* PRIMARY PURCHASE SECTION: Prominently Above The Fold */}
+            <div className="rounded-2xl border-2 border-amber-500/30 bg-amber-50/20 p-4 space-y-3.5 shadow-xs">
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-stone-700">{isBn ? "পরিমাণ:" : "Quantity:"}</span>
+                  <div className="inline-flex items-center rounded-xl border border-stone-300 bg-white shadow-xs">
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      disabled={quantity <= 1}
+                      className="p-2 text-stone-600 hover:text-amber-800 disabled:opacity-30 transition-colors cursor-pointer"
+                    >
+                      <Minus className="size-3.5" />
+                    </button>
+                    <span className="w-9 text-center font-bold text-xs text-stone-900">{quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((q) => Math.min(product.stock_quantity || 10, q + 1))}
+                      disabled={quantity >= (product.stock_quantity || 10)}
+                      className="p-2 text-stone-600 hover:text-amber-800 disabled:opacity-30 transition-colors cursor-pointer"
+                    >
+                      <Plus className="size-3.5" />
+                    </button>
+                  </div>
                 </div>
 
-                <div className="text-[11px] text-stone-500 font-medium">
+                <div className="text-[11px] font-medium">
                   {product.in_stock ? (
-                    <span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
+                    <span className="inline-flex items-center gap-1.5 text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
                       <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
                       {isBn ? "স্টক উপলব্ধ (In Stock)" : "In Stock • Ships in 24h"}
                     </span>
                   ) : (
-                    <span className="text-rose-600 font-bold">{isBn ? "স্টক শেষ (Out of Stock)" : "Out of Stock"}</span>
+                    <span className="text-rose-600 font-bold bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-full">
+                      {isBn ? "স্টক শেষ (Out of Stock)" : "Out of Stock"}
+                    </span>
                   )}
                 </div>
               </div>
@@ -411,7 +469,7 @@ export default function ProductDetailPage() {
                   type="button"
                   onClick={handleAddToCart}
                   disabled={!product.in_stock}
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-amber-600 bg-white hover:bg-amber-50 text-amber-900 font-bold py-3.5 px-4 text-sm shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-amber-600 bg-white hover:bg-amber-50 text-amber-900 font-bold py-3.5 px-4 text-sm shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-98"
                 >
                   <ShoppingBag className="size-4 text-amber-700" />
                   <span>{isBn ? "কার্টে যোগ করুন" : "Add to Cart"}</span>
@@ -421,11 +479,19 @@ export default function ProductDetailPage() {
                   type="button"
                   onClick={handleBuyNow}
                   disabled={!product.in_stock}
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-600 via-amber-700 to-yellow-700 hover:from-amber-700 hover:to-yellow-800 text-white font-extrabold py-3.5 px-4 text-sm shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-600 via-amber-700 to-yellow-700 hover:from-amber-700 hover:to-yellow-800 text-white font-extrabold py-3.5 px-4 text-sm shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-98"
                 >
                   <Zap className="size-4 fill-amber-300 text-amber-300" />
                   <span>{isBn ? "এখনই কিনুন (সরাসরি চেকআউট)" : "Buy Now (Fast Checkout)"}</span>
                 </button>
+              </div>
+
+              {/* Free Gift Assurance Pill */}
+              <div className="rounded-xl bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 flex items-center gap-2 text-xs font-bold text-amber-950">
+                <Gift className="size-4 text-amber-600 shrink-0" />
+                <span className="truncate">
+                  {freeGiftBadge || (isBn ? "সাথে ফ্রি উপহার: খাঁটি সেলিনাইট ক্রিস্টাল প্লেট (মূল্য ₹৭২৯)" : "Includes Free Gift: Selenite Plate")}
+                </span>
               </div>
 
               {/* Pincode Delivery Estimator directly beneath Add to Cart & Buy Now */}
@@ -436,19 +502,51 @@ export default function ProductDetailPage() {
                 freeGiftValue={product.free_gift_value}
               />
             </div>
-
-            {/* Sacred Vedic & Astrological Specifications Grid */}
-            <SacredSpecificationsGrid
-              rulingPlanet={product.ruling_planet}
-              deity={product.deity}
-              crystalType={product.crystal_type}
-              beejMantra={product.beej_mantra}
-              recommendedRashis={product.recommended_for_rashis}
-              productTitle={product.title}
-              categorySlug={product.category_slug}
-            />
           </div>
         </div>
+
+        {/* ================================================================= */}
+        {/* Full-Width Section: 100% Wallet Cashback to Astrologer Bridge     */}
+        {/* ================================================================= */}
+        <section className="space-y-4">
+          <CashbackConsultationBridge
+            productTitle={product.title}
+            mrp={mrp}
+            salePrice={salePrice}
+            cashbackPercent={effectiveCashback}
+            freeGiftTitle={product.free_gift_title}
+            freeGiftValue={product.free_gift_value}
+            freeGiftBadge={product.free_gift_badge}
+            categorySlug={product.category_slug}
+          />
+        </section>
+
+        {/* ================================================================= */}
+        {/* Full-Width Section: Sacred Vedic & Astrological Specifications */}
+        {/* ================================================================= */}
+        <section className="space-y-4">
+          <div className="border-b border-amber-200/80 pb-3">
+            <h2 className="font-cinzel text-xl sm:text-2xl font-bold text-stone-900 flex items-center gap-2">
+              <Sparkles className="size-5 text-amber-600" />
+              <span>{isBn ? "শাস্ত্রীয় শক্তিসূচক ও জ্যোতিষ পরিচয়" : "Sacred Vedic Shakti & Astrological Identity"}</span>
+            </h2>
+            <p className="text-xs sm:text-sm text-stone-500 mt-0.5">
+              {isBn
+                ? "বৈদিক ধর্মশাস্ত্র অনুযায়ী গ্রহ, রাশি, মন্ত্র এবং শক্তিতত্ত্বের বিস্তারিত বিশ্লেষণ।"
+                : "Canonical scriptural analysis of planetary resonance, Beej Mantra, and zodiac affinity."}
+            </p>
+          </div>
+
+          <SacredSpecificationsGrid
+            rulingPlanet={product.ruling_planet}
+            deity={product.deity}
+            crystalType={product.crystal_type}
+            beejMantra={product.beej_mantra}
+            recommendedRashis={product.recommended_for_rashis}
+            productTitle={product.title}
+            categorySlug={product.category_slug}
+          />
+        </section>
 
         {/* ================================================================= */}
         {/* Middle Section: Detailed Information & Ritual Tabs */}
@@ -643,59 +741,62 @@ export default function ProductDetailPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              {relatedProducts.map((p) => (
-                <CardTilt key={p.id} className="h-full">
-                  <div className="h-full rounded-3xl border border-stone-200 bg-white p-3.5 shadow-xs hover:border-amber-400 hover:shadow-md transition-all flex flex-col justify-between group">
-                    <div className="space-y-2">
-                      <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-stone-100 border border-stone-100">
-                        <Link href={`/shop/products/${p.slug}`}>
-                          {p.featured_image ? (
-                            <Image
-                              src={p.featured_image}
-                              alt={p.title}
-                              fill
-                              sizes="(max-width: 768px) 100vw, 25vw"
-                              className="object-cover group-hover:scale-105 transition-transform duration-300"
-                              unoptimized
-                            />
-                          ) : (
-                            <div className="size-full flex items-center justify-center text-stone-300">
-                              <ShoppingBag className="size-8" />
-                            </div>
+              {relatedProducts.map((p) => {
+                const relHref = `/shop/products/${encodeURIComponent(p.slug || p.id)}`;
+                return (
+                  <CardTilt key={p.id} className="h-full">
+                    <div className="h-full rounded-3xl border border-stone-200 bg-white p-3.5 shadow-xs hover:border-amber-400 hover:shadow-md transition-all flex flex-col justify-between group">
+                      <div className="space-y-2">
+                        <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-stone-100 border border-stone-100">
+                          <Link href={relHref}>
+                            {p.featured_image ? (
+                              <Image
+                                src={p.featured_image}
+                                alt={p.title}
+                                fill
+                                sizes="(max-width: 768px) 100vw, 25vw"
+                                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                unoptimized
+                              />
+                            ) : (
+                              <div className="size-full flex items-center justify-center text-stone-300">
+                                <ShoppingBag className="size-8" />
+                              </div>
+                            )}
+                          </Link>
+                          {p.discount_percent > 0 && (
+                            <span className="absolute top-2 left-2 bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow-xs">
+                              {p.discount_percent}% OFF
+                            </span>
                           )}
+                        </div>
+
+                        <Link
+                          href={relHref}
+                          className="font-bold text-xs text-stone-900 line-clamp-2 hover:text-amber-700 transition-colors block pt-1"
+                        >
+                          {p.title}
                         </Link>
-                        {p.discount_percent > 0 && (
-                          <span className="absolute top-2 left-2 bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow-xs">
-                            {p.discount_percent}% OFF
-                          </span>
-                        )}
                       </div>
 
-                      <Link
-                        href={`/shop/products/${p.slug}`}
-                        className="font-bold text-xs text-stone-900 line-clamp-2 hover:text-amber-700 transition-colors block pt-1"
-                      >
-                        {p.title}
-                      </Link>
-                    </div>
-
-                    <div className="pt-2 mt-2 border-t border-stone-100 flex items-center justify-between">
-                      <div className="flex items-baseline gap-1">
-                        <span className="font-extrabold text-sm text-stone-900">{formatINR(p.sale_price)}</span>
-                        {p.mrp > p.sale_price && (
-                          <span className="text-[10px] text-stone-400 line-through">{formatINR(p.mrp)}</span>
-                        )}
+                      <div className="pt-2 mt-2 border-t border-stone-100 flex items-center justify-between">
+                        <div className="flex items-baseline gap-1">
+                          <span className="font-extrabold text-sm text-stone-900">{formatINR(p.sale_price)}</span>
+                          {p.mrp > p.sale_price && (
+                            <span className="text-[10px] text-stone-400 line-through">{formatINR(p.mrp)}</span>
+                          )}
+                        </div>
+                        <Link
+                          href={relHref}
+                          className="rounded-full bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold px-3 py-1 text-[11px] transition-colors"
+                        >
+                          {isBn ? "দেখুন" : "View"}
+                        </Link>
                       </div>
-                      <Link
-                        href={`/shop/products/${p.slug}`}
-                        className="rounded-full bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold px-3 py-1 text-[11px] transition-colors"
-                      >
-                        {isBn ? "দেখুন" : "View"}
-                      </Link>
                     </div>
-                  </div>
-                </CardTilt>
-              ))}
+                  </CardTilt>
+                );
+              })}
             </div>
           </section>
         )}
