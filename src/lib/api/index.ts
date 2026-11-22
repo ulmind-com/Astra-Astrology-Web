@@ -1096,7 +1096,24 @@ export const aiAstrologerApi = {
     ai_response: string;
     rating: number;
     feedback_reason?: string;
-  }) => api.post<{ status: string }>(endpoints.aiAstrologer.feedback, body),
+    message_index?: number;
+  }) => api.post<{ feedback_id?: string; status: string }>(endpoints.aiAstrologer.feedback, body),
+
+  purgeMemory: (sessionId?: string) =>
+    api.delete<{ cleared: boolean; deleted_sessions?: number }>(
+      endpoints.aiAstrologer.memory,
+      { query: sessionId ? { session_id: sessionId } : undefined },
+    ),
+
+  transcribeVoice: async (file: Blob | File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file, file instanceof File ? file.name : "audio.webm");
+    const res = await apiFetch<{ text: string }>(endpoints.aiAstrologer.voiceTranscribe, {
+      method: "POST",
+      body: formData,
+    });
+    return res?.text || "";
+  },
 };
 
 // ------------------------------------------------------------------- Numerology & Vastu

@@ -201,6 +201,9 @@ export const endpoints = {
     chat: "/ai-astrologer/chat",
     session: (id: string) => `/ai-astrologer/session/${id}`,
     feedback: "/ai-astrologer/feedback",
+    memory: "/ai-astrologer/memory",
+    voiceTranscribe: "/ai-chat/voice-transcribe",
+    transcribe: "/ai-astrologer/transcribe",
   },
 
   numerology: {
