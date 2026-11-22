@@ -12,6 +12,7 @@ import {
   ChevronUp,
   Coins,
   CreditCard,
+  FileText,
   Gift,
   Loader2,
   Lock,
@@ -33,6 +34,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { CartDrawer } from "@/components/shop/CartDrawer";
 import { CouponOfferSelector } from "@/components/shop/CouponOfferSelector";
+import { PrintableInvoiceModal } from "@/components/shop/PrintableInvoiceModal";
 import {
   shopApi,
   type PincodeResult,
@@ -174,6 +176,7 @@ export default function CheckoutPage() {
   const [pincodeError, setPincodeError] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [orderSuccess, setOrderSuccess] = React.useState<ShopCheckoutResult | null>(null);
+  const [showInvoiceModal, setShowInvoiceModal] = React.useState(false);
   const [activeOrder, setActiveOrder] = React.useState<ShopCheckoutResult | null>(null);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const paymentStartedRef = React.useRef(false);
@@ -605,15 +608,32 @@ export default function CheckoutPage() {
               )}
             </div>
 
+            {/* Email Invoice Sent Banner */}
+            <div className="rounded-2xl border border-amber-300/80 bg-gradient-to-r from-amber-50 to-orange-50/50 p-4 text-xs text-amber-950 flex items-start gap-3 text-left shadow-2xs">
+              <span className="text-xl shrink-0">🧾</span>
+              <div className="space-y-0.5">
+                <p className="font-bold text-stone-900 flex items-center gap-1.5">
+                  <span>{isBn ? "ট্যাক্স ইনভয়েস আপনার ইমেলে পাঠানো হয়েছে" : "Official Tax Invoice Emailed"}</span>
+                  <span className="inline-block size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                </p>
+                <p className="text-stone-600 text-[11px] leading-relaxed">
+                  {isBn
+                    ? "পবিত্র প্রতিকার সামগ্রীর জিএসটি/চালান বিল আপনার ইমেলে পৌঁছে গেছে। নিচের বাটনে ক্লিক করে সরাসরি দেখতে ও প্রিন্ট করতে পারেন।"
+                    : "A computer-generated tax bill & packing receipt has been dispatched to your email. You can also view and print it below."}
+                </p>
+              </div>
+            </div>
+
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <Link
-                href="/shop"
-                className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-amber-600 px-6 py-3 text-sm font-bold text-white hover:bg-amber-700 transition-colors"
+              <button
+                type="button"
+                onClick={() => setShowInvoiceModal(true)}
+                className="flex-1 inline-flex items-center justify-center gap-2 rounded-full border-2 border-amber-500/40 bg-amber-500/10 px-6 py-3 text-sm font-bold text-amber-900 hover:bg-amber-500/20 transition-all shadow-2xs"
               >
-                <ShoppingBag className="size-4" />
-                {isBn ? "আরও প্রতিকার কিনুন" : "Continue Shopping"}
-              </Link>
+                <FileText className="size-4 text-amber-600" />
+                {isBn ? "ইনভয়েস দেখুন ও প্রিন্ট করুন" : "View & Print Invoice"}
+              </button>
               <Link
                 href="/account/orders"
                 className="flex-1 inline-flex items-center justify-center gap-2 rounded-full border border-stone-300 bg-white px-6 py-3 text-sm font-bold text-stone-800 hover:bg-stone-50 transition-colors"
@@ -622,9 +642,27 @@ export default function CheckoutPage() {
                 {isBn ? "আমার অর্ডার দেখুন" : "Track My Orders"}
               </Link>
             </div>
+
+            <div>
+              <Link
+                href="/shop"
+                className="inline-flex items-center justify-center gap-2 text-xs font-semibold text-amber-700 hover:underline"
+              >
+                <ShoppingBag className="size-3.5" />
+                {isBn ? "আরও পবিত্র প্রতিকার সামগ্রী কিনুন" : "Continue Shopping for Sacred Remedies"}
+              </Link>
+            </div>
           </div>
         </main>
         <SiteFooter />
+
+        {/* Standalone Printable Invoice Modal */}
+        <PrintableInvoiceModal
+          orderKey={orderSuccess.order_number || orderSuccess.order_id || ""}
+          orderNumber={orderSuccess.order_number || ""}
+          isOpen={showInvoiceModal}
+          onClose={() => setShowInvoiceModal(false)}
+        />
       </>
     );
   }
