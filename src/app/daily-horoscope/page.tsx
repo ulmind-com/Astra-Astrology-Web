@@ -854,28 +854,14 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
               </Link>
             </div>
 
-            {/* Right side: Celestial rotating wheel with Zodiac Emblem positioned on top */}
-            <div className="pointer-events-none absolute -right-12 sm:-right-8 lg:-right-4 top-1/2 -translate-y-1/2 hidden md:flex items-center justify-center size-[340px] lg:size-[420px]">
-              {/* Faint rotating background zodiac halo wheel */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/zodiac-wheel-gold.webp"
-                alt=""
-                aria-hidden="true"
-                className="absolute inset-0 size-full select-none opacity-25 mix-blend-multiply animate-spin [animation-duration:120s] motion-reduce:animate-none"
-              />
-
-              {/* Central soft warm golden glow */}
-              <div className="absolute size-44 sm:size-52 rounded-full bg-amber-400/15 blur-2xl pointer-events-none" />
-
-              {/* Clean Transparent Zodiac Wheel Emblem on top */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/images/daily-horoscope-zodiac-wheel.png"
-                alt="Daily Horoscope Zodiac Wheel"
-                className="relative z-10 size-[210px] lg:size-[260px] object-contain select-none drop-shadow-[0_8px_24px_rgba(180,83,9,0.18)]"
-              />
-            </div>
+            {/* Faint rotating zodiac wheel on the right */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/zodiac-wheel-gold.webp"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-16 -top-20 hidden size-[440px] select-none opacity-30 mix-blend-multiply animate-spin [animation-duration:120s] motion-reduce:animate-none lg:block"
+            />
           </div>
 
           {/* Pricing coin pill banner */}
