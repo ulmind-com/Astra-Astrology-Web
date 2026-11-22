@@ -3,6 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Package,
@@ -136,6 +137,8 @@ export default function MyOrdersPage() {
 
   // Invoice Modal State
   const [invoiceModalOrder, setInvoiceModalOrder] = React.useState<ShopOrder | null>(null);
+  const searchParams = useSearchParams();
+  const invoiceParam = searchParams?.get("invoice") || searchParams?.get("open_invoice");
 
   // Refund & Cancellation Form State
   const [cancellingOrder, setCancellingOrder] = React.useState<ShopOrder | null>(null);
@@ -180,6 +183,28 @@ export default function MyOrdersPage() {
   });
 
   const orders = data?.items || [];
+
+  // Auto-open invoice modal if user arrived via email invoice link (?invoice=...)
+  React.useEffect(() => {
+    if (!invoiceParam || !ready) return;
+
+    const found = orders.find(
+      (o) => o.order_number === invoiceParam || o.id === invoiceParam
+    );
+    if (found) {
+      setInvoiceModalOrder(found);
+      return;
+    }
+
+    shopApi
+      .getOrderDetail(invoiceParam)
+      .then((ord) => {
+        if (ord) setInvoiceModalOrder(ord);
+      })
+      .catch((err) => {
+        console.warn("[OrdersPage] Failed to load direct invoice order:", err);
+      });
+  }, [invoiceParam, ready, orders]);
 
   // Filter orders
   const filteredOrders = React.useMemo(() => {

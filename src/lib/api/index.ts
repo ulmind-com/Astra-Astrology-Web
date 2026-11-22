@@ -1472,6 +1472,9 @@ export interface ShopOrder {
   estimated_delivery_date?: string | null;
   delivered_at?: string | null;
   consecration_certificate_url?: string | null;
+  invoice_number?: string | null;
+  invoice_sent_at?: string | null;
+  invoice_email_sent?: boolean;
   refund_status?: string | null;
   refund_amount?: number | null;
   refund_upi_id?: string | null;
