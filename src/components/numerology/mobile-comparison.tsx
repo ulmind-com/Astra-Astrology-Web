@@ -24,9 +24,19 @@ export function MobileComparisonSection({
 }: MobileComparisonProps) {
   const t = MOBILE_COMPARE_I18N[language] || MOBILE_COMPARE_I18N.en;
   const [numbers, setNumbers] = React.useState<string[]>(["9876543210", "9830124567"]);
+  const [currentMulank, setCurrentMulank] = React.useState<number>(mulank || 1);
+  const [currentBhagyank, setCurrentBhagyank] = React.useState<number>(bhagyank || 1);
   const [profession, setProfession] = React.useState<string>("business");
   const [loading, setLoading] = React.useState(false);
   const [result, setResult] = React.useState<MobileCompareResponse | null>(null);
+
+  React.useEffect(() => {
+    if (mulank) setCurrentMulank(mulank);
+  }, [mulank]);
+
+  React.useEffect(() => {
+    if (bhagyank) setCurrentBhagyank(bhagyank);
+  }, [bhagyank]);
 
   const handleAddNumber = () => {
     if (numbers.length >= 6) {
@@ -62,8 +72,8 @@ export function MobileComparisonSection({
     try {
       const res = await numerologyApi.compareMobile({
         numbers: cleanList,
-        mulank,
-        bhagyank,
+        mulank: currentMulank,
+        bhagyank: currentBhagyank,
         profession,
         birth_date: birthDate || undefined,
       });
@@ -93,11 +103,35 @@ export function MobileComparisonSection({
             </p>
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-mono bg-surface-muted/60 px-3 py-1.5 rounded-lg border border-border/60">
-            <span className="text-muted-foreground">{t.kingNumber}</span>
-            <span className="font-bold text-brand-600">{mulank}</span>
-            <span className="text-muted-foreground ml-2">{t.bhagyank}</span>
-            <span className="font-bold text-brand-600">{bhagyank}</span>
+          <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
+            <div className="flex items-center gap-1.5 bg-surface-muted/60 px-2.5 py-1 rounded-lg border border-border/60">
+              <span className="text-muted-foreground">{t.kingNumber}:</span>
+              <select
+                value={currentMulank}
+                onChange={(e) => setCurrentMulank(Number(e.target.value))}
+                className="bg-transparent font-bold text-brand-600 focus:outline-none cursor-pointer"
+              >
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-1.5 bg-surface-muted/60 px-2.5 py-1 rounded-lg border border-border/60">
+              <span className="text-muted-foreground">{t.bhagyank}:</span>
+              <select
+                value={currentBhagyank}
+                onChange={(e) => setCurrentBhagyank(Number(e.target.value))}
+                className="bg-transparent font-bold text-brand-600 focus:outline-none cursor-pointer"
+              >
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 

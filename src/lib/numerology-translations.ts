@@ -38,6 +38,13 @@ export interface NumerologyTranslations {
   tabRemedies: string;
   tabProfile: string;
 
+  // Suite Modes
+  suiteCore: string;
+  suiteNameCorrect: string;
+  suiteMobileCompare: string;
+  suiteVehicleBank: string;
+  suiteBusiness: string;
+
   // Lo Shu & Raj Yogas
   loShuGridTitle: string;
   loShuSequence: string;
@@ -135,13 +142,19 @@ export const NUMEROLOGY_I18N: Record<AstrologyLanguage, NumerologyTranslations> 
     tabLoshu: "বৈদিক লো-শু গ্রিড ও যোগ",
     tabDasha: "সংখ্যা দশা টাইমলাইন",
     tabName: "চ্যালডিয়ান নাম বিশ্লেষণ",
-    tabNameCorrect: "নাম সংশোধন ও শুভ বানান",
+    tabNameCorrect: "রাজকীয় নাম সংশোধন (Royal Name Harmonizer)",
     tabMobile: "মোবাইল অডিট",
-    tabMobileCompare: "সিম তুলনা স্যুট",
+    tabMobileCompare: "মোবাইল সিম তুলনা (Compare Mobile Numbers)",
     tabBusiness: "ব্যবসা ও ব্র্যান্ড অডিট",
-    tabVehicleBank: "গাড়ি ও ব্যাংক অ্যাকাউন্ট",
+    tabVehicleBank: "গাড়ি ও ব্যাংক অডিট (Vehicle/Bank Audit)",
     tabRemedies: "অনুপস্থিত সংখ্যা প্রতিকার",
     tabProfile: "মূলাঙ্ক ২০-ক্ষেত্র বিবরণ",
+
+    suiteCore: "পূর্ণ কুষ্ঠি ও লো শু গ্রিড",
+    suiteNameCorrect: "রাজকীয় নাম সংশোধন (Royal Name Harmonizer)",
+    suiteMobileCompare: "মোবাইল সিম তুলনা (Compare Mobile Numbers)",
+    suiteVehicleBank: "গাড়ি ও ব্যাংক অডিট (Vehicle/Bank Audit)",
+    suiteBusiness: "ব্যবসা ও ব্র্যান্ড অডিট",
 
     loShuGridTitle: "বৈদিক ৩×৩ লো-শু গ্রিড",
     loShuSequence: "৩-১-৯ / ৬-৭-৫ / ২-৮-৪",
@@ -232,13 +245,19 @@ export const NUMEROLOGY_I18N: Record<AstrologyLanguage, NumerologyTranslations> 
     tabLoshu: "वैदिक लो-शु ग्रिड व राजयोग",
     tabDasha: "अंक दशा समय सारणी",
     tabName: "कैल्डियन नाम विश्लेषण",
-    tabNameCorrect: "नाम सुधार एवं शुभ वर्तनी",
+    tabNameCorrect: "शाही नाम सुधार (Royal Name Harmonizer)",
     tabMobile: "मोबाइल नंबर ऑडिट",
-    tabMobileCompare: "सिम तुलना सूट",
+    tabMobileCompare: "मोबाइल सिम तुलना (Compare Mobile Numbers)",
     tabBusiness: "व्यापार एवं ब्रांड ऑडिट",
-    tabVehicleBank: "वाहन व बैंक खाता अंक",
+    tabVehicleBank: "वाहन व बैंक ऑडिट (Vehicle/Bank Audit)",
     tabRemedies: "अनुपस्थित अंक उपाय",
     tabProfile: "मूलांक २०-क्षेत्र विवरण",
+
+    suiteCore: "पूर्ण कुंडली व लो-शु ग्रिड",
+    suiteNameCorrect: "शाही नाम सुधार (Royal Name Harmonizer)",
+    suiteMobileCompare: "मोबाइल सिम तुलना (Compare Mobile Numbers)",
+    suiteVehicleBank: "वाहन व बैंक ऑडिट (Vehicle/Bank Audit)",
+    suiteBusiness: "व्यापार एवं ब्रांड ऑडिट",
 
     loShuGridTitle: "वैदिक ३×३ लो-शु ग्रिड",
     loShuSequence: "३-१-९ / ६-७-५ / २-८-४",
@@ -329,13 +348,19 @@ export const NUMEROLOGY_I18N: Record<AstrologyLanguage, NumerologyTranslations> 
     tabLoshu: "Lo Shu Grid & Yogas",
     tabDasha: "Dasha Timeline",
     tabName: "Name Analysis",
-    tabNameCorrect: "Name Correction",
+    tabNameCorrect: "Royal Name Harmonizer",
     tabMobile: "Mobile Audit",
-    tabMobileCompare: "SIM Compare",
+    tabMobileCompare: "Compare Mobile Numbers",
     tabBusiness: "Business & Brand",
-    tabVehicleBank: "Vehicle & Bank",
+    tabVehicleBank: "Vehicle/Bank Audit",
     tabRemedies: "Missing Remedies",
     tabProfile: "20-Field Profile",
+
+    suiteCore: "Full Numerology & Lo Shu",
+    suiteNameCorrect: "Royal Name Harmonizer",
+    suiteMobileCompare: "Compare Mobile Numbers",
+    suiteVehicleBank: "Vehicle/Bank Audit",
+    suiteBusiness: "Business & Brand",
 
     loShuGridTitle: "Vedic 3x3 Lo Shu Grid",
     loShuSequence: "3-1-9 / 6-7-5 / 2-8-4",

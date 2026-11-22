@@ -22,9 +22,19 @@ export function VehicleBankAuditSection({
 }: VehicleBankAuditProps) {
   const t = VEHICLE_BANK_I18N[language] || VEHICLE_BANK_I18N.en;
   const [auditType, setAuditType] = React.useState<"vehicle" | "bank">("vehicle");
+  const [currentMulank, setCurrentMulank] = React.useState<number>(mulank || 1);
+  const [currentBhagyank, setCurrentBhagyank] = React.useState<number>(bhagyank || 1);
   const [inputString, setInputString] = React.useState("WB 02 AK 1234");
   const [loading, setLoading] = React.useState(false);
   const [result, setResult] = React.useState<VehicleBankAuditResponse | null>(null);
+
+  React.useEffect(() => {
+    if (mulank) setCurrentMulank(mulank);
+  }, [mulank]);
+
+  React.useEffect(() => {
+    if (bhagyank) setCurrentBhagyank(bhagyank);
+  }, [bhagyank]);
 
   const handleAudit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,8 +48,8 @@ export function VehicleBankAuditSection({
       const res = await numerologyApi.auditVehicleBank({
         input_string: inputString.trim(),
         audit_type: auditType,
-        mulank,
-        bhagyank,
+        mulank: currentMulank,
+        bhagyank: currentBhagyank,
       });
       if (res) {
         setResult(res);
@@ -71,11 +81,35 @@ export function VehicleBankAuditSection({
             </p>
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-mono bg-surface-muted/60 px-3 py-1.5 rounded-lg border border-border/60">
-            <span className="text-muted-foreground">{t.mulank}</span>
-            <span className="font-bold text-brand-600">{mulank}</span>
-            <span className="text-muted-foreground ml-2">{t.bhagyank}</span>
-            <span className="font-bold text-brand-600">{bhagyank}</span>
+          <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
+            <div className="flex items-center gap-1.5 bg-surface-muted/60 px-2.5 py-1 rounded-lg border border-border/60">
+              <span className="text-muted-foreground">{t.mulank}:</span>
+              <select
+                value={currentMulank}
+                onChange={(e) => setCurrentMulank(Number(e.target.value))}
+                className="bg-transparent font-bold text-brand-600 focus:outline-none cursor-pointer"
+              >
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-1.5 bg-surface-muted/60 px-2.5 py-1 rounded-lg border border-border/60">
+              <span className="text-muted-foreground">{t.bhagyank}:</span>
+              <select
+                value={currentBhagyank}
+                onChange={(e) => setCurrentBhagyank(Number(e.target.value))}
+                className="bg-transparent font-bold text-brand-600 focus:outline-none cursor-pointer"
+              >
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 

@@ -46,8 +46,37 @@ import { MobileComparisonSection } from "@/components/numerology/mobile-comparis
 import { BusinessNumerologySection } from "@/components/numerology/business-numerology";
 import { VehicleBankAuditSection } from "@/components/numerology/vehicle-bank-audit";
 import { NUMEROLOGY_I18N } from "@/lib/numerology-translations";
+import { cn } from "@/lib/utils";
 import type { NumerologyCalculateResponse } from "@/types/numerology";
 import type { AstrologyLanguage } from "@/types";
+
+function calculateMulankBhagyank(dob: string): { mulank: number; bhagyank: number } {
+  if (!dob) return { mulank: 1, bhagyank: 1 };
+  const parts = dob.split("-");
+  if (parts.length !== 3) return { mulank: 1, bhagyank: 1 };
+  const day = parseInt(parts[2], 10) || 1;
+  const month = parseInt(parts[1], 10) || 1;
+  const year = parseInt(parts[0], 10) || 2000;
+
+  const reduceToSingleDigit = (n: number): number => {
+    while (n > 9) {
+      n = String(n)
+        .split("")
+        .reduce((sum, d) => sum + parseInt(d, 10), 0);
+    }
+    return n || 1;
+  };
+
+  const mulank = reduceToSingleDigit(day);
+  const sumDigits = (n: number) =>
+    String(n)
+      .split("")
+      .reduce((acc, d) => acc + parseInt(d, 10), 0);
+  const total = sumDigits(day) + sumDigits(month) + sumDigits(year);
+  const bhagyank = reduceToSingleDigit(total);
+
+  return { mulank, bhagyank };
+}
 
 export default function NumerologyPage() {
   const { user, isSignedIn } = useAuth();
@@ -80,6 +109,13 @@ export default function NumerologyPage() {
     | "profile"
   >("loshu");
   const hasAutoFilled = React.useRef(false);
+
+  const derivedNumbers = React.useMemo(() => {
+    if (data?.mulank?.number && data?.bhagyank?.number) {
+      return { mulank: data.mulank.number, bhagyank: data.bhagyank.number };
+    }
+    return calculateMulankBhagyank(birthDate);
+  }, [data, birthDate]);
 
   // Auto-populate from user profile if signed in
   React.useEffect(() => {
@@ -233,178 +269,286 @@ export default function NumerologyPage() {
         </div>
 
         {/* =========================================================================
-            FORM CARD (Matching Astra Glassmorphic Theme)
+            TOP SUITE NAVIGATION BAR
         ========================================================================= */}
-        <div className="rounded-2xl border border-stone-200/90 bg-white p-4 sm:p-6 shadow-xs">
-          {numerologyFeature && !numerologyFeature.enabled && (
-            <div className="mb-4">
-              <FeatureDisabledAlert featureName={numerologyFeature?.name} language={language} />
-            </div>
-          )}
-          <form onSubmit={handleCalculate} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
-              <div>
-                <label className="block text-xs font-semibold text-foreground-muted mb-1.5">
-                  {t.fullName}
-                </label>
-                <input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  required
-                  className="w-full bg-surface border border-border/80 rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                  placeholder={t.fullNamePlaceholder}
-                />
-              </div>
-
-              <div>
-                <label htmlFor="num-birth-date" className="block text-xs font-semibold text-foreground-muted mb-1.5">
-                  {t.birthDate}
-                </label>
-                <input
-                  type="date"
-                  id="num-birth-date"
-                  value={birthDate}
-                  onChange={(e) => setBirthDate(e.target.value)}
-                  required
-                  className="w-full bg-surface border border-border/80 rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="num-gender" className="block text-xs font-semibold text-foreground-muted mb-1.5">
-                  {t.gender}
-                </label>
-                <select
-                  id="num-gender"
-                  value={gender}
-                  onChange={(e) => setGender(e.target.value as "male" | "female" | "other")}
-                  className="w-full bg-surface border border-border/80 rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                >
-                  <option value="male">{t.genderMale}</option>
-                  <option value="female">{t.genderFemale}</option>
-                  <option value="other">{t.genderOther}</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-foreground-muted mb-1.5">
-                  {t.mobileNumber}
-                </label>
-                <input
-                  type="tel"
-                  value={mobileNumber}
-                  onChange={(e) => setMobileNumber(e.target.value)}
-                  className="w-full bg-surface border border-border/80 rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                  placeholder={t.mobileNumberPlaceholder}
-                />
-              </div>
-
-              <div className="flex items-end">
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  variant="primary"
-                  size="lg"
-                  className="w-full h-[40px] font-bold text-ink-950 flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:brightness-105"
-                >
-                  {loading ? (
-                    <span className="inline-block w-4 h-4 border-2 border-ink-950 border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4" />
-                      {t.calculateBtn}
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </form>
+        <div className="flex p-1.5 bg-surface rounded-2xl border border-border/80 shadow-xs overflow-x-auto gap-1.5">
+          <button
+            type="button"
+            onClick={() => setActiveTab("loshu")}
+            className={cn(
+              "flex items-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer",
+              ["loshu", "dasha", "name", "mobile", "remedies", "profile"].includes(activeTab)
+                ? "bg-brand-500 text-ink-950 shadow-xs font-black"
+                : "text-muted-foreground hover:text-foreground hover:bg-surface-muted",
+            )}
+          >
+            <Layers className="size-4" />
+            {t.suiteCore}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("name_correct")}
+            className={cn(
+              "flex items-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer",
+              activeTab === "name_correct"
+                ? "bg-brand-500 text-ink-950 shadow-xs font-black"
+                : "text-muted-foreground hover:text-foreground hover:bg-surface-muted",
+            )}
+          >
+            <Wand2 className="size-4 text-amber-600 dark:text-amber-400" />
+            {t.suiteNameCorrect}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("mobile_compare")}
+            className={cn(
+              "flex items-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer",
+              activeTab === "mobile_compare"
+                ? "bg-brand-500 text-ink-950 shadow-xs font-black"
+                : "text-muted-foreground hover:text-foreground hover:bg-surface-muted",
+            )}
+          >
+            <Trophy className="size-4 text-emerald-600 dark:text-emerald-400" />
+            {t.suiteMobileCompare}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("vehicle_bank")}
+            className={cn(
+              "flex items-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer",
+              activeTab === "vehicle_bank"
+                ? "bg-brand-500 text-ink-950 shadow-xs font-black"
+                : "text-muted-foreground hover:text-foreground hover:bg-surface-muted",
+            )}
+          >
+            <Car className="size-4 text-sky-600 dark:text-sky-400" />
+            {t.suiteVehicleBank}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("business")}
+            className={cn(
+              "flex items-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 cursor-pointer",
+              activeTab === "business"
+                ? "bg-brand-500 text-ink-950 shadow-xs font-black"
+                : "text-muted-foreground hover:text-foreground hover:bg-surface-muted",
+            )}
+          >
+            <Building2 className="size-4 text-indigo-600 dark:text-indigo-400" />
+            {t.suiteBusiness}
+          </button>
         </div>
 
-        {/* =========================================================================
-            RESULTS SECTION
-        ========================================================================= */}
+        {/* If data is present, show the Top 4 Quick Stat Cards */}
         {data && (
-          <div className="space-y-8 reveal-cascade">
-            {/* Top 4 Quick Stat Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 sm:gap-4">
-              <div className="rounded-2xl border border-border/80 bg-surface p-4 sm:p-5 shadow-xs relative overflow-hidden">
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  {t.driverMulank}
-                </div>
-                <div className="text-3xl sm:text-4xl font-serif font-black text-brand-600 mt-1.5">
-                  {data.mulank.number}
-                </div>
-                <div className="text-xs font-medium text-foreground mt-1">{data.mulank.planet}</div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 sm:gap-4">
+            <div className="rounded-2xl border border-border/80 bg-surface p-4 sm:p-5 shadow-xs relative overflow-hidden">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                {t.driverMulank}
               </div>
-
-              <div className="rounded-2xl border border-border/80 bg-surface p-4 sm:p-5 shadow-xs relative overflow-hidden">
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  {t.destinyBhagyank}
-                </div>
-                <div className="text-3xl sm:text-4xl font-serif font-black text-amber-500 mt-1.5">
-                  {data.bhagyank.number}
-                </div>
-                <div className="text-xs font-medium text-foreground mt-1">{data.bhagyank.planet}</div>
+              <div className="text-3xl sm:text-4xl font-serif font-black text-brand-600 mt-1.5">
+                {data.mulank.number}
               </div>
+              <div className="text-xs font-medium text-foreground mt-1">{data.mulank.planet}</div>
+            </div>
 
-              <div className="rounded-2xl border border-border/80 bg-surface p-4 sm:p-5 shadow-xs relative overflow-hidden">
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  {t.kuaNumber}
-                </div>
-                <div className="text-3xl sm:text-4xl font-serif font-black text-sky-500 mt-1.5">
-                  {data.kua_number}
-                </div>
-                <div className="text-xs font-medium text-foreground mt-1">
-                  {t.personalVibration}
-                </div>
+            <div className="rounded-2xl border border-border/80 bg-surface p-4 sm:p-5 shadow-xs relative overflow-hidden">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                {t.destinyBhagyank}
               </div>
+              <div className="text-3xl sm:text-4xl font-serif font-black text-amber-500 mt-1.5">
+                {data.bhagyank.number}
+              </div>
+              <div className="text-xs font-medium text-foreground mt-1">{data.bhagyank.planet}</div>
+            </div>
 
-              <div className="rounded-2xl border border-border/80 bg-surface p-4 sm:p-5 shadow-xs relative overflow-hidden">
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  {t.personalYear}
-                </div>
-                <div className="text-3xl sm:text-4xl font-serif font-black text-emerald-500 mt-1.5">
-                  {data.year_prediction_number}
-                </div>
-                <div className="text-xs font-medium text-foreground mt-1 truncate">
-                  {data.year_prediction_summary.slice(0, 24)}...
-                </div>
+            <div className="rounded-2xl border border-border/80 bg-surface p-4 sm:p-5 shadow-xs relative overflow-hidden">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                {t.kuaNumber}
+              </div>
+              <div className="text-3xl sm:text-4xl font-serif font-black text-sky-500 mt-1.5">
+                {data.kua_number}
+              </div>
+              <div className="text-xs font-medium text-foreground mt-1">
+                {t.personalVibration}
               </div>
             </div>
 
-            {/* Pill Navigation Tabs (Matching Daily Horoscope Drawer Tabs) */}
-            <div className="flex flex-wrap gap-2 border-b border-border/80 pb-3">
-              {[
-                { id: "loshu", label: t.tabLoshu, icon: Layers },
-                { id: "dasha", label: t.tabDasha, icon: Compass },
-                { id: "name", label: t.tabName, icon: UserCheck },
-                { id: "name_correct", label: t.tabNameCorrect, icon: Wand2 },
-                { id: "mobile", label: t.tabMobile, icon: Phone },
-                { id: "mobile_compare", label: t.tabMobileCompare, icon: Trophy },
-                { id: "business", label: t.tabBusiness, icon: Building2 },
-                { id: "vehicle_bank", label: t.tabVehicleBank, icon: Car },
-                { id: "remedies", label: t.tabRemedies, icon: BookOpen },
-                { id: "profile", label: t.tabProfile, icon: Award },
-              ].map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold press transition-all cursor-pointer ${
-                      activeTab === tab.id
-                        ? "bg-brand-500 text-ink-950 font-bold shadow-xs"
-                        : "bg-surface border border-border/80 text-muted-foreground hover:text-foreground hover:bg-surface-muted"
-                    }`}
-                  >
-                    <Icon className="size-4" />
-                    {tab.label}
-                  </button>
-                );
-              })}
+            <div className="rounded-2xl border border-border/80 bg-surface p-4 sm:p-5 shadow-xs relative overflow-hidden">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                {t.personalYear}
+              </div>
+              <div className="text-3xl sm:text-4xl font-serif font-black text-emerald-500 mt-1.5">
+                {data.year_prediction_number}
+              </div>
+              <div className="text-xs font-medium text-foreground mt-1 truncate">
+                {data.year_prediction_summary.slice(0, 24)}...
+              </div>
             </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            TOOL SUITE SCREENS
+        ========================================================================= */}
+        {activeTab === "name_correct" ? (
+          <div className="space-y-6">
+            <NameCorrectionSection
+              initialName={fullName}
+              mulank={derivedNumbers.mulank}
+              bhagyank={derivedNumbers.bhagyank}
+              language={language}
+            />
+          </div>
+        ) : activeTab === "mobile_compare" ? (
+          <div className="space-y-6">
+            <MobileComparisonSection
+              mulank={derivedNumbers.mulank}
+              bhagyank={derivedNumbers.bhagyank}
+              birthDate={birthDate}
+              language={language}
+            />
+          </div>
+        ) : activeTab === "vehicle_bank" ? (
+          <div className="space-y-6">
+            <VehicleBankAuditSection
+              mulank={derivedNumbers.mulank}
+              bhagyank={derivedNumbers.bhagyank}
+              language={language}
+            />
+          </div>
+        ) : activeTab === "business" ? (
+          <div className="space-y-6">
+            <BusinessNumerologySection
+              ownerMulank={derivedNumbers.mulank}
+              ownerBhagyank={derivedNumbers.bhagyank}
+              language={language}
+            />
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* FORM CARD (Matching Astra Glassmorphic Theme) */}
+            <div className="rounded-2xl border border-stone-200/90 bg-white p-4 sm:p-6 shadow-xs">
+              {numerologyFeature && !numerologyFeature.enabled && (
+                <div className="mb-4">
+                  <FeatureDisabledAlert featureName={numerologyFeature?.name} language={language} />
+                </div>
+              )}
+              <form onSubmit={handleCalculate} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-semibold text-foreground-muted mb-1.5">
+                      {t.fullName}
+                    </label>
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                      className="w-full bg-surface border border-border/80 rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                      placeholder={t.fullNamePlaceholder}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="num-birth-date" className="block text-xs font-semibold text-foreground-muted mb-1.5">
+                      {t.birthDate}
+                    </label>
+                    <input
+                      type="date"
+                      id="num-birth-date"
+                      value={birthDate}
+                      onChange={(e) => setBirthDate(e.target.value)}
+                      required
+                      className="w-full bg-surface border border-border/80 rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="num-gender" className="block text-xs font-semibold text-foreground-muted mb-1.5">
+                      {t.gender}
+                    </label>
+                    <select
+                      id="num-gender"
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value as "male" | "female" | "other")}
+                      className="w-full bg-surface border border-border/80 rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                    >
+                      <option value="male">{t.genderMale}</option>
+                      <option value="female">{t.genderFemale}</option>
+                      <option value="other">{t.genderOther}</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-foreground-muted mb-1.5">
+                      {t.mobileNumber}
+                    </label>
+                    <input
+                      type="tel"
+                      value={mobileNumber}
+                      onChange={(e) => setMobileNumber(e.target.value)}
+                      className="w-full bg-surface border border-border/80 rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                      placeholder={t.mobileNumberPlaceholder}
+                    />
+                  </div>
+
+                  <div className="flex items-end">
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      variant="primary"
+                      size="lg"
+                      className="w-full h-[40px] font-bold text-ink-950 flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:brightness-105"
+                    >
+                      {loading ? (
+                        <span className="inline-block w-4 h-4 border-2 border-ink-950 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4" />
+                          {t.calculateBtn}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            {/* RESULTS SECTION */}
+            {data && (
+              <div className="space-y-8 reveal-cascade">
+                {/* Pill Navigation Tabs (Matching Daily Horoscope Drawer Tabs) */}
+                <div className="flex flex-wrap gap-2 border-b border-border/80 pb-3">
+                  {[
+                    { id: "loshu", label: t.tabLoshu, icon: Layers },
+                    { id: "dasha", label: t.tabDasha, icon: Compass },
+                    { id: "name", label: t.tabName, icon: UserCheck },
+                    { id: "name_correct", label: t.tabNameCorrect, icon: Wand2 },
+                    { id: "mobile", label: t.tabMobile, icon: Phone },
+                    { id: "mobile_compare", label: t.tabMobileCompare, icon: Trophy },
+                    { id: "business", label: t.tabBusiness, icon: Building2 },
+                    { id: "vehicle_bank", label: t.tabVehicleBank, icon: Car },
+                    { id: "remedies", label: t.tabRemedies, icon: BookOpen },
+                    { id: "profile", label: t.tabProfile, icon: Award },
+                  ].map((tab) => {
+                    const Icon = tab.icon;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id as any)}
+                        className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold press transition-all cursor-pointer ${
+                          activeTab === tab.id
+                            ? "bg-brand-500 text-ink-950 font-bold shadow-xs"
+                            : "bg-surface border border-border/80 text-muted-foreground hover:text-foreground hover:bg-surface-muted"
+                        }`}
+                      >
+                        <Icon className="size-4" />
+                        {tab.label}
+                      </button>
+                    );
+                  })}
+                </div>
 
             {/* Tab 1: Lo Shu Grid & Planes */}
             {activeTab === "loshu" && (
@@ -818,44 +962,6 @@ export default function NumerologyPage() {
               </div>
             )}
 
-            {/* Tab 7: Name Correction & Spelling Harmonizer */}
-            {activeTab === "name_correct" && (
-              <NameCorrectionSection
-                initialName={fullName}
-                mulank={data.mulank.number}
-                bhagyank={data.bhagyank.number}
-                language={language}
-              />
-            )}
-
-            {/* Tab 8: Mobile Sim Comparison Suite */}
-            {activeTab === "mobile_compare" && (
-              <MobileComparisonSection
-                mulank={data.mulank.number}
-                bhagyank={data.bhagyank.number}
-                birthDate={birthDate}
-                language={language}
-              />
-            )}
-
-            {/* Tab 9: Business & Brand Numerology Evaluator */}
-            {activeTab === "business" && (
-              <BusinessNumerologySection
-                ownerMulank={data.mulank.number}
-                ownerBhagyank={data.bhagyank.number}
-                language={language}
-              />
-            )}
-
-            {/* Tab 10: Vehicle Plate & Bank Account Numerology Audit */}
-            {activeTab === "vehicle_bank" && (
-              <VehicleBankAuditSection
-                mulank={data.mulank.number}
-                bhagyank={data.bhagyank.number}
-                language={language}
-              />
-            )}
-
             {/* Bottom Actions: Recalculate & Consult CTA */}
             <div className="rounded-2xl border border-border/80 bg-surface p-5 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4">
               <button
@@ -880,7 +986,9 @@ export default function NumerologyPage() {
             </div>
           </div>
         )}
-      </main>
+      </div>
+    )}
+  </main>
 
       <FeatureCoinModal
         open={coinModalOpen}
