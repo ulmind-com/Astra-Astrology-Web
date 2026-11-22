@@ -71,25 +71,67 @@ export interface VastuAuditResponse {
 export interface AyadiCalculationRequest {
   length: number;
   width: number;
-  unit?: "feet" | "meter";
+  unit?: "feet" | "meter" | "hasta";
 }
 
 export interface AyadiCalculationResponse {
   length: number;
   width: number;
+  unit?: string;
   area_sqft: number;
+  area_hasta?: number;
+  perimeter_ft?: number;
+  perimeter_hasta?: number;
+
+  // 1. Aaya (আয়)
   aaya_number: number;
   aaya_name: string;
   aaya_name_bn: string;
   is_auspicious: boolean;
   aaya_significance_bn: string;
+
+  // 2. Dhana & Vyaya / Rina (ধন ও ব্যয়)
   dhana_score: number;
   rina_score: number;
+  vyaya_score?: number;
   is_dhana_dominant: boolean;
-  structure_longevity_years: number;
+
+  // 3. Yoni (যোনি / দিকগত শক্তি)
+  yoni_number?: number;
+  yoni_name?: string;
+  yoni_name_bn?: string;
+  yoni_direction?: string;
+  yoni_significance_bn?: string;
+
+  // 4. Varna (বর্ণ)
+  varna_name?: string;
+  varna_name_bn?: string;
+  varna_significance_bn?: string;
+
+  // 5. Nakshatra / Tara (নক্ষত্র)
   building_nakshatra_number: number;
   building_nakshatra_name: string;
+  building_nakshatra_name_bn?: string;
+
+  // 6. Tithi (তিথি)
+  tithi_number?: number;
+  tithi_name?: string;
+  tithi_name_bn?: string;
+
+  // 7. Vara (বার)
+  vara_name?: string;
+  vara_name_bn?: string;
+
+  // 8. Paramayu / Longevity (পরমায়ু)
+  structure_longevity_years: number;
+  longevity_verdict_bn?: string;
+
+  // Overall Score, Verdict & Rectifications
+  shadvarga_score?: number;
+  shadvarga_grade?: string;
+  shadvarga_verdict_bn?: string;
   best_facing_directions_bn: string[];
+  rectification_suggestions_bn?: string[];
 }
 
 export interface MedicalVastuItem {

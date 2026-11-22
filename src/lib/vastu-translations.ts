@@ -99,16 +99,27 @@ export interface VastuTranslations {
   enterDimensions: string;
   feetUnit: string;
   meterUnit: string;
+  hastaUnit: string;
   lengthLabel: (u: string) => string;
   widthLabel: (u: string) => string;
   calculateAyadiBtn: string;
   calculatedAaya: string;
   totalArea: string;
+  perimeterLabel: string;
   dhanaVsRina: string;
   goodStatus: string;
   longevity: string;
   yearsSuffix: (y: number) => string;
   buildingNakshatra: string;
+  yoniLabel: string;
+  varnaLabel: string;
+  tithiLabel: string;
+  varaLabel: string;
+  scoreLabel: string;
+  rectificationTitle: string;
+  blueprintTitle: string;
+  quickPresetsTitle: string;
+  printAuditBtn: string;
   idealDirections: string;
   validDimensionsError: string;
   ayadiSuccess: string;
@@ -126,7 +137,7 @@ export const VASTU_I18N: Record<AstrologyLanguage, VastuTranslations> = {
     tabCompass: "স্মার্ট কম্পাস ও এআর (Live & AR)",
     tabMedical: "মেডিকেল বাস্তু (Medical Vastu)",
     tabAstroVastu: "অ্যাস্ট্রো-বাস্তু কুণ্ডলী (Astro-Vastu)",
-    tabAyadi: "আয়াদি ষড়বর্গ (Ayadi Vedic)",
+    tabAyadi: "আয়াদি ষড়বর্গ (Architectural Dimensions Audit)",
     tabAudit: "৩৬০° প্রপার্টি অডিট",
     tabZones: "১৬টি দিক ও পঞ্চভূত জোন",
     tabRemedies: "১২০ অলৌকিক প্রতিকার",
@@ -199,24 +210,35 @@ export const VASTU_I18N: Record<AstrologyLanguage, VastuTranslations> = {
     criticalDonts: "কঠোরভাবে বর্জনীয় (Critical DONTs)",
     talismanicRemedy: "তালিকাসিদ্ধ বস্তুর সক্রিয়করণ প্রতিকার (Talismanic Object Activation)",
 
-    ayadiTitle: "আয়াদি ষড়বর্গ বৈদিক গৃহ প্রকৌশল (Ayadi Shadvarga)",
-    ayadiSub: "ঘর বা প্লটের সঠিক দৈর্ঘ্য ও প্রস্থের মাধ্যমে ধনাত্মক আয়, নক্ষত্র এবং দীর্ঘায়ু নির্ধারণ।",
+    ayadiTitle: "আয়াদি ষড়বর্গ বৈদিক স্থাপত্য অডিট (Ayadi Shadvarga)",
+    ayadiSub: "ঘর বা প্লটের সঠিক দৈর্ঘ্য ও প্রস্থের মাধ্যমে আয়, ব্যয়, যোনি, বর্ণ, নক্ষত্র, তিথি ও পরমায়ু শাস্ত্রীয় নির্ধারণ।",
     enterDimensions: "জমির বা ঘরের মাপ লিখুন",
     feetUnit: "ফুট (Feet)",
     meterUnit: "মিটার (Meter)",
+    hastaUnit: "হাত (Hasta)",
     lengthLabel: (u) => `দৈর্ঘ্য (${u})`,
     widthLabel: (u) => `প্রস্থ (${u})`,
-    calculateAyadiBtn: "আয়াদি গণনা করুন",
+    calculateAyadiBtn: "আয়াদি ষড়বর্গ গণনা করুন",
     calculatedAaya: "নির্ধারিত বৈদিক আয়",
     totalArea: "মোট ক্ষেত্রফল",
-    dhanaVsRina: "ধন (আয়) বনাম ঋণ",
-    goodStatus: "শুভ",
-    longevity: "ভবনের আয়ু",
+    perimeterLabel: "পরিসীমা (Perimeter)",
+    dhanaVsRina: "ধন (আয়) বনাম ঋণ (ব্যয়)",
+    goodStatus: "উত্তম ও লাভজনক",
+    longevity: "ভবনের পরমায়ু",
     yearsSuffix: (y) => `${y} বছর`,
-    buildingNakshatra: "ভবন নক্ষত্র",
+    buildingNakshatra: "ভবন নক্ষত্র ও তারা",
+    yoniLabel: "যোনি (দিকগত প্রাণশক্তি)",
+    varnaLabel: "বর্ণ ও প্রকৃতির সামঞ্জস্য",
+    tithiLabel: "বাস্তু তিথি ও চন্দ্রকলা",
+    varaLabel: "বার ও অধিপতি গ্রহ",
+    scoreLabel: "ষড়বর্গ কম্পোজিট স্কোর",
+    rectificationTitle: "স্থাপত্য সংশোধন ও নিখুঁত মাত্রার সুপারিশ",
+    blueprintTitle: "২ডি স্থাপত্য ব্লুপ্রিন্ট ও দিকদর্শন",
+    quickPresetsTitle: "দ্রুত প্রিসেট মাপ",
+    printAuditBtn: "অডিট রিপোর্ট প্রিন্ট / পিডিএফ",
     idealDirections: "এই আয়ার জন্য শ্রেষ্ঠ প্রবেশদ্বার অভিমুখ",
     validDimensionsError: "সঠিক দৈর্ঘ্য ও প্রস্থ লিখুন।",
-    ayadiSuccess: "আয়াদি ষড়বর্গ গণনা সফলভাবে সম্পন্ন হয়েছে!",
+    ayadiSuccess: "আয়াদি ষড়বর্গ স্থাপত্য অডিট সফলভাবে সম্পন্ন হয়েছে!",
   },
   hi: {
     badge: "वैज्ञानिक वास्तु शास्त्र (16 ज़ोन एवं 32 पद चक्र)",
@@ -229,7 +251,7 @@ export const VASTU_I18N: Record<AstrologyLanguage, VastuTranslations> = {
     tabCompass: "स्मार्ट कम्पास एवं एआर",
     tabMedical: "मेडिकल वास्तु निदान",
     tabAstroVastu: "एस्ट्रो-वास्तु कुण्डली",
-    tabAyadi: "आयादि षड्वर्ग गणक",
+    tabAyadi: "आयादि षड्वर्ग (Architectural Dimensions Audit)",
     tabAudit: "360° प्रॉपर्टी ऑडिट",
     tabZones: "16 दिशाएं व पंचतत्व",
     tabRemedies: "120 अचूक उपाय",
@@ -303,20 +325,31 @@ export const VASTU_I18N: Record<AstrologyLanguage, VastuTranslations> = {
     talismanicRemedy: "सिद्ध वस्तु सक्रियण उपाय (Talismanic Object Activation)",
 
     ayadiTitle: "आयादि षड्वर्ग वैदिक वास्तु गणित (Ayadi Shadvarga)",
-    ayadiSub: "भूमि या भवन की लंबाई व चौड़ाई अनुसार आय, नक्षत्र और दीर्घायु निर्धारण।",
+    ayadiSub: "भूमि या भवन की लंबाई व चौड़ाई अनुसार आय, व्यय, योनि, वर्ण, नक्षत्र, तिथि और दीर्घायु निर्धारण।",
     enterDimensions: "भूमि या भवन की माप दर्ज करें",
     feetUnit: "फुट (Feet)",
     meterUnit: "मीटर (Meter)",
+    hastaUnit: "हाथ (हस्त)",
     lengthLabel: (u) => `लंबाई (${u})`,
     widthLabel: (u) => `चौड़ाई (${u})`,
-    calculateAyadiBtn: "आयादि गणना करें",
+    calculateAyadiBtn: "आयादि षड्वर्ग गणना करें",
     calculatedAaya: "निर्धारित वैदिक आय",
     totalArea: "कुल क्षेत्रफल",
-    dhanaVsRina: "धन (आय) बनाम ऋण",
-    goodStatus: "शुभ",
+    perimeterLabel: "परिधि (Perimeter)",
+    dhanaVsRina: "धन (आय) बनाम ऋण (व्यय)",
+    goodStatus: "उत्तम एवं लाभकारी",
     longevity: "भवन की आयु",
     yearsSuffix: (y) => `${y} वर्ष`,
-    buildingNakshatra: "भवन नक्षत्र",
+    buildingNakshatra: "भवन नक्षत्र व तारा",
+    yoniLabel: "योनि (दिशात्मक प्राणशक्ति)",
+    varnaLabel: "वर्ण व प्रकृति अनुकूलता",
+    tithiLabel: "वास्तु तिथि व चंद्रकला",
+    varaLabel: "वार एवं अधिपति ग्रह",
+    scoreLabel: "षड्वर्ग समग्र स्कोर",
+    rectificationTitle: "वास्तु सुधार एवं सटीक आयाम सुझाव",
+    blueprintTitle: "2D वास्तुकला ब्लूप्रिंट व दिकदर्शन",
+    quickPresetsTitle: "त्वरित मानक माप",
+    printAuditBtn: "ऑडिट रिपोर्ट प्रिंट / पीडीएफ",
     idealDirections: "इस आय के लिए सर्वोत्तम प्रवेश द्वार दिशा",
     validDimensionsError: "कृपया मान्य लंबाई और चौड़ाई दर्ज करें।",
     ayadiSuccess: "आयादि षड्वर्ग गणना सफलतापूर्वक पूरी हुई!",
@@ -332,7 +365,7 @@ export const VASTU_I18N: Record<AstrologyLanguage, VastuTranslations> = {
     tabCompass: "Smart Compass & AR",
     tabMedical: "Medical Vastu",
     tabAstroVastu: "Astro-Vastu Synergy",
-    tabAyadi: "Ayadi Shadvarga",
+    tabAyadi: "Ayadi Shadvarga (Architectural Dimensions Audit)",
     tabAudit: "360° Property Audit",
     tabZones: "16 Elemental Zones",
     tabRemedies: "120 Miraculous Remedies",
@@ -405,24 +438,35 @@ export const VASTU_I18N: Record<AstrologyLanguage, VastuTranslations> = {
     criticalDonts: "Critical DONTs",
     talismanicRemedy: "Talismanic Object Activation Remedy",
 
-    ayadiTitle: "Ayadi Shadvarga Vedic Engineering",
-    ayadiSub: "Calculate wealth inflow, building longevity, and astrological resonance from length and width.",
+    ayadiTitle: "Ayadi Shadvarga Vedic Architecture Audit",
+    ayadiSub: "Calculate classical Aaya, Vyaya, Yoni, Varna, Tara, Tithi, Vara, and Longevity from architectural dimensions.",
     enterDimensions: "Enter Room or Plot Dimensions",
     feetUnit: "Feet",
     meterUnit: "Meter",
+    hastaUnit: "Hasta (Cubit)",
     lengthLabel: (u) => `Length (${u})`,
     widthLabel: (u) => `Width (${u})`,
-    calculateAyadiBtn: "Calculate Ayadi",
+    calculateAyadiBtn: "Calculate Ayadi Shadvarga",
     calculatedAaya: "Calculated Vedic Aaya",
     totalArea: "Total Area",
-    dhanaVsRina: "Dhana (Income) vs Rina (Debt)",
-    goodStatus: "Good",
-    longevity: "Building Longevity",
+    perimeterLabel: "Perimeter",
+    dhanaVsRina: "Dhana (Income) vs Vyaya (Expense)",
+    goodStatus: "Highly Auspicious",
+    longevity: "Structure Longevity",
     yearsSuffix: (y) => `${y} Years`,
-    buildingNakshatra: "Building Nakshatra",
+    buildingNakshatra: "Building Nakshatra & Star",
+    yoniLabel: "Yoni (Directional Force)",
+    varnaLabel: "Varna (Elemental Harmony)",
+    tithiLabel: "Vastu Tithi (Lunar Phase)",
+    varaLabel: "Vara (Day Ruler)",
+    scoreLabel: "Shadvarga Composite Score",
+    rectificationTitle: "Architectural Rectifications & Fine-Tuning",
+    blueprintTitle: "2D Architectural Blueprint & Orientation",
+    quickPresetsTitle: "Quick Dimension Presets",
+    printAuditBtn: "Print / PDF Audit Report",
     idealDirections: "Ideal Entrance Directions for this Aaya",
     validDimensionsError: "Please enter valid dimensions.",
-    ayadiSuccess: "Ayadi calculation completed successfully!",
+    ayadiSuccess: "Ayadi Shadvarga calculation completed successfully!",
   },
 };
 
