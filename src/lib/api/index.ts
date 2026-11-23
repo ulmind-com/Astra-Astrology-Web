@@ -1000,6 +1000,25 @@ export const astrologyApi = {
       payload,
     ),
 
+  /** Cryptographically verify an Annual Lal Kitab Varshphal Certificate. */
+  verifyAnnualReport: (id: string) =>
+    api.get<AnnualReportVerificationData>(
+      endpoints.astrology.verifyAnnualReport(id),
+      { auth: false },
+    ),
+
+  /** 100% Swiss Ephemeris Vedic Muhurat, Core Kaals, Choghadiya & Horas. */
+  getMuhurat: (params?: { date?: string; latitude?: number; longitude?: number; timezone?: number; language?: string }) => {
+    const sp = new URLSearchParams();
+    if (params?.date) sp.append("date", params.date);
+    if (params?.latitude !== undefined) sp.append("latitude", String(params.latitude));
+    if (params?.longitude !== undefined) sp.append("longitude", String(params.longitude));
+    if (params?.timezone !== undefined) sp.append("timezone", String(params.timezone));
+    if (params?.language) sp.append("language", params.language);
+    const qs = sp.toString() ? `?${sp.toString()}` : "";
+    return api.get<MuhuratData>(`${endpoints.astrology.muhurat}${qs}`, { auth: false });
+  },
+
   /** Get current feature pricing and availability for all astrology tools. */
   featuresPricing: () =>
     api.get<Record<string, FeaturePricingItem>>(endpoints.astrology.featuresPricing, { auth: false }),
@@ -1043,6 +1062,115 @@ export interface WebFestivalCalendarResponse {
   total_count: number;
   next_upcoming: WebFestivalItem | null;
   festivals: WebFestivalItem[];
+  engine: string;
+  calculated_at: string;
+}
+
+export interface AnnualReportVerificationData {
+  is_valid: boolean;
+  status: "verified" | "invalid" | "revoked";
+  report_id: string;
+  target_year: number;
+  consecration_date?: string | null;
+  client_name: string;
+  date_of_birth?: string | null;
+  time_of_birth?: string | null;
+  city_name?: string | null;
+  natal_lagna?: string | null;
+  moon_rashi?: string | null;
+  varshphal_lagna?: string | null;
+  overall_score: number;
+  digital_seal: {
+    report_id?: string;
+    consecration_date?: string;
+    seal_title?: string;
+    seal_motto?: string;
+    chief_astrologer?: string;
+    authenticity_hash?: string;
+    verification_url?: string;
+  };
+  summary_text?: string | null;
+  curated_remedies_count: number;
+  verified_at: string;
+  engine: string;
+}
+
+export interface MuhuratTimingWindowData {
+  id: string;
+  name: Record<string, string>;
+  start_time: string;
+  end_time: string;
+  formatted: string;
+  quality: "super_auspicious" | "auspicious" | "neutral" | "inauspicious" | "remedial";
+  is_active: boolean;
+  description: Record<string, string>;
+  activities_recommended: string[];
+  activities_prohibited: string[];
+}
+
+export interface MuhuratChoghadiyaSlotData {
+  slot_index: number;
+  name: string;
+  name_translations: Record<string, string>;
+  period_type: "day" | "night";
+  start_time: string;
+  end_time: string;
+  quality: "super_auspicious" | "auspicious" | "neutral" | "inauspicious";
+  ruling_planet: string;
+  description: Record<string, string>;
+  is_active: boolean;
+}
+
+export interface MuhuratHoraSlotData {
+  hora_index: number;
+  start_time: string;
+  end_time: string;
+  lord: string;
+  nature: string;
+  is_active: boolean;
+  activities: string;
+}
+
+export interface MuhuratMilestoneItemData {
+  id: string;
+  name: Record<string, string>;
+  tagline: Record<string, string>;
+  desc: Record<string, string>;
+  shloka: string;
+  shloka_meaning: Record<string, string>;
+  best_nakshatras: string;
+  best_tithis: string;
+  best_vara: string;
+  best_choghadiya: string;
+  caution: string;
+  scripture_ref: string;
+  today_compatibility: "Favorable" | "Moderate" | "Avoid";
+  today_reason: Record<string, string>;
+}
+
+export interface MuhuratData {
+  date: string;
+  weekday: Record<string, string>;
+  sunrise: string;
+  sunset: string;
+  solar_noon: string;
+  next_sunrise: string;
+  day_duration_hours: number;
+  night_duration_hours: number;
+  core_windows: MuhuratTimingWindowData[];
+  abhijit: MuhuratTimingWindowData;
+  brahma_muhurat: MuhuratTimingWindowData;
+  rahu_kaal: MuhuratTimingWindowData;
+  yamaganda: MuhuratTimingWindowData;
+  gulika_kaal: MuhuratTimingWindowData;
+  durmuhurat: MuhuratTimingWindowData[];
+  amrit_kaal?: MuhuratTimingWindowData | null;
+  vijaya_muhurat?: MuhuratTimingWindowData | null;
+  godhuli_muhurat?: MuhuratTimingWindowData | null;
+  choghadiyas: MuhuratChoghadiyaSlotData[];
+  horas: MuhuratHoraSlotData[];
+  milestone_muhurats: MuhuratMilestoneItemData[];
+  panchang_summary: Record<string, any>;
   engine: string;
   calculated_at: string;
 }

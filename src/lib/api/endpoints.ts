@@ -190,6 +190,8 @@ export const endpoints = {
     dailyHoroscope: "/astrology/horoscope/daily",
     dailyUnlock: "/astrology/horoscope/daily/unlock",
     annualHoroscope: "/astrology/horoscope/annual-lal-kitab",
+    verifyAnnualReport: (id: string) => `/astrology/annual-report/verify/${encodeURIComponent(id)}`,
+    muhurat: "/astrology/muhurat",
     featuresPricing: "/astrology/features/pricing",
     geoReverse: "/astrology/geo-reverse",
     geoDetect: "/astrology/geo-detect",
