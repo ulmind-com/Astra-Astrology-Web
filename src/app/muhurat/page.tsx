@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import {
   Clock,
   Sparkles,
@@ -15,6 +16,10 @@ import {
   Info,
   CheckCircle2,
   ChevronRight,
+  Compass,
+  Sunrise,
+  Sunset,
+  Zap,
 } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -32,8 +37,16 @@ import {
   YatraDishaClipart,
 } from "@/components/astro/muhurat-cliparts";
 import { DAY_CHOGHADIYA, getPanchangKaalTimes } from "@/lib/muhurat-helper";
+import {
+  astrologyApi,
+  type MuhuratData,
+  type MuhuratChoghadiyaSlotData,
+  type MuhuratHoraSlotData,
+  type MuhuratMilestoneItemData,
+} from "@/lib/api";
 
 type FilterCategory = "all" | "milestone" | "wealth" | "wisdom";
+type SubViewTab = "milestones" | "choghadiya" | "horas";
 
 interface MuhuratCategory {
   id: string;
@@ -194,7 +207,7 @@ const MUHURATS: MuhuratCategory[] = [
       bn: "নতুন দোকান, স্টার্টআপ বা বাণিজ্যিক চুক্তির মাধ্যমে নিরবচ্ছিন্ন ধনপ্রাপ্তির যোগ।",
       hi: "दुकान उद्घाटन, नई फर्म स्थापना या बड़े व्यावसायिक अनुबंध हस्ताक्षर का श्रेष्ठ समय।",
     },
-    shloka: "॥ ॐ श्रीं ह्रीं क्लीं त्रिभुवन महालक्ष्म্যै अस्मांक दारिद्र्यं नाशय नाशय ॥",
+    shloka: "॥ ॐ श्रीं ह्रीं क्लीं त्रिभुवन महालक्ष्म्यै अस्मांक दारिद्र्यं नाशय नाशय ॥",
     shlokaMeaning: {
       en: "“O Divine Empress Lakshmi of the three realms, dissipate all lack and grant enduring prosperity.”",
       bn: "“হে ত্রিভুবন জননী মহালক্ষ্মী, আমাদের সর্বপ্রকার দারিদ্র্য বিনাশ করিয়া চিরসমৃদ্ধি প্রদান করুন।”",
@@ -249,54 +262,54 @@ const MUHURATS: MuhuratCategory[] = [
     id: "education",
     category: "wisdom",
     clipart: VidyaSaraswatiClipart,
-    accentColor: "#8B5CF6",
+    accentColor: "#6366F1",
     name: {
-      en: "Vidya Arambha (Learning)",
-      bn: "বিদ্যারম্ভ ও অক্ষরাভ্যাস",
-      hi: "विद्यारम्भ एवं अक्षरारम्भ",
+      en: "Education & Vidya (Akshararambha)",
+      bn: "বিদ্যারম্ভ ও দীক্ষা",
+      hi: "विद्यारम्भ एवं शिक्षा",
     },
     deckTitle: {
-      en: "Vidya Arambha",
+      en: "Education (Vidya)",
       bn: "বিদ্যারম্ভ",
       hi: "विद्यारम्भ",
     },
     tagline: {
-      en: "Initiating sacred learning, modern degrees, and competitive exams",
-      bn: "জ্ঞানদাত্রী মা সরস্বতীর চরণে প্রথম বর্ণমালার দীক্ষা",
-      hi: "माँ सरस्वती कृपा से ज्ञानार्जन, उच्च शिक्षा एवं परीक्षा विजय",
+      en: "Invoking Devi Saraswati for wisdom, sharpness of intellect, and rhetoric",
+      bn: "দেবী সরস্বতীর চরণে জ্ঞান, বাগ্মিতা ও একাগ্রতা অর্জনের পবিত্র ক্ষণ",
+      hi: "माँ सरस्वती के पावन सानिध्य में ज्ञानार्जन व एकाग्रता का शुभारंभ",
     },
     desc: {
-      en: "Sacred initiation for writing first alphabets, taking admission in advanced universities, and entering exams with sharpened intellect.",
-      bn: "সন্তানের প্রথম বর্ণজ্ঞান, উচ্চশিক্ষায় পদার্পণ ও বুদ্ধিবিকাশের পবিত্র মুহূর্ত।",
-      hi: "शिशु के प्रथम विद्यारम्भ, नए कोर्स में दाखिला अथवा शोध कार्य शुरू करने हेतु।",
+      en: "Golden hours for enrolling in universities, starting new courses, competitive exam prep, and Vedic initiation.",
+      bn: "নতুন শিক্ষাবর্ষ, উচ্চশিক্ষা, গবেষণাপত্র প্রকাশ ও আধ্যাত্মিক দীক্ষার জন্য প্রশস্ত।",
+      hi: "नवीन पाठ्यक्रम, उच्च शिक्षा, कोचिंग प्रवेश एवं परीक्षा की तैयारी हेतु शुभ मुहूर्त।",
     },
-    shloka: "॥ सरस्वति नमस्तुभ्यं वरदे कामरूपिणि । विद्यारम्भं करिष्यामि सिद्धिर्भवतु मे सदा ॥",
+    shloka: "॥ सरस्वति नमस्तुभ्यं वरदे कामरूपिणि विद्यारम्भं करिष्यामि सिद्धिर्भवतु मे सदा ॥",
     shlokaMeaning: {
-      en: "“O Mother Saraswati, giver of boons and fulfilled wishes, I begin my education; may I achieve total mastery.”",
-      bn: "“হে বরদায়িনী মা সরস্বতী, আমি বিদ্যারম্ভ করিতেছি; আমার সর্ববিদ্যায় যেন সিদ্ধি লাভ হয়।”",
-      hi: "“हे वरदायिनी माँ सरस्वती! मैं विद्यारम्भ करने जा रहा हूँ, मुझे सदा सफलता व सिद्धि प्राप्त हो।”",
+      en: "“O Goddess Saraswati, granter of boons, I begin my studies; may I always achieve success.”",
+      bn: "“হে বরদায়িনী দেবী সরস্বতী, আমি বিদ্যাচর্চা আরম্ভ করিতেছি; আমার সর্বদা সাফল্য হউক।”",
+      hi: "“हे वरदायिनी माँ सरस्वती, मैं विद्या आरम्भ कर रहा हूँ; मुझे सदा सफलता प्राप्त हो।”",
     },
-    bestNakshatras: "Ashwini, Rohini, Mrigashira, Ardra, Punarvasu, Pushya, Hasta, Chitra, Swati, Anuradha, Shravana, Revati",
-    bestTithis: "Shukla Dvitiya, Tritiya, Panchami (Vasant Panchami peak), Shashthi, Dashami, Ekadashi",
-    bestVara: "Wednesday (Budha - Intellect), Thursday (Guru - Wisdom)",
-    bestChoghadiya: "Amrit, Shubh, Labh",
-    caution: "Avoid Chaturthi, Ashtami, Chaturdashi, Amavasya, and days of severe Pratipada.",
-    scriptureRef: "Baudhayana Grihya Sutra · Vidyarambha Vidhi",
+    bestNakshatras: "Ashwini, Rohini, Mrigashira, Punarvasu, Pushya, Hasta, Chitra, Swati, Anuradha, Shravana, Dhanishta, Shatabhisha, Revati",
+    bestTithis: "Shukla Dvitiya, Tritiya, Panchami (Vasant Panchami), Dashami, Ekadashi, Trayodashi",
+    bestVara: "Wednesday (Budha - Intellect), Thursday (Guru - Wisdom), Sunday",
+    bestChoghadiya: "Labh (Absorption), Amrit (Permanence), Shubh (Wisdom)",
+    caution: "Avoid Amavasya, Ashtami, and combust Jupiter/Mercury.",
+    scriptureRef: "Brihat Jyotisha · Vidya Prakarana",
   },
   {
     id: "yatra",
     category: "wisdom",
     clipart: YatraDishaClipart,
-    accentColor: "#0EA5E9",
+    accentColor: "#14B8A6",
     name: {
-      en: "Auspicious Travel (Yatra)",
-      bn: "শুভ যাত্রা ও তীর্থ ভ্রমণ",
-      hi: "शुभ यात्रा एवं विदेश गमन",
+      en: "Travel & Expedition (Yatra)",
+      bn: "যাত্রা ও ভ্রমণ মুহূর্ত",
+      hi: "यात्रा एवं गमन मुहूर्त",
     },
     deckTitle: {
-      en: "Auspicious Travel",
-      bn: "শুভ যাত্রা",
-      hi: "शुभ यात्रा",
+      en: "Travel (Yatra)",
+      bn: "যাত্রা আরম্ভ",
+      hi: "यात्रा आरम्भ",
     },
     tagline: {
       en: "Harmonizing planetary hora and Disha Shoola for effortless triumph",
@@ -366,20 +379,42 @@ export default function MuhuratPage() {
   const lang = (["en", "bn", "hi"].includes(language) ? language : "en") as "en" | "bn" | "hi";
 
   const [activeCategory, setActiveCategory] = React.useState<FilterCategory>("all");
-  const [selectedMuhurat, setSelectedMuhurat] = React.useState<MuhuratCategory | null>(null);
+  const [activeSubView, setActiveSubView] = React.useState<SubViewTab>("milestones");
+  const [choghadiyaPeriod, setChoghadiyaPeriod] = React.useState<"day" | "night">("day");
 
-  // Dynamic live Kaal calculations for today
-  const todayKaal = React.useMemo(() => {
+  // Fallback calculation in case of network latency
+  const fallbackKaal = React.useMemo(() => {
     return getPanchangKaalTimes(new Date());
   }, []);
+
+  // Live Swiss Ephemeris Backend Query
+  const { data: apiData, isLoading: isMuhuratLoading } = useQuery<MuhuratData>({
+    queryKey: ["vedic-muhurat-data", lang],
+    queryFn: () => astrologyApi.getMuhurat({ language: lang }),
+    staleTime: 5 * 60_000,
+  });
+
+  // Resolved core timings
+  const abhijitFormatted = apiData?.abhijit?.formatted || fallbackKaal.abhijit.formatted;
+  const rahuFormatted = apiData?.rahu_kaal?.formatted || fallbackKaal.rahuKaal.formatted;
+  const gulikaFormatted = apiData?.gulika_kaal?.formatted || fallbackKaal.gulika.formatted;
+  const yamaFormatted = apiData?.yamaganda?.formatted || fallbackKaal.yamaghanta.formatted;
+  const brahmaFormatted = apiData?.brahma_muhurat?.formatted || "04:20 AM – 05:08 AM";
+  const vijayaFormatted = apiData?.vijaya_muhurat?.formatted || "01:50 PM – 02:35 PM";
+  const godhuliFormatted = apiData?.godhuli_muhurat?.formatted || "05:15 PM – 05:45 PM";
 
   const filteredMuhurats = React.useMemo(() => {
     if (activeCategory === "all") return MUHURATS;
     return MUHURATS.filter((m) => m.category === activeCategory);
   }, [activeCategory]);
 
+  const choghadiyasList = React.useMemo(() => {
+    if (!apiData?.choghadiyas) return [];
+    return apiData.choghadiyas.filter((c: MuhuratChoghadiyaSlotData) => c.period_type === choghadiyaPeriod);
+  }, [apiData, choghadiyaPeriod]);
+
   const t = {
-    badge: lang === "bn" ? "বৈদিক শুভ মুহূর্ত ও চোগড়িয়া" : lang === "hi" ? "वैदिक शुभ मुहूर्त एवं चौघड़िया" : "Vedic Muhurat & Kaal Guide",
+    badge: lang === "bn" ? "সুইস এফিমেরিস দ্বারা গণিত বৈদিক শুভ মুহূর্ত" : lang === "hi" ? "स्विस एफेमेरिस आधारित वैदिक शुभ मुहूर्त" : "Vedic Muhurat & Swiss Ephemeris Astrometry",
     title: lang === "bn" ? "পবিত্র বৈদিক মুহূর্ত ও কালচক্র" : lang === "hi" ? "पावन वैदिक मुहूर्त एवं कालचक्र" : "Vedic Sacred Muhurat & Timings",
     subtitle:
       lang === "bn"
@@ -387,7 +422,7 @@ export default function MuhuratPage() {
         : lang === "hi"
         ? "महर्षि पराशर व वराहमिहिर के ज्योतिष शास्त्र अनुसार प्रत्येक शुभ संस्कार का सटीक लग्न, नक्षत्र, तिथि एवं विजय मुहूर्त।"
         : "Ancient Vedic canons derived from Brihat Samhita & Muhurta Chintamani to identify planetary alignments for milestone ventures.",
-    todayKaalTitle: lang === "bn" ? "আজকের মুখ্য সময় ও কাল চক্র" : lang === "hi" ? "आज के मुख्य समय एवं काल चक्र" : "Today's Core Kaal Windows",
+    todayKaalTitle: lang === "bn" ? "আজকের মুখ্য সময় ও কাল চক্র (Swiss Ephemeris)" : lang === "hi" ? "आज के मुख्य समय एवं काल चक्र (Swiss Ephemeris)" : "Today's Core Kaal Windows (Swiss Ephemeris)",
     abhijitLabel: lang === "bn" ? "অভিজিৎ মুহূর্ত (বিজয় ক্ষণ)" : lang === "hi" ? "अभिजित मुहूर्त (विजय काल)" : "Abhijit Muhurat (Victory Hour)",
     abhijitDesc:
       lang === "bn"
@@ -404,6 +439,9 @@ export default function MuhuratPage() {
         : "Afflicted shadow window — strictly postpone initial transactions and new contracts.",
     gulikaLabel: lang === "bn" ? "গুলিকা কাল" : lang === "hi" ? "गुलिक काल" : "Gulika Kaal",
     yamaghantaLabel: lang === "bn" ? "যমঘণ্ট কাল" : lang === "hi" ? "यमघण्ट काल" : "Yamaghanta Kaal",
+    brahmaLabel: lang === "bn" ? "ব্রহ্ম মুহূর্ত" : lang === "hi" ? "ब्रह्म मुहूर्त" : "Brahma Muhurat",
+    vijayaLabel: lang === "bn" ? "বিজয় মুহূর্ত" : lang === "hi" ? "विजय मुहूर्त" : "Vijaya Muhurat",
+    godhuliLabel: lang === "bn" ? "গোধূলি মুহূর্ত" : lang === "hi" ? "गोधूलि मुहूर्त" : "Godhuli Muhurat",
     categories: {
       all: lang === "bn" ? "সকল মুহূর্ত" : lang === "hi" ? "सभी मुहूर्त" : "All Muhurats",
       milestone: lang === "bn" ? "জীবন সংস্কার" : lang === "hi" ? "जीवन संस्कार" : "Milestones",
@@ -448,6 +486,30 @@ export default function MuhuratPage() {
             {t.subtitle}
           </p>
 
+          {/* Astronomical Ephemeris Solar Bar */}
+          {apiData && (
+            <div className="mt-6 inline-flex flex-wrap items-center justify-center gap-4 bg-white/80 border border-amber-300/80 rounded-2xl px-5 py-2.5 shadow-xs text-xs">
+              <span className="flex items-center gap-1.5 font-bold text-amber-900">
+                <Sunrise className="size-4 text-amber-600" />
+                <span>সূর্যোদয়: {apiData.sunrise}</span>
+              </span>
+              <span className="text-stone-300">•</span>
+              <span className="flex items-center gap-1.5 font-bold text-amber-900">
+                <Sun className="size-4 text-amber-600" />
+                <span>মধ্যাহ্ন: {apiData.solar_noon}</span>
+              </span>
+              <span className="text-stone-300">•</span>
+              <span className="flex items-center gap-1.5 font-bold text-amber-900">
+                <Sunset className="size-4 text-rose-600" />
+                <span>সূর্যাস্ত: {apiData.sunset}</span>
+              </span>
+              <span className="text-stone-300">•</span>
+              <span className="font-semibold text-stone-600">
+                দিনমান: {apiData.day_duration_hours}h
+              </span>
+            </div>
+          )}
+
           {/* Today's Sacred Kaal Timings Dashboard */}
           <div className="mt-8 rounded-2xl border border-amber-200/90 bg-white/90 backdrop-blur-sm p-5 sm:p-6 shadow-sm">
             <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-amber-900 mb-4 flex items-center justify-center gap-2">
@@ -457,13 +519,19 @@ export default function MuhuratPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
               {/* Abhijit Card */}
-              <div className="rounded-xl border border-emerald-300 bg-emerald-50/70 p-4 transition-all hover:shadow-md">
+              <div className="rounded-xl border border-emerald-300 bg-emerald-50/70 p-4 transition-all hover:shadow-md relative overflow-hidden">
+                {apiData?.abhijit?.is_active && (
+                  <span className="absolute top-2 right-2 flex size-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full size-2 bg-emerald-500"></span>
+                  </span>
+                )}
                 <div className="flex items-center gap-2 text-emerald-800 font-bold text-xs">
                   <ShubhKaalShieldClipart size={24} isAuspicious={true} />
                   <span>{t.abhijitLabel}</span>
                 </div>
                 <div className="mt-2 text-lg font-black text-emerald-950">
-                  {todayKaal.abhijit.formatted}
+                  {abhijitFormatted}
                 </div>
                 <p className="mt-1 text-[11px] text-emerald-800/80 leading-snug">
                   {t.abhijitDesc}
@@ -471,16 +539,36 @@ export default function MuhuratPage() {
               </div>
 
               {/* Rahu Kaal Alert */}
-              <div className="rounded-xl border border-rose-300 bg-rose-50/70 p-4 transition-all hover:shadow-md">
+              <div className="rounded-xl border border-rose-300 bg-rose-50/70 p-4 transition-all hover:shadow-md relative overflow-hidden">
+                {apiData?.rahu_kaal?.is_active && (
+                  <span className="absolute top-2 right-2 flex size-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full size-2 bg-rose-500"></span>
+                  </span>
+                )}
                 <div className="flex items-center gap-2 text-rose-800 font-bold text-xs">
                   <ShubhKaalShieldClipart size={24} isAuspicious={false} />
                   <span>{t.rahuLabel}</span>
                 </div>
                 <div className="mt-2 text-lg font-black text-rose-950">
-                  {todayKaal.rahuKaal.formatted}
+                  {rahuFormatted}
                 </div>
                 <p className="mt-1 text-[11px] text-rose-800/80 leading-snug">
                   {t.rahuDesc}
+                </p>
+              </div>
+
+              {/* Brahma Muhurat */}
+              <div className="rounded-xl border border-indigo-200 bg-indigo-50/70 p-4">
+                <div className="flex items-center gap-2 text-indigo-900 font-bold text-xs">
+                  <Sparkles className="size-4 text-indigo-600" />
+                  <span>{t.brahmaLabel}</span>
+                </div>
+                <div className="mt-2 text-lg font-black text-indigo-950">
+                  {brahmaFormatted}
+                </div>
+                <p className="mt-1 text-[11px] text-indigo-800/80 leading-snug">
+                  {lang === "bn" ? "ধ্যান, যোগ ও ঈশ্বর আরাধনার পরম পবিত্র ক্ষণ।" : "Sacred pre-dawn window for meditation & study."}
                 </p>
               </div>
 
@@ -491,148 +579,323 @@ export default function MuhuratPage() {
                   <span>{t.gulikaLabel}</span>
                 </div>
                 <div className="mt-2 text-lg font-black text-amber-950">
-                  {todayKaal.gulika.formatted}
+                  {gulikaFormatted}
                 </div>
                 <p className="mt-1 text-[11px] text-amber-800/80 leading-snug">
                   {lang === "bn" ? "স্থায়ী সম্পদ ক্রয়ের জন্য প্রশমিত শুভ।" : "Steady persistence energy window."}
                 </p>
               </div>
+            </div>
 
-              {/* Yamaghanta Kaal */}
-              <div className="rounded-xl border border-stone-300 bg-stone-50 p-4">
-                <div className="flex items-center gap-2 text-stone-800 font-bold text-xs">
-                  <Moon className="size-4 text-stone-600" />
-                  <span>{t.yamaghantaLabel}</span>
-                </div>
-                <div className="mt-2 text-lg font-black text-stone-900">
-                  {todayKaal.yamaghanta.formatted}
-                </div>
-                <p className="mt-1 text-[11px] text-stone-700 leading-snug">
-                  {lang === "bn" ? "নতুন যাত্রা ও চিকিৎসায় বর্জনীয়।" : "Inauspicious for commencement."}
-                </p>
+            {/* Extra Row: Yamaganda, Vijaya, Godhuli */}
+            <div className="mt-4 pt-4 border-t border-amber-200/60 grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+              <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+                <span className="text-[11px] font-bold text-stone-700 block">{t.yamaghantaLabel}</span>
+                <span className="text-sm font-black text-stone-900">{yamaFormatted}</span>
+                <span className="text-[10px] text-stone-500 block">{lang === "bn" ? "নতুন কাজে বর্জনীয়" : "Avoid commencement"}</span>
+              </div>
+              <div className="p-3 bg-amber-50/80 rounded-xl border border-amber-200">
+                <span className="text-[11px] font-bold text-amber-800 block">{t.vijayaLabel}</span>
+                <span className="text-sm font-black text-amber-950">{vijayaFormatted}</span>
+                <span className="text-[10px] text-amber-700 block">{lang === "bn" ? "মামলা ও চ্যালেঞ্জে বিজয়" : "Triumph & legal resolution"}</span>
+              </div>
+              <div className="p-3 bg-rose-50/60 rounded-xl border border-rose-200">
+                <span className="text-[11px] font-bold text-rose-800 block">{t.godhuliLabel}</span>
+                <span className="text-sm font-black text-rose-950">{godhuliFormatted}</span>
+                <span className="text-[10px] text-rose-700 block">{lang === "bn" ? "সন্ধ্যা আরতি ও শুভ লগ্ন" : "Twilight sanctification"}</span>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Category Filter Tabs */}
-        <section className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-          {(["all", "milestone", "wealth", "wisdom"] as FilterCategory[]).map((cat) => {
-            const active = activeCategory === cat;
-            return (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setActiveCategory(cat)}
-                className={`rounded-full px-5 py-2 text-xs sm:text-sm font-bold transition-all shadow-xs cursor-pointer ${
-                  active
-                    ? "bg-amber-600 text-white shadow-md shadow-amber-600/20 scale-105"
-                    : "bg-white text-stone-700 border border-stone-200 hover:border-amber-400 hover:text-amber-800"
-                }`}
-              >
-                {t.categories[cat]}
-              </button>
-            );
-          })}
+        {/* View Mode Switcher: Milestones | 16 Choghadiya | 24 Horas */}
+        <section className="flex items-center justify-center gap-2 border-b border-amber-200 pb-4">
+          <button
+            type="button"
+            onClick={() => setActiveSubView("milestones")}
+            className={`px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeSubView === "milestones"
+                ? "bg-amber-600 text-white shadow-md"
+                : "bg-white text-stone-700 border border-stone-200 hover:border-amber-400"
+            }`}
+          >
+            {lang === "bn" ? "শুভ সংস্কার মুহূর্ত (৮টি ক্যানন)" : "Milestone Muhurats"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveSubView("choghadiya")}
+            className={`px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeSubView === "choghadiya"
+                ? "bg-amber-600 text-white shadow-md"
+                : "bg-white text-stone-700 border border-stone-200 hover:border-amber-400"
+            }`}
+          >
+            {lang === "bn" ? "১৬ বৈদিক চোগড়িয়া চক্র" : "16 Choghadiya Cycle"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveSubView("horas")}
+            className={`px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeSubView === "horas"
+                ? "bg-amber-600 text-white shadow-md"
+                : "bg-white text-stone-700 border border-stone-200 hover:border-amber-400"
+            }`}
+          >
+            {lang === "bn" ? "২৪ গ্রহের হোরা কাল" : "24 Planetary Horas"}
+          </button>
         </section>
 
-        {/* 8 Ornate Vedic Muhurat Cards Grid */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-          {filteredMuhurats.map((m) => {
-            const Clipart = m.clipart;
-            return (
-              <div
-                key={m.id}
-                className="group relative overflow-hidden rounded-3xl border border-amber-200/90 bg-white p-6 sm:p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-amber-400 flex flex-col justify-between"
-              >
-                {/* Accent Header Ribbon */}
-                <div className="flex items-start gap-4">
-                  <div
-                    className="p-2.5 rounded-2xl bg-amber-50/80 border border-amber-200 shadow-inner group-hover:scale-105 transition-transform"
-                    style={{ borderColor: `${m.accentColor}40` }}
+        {/* SUBVIEW 1: MILESTONES */}
+        {activeSubView === "milestones" && (
+          <>
+            {/* Category Filter Tabs */}
+            <section className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+              {(["all", "milestone", "wealth", "wisdom"] as FilterCategory[]).map((cat) => {
+                const active = activeCategory === cat;
+                return (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setActiveCategory(cat)}
+                    className={`rounded-full px-5 py-2 text-xs sm:text-sm font-bold transition-all shadow-xs cursor-pointer ${
+                      active
+                        ? "bg-amber-600 text-white shadow-md shadow-amber-600/20 scale-105"
+                        : "bg-white text-stone-700 border border-stone-200 hover:border-amber-400 hover:text-amber-800"
+                    }`}
                   >
-                    <Clipart size={56} color={m.accentColor} secondaryColor="#d97706" />
-                  </div>
+                    {t.categories[cat]}
+                  </button>
+                );
+              })}
+            </section>
 
-                  <div className="flex-1 min-w-0">
-                    <span
-                      className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider mb-1"
-                      style={{ backgroundColor: `${m.accentColor}18`, color: m.accentColor }}
-                    >
-                      {m.deckTitle[lang]}
-                    </span>
-                    <h3 className="font-serif text-xl sm:text-2xl font-bold text-stone-900 group-hover:text-amber-900 transition-colors">
-                      {m.name[lang]}
-                    </h3>
-                    <p className="text-xs font-medium text-amber-800/90 mt-0.5">
-                      {m.tagline[lang]}
-                    </p>
-                  </div>
-                </div>
+            {/* 8 Ornate Vedic Muhurat Cards Grid */}
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+              {filteredMuhurats.map((m) => {
+                const Clipart = m.clipart;
+                const apiMilestone = apiData?.milestone_muhurats?.find((item: MuhuratMilestoneItemData) => item.id === m.id);
+                const compat = apiMilestone?.today_compatibility || "Favorable";
 
-                {/* Sanskrit Shloka Box */}
-                <div className="my-5 rounded-2xl border-l-4 bg-amber-50/70 p-4 border-amber-500 space-y-1.5">
-                  <p className="font-serif text-sm font-bold text-amber-950 tracking-wide">
-                    {m.shloka}
-                  </p>
-                  <p className="text-xs italic text-stone-700 leading-relaxed font-serif">
-                    {m.shlokaMeaning[lang]}
-                  </p>
-                </div>
+                return (
+                  <div
+                    key={m.id}
+                    className="group relative overflow-hidden rounded-3xl border border-amber-200/90 bg-white p-6 sm:p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-amber-400 flex flex-col justify-between"
+                  >
+                    {/* Header Ribbon with Compatibility Badge */}
+                    <div className="flex items-start gap-4">
+                      <div
+                        className="p-2.5 rounded-2xl bg-amber-50/80 border border-amber-200 shadow-inner group-hover:scale-105 transition-transform"
+                        style={{ borderColor: `${m.accentColor}40` }}
+                      >
+                        <Clipart size={56} color={m.accentColor} secondaryColor="#d97706" />
+                      </div>
 
-                {/* Classical Details Grid */}
-                <div className="space-y-3 text-xs">
-                  <div>
-                    <span className="font-bold text-stone-900 block mb-1">
-                      {t.nakshatraTitle}
-                    </span>
-                    <p className="text-stone-700 leading-relaxed bg-stone-50 rounded-xl p-2.5 border border-stone-200/80 text-[11.5px]">
-                      {m.bestNakshatras}
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                    <div className="bg-stone-50/80 rounded-xl p-2.5 border border-stone-200/70">
-                      <span className="font-bold text-stone-800 text-[11px] block">{t.tithiTitle}</span>
-                      <span className="text-[11px] text-stone-600">{m.bestTithis}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <span
+                            className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider mb-1"
+                            style={{ backgroundColor: `${m.accentColor}18`, color: m.accentColor }}
+                          >
+                            {m.deckTitle[lang]}
+                          </span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            compat === "Favorable"
+                              ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                              : "bg-amber-100 text-amber-900 border border-amber-300"
+                          }`}>
+                            {compat === "Favorable" ? (lang === "bn" ? "আজ শুভ" : "Favorable Today") : (lang === "bn" ? "মধ্যম শুভ" : "Moderate")}
+                          </span>
+                        </div>
+                        <h3 className="font-serif text-xl sm:text-2xl font-bold text-stone-900 group-hover:text-amber-900 transition-colors">
+                          {m.name[lang]}
+                        </h3>
+                        <p className="text-xs font-medium text-amber-800/90 mt-0.5">
+                          {m.tagline[lang]}
+                        </p>
+                      </div>
                     </div>
-                    <div className="bg-stone-50/80 rounded-xl p-2.5 border border-stone-200/70">
-                      <span className="font-bold text-stone-800 text-[11px] block">{t.choghadiyaTitle}</span>
-                      <span className="text-[11px] text-amber-800 font-semibold">{m.bestChoghadiya}</span>
-                    </div>
-                  </div>
 
-                  {/* Caution Warning Box */}
-                  <div className="rounded-xl border border-rose-200/80 bg-rose-50/60 p-3 flex items-start gap-2 text-rose-900">
-                    <AlertTriangle className="size-4 shrink-0 text-rose-600 mt-0.5" />
-                    <div>
-                      <span className="font-bold text-[11px] block">{t.cautionTitle}</span>
-                      <p className="text-[11px] text-rose-800/90 leading-snug mt-0.5">
-                        {m.caution}
+                    {/* Sanskrit Shloka Box */}
+                    <div className="my-5 rounded-2xl border-l-4 bg-amber-50/70 p-4 border-amber-500 space-y-1.5">
+                      <p className="font-serif text-sm font-bold text-amber-950 tracking-wide">
+                        {m.shloka}
+                      </p>
+                      <p className="text-xs italic text-stone-700 leading-relaxed font-serif">
+                        {m.shlokaMeaning[lang]}
                       </p>
                     </div>
-                  </div>
-                </div>
 
-                {/* Footer Scripture Citation & Action */}
-                <div className="mt-5 pt-4 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-500">
-                  <div className="flex items-center gap-1.5 font-medium italic">
-                    <BookOpen className="size-3 text-amber-600" />
-                    <span>{m.scriptureRef}</span>
-                  </div>
+                    {/* Classical Details Grid */}
+                    <div className="space-y-3 text-xs">
+                      <div>
+                        <span className="font-bold text-stone-900 block mb-1">
+                          {t.nakshatraTitle}
+                        </span>
+                        <p className="text-stone-700 leading-relaxed bg-stone-50 rounded-xl p-2.5 border border-stone-200/80 text-[11.5px]">
+                          {m.bestNakshatras}
+                        </p>
+                      </div>
 
-                  <Link
-                    href="/astrologers"
-                    className="inline-flex items-center gap-1 font-bold text-amber-700 hover:text-amber-900 transition-colors"
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <div className="bg-stone-50/80 rounded-xl p-2.5 border border-stone-200/70">
+                          <span className="font-bold text-stone-800 text-[11px] block">{t.tithiTitle}</span>
+                          <span className="text-[11px] text-stone-600">{m.bestTithis}</span>
+                        </div>
+                        <div className="bg-stone-50/80 rounded-xl p-2.5 border border-stone-200/70">
+                          <span className="font-bold text-stone-800 text-[11px] block">{t.choghadiyaTitle}</span>
+                          <span className="text-[11px] text-amber-800 font-semibold">{m.bestChoghadiya}</span>
+                        </div>
+                      </div>
+
+                      {/* Caution Warning Box */}
+                      <div className="rounded-xl border border-rose-200/80 bg-rose-50/60 p-3 flex items-start gap-2 text-rose-900">
+                        <AlertTriangle className="size-4 shrink-0 text-rose-600 mt-0.5" />
+                        <div>
+                          <span className="font-bold text-[11px] block">{t.cautionTitle}</span>
+                          <p className="text-[11px] text-rose-800/90 leading-snug mt-0.5">
+                            {m.caution}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Footer Scripture Citation & Action */}
+                    <div className="mt-5 pt-4 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-500">
+                      <div className="flex items-center gap-1.5 font-medium italic">
+                        <BookOpen className="size-3 text-amber-600" />
+                        <span>{m.scriptureRef}</span>
+                      </div>
+
+                      <Link
+                        href="/astrologers"
+                        className="inline-flex items-center gap-1 font-bold text-amber-700 hover:text-amber-900 transition-colors"
+                      >
+                        <span>{lang === "bn" ? "পরামর্শ নিন" : lang === "hi" ? "परामर्श लें" : "Consult"}</span>
+                        <ChevronRight className="size-3.5" />
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </section>
+          </>
+        )}
+
+        {/* SUBVIEW 2: 16 CHOGHADIYA CYCLE */}
+        {activeSubView === "choghadiya" && (
+          <section className="space-y-6">
+            <div className="flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => setChoghadiyaPeriod("day")}
+                className={`px-6 py-2 rounded-full font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer ${
+                  choghadiyaPeriod === "day"
+                    ? "bg-amber-600 text-white shadow-md"
+                    : "bg-white text-stone-700 border border-stone-300"
+                }`}
+              >
+                <Sun className="size-4" />
+                <span>{lang === "bn" ? "দিবা চোগড়িয়া (সূর্যোদয় থেকে সূর্যাস্ত)" : "Day Choghadiya (8 Slots)"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setChoghadiyaPeriod("night")}
+                className={`px-6 py-2 rounded-full font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer ${
+                  choghadiyaPeriod === "night"
+                    ? "bg-indigo-900 text-white shadow-md"
+                    : "bg-white text-stone-700 border border-stone-300"
+                }`}
+              >
+                <Moon className="size-4" />
+                <span>{lang === "bn" ? "রাত্রি চোগড়িয়া (সূর্যাস্ত থেকে সূর্যোদয়)" : "Night Choghadiya (8 Slots)"}</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {choghadiyasList.map((slot: MuhuratChoghadiyaSlotData) => {
+                const isSuper = slot.quality === "super_auspicious" || slot.quality === "auspicious";
+                const isAshubh = slot.quality === "inauspicious";
+
+                return (
+                  <div
+                    key={slot.slot_index}
+                    className={`rounded-2xl p-4 border transition-all relative ${
+                      slot.is_active
+                        ? "border-amber-500 bg-amber-50/70 shadow-md ring-2 ring-amber-400/40"
+                        : isSuper
+                        ? "border-emerald-200 bg-emerald-50/30"
+                        : isAshubh
+                        ? "border-rose-200 bg-rose-50/30"
+                        : "border-stone-200 bg-white"
+                    }`}
                   >
-                    <span>{lang === "bn" ? "পরামর্শ নিন" : lang === "hi" ? "परामर्श लें" : "Consult"}</span>
-                    <ChevronRight className="size-3.5" />
-                  </Link>
+                    {slot.is_active && (
+                      <span className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-amber-600 text-white text-[9px] font-black uppercase tracking-wider animate-pulse">
+                        {lang === "bn" ? "চলমান মুহূর্ত" : "ACTIVE NOW"}
+                      </span>
+                    )}
+
+                    <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">
+                      Slot #{slot.slot_index} · {slot.ruling_planet}
+                    </span>
+
+                    <h4 className="font-cinzel font-black text-lg text-stone-900 mt-1">
+                      {slot.name_translations[lang] || slot.name}
+                    </h4>
+
+                    <div className="mt-2 text-xs font-mono font-bold text-stone-700 bg-white/80 rounded-lg p-1.5 border border-stone-200 inline-block">
+                      {slot.start_time} – {slot.end_time}
+                    </div>
+
+                    <p className="mt-2 text-[11px] text-stone-600 leading-snug">
+                      {slot.description[lang] || slot.description.en}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* SUBVIEW 3: 24 PLANETARY HORAS */}
+        {activeSubView === "horas" && (
+          <section className="space-y-4">
+            <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 text-xs text-amber-900 text-center max-w-2xl mx-auto">
+              {lang === "bn"
+                ? "হোরা হলো প্রাচীন কালডিয়ান ক্রমে বিন্যস্ত গ্রহের ২৪ ঘণ্টার প্রভাববলয়। প্রতিটি নির্দিষ্ট শুভ কর্মের জন্য নির্দিষ্ট গ্রহের হোরা নির্বাচিত হয়।"
+                : "Planetary Horas follow the ancient Chaldean celestial order, dividing the 24-hour cycle into 1-hour ruling planetary influences."}
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              {(apiData?.horas || []).map((h: MuhuratHoraSlotData) => (
+                <div
+                  key={h.hora_index}
+                  className={`rounded-2xl p-3 border transition-all text-center ${
+                    h.is_active
+                      ? "border-amber-500 bg-amber-100/80 shadow-md ring-2 ring-amber-400"
+                      : "border-stone-200 bg-white"
+                  }`}
+                >
+                  <span className="text-[10px] font-mono text-stone-500 block">
+                    {h.start_time} – {h.end_time}
+                  </span>
+                  <span className="font-cinzel font-black text-base text-amber-950 mt-1 block">
+                    {h.lord}
+                  </span>
+                  <span className="text-[9px] font-bold text-amber-800 block truncate">
+                    {h.nature}
+                  </span>
+                  <p className="mt-1 text-[10px] text-stone-600 line-clamp-2">
+                    {h.activities}
+                  </p>
                 </div>
-              </div>
-            );
-          })}
-        </section>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Astrologer Consultation CTA Banner */}
         <section className="rounded-3xl border-2 border-amber-300 bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 p-8 sm:p-10 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
