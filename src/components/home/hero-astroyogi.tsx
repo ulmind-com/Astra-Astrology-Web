@@ -221,13 +221,13 @@ export function HeroAstroyogi() {
 
   return (
     <section className="relative overflow-hidden bg-[#0a080d] sm:bg-gradient-to-b sm:from-[#060508] sm:via-[#0c0a12] sm:to-[#08070b] pt-4 pb-6 sm:pt-6 sm:pb-10 border-b border-amber-500/15">
-      {/* Left rotating celestial zodiac chakra */}
+      {/* Left rotating celestial gold zodiac wheel */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/zodiac-chakra.png"
+        src="/celestial-wheel-gold.webp"
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute -left-24 sm:-left-36 md:-left-44 lg:-left-56 top-1/2 -translate-y-1/2 size-[360px] sm:size-[480px] md:size-[600px] lg:size-[720px] select-none opacity-20 sm:opacity-25 mix-blend-screen filter drop-shadow-[0_0_35px_rgba(245,192,0,0.2)] animate-[spin_120s_linear_infinite_reverse] motion-reduce:animate-none"
+        className="pointer-events-none absolute -left-16 sm:-left-24 md:-left-32 lg:-left-40 top-1/2 -translate-y-1/2 size-[240px] sm:size-[320px] md:size-[400px] lg:size-[480px] select-none opacity-20 sm:opacity-25 mix-blend-screen filter drop-shadow-[0_0_25px_rgba(245,192,0,0.25)] animate-[spin_120s_linear_infinite_reverse] motion-reduce:animate-none"
       />
 
       {/* Right rotating celestial gold zodiac wheel */}
@@ -236,7 +236,7 @@ export function HeroAstroyogi() {
         src="/zodiac-wheel-gold.webp"
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute -right-24 sm:-right-36 md:-right-44 lg:-right-56 top-1/2 -translate-y-1/2 size-[360px] sm:size-[480px] md:size-[600px] lg:size-[720px] select-none opacity-20 sm:opacity-25 mix-blend-screen filter drop-shadow-[0_0_35px_rgba(245,192,0,0.2)] animate-spin [animation-duration:120s] motion-reduce:animate-none"
+        className="pointer-events-none absolute -right-16 sm:-right-24 md:-right-32 lg:-right-40 top-1/2 -translate-y-1/2 size-[240px] sm:size-[320px] md:size-[400px] lg:size-[480px] select-none opacity-20 sm:opacity-25 mix-blend-screen filter drop-shadow-[0_0_25px_rgba(245,192,0,0.25)] animate-spin [animation-duration:120s] motion-reduce:animate-none"
       />
 
       {/* Subtle celestial stars and ambient cosmic radial glow */}
