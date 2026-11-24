@@ -964,7 +964,7 @@ export default function KundliPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]/70 text-stone-900 flex flex-col font-sans pb-24">
+    <div suppressHydrationWarning className="min-h-screen bg-[#fafaf9]/70 text-stone-900 flex flex-col font-sans pb-24">
       <SiteHeader />
 
       {/* Main Container */}
