@@ -67,7 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
       className={`${poppins.variable} ${geistMono.variable} ${cinzel.variable} ${cinzelDecorative.variable} h-full`}
     >
-      <body className="min-h-full pb-[104px] md:pb-0">
+      <body suppressHydrationWarning className="min-h-full pb-[104px] md:pb-0">
         <ThemeProvider>
           <QueryProvider>
             <RealtimeProvider>
