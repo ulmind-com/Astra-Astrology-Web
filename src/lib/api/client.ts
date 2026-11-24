@@ -260,6 +260,16 @@ async function send(path: string, options: Options): Promise<Sent> {
 
   if (response.status === 204) return { response, payload: null };
 
+  const contentType = response.headers.get("content-type") || "";
+  if (contentType.includes("application/pdf") || contentType.includes("application/octet-stream")) {
+    try {
+      const blob = await response.blob();
+      return { response, payload: blob };
+    } catch {
+      /* fallback */
+    }
+  }
+
   let payload: unknown = null;
   try {
     payload = await response.json();
@@ -377,4 +387,10 @@ export const api = {
     apiFetch<T>(path, { ...options, method: "PATCH", body }),
   delete: <T>(path: string, options?: Options) =>
     apiFetch<T>(path, { ...options, method: "DELETE" }),
+  postBlob: async (path: string, body?: unknown, options?: Options): Promise<Blob> => {
+    const sent = await sendWithRefresh(path, { ...options, method: "POST", body });
+    if (!sent.response.ok) raise(sent, options?.auth ?? true);
+    if (sent.payload instanceof Blob) return sent.payload;
+    return sent.response.blob();
+  },
 };

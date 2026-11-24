@@ -600,6 +600,9 @@ export interface KundliUiStrings {
   presentBadge: string;
   notPresentBadge: string;
   downloadBtn: string;
+  fullReportBadge: string;
+  downloadFullPdf: string;
+  downloadFullPdfDesc: string;
   consultBtn: string;
   thPlanet: string;
   thHouse: string;
@@ -824,6 +827,9 @@ export const KUNDLI_UI_STRINGS: Record<KundliLanguage, KundliUiStrings> = {
     presentBadge: "উপস্থিত",
     notPresentBadge: "অনুপস্থিত",
     downloadBtn: "ডাউনলোড",
+    fullReportBadge: "সম্পূর্ণ প্রিমিয়াম বৈদিক কুষ্ঠি রিপোর্ট (১০০% নির্ভুল)",
+    downloadFullPdf: "সম্পূর্ণ কুষ্ঠি PDF ডাউনলোড করুন (হোরোসফট মডেল ৭)",
+    downloadFullPdfDesc: "১১৩-টপিক শোদশবর্গ, বিংশোত্তরী ও যোগিনী দশা, অষ্টকবর্গ, ষড়বল, লাল কিতাব ও কেপি সহ সম্পূর্ণ কুষ্ঠি ডসিয়ার।",
     consultBtn: "জ্যোতিষীর পরামর্শ",
     thPlanet: "গ্রহ",
     thHouse: "ভাব",
@@ -1058,6 +1064,9 @@ export const KUNDLI_UI_STRINGS: Record<KundliLanguage, KundliUiStrings> = {
     presentBadge: "उपस्थित",
     notPresentBadge: "अनुपस्थित",
     downloadBtn: "डाउनलोड",
+    fullReportBadge: "संपूर्ण प्रीमियम वैदिक कुंडली रिपोर्ट (100% सटीक)",
+    downloadFullPdf: "संपूर्ण कुंडली PDF डाउनलोड करें (होरोसॉफ्ट मॉडल 7)",
+    downloadFullPdfDesc: "113-विषय षोडशवर्ग, विंशोत्तरी व योगिनी दशा, अष्टकवर्ग, षड्बल, लाल किताब व केपी युक्त संपूर्ण कुंडली रिपोर्ट।",
     consultBtn: "ज्योतिषी परामर्श",
     thPlanet: "ग्रह",
     thHouse: "भाव",
@@ -1292,6 +1301,9 @@ export const KUNDLI_UI_STRINGS: Record<KundliLanguage, KundliUiStrings> = {
     presentBadge: "Present",
     notPresentBadge: "Not Present",
     downloadBtn: "Download",
+    fullReportBadge: "Comprehensive Vedic Kundli Report (100% Dynamic)",
+    downloadFullPdf: "Download Full Kundli PDF (Horosoft Model 7 Edition)",
+    downloadFullPdfDesc: "113-Topic Comprehensive Dossier with Shodashvarga, Vimshottari & Yogini Dashas, Ashtakavarga, Shadbala, Lal Kitab & KP Cusps.",
     consultBtn: "Consult",
     thPlanet: "Planet",
     thHouse: "House",

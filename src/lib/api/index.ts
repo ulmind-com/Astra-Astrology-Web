@@ -904,6 +904,9 @@ export const astrologyApi = {
   calculateKundli: (body: KundliCalculatePayload) =>
     api.post<KundliCalculateResult>(endpoints.astrology.kundli, body),
 
+  downloadKundliPdf: (body: KundliCalculatePayload) =>
+    api.postBlob(endpoints.astrology.kundliPdf, body),
+
   calculateKundliMatching: (body: KundliMatchingPayload) =>
     api.post<KundliMatchingResult>(endpoints.astrology.kundliMatching, body),
 

@@ -445,6 +445,8 @@ export default function KundliPage() {
   const { data: profile } = useProfile({ enabled: isSignedIn });
   const { getFeature, checkAccess, walletBalance, refresh: refreshWallet } = useFeaturePricing();
   const kundliFeature = getFeature("kundli");
+  const kundliPdfFeature = getFeature("kundli_pdf");
+  const [downloadingPdf, setDownloadingPdf] = React.useState(false);
   const [coinModalOpen, setCoinModalOpen] = React.useState(false);
   const [coinModalReason, setCoinModalReason] = React.useState<"unauthorized" | "insufficient_coins" | "disabled">("insufficient_coins");
   const [expandedHero, setExpandedHero] = React.useState(false);
@@ -844,6 +846,120 @@ export default function KundliPage() {
   const handlePrintDownload = () => {
     if (typeof window !== "undefined") {
       window.print();
+    }
+  };
+
+  // Full Horosoft Model 7 Vector PDF Download Handler
+  const handleDownloadPdf = async () => {
+    const access = checkAccess("kundli_pdf");
+    if (!access.allowed) {
+      if (access.reason === "disabled") {
+        toast.error(language === "bn" ? "পিডিএফ ডাউনলোড সাময়িকভাবে নিষ্ক্রিয় রয়েছে" : "PDF download is currently disabled");
+        return;
+      }
+      setCoinModalReason(access.reason || "insufficient_coins");
+      setCoinModalOpen(true);
+      return;
+    }
+
+    const d = parseInt(day, 10);
+    const m = parseInt(month, 10);
+    const y = parseInt(year, 10);
+    const parsedHour = parseInt(hour, 10) || 12;
+    const parsedMinute = parseInt(minute, 10) || 0;
+    const parsedSecond = parseInt(second, 10) || 0;
+    const effectivePeriod = period || "PM";
+    const effectiveLat =
+      selectedPlace?.latitude != null
+        ? selectedPlace.latitude
+        : latitude != null && !isNaN(latitude)
+        ? latitude
+        : 22.5726;
+    const effectiveLon =
+      selectedPlace?.longitude != null
+        ? selectedPlace.longitude
+        : longitude != null && !isNaN(longitude)
+        ? longitude
+        : 88.3639;
+    const rawTz =
+      selectedPlace?.timezoneOffset != null && !isNaN(selectedPlace.timezoneOffset)
+        ? selectedPlace.timezoneOffset
+        : parseFloat(timezone);
+    const effectiveTz = typeof rawTz === "number" && !isNaN(rawTz) ? rawTz : 5.5;
+    const effectivePlace = selectedPlace?.place ?? (place.trim() || "Kolkata, West Bengal, India");
+    const effectiveTzName =
+      selectedPlace?.timezoneName ||
+      (typeof profile?.birth?.timezone === "string" && isNaN(Number(profile.birth.timezone))
+        ? profile.birth.timezone
+        : null);
+
+    const payload: KundliCalculatePayload = {
+      name: name.trim() || (language === "bn" ? "জাতক / জাতিকা" : "Jataka"),
+      gender,
+      day: isNaN(d) ? 1 : d,
+      month: isNaN(m) ? 1 : m,
+      year: isNaN(y) ? 1995 : y,
+      hour: parsedHour,
+      minute: parsedMinute,
+      second: parsedSecond,
+      period: effectivePeriod,
+      place: effectivePlace,
+      latitude: effectiveLat,
+      longitude: effectiveLon,
+      timezone: effectiveTz,
+      timezone_name: effectiveTzName,
+      ayanamsa,
+      house_system: houseSystem,
+      chart_style:
+        chartStyle === "wheel"
+          ? "north_indian"
+          : chartStyle === "south"
+          ? "south_indian"
+          : chartStyle === "east"
+          ? "east_indian"
+          : "north_indian",
+      language,
+    };
+
+    setDownloadingPdf(true);
+    try {
+      const blob = await astrologyApi.downloadKundliPdf(payload);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `DivinLink_Kundli_${(name.trim() || "Jataka").replace(/\s+/g, "_")}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      if (access.requiredCoins > 0) {
+        toast.success(
+          language === "bn"
+            ? `${access.requiredCoins} কয়েন কেটে সম্পূর্ণ কুন্ডলী রিপোর্ট ডাউনলোড সম্পন্ন হয়েছে!`
+            : `Full Kundli report downloaded successfully! (${access.requiredCoins} coins used)`
+        );
+        refreshWallet();
+      } else {
+        toast.success(
+          language === "bn"
+            ? "সম্পূর্ণ বৈদিক কুন্ডলী রিপোর্ট ডাউনলোড সফল হয়েছে!"
+            : "Complete Vedic Kundli report downloaded successfully!"
+        );
+      }
+    } catch (err: any) {
+      console.error("PDF download error:", err);
+      if (err?.code === "insufficient_coins") {
+        setCoinModalReason("insufficient_coins");
+        setCoinModalOpen(true);
+      } else if (err?.code === "authentication_required" || err?.status === 401) {
+        setCoinModalReason("unauthorized");
+        setCoinModalOpen(true);
+      } else {
+        toast.error(err?.message || (language === "bn" ? "পিডিএফ জেনারেট করতে সমস্যা হয়েছে।" : "Failed to generate Kundli PDF."));
+      }
+    } finally {
+      setDownloadingPdf(false);
     }
   };
 
@@ -1429,6 +1545,59 @@ export default function KundliPage() {
                   <Edit className="size-4 text-amber-600" />
                   <span>{t.editDetails}</span>
                 </button>
+              </div>
+            </div>
+
+            {/* Horosoft Model 7 Style Complete Vedic Kundli PDF Download Card */}
+            <div className="rounded-3xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 via-yellow-50/50 to-orange-50/30 p-6 sm:p-8 shadow-md">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="space-y-2 text-center md:text-left">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-amber-100 border border-amber-300 px-3 py-1 text-xs font-bold text-amber-900">
+                    <Sparkles className="size-3.5 text-amber-600" />
+                    <span>{t.fullReportBadge}</span>
+                    {kundliPdfFeature?.coins != null && kundliPdfFeature.coins > 0 ? (
+                      <span className="rounded-full bg-amber-400 text-stone-950 px-2 py-0.5 text-[10px] font-extrabold">
+                        {kundliPdfFeature.coins} 🪙
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-emerald-500 text-white px-2 py-0.5 text-[10px] font-extrabold uppercase">
+                        Free
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="font-display text-xl sm:text-2xl font-black text-stone-900">
+                    {t.downloadFullPdf}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-stone-600 max-w-2xl leading-relaxed">
+                    {t.downloadFullPdfDesc}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] font-semibold text-stone-700">
+                    <span className="rounded-md bg-white border border-stone-200 px-2.5 py-1">✦ D1, D9, D10, Chandra</span>
+                    <span className="rounded-md bg-white border border-stone-200 px-2.5 py-1">✦ 120-Yr Vimshottari & Yogini Dasha</span>
+                    <span className="rounded-md bg-white border border-stone-200 px-2.5 py-1">✦ Ashtakavarga & Shadbala</span>
+                    <span className="rounded-md bg-white border border-stone-200 px-2.5 py-1">✦ Lal Kitab & KP Chart</span>
+                    <span className="rounded-md bg-white border border-stone-200 px-2.5 py-1">✦ Sade Sati, Manglik & Yogas</span>
+                  </div>
+                </div>
+
+                <div className="shrink-0 w-full md:w-auto flex flex-col items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleDownloadPdf}
+                    disabled={downloadingPdf}
+                    className="w-full md:w-auto inline-flex items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 px-7 py-3.5 text-sm font-extrabold text-stone-950 shadow-md press transition-all cursor-pointer disabled:opacity-60"
+                  >
+                    {downloadingPdf ? (
+                      <RefreshCw className="size-4 animate-spin text-stone-950" />
+                    ) : (
+                      <Download className="size-4 text-stone-950" />
+                    )}
+                    <span>{downloadingPdf ? (language === "bn" ? "পিডিএফ প্রস্তুত হচ্ছে..." : "Generating PDF...") : t.downloadFullPdf}</span>
+                  </button>
+                  <span className="text-[11px] text-stone-500">
+                    {language === "bn" ? "প্রিন্ট-রেডি ভেক্টর গ্রাফিক্স ও রাজকীয় সিলমোহর" : "Print-ready vector charts & consecrated seal"}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -2723,11 +2892,21 @@ export default function KundliPage() {
 
             <button
               type="button"
-              onClick={handlePrintDownload}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 py-2.5 px-3 text-xs font-bold text-white shadow-xs press transition-colors cursor-pointer"
+              onClick={handleDownloadPdf}
+              disabled={downloadingPdf}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 py-2.5 px-3 text-xs font-bold text-white shadow-xs press transition-all cursor-pointer disabled:opacity-60"
             >
-              <Download className="size-3.5" />
-              <span>{t.downloadBtn}</span>
+              {downloadingPdf ? (
+                <RefreshCw className="size-3.5 animate-spin" />
+              ) : (
+                <Download className="size-3.5" />
+              )}
+              <span>{downloadingPdf ? (language === "bn" ? "ডাউনলোড..." : "Downloading...") : t.downloadBtn}</span>
+              {kundliPdfFeature?.coins != null && kundliPdfFeature.coins > 0 && (
+                <span className="ml-1 rounded-full bg-amber-400 px-1.5 py-0.2 text-[10px] font-extrabold text-stone-950">
+                  {kundliPdfFeature.coins}🪙
+                </span>
+              )}
             </button>
 
             <Link

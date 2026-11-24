@@ -183,6 +183,7 @@ export const endpoints = {
     kp: "/astrology/kp",
     dasha: "/astrology/dasha",
     kundli: "/astrology/kundli",
+    kundliPdf: "/astrology/kundli/pdf",
     kundliMatching: "/astrology/kundli-matching",
     geoSearch: "/astrology/geo-search",
     timezone: "/astrology/timezone",
