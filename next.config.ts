@@ -1,3 +1,4 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -16,6 +17,7 @@ const nextConfig: NextConfig = {
   // on nearly every page — so it only produced build failures. Off, those
   // routes simply render on demand, which is what they need anyway.
   turbopack: {
+    root: path.resolve(__dirname, ".."),
     rules: {
       "*.css": {
         loaders: ["@tailwindcss/turbopack"],
