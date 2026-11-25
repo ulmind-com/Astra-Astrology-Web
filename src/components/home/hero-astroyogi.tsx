@@ -12,7 +12,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-import { cmsApi, type HeroSlide } from "@/lib/api";
+import { cmsApi, type HeroSlide, type HomePageCMSData } from "@/lib/api";
 import { HERO_SLIDES_TRANSLATIONS } from "@/lib/home-translations";
 import { useLanguage } from "@/providers/language-provider";
 
@@ -125,16 +125,23 @@ const QUICK_ACTIONS = [
   },
 ];
 
-export function HeroAstroyogi() {
+export function HeroAstroyogi({
+  initialCms,
+}: {
+  initialCms?: HomePageCMSData | null;
+} = {}) {
   const { language } = useLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [loadedSlides, setLoadedSlides] = useState<Set<number>>(() => new Set([0]));
   const [isPaused, setIsPaused] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
   const { data: cmsData } = useQuery({
     queryKey: ["cms", "homepage"],
     queryFn: cmsApi.getHomepage,
-    staleTime: 60_000,
+    initialData: initialCms ?? undefined,
+    staleTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
   });
 
   const slides = useMemo<HeroSlide[]>(() => {
@@ -181,6 +188,17 @@ export function HeroAstroyogi() {
   }, [language]);
 
   useEffect(() => {
+    setLoadedSlides((prev) => {
+      const nextIdx = (currentIndex + 1) % Math.max(slides.length, 1);
+      if (prev.has(currentIndex) && prev.has(nextIdx)) return prev;
+      const next = new Set(prev);
+      next.add(currentIndex);
+      next.add(nextIdx);
+      return next;
+    });
+  }, [currentIndex, slides.length]);
+
+  useEffect(() => {
     if (isPaused || slides.length <= 1) return;
 
     const timer = setInterval(() => {
@@ -222,19 +240,23 @@ export function HeroAstroyogi() {
   return (
     <section className="relative overflow-hidden bg-[#0a080d] sm:bg-gradient-to-b sm:from-[#060508] sm:via-[#0c0a12] sm:to-[#08070b] pt-4 pb-6 sm:pt-6 sm:pb-10 border-b border-amber-500/15">
       {/* Left rotating celestial gold zodiac wheel */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src="/celestial-wheel-gold.webp"
         alt=""
+        width={480}
+        height={480}
+        loading="lazy"
         aria-hidden="true"
         className="pointer-events-none absolute -left-16 sm:-left-24 md:-left-32 lg:-left-40 top-1/2 -translate-y-1/2 size-[240px] sm:size-[320px] md:size-[400px] lg:size-[480px] select-none opacity-20 sm:opacity-25 mix-blend-screen filter drop-shadow-[0_0_25px_rgba(245,192,0,0.25)] animate-[spin_120s_linear_infinite_reverse] motion-reduce:animate-none"
       />
 
       {/* Right rotating celestial gold zodiac wheel */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src="/zodiac-wheel-gold.webp"
         alt=""
+        width={480}
+        height={480}
+        loading="lazy"
         aria-hidden="true"
         className="pointer-events-none absolute -right-16 sm:-right-24 md:-right-32 lg:-right-40 top-1/2 -translate-y-1/2 size-[240px] sm:size-[320px] md:size-[400px] lg:size-[480px] select-none opacity-20 sm:opacity-25 mix-blend-screen filter drop-shadow-[0_0_25px_rgba(245,192,0,0.25)] animate-spin [animation-duration:120s] motion-reduce:animate-none"
       />
@@ -278,30 +300,37 @@ export function HeroAstroyogi() {
             className="flex w-full transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]"
             style={{ transform: `translateX(-${currentIndex * 100}%)` }}
           >
-            {slides.map((slide, idx) => (
+            {slides.map((slide, idx) => {
+              const shouldRenderImage =
+                idx === 0 || idx === currentIndex || loadedSlides.has(idx);
+              return (
               <div
                 key={slide.id || idx}
-                className="relative w-full shrink-0 aspect-[16/9] sm:aspect-[2.4/1] overflow-hidden"
+                className="relative w-full shrink-0 aspect-[16/9] sm:aspect-[2.4/1] overflow-hidden bg-[#120d1a]"
               >
                 {/* Full-bleed background image */}
-                <Image
-                  src={MOBILE_HERO_IMAGES[slide.id ?? ""] ?? slide.image_url}
-                  alt={slide.title}
-                  fill
-                  priority={idx === 0}
-                  className="object-cover object-top sm:hidden"
-                  sizes="100vw"
-                  quality={85}
-                />
-                <Image
-                  src={slide.image_url}
-                  alt={slide.title}
-                  fill
-                  priority={idx === 0}
-                  className="hidden object-cover object-center sm:block"
-                  sizes="(max-width: 1360px) 100vw, 1360px"
-                  quality={90}
-                />
+                {shouldRenderImage && (
+                  <>
+                    <Image
+                      src={MOBILE_HERO_IMAGES[slide.id ?? ""] ?? slide.image_url}
+                      alt={slide.title}
+                      fill
+                      priority={idx === 0}
+                      className="object-cover object-top sm:hidden"
+                      sizes="100vw"
+                      quality={80}
+                    />
+                    <Image
+                      src={slide.image_url}
+                      alt={slide.title}
+                      fill
+                      priority={idx === 0}
+                      className="hidden object-cover object-center sm:block"
+                      sizes="(max-width: 1360px) 100vw, 1360px"
+                      quality={82}
+                    />
+                  </>
+                )}
 
                 {/* Left gradient scrim for text readability */}
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent sm:from-black/50 sm:via-black/20" />
@@ -350,7 +379,8 @@ export function HeroAstroyogi() {
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Bottom bar: dot indicators */}

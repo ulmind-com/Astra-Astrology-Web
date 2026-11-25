@@ -26,6 +26,8 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 2678400,
     // Profile pictures, Google OAuth avatars, course thumbnails, and CDN galleries.
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" },
@@ -55,6 +57,24 @@ const nextConfig: NextConfig = {
           {
             key: "Cache-Control",
             value: "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+          },
+        ],
+      },
+      {
+        source: "/(images|banners|vastu)/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=2592000, stale-while-revalidate=86400",
+          },
+        ],
+      },
+      {
+        source: "/:asset(logo\\.png|icon\\.png|apple-icon\\.png|celestial-wheel-gold\\.webp|zodiac-wheel-gold\\.webp|zodiac-chakra\\.png|meditating-guru\\.png|kundli-milan-report-cover\\.png|ulmind\\.png|video_call\\.mp3|notification\\.mp3)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=604800, stale-while-revalidate=86400",
           },
         ],
       },

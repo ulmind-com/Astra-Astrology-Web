@@ -1,0 +1,381 @@
+"use client";
+
+import {
+  ArrowRight,
+  Lock,
+  Shield,
+  Sparkles,
+  Star,
+  Zap,
+} from "lucide-react";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import * as React from "react";
+import { useQuery } from "@tanstack/react-query";
+
+import { AstrologyPredictionZodiac } from "@/components/home/astrology-prediction-zodiac";
+import { AppDownloadSection } from "@/components/home/app-download-section";
+import { AstroyogiHeader } from "@/components/home/astroyogi-header";
+import { VedicFestivalsSection } from "@/components/home/vedic-festivals-section";
+import { CoursesSection } from "@/components/home/courses-section";
+import { FreeAstrologyReadings } from "@/components/home/free-astrology-readings";
+import { HeroAstroyogi } from "@/components/home/hero-astroyogi";
+import { ToolRail } from "@/components/home/tool-rail";
+import { OurServicesSection } from "@/components/home/our-services-section";
+import { TopAstrologersSection, INITIAL_TOP_ASTROLOGERS } from "@/components/home/top-astrologers-section";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { cmsApi, astrologerApi, type HomePageCMSData } from "@/lib/api";
+import { HOME_STEPS_AND_TRUST_TRANSLATIONS } from "@/lib/home-translations";
+import { useLanguage } from "@/providers/language-provider";
+import type { CourseListItem, PaginatedAstrologers } from "@/types";
+
+const FirstChatFreeModal = dynamic(
+  () => import("@/components/home/first-chat-free-modal").then((m) => m.FirstChatFreeModal),
+  { ssr: false },
+);
+
+const ChineseZodiacModal = dynamic(
+  () => import("@/components/astrology/chinese-zodiac-modal").then((m) => m.ChineseZodiacModal),
+  { ssr: false },
+);
+
+interface HomePageClientProps {
+  initialCms?: HomePageCMSData | null;
+  initialAstrologers?: PaginatedAstrologers | null;
+  initialCourses?: CourseListItem[] | null;
+}
+
+export function HomePageClient({
+  initialCms = null,
+  initialAstrologers = null,
+  initialCourses = null,
+}: HomePageClientProps) {
+  const { language } = useLanguage();
+  const [isChineseModalOpen, setIsChineseModalOpen] = React.useState(false);
+  const t = HOME_STEPS_AND_TRUST_TRANSLATIONS[language] || HOME_STEPS_AND_TRUST_TRANSLATIONS.en;
+
+  const { data: cmsData } = useQuery({
+    queryKey: ["cms", "homepage"],
+    queryFn: cmsApi.getHomepage,
+    initialData: initialCms ?? undefined,
+    staleTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+  });
+
+  const hasServerAstrologers = Boolean(initialAstrologers?.items?.length);
+  const { data: astrologersData } = useQuery({
+    queryKey: ["astrologers", { home: true, limit: 12 }],
+    queryFn: async () => {
+      try {
+        const res = await astrologerApi.list({ limit: 12 });
+        if (res?.items && res.items.length > 0) return res;
+        return initialAstrologers ?? INITIAL_TOP_ASTROLOGERS;
+      } catch {
+        return initialAstrologers ?? INITIAL_TOP_ASTROLOGERS;
+      }
+    },
+    initialData: initialAstrologers ?? INITIAL_TOP_ASTROLOGERS,
+    initialDataUpdatedAt: hasServerAstrologers ? undefined : 0,
+    staleTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+  });
+
+  const liveAstrologerCount = astrologersData?.items?.length ?? 2;
+
+  const dynamicTrustStats = React.useMemo(() => {
+    return [
+      {
+        value: `${liveAstrologerCount}`,
+        label:
+          language === "bn"
+            ? "শীর্ষ যাচাইকৃত জ্যোতিষী"
+            : language === "hi"
+            ? "सत्यापित शीर्ष ज्योतिषी"
+            : "VERIFIED ASTROLOGERS",
+      },
+      {
+        value: "100%",
+        label:
+          language === "bn"
+            ? "সুইস এফিমেরিস সঠিক গণনা"
+            : language === "hi"
+            ? "स्विस एफेमेरिस शुद्ध गणना"
+            : "SWISS EPHEMERIS ACCURACY",
+      },
+      {
+        value: "4.8★",
+        label:
+          language === "bn"
+            ? "গড় ক্লায়েন্ট সন্তুষ্টি"
+            : language === "hi"
+            ? "औसत ग्राहक रेटिंग"
+            : "AVERAGE CLIENT RATING",
+      },
+    ];
+  }, [liveAstrologerCount, language]);
+
+  const steps = React.useMemo(() => {
+    return t.steps.map((st) => ({
+      num: st.num,
+      title: st.title,
+      body: st.body,
+    }));
+  }, [t]);
+
+  const trustFeatures = React.useMemo(() => {
+    const icons = [Shield, Lock, Zap, Star];
+    return t.trust.map((item, i) => ({
+      icon: icons[i] || Shield,
+      title: item.title,
+      body: item.body,
+    }));
+  }, [t]);
+
+  return (
+    <>
+      {/* Main Astroyogi Top Header & Category Navigation */}
+      <AstroyogiHeader />
+
+      <main className="min-h-screen bg-white">
+        {/* 1. HERO BANNER & QUICK ACTION TILES */}
+        <HeroAstroyogi initialCms={initialCms} />
+
+        {/* 1b. 21-TOOL GOLDEN CIRCULAR RAIL (Matching Mobile App) */}
+        <ToolRail />
+
+        {/* 2. TOP ONLINE ASTROLOGERS */}
+        <TopAstrologersSection initialAstrologers={initialAstrologers} />
+
+        {/* 4. TODAY'S ASTROLOGY PREDICTION (12 ZODIAC SIGNS) */}
+        <AstrologyPredictionZodiac />
+
+        {/* 5. FREE ASTROLOGY READINGS (12 RICH 3D TILES) */}
+        <FreeAstrologyReadings />
+
+        {/* 5b. OUR SERVICES (horizontal premium rail) */}
+        <OurServicesSection />
+
+        {/* 6. LEARN: ASTROLOGY MASTERCLASSES */}
+        <CoursesSection initialCourses={initialCourses} />
+
+        {/* 7. VEDIC FESTIVALS & AUSPICIOUS TITHIS */}
+        <VedicFestivalsSection />
+
+        {/* Dynamic Trust Stats Strip */}
+        <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8 py-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-stone-200 rounded-2xl border border-stone-200 bg-gradient-to-r from-[#fffdf5] via-[#fffdfa] to-[#fffbf0] py-6 shadow-xs text-center">
+            {dynamicTrustStats.map((stat, i) => (
+              <div key={i} className="px-4 py-2 sm:py-0">
+                <div className="text-2xl sm:text-3xl font-extrabold text-[#1a1208]">{stat.value}</div>
+                <div className="mt-1 text-[11px] sm:text-xs font-bold text-[#8b7d63] uppercase tracking-wider">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 8. HOW IT WORKS: 3 STEPS TO CLARITY */}
+        <section className="relative overflow-hidden bg-transparent py-12 sm:py-16 border-b border-stone-200/80">
+          {/* Slowly rotating yellow celestial ring above the section */}
+          <div className="pointer-events-none absolute left-1/2 -top-20 sm:-top-24 -translate-x-1/2 z-0">
+            <div className="animate-celestial-spin size-48 sm:size-64 rounded-full border-2 border-dashed border-[#facc15]/35">
+              <div className="absolute inset-4 rounded-full border border-[#facc15]/25" />
+              <span className="absolute left-1/2 top-0 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#facc15] shadow-[0_0_12px_4px_rgba(250,204,21,0.6)]" />
+              <span className="absolute left-1/2 bottom-0 size-1.5 -translate-x-1/2 translate-y-1/2 rounded-full bg-[#fde047] shadow-[0_0_8px_3px_rgba(253,224,71,0.5)]" />
+            </div>
+          </div>
+
+          <div className="relative z-10 mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-2xl mx-auto mb-10">
+              <span className="inline-block rounded-full bg-brand-200/80 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#8b5e0a] border border-brand-400/40 mb-3">
+                {language === "bn" ? "সহজ ও নির্ভরযোগ্য" : language === "hi" ? "सरल एवं सहज" : "Simple & Seamless"}
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-extrabold text-[#1a1208] tracking-tight">
+                {language === "bn"
+                  ? "স্পষ্টতা ও দিকনির্দেশনার ৩টি সহজ ধাপ"
+                  : language === "hi"
+                  ? "मार्गदर्शन के 3 सरल चरण"
+                  : "Three Steps to Clarity"}
+              </h2>
+              <p className="mt-2 text-xs sm:text-sm text-[#6b5f4d]">
+                {language === "bn"
+                  ? "মাত্র ২ মিনিটে জীবন, প্রেম এবং ভবিষ্যতের নির্ভুল দিকনির্দেশনা পান।"
+                  : language === "hi"
+                  ? "मात्र 2 मिनट में अपने जीवन, प्रेम एवं भविष्य का मार्गदर्शन प्राप्त करें।"
+                  : "Get instant guidance on your life, love, and destiny in under 2 minutes."}
+              </p>
+            </div>
+
+            <div className="flex flex-col md:flex-row md:items-stretch gap-3 md:gap-0">
+              {steps.map((step, idx) => (
+                <React.Fragment key={step.num}>
+                  <div className="group relative flex flex-1 flex-col overflow-hidden rounded-[18px] sm:rounded-[26px] border border-stone-200 bg-white p-4 sm:p-7 shadow-[0_8px_26px_-14px_rgba(26,18,8,0.1)] transition-all duration-300 hover:-translate-y-2 hover:border-brand-400 hover:shadow-lg">
+                    {/* Giant watermark number */}
+                    <span className="pointer-events-none absolute -right-1 -top-3 sm:-right-2 sm:-top-4 font-cinzel text-[64px] sm:text-[96px] font-black leading-none text-[#fcef9a]/40 select-none">
+                      {step.num}
+                    </span>
+
+                    <div className="relative">
+                      <div className="flex items-center justify-between mb-3 sm:mb-5">
+                        {/* Dark number badge with neon ring */}
+                        <span className="relative flex size-10 sm:size-12 items-center justify-center rounded-xl sm:rounded-2xl bg-[#1a1412] font-cinzel text-base sm:text-lg font-black text-[#fde047] ring-1 ring-[#facc15]/60 shadow-[0_0_18px_-2px_rgba(250,204,21,0.7)]">
+                          {step.num}
+                        </span>
+                        <span className="text-[10px] sm:text-[11px] font-bold text-[#a07a16] uppercase tracking-[0.15em]">
+                          {language === "bn" ? `ধাপ ${idx + 1}` : language === "hi" ? `चरण ${idx + 1}` : `Step ${idx + 1}`}
+                        </span>
+                      </div>
+
+                      <h3 className="text-[15px] sm:text-lg font-extrabold tracking-tight text-[#1a1208]">
+                        {step.title}
+                      </h3>
+                      <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-[#6b5f4d] leading-relaxed">
+                        {step.body}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Neon yellow connector arrow between cards */}
+                  {idx < steps.length - 1 && (
+                    <div className="flex shrink-0 items-center justify-center md:px-3 lg:px-4 py-1 md:py-0">
+                      <ArrowRight
+                        className={`size-7 sm:size-8 text-[#facc15] rotate-90 md:rotate-0 ${
+                          idx === 0 ? "animate-neon-arrow" : "animate-neon-arrow-2"
+                        }`}
+                        strokeWidth={2.6}
+                      />
+                    </div>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 9. WHY TRUST DIVINLINK */}
+        <section className="bg-transparent py-12 sm:py-16 border-b border-stone-200/80">
+          <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-2xl mx-auto mb-10">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1a1208] tracking-tight">
+                {language === "bn"
+                  ? "কেন ডিভিনলিংক-এ আস্থা রাখবেন"
+                  : language === "hi"
+                  ? "डिविनलिंक पर क्यों भरोसा करें"
+                  : "Why Choose DivinLink"}
+              </h2>
+              <p className="mt-2 text-xs sm:text-sm text-[#6b5f4d]">
+                {language === "bn"
+                  ? "শাস্ত্রজ্ঞ বৈদিক পন্ডিত, স্বচ্ছ মূল্য এবং ১০০% নির্ভরযোগ্য গোপনীয়তা।"
+                  : language === "hi"
+                  ? "सत्यापित वैदिक विद्वान, पारदर्शी शुल्क और पूर्ण गोपनीयता की गारंटी।"
+                  : "Rigorously vetted Vedic scholars, transparent pricing, and complete privacy guaranteed."}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {trustFeatures.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={item.title}
+                    className="rounded-2xl border border-stone-200 bg-white p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brand-400 hover:shadow-md"
+                  >
+                    <div className="flex size-12 items-center justify-center rounded-2xl bg-brand-300 text-ink-900 shadow-sm mb-4">
+                      <Icon className="size-6 text-[#8b5e0a]" />
+                    </div>
+                    <h3 className="font-bold text-sm sm:text-base text-[#1a1208]">
+                      {item.title}
+                    </h3>
+                    <p className="mt-2 text-xs sm:text-sm text-[#6b5f4d] leading-relaxed">
+                      {item.body}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* 9b. DOWNLOAD THE DIVINLINK APP */}
+        <AppDownloadSection />
+
+        {/* 10. BOTTOM CALL TO ACTION BANNER */}
+        <section className="bg-transparent py-12 sm:py-16">
+          <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
+            <div className="relative overflow-hidden rounded-3xl border border-stone-200 bg-gradient-to-br from-stone-50 via-white to-amber-50/40 p-8 sm:p-12 text-center shadow-lg">
+              <div className="relative z-10 max-w-2xl mx-auto">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#8b5e0a] shadow-xs mb-4">
+                  <Sparkles className="size-3.5" />{" "}
+                  {language === "bn"
+                    ? "আত্মবিশ্বাসের সাথে শুরু করুন"
+                    : language === "hi"
+                    ? "विश्वास के साथ शुरुआत करें"
+                    : "Start With Confidence"}
+                </span>
+
+                <h2 className="text-2xl sm:text-4xl font-extrabold text-[#1a1208] tracking-tight">
+                  {language === "bn"
+                    ? "অভিজ্ঞ জ্যোতিষীর সাথে পরামর্শ করতে প্রস্তুত?"
+                    : language === "hi"
+                    ? "विशेषज्ञ से परामर्श के लिए तैयार हैं?"
+                    : "Ready to Consult with an Expert?"}
+                </h2>
+                <p className="mt-3 text-sm sm:text-base text-[#524436] leading-relaxed">
+                  {cmsData?.cta_description ||
+                    (language === "bn"
+                      ? "প্রেম, ক্যারিয়ার, বিয়ে ও স্বাস্থ্যে শাস্ত্রীয় স্পষ্টতা ও সঠিক প্রতিকার পান। প্রথম কনসালটেশন দিয়ে আজই শুরু করুন।"
+                      : language === "hi"
+                      ? "प्रेम, करियर और जीवन में शास्त्रीय मार्गदर्शन एवं सटीक उपाय पाएं। प्रथम परामर्श से आज ही शुरुआत करें।"
+                      : "Find authentic clarity and personalized Vedic guidance for love, career, and life. Start your journey today.")}
+                </p>
+
+                <div className="mt-7 flex flex-wrap items-center justify-center gap-3.5">
+                  <Link href="/astrologers">
+                    <button
+                      type="button"
+                      className="rounded-full bg-[#fcd404] hover:bg-[#e6be00] text-[#1c1304] font-extrabold text-sm sm:text-base px-8 py-3.5 shadow-md transition-transform hover:scale-105 flex items-center gap-2 border border-[#d9af00]"
+                    >
+                      <span>
+                        {language === "bn"
+                          ? "ফ্রি পরামর্শ নিন"
+                          : language === "hi"
+                          ? "मुफ़्त परामर्श लें"
+                          : "Consult for FREE"}
+                      </span>
+                      <ArrowRight className="size-4" />
+                    </button>
+                  </Link>
+
+                  <Link href="/kundli">
+                    <button
+                      type="button"
+                      className="rounded-full bg-white/90 hover:bg-white text-[#1a1208] font-bold text-sm sm:text-base px-7 py-3.5 border border-[#eadf9a] shadow-xs transition-colors"
+                    >
+                      {language === "bn"
+                        ? "ফ্রি কুণ্ডলী তৈরি করুন"
+                        : language === "hi"
+                        ? "मुफ़्त कुंडली बनाएं"
+                        : "Generate Free Kundli"}
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Chinese Zodiac Modal */}
+        {isChineseModalOpen && (
+          <ChineseZodiacModal
+            isOpen={isChineseModalOpen}
+            onClose={() => setIsChineseModalOpen(false)}
+          />
+        )}
+
+        {/* First Chat Free Welcome Pop-up */}
+        <FirstChatFreeModal />
+      </main>
+
+      <SiteFooter />
+    </>
+  );
+}

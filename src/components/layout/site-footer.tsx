@@ -167,10 +167,12 @@ export function SiteFooter() {
   return (
     <footer className="relative mt-20 overflow-hidden border-t border-[#efe3c0] bg-gradient-to-b from-[#fffdf5] to-[#fdf6e3] print:hidden">
       {/* Faint rotating zodiac wheel at the very bottom */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src="/zodiac-wheel-gold.webp"
         alt=""
+        width={560}
+        height={560}
+        loading="lazy"
         aria-hidden="true"
         className="pointer-events-none absolute -bottom-48 left-1/2 size-[560px] -translate-x-1/2 select-none opacity-[0.08] mix-blend-multiply animate-spin [animation-duration:140s] motion-reduce:animate-none"
       />

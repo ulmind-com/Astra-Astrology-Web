@@ -24,8 +24,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { LoadingBlock } from "@/components/ui";
 import { astrologyApi } from "@/lib/api";
-import { INITIAL_DAILY_HOROSCOPE } from "@/components/home/astrology-prediction-zodiac";
-import initialTabHoroscopes from "@/components/home/initial-horoscopes-tabs.json";
+import initialHoroscopeFallback from "@/components/home/initial-horoscope.json";
 import { useLanguage } from "@/providers/language-provider";
 import {
   SuryaChandraHorizonArc,
@@ -74,15 +73,10 @@ export default function PanchangPage() {
   const [horaPeriod, setHoraPeriod] = React.useState<"day" | "night">("day");
   const [choghadiyaPeriod, setChoghadiyaPeriod] = React.useState<"day" | "night">("day");
 
-  const tabDataMap = initialTabHoroscopes as unknown as Record<string, typeof INITIAL_DAILY_HOROSCOPE>;
-  const dateInitialData =
-    tabDataMap[selectedDate] ??
-    (selectedDate === tomorrowStr ? tabDataMap["tomorrow"] ?? tabDataMap["2026-11-21"] : undefined) ??
-    (selectedDate === yesterdayStr ? tabDataMap["yesterday"] ?? tabDataMap["2026-11-19"] : undefined) ??
-    (selectedDate === todayStr ? INITIAL_DAILY_HOROSCOPE : undefined);
+  const fallbackHoroscope = initialHoroscopeFallback as unknown as import("@/types").DailyHoroscopeResult;
 
-  // Real-time backend API query with pre-hydrated Swiss Ephemeris data for instant switching
-  const { data: horoscopeData, isLoading, error } = useQuery({
+  // Real-time backend API query with lightweight placeholder data while Swiss Ephemeris resolves
+  const { data: fetchedHoroscope, isLoading, error } = useQuery({
     queryKey: ["panchang", "daily", lang, selectedDate],
     queryFn: () =>
       astrologyApi.dailyHoroscope({
@@ -92,16 +86,12 @@ export default function PanchangPage() {
         longitude: 88.3639,
         timezone: 5.5,
       }),
-    initialData: dateInitialData,
-    placeholderData: (previousData) => previousData ?? dateInitialData ?? INITIAL_DAILY_HOROSCOPE,
+    placeholderData: (previousData) => previousData ?? fallbackHoroscope,
     staleTime: 1000 * 60 * 15,
   });
 
-  const panchang =
-    horoscopeData?.panchang ??
-    dateInitialData?.panchang ??
-    tabDataMap["today"]?.panchang ??
-    INITIAL_DAILY_HOROSCOPE.panchang;
+  const horoscopeData = fetchedHoroscope ?? fallbackHoroscope;
+  const panchang = horoscopeData.panchang;
   const horas: HoraItem[] = panchang?.horas ?? [];
   const choghadiya: ChoghadiyaItem[] = panchang?.choghadiya ?? [];
 

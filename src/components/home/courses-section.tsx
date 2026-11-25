@@ -34,6 +34,8 @@ function CourseCard({ course }: { course: CourseListItem }) {
           <img
             src={course.thumbnail_url}
             alt={course.title}
+            loading="lazy"
+            decoding="async"
             className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
@@ -89,7 +91,13 @@ function CourseCard({ course }: { course: CourseListItem }) {
           <span className="size-8 shrink-0 overflow-hidden rounded-full bg-stone-200 ring-1 ring-stone-200">
             {course.instructor_avatar ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={course.instructor_avatar} alt={course.instructor_name} className="size-full object-cover" />
+              <img
+                src={course.instructor_avatar}
+                alt={course.instructor_name}
+                loading="lazy"
+                decoding="async"
+                className="size-full object-cover"
+              />
             ) : (
               <span className="flex size-full items-center justify-center text-xs font-bold text-[#8b5e0a]">
                 {course.instructor_name?.charAt(0) ?? "A"}
@@ -200,8 +208,13 @@ const INITIAL_COURSES: CourseListItem[] = [
   },
 ];
 
-export function CoursesSection() {
+export function CoursesSection({
+  initialCourses,
+}: {
+  initialCourses?: CourseListItem[] | null;
+} = {}) {
   const { language } = useLanguage();
+  const hasServerData = Boolean(initialCourses?.length);
 
   const { data, isLoading } = useQuery({
     queryKey: ["courses", { home: true, limit: 6 }],
@@ -209,13 +222,14 @@ export function CoursesSection() {
       try {
         const res = await courseApi.getCourses({ limit: 6 });
         if (res && res.length > 0) return res;
-        return INITIAL_COURSES;
+        return initialCourses ?? INITIAL_COURSES;
       } catch (err) {
         console.warn("Live courses fetch issue, using real cached records:", err);
-        return INITIAL_COURSES;
+        return initialCourses ?? INITIAL_COURSES;
       }
     },
-    initialData: INITIAL_COURSES,
+    initialData: hasServerData ? initialCourses! : INITIAL_COURSES,
+    initialDataUpdatedAt: hasServerData ? undefined : 0,
     staleTime: 5 * 60_000,
     refetchOnWindowFocus: false,
   });

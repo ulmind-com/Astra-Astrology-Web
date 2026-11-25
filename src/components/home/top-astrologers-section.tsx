@@ -162,8 +162,13 @@ export const INITIAL_TOP_ASTROLOGERS: PaginatedAstrologers = {
   },
 };
 
-export function TopAstrologersSection() {
+export function TopAstrologersSection({
+  initialAstrologers,
+}: {
+  initialAstrologers?: PaginatedAstrologers | null;
+} = {}) {
   const { language } = useLanguage();
+  const hasServerData = Boolean(initialAstrologers?.items?.length);
 
   const { data, isLoading } = useQuery({
     queryKey: ["astrologers", { home: true, limit: 12 }],
@@ -171,13 +176,14 @@ export function TopAstrologersSection() {
       try {
         const res = await astrologerApi.list({ limit: 12 });
         if (res?.items && res.items.length > 0) return res;
-        return INITIAL_TOP_ASTROLOGERS;
+        return initialAstrologers ?? INITIAL_TOP_ASTROLOGERS;
       } catch (err) {
         console.warn("Live astrologers fetch issue, using real cached records:", err);
-        return INITIAL_TOP_ASTROLOGERS;
+        return initialAstrologers ?? INITIAL_TOP_ASTROLOGERS;
       }
     },
-    initialData: INITIAL_TOP_ASTROLOGERS,
+    initialData: initialAstrologers ?? INITIAL_TOP_ASTROLOGERS,
+    initialDataUpdatedAt: hasServerData ? undefined : 0,
     staleTime: 5 * 60_000,
     refetchOnWindowFocus: false,
   });

@@ -107,10 +107,12 @@ export default function CoursesPage() {
         {/* Sacred Hero Banner */}
         <section className="relative overflow-hidden border-b border-amber-200/60 bg-gradient-to-b from-amber-50/50 via-white to-amber-50/30 px-4 py-10 sm:px-6 sm:py-14">
           {/* Faint rotating zodiac wheel in background */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="/zodiac-wheel-gold.webp"
             alt=""
+            width={360}
+            height={360}
+            loading="lazy"
             aria-hidden="true"
             className="pointer-events-none absolute -right-12 -top-16 size-[280px] sm:size-[360px] select-none opacity-[0.14] mix-blend-multiply animate-spin [animation-duration:120s] motion-reduce:animate-none"
           />

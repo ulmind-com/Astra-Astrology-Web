@@ -37,7 +37,9 @@ import {
 import { onSessionChange, session } from "@/lib/session";
 
 /** How often presence is re-judged against the clock. */
-const DECAY_MS = 5_000;
+const DECAY_MS = 10_000;
+/** Defer anonymous WebSocket handshake slightly so critical paint & API fetches finish first. */
+const ANON_WS_DELAY_MS = 2_000;
 
 /** Anything the socket carries that is about a chat rather than the market. */
 export type ChatEvent =
@@ -118,33 +120,70 @@ function isPrivateShape(astrologer: PatchableAstrologer): boolean {
  * would re-render the whole directory.
  */
 function merge(rest: PatchableAstrologer, live: LiveAstrologer, now: number): PatchableAstrologer {
-  const next: PatchableAstrologer = {
+  const nextOnline = isPresent(live, now);
+  const avail = rest.availability as Record<string, unknown> | undefined;
+  const availSame =
+    avail?.is_online === nextOnline &&
+    avail?.is_busy === live.availability.is_busy &&
+    avail?.is_available_for_chat === live.availability.is_available_for_chat &&
+    avail?.is_available_for_call === live.availability.is_available_for_call &&
+    avail?.is_available_for_video === live.availability.is_available_for_video &&
+    avail?.last_seen_at === live.availability.last_seen_at;
+
+  const isPriv = isPrivateShape(rest);
+  if (isPriv) {
+    if (availSame) return rest;
+    return {
+      ...rest,
+      availability: {
+        ...(rest.availability ?? {}),
+        is_online: nextOnline,
+        is_busy: live.availability.is_busy,
+        is_available_for_chat: live.availability.is_available_for_chat,
+        is_available_for_call: live.availability.is_available_for_call,
+        is_available_for_video: live.availability.is_available_for_video,
+        last_seen_at: live.availability.last_seen_at,
+      },
+    };
+  }
+
+  const ratesSame =
+    rest.rates?.chat_coins_per_minute === live.rates.chat_coins_per_minute &&
+    rest.rates?.call_coins_per_minute === live.rates.call_coins_per_minute &&
+    rest.rates?.video_coins_per_minute === live.rates.video_coins_per_minute;
+  const ratingSame =
+    rest.rating?.average === live.rating.average &&
+    rest.rating?.count === live.rating.count;
+  const metaSame =
+    rest.total_consultations === live.total_consultations &&
+    rest.is_featured === live.is_featured;
+
+  if (availSame && ratesSame && ratingSame && metaSame) {
+    return rest;
+  }
+
+  return {
     ...rest,
     availability: {
       ...(rest.availability ?? {}),
       // The TTL is applied here, not taken from the document: a stale card
       // still claims to be online, and only the clock can say otherwise.
-      is_online: isPresent(live, now),
+      is_online: nextOnline,
       is_busy: live.availability.is_busy,
       is_available_for_chat: live.availability.is_available_for_chat,
       is_available_for_call: live.availability.is_available_for_call,
       is_available_for_video: live.availability.is_available_for_video,
       last_seen_at: live.availability.last_seen_at,
     },
-  };
-
-  if (!isPrivateShape(rest)) {
-    next.rates = {
+    rates: {
       chat_coins_per_minute: live.rates.chat_coins_per_minute,
       call_coins_per_minute: live.rates.call_coins_per_minute,
       video_coins_per_minute: live.rates.video_coins_per_minute,
-    };
-    next.rating = { average: live.rating.average, count: live.rating.count };
-    next.total_consultations = live.total_consultations;
-    next.is_featured = live.is_featured;
-  }
-
-  return JSON.stringify(next) === JSON.stringify(rest) ? rest : next;
+    },
+    rating: { average: live.rating.average, count: live.rating.count },
+    total_consultations: live.total_consultations,
+    is_featured: live.is_featured,
+  };
 }
 
 /** One astrologer, a list of them, or a page of them — patched in place. */
@@ -253,8 +292,12 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     let live: LiveConnection | null = null;
+    let cancelled = false;
+    let delayTimer: number | undefined;
 
-    live = openLive(apiBase, () => session.accessToken, (message) => {
+    const connectSocket = () => {
+      if (cancelled) return;
+      live = openLive(apiBase, () => session.accessToken, (message) => {
       switch (message.type) {
         case "ready":
           setConnected(true);
@@ -319,11 +362,20 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
         default:
           break;
       }
-    });
+      });
 
-    liveConnRef.current = live;
+      liveConnRef.current = live;
+    };
+
+    if (session.accessToken) {
+      connectSocket();
+    } else {
+      delayTimer = window.setTimeout(connectSocket, ANON_WS_DELAY_MS);
+    }
 
     return () => {
+      cancelled = true;
+      if (delayTimer !== undefined) window.clearTimeout(delayTimer);
       live?.close();
       liveConnRef.current = null;
       setConnected(false);
@@ -331,10 +383,10 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
   }, [queryClient, sessionEpoch]);
 
   // Presence has to expire without anyone sending anything, so this re-judges
-  // the cards on a tick. `merge` returns the same object when nothing changed,
-  // so an idle tick costs no re-render.
+  // the cards on a tick. Skip idle ticks when the map is empty or tab hidden.
   React.useEffect(() => {
     const timer = window.setInterval(() => {
+      if (latest.current.size === 0 || document.visibilityState === "hidden") return;
       patchCache(queryClient, latest.current, Date.now());
     }, DECAY_MS);
     return () => window.clearInterval(timer);

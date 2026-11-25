@@ -1016,12 +1016,35 @@ export const astrologyApi = {
       { query: { language }, auth: false },
     ),
 
-  /** 100% In-house Vedic Daily Horoscope (Moon Transit Gochar & Panchang). */
-  dailyHoroscope: (payload?: DailyHoroscopePayload) =>
-    api.post<DailyHoroscopeResult>(
+  /** 100% In-house Vedic Daily Horoscope (Moon Transit Gochar & Panchang).
+   * Uses cacheable public GET when no personalized birth chart parameters are supplied.
+   */
+  dailyHoroscope: (payload?: DailyHoroscopePayload) => {
+    const p = payload || {};
+    const hasPersonalParams =
+      p.birth_nakshatra_index != null ||
+      Boolean(p.birth_date) ||
+      Boolean(p.birth_time) ||
+      p.birth_rashi_index != null ||
+      p.birth_lagna_index != null;
+    if (!hasPersonalParams) {
+      return api.get<DailyHoroscopeResult>(endpoints.astrology.dailyHoroscope, {
+        query: {
+          date: p.date ?? undefined,
+          sign: p.sign ?? undefined,
+          language: p.language ?? "en",
+          latitude: p.latitude ?? 22.5726,
+          longitude: p.longitude ?? 88.3639,
+          timezone: p.timezone ?? 5.5,
+        },
+        auth: false,
+      });
+    }
+    return api.post<DailyHoroscopeResult>(
       endpoints.astrology.dailyHoroscope,
-      payload || {},
-    ),
+      p,
+    );
+  },
 
   /** Charge 10 coins to open a sign's detailed daily reading (idempotent per day). */
   unlockDailyHoroscope: (signIndex: number) =>

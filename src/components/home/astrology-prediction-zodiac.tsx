@@ -8,11 +8,9 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { astrologyApi } from "@/lib/api";
 import { useLanguage } from "@/providers/language-provider";
 import type { DailyHoroscopeResult, DailySignHoroscope } from "@/types";
-import initialHoroscopeData from "./initial-horoscope.json";
-import initialTabHoroscopes from "./initial-horoscopes-tabs.json";
+import initialTeaserData from "./initial-horoscope-teaser.json";
 
-export const INITIAL_DAILY_HOROSCOPE = initialHoroscopeData as unknown as DailyHoroscopeResult;
-const TAB_DATA_MAP = initialTabHoroscopes as unknown as Record<string, DailyHoroscopeResult>;
+const INITIAL_ZODIAC_TEASER = initialTeaserData as unknown as DailyHoroscopeResult;
 
 interface ZodiacSignItem {
   id: string;
@@ -297,12 +295,15 @@ export function AstrologyPredictionZodiac() {
   const [tab, setTab] = React.useState<RangeTab>("today");
   const [activeIndex, setActiveIndex] = React.useState<number>(0); // Aries default (or user preference)
 
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const selectedDate = React.useMemo(() => {
     const t = RANGE_TABS.find((r) => r.id === tab) ?? RANGE_TABS[0];
     return dateFromOffset(t.offset);
   }, [tab]);
-
-  const tabInitialData = TAB_DATA_MAP[tab] ?? INITIAL_DAILY_HOROSCOPE;
 
   const { data, isLoading: loading } = useQuery({
     queryKey: ["dailyHoroscope", formatDateToYMD(selectedDate), language, tab],
@@ -314,11 +315,11 @@ export function AstrologyPredictionZodiac() {
         longitude: 88.3639,
         timezone: 5.5,
       }),
-    initialData: tabInitialData,
-    placeholderData: (previousData) => previousData,
-    staleTime: 60_000,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+    placeholderData: (previousData) =>
+      previousData ?? (tab === "today" ? INITIAL_ZODIAC_TEASER : undefined),
+    staleTime: 1000 * 60 * 15,
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 8000),
   });
 
   const activeMeta = ZODIAC_SIGNS[activeIndex] || ZODIAC_SIGNS[0];
@@ -415,7 +416,6 @@ export function AstrologyPredictionZodiac() {
                     width={80}
                     height={80}
                     className="size-14 sm:size-16 md:size-17 object-contain transform transition-transform duration-300 group-hover:scale-110 drop-shadow-xs"
-                    unoptimized
                   />
                 </div>
 
@@ -449,7 +449,6 @@ export function AstrologyPredictionZodiac() {
                   width={64}
                   height={64}
                   className="size-12 sm:size-14 object-contain"
-                  unoptimized
                 />
               </div>
               <div>
@@ -470,8 +469,11 @@ export function AstrologyPredictionZodiac() {
             </div>
 
             <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="rounded-full border border-amber-300/60 bg-amber-50 px-3.5 py-1.5 text-xs font-bold text-amber-900 shadow-2xs">
-                {datePill}
+              <span
+                suppressHydrationWarning
+                className="rounded-full border border-amber-300/60 bg-amber-50 px-3.5 py-1.5 text-xs font-bold text-amber-900 shadow-2xs"
+              >
+                {mounted ? datePill : tabLabels[tab]}
               </span>
               <Link
                 href={`/daily-horoscope/${activeMeta.id}`}

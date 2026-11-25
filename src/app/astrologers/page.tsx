@@ -20,6 +20,7 @@ import {
   Wallet,
   type LucideIcon,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
 
@@ -270,6 +271,7 @@ function DirectoryInner() {
       return isDefaultQuery ? INITIAL_TOP_ASTROLOGERS : res;
     },
     initialData: isDefaultQuery ? INITIAL_TOP_ASTROLOGERS : undefined,
+    initialDataUpdatedAt: isDefaultQuery ? 0 : undefined,
     // Keeps the previous page on screen while the next one loads.
     placeholderData: (previous) => previous,
     staleTime: 5 * 60 * 1000,
@@ -310,9 +312,12 @@ function DirectoryInner() {
 
             {/* Right: slow-rotating zodiac wheel + sample chat bubbles */}
             <div className="relative hidden min-h-[280px] items-center justify-center lg:flex" aria-hidden="true">
-              <img
+              <Image
                 src="/zodiac-wheel-gold.webp"
                 alt=""
+                width={420}
+                height={420}
+                loading="lazy"
                 className="pointer-events-none absolute size-[420px] select-none opacity-60 mix-blend-multiply animate-spin [animation-duration:90s] motion-reduce:animate-none"
               />
               <div className="absolute right-4 top-6 max-w-[230px] rounded-2xl rounded-tr-md bg-white px-4 py-2.5 text-sm leading-snug text-ink-800 shadow-[0_12px_32px_-12px_rgba(180,83,9,0.3)] ring-1 ring-black/5">
