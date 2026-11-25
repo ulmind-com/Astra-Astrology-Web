@@ -313,6 +313,7 @@ export const endpoints = {
     list: "/purohits",
     detail: (idOrSlug: string) => `/purohits/${idOrSlug}`,
     book: "/purohits/bookings",
+    verifyPayment: (bookingId: string) => `/purohits/bookings/${bookingId}/verify-payment`,
     myBookings: "/purohits/bookings/mine",
     roomToken: (bookingId: string) => `/purohits/bookings/${bookingId}/token`,
     myProfile: "/purohits/me/profile",

@@ -18,6 +18,7 @@ import {
   Star,
   User,
   Video,
+  Wallet,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -26,9 +27,30 @@ import * as React from "react";
 import { toast } from "sonner";
 
 import { Avatar, Badge, Button, Card, CardBody, CardHeader, CardTitle, LoadingBlock, Modal } from "@/components/ui";
-import { purohitApi, type PujaBookingData, type PurohitData, type PurohitPujaItem } from "@/lib/api";
+import { purohitApi, walletApi, type PujaBookingData, type PurohitData, type PurohitPujaItem } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/providers/auth-provider";
+
+const RZP_SRC = "https://checkout.razorpay.com/v1/checkout.js";
+
+function loadRazorpay(): Promise<boolean> {
+  if (typeof window === "undefined") return Promise.resolve(false);
+  if ((window as any).Razorpay) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${RZP_SRC}"]`);
+    if (existing) {
+      existing.addEventListener("load", () => resolve(true));
+      existing.addEventListener("error", () => resolve(false));
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = RZP_SRC;
+    s.async = true;
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.body.appendChild(s);
+  });
+}
 
 export default function PurohitDetailPage() {
   const params = useParams<{ id: string }>();
@@ -42,6 +64,15 @@ export default function PurohitDetailPage() {
   const [sankalpaName, setSankalpaName] = React.useState(user?.full_name || "");
   const [sankalpaGotra, setSankalpaGotra] = React.useState("Kashyapa");
   const [sankalpaWish, setSankalpaWish] = React.useState("");
+  const [paymentMethod, setPaymentMethod] = React.useState<"razorpay" | "wallet">("razorpay");
+  const [isVerifyingPayment, setIsVerifyingPayment] = React.useState(false);
+
+  const { data: walletSummary } = useQuery({
+    queryKey: ["wallet", "summary"],
+    queryFn: () => walletApi.summary(),
+    enabled: isSignedIn,
+  });
+  const walletBalanceCoins = walletSummary?.wallet?.balance_coins ?? 0;
 
   // Update devotee name once user auth loads
   React.useEffect(() => {
@@ -68,17 +99,88 @@ export default function PurohitDetailPage() {
       sankalpa_name: string;
       sankalpa_gotra: string;
       sankalpa_wish?: string;
+      payment_method: "razorpay" | "wallet";
     }) => {
       const res = await purohitApi.book(payload);
       return (res as any)?.data || res;
     },
-    onSuccess: (booking: PujaBookingData) => {
-      toast.success("পূজা বুকিং সফল হয়েছে! ভিডিও রুমে প্রবেশ করা হচ্ছে...");
-      setSelectedPuja(null);
-      // Immediately navigate devotee to the live video puja room
-      router.push(`/purohit-booking/${booking.id}/room`);
+    onSuccess: async (booking: PujaBookingData) => {
+      if (booking.payment_status === "paid") {
+        toast.success("পূজা বুকিং ও পেমেন্ট সফল হয়েছে! ভিডিও রুমে প্রবেশ করা হচ্ছে...");
+        setSelectedPuja(null);
+        router.push(`/purohit-booking/${booking.id}/room`);
+        return;
+      }
+
+      if (!booking.razorpay_order_id || !booking.razorpay_key_id) {
+        toast.error("পেমেন্ট গেটওয়ে অর্ডার শুরু করা যায়নি। অনুগ্রহ করে পরে চেষ্টা করুন।");
+        return;
+      }
+
+      const loaded = await loadRazorpay();
+      if (!loaded || !(window as any).Razorpay) {
+        toast.error("পেমেন্ট গেটওয়ে লোড ব্যর্থ হয়েছে। ইন্টারনেট সংযোগ পরীক্ষা করুন।");
+        return;
+      }
+
+      setIsVerifyingPayment(true);
+      const rzp = new (window as any).Razorpay({
+        key: booking.razorpay_key_id,
+        order_id: booking.razorpay_order_id,
+        amount: Math.round(booking.amount_inr * 100),
+        currency: "INR",
+        name: "DivinLink Vedic Purohit",
+        description: `${booking.puja_name} (${booking.booking_number})`,
+        image: "/icon.png",
+        prefill: {
+          name: sankalpaName.trim() || user?.full_name || "",
+          email: user?.email || "",
+          contact: (user as any)?.phone || "",
+        },
+        theme: { color: "#d97706" },
+        handler: async (response: {
+          razorpay_order_id?: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) => {
+          try {
+            toast.loading("পেমেন্ট যাচাই হচ্ছে...", { id: "puja-rzp-verify" });
+            const verified = await purohitApi.verifyPayment(booking.id, {
+              razorpay_order_id: response.razorpay_order_id || booking.razorpay_order_id || "",
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+            toast.dismiss("puja-rzp-verify");
+            if (verified?.payment_status !== "paid") {
+              toast.error("পেমেন্ট নিশ্চিত করা যায়নি।");
+              return;
+            }
+            toast.success("পেমেন্ট সম্পন্ন! ভিডিও রুমে প্রবেশ করা হচ্ছে...");
+            setSelectedPuja(null);
+            router.push(`/purohit-booking/${booking.id}/room`);
+          } catch (err) {
+            toast.dismiss("puja-rzp-verify");
+            const msg = err instanceof ApiError ? err.message : "পেমেন্ট যাচাই ব্যর্থ হয়েছে";
+            toast.error(msg);
+          } finally {
+            setIsVerifyingPayment(false);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setIsVerifyingPayment(false);
+            toast.info("পেমেন্ট বাতিল করা হয়েছে। আমার বুকিং পেজ থেকে পরে সম্পূর্ণ করতে পারবেন।");
+          },
+        },
+      });
+      rzp.on("payment.failed", (resp: any) => {
+        setIsVerifyingPayment(false);
+        toast.error(resp?.error?.description || "পেমেন্ট ব্যর্থ হয়েছে।");
+      });
+      rzp.open();
     },
     onError: (err) => {
+      setIsVerifyingPayment(false);
       const msg = err instanceof ApiError ? err.message : "পূজা বুকিং করতে সমস্যা হয়েছে";
       toast.error(msg);
     },
@@ -105,6 +207,10 @@ export default function PurohitDetailPage() {
       toast.error("গোত্র প্রদান করুন (অজানা থাকলে কাশ্যপ লিখুন)");
       return;
     }
+    if (paymentMethod === "wallet" && walletBalanceCoins < Math.ceil(selectedPuja.price_inr)) {
+      toast.error(`ওয়ালেটে পর্যাপ্ত কয়েন নেই (প্রয়োজন: ${Math.ceil(selectedPuja.price_inr)} কয়েন)`);
+      return;
+    }
 
     bookMutation.mutate({
       purohit_id: purohit.id,
@@ -112,6 +218,7 @@ export default function PurohitDetailPage() {
       sankalpa_name: sankalpaName.trim(),
       sankalpa_gotra: sankalpaGotra.trim(),
       sankalpa_wish: sankalpaWish.trim() || undefined,
+      payment_method: paymentMethod,
     });
   };
 
@@ -429,6 +536,40 @@ export default function PurohitDetailPage() {
               />
             </div>
 
+            {/* Payment Method */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1">
+                <Wallet className="size-3.5 text-amber-600" />
+                <span>পেমেন্ট পদ্ধতি নির্বাচন করুন *</span>
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("razorpay")}
+                  className={`rounded-xl border px-3 py-2 text-left text-xs transition-all cursor-pointer ${
+                    paymentMethod === "razorpay"
+                      ? "border-amber-500 bg-amber-50 dark:bg-amber-950/40 font-bold text-amber-900 dark:text-amber-100"
+                      : "border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300"
+                  }`}
+                >
+                  <div>UPI / Card (Razorpay)</div>
+                  <div className="text-[10px] font-normal opacity-75">₹{selectedPuja.price_inr}</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("wallet")}
+                  className={`rounded-xl border px-3 py-2 text-left text-xs transition-all cursor-pointer ${
+                    paymentMethod === "wallet"
+                      ? "border-amber-500 bg-amber-50 dark:bg-amber-950/40 font-bold text-amber-900 dark:text-amber-100"
+                      : "border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300"
+                  }`}
+                >
+                  <div>Wallet Coins</div>
+                  <div className="text-[10px] font-normal opacity-75">ব্যালেন্স: {walletBalanceCoins} কয়েন</div>
+                </button>
+              </div>
+            </div>
+
             {/* Submit Actions */}
             <div className="pt-2 flex items-center justify-end gap-2 border-t border-stone-200 dark:border-stone-800">
               <Button
@@ -443,11 +584,13 @@ export default function PurohitDetailPage() {
                 type="submit"
                 variant="primary"
                 size="sm"
-                loading={bookMutation.isPending}
+                loading={bookMutation.isPending || isVerifyingPayment}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs"
               >
                 <Video className="size-3.5 mr-1" />
-                সংকল্প নিশ্চিত করুন ও রুমে যান (₹{selectedPuja.price_inr})
+                {paymentMethod === "wallet"
+                  ? `ওয়ালেট থেকে পে ও রুমে যান (${Math.ceil(selectedPuja.price_inr)} কয়েন)`
+                  : `পেমেন্ট করুন ও রুমে যান (₹${selectedPuja.price_inr})`}
               </Button>
             </div>
           </form>

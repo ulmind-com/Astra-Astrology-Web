@@ -328,9 +328,9 @@ export const astrologerApi = {
     api.post<{ email: string }>(endpoints.astrologers.applicationSendOtp, { email }, { auth: false }),
 
   verifyApplicationOtp: (email: string, code: string) =>
-    api.post<{ verified: boolean }>(endpoints.astrologers.applicationVerifyOtp, { email, code }, { auth: false }),
+    api.post<{ verified: boolean; upload_token?: string }>(endpoints.astrologers.applicationVerifyOtp, { email, code }, { auth: false }),
 
-  uploadApplicationDoc: async (file: File) => {
+  uploadApplicationDoc: async (file: File, uploadToken?: string) => {
     const fd = new FormData();
     fd.append("file", file);
     return apiFetch<{ url: string; public_id: string; format: string }>(
@@ -338,6 +338,8 @@ export const astrologerApi = {
       {
         method: "POST",
         body: fd,
+        auth: false,
+        headers: uploadToken ? { "X-Upload-Token": uploadToken } : undefined,
       }
     );
   },
@@ -2246,6 +2248,9 @@ export interface PujaBookingData {
   zego_token?: string | null;
   status: "pending" | "confirmed" | "in_progress" | "completed" | "cancelled";
   payment_status: "pending" | "paid" | "failed" | "refunded";
+  payment_method?: "razorpay" | "wallet";
+  razorpay_order_id?: string | null;
+  razorpay_key_id?: string | null;
   started_at?: string | null;
   completed_at?: string | null;
   created_at: string;
@@ -2327,7 +2332,17 @@ export const purohitApi = {
     sankalpa_gotra: string;
     sankalpa_nakshatra?: string | null;
     sankalpa_wish?: string | null;
+    payment_method?: "razorpay" | "wallet";
   }) => api.post<PujaBookingData>(endpoints.purohits.book, body),
+
+  verifyPayment: (
+    bookingId: string,
+    body: {
+      razorpay_order_id: string;
+      razorpay_payment_id: string;
+      razorpay_signature: string;
+    },
+  ) => api.post<PujaBookingData>(endpoints.purohits.verifyPayment(bookingId), body),
 
   getMyBookings: () =>
     api.get<PujaBookingData[]>(endpoints.purohits.myBookings),
@@ -2342,9 +2357,9 @@ export const purohitApi = {
     api.post<{ email: string }>(endpoints.purohits.applicationSendOtp, { email }, { auth: false }),
 
   verifyApplicationOtp: (email: string, code: string) =>
-    api.post<{ verified: boolean }>(endpoints.purohits.applicationVerifyOtp, { email, code }, { auth: false }),
+    api.post<{ verified: boolean; upload_token?: string }>(endpoints.purohits.applicationVerifyOtp, { email, code }, { auth: false }),
 
-  uploadApplicationDoc: async (file: File) => {
+  uploadApplicationDoc: async (file: File, uploadToken?: string) => {
     const fd = new FormData();
     fd.append("file", file);
     return apiFetch<{ url: string; public_id: string; format: string }>(
@@ -2352,6 +2367,8 @@ export const purohitApi = {
       {
         method: "POST",
         body: fd,
+        auth: false,
+        headers: uploadToken ? { "X-Upload-Token": uploadToken } : undefined,
       }
     );
   },

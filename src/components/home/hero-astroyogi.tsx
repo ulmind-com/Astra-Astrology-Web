@@ -173,7 +173,7 @@ export function HeroAstroyogi({
 } = {}) {
   const { language } = useLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loadedSlides, setLoadedSlides] = useState<Set<number>>(() => new Set([0]));
+  const [visitedSlides, setVisitedSlides] = useState<Set<number>>(() => new Set([0, 1]));
   const [isPaused, setIsPaused] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
@@ -228,20 +228,24 @@ export function HeroAstroyogi({
     });
   }, [language]);
 
-  // Keep the current and the next slide's images mounted, so a slide is
-  // already decoded by the time it arrives. Adjusted during render (React's
-  // "storing information from previous renders" pattern), not in an effect.
-  const [seenIndex, setSeenIndex] = useState(-1);
-  if (seenIndex !== currentIndex) {
-    setSeenIndex(currentIndex);
-    const nextIdx = (currentIndex + 1) % Math.max(slides.length, 1);
-    if (!loadedSlides.has(currentIndex) || !loadedSlides.has(nextIdx)) {
-      const next = new Set(loadedSlides);
-      next.add(currentIndex);
-      next.add(nextIdx);
-      setLoadedSlides(next);
-    }
-  }
+  const selectSlide = React.useCallback(
+    (targetIdx: number) => {
+      const n = Math.max(slides.length, 1);
+      const normalized = ((targetIdx % n) + n) % n;
+      setCurrentIndex(normalized);
+      setVisitedSlides((prev) => {
+        const nextIdx = (normalized + 1) % n;
+        const prevIdx = (normalized - 1 + n) % n;
+        if (prev.has(normalized) && prev.has(nextIdx) && prev.has(prevIdx)) return prev;
+        const copy = new Set(prev);
+        copy.add(normalized);
+        copy.add(nextIdx);
+        copy.add(prevIdx);
+        return copy;
+      });
+    },
+    [slides.length],
+  );
 
   useEffect(() => {
     if (isPaused || slides.length <= 1) return;
@@ -250,22 +254,22 @@ export function HeroAstroyogi({
     // A timeout restarted on every slide change, so a manual jump gets a full
     // interval before the next advance (the progress dot restarts with it).
     const timer = setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1) % slides.length);
+      selectSlide(currentIndex + 1);
     }, SPOT_INTERVAL_MS);
 
     return () => clearTimeout(timer);
-  }, [isPaused, slides.length, currentIndex]);
+  }, [isPaused, slides.length, currentIndex, selectSlide]);
 
   const goToSlide = (index: number) => {
-    setCurrentIndex(index);
+    selectSlide(index);
   };
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % slides.length);
+    selectSlide(currentIndex + 1);
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
+    selectSlide(currentIndex - 1);
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -323,8 +327,14 @@ export function HeroAstroyogi({
             style={{ transform: `translateX(-${currentIndex * 100}%)` }}
           >
             {slides.map((slide, idx) => {
+              const prevIdx = (currentIndex - 1 + slides.length) % Math.max(slides.length, 1);
+              const nextIdx = (currentIndex + 1) % Math.max(slides.length, 1);
               const shouldRenderImage =
-                idx === 0 || idx === currentIndex || loadedSlides.has(idx);
+                idx === 0 ||
+                idx === currentIndex ||
+                idx === nextIdx ||
+                idx === prevIdx ||
+                visitedSlides.has(idx);
               return (
               <div
                 key={slide.id || idx}

@@ -106,26 +106,32 @@ html:has(.dl-home) body {
   position: absolute;
   inset: 0;
   z-index: 1;
-  will-change: transform;
 }
 
 .dl-slide {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
   z-index: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .dl-slide.is-current,
 .dl-slide.is-outgoing,
 .dl-slide.is-incoming {
-  visibility: visible;
+  opacity: 1;
 }
 
 .dl-slide.is-current,
 .dl-slide.is-outgoing {
   z-index: 1;
+}
+
+.dl-slide.is-current {
+  pointer-events: auto;
 }
 
 .dl-slide.is-incoming {
@@ -135,10 +141,19 @@ html:has(.dl-home) body {
 .dl-photo {
   position: absolute;
   inset: -3%;
-  background-size: cover;
-  background-repeat: no-repeat;
-  transform: scale(1.04);
-  will-change: transform;
+  overflow: hidden;
+  transform: translate3d(0, 0, 0) scale(1.04);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.dl-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  user-select: none;
 }
 
 .dl-tint {
@@ -225,12 +240,12 @@ html:has(.dl-home) body {
   opacity: 0;
   pointer-events: none;
   background: radial-gradient(
-    ellipse 50% 60% at 50% 50%,
-    rgba(255, 236, 226, 0.75) 0%,
-    rgba(255, 236, 226, 0.35) 45%,
-    rgba(255, 236, 226, 0) 72%
+    ellipse 52% 62% at 50% 50%,
+    rgba(255, 236, 226, 0.88) 0%,
+    rgba(255, 236, 226, 0.48) 38%,
+    rgba(255, 236, 226, 0.14) 58%,
+    rgba(255, 236, 226, 0) 76%
   );
-  filter: blur(10px);
   will-change: transform, opacity;
 }
 
@@ -245,7 +260,8 @@ html:has(.dl-home) body {
   mix-blend-mode: screen;
   pointer-events: none;
   transform-origin: 50% 100%;
-  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .dl-cloud {
@@ -295,7 +311,8 @@ html:has(.dl-home) body {
   opacity: 0;
   mix-blend-mode: screen;
   pointer-events: none;
-  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .dl-clouds-top .dl-cloud {
@@ -331,7 +348,6 @@ html:has(.dl-home) body {
   inset: 0;
   z-index: 9;
   pointer-events: none;
-  will-change: transform, opacity;
 }
 
 .dl-ring {

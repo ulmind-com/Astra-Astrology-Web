@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 
 import {
   CLOUD_IMAGE,
@@ -104,6 +105,8 @@ export function CinematicHero({ language, paused, children }: HeroProps) {
     py: 0,
     tx: 0,
     ty: 0,
+    lastSy: -1,
+    lastAnimWrite: -1,
   });
   const autoTimer = React.useRef<number | null>(null);
   const captionTimer = React.useRef<number | null>(null);
@@ -142,9 +145,9 @@ export function CinematicHero({ language, paused, children }: HeroProps) {
       e.start = performance.now();
       e.animating = true;
 
-      const mask = "linear-gradient(to left, transparent 0%, transparent 100%)";
-      incoming.style.webkitMaskImage = mask;
-      incoming.style.maskImage = mask;
+      // Clip-path hardware scissor wipe avoids Chromium/Android GPU mask-image
+      // texture re-allocation and tile dropouts during slide transitions.
+      incoming.style.clipPath = "inset(0 0 0 100%)";
       incoming.classList.add("is-incoming");
       outgoing.classList.remove("is-current");
       outgoing.classList.add("is-outgoing");
@@ -159,13 +162,21 @@ export function CinematicHero({ language, paused, children }: HeroProps) {
     },
     [],
   );
-  const scheduleAuto = React.useCallback((delay: number) => {
-    if (autoTimer.current) window.clearTimeout(autoTimer.current);
-    autoTimer.current = window.setTimeout(() => {
-      const e = engine.current;
-      goTo((e.cur + 1) % HERO_SLIDES.length);
-    }, delay);
-  }, [goTo]);
+  const scheduleAuto = React.useCallback(
+    (delay: number) => {
+      if (autoTimer.current) window.clearTimeout(autoTimer.current);
+      const attempt = () => {
+        if (document.hidden || pausedRef.current) {
+          autoTimer.current = window.setTimeout(attempt, 1000);
+          return;
+        }
+        const e = engine.current;
+        goTo((e.cur + 1) % HERO_SLIDES.length);
+      };
+      autoTimer.current = window.setTimeout(attempt, delay);
+    },
+    [goTo],
+  );
 
 
   /* ---------- intro ---------- */
@@ -185,6 +196,7 @@ export function CinematicHero({ language, paused, children }: HeroProps) {
   /* ---------- pointer parallax ---------- */
   React.useEffect(() => {
     const onMove = (ev: PointerEvent) => {
+      if (ev.pointerType === "touch") return;
       const e = engine.current;
       e.tx = (ev.clientX / window.innerWidth) * 2 - 1;
       e.ty = (ev.clientY / window.innerHeight) * 2 - 1;
@@ -198,27 +210,32 @@ export function CinematicHero({ language, paused, children }: HeroProps) {
     let raf = 0;
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick);
-      if (pausedRef.current) return;
+      if (pausedRef.current || document.hidden) return;
 
       const e = engine.current;
       const sy = window.scrollY;
       const vh = window.innerHeight;
       const W = window.innerWidth;
 
-      // Scroll choreography (skipped once the hero is far off screen).
-      if (sy < vh * 1.6) {
-        if (stackRef.current) stackRef.current.style.transform = `translate3d(0, ${sy * 0.42}px, 0)`;
+      // Scroll choreography (updated only when scrollY actually changes).
+      if (sy !== e.lastSy) {
+        const clampedSy = Math.min(sy, vh * 1.6);
+        e.lastSy = sy;
+        if (stackRef.current) stackRef.current.style.transform = `translate3d(0, ${clampedSy * 0.42}px, 0)`;
         if (cloudsRef.current)
-          cloudsRef.current.style.transform = `translate3d(0, ${-0.38 * sy}px, 0) scale(${1 + (0.35 * sy) / vh})`;
+          cloudsRef.current.style.transform = `translate3d(0, ${-0.38 * clampedSy}px, 0) scale(${1 + (0.35 * clampedSy) / vh})`;
         if (cloudsTopRef.current) {
-          cloudsTopRef.current.style.opacity = String(Math.min(1, sy / (0.45 * vh)));
-          cloudsTopRef.current.style.transform = `translate3d(0, ${-0.25 * sy}px, 0)`;
+          cloudsTopRef.current.style.opacity = String(Math.min(1, clampedSy / (0.45 * vh)));
+          cloudsTopRef.current.style.transform = `translate3d(0, ${-0.25 * clampedSy}px, 0)`;
         }
         if (railRef.current) {
-          railRef.current.style.transform = `translate3d(0, ${0.2 * sy}px, 0)`;
-          railRef.current.style.opacity = String(Math.max(0, 1 - sy / (0.5 * vh)));
+          railRef.current.style.transform = `translate3d(0, ${0.2 * clampedSy}px, 0)`;
+          railRef.current.style.opacity = String(Math.max(0, 1 - clampedSy / (0.5 * vh)));
         }
       }
+
+      // If scrolled completely past the hero and not wiping, skip per-frame hero photo math.
+      if (!e.animating && sy > vh * 1.2) return;
 
       // Smoothed pointer parallax.
       e.px += (e.tx - e.px) * 0.05;
@@ -229,34 +246,29 @@ export function CinematicHero({ language, paused, children }: HeroProps) {
       if (e.animating) {
         const t = Math.min(1, (now - e.start) / WIPE_MS);
         const p = easeInOutCubic(t);
-        const b = p * 135;
-        const a = b - 35;
-        const mid = b - 17.5;
+        const edgePct = (1 - p) * 100;
         const incoming = slideRefs.current[e.to];
         const outgoing = slideRefs.current[e.from];
         const inPhoto = photoRefs.current[e.to];
         const outPhoto = photoRefs.current[e.from];
 
         if (incoming) {
-          const mask = `linear-gradient(to left, #000 ${a}%, rgba(0,0,0,0.6) ${mid}%, transparent ${b}%)`;
-          incoming.style.webkitMaskImage = mask;
-          incoming.style.maskImage = mask;
+          incoming.style.clipPath = `inset(0 0 0 ${edgePct}%)`;
         }
         if (inPhoto)
-          inPhoto.style.transform = `translate(${2 * (1 - p) + parX * p}%, ${parY * p}%) scale(${1.12 - 0.08 * p})`;
+          inPhoto.style.transform = `translate3d(${2 * (1 - p) + parX * p}%, ${parY * p}%, 0) scale(${1.12 - 0.08 * p})`;
         if (outPhoto)
-          outPhoto.style.transform = `translate(${parX - 2 * p}%, ${parY}%) scale(${e.outBaseScale + 0.05 * p})`;
+          outPhoto.style.transform = `translate3d(${parX - 2 * p}%, ${parY}%, 0) scale(${e.outBaseScale + 0.05 * p})`;
 
         if (mistRef.current) {
-          const edgeX = W * (1 - mid / 100);
+          const edgeX = W * (1 - p);
           mistRef.current.style.transform = `translate3d(${edgeX - W * 0.17}px, 0, 0)`;
           mistRef.current.style.opacity = String(0.95 * Math.sin(Math.PI * t));
         }
 
         if (t >= 1) {
           if (incoming) {
-            incoming.style.webkitMaskImage = "";
-            incoming.style.maskImage = "";
+            incoming.style.clipPath = "";
             incoming.classList.remove("is-incoming");
             incoming.classList.add("is-current");
           }
@@ -269,9 +281,15 @@ export function CinematicHero({ language, paused, children }: HeroProps) {
           scheduleAuto(AUTO_MS);
         }
       } else {
-        const kb = Math.min(12, (now - e.settledAt) / 1000) * 0.0035;
-        const photo = photoRefs.current[e.cur];
-        if (photo) photo.style.transform = `translate(${parX}%, ${parY}%) scale(${1.04 + kb})`;
+        const elapsedSec = (now - e.settledAt) / 1000;
+        const pointerSettled = Math.abs(e.tx - e.px) < 0.001 && Math.abs(e.ty - e.py) < 0.001;
+        // Skip redundant style writes once Ken Burns hits its 12s cap and pointer is idle.
+        if (elapsedSec <= 12.1 || !pointerSettled || e.lastAnimWrite < e.settledAt) {
+          e.lastAnimWrite = now;
+          const kb = Math.min(12, elapsedSec) * 0.0035;
+          const photo = photoRefs.current[e.cur];
+          if (photo) photo.style.transform = `translate3d(${parX}%, ${parY}%, 0) scale(${1.04 + kb})`;
+        }
       }
     };
     raf = requestAnimationFrame(tick);
@@ -305,8 +323,21 @@ export function CinematicHero({ language, paused, children }: HeroProps) {
                     photoRefs.current[i] = el;
                   }}
                   className="dl-photo"
-                  style={{ backgroundImage: `url(${slide.photo})`, backgroundPosition: slide.position }}
-                />
+                >
+                  <Image
+                    src={slide.photo}
+                    alt=""
+                    fill
+                    loading={i === 0 ? undefined : "eager"}
+                    decoding="sync"
+                    priority={i === 0}
+                    sizes="100vw"
+                    unoptimized
+                    draggable={false}
+                    className="dl-photo-img"
+                    style={{ objectPosition: slide.position }}
+                  />
+                </div>
                 <div className="dl-tint" />
                 {React.createElement(
                   i === 0 ? "h1" : "p",

@@ -244,6 +244,17 @@ function DirectoryInner() {
   const [filters, setFilters] = React.useState<Filters>(EMPTY_FILTERS);
   const [page, setPage] = React.useState(1);
 
+  React.useEffect(() => {
+    try {
+      const modeParam = new URLSearchParams(window.location.search).get("mode");
+      if (modeParam === "chat" || modeParam === "call" || modeParam === "video") {
+        setFilters((prev) => ({ ...prev, mode: modeParam }));
+      }
+    } catch {
+      // Ignore URL parsing issues
+    }
+  }, []);
+
   // Typing should not fire a request per keystroke.
   const [debouncedSearch, setDebouncedSearch] = React.useState("");
   React.useEffect(() => {

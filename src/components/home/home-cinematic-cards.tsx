@@ -58,7 +58,7 @@ export function ReadingCard({ reading, language, column, liked, onToggleLike, on
           }
         }
       },
-      { threshold: 0.15 },
+      { threshold: 0.01, rootMargin: "120px 0px" },
     );
     io.observe(el);
     return () => io.disconnect();

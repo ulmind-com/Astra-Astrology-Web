@@ -58,22 +58,11 @@ export function CashbackConsultationBridge({
 
   // If cashback is explicitly disabled (0%) by admin and no free gift, do not show
   const effectiveCashback = cashbackPercent ?? 100;
-  if (effectiveCashback === 0) {
-    return null;
-  }
 
   // Interactive consultation calculator mode
   const [activeMode, setActiveMode] = React.useState<"call" | "chat" | "video">("call");
   const [showHowItWorks, setShowHowItWorks] = React.useState<boolean>(false);
   const [showDetails, setShowDetails] = React.useState<boolean>(false);
-
-  // Cashback coins calculation
-  const cashbackCoins = Math.round(salePrice * (effectiveCashback / 100));
-
-  // Free gift info (only enabled if explicitly provided with positive value)
-  const hasFreeGift = Boolean(freeGiftTitle && freeGiftValue && freeGiftValue > 0);
-  const giftVal = hasFreeGift ? (freeGiftValue ?? 0) : 0;
-  const giftTitle = freeGiftTitle || "";
 
   // Fetch real verified astrologers
   const { data: astrologersData } = useQuery({
@@ -87,8 +76,21 @@ export function CashbackConsultationBridge({
         return null;
       }
     },
+    enabled: effectiveCashback !== 0,
     staleTime: 5 * 60_000,
   });
+
+  if (effectiveCashback === 0) {
+    return null;
+  }
+
+  // Cashback coins calculation
+  const cashbackCoins = Math.round(salePrice * (effectiveCashback / 100));
+
+  // Free gift info (only enabled if explicitly provided with positive value)
+  const hasFreeGift = Boolean(freeGiftTitle && freeGiftValue && freeGiftValue > 0);
+  const giftVal = hasFreeGift ? (freeGiftValue ?? 0) : 0;
+  const giftTitle = freeGiftTitle || "";
 
   const apiAstrologers = astrologersData?.items || [];
   const displayAstrologers = apiAstrologers.length >= 2 ? apiAstrologers.slice(0, 2) : null;

@@ -90,7 +90,8 @@ export function HomeDetailOverlay({
 
   const book = () => {
     setBookingId(reading.id);
-    window.setTimeout(() => router.push(reading.href), 650);
+    const sep = reading.href.includes("?") ? "&" : "?";
+    window.setTimeout(() => router.push(`${reading.href}${sep}mode=${encodeURIComponent(mode)}`), 650);
   };
 
   let d = 0;

@@ -101,6 +101,7 @@ export default function BecomeAPurohitPage() {
   const [otpCode, setOtpCode] = React.useState("");
   const [isOtpSent, setIsOtpSent] = React.useState(false);
   const [isOtpVerified, setIsOtpVerified] = React.useState(false);
+  const [uploadToken, setUploadToken] = React.useState<string>("");
   const [isSendingOtp, setIsSendingOtp] = React.useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = React.useState(false);
   const [resendCountdown, setResendCountdown] = React.useState(0);
@@ -174,7 +175,10 @@ export default function BecomeAPurohitPage() {
     }
     try {
       setIsVerifyingOtp(true);
-      await purohitApi.verifyApplicationOtp(email.trim().toLowerCase(), otpCode.trim());
+      const res = await purohitApi.verifyApplicationOtp(email.trim().toLowerCase(), otpCode.trim());
+      if (res?.upload_token) {
+        setUploadToken(res.upload_token);
+      }
       setIsOtpVerified(true);
       toast.success("ইমেইল সফলভাবে ভেরিফাই করা হয়েছে!");
     } catch (err) {
@@ -189,13 +193,17 @@ export default function BecomeAPurohitPage() {
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!uploadToken) {
+      toast.error("নথি আপলোডের আগে অনুগ্রহ করে ইমেইল ওটিপি যাচাই করুন।");
+      return;
+    }
     if (file.size > 10 * 1024 * 1024) {
       toast.error("ছবির আকার সর্বোচ্চ ১০ মেগাবাইট হতে পারবে।");
       return;
     }
     try {
       setIsUploadingAvatar(true);
-      const res = await purohitApi.uploadApplicationDoc(file);
+      const res = await purohitApi.uploadApplicationDoc(file, uploadToken);
       const data = (res as any)?.data || res;
       setAvatarUrl(data.url);
       toast.success("প্রোফাইল ছবি সফলভাবে আপলোড হয়েছে!");
@@ -211,13 +219,17 @@ export default function BecomeAPurohitPage() {
   const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!uploadToken) {
+      toast.error("নথি আপলোডের আগে অনুগ্রহ করে ইমেইল ওটিপি যাচাই করুন।");
+      return;
+    }
     if (file.size > 15 * 1024 * 1024) {
       toast.error("নথিপত্রের আকার সর্বোচ্চ ১৫ মেগাবাইট হতে পারবে।");
       return;
     }
     try {
       setIsUploadingDoc(true);
-      const res = await purohitApi.uploadApplicationDoc(file);
+      const res = await purohitApi.uploadApplicationDoc(file, uploadToken);
       const data = (res as any)?.data || res;
       setIdentityProofUrl(data.url);
       toast.success("পরিচয়পত্র / প্রশংসাপত্র সফলভাবে আপলোড হয়েছে!");

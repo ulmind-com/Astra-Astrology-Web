@@ -12,6 +12,7 @@ import {
   Plus,
   Trash2,
   Video,
+  Wallet,
 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
@@ -35,7 +36,7 @@ import {
   Switch,
   Textarea,
 } from "@/components/ui";
-import { purohitApi, type PujaBookingData, type PurohitPujaItem } from "@/lib/api";
+import { earningsApi, purohitApi, type PujaBookingData, type PurohitPujaItem } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -56,7 +57,7 @@ const DEFAULT_SLOTS = [
   "08:00 PM - 10:00 PM",
 ];
 
-type DeskTab = "bookings" | "pujas" | "availability" | "profile";
+type DeskTab = "bookings" | "pujas" | "availability" | "earnings" | "profile";
 
 export default function WebPurohitDeskPage() {
   const { user } = useAuth();
@@ -75,6 +76,41 @@ export default function WebPurohitDeskPage() {
     queryKey: ["purohit", "me", "bookings"],
     queryFn: () => purohitApi.getMyPurohitBookings(),
     enabled: isPurohit,
+  });
+
+  const { data: earningsBalance, isLoading: earningsLoading } = useQuery({
+    queryKey: ["purohit", "me", "earnings", "balance"],
+    queryFn: () => earningsApi.balance(),
+    enabled: isPurohit,
+  });
+
+  const { data: myPayouts = [] } = useQuery({
+    queryKey: ["purohit", "me", "payouts"],
+    queryFn: () => earningsApi.myPayouts(25),
+    enabled: isPurohit,
+  });
+
+  const [payoutAmountInr, setPayoutAmountInr] = React.useState("");
+  const [payoutUpiId, setPayoutUpiId] = React.useState("");
+  const requestPayoutMutation = useMutation({
+    mutationFn: async () => {
+      const amountNum = Number(payoutAmountInr);
+      if (!Number.isFinite(amountNum) || amountNum < 500) {
+        throw new Error("Minimum payout request is ₹500.");
+      }
+      return earningsApi.requestPayout({
+        amount_paise: Math.round(amountNum * 100),
+        payout_method: "upi",
+        upi_id: payoutUpiId.trim() || undefined,
+      });
+    },
+    onSuccess: () => {
+      setPayoutAmountInr("");
+      void queryClient.invalidateQueries({ queryKey: ["purohit", "me", "earnings"] });
+      void queryClient.invalidateQueries({ queryKey: ["purohit", "me", "payouts"] });
+      toast.success("Payout withdrawal request submitted!");
+    },
+    onError: (err: any) => toast.error(err?.message || "Failed to submit payout request"),
   });
 
   const [isOnline, setIsOnline] = React.useState(false);
@@ -261,6 +297,7 @@ export default function WebPurohitDeskPage() {
             { id: "bookings", label: `Bookings (${bookings.length})` },
             { id: "pujas", label: `Puja Catalog (${pujasCatalog.length})` },
             { id: "availability", label: "Auspicious Availability" },
+            { id: "earnings", label: "Earnings & Payouts" },
             { id: "profile", label: "Profile & Avatar" },
           ] as const
         ).map((item) => (
@@ -508,7 +545,103 @@ export default function WebPurohitDeskPage() {
         </Card>
       )}
 
-      {/* TAB 4: PROFILE */}
+      {/* TAB 4: EARNINGS & PAYOUTS */}
+      {tab === "earnings" && (
+        <div className="space-y-4">
+          {earningsLoading ? (
+            <LoadingBlock label="Fetching Purohit earnings ledger..." />
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <Card>
+                  <CardBody>
+                    <p className="text-xs text-muted-foreground">Withdrawable Balance</p>
+                    <p className="text-2xl font-bold text-emerald-700 mt-1">
+                      ₹{(((earningsBalance as any)?.available_paise ?? (earningsBalance as any)?.withdrawable_paise ?? 0) / 100).toLocaleString("en-IN")}
+                    </p>
+                  </CardBody>
+                </Card>
+                <Card>
+                  <CardBody>
+                    <p className="text-xs text-muted-foreground">Pending Settlements</p>
+                    <p className="text-2xl font-bold text-amber-700 mt-1">
+                      ₹{(((earningsBalance as any)?.pending_paise ?? 0) / 100).toLocaleString("en-IN")}
+                    </p>
+                  </CardBody>
+                </Card>
+                <Card>
+                  <CardBody>
+                    <p className="text-xs text-muted-foreground">Lifetime Earned</p>
+                    <p className="text-2xl font-bold text-stone-900 mt-1">
+                      ₹{(((earningsBalance as any)?.total_earned_paise ?? 0) / 100).toLocaleString("en-IN")}
+                    </p>
+                  </CardBody>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Wallet className="size-4 text-amber-600" />
+                    Request Payout &amp; Ledger
+                  </CardTitle>
+                  <CardDescription>
+                    Request settlement to your verified UPI ID or manage full bank &amp; QR details on{" "}
+                    <Link href="/account/earnings" className="underline font-semibold text-amber-700">
+                      Earnings Desk
+                    </Link>
+                    .
+                  </CardDescription>
+                </CardHeader>
+                <CardBody className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                    <Field label="Amount (INR)" htmlFor="purohit-payout-inr">
+                      <Input
+                        id="purohit-payout-inr"
+                        type="number"
+                        min={500}
+                        placeholder="500"
+                        value={payoutAmountInr}
+                        onChange={(e) => setPayoutAmountInr(e.target.value)}
+                      />
+                    </Field>
+                    <Field label="UPI ID (optional if saved)" htmlFor="purohit-payout-upi">
+                      <Input
+                        id="purohit-payout-upi"
+                        placeholder="pandit@upi"
+                        value={payoutUpiId}
+                        onChange={(e) => setPayoutUpiId(e.target.value)}
+                      />
+                    </Field>
+                    <Button
+                      loading={requestPayoutMutation.isPending}
+                      onClick={() => requestPayoutMutation.mutate()}
+                    >
+                      Request Payout
+                    </Button>
+                  </div>
+
+                  {myPayouts.length > 0 && (
+                    <div className="space-y-2 pt-2 border-t border-border">
+                      <h4 className="text-xs font-bold text-stone-700">Recent Payout Requests</h4>
+                      {myPayouts.slice(0, 5).map((p: any) => (
+                        <div key={p.id} className="flex items-center justify-between text-xs py-1.5 border-b border-border/50 last:border-0">
+                          <span>₹{((p.amount_paise ?? 0) / 100).toLocaleString("en-IN")} · {p.payout_method}</span>
+                          <Badge tone={p.status === "paid" ? "green" : p.status === "rejected" ? "red" : "neutral"}>
+                            {p.status}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardBody>
+              </Card>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* TAB 5: PROFILE */}
       {tab === "profile" && (
         <Card>
           <CardHeader>

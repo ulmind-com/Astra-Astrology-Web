@@ -89,7 +89,32 @@ export function HomePageClient({
 
   const router = useRouter();
   const [birth, setBirth] = React.useState<BirthState>(EMPTY_BIRTH);
-  const [likedIds, setLikedIds] = React.useState<Set<string>>(() => new Set());
+  const likedIdsRaw = React.useSyncExternalStore(
+    React.useCallback((onStoreChange: () => void) => {
+      window.addEventListener("storage", onStoreChange);
+      window.addEventListener("divinlink_likes_updated", onStoreChange);
+      return () => {
+        window.removeEventListener("storage", onStoreChange);
+        window.removeEventListener("divinlink_likes_updated", onStoreChange);
+      };
+    }, []),
+    () => {
+      try {
+        return window.localStorage.getItem("divinlink_liked_readings_v1") || "[]";
+      } catch {
+        return "[]";
+      }
+    },
+    () => "[]",
+  );
+  const likedIds = React.useMemo(() => {
+    try {
+      const parsed = JSON.parse(likedIdsRaw);
+      return new Set<string>(Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === "string") : []);
+    } catch {
+      return new Set<string>();
+    }
+  }, [likedIdsRaw]);
 
   const [detail, setDetail] = React.useState<Reading | null>(null);
   const [detailShown, setDetailShown] = React.useState(false);
@@ -111,12 +136,17 @@ export function HomePageClient({
   }, [detail]);
 
   const toggleLike = React.useCallback((id: string) => {
-    setLikedIds((prev) => {
-      const next = new Set(prev);
+    try {
+      const saved = window.localStorage.getItem("divinlink_liked_readings_v1") || "[]";
+      const parsed = JSON.parse(saved);
+      const next = new Set<string>(Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === "string") : []);
       if (next.has(id)) next.delete(id);
       else next.add(id);
-      return next;
-    });
+      window.localStorage.setItem("divinlink_liked_readings_v1", JSON.stringify(Array.from(next)));
+      window.dispatchEvent(new Event("divinlink_likes_updated"));
+    } catch {
+      // Ignore storage failures
+    }
   }, []);
 
   const openReading = React.useCallback((reading: Reading, fromEl: HTMLElement) => {
