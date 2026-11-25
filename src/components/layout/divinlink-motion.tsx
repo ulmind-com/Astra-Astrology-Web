@@ -28,7 +28,7 @@ const SKIP_ROUTES = ["/call", "/chat"];
 
 /** Containers whose contents are never auto-revealed. */
 const EXCLUDED =
-  "header, nav, footer, [role='dialog'], [aria-modal='true'], .dl-home, [data-no-reveal], .reveal, .stagger-group, .reveal-cascade, [data-site-rail]";
+  "header, nav, footer, [role='dialog'], [aria-modal='true'], .dl-hero-wrap, .dl-stays, .dl-detail, .dl-steps, .dl-spot-frame, .dl-marquee, [data-no-reveal], .reveal, .stagger-group, .reveal-cascade, [data-site-rail]";
 
 const MAX_PER_SCAN = 400;
 
