@@ -16,7 +16,6 @@ import { HeroAstroyogi } from "@/components/home/hero-astroyogi";
 import { HomeMarquee } from "@/components/home/home-marquee";
 import { HomeBottomCta, HomeTrustSections } from "@/components/home/home-trust-sections";
 import { OurServicesSection } from "@/components/home/our-services-section";
-import { ToolRail } from "@/components/home/tool-rail";
 import { INITIAL_TOP_ASTROLOGERS, TopAstrologersSection } from "@/components/home/top-astrologers-section";
 import { VedicFestivalsSection } from "@/components/home/vedic-festivals-section";
 import { ReadingGrid } from "@/components/home/home-cinematic-cards";
@@ -271,7 +270,6 @@ export function HomePageClient({
         <HomeMarquee language={language} />
 
         <div className="dl-legacy">
-          <ToolRail />
           <TopAstrologersSection initialAstrologers={initialAstrologers} />
           <HeroAstroyogi initialCms={initialCms} />
           <AstrologyPredictionZodiac />
