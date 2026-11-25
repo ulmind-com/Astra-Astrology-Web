@@ -1,11 +1,13 @@
 "use client";
 
+import * as React from "react";
 import { Lock, ShieldCheck, Wallet } from "lucide-react";
 import { FaApple, FaFacebookF, FaGooglePlay, FaInstagram, FaLinkedinIn, FaYoutube } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
 import { Year } from "@/components/ui";
 import { UlmindCredit } from "@/components/ulmind-credit";
+import { APP_STORE_URL, AppWaitlistModal, PLAY_STORE_URL } from "@/components/home/app-waitlist-modal";
 import { useLanguage } from "@/providers/language-provider";
 import type { AstrologyLanguage } from "@/types";
 
@@ -160,6 +162,7 @@ function getFooterColumns(lang: AstrologyLanguage): Column[] {
 export function SiteFooter() {
   const { language } = useLanguage();
   const columns = getFooterColumns(language);
+  const [waitlistStore, setWaitlistStore] = React.useState<"android" | "ios" | null>(null);
 
   return (
     <footer className="relative mt-20 overflow-hidden border-t border-[#efe3c0] bg-gradient-to-b from-[#fffdf5] to-[#fdf6e3] print:hidden">
@@ -268,13 +271,18 @@ export function SiteFooter() {
             </p>
             <ul className="mt-4 space-y-2.5">
               <li>
-                <Link href="#" className="text-sm text-[#6b5f4d] transition-colors hover:text-[#8b5e0a]">
+                <Link href="/login" className="text-sm text-[#6b5f4d] transition-colors hover:text-[#8b5e0a]">
                   {language === "bn" ? "জ্যোতিষী লগইন" : language === "hi" ? "ज्योतिषी लॉगिन" : "Astrologer Login"}
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-sm text-[#6b5f4d] transition-colors hover:text-[#8b5e0a]">
+                <Link href="/become-an-astrologer" className="text-sm text-[#6b5f4d] transition-colors hover:text-[#8b5e0a]">
                   {language === "bn" ? "জ্যোতিষী নিবন্ধন" : language === "hi" ? "ज्योतिषी पंजीकरण" : "Astrologer Registration"}
+                </Link>
+              </li>
+              <li>
+                <Link href="/become-a-purohit" className="text-sm text-[#6b5f4d] transition-colors hover:text-[#8b5e0a]">
+                  {language === "bn" ? "পুরোহিত নিবন্ধন" : language === "hi" ? "पुरोहित पंजीकरण" : "Become a Purohit"}
                 </Link>
               </li>
             </ul>
@@ -310,20 +318,34 @@ export function SiteFooter() {
             </ul>
             <div className="mt-5 flex items-center gap-3">
               {[
-                { label: "Facebook", Icon: FaFacebookF },
-                { label: "Instagram", Icon: FaInstagram },
-                { label: "LinkedIn", Icon: FaLinkedinIn },
-                { label: "YouTube", Icon: FaYoutube },
-              ].map(({ label, Icon }) => (
-                <a
-                  key={label}
-                  href="#"
-                  aria-label={label}
-                  className="flex size-9 items-center justify-center rounded-full border border-[#eadf9a] bg-white text-[#6b5f4d] shadow-2xs transition-colors hover:border-[#d9b64a] hover:text-[#8b5e0a]"
-                >
-                  <Icon className="size-4" aria-hidden="true" />
-                </a>
-              ))}
+                { label: "Facebook", Icon: FaFacebookF, href: process.env.NEXT_PUBLIC_FACEBOOK_URL || "/support" },
+                { label: "Instagram", Icon: FaInstagram, href: process.env.NEXT_PUBLIC_INSTAGRAM_URL || "/support" },
+                { label: "LinkedIn", Icon: FaLinkedinIn, href: process.env.NEXT_PUBLIC_LINKEDIN_URL || "/support" },
+                { label: "YouTube", Icon: FaYoutube, href: process.env.NEXT_PUBLIC_YOUTUBE_URL || "/support" },
+              ].map(({ label, Icon, href }) => {
+                const isExternal = href.startsWith("http");
+                return isExternal ? (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    className="flex size-9 items-center justify-center rounded-full border border-[#eadf9a] bg-white text-[#6b5f4d] shadow-2xs transition-colors hover:border-[#d9b64a] hover:text-[#8b5e0a]"
+                  >
+                    <Icon className="size-4" aria-hidden="true" />
+                  </a>
+                ) : (
+                  <Link
+                    key={label}
+                    href={href}
+                    aria-label={label}
+                    className="flex size-9 items-center justify-center rounded-full border border-[#eadf9a] bg-white text-[#6b5f4d] shadow-2xs transition-colors hover:border-[#d9b64a] hover:text-[#8b5e0a]"
+                  >
+                    <Icon className="size-4" aria-hidden="true" />
+                  </Link>
+                );
+              })}
             </div>
           </div>
 
@@ -333,20 +355,40 @@ export function SiteFooter() {
               {language === "bn" ? "অ্যাপ ডাউনলোড করুন" : language === "hi" ? "ऐप डाउनलोड करें" : "Download the App"}
             </p>
             <div className="mt-4 flex flex-col gap-3">
-              <a href="#" aria-label="Get it on Google Play" className="inline-flex w-44 items-center gap-2.5 rounded-xl bg-[#1a1208] px-4 py-2.5 text-white transition-transform hover:scale-[1.02]">
-                <FaGooglePlay className="size-6 shrink-0" />
-                <span className="flex flex-col leading-tight">
-                  <span className="text-[9px] uppercase tracking-wide opacity-80">Get it on</span>
-                  <span className="text-sm font-bold">Google Play</span>
-                </span>
-              </a>
-              <a href="#" aria-label="Download on the App Store" className="inline-flex w-44 items-center gap-2.5 rounded-xl bg-[#1a1208] px-4 py-2.5 text-white transition-transform hover:scale-[1.02]">
-                <FaApple className="size-6 shrink-0" />
-                <span className="flex flex-col leading-tight">
-                  <span className="text-[9px] uppercase tracking-wide opacity-80">Download on the</span>
-                  <span className="text-sm font-bold">App Store</span>
-                </span>
-              </a>
+              {PLAY_STORE_URL ? (
+                <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="Get it on Google Play" className="inline-flex w-44 items-center gap-2.5 rounded-xl bg-[#1a1208] px-4 py-2.5 text-white transition-transform hover:scale-[1.02]">
+                  <FaGooglePlay className="size-6 shrink-0" />
+                  <span className="flex flex-col leading-tight">
+                    <span className="text-[9px] uppercase tracking-wide opacity-80">Get it on</span>
+                    <span className="text-sm font-bold">Google Play</span>
+                  </span>
+                </a>
+              ) : (
+                <button type="button" onClick={() => setWaitlistStore("android")} aria-label="Get it on Google Play" className="inline-flex w-44 items-center gap-2.5 rounded-xl bg-[#1a1208] px-4 py-2.5 text-left text-white transition-transform hover:scale-[1.02] cursor-pointer">
+                  <FaGooglePlay className="size-6 shrink-0" />
+                  <span className="flex flex-col leading-tight">
+                    <span className="text-[9px] uppercase tracking-wide opacity-80">Get it on</span>
+                    <span className="text-sm font-bold">Google Play</span>
+                  </span>
+                </button>
+              )}
+              {APP_STORE_URL ? (
+                <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="Download on the App Store" className="inline-flex w-44 items-center gap-2.5 rounded-xl bg-[#1a1208] px-4 py-2.5 text-white transition-transform hover:scale-[1.02]">
+                  <FaApple className="size-6 shrink-0" />
+                  <span className="flex flex-col leading-tight">
+                    <span className="text-[9px] uppercase tracking-wide opacity-80">Download on the</span>
+                    <span className="text-sm font-bold">App Store</span>
+                  </span>
+                </a>
+              ) : (
+                <button type="button" onClick={() => setWaitlistStore("ios")} aria-label="Download on the App Store" className="inline-flex w-44 items-center gap-2.5 rounded-xl bg-[#1a1208] px-4 py-2.5 text-left text-white transition-transform hover:scale-[1.02] cursor-pointer">
+                  <FaApple className="size-6 shrink-0" />
+                  <span className="flex flex-col leading-tight">
+                    <span className="text-[9px] uppercase tracking-wide opacity-80">Download on the</span>
+                    <span className="text-sm font-bold">App Store</span>
+                  </span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -369,6 +411,11 @@ export function SiteFooter() {
           </p>
         </div>
       </div>
+      <AppWaitlistModal
+        open={Boolean(waitlistStore)}
+        platform={waitlistStore}
+        onClose={() => setWaitlistStore(null)}
+      />
     </footer>
   );
 }

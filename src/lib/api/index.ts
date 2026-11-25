@@ -290,6 +290,17 @@ export const astrologerApi = {
 
   removeImage: () => api.delete<AstrologerProfile>(endpoints.astrologers.image),
 
+  uploadBanner: (file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return apiFetch<AstrologerProfile>(endpoints.astrologers.banner, {
+      method: "POST",
+      body: form,
+    });
+  },
+
+  removeBanner: () => api.delete<AstrologerProfile>(endpoints.astrologers.banner),
+
   addGalleryImage: (file: File) => {
     const form = new FormData();
     form.append("file", file);
@@ -619,10 +630,33 @@ export const appointmentApi = {
       { day },
     ),
 
+  openTatkalWindow: (body: {
+    starts_at: string;
+    minutes?: number;
+    multiplier?: number;
+    fixed_paise?: number | null;
+    custom_title?: string | null;
+    is_private?: boolean;
+  }) =>
+    api.post<{
+      id: string;
+      day: string;
+      starts_at: string;
+      ends_at: string;
+      is_tatkal: boolean;
+      tatkal_multiplier?: number | null;
+      custom_title?: string | null;
+      is_private: boolean;
+    }>(endpoints.appointments.tatkalWindow, body),
+
   synergy: (astrologer_id: string, dob?: string | null) =>
-    api.get<Record<string, any>>(`/appointments/synergy`, {
+    api.get<{
+      score: number;
+      harmony_tier: string;
+      resonance_factors: string[];
+      recommended_muhurat: string;
+    }>(endpoints.appointments.synergy, {
       query: { astrologer_id, ...(dob ? { dob } : {}) },
-      auth: false,
     }),
 
   getCertificate: (id: string) =>
@@ -1206,6 +1240,14 @@ export interface AIChatSessionData {
   updated_at: string;
 }
 
+export interface AIChatSessionSummary {
+  session_id: string;
+  title: string;
+  preview?: string;
+  message_count: number;
+  updated_at: string;
+}
+
 export const aiAstrologerApi = {
   chat: (body: {
     message: string;
@@ -1218,8 +1260,14 @@ export const aiAstrologerApi = {
     preferred_language?: string;
   }) => api.post<AIChatResponse>(endpoints.aiAstrologer.chat, body),
 
+  listSessions: () =>
+    api.get<AIChatSessionSummary[]>(endpoints.aiAstrologer.sessions),
+
   getSession: (sessionId: string) =>
     api.get<AIChatSessionData>(endpoints.aiAstrologer.session(sessionId)),
+
+  deleteSession: (sessionId: string) =>
+    api.delete<{ deleted?: boolean }>(endpoints.aiAstrologer.session(sessionId)),
 
   sendFeedback: (body: {
     session_id: string;
@@ -2287,6 +2335,52 @@ export const purohitApi = {
 
   submitApplication: (body: PurohitApplicationSubmitPayload) =>
     api.post<PurohitApplicationData>(endpoints.purohits.applicationSubmit, body, { auth: false }),
+
+  // Logged-in Purohit Partner Desk
+  getMyProfile: () => api.get<PurohitData>(endpoints.purohits.myProfile),
+
+  uploadMyAvatar: (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    return apiFetch<PurohitData>(endpoints.purohits.myAvatar, {
+      method: "POST",
+      body: fd,
+    });
+  },
+
+  getMyAvailability: () => api.get<PurohitData>(endpoints.purohits.myAvailability),
+
+  updateMyAvailability: (body: {
+    is_online: boolean;
+    available_days?: string[];
+    available_slots?: string[];
+    weekly_schedule?: Record<string, string[]>;
+  }) => api.put<PurohitData>(endpoints.purohits.myAvailability, body),
+
+  getMyPurohitBookings: () => api.get<PujaBookingData[]>(endpoints.purohits.myPurohitBookings),
+
+  addMyPuja: (body: {
+    puja_name: string;
+    description: string;
+    duration_minutes: number;
+    price_inr: number;
+    samagri_notes?: string;
+    is_active?: boolean;
+  }) => api.post<PurohitPujaItem>(endpoints.purohits.myPujas, body),
+
+  updateMyPuja: (
+    pujaId: string,
+    body: {
+      puja_name?: string;
+      description?: string;
+      duration_minutes?: number;
+      price_inr?: number;
+      samagri_notes?: string;
+      is_active?: boolean;
+    },
+  ) => api.put<PurohitPujaItem>(endpoints.purohits.myPuja(pujaId), body),
+
+  deleteMyPuja: (pujaId: string) => api.delete<null>(endpoints.purohits.myPuja(pujaId)),
 };
 
 // ------------------------------------------------------------------- earnings & payouts

@@ -454,7 +454,12 @@ export default function KundliPage() {
 
   // Centralized Language state
   const { language, setLanguage } = useLanguage();
+  const [pdfLanguage, setPdfLanguage] = React.useState<"en" | "bn" | "hi">(language);
   const t = KUNDLI_UI_STRINGS[language] || KUNDLI_UI_STRINGS.bn;
+
+  React.useEffect(() => {
+    setPdfLanguage(language);
+  }, [language]);
 
   // Form State
   const [name, setName] = React.useState("");
@@ -918,7 +923,7 @@ export default function KundliPage() {
           : chartStyle === "east"
           ? "east_indian"
           : "north_indian",
-      language,
+      language: pdfLanguage,
     };
 
     setDownloadingPdf(true);
@@ -1581,19 +1586,35 @@ export default function KundliPage() {
                 </div>
 
                 <div className="shrink-0 w-full md:w-auto flex flex-col items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleDownloadPdf}
-                    disabled={downloadingPdf}
-                    className="w-full md:w-auto inline-flex items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 px-7 py-3.5 text-sm font-extrabold text-stone-950 shadow-md press transition-all cursor-pointer disabled:opacity-60"
-                  >
-                    {downloadingPdf ? (
-                      <RefreshCw className="size-4 animate-spin text-stone-950" />
-                    ) : (
-                      <Download className="size-4 text-stone-950" />
-                    )}
-                    <span>{downloadingPdf ? (language === "bn" ? "পিডিএফ প্রস্তুত হচ্ছে..." : "Generating PDF...") : t.downloadFullPdf}</span>
-                  </button>
+                  <div className="w-full md:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <label className="sr-only" htmlFor="kundli-pdf-lang">
+                      PDF Language
+                    </label>
+                    <select
+                      id="kundli-pdf-lang"
+                      value={pdfLanguage}
+                      onChange={(e) => setPdfLanguage(e.target.value as "en" | "bn" | "hi")}
+                      className="rounded-2xl border border-amber-300 bg-white px-3.5 py-3 text-xs font-bold text-stone-800 shadow-xs focus:border-amber-500 focus:outline-none cursor-pointer"
+                      aria-label="Choose Kundli PDF report language"
+                    >
+                      <option value="en">PDF: English</option>
+                      <option value="bn">PDF: বাংলা (Bengali)</option>
+                      <option value="hi">PDF: हिन्दी (Hindi)</option>
+                    </select>
+                    <button
+                      type="button"
+                      onClick={handleDownloadPdf}
+                      disabled={downloadingPdf}
+                      className="w-full md:w-auto inline-flex items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 px-7 py-3.5 text-sm font-extrabold text-stone-950 shadow-md press transition-all cursor-pointer disabled:opacity-60"
+                    >
+                      {downloadingPdf ? (
+                        <RefreshCw className="size-4 animate-spin text-stone-950" />
+                      ) : (
+                        <Download className="size-4 text-stone-950" />
+                      )}
+                      <span>{downloadingPdf ? (language === "bn" ? "পিডিএফ প্রস্তুত হচ্ছে..." : "Generating PDF...") : t.downloadFullPdf}</span>
+                    </button>
+                  </div>
                   <span className="text-[11px] text-stone-500">
                     {language === "bn" ? "প্রিন্ট-রেডি ভেক্টর গ্রাফিক্স ও রাজকীয় সিলমোহর" : "Print-ready vector charts & consecrated seal"}
                   </span>

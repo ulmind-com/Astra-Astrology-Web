@@ -33,6 +33,7 @@ export const endpoints = {
     myEarningsRecent: "/astrologers/me/earnings/recent",
     availability: "/astrologers/me/availability",
     image: "/astrologers/me/image",
+    banner: "/astrologers/me/banner",
     gallery: "/astrologers/me/gallery",
     galleryImage: (publicId: string) => `/astrologers/me/gallery/${publicId}`,
     favorite: (slugOrId: string) => `/astrologers/${slugOrId}/favorite`,
@@ -110,6 +111,8 @@ export const endpoints = {
     auspiciousTransit: (on?: string) => `/appointments/auspicious-transit${on ? `?on=${encodeURIComponent(on)}` : ""}`,
     activateAuspiciousSurge: "/appointments/me/auspicious-transit-surge",
     deactivateAuspiciousSurge: "/appointments/me/auspicious-transit-surge/deactivate",
+    tatkalWindow: "/appointments/me/tatkal-window",
+    synergy: "/appointments/synergy",
     googleCalendar: {
       authUrl: "/appointments/google-calendar/auth-url",
       callback: "/appointments/google-calendar/callback",
@@ -202,6 +205,7 @@ export const endpoints = {
 
   aiAstrologer: {
     chat: "/ai-astrologer/chat",
+    sessions: "/ai-astrologer/sessions",
     session: (id: string) => `/ai-astrologer/session/${id}`,
     feedback: "/ai-astrologer/feedback",
     memory: "/ai-astrologer/memory",
@@ -311,6 +315,12 @@ export const endpoints = {
     book: "/purohits/bookings",
     myBookings: "/purohits/bookings/mine",
     roomToken: (bookingId: string) => `/purohits/bookings/${bookingId}/token`,
+    myProfile: "/purohits/me/profile",
+    myAvatar: "/purohits/me/avatar",
+    myAvailability: "/purohits/me/availability",
+    myPurohitBookings: "/purohits/me/bookings",
+    myPujas: "/purohits/me/pujas",
+    myPuja: (pujaId: string) => `/purohits/me/pujas/${pujaId}`,
     applicationSendOtp: "/purohits/applications/send-otp",
     applicationVerifyOtp: "/purohits/applications/verify-otp",
     applicationUploadDoc: "/purohits/applications/upload-document",

@@ -68,6 +68,7 @@ import {
 import {
   aiAstrologerApi,
   type AIChatMessage,
+  type AIChatSessionSummary,
 } from "@/lib/api";
 
 /* ---------------------------------------------------------------------------
@@ -437,6 +438,12 @@ export default function AIAstrologerPage() {
   const [showPurgeModal, setShowPurgeModal] = React.useState(false);
   const [purgingMemory, setPurgingMemory] = React.useState(false);
 
+  // Session History Drawer state
+  const [showSessionsDrawer, setShowSessionsDrawer] = React.useState(false);
+  const [sessionsList, setSessionsList] = React.useState<AIChatSessionSummary[]>([]);
+  const [loadingSessions, setLoadingSessions] = React.useState(false);
+  const [loadingSessionId, setLoadingSessionId] = React.useState<string | null>(null);
+
   // Session & Messages state
   const [sessionId, setSessionId] = React.useState<string>("");
   const [messages, setMessages] = React.useState<AIChatMessage[]>([]);
@@ -645,6 +652,63 @@ export default function AIAstrologerPage() {
       if (recorderRef.current) recorderRef.current.cancel();
     };
   }, []);
+
+  async function openSessionsHistory() {
+    setShowSessionsDrawer(true);
+    if (!isSignedIn) return;
+    setLoadingSessions(true);
+    try {
+      const list = await aiAstrologerApi.listSessions();
+      setSessionsList(Array.isArray(list) ? list : []);
+    } catch {
+      setSessionsList([]);
+    } finally {
+      setLoadingSessions(false);
+    }
+  }
+
+  async function handleSelectHistorySession(targetSessionId: string) {
+    setLoadingSessionId(targetSessionId);
+    try {
+      const data = await aiAstrologerApi.getSession(targetSessionId);
+      setSessionId(data.session_id);
+      localStorage.setItem("astra_ai_session_id", data.session_id);
+      if (Array.isArray(data.messages) && data.messages.length > 0) {
+        setMessages(data.messages);
+      }
+      setFeedbackGiven({});
+      setShowSessionsDrawer(false);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Could not load past session.");
+    } finally {
+      setLoadingSessionId(null);
+    }
+  }
+
+  async function handleDeleteHistorySession(targetSessionId: string) {
+    try {
+      await aiAstrologerApi.deleteSession(targetSessionId);
+      setSessionsList((prev) => prev.filter((s) => s.session_id !== targetSessionId));
+      if (targetSessionId === sessionId) {
+        const newId = `sess_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        setSessionId(newId);
+        localStorage.setItem("astra_ai_session_id", newId);
+        const welcome = WELCOME_MESSAGES[language] || WELCOME_MESSAGES.bn;
+        setMessages([
+          {
+            role: "assistant",
+            content: welcome.content,
+            timestamp: new Date().toISOString(),
+            suggested_followups: welcome.suggested_followups,
+          },
+        ]);
+        setFeedbackGiven({});
+      }
+      toast.success(language === "bn" ? "সেশন মুছে ফেলা হয়েছে" : "Session deleted");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete session.");
+    }
+  }
 
   async function handlePurgeMemory() {
     setPurgingMemory(true);
@@ -1056,6 +1120,19 @@ export default function AIAstrologerPage() {
                     : t.linkKundli}
                 </span>
                 {birthDate && <span className="text-[10px] text-emerald-600 font-bold">✓</span>}
+              </button>
+
+              {/* Past Sessions Drawer Trigger */}
+              <button
+                type="button"
+                onClick={() => void openSessionsHistory()}
+                title={language === "bn" ? "পূর্ববর্তী কথোপকথন" : "Past AI Sessions"}
+                className="group flex min-h-9 items-center gap-1.5 rounded-xl border border-amber-200/80 bg-white/90 px-2 sm:px-2.5 py-1.5 text-xs font-semibold text-amber-900 shadow-2xs press transition-all hover:border-amber-300 hover:bg-amber-50 cursor-pointer"
+              >
+                <History className="size-3.5 text-amber-600" />
+                <span className="hidden md:inline text-[11px] font-bold">
+                  {language === "bn" ? "হিস্ট্রি" : language === "hi" ? "इतिहास" : "History"}
+                </span>
               </button>
 
               {/* Purge Cosmic Memory (Privacy) Button */}
@@ -1769,6 +1846,120 @@ export default function AIAstrologerPage() {
                   )}
                   <span>{t.purgeModalConfirm}</span>
                 </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Session History Drawer Modal (AUD-001) */}
+        {showSessionsDrawer && (
+          <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-xs">
+            <div className="flex h-full w-full max-w-sm flex-col bg-white shadow-2xl border-l border-amber-200 animate-in slide-in-from-right duration-200">
+              <div className="flex items-center justify-between border-b border-amber-100 px-5 py-4 bg-gradient-to-r from-amber-50 to-white">
+                <div className="flex items-center gap-2">
+                  <History className="size-4 text-amber-700" />
+                  <h2 className="font-display text-sm font-bold text-amber-950">
+                    {language === "bn" ? "কথোপকথনের ইতিহাস" : "Cosmic Chat Sessions"}
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowSessionsDrawer(false)}
+                  className="rounded-lg p-1.5 text-slate-500 hover:bg-amber-100 cursor-pointer"
+                  aria-label="Close session history"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+
+              <div className="p-3 border-b border-slate-100">
+                <Button
+                  size="sm"
+                  className="w-full gap-1.5"
+                  onClick={() => {
+                    const newId = `sess_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+                    setSessionId(newId);
+                    localStorage.setItem("astra_ai_session_id", newId);
+                    const welcome = WELCOME_MESSAGES[language] || WELCOME_MESSAGES.bn;
+                    setMessages([
+                      {
+                        role: "assistant",
+                        content: welcome.content,
+                        timestamp: new Date().toISOString(),
+                        suggested_followups: welcome.suggested_followups,
+                      },
+                    ]);
+                    setFeedbackGiven({});
+                    setShowSessionsDrawer(false);
+                    toast.success(t.newChatSuccess);
+                  }}
+                >
+                  <Plus className="size-4" />
+                  <span>{t.newChat}</span>
+                </Button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                {!isSignedIn ? (
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 text-center text-xs text-amber-900">
+                    <p className="font-semibold">
+                      {language === "bn"
+                        ? "আপনার পুরানো এআই চ্যাট সেশন সংরক্ষণ ও দেখতে সাইন ইন করুন।"
+                        : "Sign in to save and revisit your past AI consultation sessions across devices."}
+                    </p>
+                    <Link href="/login?redirect=/ai-astrologer" className="mt-2 inline-block font-bold underline">
+                      {language === "bn" ? "সাইন ইন করুন" : "Sign In"}
+                    </Link>
+                  </div>
+                ) : loadingSessions ? (
+                  <div className="flex items-center justify-center py-10 text-xs text-slate-500 gap-2">
+                    <Loader2 className="size-4 animate-spin text-amber-600" />
+                    <span>Loading past sessions...</span>
+                  </div>
+                ) : sessionsList.length === 0 ? (
+                  <p className="py-10 text-center text-xs text-slate-500">
+                    {language === "bn"
+                      ? "এখনও কোনো পুরানো কথোপকথন সংরক্ষিত নেই।"
+                      : "No past consultation sessions found yet."}
+                  </p>
+                ) : (
+                  sessionsList.map((s) => {
+                    const isCurrent = s.session_id === sessionId;
+                    return (
+                      <div
+                        key={s.session_id}
+                        className={`flex items-center justify-between gap-2 rounded-2xl border p-3 transition-all ${
+                          isCurrent
+                            ? "border-amber-400 bg-amber-50/90 shadow-2xs"
+                            : "border-slate-200 bg-white hover:border-amber-200 hover:bg-amber-50/30"
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => void handleSelectHistorySession(s.session_id)}
+                          disabled={loadingSessionId === s.session_id}
+                          className="min-w-0 flex-1 text-left cursor-pointer"
+                        >
+                          <p className="truncate text-xs font-bold text-slate-900">
+                            {s.title || "Vedic Consultation"}
+                          </p>
+                          <p className="text-[11px] text-slate-500 mt-0.5">
+                            {s.message_count ?? 0} messages ·{" "}
+                            {s.updated_at ? new Date(s.updated_at).toLocaleDateString() : ""}
+                          </p>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleDeleteHistorySession(s.session_id)}
+                          className="shrink-0 rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 cursor-pointer"
+                          title="Delete session"
+                        >
+                          <Trash2 className="size-3.5" />
+                        </button>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
           </div>

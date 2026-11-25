@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   Sparkles,
   Video,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -723,6 +724,9 @@ export default function MyAppointmentsPage() {
           {/* Auspicious Transit Tatkal Surge Pricing (Amavasya, Purnima, Pradosh, Grahan) */}
           <AuspiciousDaySurgeCard />
 
+          {/* 1-Click Tatkal VIP Emergency 15-Min Window (AUD-006) */}
+          {user?.role === "astrologer" && <TatkalQuickWindowCard language={language} />}
+
           {/* Astrologer Emergency Break & Seeker Auto-Rescue Engine */}
           <BrahmaPauseControlCard />
 
@@ -1399,6 +1403,110 @@ export default function MyAppointmentsPage() {
       )}
         </>
       )}
+    </div>
+  );
+}
+
+function TatkalQuickWindowCard({ language }: { language: string }) {
+  const queryClient = useQueryClient();
+  const [multiplier, setMultiplier] = React.useState<number>(1.5);
+  const [activeUntil, setActiveUntil] = React.useState<number | null>(null);
+  const [now, setNow] = React.useState<number>(() => Date.now());
+
+  React.useEffect(() => {
+    if (!activeUntil) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [activeUntil]);
+
+  const mutation = useMutation({
+    mutationFn: () =>
+      appointmentApi.openTatkalWindow({
+        starts_at: new Date().toISOString(),
+        minutes: 15,
+        multiplier,
+        custom_title: "VIP Emergency Tatkal Slot (15m)",
+        is_private: false,
+      }),
+    onSuccess: (win) => {
+      const endsMs = new Date(win.ends_at).getTime();
+      setActiveUntil(Number.isFinite(endsMs) ? endsMs : Date.now() + 15 * 60_000);
+      void queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      toast.success(
+        language === "bn"
+          ? `১৫ মিনিটের তৎকাল ভিআইপি স্লট (${multiplier}x) চালু হয়েছে!`
+          : `15-Minute Tatkal VIP Window (${multiplier}x) is now LIVE!`
+      );
+    },
+    onError: (err: any) => toast.error(err?.message || "Could not open Tatkal emergency slot."),
+  });
+
+  const remainingMs = activeUntil ? Math.max(0, activeUntil - now) : 0;
+  const isLive = remainingMs > 0;
+  const mins = Math.floor(remainingMs / 60_000);
+  const secs = Math.floor((remainingMs % 60_000) / 1000);
+
+  return (
+    <div className="rounded-2xl border border-amber-300/80 bg-gradient-to-r from-amber-50 via-yellow-50/70 to-white p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex items-start gap-3">
+        <div className="size-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+          <Zap className="size-5 fill-white" />
+        </div>
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="font-bold text-sm text-stone-900">
+              {language === "bn"
+                ? "১-ক্লিক তৎকাল জরুরি স্লট (১৫ মিনিট)"
+                : "1-Click Tatkal Emergency Window (15m)"}
+            </h3>
+            {isLive && (
+              <Badge tone="gold">
+                LIVE · {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
+              </Badge>
+            )}
+          </div>
+          <p className="text-xs text-stone-600 mt-0.5">
+            {language === "bn"
+              ? "তাৎক্ষণিক ১৫ মিনিটের প্রিমিয়াম ভিআইপি কনসাল্টেশন স্লট খুলুন।"
+              : "Instantly open a 15-minute urgent VIP booking window at priority surge rates."}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 shrink-0">
+        <div className="inline-flex rounded-xl border border-amber-300 bg-white p-0.5 text-xs">
+          {[1.5, 2.0].map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setMultiplier(m)}
+              className={cn(
+                "rounded-lg px-2.5 py-1 font-bold transition-colors cursor-pointer",
+                multiplier === m ? "bg-amber-500 text-white" : "text-stone-600 hover:bg-amber-50"
+              )}
+            >
+              {m}x
+            </button>
+          ))}
+        </div>
+        <Button
+          size="sm"
+          loading={mutation.isPending}
+          onClick={() => mutation.mutate()}
+          className="gap-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold"
+        >
+          <Zap className="size-3.5" />
+          <span>
+            {isLive
+              ? language === "bn"
+                ? "নতুন তৎকাল স্লট"
+                : "Extend / Open New"
+              : language === "bn"
+              ? "তৎকাল চালু করুন"
+              : "Start Tatkal (15m)"}
+          </span>
+        </Button>
+      </div>
     </div>
   );
 }

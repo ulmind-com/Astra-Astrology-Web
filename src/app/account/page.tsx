@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, Check, Globe, Languages, Sparkles, Trash2, Package, ArrowRight, ShieldAlert } from "lucide-react";
+import { Camera, Check, Globe, ImageIcon, Languages, Sparkles, Trash2, Package, ArrowRight, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { toast } from "sonner";
@@ -22,10 +22,10 @@ import {
   Switch,
 } from "@/components/ui";
 import { useProfile, useUpdateProfile, PROFILE_KEY } from "@/hooks/use-profile";
-import { userApi } from "@/lib/api";
+import { astrologerApi, userApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { GENDER_LABELS, MARITAL_LABELS, type Gender, type MaritalStatus } from "@/types";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function ProfilePage() {
   const { data: profile, isLoading, error } = useProfile();
@@ -44,6 +44,32 @@ export default function ProfilePage() {
   });
   const [uploading, setUploading] = React.useState(false);
   const fileRef = React.useRef<HTMLInputElement>(null);
+  const bannerFileRef = React.useRef<HTMLInputElement>(null);
+
+  const isAstrologer = profile?.role === "astrologer";
+  const { data: astroProfile } = useQuery({
+    queryKey: ["astrologer", "me"],
+    queryFn: () => astrologerApi.me(),
+    enabled: Boolean(isAstrologer),
+  });
+
+  const uploadBannerMutation = useMutation({
+    mutationFn: (file: File) => astrologerApi.uploadBanner(file),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["astrologer", "me"] });
+      toast.success("Profile card banner updated!");
+    },
+    onError: (err: any) => toast.error(err?.message || "Failed to upload card banner"),
+  });
+
+  const removeBannerMutation = useMutation({
+    mutationFn: () => astrologerApi.removeBanner(),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["astrologer", "me"] });
+      toast.success("Profile card banner removed.");
+    },
+    onError: (err: any) => toast.error(err?.message || "Failed to remove card banner"),
+  });
 
   // Fill the form once the profile arrives, and again if it is refetched.
   React.useEffect(() => {
@@ -231,6 +257,74 @@ export default function ProfilePage() {
             <ArrowRight className="size-3.5" />
           </Link>
         </div>
+      )}
+
+      {/* Astrologer Profile Card Banner Upload & Removal */}
+      {profile.role === "astrologer" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ImageIcon className="size-4 text-amber-600" />
+              <span>{language === "bn" ? "ডিরেক্টরি কার্ড ব্যানার" : "Astrologer Directory Card Banner"}</span>
+            </CardTitle>
+          </CardHeader>
+          <CardBody className="space-y-4">
+            {astroProfile?.banner_image_url ? (
+              <div className="relative h-32 w-full overflow-hidden rounded-2xl border border-amber-200/80">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={astroProfile.banner_image_url}
+                  alt="Astrologer card banner"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="flex h-24 items-center justify-center rounded-2xl border border-dashed border-border bg-surface-muted text-xs text-muted-foreground">
+                {language === "bn"
+                  ? "এখনও কোনো কাস্টম কার্ড ব্যানার আপলোড করা হয়নি"
+                  : "No custom card banner uploaded yet (using celestial gradient fallback)"}
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center gap-2.5">
+              <input
+                ref={bannerFileRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) uploadBannerMutation.mutate(file);
+                  e.target.value = "";
+                }}
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                loading={uploadBannerMutation.isPending}
+                onClick={() => bannerFileRef.current?.click()}
+                className="gap-1.5"
+              >
+                <Camera className="size-3.5" />
+                {astroProfile?.banner_image_url ? "Replace Banner" : "Upload Card Banner"}
+              </Button>
+              {astroProfile?.banner_image_url && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  loading={removeBannerMutation.isPending}
+                  onClick={() => removeBannerMutation.mutate()}
+                  className="text-danger hover:bg-danger/10 gap-1.5"
+                >
+                  <Trash2 className="size-3.5" />
+                  Remove Banner
+                </Button>
+              )}
+            </div>
+          </CardBody>
+        </Card>
       )}
 
       {/* --------------------------------------------------------- details */}

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { MessageCircle, ShieldCheck, Check, Phone, ChevronLeft, Send } from "lucide-react";
 
 import { useLanguage } from "@/providers/language-provider";
+import { APP_STORE_URL, AppWaitlistModal, PLAY_STORE_URL } from "@/components/home/app-waitlist-modal";
 import type { AstrologyLanguage } from "@/types";
 
 // Chat bubbles that animate in one by one (same as the video).
@@ -103,9 +104,37 @@ const REVEAL_MS = 1400;
 const badgeClass =
   "group inline-flex items-center gap-2 rounded-[13px] bg-gradient-to-b from-zinc-800 to-black px-3 py-1.5 text-white shadow-[0_6px_18px_-8px_rgba(0,0,0,0.6)] ring-1 ring-white/10 transition-all duration-200 hover:from-zinc-700 hover:scale-[1.03] hover:ring-white/20";
 
-function AppStoreBadge() {
+function AppStoreBadge({ onOpenWaitlist }: { onOpenWaitlist: () => void }) {
+  if (APP_STORE_URL) {
+    return (
+      <a
+        href={APP_STORE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Download on the App Store"
+        className={badgeClass}
+      >
+        <Image
+          src="/images/badges/apple-store-icon-white.png"
+          alt="Apple App Store"
+          width={22}
+          height={22}
+          className="size-[22px] shrink-0 object-contain"
+        />
+        <span className="flex flex-col text-left">
+          <span className="text-[8px] font-medium uppercase tracking-wide text-zinc-400 leading-tight">Download on the</span>
+          <span className="text-[13px] font-bold tracking-tight text-white leading-snug">App Store</span>
+        </span>
+      </a>
+    );
+  }
   return (
-    <a href="#" aria-label="Download on the App Store" className={badgeClass}>
+    <button
+      type="button"
+      onClick={onOpenWaitlist}
+      aria-label="Download on the App Store"
+      className={`${badgeClass} cursor-pointer`}
+    >
       <Image
         src="/images/badges/apple-store-icon-white.png"
         alt="Apple App Store"
@@ -117,13 +146,41 @@ function AppStoreBadge() {
         <span className="text-[8px] font-medium uppercase tracking-wide text-zinc-400 leading-tight">Download on the</span>
         <span className="text-[13px] font-bold tracking-tight text-white leading-snug">App Store</span>
       </span>
-    </a>
+    </button>
   );
 }
 
-function GooglePlayBadge() {
+function GooglePlayBadge({ onOpenWaitlist }: { onOpenWaitlist: () => void }) {
+  if (PLAY_STORE_URL) {
+    return (
+      <a
+        href={PLAY_STORE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Get it on Google Play"
+        className={badgeClass}
+      >
+        <Image
+          src="/images/badges/google-play-icon.png"
+          alt="Google Play"
+          width={20}
+          height={20}
+          className="size-5 shrink-0 object-contain"
+        />
+        <span className="flex flex-col text-left">
+          <span className="text-[8px] font-medium uppercase tracking-wide text-zinc-400 leading-tight">Get it on</span>
+          <span className="text-[13px] font-bold tracking-tight text-white leading-snug">Google Play</span>
+        </span>
+      </a>
+    );
+  }
   return (
-    <a href="#" aria-label="Get it on Google Play" className={badgeClass}>
+    <button
+      type="button"
+      onClick={onOpenWaitlist}
+      aria-label="Get it on Google Play"
+      className={`${badgeClass} cursor-pointer`}
+    >
       <Image
         src="/images/badges/google-play-icon.png"
         alt="Google Play"
@@ -135,7 +192,7 @@ function GooglePlayBadge() {
         <span className="text-[8px] font-medium uppercase tracking-wide text-zinc-400 leading-tight">Get it on</span>
         <span className="text-[13px] font-bold tracking-tight text-white leading-snug">Google Play</span>
       </span>
-    </a>
+    </button>
   );
 }
 
@@ -146,6 +203,7 @@ export function AppDownloadSection() {
 
   const [visible, setVisible] = React.useState<number>(0);
   const [typing, setTyping] = React.useState<boolean>(false);
+  const [waitlistStore, setWaitlistStore] = React.useState<"android" | "ios" | null>(null);
 
   // Reveal chat bubbles one by one, with a typing pause, then loop.
   // Re-runs when the language (and therefore the script) changes.
@@ -234,8 +292,8 @@ export function AppDownloadSection() {
             </ul>
 
             <div className="mt-8 flex flex-nowrap items-center gap-2.5">
-              <AppStoreBadge />
-              <GooglePlayBadge />
+              <AppStoreBadge onOpenWaitlist={() => setWaitlistStore("ios")} />
+              <GooglePlayBadge onOpenWaitlist={() => setWaitlistStore("android")} />
             </div>
           </div>
 
@@ -332,6 +390,11 @@ export function AppDownloadSection() {
           </div>
         </div>
       </div>
+      <AppWaitlistModal
+        open={Boolean(waitlistStore)}
+        platform={waitlistStore}
+        onClose={() => setWaitlistStore(null)}
+      />
     </section>
   );
 }

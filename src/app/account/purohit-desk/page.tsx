@@ -1,0 +1,652 @@
+"use client";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  CalendarClock,
+  Camera,
+  CheckCircle2,
+  Clock,
+  Edit2,
+  Flame,
+  Loader2,
+  Plus,
+  Trash2,
+  Video,
+} from "lucide-react";
+import Link from "next/link";
+import * as React from "react";
+import { toast } from "sonner";
+
+import {
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  CardBody,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  ConfirmModal,
+  EmptyState,
+  Field,
+  Input,
+  LoadingBlock,
+  Modal,
+  Switch,
+  Textarea,
+} from "@/components/ui";
+import { purohitApi, type PujaBookingData, type PurohitPujaItem } from "@/lib/api";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/providers/auth-provider";
+
+const DAYS_OF_WEEK = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
+const DEFAULT_SLOTS = [
+  "06:00 AM - 08:00 AM",
+  "08:30 AM - 11:00 AM",
+  "05:00 PM - 07:30 PM",
+  "08:00 PM - 10:00 PM",
+];
+
+type DeskTab = "bookings" | "pujas" | "availability" | "profile";
+
+export default function WebPurohitDeskPage() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [tab, setTab] = React.useState<DeskTab>("bookings");
+
+  const isPurohit = (user?.role as string) === "purohit" || user?.role === "admin";
+
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ["purohit", "me", "profile"],
+    queryFn: () => purohitApi.getMyProfile(),
+    enabled: isPurohit,
+  });
+
+  const { data: bookings = [], isLoading: bookingsLoading } = useQuery({
+    queryKey: ["purohit", "me", "bookings"],
+    queryFn: () => purohitApi.getMyPurohitBookings(),
+    enabled: isPurohit,
+  });
+
+  const [isOnline, setIsOnline] = React.useState(false);
+  const [selectedDays, setSelectedDays] = React.useState<string[]>(DAYS_OF_WEEK.slice(0, 5));
+  const [selectedSlots, setSelectedSlots] = React.useState<string[]>(DEFAULT_SLOTS.slice(0, 2));
+
+  React.useEffect(() => {
+    if (!profile) return;
+    setIsOnline(Boolean(profile.is_online));
+    const days = (profile as unknown as { available_days?: string[] }).available_days;
+    const slots = (profile as unknown as { available_slots?: string[] }).available_slots;
+    if (Array.isArray(days) && days.length) setSelectedDays(days);
+    if (Array.isArray(slots) && slots.length) setSelectedSlots(slots);
+  }, [profile]);
+
+  const avatarInputRef = React.useRef<HTMLInputElement>(null);
+  const uploadAvatarMutation = useMutation({
+    mutationFn: (file: File) => purohitApi.uploadMyAvatar(file),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["purohit", "me", "profile"] });
+      toast.success("Purohit profile photo updated!");
+    },
+    onError: (err: any) => toast.error(err?.message || "Failed to upload avatar"),
+  });
+
+  const updateAvailabilityMutation = useMutation({
+    mutationFn: (nextOnline?: boolean) =>
+      purohitApi.updateMyAvailability({
+        is_online: nextOnline ?? isOnline,
+        available_days: selectedDays,
+        available_slots: selectedSlots,
+      }),
+    onSuccess: (updated) => {
+      setIsOnline(updated.is_online);
+      void queryClient.invalidateQueries({ queryKey: ["purohit", "me", "profile"] });
+      toast.success(
+        updated.is_online ? "You are now Online for live Pujas!" : "Status updated successfully."
+      );
+    },
+    onError: (err: any) => toast.error(err?.message || "Failed to update availability"),
+  });
+
+  const completeBookingMutation = useMutation({
+    mutationFn: (bookingId: string) => purohitApi.completeBooking(bookingId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["purohit", "me", "bookings"] });
+      toast.success("Puja ritual marked as completed!");
+    },
+    onError: (err: any) => toast.error(err?.message || "Could not complete booking"),
+  });
+
+  // Puja Catalog Modal State
+  const [pujaModalOpen, setPujaModalOpen] = React.useState(false);
+  const [editingPuja, setEditingPuja] = React.useState<PurohitPujaItem | null>(null);
+  const [deletingPujaId, setDeletingPujaId] = React.useState<string | null>(null);
+  const [pujaForm, setPujaForm] = React.useState({
+    puja_name: "",
+    description: "",
+    duration_minutes: 45,
+    price_inr: 501,
+    samagri_notes: "",
+    is_active: true,
+  });
+
+  const savePujaMutation = useMutation({
+    mutationFn: () => {
+      if (!pujaForm.puja_name.trim()) throw new Error("Puja name is required");
+      if (editingPuja) {
+        return purohitApi.updateMyPuja(editingPuja.id, pujaForm);
+      }
+      return purohitApi.addMyPuja(pujaForm);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["purohit", "me", "profile"] });
+      setPujaModalOpen(false);
+      setEditingPuja(null);
+      toast.success(editingPuja ? "Puja updated!" : "New Puja added to your catalog!");
+    },
+    onError: (err: any) => toast.error(err?.message || "Failed to save Puja offering"),
+  });
+
+  const deletePujaMutation = useMutation({
+    mutationFn: (pujaId: string) => purohitApi.deleteMyPuja(pujaId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["purohit", "me", "profile"] });
+      setDeletingPujaId(null);
+      toast.success("Puja removed from catalog.");
+    },
+    onError: (err: any) => toast.error(err?.message || "Failed to delete Puja"),
+  });
+
+  const openAddPuja = () => {
+    setEditingPuja(null);
+    setPujaForm({
+      puja_name: "",
+      description: "",
+      duration_minutes: 45,
+      price_inr: 501,
+      samagri_notes: "",
+      is_active: true,
+    });
+    setPujaModalOpen(true);
+  };
+
+  const openEditPuja = (item: PurohitPujaItem) => {
+    setEditingPuja(item);
+    setPujaForm({
+      puja_name: item.puja_name,
+      description: item.description || "",
+      duration_minutes: item.duration_minutes || 45,
+      price_inr: item.price_inr || 501,
+      samagri_notes: item.samagri_notes || "",
+      is_active: item.is_active !== false,
+    });
+    setPujaModalOpen(true);
+  };
+
+  if (!isPurohit) {
+    return (
+      <Card>
+        <CardBody>
+          <EmptyState
+            icon={Flame}
+            title="Purohit Partner Access Required"
+            description="This dedicated desk is for verified Vedic Purohits to manage rituals, Sankalpa bookings, and dakshina pricing."
+            action={
+              <Link href="/become-a-purohit">
+                <Button>Apply as a Vedic Purohit</Button>
+              </Link>
+            }
+          />
+        </CardBody>
+      </Card>
+    );
+  }
+
+  if (profileLoading) {
+    return <LoadingBlock label="Loading your Purohit Desk..." />;
+  }
+
+  const pujasCatalog = profile?.pujas || [];
+
+  return (
+    <div className="space-y-6">
+      {/* Header Banner */}
+      <div className="rounded-3xl border border-amber-300/70 bg-gradient-to-br from-amber-50 via-orange-50/50 to-white p-5 sm:p-6 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <Avatar src={profile?.avatar_url} name={profile?.display_name || "Pandit Ji"} size="lg" />
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="font-display text-xl font-bold text-stone-900">
+                  {profile?.display_name || "Purohit Partner Desk"}
+                </h1>
+                <Badge tone={isOnline ? "green" : "neutral"}>
+                  {isOnline ? "Live Online" : "Offline"}
+                </Badge>
+              </div>
+              <p className="text-xs text-stone-600 mt-0.5">
+                {profile?.title || "Sacred Vedic Rituals & Sankalpa Desk"} ·{" "}
+                {profile?.total_pujas_performed ?? 0} Pujas Completed
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 rounded-2xl bg-white/90 px-4 py-2.5 border border-amber-200/80 shadow-2xs">
+            <span className="text-xs font-bold text-stone-800">Online for Pujas</span>
+            <Switch
+              checked={isOnline}
+              disabled={updateAvailabilityMutation.isPending}
+              onChange={(checked) => {
+                setIsOnline(checked);
+                updateAvailabilityMutation.mutate(checked);
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation Pills */}
+      <div className="flex flex-wrap gap-2">
+        {(
+          [
+            { id: "bookings", label: `Bookings (${bookings.length})` },
+            { id: "pujas", label: `Puja Catalog (${pujasCatalog.length})` },
+            { id: "availability", label: "Auspicious Availability" },
+            { id: "profile", label: "Profile & Avatar" },
+          ] as const
+        ).map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => setTab(item.id)}
+            className={cn(
+              "rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer",
+              tab === item.id
+                ? "bg-amber-600 text-white shadow-xs"
+                : "bg-surface border border-border text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+
+      {/* TAB 1: BOOKINGS */}
+      {tab === "bookings" && (
+        <div className="space-y-4">
+          {bookingsLoading ? (
+            <LoadingBlock label="Fetching devotee Sankalpa bookings..." />
+          ) : bookings.length === 0 ? (
+            <EmptyState
+              icon={Flame}
+              title="No Puja Bookings Yet"
+              description="Toggle your status Online and keep your Puja catalog updated so devotees can book live Sankalpa rituals."
+            />
+          ) : (
+            bookings.map((b: PujaBookingData) => (
+              <Card key={b.id}>
+                <CardBody className="space-y-3">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-stone-900">{b.puja_name}</h3>
+                        <Badge tone={b.status === "completed" ? "green" : b.status === "in_progress" ? "gold" : "neutral"}>
+                          {b.status}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-stone-500 mt-0.5">
+                        #{b.booking_number} · Devotee: {b.user_name} · {b.puja_duration_minutes} mins · ₹{b.amount_inr}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {b.status !== "completed" && b.status !== "cancelled" && (
+                        <>
+                          <Link href={`/purohits/live/${b.id}`}>
+                            <Button size="sm" className="gap-1.5">
+                              <Video className="size-3.5" />
+                              Enter Live Chamber
+                            </Button>
+                          </Link>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            loading={completeBookingMutation.isPending}
+                            onClick={() => completeBookingMutation.mutate(b.id)}
+                            className="gap-1.5 border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                          >
+                            <CheckCircle2 className="size-3.5" />
+                            Mark Complete
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Sankalpa Details */}
+                  <div className="rounded-xl bg-amber-50/70 border border-amber-200/70 p-3 text-xs grid sm:grid-cols-2 gap-2">
+                    <div>
+                      <span className="font-bold text-amber-950">Sankalpa Name: </span>
+                      <span className="text-stone-700">{b.sankalpa_name}</span>
+                    </div>
+                    <div>
+                      <span className="font-bold text-amber-950">Gotra: </span>
+                      <span className="text-stone-700">{b.sankalpa_gotra}</span>
+                    </div>
+                    {b.sankalpa_nakshatra && (
+                      <div>
+                        <span className="font-bold text-amber-950">Nakshatra: </span>
+                        <span className="text-stone-700">{b.sankalpa_nakshatra}</span>
+                      </div>
+                    )}
+                    {b.sankalpa_wish && (
+                      <div className="sm:col-span-2">
+                        <span className="font-bold text-amber-950">Prayer / Wish: </span>
+                        <span className="text-stone-700">{b.sankalpa_wish}</span>
+                      </div>
+                    )}
+                  </div>
+                </CardBody>
+              </Card>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* TAB 2: PUJA CATALOG */}
+      {tab === "pujas" && (
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <p className="text-xs text-muted-foreground">Manage your custom Puja offerings and Dakshina pricing.</p>
+            <Button size="sm" onClick={openAddPuja} className="gap-1.5">
+              <Plus className="size-4" />
+              Add Puja Offering
+            </Button>
+          </div>
+
+          {pujasCatalog.length === 0 ? (
+            <EmptyState
+              icon={Flame}
+              title="No Pujas in Catalog"
+              description="Add your first sacred ritual with duration, samagri checklist, and dakshina amount."
+              action={<Button onClick={openAddPuja}>Add Puja Offering</Button>}
+            />
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {pujasCatalog.map((item) => (
+                <Card key={item.id}>
+                  <CardBody className="space-y-2.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h3 className="font-bold text-sm text-stone-900">{item.puja_name}</h3>
+                        <p className="text-xs font-extrabold text-amber-700 mt-0.5">
+                          ₹{item.price_inr} · {item.duration_minutes} mins
+                        </p>
+                      </div>
+                      <Badge tone={item.is_active ? "green" : "neutral"}>
+                        {item.is_active ? "Active" : "Paused"}
+                      </Badge>
+                    </div>
+                    {item.description && (
+                      <p className="text-xs text-stone-600 line-clamp-2">{item.description}</p>
+                    )}
+                    {item.samagri_notes && (
+                      <p className="text-[11px] text-amber-800 bg-amber-50 rounded-lg p-2">
+                        Samagri: {item.samagri_notes}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/60">
+                      <Button size="sm" variant="outline" onClick={() => openEditPuja(item)} className="gap-1">
+                        <Edit2 className="size-3.5" />
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setDeletingPujaId(item.id)}
+                        className="text-danger hover:bg-danger/10 gap-1"
+                      >
+                        <Trash2 className="size-3.5" />
+                        Delete
+                      </Button>
+                    </div>
+                  </CardBody>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAB 3: AVAILABILITY */}
+      {tab === "availability" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CalendarClock className="size-5 text-amber-600" />
+              Weekly Auspicious Schedule
+            </CardTitle>
+            <CardDescription>
+              Select the days and Muhurat time blocks when devotees can schedule virtual pujas with you.
+            </CardDescription>
+          </CardHeader>
+          <CardBody className="space-y-5">
+            <div>
+              <p className="text-xs font-bold text-stone-700 mb-2">Available Days</p>
+              <div className="flex flex-wrap gap-2">
+                {DAYS_OF_WEEK.map((day) => {
+                  const active = selectedDays.includes(day);
+                  return (
+                    <button
+                      key={day}
+                      type="button"
+                      onClick={() =>
+                        setSelectedDays((prev) =>
+                          active ? prev.filter((d) => d !== day) : [...prev, day]
+                        )
+                      }
+                      className={cn(
+                        "rounded-xl px-3 py-1.5 text-xs font-bold border transition-all cursor-pointer",
+                        active
+                          ? "bg-amber-600 text-white border-amber-600"
+                          : "bg-white text-stone-600 border-stone-200 hover:border-amber-300"
+                      )}
+                    >
+                      {day}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-bold text-stone-700 mb-2">Auspicious Time Slots</p>
+              <div className="flex flex-wrap gap-2">
+                {DEFAULT_SLOTS.map((slot) => {
+                  const active = selectedSlots.includes(slot);
+                  return (
+                    <button
+                      key={slot}
+                      type="button"
+                      onClick={() =>
+                        setSelectedSlots((prev) =>
+                          active ? prev.filter((s) => s !== slot) : [...prev, slot]
+                        )
+                      }
+                      className={cn(
+                        "inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold border transition-all cursor-pointer",
+                        active
+                          ? "bg-emerald-600 text-white border-emerald-600"
+                          : "bg-white text-stone-600 border-stone-200 hover:border-emerald-300"
+                      )}
+                    >
+                      <Clock className="size-3.5" />
+                      {slot}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <Button
+                loading={updateAvailabilityMutation.isPending}
+                onClick={() => updateAvailabilityMutation.mutate(isOnline)}
+              >
+                Save Availability Schedule
+              </Button>
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
+      {/* TAB 4: PROFILE */}
+      {tab === "profile" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Purohit Credentials & Avatar</CardTitle>
+            <CardDescription>
+              Keep your portrait photo updated for the public DivinLink Purohit Directory.
+            </CardDescription>
+          </CardHeader>
+          <CardBody className="space-y-4">
+            <div className="flex flex-wrap items-center gap-4">
+              <Avatar src={profile?.avatar_url} name={profile?.display_name || "Pandit Ji"} size="xl" />
+              <div className="space-y-2">
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) uploadAvatarMutation.mutate(file);
+                    e.target.value = "";
+                  }}
+                />
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  loading={uploadAvatarMutation.isPending}
+                  onClick={() => avatarInputRef.current?.click()}
+                  className="gap-1.5"
+                >
+                  <Camera className="size-4" />
+                  Upload Purohit Portrait
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  Languages: {profile?.languages?.join(", ") || "Sanskrit, Hindi, Bengali"} · {profile?.experience_years ?? 5} yrs exp
+                </p>
+              </div>
+            </div>
+            {profile?.bio && (
+              <div className="rounded-xl bg-surface-muted p-3.5 text-xs text-stone-700 leading-relaxed">
+                {profile.bio}
+              </div>
+            )}
+          </CardBody>
+        </Card>
+      )}
+
+      {/* Add / Edit Puja Modal */}
+      <Modal
+        open={pujaModalOpen}
+        onClose={() => {
+          setPujaModalOpen(false);
+          setEditingPuja(null);
+        }}
+        title={editingPuja ? "Edit Puja Offering" : "Add New Puja Offering"}
+      >
+        <div className="space-y-3">
+          <Field label="Puja Name" htmlFor="puja-name" required>
+            <Input
+              id="puja-name"
+              placeholder="e.g. Satyanarayan Katha & Maha Aarti"
+              value={pujaForm.puja_name}
+              onChange={(e) => setPujaForm((p) => ({ ...p, puja_name: e.target.value }))}
+            />
+          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Dakshina (INR)" htmlFor="puja-price" required>
+              <Input
+                id="puja-price"
+                type="number"
+                min={101}
+                value={pujaForm.price_inr}
+                onChange={(e) => setPujaForm((p) => ({ ...p, price_inr: Number(e.target.value) || 0 }))}
+              />
+            </Field>
+            <Field label="Duration (Minutes)" htmlFor="puja-duration" required>
+              <Input
+                id="puja-duration"
+                type="number"
+                min={15}
+                value={pujaForm.duration_minutes}
+                onChange={(e) => setPujaForm((p) => ({ ...p, duration_minutes: Number(e.target.value) || 30 }))}
+              />
+            </Field>
+          </div>
+          <Field label="Ritual Description" htmlFor="puja-desc">
+            <Textarea
+              id="puja-desc"
+              rows={3}
+              placeholder="Describe the Vedic Vidhi and spiritual benefits..."
+              value={pujaForm.description}
+              onChange={(e) => setPujaForm((p) => ({ ...p, description: e.target.value }))}
+            />
+          </Field>
+          <Field label="Samagri Checklist Notes" htmlFor="puja-samagri">
+            <Textarea
+              id="puja-samagri"
+              rows={2}
+              placeholder="Items devotee should keep ready before joining..."
+              value={pujaForm.samagri_notes}
+              onChange={(e) => setPujaForm((p) => ({ ...p, samagri_notes: e.target.value }))}
+            />
+          </Field>
+          <div className="flex items-center justify-between pt-1">
+            <span className="text-xs font-bold text-stone-700">Active in Public Catalog</span>
+            <Switch
+              checked={pujaForm.is_active}
+              onChange={(checked) => setPujaForm((p) => ({ ...p, is_active: checked }))}
+            />
+          </div>
+          <div className="flex justify-end gap-2 pt-3 border-t border-border">
+            <Button variant="outline" onClick={() => setPujaModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              loading={savePujaMutation.isPending}
+              onClick={() => savePujaMutation.mutate()}
+              className="gap-1.5"
+            >
+              {savePujaMutation.isPending && <Loader2 className="size-4 animate-spin" />}
+              {editingPuja ? "Save Changes" : "Add Puja"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <ConfirmModal
+        open={Boolean(deletingPujaId)}
+        onClose={() => setDeletingPujaId(null)}
+        onConfirm={() => {
+          if (deletingPujaId) deletePujaMutation.mutate(deletingPujaId);
+        }}
+        title="Delete Puja Offering"
+        description="Remove this ritual from your public catalog? Past bookings are unaffected."
+        confirmLabel="Delete Puja"
+        tone="danger"
+        loading={deletePujaMutation.isPending}
+      />
+    </div>
+  );
+}

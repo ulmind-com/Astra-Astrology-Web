@@ -42,11 +42,16 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
   // Held until the session is confirmed, so a protected page never flashes.
   const { ready } = useRequireAuth();
 
-  const isProfessional = user?.role === "astrologer" || (user?.role as string) === "purohit" || pathname.startsWith("/account/earnings");
+  const isAstrologer = user?.role === "astrologer";
+  const isPurohit = (user?.role as string) === "purohit";
+  const isProfessional = isAstrologer || isPurohit || pathname.startsWith("/account/earnings");
 
   const navItems = React.useMemo(() => {
+    const items = [...BASE_NAV];
+    if (isPurohit) {
+      items.splice(1, 0, { href: "/account/purohit-desk", label: "Purohit Desk", icon: Flame });
+    }
     if (isProfessional) {
-      const items = [...BASE_NAV];
       // Insert Earnings & Payouts right after Wallet
       const walletIdx = items.findIndex((i) => i.href === "/account/wallet");
       const earningItem = { href: "/account/earnings", label: "Earnings & Payouts", icon: Banknote };
@@ -57,8 +62,8 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
       }
       return items;
     }
-    return BASE_NAV;
-  }, [isProfessional]);
+    return items;
+  }, [isProfessional, isPurohit]);
 
   return (
     <>

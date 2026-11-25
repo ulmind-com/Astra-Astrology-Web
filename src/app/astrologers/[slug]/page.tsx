@@ -37,7 +37,7 @@ import {
   StatusDot,
 } from "@/components/ui";
 import { MilanLauncher } from "@/components/call/milan-launcher";
-import { astrologerApi, callApi, chatApi } from "@/lib/api";
+import { appointmentApi, astrologerApi, callApi, chatApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { cn, coinsPerMinute, formatNumber } from "@/lib/utils";
 import { DurationPicker } from "@/components/consult/duration-picker";
@@ -76,6 +76,13 @@ export default function AstrologerDetailPage() {
     queryKey: ["astrologer-favorite", slug],
     queryFn: () => astrologerApi.favoriteStatus(slug),
     enabled: Boolean(slug),
+  });
+
+  const { data: synergyData } = useQuery({
+    queryKey: ["astrologer-synergy", astrologer?.id],
+    queryFn: () => appointmentApi.synergy(astrologer!.id),
+    enabled: Boolean(user && astrologer?.id),
+    staleTime: 5 * 60_000,
   });
 
   const [isFav, setIsFav] = React.useState(false);
@@ -277,6 +284,56 @@ export default function AstrologerDetailPage() {
                         <span>{astrologer.languages.join(" · ")}</span>
                       </p>
                     )}
+
+                    {/* Cosmic Resonance Compatibility Meter (AUD-012) */}
+                    {synergyData ? (
+                      <div className="mt-4 rounded-2xl border border-amber-300/70 bg-gradient-to-r from-amber-50/90 via-yellow-50/70 to-orange-50/70 p-3.5 shadow-2xs">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className="flex size-8 items-center justify-center rounded-xl bg-amber-500 text-white text-xs font-black shadow-xs">
+                              {synergyData.score}%
+                            </span>
+                            <div>
+                              <p className="text-xs font-extrabold text-amber-950">
+                                {language === "bn"
+                                  ? `কসমিক সিনার্জি স্কোর: ${synergyData.harmony_tier}`
+                                  : `Cosmic Synergy: ${synergyData.harmony_tier}`}
+                              </p>
+                              <p className="text-[11px] text-amber-800/90">
+                                {language === "bn" ? "শুভ মুহূর্ত: " : "Recommended Muhurat: "}
+                                {synergyData.recommended_muhurat}
+                              </p>
+                            </div>
+                          </div>
+                          <Badge tone="gold">{synergyData.harmony_tier}</Badge>
+                        </div>
+                        {synergyData.resonance_factors?.length > 0 && (
+                          <ul className="mt-2 space-y-1 border-t border-amber-200/70 pt-2 text-[11px] text-amber-900">
+                            {synergyData.resonance_factors.slice(0, 2).map((factor, idx) => (
+                              <li key={idx} className="flex items-start gap-1.5">
+                                <Sparkles className="size-3 mt-0.5 shrink-0 text-amber-600" />
+                                <span>{factor}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ) : !user ? (
+                      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-amber-200/70 bg-amber-50/50 px-3.5 py-2.5 text-xs">
+                        <span className="flex items-center gap-1.5 text-amber-900 font-medium">
+                          <Sparkles className="size-3.5 text-amber-600" />
+                          {language === "bn"
+                            ? "এই জ্যোতিষীর সাথে আপনার কসমিক সিনার্জি স্কোর দেখতে সাইন ইন করুন।"
+                            : "Sign in to view your personalized Cosmic Resonance score with this astrologer."}
+                        </span>
+                        <Link
+                          href={`/login?redirect=/astrologers/${slug}`}
+                          className="font-bold text-amber-800 underline hover:text-amber-950"
+                        >
+                          {language === "bn" ? "সাইন ইন" : "Sign in"}
+                        </Link>
+                      </div>
+                    ) : null}
 
                     {/* Dynamic Realtime Service Duration Delivery */}
                     {(() => {
