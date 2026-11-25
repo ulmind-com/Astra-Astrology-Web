@@ -36,12 +36,12 @@ export const HERO_SLIDES: HeroSlide[] = [
     layout: "one",
     title: {
       en: ["WELCOME TO DIVINLINK"],
-      bn: ["ডিভিনলিংকে স্বাগতম"],
+      bn: ["ডিভাইনলিংকে স্বাগতম"],
       hi: ["डिवाइनलिंक में स्वागत"],
     },
     heading: {
       en: "Discover DivinLink",
-      bn: "ডিভিনলিংক আবিষ্কার করুন",
+      bn: "ডিভাইনলিংক আবিষ্কার করুন",
       hi: "डिवाइनलिंक को जानें",
     },
     description: {
@@ -98,6 +98,49 @@ export const HERO_SLIDES: HeroSlide[] = [
 
 /** Rail order top → bottom, as slide indices (slide 3 on top, slide 1 at the bottom). */
 export const RAIL_ORDER = [2, 1, 0];
+
+function parseTitleLines(text?: string): string[] {
+  if (!text) return [];
+  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  return lines.length > 0 ? lines : [text.trim()];
+}
+
+export function mapCmsToHeroSlides(
+  cmsSlides?: import("@/lib/api").CinematicHeroSlideCMS[],
+): HeroSlide[] {
+  if (!cmsSlides || !Array.isArray(cmsSlides) || cmsSlides.length === 0) {
+    return HERO_SLIDES;
+  }
+  return cmsSlides.map((s, idx) => {
+    const fallback = HERO_SLIDES[idx] ?? HERO_SLIDES[0];
+    const titleEn = parseTitleLines(s.title_en || fallback.title.en.join("\n"));
+    const titleBn = parseTitleLines(s.title_bn || fallback.title.bn.join("\n"));
+    const titleHi = parseTitleLines(s.title_hi || fallback.title.hi.join("\n"));
+
+    return {
+      id: s.id || `slide-${idx + 1}`,
+      photo: s.photo || fallback.photo,
+      position: s.position || fallback.position || "center center",
+      thumb: s.thumb || s.photo || fallback.thumb,
+      layout: (s.layout === "two" || titleEn.length > 1 || titleBn.length > 1) ? "two" : "one",
+      title: {
+        en: titleEn,
+        bn: titleBn,
+        hi: titleHi,
+      },
+      heading: {
+        en: s.heading_en || fallback.heading.en,
+        bn: s.heading_bn || fallback.heading.bn,
+        hi: s.heading_hi || fallback.heading.hi,
+      },
+      description: {
+        en: s.description_en || fallback.description.en,
+        bn: s.description_bn || fallback.description.bn,
+        hi: s.description_hi || fallback.description.hi,
+      },
+    };
+  });
+}
 
 export const CLOUD_IMAGE = "/images/clouds-screen.webp";
 

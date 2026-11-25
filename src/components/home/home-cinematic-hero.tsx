@@ -6,10 +6,12 @@ import Image from "next/image";
 import {
   CLOUD_IMAGE,
   HERO_SLIDES,
+  mapCmsToHeroSlides,
   RAIL_ORDER,
   tr,
 } from "@/components/home/home-cinematic-data";
 import type { AstrologyLanguage } from "@/types";
+import type { CinematicHeroSlideCMS } from "@/lib/api";
 
 const WIPE_MS = 1250;
 const AUTO_MS = 5200;
@@ -34,14 +36,14 @@ interface RailLayout {
   caption: { left: number; top: number; bar: number };
 }
 
-function computeRail(W: number, H: number, active: number): RailLayout {
+function computeRail(W: number, H: number, active: number, railOrder: number[] = RAIL_ORDER): RailLayout {
   const A = clamp(96, 0.113 * W, 190);
   const I = clamp(46, 0.054 * W, 92);
   const G = Math.max(8, 0.009 * W);
   const cx = 0.855 * W;
   let y = 74 + 0.085 * H;
 
-  const thumbs = RAIL_ORDER.map((slide) => {
+  const thumbs = railOrder.map((slide) => {
     const size = slide === active ? A : I;
     const t = { slide, left: cx - size / 2, top: y, size };
     y += size + G;
@@ -69,10 +71,17 @@ interface HeroProps {
   language: AstrologyLanguage;
   /** Pauses the render loop while the detail page covers the hero. */
   paused: boolean;
+  slides?: CinematicHeroSlideCMS[];
   children?: React.ReactNode;
 }
 
-export function CinematicHero({ language, paused, children }: HeroProps) {
+export function CinematicHero({ language, paused, slides, children }: HeroProps) {
+  const heroSlides = React.useMemo(() => mapCmsToHeroSlides(slides), [slides]);
+  const railOrder = React.useMemo(
+    () => heroSlides.map((_, idx) => idx).reverse(),
+    [heroSlides],
+  );
+
   const heroRef = React.useRef<HTMLElement>(null);
   const stackRef = React.useRef<HTMLDivElement>(null);
   const mistRef = React.useRef<HTMLDivElement>(null);
@@ -123,8 +132,8 @@ export function CinematicHero({ language, paused, children }: HeroProps) {
   }, []);
 
   const layout = React.useMemo(
-    () => (size ? computeRail(size.w, size.h, railTarget) : null),
-    [size, railTarget],
+    () => (size ? computeRail(size.w, size.h, railTarget, railOrder) : null),
+    [size, railTarget, railOrder],
   );
 
   /* ---------- slide change ---------- */
@@ -171,11 +180,11 @@ export function CinematicHero({ language, paused, children }: HeroProps) {
           return;
         }
         const e = engine.current;
-        goTo((e.cur + 1) % HERO_SLIDES.length);
+        goTo((e.cur + 1) % heroSlides.length);
       };
       autoTimer.current = window.setTimeout(attempt, delay);
     },
-    [goTo],
+    [goTo, heroSlides.length],
   );
 
 
@@ -300,13 +309,13 @@ export function CinematicHero({ language, paused, children }: HeroProps) {
     goTo(slide);
   };
 
-  const caption = HERO_SLIDES[captionIdx];
+  const caption = heroSlides[captionIdx] ?? heroSlides[0];
 
   return (
     <div className={`dl-hero-wrap${isIn ? " is-in" : ""}`}>
       <section ref={heroRef} className="dl-hero" aria-roledescription="carousel">
         <div ref={stackRef} className="dl-stack">
-          {HERO_SLIDES.map((slide, i) => {
+          {heroSlides.map((slide, i) => {
             const lines = (slide.title[language] ?? slide.title.en).map((l) => l.split(" "));
             const offsets = lines.map((_, li) => lines.slice(0, li).reduce((n, w) => n + w.length, 0));
             return (
@@ -409,7 +418,7 @@ export function CinematicHero({ language, paused, children }: HeroProps) {
               </div>
 
               {layout.thumbs.map((t, order) => {
-                const slide = HERO_SLIDES[t.slide];
+                const slide = heroSlides[t.slide] ?? heroSlides[0];
                 return (
                   <button
                     key={slide.id}

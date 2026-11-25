@@ -242,7 +242,11 @@ export function HomePageClient({
       <AstroyogiHeader overlay forceSolid={Boolean(detail)} onLogoClick={onLogo} />
 
       <main>
-        <CinematicHero language={language} paused={Boolean(detail) && detailShown}>
+        <CinematicHero
+          language={language}
+          paused={Boolean(detail) && detailShown}
+          slides={cmsData?.cinematic_hero_slides}
+        >
           <CinematicSearch
             language={language}
             value={birth}

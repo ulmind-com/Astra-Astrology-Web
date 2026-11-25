@@ -1427,7 +1427,25 @@ export interface TrustStatConfig {
   label: string;
 }
 
+export interface CinematicHeroSlideCMS {
+  id?: string;
+  photo: string;
+  position?: string;
+  thumb?: string;
+  layout?: "one" | "two";
+  title_en: string;
+  title_bn: string;
+  title_hi: string;
+  heading_en?: string;
+  heading_bn?: string;
+  heading_hi?: string;
+  description_en?: string;
+  description_bn?: string;
+  description_hi?: string;
+}
+
 export interface HomePageCMSData {
+  cinematic_hero_slides?: CinematicHeroSlideCMS[];
   hero_slides?: HeroSlide[];
   hero_eyebrow?: string;
   hero_title_line1?: string;
