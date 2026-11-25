@@ -70,12 +70,12 @@ function computeRail(W: number, H: number, active: number, railOrder: number[] =
 interface HeroProps {
   language: AstrologyLanguage;
   /** Pauses the render loop while the detail page covers the hero. */
-  paused: boolean;
+  paused?: boolean;
   slides?: CinematicHeroSlideCMS[];
   children?: React.ReactNode;
 }
 
-export function CinematicHero({ language, paused, slides, children }: HeroProps) {
+export function CinematicHero({ language, paused = false, slides, children }: HeroProps) {
   const heroSlides = React.useMemo(() => mapCmsToHeroSlides(slides), [slides]);
   const railOrder = React.useMemo(
     () => heroSlides.map((_, idx) => idx).reverse(),

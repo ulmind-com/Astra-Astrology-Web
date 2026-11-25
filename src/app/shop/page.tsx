@@ -42,6 +42,8 @@ import { ShopFaqAccordion } from "@/components/shop/ShopFaqAccordion";
 import { CardTilt } from "@/components/ui/card-tilt";
 import { ShopFilterDrawer } from "@/components/shop/ShopFilterDrawer";
 import { ShopTrustMarquee } from "@/components/shop/ShopTrustMarquee";
+import { ShopProductDetailOverlay } from "@/components/shop/ShopProductDetailOverlay";
+import "@/components/shop/shop-cinematic.css";
 import initialProductsData from "@/lib/initial-shop-products.json";
 import initialCategoriesData from "@/lib/initial-shop-categories.json";
 
@@ -75,16 +77,29 @@ function getCategoryLocalizedName(cat: ShopProductCategory, language: string) {
   return cat.name;
 }
 
-function ProductCard({ p, language }: { p: ShopProduct; language: string }) {
+function ProductCard({
+  p,
+  language,
+  onOpenProduct,
+}: {
+  p: ShopProduct;
+  language: string;
+  onOpenProduct?: (product: ShopProduct, el: HTMLElement) => void;
+}) {
   const router = useRouter();
   const discount = p.discount_percent || Math.round(((p.mrp - p.sale_price) / p.mrp) * 100);
   const freeGiftBadge = p.free_gift_badge || "FREE Raw Selenite Plate worth ₹729";
   const productSlugOrId = p.slug || p.id;
   const productHref = `/shop/products/${encodeURIComponent(productSlugOrId)}`;
 
-  const handleCardClick = (e: React.MouseEvent) => {
+  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // If clicked on a button or inside a button, don't trigger card navigation
     if ((e.target as HTMLElement).closest("button")) {
+      return;
+    }
+    if (onOpenProduct) {
+      e.preventDefault();
+      onOpenProduct(p, e.currentTarget);
       return;
     }
     router.push(productHref);
@@ -169,13 +184,21 @@ function ProductCard({ p, language }: { p: ShopProduct; language: string }) {
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <Link
-              href={productHref}
-              onClick={(e) => e.stopPropagation()}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onOpenProduct) {
+                  const cardEl = (e.currentTarget.closest(".group") as HTMLElement) || e.currentTarget;
+                  onOpenProduct(p, cardEl);
+                } else {
+                  router.push(productHref);
+                }
+              }}
               className="py-2 px-2 rounded-xl border border-stone-200 text-stone-700 font-bold text-[11px] hover:bg-stone-50 transition-colors text-center flex items-center justify-center cursor-pointer"
             >
               {language === "bn" ? "বিস্তারিত" : language === "hi" ? "विवরণ" : "Details"}
-            </Link>
+            </button>
             <button
               type="button"
               onClick={(e) => {
@@ -211,6 +234,124 @@ function ShopInner() {
 
   const { openCart, getItemCount } = useCartStore();
   const cartItemCount = getItemCount();
+
+  const [detailProduct, setDetailProduct] = React.useState<ShopProduct | null>(null);
+  const [detailShown, setDetailShown] = React.useState(false);
+  const [detailClosing, setDetailClosing] = React.useState(false);
+  const [mainHidden, setMainHidden] = React.useState(false);
+  const mainRef = React.useRef<HTMLDivElement>(null);
+  const detailScrollRef = React.useRef<HTMLDivElement>(null);
+  const pendingFlight = React.useRef<{ rect: DOMRect; image: string } | null>(null);
+
+  const FLIGHT_MS = 850;
+
+  const easeInOutCubic = (t: number): number => {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  };
+
+  // Lock the page behind the detail view.
+  React.useEffect(() => {
+    if (!detailProduct) return;
+    const html = document.documentElement;
+    const prev = html.style.overflow;
+    html.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = prev;
+    };
+  }, [detailProduct]);
+
+  // Handle browser back button (popstate)
+  React.useEffect(() => {
+    const handlePopState = () => {
+      if (detailProduct) {
+        setDetailClosing(true);
+        window.setTimeout(() => {
+          setDetailProduct(null);
+          setDetailShown(false);
+          setDetailClosing(false);
+        }, 350);
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [detailProduct]);
+
+  const openProduct = React.useCallback((prod: ShopProduct, fromEl: HTMLElement) => {
+    const imgEl = fromEl.querySelector("img") || fromEl;
+    const rect = imgEl.getBoundingClientRect();
+    const image = prod.featured_image || (prod.images && prod.images[0]) || "";
+
+    pendingFlight.current = { rect, image };
+    setMainHidden(true);
+    setDetailClosing(false);
+    setDetailProduct(prod);
+
+    if (typeof window !== "undefined") {
+      const url = `/shop/products/${encodeURIComponent(prod.slug || prod.id)}`;
+      window.history.pushState({ shopProductSlug: prod.slug }, "", url);
+    }
+  }, []);
+
+  // Shared-element flight animation
+  React.useLayoutEffect(() => {
+    const flight = pendingFlight.current;
+    if (!detailProduct || !flight) return;
+    pendingFlight.current = null;
+
+    if (detailScrollRef.current) detailScrollRef.current.scrollTop = 0;
+    if (!detailShown) requestAnimationFrame(() => setDetailShown(true));
+
+    const target = mainRef.current?.getBoundingClientRect();
+    if (!target) {
+      setMainHidden(false);
+      return;
+    }
+
+    const from = flight.rect;
+    const el = document.createElement("div");
+    el.className = "dl-flight";
+    if (flight.image) {
+      el.style.backgroundImage = `url("${flight.image}")`;
+    }
+    el.style.borderRadius = "16px";
+    document.body.appendChild(el);
+
+    let raf = 0;
+    const start = performance.now();
+    const step = (now: number) => {
+      const t = Math.min(1, (now - start) / FLIGHT_MS);
+      const e = easeInOutCubic(t);
+      el.style.left = `${from.left + (target.left - from.left) * e}px`;
+      el.style.top = `${from.top + (target.top - from.top) * e}px`;
+      el.style.width = `${from.width + (target.width - from.width) * e}px`;
+      el.style.height = `${from.height + (target.height - from.height) * e}px`;
+      el.style.borderRadius = `${16 + (24 - 16) * e}px`;
+      if (t < 1) {
+        raf = requestAnimationFrame(step);
+      } else {
+        setMainHidden(false);
+        requestAnimationFrame(() => el.remove());
+      }
+    };
+    step(start);
+    return () => {
+      cancelAnimationFrame(raf);
+      el.remove();
+    };
+  }, [detailProduct]);
+
+  const closeDetail = React.useCallback((updateHistory = true) => {
+    if (!detailProduct) return;
+    setDetailClosing(true);
+    if (updateHistory && typeof window !== "undefined") {
+      window.history.pushState(null, "", "/shop");
+    }
+    window.setTimeout(() => {
+      setDetailProduct(null);
+      setDetailShown(false);
+      setDetailClosing(false);
+    }, 350);
+  }, [detailProduct]);
 
   React.useEffect(() => {
     if (initialPlanet) setSelectedPlanet(initialPlanet);
@@ -455,7 +596,7 @@ function ShopInner() {
         <ShopByWhatMatters onSelectFilter={handleSelectFilter} />
 
         {/* 5. Most Loved By Customers (Bestsellers Section) */}
-        <ShopBestsellers products={rawProducts} />
+        <ShopBestsellers products={rawProducts} onOpenProduct={openProduct} />
 
         {/* 6. Promotional 100% Wallet Cashback Strip */}
         <CashbackPromoBanner />
@@ -699,7 +840,7 @@ function ShopInner() {
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                 {filteredProducts.map((p) => (
-                  <ProductCard key={p.id} p={p} language={language} />
+                  <ProductCard key={p.id} p={p} language={language} onOpenProduct={openProduct} />
                 ))}
               </div>
             </div>
@@ -766,7 +907,7 @@ function ShopInner() {
                     {/* Category Products Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                       {catProducts.map((p) => (
-                        <ProductCard key={p.id} p={p} language={language} />
+                        <ProductCard key={p.id} p={p} language={language} onOpenProduct={openProduct} />
                       ))}
                     </div>
                   </section>
@@ -801,6 +942,22 @@ function ShopInner() {
             ₹{useCartStore.getState().getSubtotal().toLocaleString("en-IN")}
           </span>
         </button>
+      )}
+
+      {/* Product Detail Cinematic Shared-Element Overlay */}
+      {detailProduct && (
+        <ShopProductDetailOverlay
+          product={detailProduct}
+          language={language}
+          shown={detailShown}
+          closing={detailClosing}
+          mainHidden={mainHidden}
+          mainRef={mainRef}
+          scrollRef={detailScrollRef}
+          onClose={() => closeDetail(true)}
+          onOpenProduct={openProduct}
+          relatedProducts={rawProducts.filter((p) => p.id !== detailProduct.id).slice(0, 4)}
+        />
       )}
 
       <SiteFooter />

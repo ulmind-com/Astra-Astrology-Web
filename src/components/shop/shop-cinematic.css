@@ -1,0 +1,156 @@
+/* ==========================================================================
+   DivinLink Shop Cinematic Transition & Overlay CSS
+   Enables shared-element flight animation and cinematic product detail overlay.
+   ========================================================================== */
+
+.dl-flight {
+  position: fixed;
+  z-index: 9999;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  will-change: left, top, width, height, border-radius;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.dl-shop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  background: linear-gradient(180deg, #fbeee5 0%, #fbeee5 260px, #ffffff 380px, #ffffff 100%);
+  color: #1c1917;
+  opacity: 0;
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-overflow-scrolling: touch;
+}
+
+.dl-shop-overlay.is-open {
+  opacity: 1;
+}
+
+.dl-shop-overlay.is-closing {
+  opacity: 0;
+  transition-duration: 0.35s;
+}
+
+.dl-shop-overlay-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+}
+
+@media (min-width: 640px) {
+  .dl-shop-overlay-inner {
+    padding: 32px 24px 100px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dl-shop-overlay-inner {
+    padding: 36px 32px 120px;
+  }
+}
+
+/* Staggered rise animation for overlay elements */
+.dl-rise {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(160ms + var(--d, 0) * 45ms);
+}
+
+.dl-shop-overlay.is-open .dl-rise {
+  opacity: 1;
+  transform: none;
+}
+
+/* Target main photo */
+.dl-shop-main-photo {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  border-radius: 24px;
+  overflow: hidden;
+  background-color: #f7f5ed;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 1px solid #e7e5e4;
+  box-shadow: 0 16px 40px rgba(110, 60, 50, 0.12);
+  transition: opacity 0.2s ease;
+}
+
+.dl-shop-main-photo.is-hidden {
+  visibility: hidden !important;
+}
+
+/* Gallery thumbnails */
+.dl-shop-gallery {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.dl-shop-gallery-thumb {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-color: #f5f5f4;
+  border: 2px solid #e7e5e4;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dl-shop-gallery-thumb:hover {
+  transform: translateY(-2px);
+  border-color: #d97706;
+}
+
+.dl-shop-gallery-thumb.is-active {
+  border-color: #d97706;
+  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3);
+}
+
+/* Breadcrumbs bar inside overlay */
+.dl-shop-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #78716c;
+  margin-bottom: 20px;
+}
+
+.dl-shop-crumbs button {
+  font-weight: 600;
+  color: #57534e;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+
+.dl-shop-crumbs button:hover {
+  color: #b45309;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.dl-shop-crumbs .is-current {
+  color: #1c1917;
+  font-weight: 700;
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

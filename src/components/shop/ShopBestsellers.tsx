@@ -11,9 +11,10 @@ import { useLanguage } from "@/providers/language-provider";
 
 interface Props {
   products?: ShopProduct[];
+  onOpenProduct?: (product: ShopProduct, el: HTMLElement) => void;
 }
 
-export function ShopBestsellers({ products = [] }: Props) {
+export function ShopBestsellers({ products = [], onOpenProduct }: Props) {
   const { language } = useLanguage();
   const { addItem } = useCartStore();
   const [activeTab, setActiveTab] = React.useState<string>("all");
@@ -117,16 +118,28 @@ export function ShopBestsellers({ products = [] }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {filtered.slice(0, 8).map((product) => {
           const isAdded = addedId === product.id;
+          const realProd = products.find((p) => p.id === product.id) || (product as unknown as ShopProduct);
+          const productHref = `/shop/products/${encodeURIComponent(product.slug || product.id)}`;
+
+          const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+            if ((e.target as HTMLElement).closest("button")) {
+              return;
+            }
+            if (onOpenProduct) {
+              e.preventDefault();
+              onOpenProduct(realProd, e.currentTarget);
+            }
+          };
 
           return (
             <div
               key={product.id}
-              className="rounded-2xl border border-stone-200 bg-white p-3.5 sm:p-4 shadow-xs hover:border-amber-400 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group"
+              onClick={handleCardClick}
+              className="rounded-2xl border border-stone-200 bg-white p-3.5 sm:p-4 shadow-xs hover:border-amber-400 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group cursor-pointer"
             >
               <div className="space-y-3">
                 {/* Image Box */}
-                <Link
-                  href={`/shop/products/${encodeURIComponent(product.slug || product.id)}`}
+                <div
                   className="relative aspect-square w-full rounded-xl overflow-hidden bg-[#f7f5ed] block cursor-pointer"
                 >
                   <Image
@@ -146,19 +159,18 @@ export function ShopBestsellers({ products = [] }: Props) {
                       </span>
                     </div>
                   )}
-                </Link>
+                </div>
 
                 {/* Details */}
                 <div className="space-y-1">
                   <span className="text-xs text-stone-400 font-medium block">
                     {product.category_label || "Astro Product"}
                   </span>
-                  <Link
-                    href={`/shop/products/${encodeURIComponent(product.slug || product.id)}`}
+                  <h3
                     className="text-sm font-bold text-stone-900 line-clamp-1 hover:text-amber-700 transition-colors block"
                   >
                     {product.title}
-                  </Link>
+                  </h3>
 
                   {/* Price Row: Bold Sale Price, Gray Strikethrough MRP, Green Discount */}
                   <div className="flex items-baseline gap-2 pt-1">
