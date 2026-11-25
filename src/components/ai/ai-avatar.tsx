@@ -1,21 +1,18 @@
 "use client";
 
 /**
- * The astrologer's face in the chat — the animated mark, not a flat icon.
+ * AiAvatar — Live 3D robot avatar for the AI chat stream.
  *
- * Three things here are about not making the page worse to load.
+ * Uses a **singleton offscreen WebGL renderer** (`SharedAvatarRenderer`) so
+ * even a 100-message conversation creates only ONE extra WebGL context.
+ * Each `<AiAvatar>` subscribes a tiny `<canvas>` that receives blits every
+ * frame via `ctx.drawImage()`.
  *
- * The player is imported dynamically with `ssr: false`. `lottie-web` reaches
- * for `document` as it initialises, so rendering it on the server throws; and
- * it is a heavy dependency that nothing on first paint needs.
- *
- * The animation JSON is fetched once and shared. The avatar appears beside
- * every assistant message, and letting each copy fetch and hold its own 25 KB
- * of keyframes would be twenty copies in a long conversation.
- *
- * It falls back to a static mark. If the fetch fails, or the player cannot
- * load, or the reader has asked for reduced motion, the chat still has a
- * perfectly good avatar rather than a hole where one should be.
+ * Falls back gracefully:
+ *   1. If the browser has `prefers-reduced-motion: reduce` → still renders
+ *      robot but with minimal animation (handled inside SharedAvatarRenderer).
+ *   2. If WebGL fails entirely → shows the existing Lottie logo animation.
+ *   3. If Lottie also fails → shows a static <Bot> icon.
  */
 
 import dynamic from "next/dynamic";
@@ -24,39 +21,37 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/* ---------- Lazy imports (never SSR) ---------- */
+
 const Lottie = dynamic(() => import("lottie-react"), {
   ssr: false,
   loading: () => null,
 });
 
-/** Shared across every avatar on the page: fetched once, held once. */
-let cached: unknown | null = null;
-let inFlight: Promise<unknown | null> | null = null;
+/* ---------- Lottie fallback (shared fetch, same as before) ---------- */
 
-function loadAnimation(): Promise<unknown | null> {
-  if (cached) return Promise.resolve(cached);
-  if (!inFlight) {
-    inFlight = fetch("/ai-logo.json")
-      .then((response) => (response.ok ? response.json() : null))
+let cachedLottie: unknown | null = null;
+let lottieInFlight: Promise<unknown | null> | null = null;
+
+function loadLottieAnimation(): Promise<unknown | null> {
+  if (cachedLottie) return Promise.resolve(cachedLottie);
+  if (!lottieInFlight) {
+    lottieInFlight = fetch("/ai-logo.json")
+      .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        cached = data;
+        cachedLottie = data;
         return data;
       })
       .catch(() => null)
       .finally(() => {
-        inFlight = null;
+        lottieInFlight = null;
       });
   }
-  return inFlight;
+  return lottieInFlight;
 }
 
-/** Whether this reader has asked the system not to animate things. */
-//
-//  Read through `useSyncExternalStore` rather than an effect: the value exists
-//  before the first paint in the browser and not at all on the server, which
-//  is exactly the case that API is for. Setting it from an effect would mean a
-//  frame of animation playing before it was switched off, for the one reader
-//  who asked for no animation.
+/* ---------- Reduced-motion subscription ---------- */
+
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 
 function subscribeToMotionPreference(onChange: () => void): () => void {
@@ -69,6 +64,8 @@ function readMotionPreference(): boolean {
   return window.matchMedia(REDUCED_MOTION).matches;
 }
 
+/* ---------- Component ---------- */
+
 export function AiAvatar({
   size = 44,
   className,
@@ -79,24 +76,66 @@ export function AiAvatar({
   className?: string;
   active?: boolean;
 }) {
-  const [animation, setAnimation] = React.useState<unknown | null>(null);
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const [webglReady, setWebglReady] = React.useState(false);
+  const [webglFailed, setWebglFailed] = React.useState(false);
+  const [lottieData, setLottieData] = React.useState<unknown | null>(null);
+
   const still = React.useSyncExternalStore(
     subscribeToMotionPreference,
     readMotionPreference,
-    // The server cannot know, and guessing "animate" matches what every other
-    // reader gets.
     () => false,
   );
 
+  // Try the 3D robot first
   React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // Dynamic import to avoid bundling Three.js when SSR
+    let unsubscribe: (() => void) | null = null;
     let alive = true;
-    loadAnimation().then((data) => {
-      if (alive && data) setAnimation(data);
+
+    import("@/lib/ai-robot-scene").then(({ getSharedAvatarRenderer }) => {
+      if (!alive || !canvas) return;
+      const renderer = getSharedAvatarRenderer();
+      unsubscribe = renderer.subscribe(
+        canvas,
+        () => {
+          if (alive) setWebglReady(true);
+        },
+        () => {
+          if (alive) {
+            queueMicrotask(() => {
+              if (alive) setWebglFailed(true);
+            });
+          }
+        },
+      );
+    }).catch(() => {
+      if (alive) setWebglFailed(true);
+    });
+
+    return () => {
+      alive = false;
+      unsubscribe?.();
+    };
+  }, []);
+
+  // Lottie fallback: only load if WebGL fails
+  React.useEffect(() => {
+    if (!webglFailed) return;
+    let alive = true;
+    loadLottieAnimation().then((data) => {
+      if (alive && data) setLottieData(data);
     });
     return () => {
       alive = false;
     };
-  }, []);
+  }, [webglFailed]);
+
+  // Internal canvas resolution (sharp on retina, shared renderer is 128×128)
+  const canvasPx = 128;
 
   return (
     <span
@@ -108,19 +147,30 @@ export function AiAvatar({
       style={{ width: size, height: size }}
       aria-hidden
     >
-      {animation ? (
+      {/* Layer 1: 3D robot canvas (always mounted for subscription) */}
+      <canvas
+        ref={canvasRef}
+        width={canvasPx}
+        height={canvasPx}
+        className={cn(
+          "absolute inset-0 block size-full transition-opacity duration-300",
+          webglReady && !webglFailed ? "opacity-100" : "opacity-0",
+        )}
+        aria-hidden
+      />
+
+      {/* Layer 2: Lottie fallback when WebGL fails */}
+      {webglFailed && lottieData ? (
         <Lottie
-          animationData={animation}
+          animationData={lottieData}
           loop={active && !still}
           autoplay={!still}
-          // The mark is drawn on its own background; letting it bleed to the
-          // edges of the tile reads as part of the bubble rather than a sticker
-          // sitting on it.
           style={{ width: "118%", height: "118%" }}
         />
-      ) : (
+      ) : webglFailed && !lottieData ? (
+        /* Layer 3: Static icon fallback */
         <Bot className="text-white" style={{ width: size * 0.5, height: size * 0.5 }} />
-      )}
+      ) : null}
     </span>
   );
 }

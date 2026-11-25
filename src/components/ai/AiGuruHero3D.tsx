@@ -553,10 +553,11 @@ export function AiGuruHero3D({
       const bezel = new THREE.Mesh(
         bezelGeo,
         new THREE.MeshPhysicalMaterial({
-          color: new THREE.Color("#141113"),
-          roughness: 0.3,
-          metalness: 0.3,
+          color: new THREE.Color("#0c0a0b"),
+          roughness: 0.28,
+          metalness: 0.28,
           clearcoat: 0.85,
+          envMapIntensity: 0.55,
           polygonOffset: true,
           polygonOffsetFactor: -6,
           polygonOffsetUnits: -6,
@@ -569,12 +570,12 @@ export function AiGuruHero3D({
       const glass = new THREE.Mesh(
         glassGeo,
         new THREE.MeshPhysicalMaterial({
-          color: new THREE.Color("#060506"),
-          roughness: 0.12,
+          color: new THREE.Color("#020203"),
+          roughness: 0.09,
           metalness: 0.05,
           clearcoat: 1.0,
           clearcoatRoughness: 0.08,
-          envMapIntensity: 0.95,
+          envMapIntensity: 0.55,
           polygonOffset: true,
           polygonOffsetFactor: -8,
           polygonOffsetUnits: -8,
@@ -636,30 +637,32 @@ export function AiGuruHero3D({
           }),
         );
         iris.position.z = 0.001;
-        iris.renderOrder = 10;
+        iris.renderOrder = 11;
         eyeGroup.add(iris);
 
+        // Strictly ascending renderOrder (12 for pupil, 13 for glint) guarantees
+        // BOTH eyes always draw pupils on top of iris regardless of camera distance sorting!
         const pupilWrap = new THREE.Group();
         const pupil = new THREE.Mesh(
-          new THREE.CircleGeometry(0.083, 32),
+          new THREE.CircleGeometry(0.085, 32),
           new THREE.MeshBasicMaterial({
             color: new THREE.Color("#0d0907"),
             ...baseEyeMat,
           }),
         );
         pupil.position.z = 0.003;
-        pupil.renderOrder = 10;
+        pupil.renderOrder = 12;
         pupilWrap.add(pupil);
 
         const glint = new THREE.Mesh(
-          new THREE.CircleGeometry(0.022, 20),
+          new THREE.CircleGeometry(0.023, 20),
           new THREE.MeshBasicMaterial({
             color: new THREE.Color("#fffcf7"),
             ...baseEyeMat,
           }),
         );
         glint.position.set(0.032, 0.034, 0.005);
-        glint.renderOrder = 10;
+        glint.renderOrder = 13;
         pupilWrap.add(glint);
 
         eyeGroup.add(pupilWrap);
