@@ -239,7 +239,7 @@ export default function FestivalsPage() {
   }, [upcomingData, todayIso]);
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] text-slate-900 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#fff8f3] text-slate-900 flex flex-col font-sans">
       <SiteHeader />
 
       <main className="relative flex-1 w-full pb-28 overflow-hidden">
@@ -577,10 +577,10 @@ export default function FestivalsPage() {
 
                       {/* Expandable Details Section */}
                       {isExpanded && (
-                        <div className="border-t border-amber-900/10 bg-gradient-to-b from-[#FFFDF9] to-[#FAF6EE]/50 p-5 sm:p-7 space-y-5 animate-in slide-in-from-top-2 duration-200">
+                        <div className="border-t border-amber-900/10 bg-gradient-to-b from-[#fff8f3] to-[#FAF6EE]/50 p-5 sm:p-7 space-y-5 animate-in slide-in-from-top-2 duration-200">
                           {/* Sacred Shloka in Golden Parchment Card */}
                           {f.shloka && (
-                            <div className="relative rounded-2xl border border-amber-300/80 bg-gradient-to-r from-[#FFFBEB] via-[#FEF3C7]/60 to-[#FFFBEB] p-4 text-center shadow-2xs">
+                            <div className="relative rounded-2xl border border-amber-300/80 bg-gradient-to-r from-[#fdf3ec] via-[#fbdeca]/60 to-[#fdf3ec] p-4 text-center shadow-2xs">
                               <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-800 block mb-1">
                                 ॐ {isBn ? "পবিত্র বৈদিক শ্লোক ও স্তোত্র" : "Sacred Vedic Shloka"} ॐ
                               </span>

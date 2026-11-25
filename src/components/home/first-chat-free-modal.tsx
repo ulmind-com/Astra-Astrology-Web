@@ -201,7 +201,7 @@ export function FirstChatFreeModal({
       />
 
       {/* 2. Main Modal Card */}
-      <div className="relative my-auto w-full max-w-[840px] overflow-hidden rounded-[26px] sm:rounded-[32px] border border-amber-300/80 dark:border-amber-500/35 bg-gradient-to-br from-[#fffdf7] via-[#fffcee] to-[#fff5d8] dark:from-[#17110c] dark:via-[#1c1611] dark:to-[#120d09] shadow-[0_25px_70px_-15px_rgba(26,18,8,0.35),0_0_50px_rgba(245,158,11,0.22)] p-4 pt-11 sm:p-7 sm:pt-7 md:p-8 z-10 animate-in zoom-in-95 duration-200 text-stone-900 dark:text-amber-50">
+      <div className="relative my-auto w-full max-w-[840px] overflow-hidden rounded-[26px] sm:rounded-[32px] border border-amber-300/80 dark:border-amber-500/35 bg-gradient-to-br from-[#fefaf8] via-[#fef5ef] to-[#fce8db] dark:from-[#17110c] dark:via-[#1c1611] dark:to-[#120d09] shadow-[0_25px_70px_-15px_rgba(26,18,8,0.35),0_0_50px_rgba(245,158,11,0.22)] p-4 pt-11 sm:p-7 sm:pt-7 md:p-8 z-10 animate-in zoom-in-95 duration-200 text-stone-900 dark:text-amber-50">
         {/* Glow orb accents */}
         <div className="pointer-events-none absolute -top-24 -left-24 size-72 rounded-full bg-radial from-amber-300/40 dark:from-amber-500/20 via-transparent to-transparent blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -right-24 size-72 rounded-full bg-radial from-yellow-400/35 dark:from-amber-600/15 via-transparent to-transparent blur-3xl" />
@@ -340,7 +340,7 @@ export function FirstChatFreeModal({
             </div>
 
             {/* Interactive Preview Container */}
-            <div className="relative w-full rounded-2xl border border-amber-300/80 dark:border-amber-500/35 bg-[#fffef9]/90 dark:bg-[#15100c]/90 p-2.5 sm:p-4 shadow-[inset_0_2px_8px_rgba(245,158,11,0.06)] flex flex-col items-center justify-center">
+            <div className="relative w-full rounded-2xl border border-amber-300/80 dark:border-amber-500/35 bg-[#fffbf9]/90 dark:bg-[#15100c]/90 p-2.5 sm:p-4 shadow-[inset_0_2px_8px_rgba(245,158,11,0.06)] flex flex-col items-center justify-center">
               {activeTab === "lagna" && (
                 <div className="w-full flex flex-col items-center animate-in fade-in duration-200">
                   {/* Chart Title Header */}

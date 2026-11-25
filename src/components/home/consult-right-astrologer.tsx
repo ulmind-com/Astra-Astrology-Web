@@ -59,14 +59,14 @@ export function ConsultRightAstrologer() {
   }, [pricing, language]);
 
   return (
-    <section className="relative bg-transparent py-10 sm:py-14 border-b border-[#f2e9b0]/60">
+    <section className="relative bg-transparent py-10 sm:py-14 border-b border-[#fbdcc8]/60">
       <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <span className="text-xs font-bold uppercase tracking-[0.18em] text-[#c2410c]">
             {language === "bn" ? "আমাদের সেবা" : language === "hi" ? "हमारी सेवाएँ" : "Our Services"}
           </span>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#1a1208] sm:text-4xl lg:text-5xl">
+          <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#1d1a1c] sm:text-4xl lg:text-5xl">
             {language === "bn" ? (
               <>
                 আমাদের{" "}
@@ -98,7 +98,7 @@ export function ConsultRightAstrologer() {
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div
                 key={i}
-                className="h-[150px] w-[230px] shrink-0 animate-pulse rounded-2xl border border-[#eadf9a]/70 bg-white p-5"
+                className="h-[150px] w-[230px] shrink-0 animate-pulse rounded-2xl border border-[#f7c9a8]/70 bg-white p-5"
               >
                 <div className="size-11 rounded-xl bg-stone-200" />
                 <div className="mt-4 h-4 w-2/3 rounded bg-stone-200" />
@@ -107,8 +107,8 @@ export function ConsultRightAstrologer() {
             ))}
           </div>
         ) : services.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-[#eadf9a] bg-white/60 p-8 text-center">
-            <p className="text-sm font-semibold text-[#1a1208]">
+          <div className="rounded-2xl border border-dashed border-[#f7c9a8] bg-white/60 p-8 text-center">
+            <p className="text-sm font-semibold text-[#1d1a1c]">
               {language === "bn"
                 ? "কোনো সেবা সক্রিয় নেই।"
                 : language === "hi"
@@ -124,15 +124,15 @@ export function ConsultRightAstrologer() {
                 <Link
                   key={s.featureId}
                   href={s.href}
-                  className="group relative flex w-[230px] shrink-0 flex-col rounded-2xl border border-[#eadf9a] bg-white p-5 shadow-[0_4px_16px_-6px_rgba(26,18,8,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-brand-400 hover:shadow-[0_16px_32px_-12px_rgba(240,210,80,0.55)]"
+                  className="group relative flex w-[230px] shrink-0 flex-col rounded-2xl border border-[#f7c9a8] bg-white p-5 shadow-[0_4px_16px_-6px_rgba(26,18,8,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-brand-400 hover:shadow-[0_16px_32px_-12px_rgba(241,171,79,0.55)]"
                 >
                   <span className={`flex size-11 items-center justify-center rounded-xl ${s.bg} ${s.fg}`}>
                     <Icon className="size-5" />
                   </span>
 
-                  <h3 className="mt-4 text-base font-bold text-[#1a1208]">{s.name}</h3>
+                  <h3 className="mt-4 text-base font-bold text-[#1d1a1c]">{s.name}</h3>
                   {s.description && (
-                    <p className="mt-1 line-clamp-2 pr-8 text-xs leading-relaxed text-[#6b5f4d]">
+                    <p className="mt-1 line-clamp-2 pr-8 text-xs leading-relaxed text-[#5c5156]">
                       {s.description}
                     </p>
                   )}

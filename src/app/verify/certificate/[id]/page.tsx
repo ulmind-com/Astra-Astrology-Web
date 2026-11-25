@@ -576,7 +576,7 @@ export default function CourseCertificateVerificationPage() {
             {/* Official QR Code Box */}
             {qrCodeDataUrl && (
               <div className="absolute bottom-[4.6%] right-[3.2%] flex flex-col items-center text-center z-20">
-                <div className="p-0.5 bg-white rounded border border-[#C59B27]/40 shadow-xs">
+                <div className="p-0.5 bg-white rounded border border-[#da8312]/40 shadow-xs">
                   <img
                     src={qrCodeDataUrl}
                     alt="Verification QR Code"

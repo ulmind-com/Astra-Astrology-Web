@@ -39,9 +39,9 @@ export function ParallaxRibbon() {
   const offset = (scrollY * 0.22) % 1200;
 
   return (
-    <div className="relative w-full overflow-hidden py-4 bg-[#fffdf2] border-y border-[#f2e9b0]/80 select-none">
+    <div className="relative w-full overflow-hidden py-4 bg-[#fef7f3] border-y border-[#fbdcc8]/80 select-none">
       {/* Background Soft Glow */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#fdf3c4]/40 via-transparent to-[#fdf3c4]/40 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#fadbc7]/40 via-transparent to-[#fadbc7]/40 pointer-events-none" />
 
       {/* Moving Text Track with combined CSS marquee + Parallax scroll offset */}
       <div
@@ -56,7 +56,7 @@ export function ParallaxRibbon() {
           <div key={copyIndex} className="flex items-center gap-8 shrink-0 pr-8">
             {CELESTIAL_WORDS.map((word, i) => (
               <React.Fragment key={`${copyIndex}-${i}`}>
-                <span className="font-cinzel text-xs sm:text-sm font-bold tracking-[0.2em] text-[#6b5f4d] hover:text-[#bd6c0c] transition-colors">
+                <span className="font-cinzel text-xs sm:text-sm font-bold tracking-[0.2em] text-[#5c5156] hover:text-[#bd6c0c] transition-colors">
                   {word}
                 </span>
                 <span className="text-[#bd6c0c] text-xs font-serif opacity-70">

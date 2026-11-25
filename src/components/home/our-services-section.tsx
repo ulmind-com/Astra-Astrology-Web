@@ -56,7 +56,7 @@ const SERVICES: ServiceItem[] = [
   {
     icon: Sun,
     href: "/daily-horoscope",
-    tile: "from-[#ffd34d] to-[#f5a300]",
+    tile: "from-[#ffb24d] to-[#f5a300]",
     glow: "rgba(245,163,0,0.34)",
     title: { en: "Daily Horoscope", bn: "দৈনিক রাশিফল", hi: "दैनिक राशिफल" },
     subtitle: {
@@ -152,13 +152,13 @@ export function OurServicesSection() {
             <span className="text-xs font-bold uppercase tracking-[0.18em] text-[#c08a12]">
               {copy.kicker}
             </span>
-            <h2 className="mt-1.5 text-3xl sm:text-5xl font-black tracking-tight text-[#1a1208] leading-none">
+            <h2 className="mt-1.5 text-3xl sm:text-5xl font-black tracking-tight text-[#1d1a1c] leading-none">
               {copy.heading1}
               <span className="bg-gradient-to-r from-[#f5a300] to-[#e07b00] bg-clip-text text-transparent">
                 {copy.heading2}
               </span>
             </h2>
-            <p className="mt-2.5 text-xs sm:text-sm text-[#6b5f4d] max-w-md">{copy.sub}</p>
+            <p className="mt-2.5 text-xs sm:text-sm text-[#5c5156] max-w-md">{copy.sub}</p>
           </div>
 
           {/* Scroll controls */}
@@ -167,7 +167,7 @@ export function OurServicesSection() {
               type="button"
               onClick={() => scrollBy(-1)}
               aria-label="Scroll left"
-              className="flex size-10 items-center justify-center rounded-full border border-stone-200 bg-white text-[#8b6a1a] hover:bg-[#fcd404] hover:text-[#1c1304] hover:border-[#d9af00] transition-all cursor-pointer shadow-xs"
+              className="flex size-10 items-center justify-center rounded-full border border-stone-200 bg-white text-[#8b6a1a] hover:bg-[#f39419] hover:text-[#1d1a1c] hover:border-[#d97b0b] transition-all cursor-pointer shadow-xs"
             >
               <ChevronLeft className="size-5" />
             </button>
@@ -175,7 +175,7 @@ export function OurServicesSection() {
               type="button"
               onClick={() => scrollBy(1)}
               aria-label="Scroll right"
-              className="flex size-10 items-center justify-center rounded-full border border-stone-200 bg-white text-[#8b6a1a] hover:bg-[#fcd404] hover:text-[#1c1304] hover:border-[#d9af00] transition-all cursor-pointer shadow-xs"
+              className="flex size-10 items-center justify-center rounded-full border border-stone-200 bg-white text-[#8b6a1a] hover:bg-[#f39419] hover:text-[#1d1a1c] hover:border-[#d97b0b] transition-all cursor-pointer shadow-xs"
             >
               <ChevronRight className="size-5" />
             </button>
@@ -210,17 +210,17 @@ export function OurServicesSection() {
                 </div>
 
                 {/* Text */}
-                <h3 className="relative mt-3 sm:mt-5 text-[13px] sm:text-[15px] font-extrabold tracking-tight text-[#1a1208]">
+                <h3 className="relative mt-3 sm:mt-5 text-[13px] sm:text-[15px] font-extrabold tracking-tight text-[#1d1a1c]">
                   {svc.title[lang]}
                 </h3>
-                <p className="relative mt-1 text-[10.5px] sm:text-[11.5px] leading-snug text-[#766545] min-h-[28px] sm:min-h-[32px]">
+                <p className="relative mt-1 text-[10.5px] sm:text-[11.5px] leading-snug text-[#5c5156] min-h-[28px] sm:min-h-[32px]">
                   {svc.subtitle[lang]}
                 </p>
 
                 {/* Arrow */}
                 <div className="relative mt-2.5 sm:mt-4 flex items-center justify-between">
-                  <span className="h-px flex-1 bg-gradient-to-r from-[#efe3b0] to-transparent" />
-                  <span className="ml-3 flex size-7 sm:size-8 items-center justify-center rounded-full bg-[#fef6d8] text-[#9a7414] transition-all duration-300 group-hover:bg-[#fcd404] group-hover:text-[#1c1304]">
+                  <span className="h-px flex-1 bg-gradient-to-r from-[#f8d5a7] to-transparent" />
+                  <span className="ml-3 flex size-7 sm:size-8 items-center justify-center rounded-full bg-[#fce8da] text-[#9a7414] transition-all duration-300 group-hover:bg-[#f39419] group-hover:text-[#1d1a1c]">
                     <ArrowUpRight className="size-3.5 sm:size-4 stroke-[2.4]" />
                   </span>
                 </div>

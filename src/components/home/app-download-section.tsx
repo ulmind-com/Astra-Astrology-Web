@@ -261,7 +261,7 @@ export function AppDownloadSection() {
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#c2410c]">
               {t.eyebrow}
             </span>
-            <h2 className="mt-3 text-4xl font-bold leading-[1.08] tracking-tight text-[#1a1208] sm:text-5xl">
+            <h2 className="mt-3 text-4xl font-bold leading-[1.08] tracking-tight text-[#1d1a1c] sm:text-5xl">
               {t.headingLine1}
               <br />
               {t.headingLine2}
@@ -305,17 +305,17 @@ export function AppDownloadSection() {
               {/* screen */}
               <div className="flex h-[560px] flex-col overflow-hidden rounded-[2.1rem] bg-[#f4f3f2] sm:h-[600px]">
                 {/* status bar */}
-                <div className="flex items-center justify-between px-5 pt-3 text-[11px] font-semibold text-[#1a1208]">
+                <div className="flex items-center justify-between px-5 pt-3 text-[11px] font-semibold text-[#1d1a1c]">
                   <span>9:41</span>
                   <span className="flex items-center gap-1">
-                    <span className="inline-block h-2.5 w-3.5 rounded-sm bg-[#1a1208]/80" />
-                    <span className="inline-block h-2.5 w-2 rounded-sm bg-[#1a1208]/60" />
+                    <span className="inline-block h-2.5 w-3.5 rounded-sm bg-[#1d1a1c]/80" />
+                    <span className="inline-block h-2.5 w-2 rounded-sm bg-[#1d1a1c]/60" />
                   </span>
                 </div>
 
                 {/* chat header */}
                 <div className="flex items-center gap-2.5 border-b border-black/5 bg-white px-4 py-2.5">
-                  <ChevronLeft className="size-5 text-[#6b5f4d]" />
+                  <ChevronLeft className="size-5 text-[#5c5156]" />
                   <Image
                     src="/images/astrologers/avatar-chat.png"
                     alt={t.name}
@@ -325,7 +325,7 @@ export function AppDownloadSection() {
                     priority
                   />
                   <div className="flex-1 leading-tight">
-                    <div className="flex items-center gap-1 text-sm font-bold text-[#1a1208]">
+                    <div className="flex items-center gap-1 text-sm font-bold text-[#1d1a1c]">
                       {t.name}
                       <Check className="size-3.5 rounded-full bg-[#1d9bf0] p-0.5 text-white" />
                     </div>
@@ -333,7 +333,7 @@ export function AppDownloadSection() {
                       <span className="text-[#15803d]">{t.online}</span> · {t.rate}
                     </div>
                   </div>
-                  <span className="flex size-8 items-center justify-center rounded-full bg-[#fcd404] text-[#1c1304]">
+                  <span className="flex size-8 items-center justify-center rounded-full bg-[#f39419] text-[#1d1a1c]">
                     <Phone className="size-4" />
                   </span>
                 </div>
@@ -355,7 +355,7 @@ export function AppDownloadSection() {
                         <div
                           className={`max-w-[78%] rounded-2xl px-3 py-2 text-[12.5px] leading-snug shadow-xs ${
                             isUser
-                              ? "rounded-br-sm bg-[#fdf3a6] text-[#3b3425]"
+                              ? "rounded-br-sm bg-[#fdd7a6] text-[#3b3425]"
                               : "rounded-bl-sm bg-white text-[#3b3425]"
                           }`}
                         >
@@ -381,7 +381,7 @@ export function AppDownloadSection() {
                   <div className="flex-1 rounded-full bg-[#f0efed] px-3.5 py-2 text-[12px] text-[#9a8f78]">
                     {t.placeholder}
                   </div>
-                  <span className="flex size-9 items-center justify-center rounded-full bg-[#fcd404] text-[#1c1304]">
+                  <span className="flex size-9 items-center justify-center rounded-full bg-[#f39419] text-[#1d1a1c]">
                     <Send className="size-4" />
                   </span>
                 </div>

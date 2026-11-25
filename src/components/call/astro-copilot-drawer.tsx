@@ -460,7 +460,7 @@ export function AstroCoPilotDrawer({
         "fixed right-0 top-0 bottom-0 z-40 w-full sm:w-[420px] md:w-[450px] flex flex-col shadow-2xl transition-all duration-300 border-l backdrop-blur-2xl animate-in slide-in-from-right",
         isDark
           ? "border-amber-500/30 bg-slate-950/95 text-slate-100"
-          : "border-[#ebdca5] bg-[#fffdf9]/95 text-slate-900",
+          : "border-[#f7ce99] bg-[#fff8f3]/95 text-slate-900",
       )}
     >
       {/* Drawer Header */}

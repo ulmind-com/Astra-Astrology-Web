@@ -351,14 +351,14 @@ export function AstrologyPredictionZodiac() {
         {/* Section Header: Choose your Zodiac Sign (Exact InstaAstro Screenshot Design) */}
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between pb-2">
           <div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-[#1a1208]">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-[#1d1a1c]">
               {language === "bn"
                 ? "আপনার রাশি বেছে নিন"
                 : language === "hi"
                 ? "अपनी राशि चुनें"
                 : "Choose your Zodiac Sign"}
             </h2>
-            <p className="mt-2 text-xs sm:text-sm text-[#6b5f4d] font-medium max-w-xl">
+            <p className="mt-2 text-xs sm:text-sm text-[#5c5156] font-medium max-w-xl">
               {language === "bn"
                 ? "আজকের গ্রহের প্রভাব, শুভ রং এবং বিশদ রাশিফল দেখতে যেকোনো রাশিতে ক্লিক করুন।"
                 : "Select your rashi below to discover today's planetary transit, cosmic scores, and guidance."}
@@ -453,7 +453,7 @@ export function AstrologyPredictionZodiac() {
               </div>
               <div>
                 <div className="flex items-baseline gap-2">
-                  <h3 className="text-xl sm:text-2xl font-bold text-[#1a1208]">
+                  <h3 className="text-xl sm:text-2xl font-bold text-[#1d1a1c]">
                     {language === "bn"
                       ? `${activeMeta.bengaliName} (${activeMeta.name})`
                       : language === "hi"
@@ -510,12 +510,12 @@ export function AstrologyPredictionZodiac() {
                       : "Cosmic energies favor productive focus and positive interactions today. Balance ambition with gentle mindfulness.")}
               </p>
 
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[#6b5f4d] pt-2">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[#5c5156] pt-2">
                 <span className="inline-flex items-center gap-1.5">
                   <span className="font-semibold text-stone-500">
                     {language === "bn" ? "মনোভাব:" : language === "hi" ? "मनोदशा:" : "Mood:"}
                   </span>
-                  <span className="font-bold text-[#1a1208]">
+                  <span className="font-bold text-[#1d1a1c]">
                     {mood.emoji} {mood.label}
                   </span>
                 </span>
@@ -523,7 +523,7 @@ export function AstrologyPredictionZodiac() {
                   <span className="font-semibold text-stone-500">
                     {language === "bn" ? "শুভ সংখ্যা:" : language === "hi" ? "शुभ अंक:" : "Lucky #:"}
                   </span>
-                  <span className="font-bold text-[#1a1208]">{activeSign?.lucky_number ?? "7"}</span>
+                  <span className="font-bold text-[#1d1a1c]">{activeSign?.lucky_number ?? "7"}</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="font-semibold text-stone-500">

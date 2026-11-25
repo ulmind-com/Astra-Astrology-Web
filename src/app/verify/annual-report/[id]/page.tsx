@@ -95,7 +95,7 @@ export default function AnnualReportVerificationPage() {
 
   if (isError || !isValid) {
     return (
-      <div className="min-h-screen bg-[#faf6f0] text-[#332c39]">
+      <div className="min-h-screen bg-[#fbeee5] text-[#1d1a1c]">
         <SiteHeader />
         <main className="max-w-xl mx-auto px-4 py-16 text-center space-y-6">
           <div className="size-16 mx-auto rounded-full bg-rose-100 text-rose-600 flex items-center justify-center border border-rose-300 shadow-sm">
@@ -138,7 +138,7 @@ export default function AnnualReportVerificationPage() {
   const score = verifiedData?.overall_score ?? 80;
 
   return (
-    <div className="min-h-screen bg-[#faf6f0] text-[#332c39]">
+    <div className="min-h-screen bg-[#fbeee5] text-[#1d1a1c]">
       <div className="print:hidden">
         <SiteHeader />
       </div>
@@ -181,7 +181,7 @@ export default function AnnualReportVerificationPage() {
         </div>
 
         {/* Certificate Card */}
-        <div className="relative rounded-3xl border-4 border-double border-amber-600/70 bg-gradient-to-b from-[#faf4eb] via-[#fffdf9] to-[#faf4eb] p-6 sm:p-10 text-[#332c39] shadow-2xl print:border-amber-700 print:shadow-none">
+        <div className="relative rounded-3xl border-4 border-double border-amber-600/70 bg-gradient-to-b from-[#faf4eb] via-[#fff8f3] to-[#faf4eb] p-6 sm:p-10 text-[#1d1a1c] shadow-2xl print:border-amber-700 print:shadow-none">
           {/* Header */}
           <div className="text-center space-y-2 border-b-2 border-amber-500/40 pb-6 relative">
             <div className="mx-auto size-16 rounded-full border-2 border-amber-600 bg-gradient-to-tr from-amber-500 via-amber-300 to-amber-500 flex items-center justify-center shadow-md">

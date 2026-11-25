@@ -254,8 +254,8 @@ export function ToolRail() {
                 className="group relative flex flex-col items-center shrink-0 w-[72px] sm:w-[76px] transition-transform duration-200 hover:-translate-y-1 focus:outline-hidden"
               >
                 {/* Glow & Circular Dot */}
-                <div className="relative size-16 sm:size-[68px] rounded-full bg-gradient-to-tr from-[#f59e0b] via-[#fbbf24] to-[#fef08a] p-[2px] shadow-[0_4px_16px_rgba(245,158,11,0.35)] transition-all duration-300 group-hover:shadow-[0_8px_24px_rgba(245,158,11,0.55)] group-hover:scale-105">
-                  <div className="size-full rounded-full bg-gradient-to-b from-[#fffbeb] via-[#fef3c7] to-[#fde68a] flex items-center justify-center text-amber-950 border border-amber-300/80">
+                <div className="relative size-16 sm:size-[68px] rounded-full bg-gradient-to-tr from-[#f59e0b] via-[#fbbf24] to-[#fecc8a] p-[2px] shadow-[0_4px_16px_rgba(245,158,11,0.35)] transition-all duration-300 group-hover:shadow-[0_8px_24px_rgba(245,158,11,0.55)] group-hover:scale-105">
+                  <div className="size-full rounded-full bg-gradient-to-b from-[#fdf3ec] via-[#fbdeca] to-[#fdcb8a] flex items-center justify-center text-amber-950 border border-amber-300/80">
                     <Icon className="size-7 sm:size-[30px] stroke-[2.2] text-amber-950 transition-transform duration-200 group-hover:scale-110" />
                   </div>
 

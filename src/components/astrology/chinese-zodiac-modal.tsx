@@ -201,27 +201,27 @@ export function ChineseZodiacModal({ isOpen, onClose }: ChineseZodiacModalProps)
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-xs fade-in">
       <div
-        className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl border border-[#eadf9a] bg-[#fffdf5] p-6 sm:p-8 shadow-2xl text-[#1a1208]"
+        className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl border border-[#f7c9a8] bg-[#fff8f3] p-6 sm:p-8 shadow-2xl text-[#1d1a1c]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-[#f2e9b0] pb-5">
+        <div className="flex items-start justify-between border-b border-[#fbdcc8] pb-5">
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[#bd6c0c]">
               <Sparkles className="size-3.5" />
               <span>Eastern Astrology</span>
             </div>
-            <h2 className="mt-1 font-serif text-2xl sm:text-3xl font-bold tracking-tight text-[#1a1208]">
+            <h2 className="mt-1 font-serif text-2xl sm:text-3xl font-bold tracking-tight text-[#1d1a1c]">
               12 Chinese Zodiac Signs <span className="font-normal text-[#bd6c0c]">(生肖)</span>
             </h2>
-            <p className="mt-1 text-xs sm:text-sm text-[#6b5f4d]">
+            <p className="mt-1 text-xs sm:text-sm text-[#5c5156]">
               Discover your Lunar animal sign, innate elemental power, and personality traits.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 text-[#6b5f4d] hover:bg-[#fef7cf] hover:text-[#1a1208] transition-colors"
+            className="rounded-full p-2 text-[#5c5156] hover:bg-[#fdeee3] hover:text-[#1d1a1c] transition-colors"
             aria-label="Close modal"
           >
             <X className="size-5" />
@@ -229,8 +229,8 @@ export function ChineseZodiacModal({ isOpen, onClose }: ChineseZodiacModalProps)
         </div>
 
         {/* Year Finder Input */}
-        <div className="mt-5 rounded-2xl bg-[#fffbe8] border border-[#eadf9a] p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <label className="text-xs sm:text-sm font-semibold text-[#1a1208]">
+        <div className="mt-5 rounded-2xl bg-[#fff6ef] border border-[#f7c9a8] p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <label className="text-xs sm:text-sm font-semibold text-[#1d1a1c]">
             Find your animal by birth year:
           </label>
           <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -241,7 +241,7 @@ export function ChineseZodiacModal({ isOpen, onClose }: ChineseZodiacModalProps)
               placeholder="e.g. 1998, 2004"
               value={searchYear}
               onChange={(e) => setSearchYear(e.target.value)}
-              className="w-full sm:w-40 px-3.5 py-1.5 rounded-xl border border-[#e3d58f] bg-white text-sm font-semibold text-[#1a1208] text-center focus:outline-none focus:ring-2 focus:ring-[#bd6c0c]"
+              className="w-full sm:w-40 px-3.5 py-1.5 rounded-xl border border-[#f3c9ac] bg-white text-sm font-semibold text-[#1d1a1c] text-center focus:outline-none focus:ring-2 focus:ring-[#bd6c0c]"
             />
             {searchYear.length === 4 && (
               <span className="shrink-0 text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-200">
@@ -252,42 +252,42 @@ export function ChineseZodiacModal({ isOpen, onClose }: ChineseZodiacModalProps)
         </div>
 
         {/* Selected Sign Spotlight */}
-        <div className="mt-5 rounded-2xl border border-[#e3d58f] bg-gradient-to-r from-[#fffdf2] to-[#fffbe8] p-5">
+        <div className="mt-5 rounded-2xl border border-[#f3c9ac] bg-gradient-to-r from-[#fef7f3] to-[#fff6ef] p-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-[#f8c76b] bg-[#fffdf5] text-2xl font-serif font-bold text-[#bd6c0c] shadow-xs">
+              <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-[#f8c76b] bg-[#fff8f3] text-2xl font-serif font-bold text-[#bd6c0c] shadow-xs">
                 {selectedSign.chinese}
               </span>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-xl font-bold font-serif text-[#1a1208]">
+                  <h3 className="text-xl font-bold font-serif text-[#1d1a1c]">
                     The {selectedSign.name} ({selectedSign.pinyin})
                   </h3>
-                  <span className="rounded-full bg-[#fef7cf] border border-[#f2e9b0] px-2.5 py-0.5 text-[11px] font-semibold text-[#bd6c0c]">
+                  <span className="rounded-full bg-[#fdeee3] border border-[#fbdcc8] px-2.5 py-0.5 text-[11px] font-semibold text-[#bd6c0c]">
                     Element: {selectedSign.element}
                   </span>
                 </div>
-                <p className="text-xs text-[#6b5f4d] mt-0.5">
+                <p className="text-xs text-[#5c5156] mt-0.5">
                   Years: {selectedSign.recentYears.slice(-5).join(", ")}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs border-t border-[#f2e9b0] pt-3.5">
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs border-t border-[#fbdcc8] pt-3.5">
             <div>
               <span className="font-semibold text-[#964f0f]">Core Traits:</span>
-              <p className="text-[#6b5f4d] mt-0.5">{selectedSign.traits.join(" · ")}</p>
+              <p className="text-[#5c5156] mt-0.5">{selectedSign.traits.join(" · ")}</p>
             </div>
             <div>
               <span className="font-semibold text-[#964f0f]">Lucky Numbers & Colors:</span>
-              <p className="text-[#6b5f4d] mt-0.5">
+              <p className="text-[#5c5156] mt-0.5">
                 #{selectedSign.luckyNumbers.join(", #")} | {selectedSign.luckyColors.join(", ")}
               </p>
             </div>
             <div>
               <span className="font-semibold text-[#964f0f]">Best Compatible:</span>
-              <p className="text-[#6b5f4d] mt-0.5">{selectedSign.compatibleWith.join(", ")}</p>
+              <p className="text-[#5c5156] mt-0.5">{selectedSign.compatibleWith.join(", ")}</p>
             </div>
           </div>
         </div>
@@ -307,16 +307,16 @@ export function ChineseZodiacModal({ isOpen, onClose }: ChineseZodiacModalProps)
                   onClick={() => setSelectedSign(s)}
                   className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-left transition-all ${
                     isSelected
-                      ? "border-[#bd6c0c] bg-[#fef7cf] ring-2 ring-[#bd6c0c]/30 shadow-xs"
-                      : "border-[#f2e9b0] bg-white/70 hover:bg-[#fffbe8]"
+                      ? "border-[#bd6c0c] bg-[#fdeee3] ring-2 ring-[#bd6c0c]/30 shadow-xs"
+                      : "border-[#fbdcc8] bg-white/70 hover:bg-[#fff6ef]"
                   }`}
                 >
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#fffdf5] border border-[#e3d58f] font-serif font-bold text-sm text-[#bd6c0c]">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#fff8f3] border border-[#f3c9ac] font-serif font-bold text-sm text-[#bd6c0c]">
                     {s.chinese}
                   </span>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-[#1a1208] truncate">{s.name}</p>
-                    <p className="text-[10px] text-[#6b5f4d] truncate">{s.recentYears[s.recentYears.length - 1]}</p>
+                    <p className="text-xs font-bold text-[#1d1a1c] truncate">{s.name}</p>
+                    <p className="text-[10px] text-[#5c5156] truncate">{s.recentYears[s.recentYears.length - 1]}</p>
                   </div>
                 </button>
               );
@@ -325,7 +325,7 @@ export function ChineseZodiacModal({ isOpen, onClose }: ChineseZodiacModalProps)
         </div>
 
         {/* Footer */}
-        <div className="mt-6 border-t border-[#f2e9b0] pt-4 flex items-center justify-end">
+        <div className="mt-6 border-t border-[#fbdcc8] pt-4 flex items-center justify-end">
           <button
             type="button"
             onClick={onClose}

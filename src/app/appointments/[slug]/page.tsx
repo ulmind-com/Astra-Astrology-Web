@@ -21,7 +21,7 @@ export default function BookAppointmentSlugPage() {
   return (
     <>
       <SiteHeader />
-      <main className="min-h-screen bg-[#FDFBF7] flex items-center justify-center py-24">
+      <main className="min-h-screen bg-[#fff8f3] flex items-center justify-center py-24">
         <div className="text-center">
           <LoadingBlock label="Opening Vedic booking chamber..." />
         </div>

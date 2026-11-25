@@ -84,7 +84,16 @@ function GoldCoinIcon({ className = "size-3.5" }: { className?: string }) {
   );
 }
 
-export function AstroyogiHeader() {
+export interface AstroyogiHeaderProps {
+  /** Home hero mode: fixed, transparent with white text until scrolled 30vh. */
+  overlay?: boolean;
+  /** Keep the bar solid and pinned (e.g. while a full-screen detail view is open). */
+  forceSolid?: boolean;
+  /** Runs before the logo navigates home; call preventDefault to stay put. */
+  onLogoClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+}
+
+export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoClick }: AstroyogiHeaderProps = {}) {
   const pathname = usePathname();
   const { user, isSignedIn, signOut } = useAuth();
   const { language, setLanguage } = useLanguage();
@@ -103,6 +112,16 @@ export function AstroyogiHeader() {
   // (document is unavailable during SSR).
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
+
+  // Over the home hero the bar turns solid after 30% of the viewport.
+  const [scrolledPast, setScrolledPast] = React.useState(false);
+  React.useEffect(() => {
+    if (!overlay) return;
+    const onScroll = () => setScrolledPast(window.scrollY > window.innerHeight * 0.3);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [overlay]);
 
   // Hide the header on scroll down, reveal it on scroll up.
   const [headerHidden, setHeaderHidden] = React.useState(false);
@@ -995,374 +1014,280 @@ export function AstroyogiHeader() {
       ? "मुफ़्त कुंडली"
       : "Free Kundli";
 
+  const nameOf = user?.full_name || user?.first_name || "User";
+  const signInLabel = language === "bn" ? "সাইন ইন" : language === "hi" ? "लॉग इन" : "Sign In";
+  const solid = !overlay || scrolledPast || forceSolid || anyMenuOpen;
+
+  const onMenuPill = () => {
+    if (window.matchMedia("(min-width: 1280px)").matches) {
+      if (isSignedIn) setProfileDropdownOpen((v) => !v);
+      else window.location.assign("/login");
+    } else {
+      setMobileMenuOpen((v) => !v);
+    }
+  };
+
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 w-full bg-white/95 dark:bg-[#140f0c]/95 backdrop-blur-md border-b border-stone-200/80 shadow-[0_2px_15px_-4px_rgba(26,18,8,0.06)]",
-        "transition-transform duration-300 ease-out will-change-transform",
-        headerHidden && !anyMenuOpen ? "-translate-y-full" : "translate-y-0",
+        "dl-site-nav",
+        overlay && !solid && "is-overlay",
+        overlay && "fixed! left-0 right-0",
+        headerHidden && !anyMenuOpen && !forceSolid && "is-hidden",
       )}
     >
-      {/* Astrotalk-Style Unified Single Row Navigation Bar */}
-      <div className="mx-auto max-w-[1600px] w-full px-2 sm:px-4 xl:px-3 2xl:px-6">
-        <div className="flex h-16 sm:h-[68px] items-center justify-between gap-1 xl:gap-1.5 2xl:gap-3 overflow-visible">
-          {/* ================= LEFT: Brand Logo + Name ================= */}
-          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 whitespace-nowrap">
-            {/* Mobile Hamburger Toggle */}
+      <div className="dl-site-nav-row">
+        {/* ================= LEFT: logo, divider ================= */}
+        <div className="flex items-center min-w-0 shrink-0">
+          <Link
+            href="/"
+            className="dl-site-logo"
+            aria-label="DivinLink home"
+            onClick={(e) => {
+              if (onLogoClick) onLogoClick(e);
+            }}
+          >
+            <span className="dl-site-logo-mark">
+              <Image src="/logo.png" alt="" width={34} height={34} className="size-full object-contain" priority />
+            </span>
+            <span className="dl-site-logo-word">DivinLink</span>
+          </Link>
+          <span className="dl-site-divider" aria-hidden />
+        </div>
+
+        {/* ================= CENTER: category links with mega menus ================= */}
+        <nav className="dl-site-links" aria-label="Main">
+          {navCategories.map((cat) => {
+            const isActive = cat.href === pathname || (cat.label === "Home" && pathname === "/");
+            const hasDropdown = Boolean(cat.dropdown && cat.dropdown.length > 0);
+            const isHovered = hoveredCategory === cat.label;
+
+            return (
+              <div
+                key={cat.label}
+                className="relative shrink-0"
+                onMouseEnter={() => setHoveredCategory(cat.label)}
+                onMouseLeave={() => setHoveredCategory(null)}
+              >
+                <Link
+                  href={cat.href}
+                  onClick={() => setHoveredCategory(null)}
+                  className={cn("dl-site-link", isActive && "is-active")}
+                  data-open={isHovered && hasDropdown ? "true" : undefined}
+                  aria-current={isActive ? "page" : undefined}
+                >
+                  {cat.isLive && (
+                    <span className="relative flex size-2 shrink-0 mr-0.5">
+                      <span className="absolute inline-flex size-full animate-ping rounded-full bg-rose-400 opacity-75" />
+                      <span className="relative inline-flex size-2 rounded-full bg-rose-500" />
+                    </span>
+                  )}
+                  <span>{cat.label}</span>
+                  {cat.badge && (
+                    <span className="rounded-full bg-[#f39419] text-white text-[9px] font-bold px-1.5 py-0.5 leading-none">
+                      {cat.badge}
+                    </span>
+                  )}
+                  {hasDropdown && <ChevronDown />}
+                </Link>
+
+                {hasDropdown && isHovered && (
+                  <div
+                    className={cn(
+                      "absolute left-1/2 -translate-x-1/2 top-full pt-3 z-50",
+                      cat.href === "/shop" ? "w-[460px] max-w-[calc(100vw-24px)]" : "w-80",
+                    )}
+                  >
+                    <div className="dl-pop-card p-2">
+                      {cat.dropdown?.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                          <Link
+                            key={item.label}
+                            href={item.href}
+                            onClick={() => setHoveredCategory(null)}
+                            className="dl-pop-item"
+                          >
+                            <span className="dl-pop-icon">
+                              {item.iconUrl ? (
+                                <Image src={item.iconUrl} alt={item.label} fill sizes="38px" className="object-cover" unoptimized />
+                              ) : (
+                                <Icon />
+                              )}
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="flex items-center justify-between gap-2.5 min-w-0">
+                                <span className="font-semibold text-[13.5px] leading-tight truncate">{item.label}</span>
+                                {item.badge && (
+                                  <span className="shrink-0 rounded-full bg-[#fbe4d6] text-[#1d1a1c] text-[10px] font-bold px-2 py-0.5 whitespace-nowrap ml-auto">
+                                    {item.badge}
+                                  </span>
+                                )}
+                              </span>
+                              <span className="mt-0.5 block text-[11.5px] text-[#8a7f83] leading-snug line-clamp-1">
+                                {item.description}
+                              </span>
+                            </span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </nav>
+
+        {/* ================= RIGHT: language, cart, account pill, CTA ================= */}
+        <div className="dl-site-right">
+          <div className="relative shrink-0">
             <button
               type="button"
-              onClick={() => setMobileMenuOpen((v) => !v)}
-              className="xl:hidden flex size-9 items-center justify-center rounded-xl border border-stone-200 text-stone-900 hover:bg-stone-50 transition-colors"
-              aria-label="Toggle Navigation Menu"
+              onClick={() => setLangDropdownOpen((v) => !v)}
+              className="dl-site-icon"
+              title="Change language / ভাষা পরিবর্তন"
+              aria-label="Change language"
+              aria-expanded={langDropdownOpen}
             >
-              {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+              <Globe strokeWidth={1.3} />
+              <span className="dl-site-lang-code">{language === "bn" ? "বাং" : language === "hi" ? "हि" : "EN"}</span>
             </button>
 
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <span className="relative flex size-9 sm:size-9.5 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-soft transition-transform duration-300 group-hover:scale-105">
-                <Image
-                  src="/logo.png"
-                  alt="DivinLink"
-                  width={38}
-                  height={38}
-                  className="size-full object-contain"
-                  priority
-                />
-              </span>
-              <span className="font-display hidden sm:inline whitespace-nowrap text-[17px] sm:text-[18px] font-bold tracking-wide text-foreground group-hover:text-amber-700 transition-colors">
-                DivinLink
-              </span>
-            </Link>
+            {langDropdownOpen && (
+              <>
+                <div className="fixed inset-0 z-30" onClick={() => setLangDropdownOpen(false)} />
+                <div className="dl-pop-card absolute right-0 top-full mt-3 z-40 w-44 p-1.5">
+                  {[
+                    { code: "bn", label: "বাংলা", badge: "বাং" },
+                    { code: "hi", label: "हिन्दी", badge: "हिन्दी" },
+                    { code: "en", label: "English", badge: "EN" },
+                  ].map((l) => (
+                    <button
+                      key={l.code}
+                      type="button"
+                      onClick={() => {
+                        setLanguage(l.code as AstrologyLanguage);
+                        setLangDropdownOpen(false);
+                      }}
+                      className={cn("dl-pop-item justify-between", language === l.code && "is-current")}
+                    >
+                      <span>{l.label}</span>
+                      <span className="text-[10px] text-[#8a7f83] font-bold">{l.badge}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
-          {/* ================= CENTER: Single-Row Luxury Navigation Links ================= */}
-          <nav className="hidden xl:flex items-center gap-0.5 xl:gap-0.5 2xl:gap-1 whitespace-nowrap shrink-0 overflow-visible">
-            {navCategories.map((cat) => {
-              const isActive = cat.href === pathname || (cat.label === "Home" && pathname === "/");
-              const hasDropdown = Boolean(cat.dropdown && cat.dropdown.length > 0);
-              const isHovered = hoveredCategory === cat.label;
-
-              return (
-                <div
-                  key={cat.label}
-                  className="relative group shrink-0 py-1"
-                  onMouseEnter={() => setHoveredCategory(cat.label)}
-                  onMouseLeave={() => setHoveredCategory(null)}
-                >
-                  <Link
-                    href={cat.href}
-                    onClick={() => setHoveredCategory(null)}
-                    className={`whitespace-nowrap shrink-0 inline-flex items-center gap-0.5 xl:gap-1 px-1.5 xl:px-2 2xl:px-2.5 py-1.5 rounded-full text-[12px] xl:text-[12.5px] 2xl:text-[13.5px] font-semibold tracking-normal transition-all duration-150 select-none ${
-                      isActive
-                        ? "text-amber-950 font-bold bg-amber-100/90 shadow-2xs"
-                        : "text-stone-700 hover:text-stone-950 hover:bg-stone-100/80"
-                    }`}
-                  >
-                    {cat.isLive && (
-                      <span className="relative flex size-2 shrink-0 mr-0.5">
-                        <span className="absolute inline-flex size-full animate-ping rounded-full bg-red-400 opacity-75" />
-                        <span className="relative inline-flex size-2 rounded-full bg-red-500" />
-                      </span>
-                    )}
-
-                    <span className="whitespace-nowrap leading-normal">{cat.label}</span>
-
-                    {cat.badge && (
-                      <span className="rounded-full bg-amber-500/15 text-amber-900 dark:text-amber-300 text-[9px] font-bold px-1.5 py-0.5 leading-none shrink-0 border border-amber-400/30">
-                        {cat.badge}
-                      </span>
-                    )}
-
-                    {hasDropdown && (
-                      <ChevronDown
-                        className={cn(
-                          "size-3 2xl:size-3.5 text-stone-400 transition-transform duration-200 shrink-0",
-                          isHovered && "rotate-180 text-amber-700"
-                        )}
-                      />
-                    )}
-                  </Link>
-
-                  {/* Dropdown Menu Popup */}
-                  {hasDropdown && isHovered && (
-                    <div
-                      className={cn(
-                        "absolute left-0 top-full pt-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150",
-                        cat.href === "/shop" ? "w-[440px] sm:w-[480px] max-w-[calc(100vw-24px)]" : "w-80"
-                      )}
-                    >
-                      <div className="overflow-hidden rounded-2xl border border-amber-200/90 bg-white p-2 shadow-[0_18px_45px_-10px_rgba(26,18,8,0.18)] ring-1 ring-black/5">
-                        <div className="space-y-1">
-                          {cat.dropdown?.map((item) => {
-                            const Icon = item.icon;
-                            return (
-                              <Link
-                                key={item.label}
-                                href={item.href}
-                                onClick={() => setHoveredCategory(null)}
-                                className="group/item flex items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-amber-50/80"
-                              >
-                                <div className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-100/90 text-amber-800 group-hover/item:bg-amber-200 transition-colors overflow-hidden border border-amber-200 shadow-2xs">
-                                  {item.iconUrl ? (
-                                    <Image
-                                      src={item.iconUrl}
-                                      alt={item.label}
-                                      fill
-                                      sizes="40px"
-                                      className="object-cover"
-                                      unoptimized
-                                    />
-                                  ) : (
-                                    <Icon className="size-5" />
-                                  )}
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <div className="flex items-center justify-between gap-2.5 min-w-0">
-                                    <span className="font-bold text-xs sm:text-[13px] text-stone-900 group-hover/item:text-amber-800 leading-tight truncate">
-                                      {item.label}
-                                    </span>
-                                    {item.badge && (
-                                      <span className="shrink-0 rounded-full bg-amber-100 text-amber-950 text-[10px] font-bold px-2 py-0.5 border border-amber-300/80 whitespace-nowrap shadow-2xs ml-auto">
-                                        {item.badge}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <p className="mt-0.5 text-[11px] text-stone-500 leading-snug line-clamp-1">
-                                    {item.description}
-                                  </p>
-                                </div>
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </nav>
-
-          {/* ================= RIGHT: Language, Profile & Astrotalk-Style CTA Button ================= */}
-          <div className="flex items-center gap-1.5 xl:gap-2 2xl:gap-2.5 shrink-0 whitespace-nowrap">
-            {/* Language Selector Dropdown */}
-            <div className="relative shrink-0">
-              <button
-                type="button"
-                onClick={() => setLangDropdownOpen((v) => !v)}
-                className="inline-flex items-center gap-1 rounded-full border border-stone-200 hover:border-amber-400 bg-white px-2.5 py-1.5 text-xs font-bold text-stone-700 transition-colors hover:bg-stone-50 cursor-pointer whitespace-nowrap"
-                title="Change language / ভাষা পরিবর্তন"
-                aria-expanded={langDropdownOpen}
-              >
-                <Globe className="size-3.5 text-amber-600 shrink-0" />
-                <span>{language === "bn" ? "বাং" : language === "hi" ? "हिन्दी" : "EN"}</span>
-                <ChevronDown
-                  className={cn(
-                    "size-3 text-stone-400 transition-transform duration-200 shrink-0",
-                    langDropdownOpen && "rotate-180"
-                  )}
-                />
-              </button>
-
-              {langDropdownOpen && (
-                <>
-                  <div className="fixed inset-0 z-30" onClick={() => setLangDropdownOpen(false)} />
-                  <div className="absolute right-0 top-full mt-2 z-40 w-40 rounded-2xl border border-amber-200 bg-white p-1.5 shadow-2xl animate-in fade-in duration-150">
-                    {[
-                      { code: "bn", label: "বাংলা", badge: "বাং" },
-                      { code: "hi", label: "हिन्दी", badge: "हिन्दी" },
-                      { code: "en", label: "English", badge: "EN" },
-                    ].map((l) => (
-                      <button
-                        key={l.code}
-                        type="button"
-                        onClick={() => {
-                          setLanguage(l.code as AstrologyLanguage);
-                          setLangDropdownOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-colors cursor-pointer ${
-                          language === l.code
-                            ? "bg-amber-100 text-amber-900 font-bold"
-                            : "text-stone-700 hover:bg-stone-100"
-                        }`}
-                      >
-                        <span>{l.label}</span>
-                        <span className="text-[10px] text-stone-400 font-bold">{l.badge}</span>
-                      </button>
-                    ))}
-                  </div>
-                </>
+          {(pathname.startsWith("/shop") || cartItemCount > 0) && (
+            <button
+              type="button"
+              onClick={openCart}
+              className="dl-site-icon"
+              title={language === "bn" ? "কার্ট দেখুন" : language === "hi" ? "कार्ट देखें" : "View Cart"}
+              aria-label="Shopping Cart"
+            >
+              <ShoppingBag strokeWidth={1.4} />
+              {cartItemCount > 0 && (
+                <span className="dl-site-badge">{cartItemCount > 99 ? "99+" : cartItemCount}</span>
               )}
-            </div>
+            </button>
+          )}
 
-            {/* Cart Button: Appears on Shop pages or whenever items are added */}
-            {(pathname.startsWith("/shop") || cartItemCount > 0) && (
+          <div className="relative shrink-0">
+            <div className="dl-site-pill">
               <button
                 type="button"
-                onClick={openCart}
-                className="relative inline-flex size-9 sm:size-[38px] items-center justify-center rounded-full border border-stone-200 hover:border-amber-400 bg-white hover:bg-amber-50/50 text-stone-700 hover:text-amber-800 transition-all cursor-pointer shrink-0 shadow-2xs animate-in fade-in duration-200"
-                title={language === "bn" ? "কার্ট দেখুন" : language === "hi" ? "कार्ट देखें" : "View Cart"}
-                aria-label="Shopping Cart"
+                onClick={onMenuPill}
+                className="grid place-items-center"
+                aria-label="Toggle Navigation Menu"
+                aria-expanded={mobileMenuOpen || profileDropdownOpen}
               >
-                <ShoppingBag className="size-4 sm:size-4.5" />
-                {cartItemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-extrabold text-white shadow-xs animate-in zoom-in-75 duration-150">
-                    {cartItemCount > 99 ? "99+" : cartItemCount}
-                  </span>
-                )}
+                {mobileMenuOpen ? <X className="size-[18px]" /> : <Menu className="size-[18px]" strokeWidth={1.6} />}
               </button>
-            )}
-
-            {/* User Profile Dropdown or Sign In */}
-            {isSignedIn ? (
-              <div className="relative shrink-0 whitespace-nowrap">
+              {isSignedIn ? (
                 <button
                   type="button"
                   onClick={() => setProfileDropdownOpen((v) => !v)}
-                  className="flex size-8.5 sm:size-9 items-center justify-center rounded-full border-2 border-amber-400 hover:border-amber-500 overflow-hidden shrink-0 shadow-2xs hover:scale-105 transition-all cursor-pointer ring-2 ring-amber-100"
+                  className="dl-site-pill-avatar"
                   aria-expanded={profileDropdownOpen}
                   aria-label="User account menu"
                 >
-                  <Avatar
-                    src={user?.avatar_url}
-                    name={user?.full_name || user?.first_name || "User"}
-                    size="sm"
-                    className="size-full"
-                  />
+                  <Avatar src={user?.avatar_url} name={nameOf} size="sm" className="size-full" />
                 </button>
+              ) : (
+                <Link href="/login" className="dl-site-pill-avatar" aria-label={signInLabel} title={signInLabel}>
+                  <User strokeWidth={0} />
+                </Link>
+              )}
+            </div>
 
-                {profileDropdownOpen && (
-                  <>
-                    <div className="fixed inset-0 z-30" onClick={() => setProfileDropdownOpen(false)} />
-                    <div className="absolute right-0 top-full mt-2.5 z-50 w-72 rounded-3xl border border-stone-200 bg-white p-3 shadow-[0_20px_50px_rgba(26,18,8,0.18)] animate-in fade-in zoom-in-95 duration-150 ring-1 ring-black/5">
-                      {/* User Header Profile Card */}
-                      <div className="flex items-center gap-3 p-2 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-200/50">
-                        <Avatar
-                          src={user?.avatar_url}
-                          name={user?.full_name || user?.first_name || "User"}
-                          size="md"
-                          className="size-11 border-2 border-amber-400 shadow-sm shrink-0"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <h4 className="font-bold text-sm text-stone-900 truncate leading-tight">
-                            {user?.full_name || user?.first_name || "User"}
-                          </h4>
-                          <p className="text-[11px] text-stone-500 truncate mt-0.5">
-                            {user?.email || (user as { phone_number?: string })?.phone_number || (language === "bn" ? "অ্যাস্ট্রা ভক্ত" : language === "hi" ? "एस्ट्रा भक्त" : "Astra Devotee")}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="my-2 border-t border-stone-100" />
-
-                      {/* 4 Profile-related menu items */}
-                      <div className="space-y-1">
-                        {/* Notifications */}
-                        <Link
-                          href="/account"
-                          onClick={() => setProfileDropdownOpen(false)}
-                          className="flex items-center gap-3 p-2.5 rounded-2xl hover:bg-stone-50 text-stone-700 hover:text-stone-950 transition-colors group cursor-pointer"
-                        >
-                          <div className="size-8 rounded-xl bg-stone-100 flex items-center justify-center text-stone-600 group-hover:bg-amber-100 group-hover:text-amber-800 transition-colors">
-                            <Bell className="size-4" />
-                          </div>
-                          <span className="text-xs font-semibold">
-                            {language === "bn" ? "বিজ্ঞপ্তি" : language === "hi" ? "सूचनाएं" : "Notifications"}
-                          </span>
-                        </Link>
-
-                        {/* Wallet Transactions / Coins (Dynamic live balance) */}
-                        <Link
-                          href="/account/wallet"
-                          onClick={() => setProfileDropdownOpen(false)}
-                          className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-amber-50/80 text-stone-700 hover:text-amber-950 transition-colors group cursor-pointer"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="size-8 rounded-xl bg-amber-100 flex items-center justify-center text-amber-800 group-hover:bg-amber-200 transition-colors">
-                              <Coins className="size-4 text-amber-600" />
-                            </div>
-                            <span className="text-xs font-semibold">
-                              {language === "bn" ? "ওয়ালেট কয়েন" : language === "hi" ? "वॉलेट कॉइन" : "Wallet Transactions"}
-                            </span>
-                          </div>
-                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-950 bg-amber-100/90 px-2.5 py-0.5 rounded-full border border-amber-300/80 tabular-nums shadow-2xs">
-                            <GoldCoinIcon className="size-3.5 shrink-0" />
-                            <span>{coinsBalance !== undefined ? formatCoins(coinsBalance) : walletLoading ? "..." : "0"}</span>
-                          </span>
-                        </Link>
-
-                        {/* Order History */}
-                        <Link
-                          href="/account/orders"
-                          onClick={() => setProfileDropdownOpen(false)}
-                          className="flex items-center gap-3 p-2.5 rounded-2xl hover:bg-stone-50 text-stone-700 hover:text-stone-950 transition-colors group cursor-pointer"
-                        >
-                          <div className="size-8 rounded-xl bg-stone-100 flex items-center justify-center text-stone-600 group-hover:bg-amber-100 group-hover:text-amber-800 transition-colors">
-                            <FileText className="size-4" />
-                          </div>
-                          <span className="text-xs font-semibold">
-                            {language === "bn" ? "অর্ডারের ইতিহাস" : language === "hi" ? "ऑर्डर इतिहास" : "Order History"}
-                          </span>
-                        </Link>
-
-                        {/* Customer Support Chat */}
-                        <Link
-                          href="/support"
-                          onClick={() => setProfileDropdownOpen(false)}
-                          className="flex items-center gap-3 p-2.5 rounded-2xl hover:bg-stone-50 text-stone-700 hover:text-stone-950 transition-colors group cursor-pointer"
-                        >
-                          <div className="size-8 rounded-xl bg-stone-100 flex items-center justify-center text-stone-600 group-hover:bg-amber-100 group-hover:text-amber-800 transition-colors">
-                            <MessageSquare className="size-4" />
-                          </div>
-                          <span className="text-xs font-semibold">
-                            {language === "bn" ? "কাস্টমার সাপোর্ট চ্যাট" : language === "hi" ? "कस्टमर सपोर्ट चैट" : "Customer Support Chat"}
-                          </span>
-                        </Link>
-                      </div>
-
-                      <div className="my-2 border-t border-stone-100" />
-
-                      {/* Logout Button */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setProfileDropdownOpen(false);
-                          signOut();
-                        }}
-                        className="w-full flex items-center gap-3 p-2.5 rounded-2xl hover:bg-rose-50 text-rose-600 font-bold transition-colors group cursor-pointer text-xs"
-                      >
-                        <div className="size-8 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600 group-hover:bg-rose-200 transition-colors">
-                          <LogOut className="size-4 text-rose-600" />
-                        </div>
-                        <span>{language === "bn" ? "লগআউট" : language === "hi" ? "लॉग आउट" : "Logout"}</span>
-                      </button>
+            {isSignedIn && profileDropdownOpen && (
+              <>
+                <div className="fixed inset-0 z-30" onClick={() => setProfileDropdownOpen(false)} />
+                <div className="dl-pop-card absolute right-0 top-full mt-3 z-50 w-72 p-3">
+                  <div className="flex items-center gap-3 p-2.5 rounded-[14px] bg-[#fbeee5]">
+                    <Avatar src={user?.avatar_url} name={nameOf} size="md" className="size-11 border-2 border-white shadow-sm shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-sm text-[#1d1a1c] truncate leading-tight">{nameOf}</p>
+                      <p className="text-[11.5px] text-[#8a7f83] truncate mt-0.5">
+                        {user?.email || (user as { phone_number?: string })?.phone_number || (language === "bn" ? "অ্যাস্ট্রা ভক্ত" : language === "hi" ? "एस्ट्रा भक्त" : "Astra Devotee")}
+                      </p>
                     </div>
-                  </>
-                )}
-              </div>
-            ) : (
-              <Link href="/login" className="hidden sm:inline-flex shrink-0">
-                <button
-                  type="button"
-                  className="rounded-full px-3.5 py-1.5 text-xs font-bold text-stone-700 hover:text-stone-950 hover:bg-stone-100 border border-stone-200 transition-colors cursor-pointer whitespace-nowrap"
-                >
-                  {language === "bn" ? "সাইন ইন" : language === "hi" ? "लॉग इन" : "Sign In"}
-                </button>
-              </Link>
-            )}
+                  </div>
 
-            {/* Astrotalk-Style Signature Golden Pill Button */}
-            <Link href="/astrologers" className="shrink-0 group">
-              <button
-                type="button"
-                className="group relative inline-flex h-9 sm:h-[38px] items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 px-3 xl:px-3.5 2xl:px-4 text-stone-950 font-bold text-xs sm:text-[12.5px] tracking-tight shadow-[0_3px_12px_-2px_rgba(245,158,11,0.5)] hover:shadow-[0_5px_16px_-2px_rgba(245,158,11,0.7)] transition-all hover:scale-[1.02] active:scale-[0.98] border border-amber-300 whitespace-nowrap cursor-pointer leading-none"
-              >
-                <Phone className="size-3 text-stone-950 fill-stone-950/20 shrink-0" />
-                <span className="leading-none">{ctaPart1}</span>
-                <ArrowRight className="size-3 stroke-[2.5] text-stone-900 transition-transform duration-200 group-hover:translate-x-0.5 shrink-0" />
-              </button>
-            </Link>
+                  <div className="my-2 h-px bg-[rgba(29,26,28,0.08)]" />
+
+                  <div className="space-y-0.5">
+                    <Link href="/account" onClick={() => setProfileDropdownOpen(false)} className="dl-pop-item">
+                      <span className="dl-pop-icon !size-8 !basis-8 !rounded-[10px]"><Bell className="!size-4" /></span>
+                      <span>{language === "bn" ? "বিজ্ঞপ্তি" : language === "hi" ? "सूचनाएं" : "Notifications"}</span>
+                    </Link>
+                    <Link href="/account/wallet" onClick={() => setProfileDropdownOpen(false)} className="dl-pop-item justify-between">
+                      <span className="flex items-center gap-3">
+                        <span className="dl-pop-icon !size-8 !basis-8 !rounded-[10px]"><Coins className="!size-4" /></span>
+                        <span>{language === "bn" ? "ওয়ালেট কয়েন" : language === "hi" ? "वॉलेट कॉइन" : "Wallet Transactions"}</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#1d1a1c] bg-[#fbe4d6] px-2.5 py-0.5 rounded-full tabular-nums">
+                        <GoldCoinIcon className="size-3.5 shrink-0" />
+                        <span>{coinsBalance !== undefined ? formatCoins(coinsBalance) : walletLoading ? "..." : "0"}</span>
+                      </span>
+                    </Link>
+                    <Link href="/account/orders" onClick={() => setProfileDropdownOpen(false)} className="dl-pop-item">
+                      <span className="dl-pop-icon !size-8 !basis-8 !rounded-[10px]"><FileText className="!size-4" /></span>
+                      <span>{language === "bn" ? "অর্ডারের ইতিহাস" : language === "hi" ? "ऑर्डर इतिहास" : "Order History"}</span>
+                    </Link>
+                    <Link href="/support" onClick={() => setProfileDropdownOpen(false)} className="dl-pop-item">
+                      <span className="dl-pop-icon !size-8 !basis-8 !rounded-[10px]"><MessageSquare className="!size-4" /></span>
+                      <span>{language === "bn" ? "কাস্টমার সাপোর্ট চ্যাট" : language === "hi" ? "कस्टमर सपोर्ट चैट" : "Customer Support Chat"}</span>
+                    </Link>
+                  </div>
+
+                  <div className="my-2 h-px bg-[rgba(29,26,28,0.08)]" />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProfileDropdownOpen(false);
+                      signOut();
+                    }}
+                    className="dl-pop-item text-[#e63a4c]! font-semibold hover:bg-[#ffecee]!"
+                  >
+                    <span className="dl-pop-icon !size-8 !basis-8 !rounded-[10px] !bg-[#ffe1e4] !text-[#e63a4c]"><LogOut className="!size-4" /></span>
+                    <span>{language === "bn" ? "লগআউট" : language === "hi" ? "लॉग आउट" : "Logout"}</span>
+                  </button>
+                </div>
+              </>
+            )}
           </div>
+
+          <Link href="/astrologers" className="dl-site-cta" aria-label={ctaPart1} title={ctaPart1}>
+            <Phone strokeWidth={2} />
+            <span className="dl-site-cta-label">{ctaPart1}</span>
+            <ArrowRight strokeWidth={2.4} className="dl-site-cta-arrow" />
+          </Link>
         </div>
       </div>
 
@@ -1372,13 +1297,13 @@ export function AstroyogiHeader() {
       {mounted &&
         mobileMenuOpen &&
         createPortal(
-          <div className="fixed inset-0 z-[60] xl:hidden">
+          <div className="fixed inset-0 z-[160] xl:hidden">
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-300"
+            className="fixed inset-0 bg-[rgba(29,26,28,0.45)] backdrop-blur-xs transition-opacity duration-300"
             onClick={() => setMobileMenuOpen(false)}
           />
 
-          <div className="fixed inset-y-0 left-0 w-full max-w-xs bg-white shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-left duration-200">
+          <div className="fixed inset-y-0 left-0 w-full max-w-xs bg-[#fdf0e7] shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-left duration-300 text-[#1d1a1c]">
             <div>
               {/* Drawer Header */}
               <div className="flex items-center justify-between p-4 border-b border-stone-100">
@@ -1392,7 +1317,7 @@ export function AstroyogiHeader() {
                       className="size-full object-contain"
                     />
                   </span>
-                  <span className="font-display text-[16px] font-bold tracking-wide text-foreground">
+                  <span className="dl-site-logo-word !text-[22px]">
                     DivinLink
                   </span>
                 </div>
@@ -1491,11 +1416,11 @@ export function AstroyogiHeader() {
             </div>
 
             {/* Drawer Bottom Actions */}
-            <div className="p-4 border-t border-stone-100 bg-stone-50 space-y-3">
+            <div className="p-4 border-t border-stone-200/60 bg-[#fbe7da] space-y-3">
               <Link href="/astrologers" onClick={() => setMobileMenuOpen(false)}>
                 <button
                   type="button"
-                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-yellow-400 text-stone-950 font-semibold text-sm py-2.5 shadow-sm"
+                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-full bg-[#f39419] text-white font-bold text-sm py-3 shadow-[0_10px_24px_-12px_rgba(243,148,25,0.85)]"
                 >
                   <span>{ctaPart1}</span>
                   <span className="opacity-35 font-light">|</span>

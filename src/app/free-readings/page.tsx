@@ -270,12 +270,12 @@ export default function FreeReadingsPage() {
     | "hi";
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] text-slate-900 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#fff8f3] text-slate-900 flex flex-col font-sans">
       <SiteHeader />
 
       <main className="flex-1 w-full pb-24">
         {/* Luxury Hero Banner */}
-        <section className="relative overflow-hidden bg-gradient-to-b from-[#FFF9EE] via-[#FDFBF7] to-white border-b border-stone-200/80 py-12 sm:py-16">
+        <section className="relative overflow-hidden bg-gradient-to-b from-[#FFF9EE] via-[#fff8f3] to-white border-b border-stone-200/80 py-12 sm:py-16">
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
             <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[400px] bg-gradient-to-b from-amber-200/40 via-orange-100/20 to-transparent blur-3xl opacity-70" />
           </div>
@@ -292,7 +292,7 @@ export default function FreeReadingsPage() {
               </span>
             </div>
 
-            <h1 className="font-display text-3xl sm:text-5xl font-extrabold text-[#1a1208] tracking-tight max-w-3xl mx-auto">
+            <h1 className="font-display text-3xl sm:text-5xl font-extrabold text-[#1d1a1c] tracking-tight max-w-3xl mx-auto">
               {language === "bn"
                 ? "ফ্রি বৈদিক জ্যোতিষ ও ভাগ্যফল কেন্দ্র"
                 : language === "hi"
@@ -358,7 +358,7 @@ export default function FreeReadingsPage() {
                       </div>
 
                       {tool.badge && (
-                        <span className="rounded-full border border-amber-300/60 bg-[#fff8db] px-2.5 py-0.5 text-[11px] font-bold text-[#8b5e0a] shadow-2xs">
+                        <span className="rounded-full border border-amber-300/60 bg-[#fceade] px-2.5 py-0.5 text-[11px] font-bold text-[#8b5e0a] shadow-2xs">
                           {tool.badge}
                         </span>
                       )}

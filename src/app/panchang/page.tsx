@@ -96,7 +96,7 @@ export default function PanchangPage() {
   const choghadiya: ChoghadiyaItem[] = panchang?.choghadiya ?? [];
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] text-slate-900 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#fff8f3] text-slate-900 flex flex-col font-sans">
       <SiteHeader />
 
       <main className="relative flex-1 w-full pb-28 overflow-hidden">

@@ -1,10 +1,18 @@
 import type { Metadata, Viewport } from "next";
 import * as React from "react";
-import { Cinzel, Cinzel_Decorative, Geist_Mono, Poppins } from "next/font/google";
+import {
+  Cinzel,
+  Cinzel_Decorative,
+  Geist_Mono,
+  Gilda_Display,
+  Poppins,
+  Urbanist,
+} from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "sonner";
 
+import { DivinLinkMotion } from "@/components/layout/divinlink-motion";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { RouteProgressBar } from "@/components/layout/route-progress-bar";
 import { ReviewPrompt } from "@/components/reviews/review-prompt";
@@ -14,6 +22,7 @@ import { QueryProvider } from "@/providers/query-provider";
 import { RealtimeProvider } from "@/providers/realtime-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import "./globals.css";
+import "./divinlink.css";
 
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 const poppins = Poppins({
@@ -30,6 +39,16 @@ const cinzelDecorative = Cinzel_Decorative({
   variable: "--font-cinzel-decorative",
   subsets: ["latin"],
   weight: ["700", "900"],
+});
+const urbanist = Urbanist({
+  variable: "--font-urbanist",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+});
+const gildaDisplay = Gilda_Display({
+  variable: "--font-gilda",
+  subsets: ["latin"],
+  weight: ["400"],
 });
 
 export const viewport: Viewport = {
@@ -65,7 +84,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${poppins.variable} ${geistMono.variable} ${cinzel.variable} ${cinzelDecorative.variable} h-full`}
+      className={`${poppins.variable} ${geistMono.variable} ${cinzel.variable} ${cinzelDecorative.variable} ${urbanist.variable} ${gildaDisplay.variable} h-full`}
     >
       <body suppressHydrationWarning className="min-h-full pb-[104px] md:pb-0">
         <ThemeProvider>
@@ -79,6 +98,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   {children}
                   <ReviewPrompt />
                   <MobileBottomNav />
+                  <DivinLinkMotion />
                   <Toaster
                     theme="light"
                     position="top-center"

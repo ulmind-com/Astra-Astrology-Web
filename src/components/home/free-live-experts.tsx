@@ -94,12 +94,12 @@ export function FreeLiveExperts() {
   }, [data]);
 
   return (
-    <section id="live-experts" className="relative bg-transparent py-8 sm:py-12 border-b border-[#f2e9b0]/60">
+    <section id="live-experts" className="relative bg-transparent py-8 sm:py-12 border-b border-[#fbdcc8]/60">
       <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="flex items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-2.5">
-            <h2 className="text-xl sm:text-2xl lg:text-[1.75rem] font-bold tracking-tight text-[#1a1208]">
+            <h2 className="text-xl sm:text-2xl lg:text-[1.75rem] font-bold tracking-tight text-[#1d1a1c]">
               {language === "bn" ? "অ্যাস্ট্রা লাইভ বিশেষজ্ঞ" : language === "hi" ? "एस्ट्रा लाइव विशेषज्ञ" : "Free Live Experts"}
             </h2>
             <span className="relative flex size-2.5">
@@ -110,7 +110,7 @@ export function FreeLiveExperts() {
 
           <Link
             href="/astrologers"
-            className="rounded-full border border-[#eadf9a] bg-[#fffdf5] px-4 py-1.5 text-xs sm:text-sm font-bold text-[#8b5e0a] hover:bg-[#fff7d1] hover:border-brand-400 transition-colors shadow-2xs"
+            className="rounded-full border border-[#f7c9a8] bg-[#fff8f3] px-4 py-1.5 text-xs sm:text-sm font-bold text-[#8b5e0a] hover:bg-[#fce4d4] hover:border-brand-400 transition-colors shadow-2xs"
           >
             {language === "bn" ? "সব দেখুন" : language === "hi" ? "सभी देखें" : "View All"}
           </Link>
@@ -122,7 +122,7 @@ export function FreeLiveExperts() {
             {[1, 2, 3, 4, 5].map((i) => (
               <div
                 key={i}
-                className="rounded-2xl bg-gradient-to-b from-[#1e1730] to-[#0d0917] border border-[#ffdb4d]/20 p-4 h-64 animate-pulse flex flex-col items-center justify-between"
+                className="rounded-2xl bg-gradient-to-b from-[#1e1730] to-[#0d0917] border border-[#ffb24d]/20 p-4 h-64 animate-pulse flex flex-col items-center justify-between"
               >
                 <div className="size-16 rounded-full bg-white/10" />
                 <div className="w-3/4 h-4 bg-white/10 rounded" />
@@ -131,15 +131,15 @@ export function FreeLiveExperts() {
             ))}
           </div>
         ) : liveExperts.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-[#eadf9a] bg-[#fffdf5] p-8 text-center">
-            <p className="text-sm font-semibold text-[#1a1208]">
+          <div className="rounded-2xl border border-dashed border-[#f7c9a8] bg-[#fff8f3] p-8 text-center">
+            <p className="text-sm font-semibold text-[#1d1a1c]">
               {language === "bn"
                 ? "এই মুহূর্তে কোনো বিশেষজ্ঞ সরাসরি সম্প্রচার করছেন না।"
                 : language === "hi"
                 ? "इस समय कोई विशेषज्ञ लाइव नहीं हैं।"
                 : "No live experts broadcasting at this moment."}
             </p>
-            <p className="text-xs text-[#6b5f4d] mt-1">
+            <p className="text-xs text-[#5c5156] mt-1">
               {language === "bn"
                 ? "জ্যোতিষীরা অনলাইনে এলে এখানে স্বয়ংক্রিয়ভাবে প্রদর্শিত হবেন।"
                 : language === "hi"
@@ -156,7 +156,7 @@ export function FreeLiveExperts() {
               return (
                 <div
                   key={expert.id}
-                  className="group relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#1e1730] via-[#161026] to-[#0d0917] border border-[#ffdb4d]/40 shadow-[0_8px_24px_-6px_rgba(20,10,40,0.4)] flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:border-[#ffdb4d] hover:shadow-[0_16px_32px_-8px_rgba(255,219,77,0.3)]"
+                  className="group relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#1e1730] via-[#161026] to-[#0d0917] border border-[#ffb24d]/40 shadow-[0_8px_24px_-6px_rgba(20,10,40,0.4)] flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:border-[#ffb24d] hover:shadow-[0_16px_32px_-8px_rgba(255,178,77,0.3)]"
                 >
                   {/* Background astrological pattern overlay */}
                   <div
@@ -181,7 +181,7 @@ export function FreeLiveExperts() {
                   {/* Center Content: Avatar + Follow + Name + Topic Bubble */}
                   <div className="relative px-3.5 flex flex-col items-center text-center">
                     {/* Circular Avatar with Glowing Ring */}
-                    <div className="relative size-16 sm:size-18 rounded-full p-0.5 bg-gradient-to-tr from-[#ffd700] via-[#ff9900] to-[#ffd700] shadow-[0_0_15px_rgba(255,215,0,0.4)]">
+                    <div className="relative size-16 sm:size-18 rounded-full p-0.5 bg-gradient-to-tr from-[#ff9000] via-[#ff9900] to-[#ff9000] shadow-[0_0_15px_rgba(255,144,0,0.4)]">
                       <div className="relative size-full rounded-full overflow-hidden bg-stone-900 flex items-center justify-center">
                         {expert.avatarUrl ? (
                           <Image
@@ -192,7 +192,7 @@ export function FreeLiveExperts() {
                             sizes="80px"
                           />
                         ) : (
-                          <span className="font-extrabold text-xl text-[#ffd700]">
+                          <span className="font-extrabold text-xl text-[#ff9000]">
                             {expert.name.charAt(0).toUpperCase()}
                           </span>
                         )}
@@ -206,7 +206,7 @@ export function FreeLiveExperts() {
                       className={`mt-2 rounded-full px-3 py-0.5 text-[10px] font-bold transition-all shadow-xs ${
                         isFollowed
                           ? "bg-emerald-500 text-white"
-                          : "bg-white/95 text-[#1a1208] hover:bg-white hover:scale-105"
+                          : "bg-white/95 text-[#1d1a1c] hover:bg-white hover:scale-105"
                       }`}
                     >
                       {isFollowed ? "Following" : "+ Follow"}
@@ -219,7 +219,7 @@ export function FreeLiveExperts() {
 
                     {/* Speech Bubble / Topic Pill */}
                     <div className="mt-2 mb-3.5 w-full">
-                      <span className="inline-block w-full truncate rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-[#1a1208] shadow-xs">
+                      <span className="inline-block w-full truncate rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-[#1d1a1c] shadow-xs">
                         {expert.topic}
                       </span>
                     </div>
@@ -246,7 +246,7 @@ export function FreeLiveExperts() {
       {/* Interactive Live Stream Modal */}
       {activeModalExpert && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
-          <div className="relative w-full max-w-2xl overflow-hidden rounded-3xl bg-[#140e24] border border-[#ffdb4d]/40 shadow-2xl">
+          <div className="relative w-full max-w-2xl overflow-hidden rounded-3xl bg-[#140e24] border border-[#ffb24d]/40 shadow-2xl">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-white/10 px-5 py-3.5">
               <div className="flex items-center gap-3">
@@ -308,7 +308,7 @@ export function FreeLiveExperts() {
                   <Link href={`/chat/${activeModalExpert.id}`}>
                     <button
                       type="button"
-                      className="rounded-full bg-[#fcd404] hover:bg-[#e6be00] text-[#1c1304] font-bold text-xs px-5 py-2 shadow-md transition-transform hover:scale-105 flex items-center gap-1.5"
+                      className="rounded-full bg-[#f39419] hover:bg-[#e68200] text-[#1d1a1c] font-bold text-xs px-5 py-2 shadow-md transition-transform hover:scale-105 flex items-center gap-1.5"
                     >
                       <MessageCircle className="size-3.5" />
                       <span>Chat Now</span>

@@ -794,7 +794,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
   }
 
   return (
-    <div className="min-h-screen bg-[#faf6f0] text-[#332c39]">
+    <div className="min-h-screen bg-[#fbeee5] text-[#1d1a1c]">
       <SiteHeader />
 
       <main className="relative overflow-hidden pt-6 pb-20">
@@ -827,14 +827,14 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                 <span>{t.tag}</span>
               </div>
 
-              <h1 className="font-cinzel text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-[#4D4664]">
+              <h1 className="font-cinzel text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-[#5c5156]">
                 {t.title}
               </h1>
 
-              <p className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[#8c7e97]">
+              <p className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[#8a7f83]">
                 <Calendar className="size-4 text-[#b06d4e]" />
                 {language === "bn" ? "আপডেট" : language === "hi" ? "अपडेट" : "Updated on"}:{" "}
-                <span className="font-semibold text-[#4D4664]">{heroDateLabel}</span>
+                <span className="font-semibold text-[#5c5156]">{heroDateLabel}</span>
               </p>
 
               <p className="mt-4 max-w-xl text-sm sm:text-base leading-relaxed text-[#6f637b]">
@@ -847,7 +847,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
 
               <Link
                 href="/astrologers"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#f2d94a] px-6 py-3 text-sm font-bold text-[#1a1208] shadow-[0_8px_20px_-8px_rgba(242,217,74,0.9)] transition-all hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0"
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#f2a94a] px-6 py-3 text-sm font-bold text-[#1d1a1c] shadow-[0_8px_20px_-8px_rgba(242,169,74,0.9)] transition-all hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0"
               >
                 <Sparkles className="size-4" />
                 {language === "bn" ? "ফ্রি পরামর্শ নিন" : language === "hi" ? "फ्री परामर्श लें" : "Get Free Consultation"}
@@ -892,7 +892,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                 className={`inline-flex min-h-9 items-center px-3 py-2 rounded-xl text-xs font-medium press transition-all ${
                   selectedDate === yesterdayStr
                     ? "bg-[#b06d4e] text-white shadow-xs"
-                    : "bg-[#f5ece3] text-[#5e5369] hover:bg-[#ebdccf]"
+                    : "bg-[#f5ece3] text-[#5c5156] hover:bg-[#ebdccf]"
                 }`}
               >
                 {t.yesterday}
@@ -903,7 +903,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                 className={`inline-flex min-h-9 items-center px-3.5 py-2 rounded-xl text-xs font-semibold press transition-all ${
                   selectedDate === todayStr
                     ? "bg-[#b06d4e] text-white shadow-xs ring-2 ring-[#b06d4e]/30"
-                    : "bg-[#f5ece3] text-[#5e5369] hover:bg-[#ebdccf]"
+                    : "bg-[#f5ece3] text-[#5c5156] hover:bg-[#ebdccf]"
                 }`}
               >
                 {t.today}
@@ -914,7 +914,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                 className={`inline-flex min-h-9 items-center px-3.5 py-2 rounded-xl text-xs font-medium press transition-all ${
                   selectedDate === tomorrowStr
                     ? "bg-[#b06d4e] text-white shadow-xs"
-                    : "bg-[#f5ece3] text-[#5e5369] hover:bg-[#ebdccf]"
+                    : "bg-[#f5ece3] text-[#5c5156] hover:bg-[#ebdccf]"
                 }`}
               >
                 {t.tomorrow}
@@ -922,14 +922,14 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
 
               {/* Custom Date Input */}
               <div className="flex items-center gap-1.5 ml-1 sm:ml-2 pl-2 border-l border-[#e2d0bf]">
-                <Calendar className="size-3.5 text-[#8c7e97]" />
+                <Calendar className="size-3.5 text-[#8a7f83]" />
                 <input
                   type="date"
                   value={selectedDate}
                   onChange={(e) => {
                     if (e.target.value) setSelectedDate(e.target.value);
                   }}
-                  className="min-h-9 rounded-lg border border-[#e2d0bf] bg-[#fffaf5] px-2 py-2 text-xs text-[#4D4664] focus:outline-none focus:ring-1 focus:ring-[#b06d4e]"
+                  className="min-h-9 rounded-lg border border-[#e2d0bf] bg-[#fff8f3] px-2 py-2 text-xs text-[#5c5156] focus:outline-none focus:ring-1 focus:ring-[#b06d4e]"
                 />
               </div>
             </div>
@@ -944,7 +944,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                 className={`flex min-h-9 items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium press transition-all shadow-2xs ${
                   showPersonalize || selectedNakshatra !== null
                     ? "border-[#b06d4e] bg-[#fbf1e7] text-[#b06d4e] ring-2 ring-[#b06d4e]/20"
-                    : "border-[#e2d0bf] bg-[#fbf4ec] text-[#5e5369] hover:text-[#b06d4e]"
+                    : "border-[#e2d0bf] bg-[#fbeee5] text-[#5c5156] hover:text-[#b06d4e]"
                 }`}
               >
                 <Sparkles className="size-3.5 text-[#b06d4e]" />
@@ -961,12 +961,12 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
               </button>
 
               {/* Language Selector */}
-              <div className="flex items-center rounded-xl border border-[#e2d0bf] bg-[#fbf4ec] p-0.5 text-xs">
+              <div className="flex items-center rounded-xl border border-[#e2d0bf] bg-[#fbeee5] p-0.5 text-xs">
                 <button
                   type="button"
                   onClick={() => setLanguage("bn")}
                   className={`min-h-9 inline-flex items-center justify-center px-2.5 py-2 rounded-lg press transition-colors font-medium ${
-                    language === "bn" ? "bg-[#b06d4e] text-white shadow-2xs" : "text-[#5e5369] hover:text-[#332c39]"
+                    language === "bn" ? "bg-[#b06d4e] text-white shadow-2xs" : "text-[#5c5156] hover:text-[#1d1a1c]"
                   }`}
                 >
                   বাংলা
@@ -975,7 +975,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                   type="button"
                   onClick={() => setLanguage("hi")}
                   className={`min-h-9 inline-flex items-center justify-center px-2.5 py-2 rounded-lg press transition-colors font-medium ${
-                    language === "hi" ? "bg-[#b06d4e] text-white shadow-2xs" : "text-[#5e5369] hover:text-[#332c39]"
+                    language === "hi" ? "bg-[#b06d4e] text-white shadow-2xs" : "text-[#5c5156] hover:text-[#1d1a1c]"
                   }`}
                 >
                   हिन्दी
@@ -984,7 +984,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                   type="button"
                   onClick={() => setLanguage("en")}
                   className={`min-h-9 inline-flex items-center justify-center px-2.5 py-2 rounded-lg press transition-colors font-medium ${
-                    language === "en" ? "bg-[#b06d4e] text-white shadow-2xs" : "text-[#5e5369] hover:text-[#332c39]"
+                    language === "en" ? "bg-[#b06d4e] text-white shadow-2xs" : "text-[#5c5156] hover:text-[#1d1a1c]"
                   }`}
                 >
                   EN
@@ -1005,7 +1005,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                   )
                 }
                 title="Refresh"
-                className="flex size-8 items-center justify-center rounded-xl border border-[#e2d0bf] bg-[#fbf4ec] text-[#5e5369] hover:text-[#b06d4e] transition-colors shadow-2xs"
+                className="flex size-8 items-center justify-center rounded-xl border border-[#e2d0bf] bg-[#fbeee5] text-[#5c5156] hover:text-[#b06d4e] transition-colors shadow-2xs"
               >
                 <RotateCcw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
               </button>
@@ -1013,7 +1013,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                 type="button"
                 onClick={handleShare}
                 title={t.share}
-                className="flex size-8 items-center justify-center rounded-xl border border-[#e2d0bf] bg-[#fbf4ec] text-[#5e5369] hover:text-[#b06d4e] press transition-colors shadow-2xs"
+                className="flex size-8 items-center justify-center rounded-xl border border-[#e2d0bf] bg-[#fbeee5] text-[#5c5156] hover:text-[#b06d4e] press transition-colors shadow-2xs"
               >
                 <Share2 className="size-3.5" />
               </button>
@@ -1027,8 +1027,8 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                 <div className="flex items-center gap-2">
                   <UserCheck className="size-5 text-[#b06d4e]" />
                   <div>
-                    <h3 className="font-cinzel text-base font-bold text-[#4D4664]">{t.personalizeTitle}</h3>
-                    <p className="text-xs text-[#7d7388]">{t.personalizeSub}</p>
+                    <h3 className="font-cinzel text-base font-bold text-[#5c5156]">{t.personalizeTitle}</h3>
+                    <p className="text-xs text-[#8a7f83]">{t.personalizeSub}</p>
                   </div>
                 </div>
                 {(selectedNakshatra !== null || birthDateInput !== "" || selectedLagna !== null) && (
@@ -1051,7 +1051,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                 
                 {/* Method 1: Direct Nakshatra Selector */}
                 <div>
-                  <label htmlFor="dh-nakshatra" className="block text-xs font-bold text-[#4D4664] mb-1">
+                  <label htmlFor="dh-nakshatra" className="block text-xs font-bold text-[#5c5156] mb-1">
                     {t.personalizeStep1}
                   </label>
                   <select
@@ -1061,7 +1061,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                       const val = e.target.value === "" ? null : Number(e.target.value);
                       setSelectedNakshatra(val);
                     }}
-                    className="w-full rounded-xl border border-[#e2d0bf] bg-[#fffaf5] px-3 py-2 text-xs text-[#4D4664] focus:outline-none focus:ring-1 focus:ring-[#b06d4e]"
+                    className="w-full rounded-xl border border-[#e2d0bf] bg-[#fff8f3] px-3 py-2 text-xs text-[#5c5156] focus:outline-none focus:ring-1 focus:ring-[#b06d4e]"
                   >
                     <option value="">-- {t.selectNakshatra} --</option>
                     {NAKSHATRA_OPTIONS.map((n) => (
@@ -1074,7 +1074,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
 
                 {/* Method 2: Birth Date & Time */}
                 <div>
-                  <label className="block text-xs font-bold text-[#4D4664] mb-1">
+                  <label className="block text-xs font-bold text-[#5c5156] mb-1">
                     {t.personalizeStep2}
                   </label>
                   <div className="flex items-center gap-2">
@@ -1084,7 +1084,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                       value={birthDateInput}
                       onChange={(e) => setBirthDateInput(e.target.value)}
                       placeholder={t.birthDatePlaceholder}
-                      className="w-1/2 rounded-xl border border-[#e2d0bf] bg-[#fffaf5] px-2.5 py-1.5 text-xs text-[#4D4664] focus:outline-none focus:ring-1 focus:ring-[#b06d4e]"
+                      className="w-1/2 rounded-xl border border-[#e2d0bf] bg-[#fff8f3] px-2.5 py-1.5 text-xs text-[#5c5156] focus:outline-none focus:ring-1 focus:ring-[#b06d4e]"
                     />
                     <input
                       type="time"
@@ -1092,14 +1092,14 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                       value={birthTimeInput}
                       onChange={(e) => setBirthTimeInput(e.target.value)}
                       placeholder={t.birthTimePlaceholder}
-                      className="w-1/2 rounded-xl border border-[#e2d0bf] bg-[#fffaf5] px-2.5 py-1.5 text-xs text-[#4D4664] focus:outline-none focus:ring-1 focus:ring-[#b06d4e]"
+                      className="w-1/2 rounded-xl border border-[#e2d0bf] bg-[#fff8f3] px-2.5 py-1.5 text-xs text-[#5c5156] focus:outline-none focus:ring-1 focus:ring-[#b06d4e]"
                     />
                   </div>
                 </div>
 
                 {/* Method 3: Birth Lagna Selector for Dual Transit */}
                 <div className="md:col-span-2 pt-2 border-t border-[#ebd7c8]/60">
-                  <label htmlFor="dh-lagna" className="block text-xs font-bold text-[#4D4664] mb-1">
+                  <label htmlFor="dh-lagna" className="block text-xs font-bold text-[#5c5156] mb-1">
                     {t.personalizeStep3}
                   </label>
                   <select
@@ -1109,7 +1109,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                       const val = e.target.value === "" ? null : Number(e.target.value);
                       setSelectedLagna(val);
                     }}
-                    className="w-full sm:w-1/2 rounded-xl border border-[#e2d0bf] bg-[#fffaf5] px-3 py-2 text-xs text-[#4D4664] focus:outline-none focus:ring-1 focus:ring-[#b06d4e]"
+                    className="w-full sm:w-1/2 rounded-xl border border-[#e2d0bf] bg-[#fff8f3] px-3 py-2 text-xs text-[#5c5156] focus:outline-none focus:ring-1 focus:ring-[#b06d4e]"
                   >
                     <option value="">-- {t.selectLagna} --</option>
                     {ZODIAC_LIST.map((z) => (
@@ -1148,18 +1148,18 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                       </span>
                     </div>
                     <p className="text-xs text-[#594c65] mt-0.5">
-                      {t.lord}: <strong className="text-[#4D4664]">{horoscopeData.personalized_profile.birth_nakshatra_lord}</strong> • {t.deity}: <strong className="text-[#4D4664]">{horoscopeData.personalized_profile.birth_nakshatra_deity}</strong> • {t.tree}: <strong className="text-[#4D4664]">{horoscopeData.personalized_profile.sacred_tree}</strong>
+                      {t.lord}: <strong className="text-[#5c5156]">{horoscopeData.personalized_profile.birth_nakshatra_lord}</strong> • {t.deity}: <strong className="text-[#5c5156]">{horoscopeData.personalized_profile.birth_nakshatra_deity}</strong> • {t.tree}: <strong className="text-[#5c5156]">{horoscopeData.personalized_profile.sacred_tree}</strong>
                     </p>
                   </div>
                 </div>
 
                 {/* Navatara Tara Bala Badge */}
-                <div className="flex items-center gap-3 bg-[#fffaf5] border border-[#e5ccba] rounded-2xl p-3 sm:px-4 shadow-2xs">
+                <div className="flex items-center gap-3 bg-[#fff8f3] border border-[#e5ccba] rounded-2xl p-3 sm:px-4 shadow-2xs">
                   <div className="text-right">
-                    <span className="text-[10px] font-bold text-[#8c7e97] uppercase tracking-wider block">
+                    <span className="text-[10px] font-bold text-[#8a7f83] uppercase tracking-wider block">
                       {t.taraBalaBadge}
                     </span>
-                    <strong className="text-xs text-[#4D4664] block font-cinzel">
+                    <strong className="text-xs text-[#5c5156] block font-cinzel">
                       {language === "bn"
                         ? horoscopeData.personalized_profile.tara_bala.tara_name_bn
                         : language === "hi"
@@ -1204,18 +1204,18 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
 
           {/* Daily Panchang Banner */}
           {horoscopeData?.panchang && (
-            <div className="mb-8 rounded-2xl border border-[#ebd7c8] bg-gradient-to-r from-[#fbf4eb] via-[#f7ebe0] to-[#fbf4eb] p-4 sm:p-5 shadow-sm">
+            <div className="mb-8 rounded-2xl border border-[#ebd7c8] bg-gradient-to-r from-[#fbeee5] via-[#f7ebe0] to-[#fbeee5] p-4 sm:p-5 shadow-sm">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-3.5 border-b border-[#ebd7c8]/80">
                 <div className="flex items-center gap-2.5">
                   <div className="flex size-9 items-center justify-center rounded-xl bg-[#b06d4e]/10 text-[#b06d4e]">
                     <Sun className="size-5" />
                   </div>
                   <div>
-                    <h2 className="font-cinzel text-base font-bold text-[#4D4664]">
+                    <h2 className="font-cinzel text-base font-bold text-[#5c5156]">
                       {t.panchangTitle} • {horoscopeData.date} ({horoscopeData.day_of_week})
                     </h2>
-                    <p className="text-xs text-[#7d7388]">
-                      {t.rulingLord}: <span className="font-semibold text-[#4D4664]">{horoscopeData.vara_lord}</span> • {t.moonPosition}: <span className="font-semibold text-[#b06d4e]">{horoscopeData.moon_sign} ({horoscopeData.moon_degree})</span>
+                    <p className="text-xs text-[#8a7f83]">
+                      {t.rulingLord}: <span className="font-semibold text-[#5c5156]">{horoscopeData.vara_lord}</span> • {t.moonPosition}: <span className="font-semibold text-[#b06d4e]">{horoscopeData.moon_sign} ({horoscopeData.moon_degree})</span>
                     </p>
                   </div>
                 </div>
@@ -1257,7 +1257,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                       }
                     }}
                     className={`flex items-center gap-1.5 px-3 py-1 rounded-full border transition-colors font-medium shadow-2xs ${
-                      showChoghadiya ? "bg-[#4D4664] text-white border-[#4D4664]" : "bg-[#4D4664]/10 text-[#4D4664] border-[#4D4664]/30 hover:bg-[#4D4664]/20"
+                      showChoghadiya ? "bg-[#5c5156] text-white border-[#5c5156]" : "bg-[#5c5156]/10 text-[#5c5156] border-[#5c5156]/30 hover:bg-[#5c5156]/20"
                     }`}
                   >
                     <Sparkles className="size-3.5" />
@@ -1332,31 +1332,31 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
 
               {/* Panchang 5 Limbs Grid */}
               <div className="mt-3.5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
-                <div className="rounded-xl bg-[#fffcf9] border border-[#f0dfd2] p-2.5">
-                  <span className="text-[#8c7e97] block font-medium">{t.tithi}</span>
-                  <p className="mt-0.5 font-bold text-[#4D4664] truncate">{horoscopeData.panchang.tithi}</p>
+                <div className="rounded-xl bg-[#fff8f3] border border-[#f0dfd2] p-2.5">
+                  <span className="text-[#8a7f83] block font-medium">{t.tithi}</span>
+                  <p className="mt-0.5 font-bold text-[#5c5156] truncate">{horoscopeData.panchang.tithi}</p>
                   <span className="text-[10px] text-[#a597b0] block">{horoscopeData.panchang.paksha}</span>
                 </div>
-                <div className="rounded-xl bg-[#fffcf9] border border-[#f0dfd2] p-2.5">
-                  <span className="text-[#8c7e97] block font-medium">{t.nakshatra}</span>
-                  <p className="mt-0.5 font-bold text-[#4D4664] truncate">{horoscopeData.panchang.nakshatra}</p>
+                <div className="rounded-xl bg-[#fff8f3] border border-[#f0dfd2] p-2.5">
+                  <span className="text-[#8a7f83] block font-medium">{t.nakshatra}</span>
+                  <p className="mt-0.5 font-bold text-[#5c5156] truncate">{horoscopeData.panchang.nakshatra}</p>
                   <span className="text-[10px] text-[#a597b0] block">{t.pada} {horoscopeData.panchang.nakshatra_pada}</span>
                 </div>
-                <div className="rounded-xl bg-[#fffcf9] border border-[#f0dfd2] p-2.5">
-                  <span className="text-[#8c7e97] block font-medium">{t.yoga}</span>
-                  <p className="mt-0.5 font-bold text-[#4D4664] truncate">{horoscopeData.panchang.yoga}</p>
+                <div className="rounded-xl bg-[#fff8f3] border border-[#f0dfd2] p-2.5">
+                  <span className="text-[#8a7f83] block font-medium">{t.yoga}</span>
+                  <p className="mt-0.5 font-bold text-[#5c5156] truncate">{horoscopeData.panchang.yoga}</p>
                 </div>
-                <div className="rounded-xl bg-[#fffcf9] border border-[#f0dfd2] p-2.5">
-                  <span className="text-[#8c7e97] block font-medium">{t.karana}</span>
-                  <p className="mt-0.5 font-bold text-[#4D4664] truncate">{horoscopeData.panchang.karana}</p>
+                <div className="rounded-xl bg-[#fff8f3] border border-[#f0dfd2] p-2.5">
+                  <span className="text-[#8a7f83] block font-medium">{t.karana}</span>
+                  <p className="mt-0.5 font-bold text-[#5c5156] truncate">{horoscopeData.panchang.karana}</p>
                 </div>
-                <div className="rounded-xl bg-[#fffcf9] border border-[#f0dfd2] p-2.5">
-                  <span className="text-[#8c7e97] block font-medium">{t.sunSign}</span>
+                <div className="rounded-xl bg-[#fff8f3] border border-[#f0dfd2] p-2.5">
+                  <span className="text-[#8a7f83] block font-medium">{t.sunSign}</span>
                   <p className="mt-0.5 font-bold text-[#b06d4e] truncate">{horoscopeData.sun_sign}</p>
                 </div>
-                <div className="rounded-xl bg-[#fffcf9] border border-[#f0dfd2] p-2.5">
-                  <span className="text-[#8c7e97] block font-medium">{t.vara}</span>
-                  <p className="mt-0.5 font-bold text-[#4D4664] truncate">{horoscopeData.panchang.vara}</p>
+                <div className="rounded-xl bg-[#fff8f3] border border-[#f0dfd2] p-2.5">
+                  <span className="text-[#8a7f83] block font-medium">{t.vara}</span>
+                  <p className="mt-0.5 font-bold text-[#5c5156] truncate">{horoscopeData.panchang.vara}</p>
                 </div>
               </div>
 
@@ -1370,7 +1370,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                 </div>
                 {horoscopeData.panchang.favorable_chandra_rashis && horoscopeData.panchang.favorable_chandra_rashis.length > 0 && (
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-[#8c7e97]">{t.favorableChandraTitle}:</span>
+                    <span className="text-[#8a7f83]">{t.favorableChandraTitle}:</span>
                     {horoscopeData.panchang.favorable_chandra_rashis.map((r, i) => (
                       <span key={i} className="px-2 py-0.5 rounded-md bg-[#fff7ef] border border-[#edd7c4] text-[#8c5035] font-semibold text-[11px]">
                         {r}
@@ -1384,22 +1384,22 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
 
           {/* Interactive 24-Hour Planetary Hora Timeline Drawer */}
           {showHoras && horoscopeData?.panchang.horas && (
-            <div className="mb-8 rounded-3xl border border-[#d6b7a2] bg-gradient-to-br from-[#fbf4eb] via-[#f8ebe0] to-[#fbf4eb] p-6 shadow-sm fade-in slide-in-from-top-3">
+            <div className="mb-8 rounded-3xl border border-[#d6b7a2] bg-gradient-to-br from-[#fbeee5] via-[#f8ebe0] to-[#fbeee5] p-6 shadow-sm fade-in slide-in-from-top-3">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[#ebd7c8]">
                 <div>
-                  <h3 className="font-cinzel text-lg font-bold text-[#4D4664] flex items-center gap-2">
+                  <h3 className="font-cinzel text-lg font-bold text-[#5c5156] flex items-center gap-2">
                     <Clock className="size-5 text-[#b06d4e]" />
                     <span>{t.horaTitle}</span>
                   </h3>
-                  <p className="text-xs text-[#7d7388] mt-0.5">{t.horaDesc}</p>
+                  <p className="text-xs text-[#8a7f83] mt-0.5">{t.horaDesc}</p>
                 </div>
 
-                <div className="flex items-center rounded-xl border border-[#e2d0bf] bg-[#fbf4ec] p-0.5 text-xs">
+                <div className="flex items-center rounded-xl border border-[#e2d0bf] bg-[#fbeee5] p-0.5 text-xs">
                   <button
                     type="button"
                     onClick={() => setHoraViewPeriod("day")}
                     className={`px-3 py-1 rounded-lg press transition-colors font-semibold ${
-                      horaViewPeriod === "day" ? "bg-[#b06d4e] text-white shadow-xs" : "text-[#5e5369]"
+                      horaViewPeriod === "day" ? "bg-[#b06d4e] text-white shadow-xs" : "text-[#5c5156]"
                     }`}
                   >
                     ☀️ {t.dayHoras}
@@ -1408,7 +1408,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                     type="button"
                     onClick={() => setHoraViewPeriod("night")}
                     className={`px-3 py-1 rounded-lg press transition-colors font-semibold ${
-                      horaViewPeriod === "night" ? "bg-[#b06d4e] text-white shadow-xs" : "text-[#5e5369]"
+                      horaViewPeriod === "night" ? "bg-[#b06d4e] text-white shadow-xs" : "text-[#5c5156]"
                     }`}
                   >
                     🌙 {t.nightHoras}
@@ -1425,12 +1425,12 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                       key={hora.hora_index}
                       className={`rounded-2xl border p-3.5 transition-all text-xs ${
                         hora.is_auspicious
-                          ? "bg-[#fffcf9] border-emerald-500/25 hover:border-emerald-500/50 shadow-2xs"
-                          : "bg-[#fffaf5] border-amber-500/25 hover:border-amber-500/50 shadow-2xs"
+                          ? "bg-[#fff8f3] border-emerald-500/25 hover:border-emerald-500/50 shadow-2xs"
+                          : "bg-[#fff8f3] border-amber-500/25 hover:border-amber-500/50 shadow-2xs"
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="font-bold text-[#4D4664]">
+                        <span className="font-bold text-[#5c5156]">
                           {hora.start_time} – {hora.end_time}
                         </span>
                         <span
@@ -1458,10 +1458,10 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                             : hora.planet}{" "}
                           {t.horaSuffix}
                         </span>
-                        <span className="text-xs font-normal text-[#8c7e97]">{hora.planet_sa}</span>
+                        <span className="text-xs font-normal text-[#8a7f83]">{hora.planet_sa}</span>
                       </div>
 
-                      <p className="text-[11px] font-medium text-[#4D4664] mb-1">
+                      <p className="text-[11px] font-medium text-[#5c5156] mb-1">
                         {language === "bn"
                           ? hora.verdict_bn || hora.verdict
                           : language === "hi"
@@ -1484,22 +1484,22 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
 
           {/* Interactive 16 Vedic Choghadiya Drawer */}
           {showChoghadiya && horoscopeData?.panchang.choghadiya && (
-            <div className="mb-8 rounded-3xl border border-[#d6b7a2] bg-gradient-to-br from-[#fbf4eb] via-[#f8ebe0] to-[#fbf4eb] p-6 shadow-sm fade-in slide-in-from-top-3">
+            <div className="mb-8 rounded-3xl border border-[#d6b7a2] bg-gradient-to-br from-[#fbeee5] via-[#f8ebe0] to-[#fbeee5] p-6 shadow-sm fade-in slide-in-from-top-3">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[#ebd7c8]">
                 <div>
-                  <h3 className="font-cinzel text-lg font-bold text-[#4D4664] flex items-center gap-2">
+                  <h3 className="font-cinzel text-lg font-bold text-[#5c5156] flex items-center gap-2">
                     <Sparkles className="size-5 text-[#b06d4e]" />
                     <span>{t.choghadiyaTitle}</span>
                   </h3>
-                  <p className="text-xs text-[#7d7388] mt-0.5">{t.choghadiyaDesc}</p>
+                  <p className="text-xs text-[#8a7f83] mt-0.5">{t.choghadiyaDesc}</p>
                 </div>
 
-                <div className="flex items-center rounded-xl border border-[#e2d0bf] bg-[#fbf4ec] p-0.5 text-xs">
+                <div className="flex items-center rounded-xl border border-[#e2d0bf] bg-[#fbeee5] p-0.5 text-xs">
                   <button
                     type="button"
                     onClick={() => setChoghadiyaViewPeriod("day")}
                     className={`px-3 py-1 rounded-lg press transition-colors font-semibold ${
-                      choghadiyaViewPeriod === "day" ? "bg-[#b06d4e] text-white shadow-xs" : "text-[#5e5369]"
+                      choghadiyaViewPeriod === "day" ? "bg-[#b06d4e] text-white shadow-xs" : "text-[#5c5156]"
                     }`}
                   >
                     ☀️ {t.dayChoghadiya}
@@ -1508,7 +1508,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                     type="button"
                     onClick={() => setChoghadiyaViewPeriod("night")}
                     className={`px-3 py-1 rounded-lg press transition-colors font-semibold ${
-                      choghadiyaViewPeriod === "night" ? "bg-[#b06d4e] text-white shadow-xs" : "text-[#5e5369]"
+                      choghadiyaViewPeriod === "night" ? "bg-[#b06d4e] text-white shadow-xs" : "text-[#5c5156]"
                     }`}
                   >
                     🌙 {t.nightChoghadiya}
@@ -1523,10 +1523,10 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                   .map((chog: ChoghadiyaItem) => (
                     <div
                       key={chog.period_index}
-                      className="rounded-2xl border border-[#eedecf] bg-[#fffcf9] p-3.5 transition-all text-xs shadow-2xs hover:border-[#b06d4e]/40"
+                      className="rounded-2xl border border-[#eedecf] bg-[#fff8f3] p-3.5 transition-all text-xs shadow-2xs hover:border-[#b06d4e]/40"
                     >
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="font-bold text-[#4D4664]">
+                        <span className="font-bold text-[#5c5156]">
                           {chog.start_time} – {chog.end_time}
                         </span>
                         <span
@@ -1542,10 +1542,10 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                         <span>
                           {language === "bn" ? chog.name_bn : language === "hi" ? chog.name_hi || chog.name : chog.name}
                         </span>
-                        <span className="text-[11px] font-normal text-[#8c7e97]">{chog.ruler_planet}</span>
+                        <span className="text-[11px] font-normal text-[#8a7f83]">{chog.ruler_planet}</span>
                       </div>
 
-                      <p className="text-[11px] leading-relaxed text-[#594f63] mt-1">
+                      <p className="text-[11px] leading-relaxed text-[#5c5156] mt-1">
                         {language === "bn"
                           ? chog.guidance_bn
                           : language === "hi"
@@ -1576,7 +1576,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                     key={bio.hour}
                     className="rounded-xl border border-emerald-600/20 bg-white/90 p-2.5 text-center text-xs shadow-2xs"
                   >
-                    <span className="text-[11px] font-semibold text-[#8c7e97] block">
+                    <span className="text-[11px] font-semibold text-[#8a7f83] block">
                       {bio.time_label}
                     </span>
                     <strong className="text-base font-bold text-emerald-900 block my-1">
@@ -1596,10 +1596,10 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                         style={{ width: `${bio.energy_score}%` }}
                       />
                     </div>
-                    <span className="text-[10px] text-[#594f63] font-medium block truncate">
+                    <span className="text-[10px] text-[#5c5156] font-medium block truncate">
                       {language === "bn" ? bio.status_bn : language === "hi" ? bio.status_hi || bio.status : bio.status}
                     </span>
-                    <span className="text-[9px] text-[#8c7e97] block">
+                    <span className="text-[9px] text-[#8a7f83] block">
                       {bio.dominant_graha}
                     </span>
                   </div>
@@ -1610,14 +1610,14 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
 
           {/* Read Your Daily Horoscope by choosing your Zodiac Sign — Astrotalk style */}
           <div className="mb-8">
-            <h2 className="font-cinzel text-2xl sm:text-3xl font-bold text-[#4D4664]">
+            <h2 className="font-cinzel text-2xl sm:text-3xl font-bold text-[#5c5156]">
               {language === "bn"
                 ? "আপনার রাশি বেছে দৈনিক রাশিফল পড়ুন"
                 : language === "hi"
                 ? "अपनी राशि चुनकर दैनिक राशिफल पढ़ें"
                 : "Read Your Daily Horoscope by choosing your Zodiac Sign"}
             </h2>
-            <p className="mt-1 mb-5 text-sm text-[#8c7e97]">
+            <p className="mt-1 mb-5 text-sm text-[#8a7f83]">
               {language === "bn"
                 ? "১২টি রাশির আজকের পূর্বাভাস পড়ুন।"
                 : language === "hi"
@@ -1650,10 +1650,10 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                         <img src={sign.icon} alt={sign.en} width={38} height={38} className="size-9 object-contain" />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-base font-bold leading-tight text-[#1a1208] group-hover:text-[#b06d4e] transition-colors">
+                        <h3 className="text-base font-bold leading-tight text-[#1d1a1c] group-hover:text-[#b06d4e] transition-colors">
                           {name}
                         </h3>
-                        <p className="text-xs text-[#8c7e97]">{SIGN_DATES[sign.id]}</p>
+                        <p className="text-xs text-[#8a7f83]">{SIGN_DATES[sign.id]}</p>
                       </div>
                       {typeof score === "number" && (
                         <span
@@ -1674,7 +1674,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                     <div className="mt-3 flex items-center gap-4 text-xs text-[#6f637b]">
                       <span className="inline-flex items-center gap-1">
                         {t.luckyNumber}:{" "}
-                        <strong className="text-[#4D4664]">{sh ? sh.lucky_number : "—"}</strong>
+                        <strong className="text-[#5c5156]">{sh ? sh.lucky_number : "—"}</strong>
                       </span>
                       <span className="inline-flex items-center gap-1.5">
                         {t.luckyColor}:
@@ -1708,8 +1708,8 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
           {isDetail && (loading ? (
             <div className="rounded-3xl border border-[#ebd7c8] bg-[#fdf9f4] p-12 text-center shadow-sm">
               <RotateCcw className="size-8 text-[#b06d4e] animate-spin mx-auto mb-3" />
-              <p className="font-cinzel text-lg font-bold text-[#4D4664]">{t.calculatingTitle}</p>
-              <p className="text-xs text-[#7d7388] mt-1">{t.calculatingSub}</p>
+              <p className="font-cinzel text-lg font-bold text-[#5c5156]">{t.calculatingTitle}</p>
+              <p className="text-xs text-[#8a7f83] mt-1">{t.calculatingSub}</p>
             </div>
           ) : error ? (
             <div className="rounded-3xl border border-rose-300 bg-rose-50/70 p-8 text-center">
@@ -1771,12 +1771,12 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
               )}
 
               {/* Active Sign Header & Score Overview Card */}
-              <div className="rounded-3xl border border-[#e5cebd] bg-gradient-to-br from-[#fbf4eb] via-[#f8ede2] to-[#faf1e6] p-6 sm:p-8 shadow-sm">
+              <div className="rounded-3xl border border-[#e5cebd] bg-gradient-to-br from-[#fbeee5] via-[#f8ede2] to-[#faf1e6] p-6 sm:p-8 shadow-sm">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 pb-6 border-b border-[#e5cebd]">
                   
                   {/* Left: Sign Identity */}
                   <div className="flex items-center gap-4 sm:gap-5">
-                    <div className="flex size-16 sm:size-20 shrink-0 items-center justify-center rounded-2xl border border-[#d9b64a] bg-gradient-to-br from-[#fdf6da] to-[#f3e3a0] shadow-sm">
+                    <div className="flex size-16 sm:size-20 shrink-0 items-center justify-center rounded-2xl border border-[#ef9e34] bg-gradient-to-br from-[#fce8db] to-[#f7d09c] shadow-sm">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={ZODIAC_LIST[activeSignIndex]?.icon ?? "/images/zodiac/vedic/mesha.svg"}
@@ -1788,7 +1788,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                     </div>
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h2 className="font-cinzel text-2xl sm:text-3xl font-bold text-[#4D4664]">
+                        <h2 className="font-cinzel text-2xl sm:text-3xl font-bold text-[#5c5156]">
                           {activeSignData.sign_name}
                         </h2>
                         <span className="text-sm font-serif italic text-[#8d7b92]">
@@ -1800,7 +1800,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                       </div>
 
                       <p className="mt-1 text-xs sm:text-sm text-[#736780]">
-                        <strong>{activeSignData.transit_house_name}</strong> • {t.rulingLord}: <strong className="text-[#4D4664]">{currentMeta.ruler}</strong> • {t.element}: <strong className="text-[#4D4664]">{currentMeta.element}</strong>
+                        <strong>{activeSignData.transit_house_name}</strong> • {t.rulingLord}: <strong className="text-[#5c5156]">{currentMeta.ruler}</strong> • {t.element}: <strong className="text-[#5c5156]">{currentMeta.element}</strong>
                       </p>
 
                       {/* Saturn Sade Sati & Jupiter Status Badges */}
@@ -1811,7 +1811,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                           </span>
                         )}
                         {activeSignData.guru_gochar_verdict && (
-                          <span className="px-2.5 py-0.5 rounded-full bg-[#fbf3db] border border-[#ebd6a4] text-[#73581c] font-semibold text-[11px]">
+                          <span className="px-2.5 py-0.5 rounded-full bg-[#fbe8db] border border-[#ebd6a4] text-[#73581c] font-semibold text-[11px]">
                             🌟 {t.guruLabel}: {activeSignData.guru_gochar_verdict}
                           </span>
                         )}
@@ -1820,9 +1820,9 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                   </div>
 
                   {/* Right: Overall Day Score Wheel / Badge */}
-                  <div className="flex items-center gap-4 bg-[#fffaf5] border border-[#ebd7c8] rounded-2xl p-4 sm:px-6 shadow-2xs">
+                  <div className="flex items-center gap-4 bg-[#fff8f3] border border-[#ebd7c8] rounded-2xl p-4 sm:px-6 shadow-2xs">
                     <div className="text-right">
-                      <span className="text-xs font-semibold text-[#8c7e97] block uppercase tracking-wider">{t.overall}</span>
+                      <span className="text-xs font-semibold text-[#8a7f83] block uppercase tracking-wider">{t.overall}</span>
                       <p className="text-xs text-[#6e6279]">{t.vedicGocharIndex}</p>
                     </div>
                     <div className="flex size-14 sm:size-16 items-center justify-center rounded-full border-4 border-[#b06d4e] bg-[#fbf1e7] text-xl sm:text-2xl font-bold text-[#b06d4e] shadow-inner">
@@ -1836,7 +1836,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                   
                   {/* Career */}
                   <div className="rounded-2xl bg-[#fffbf7] border border-[#eedecf] p-4">
-                    <div className="flex items-center justify-between text-xs font-bold text-[#4D4664] mb-2">
+                    <div className="flex items-center justify-between text-xs font-bold text-[#5c5156] mb-2">
                       <span className="flex items-center gap-1.5">
                         <Briefcase className="size-3.5 text-blue-600" />
                         {t.career}
@@ -1853,7 +1853,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
 
                   {/* Love */}
                   <div className="rounded-2xl bg-[#fffbf7] border border-[#eedecf] p-4">
-                    <div className="flex items-center justify-between text-xs font-bold text-[#4D4664] mb-2">
+                    <div className="flex items-center justify-between text-xs font-bold text-[#5c5156] mb-2">
                       <span className="flex items-center gap-1.5">
                         <Heart className="size-3.5 text-rose-500" />
                         {t.love}
@@ -1870,7 +1870,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
 
                   {/* Finance */}
                   <div className="rounded-2xl bg-[#fffbf7] border border-[#eedecf] p-4">
-                    <div className="flex items-center justify-between text-xs font-bold text-[#4D4664] mb-2">
+                    <div className="flex items-center justify-between text-xs font-bold text-[#5c5156] mb-2">
                       <span className="flex items-center gap-1.5">
                         <Coins className="size-3.5 text-emerald-600" />
                         {t.finance}
@@ -1887,7 +1887,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
 
                   {/* Health */}
                   <div className="rounded-2xl bg-[#fffbf7] border border-[#eedecf] p-4">
-                    <div className="flex items-center justify-between text-xs font-bold text-[#4D4664] mb-2">
+                    <div className="flex items-center justify-between text-xs font-bold text-[#5c5156] mb-2">
                       <span className="flex items-center gap-1.5">
                         <Activity className="size-3.5 text-amber-600" />
                         {t.health}
@@ -1907,22 +1907,22 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
 
               {/* Dual Transit Analysis (Moon Mind + Lagna Manifestation) */}
               {horoscopeData?.dual_transit && (
-                <div className="rounded-2xl border border-[#c4a482] bg-gradient-to-br from-[#fbf4eb] via-[#f7e9dc] to-[#fbf4eb] p-5 sm:p-6 shadow-xs">
+                <div className="rounded-2xl border border-[#c4a482] bg-gradient-to-br from-[#fbeee5] via-[#f7e9dc] to-[#fbeee5] p-5 sm:p-6 shadow-xs">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2.5 text-[#8c5035]">
                       <Scale className="size-5 text-[#b06d4e]" />
-                      <h3 className="font-cinzel text-base font-bold text-[#4D4664]">{t.dualTransitTitle}</h3>
+                      <h3 className="font-cinzel text-base font-bold text-[#5c5156]">{t.dualTransitTitle}</h3>
                     </div>
                     <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
                       {horoscopeData.dual_transit.dual_harmony_score}% Harmony
                     </span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                    <div className="rounded-xl bg-[#fffcf9] border border-[#f0dfd2] p-3.5">
+                    <div className="rounded-xl bg-[#fff8f3] border border-[#f0dfd2] p-3.5">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-[#b06d4e]">
                         {t.moonTransitHeading}
                       </span>
-                      <p className="text-sm font-bold text-[#4D4664] mt-0.5">
+                      <p className="text-sm font-bold text-[#5c5156] mt-0.5">
                         {language === "bn"
                           ? `${horoscopeData.dual_transit.moon_transit_house}ম ভাব গোচর`
                           : language === "hi"
@@ -1937,11 +1937,11 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                           : horoscopeData.dual_transit.emotional_outlook}
                       </p>
                     </div>
-                    <div className="rounded-xl bg-[#fffcf9] border border-[#f0dfd2] p-3.5">
+                    <div className="rounded-xl bg-[#fff8f3] border border-[#f0dfd2] p-3.5">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-[#b06d4e]">
                         {t.lagnaTransitHeading}
                       </span>
-                      <p className="text-sm font-bold text-[#4D4664] mt-0.5">
+                      <p className="text-sm font-bold text-[#5c5156] mt-0.5">
                         {language === "bn"
                           ? `${horoscopeData.dual_transit.lagna_transit_house}ম ভাব গোচর`
                           : language === "hi"
@@ -1957,7 +1957,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                       </p>
                     </div>
                   </div>
-                  <p className="mt-3 text-xs leading-relaxed text-[#594f63] font-medium border-t border-[#ebd0be] pt-2.5">
+                  <p className="mt-3 text-xs leading-relaxed text-[#5c5156] font-medium border-t border-[#ebd0be] pt-2.5">
                     {language === "bn"
                       ? horoscopeData.dual_transit.synthesis_verdict_bn
                       : language === "hi"
@@ -1973,7 +1973,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2 text-[#b06d4e]">
                       <Coins className="size-4" />
-                      <h3 className="font-cinzel text-base font-bold text-[#4D4664]">{t.numerologySynergyTitle}</h3>
+                      <h3 className="font-cinzel text-base font-bold text-[#5c5156]">{t.numerologySynergyTitle}</h3>
                     </div>
                     <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
                       {horoscopeData.numerology_synergy.synergy_score_pct}% Match
@@ -1981,19 +1981,19 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs mb-3">
                     <div className="rounded-xl bg-[#fff] border border-[#f0dfd2] p-2.5 text-center">
-                      <span className="text-[#8c7e97] block">{t.mulank}</span>
+                      <span className="text-[#8a7f83] block">{t.mulank}</span>
                       <strong className="text-lg text-[#b06d4e]">{horoscopeData.numerology_synergy.mulank}</strong>
                     </div>
                     <div className="rounded-xl bg-[#fff] border border-[#f0dfd2] p-2.5 text-center">
-                      <span className="text-[#8c7e97] block">{t.bhagyank}</span>
-                      <strong className="text-lg text-[#4D4664]">{horoscopeData.numerology_synergy.bhagyank}</strong>
+                      <span className="text-[#8a7f83] block">{t.bhagyank}</span>
+                      <strong className="text-lg text-[#5c5156]">{horoscopeData.numerology_synergy.bhagyank}</strong>
                     </div>
                     <div className="rounded-xl bg-[#fff] border border-[#f0dfd2] p-2.5 text-center">
-                      <span className="text-[#8c7e97] block">{t.ruler}</span>
-                      <strong className="text-sm text-[#4D4664]">{horoscopeData.numerology_synergy.ruling_planet}</strong>
+                      <span className="text-[#8a7f83] block">{t.ruler}</span>
+                      <strong className="text-sm text-[#5c5156]">{horoscopeData.numerology_synergy.ruling_planet}</strong>
                     </div>
                     <div className="rounded-xl bg-[#fff] border border-[#f0dfd2] p-2.5 text-center">
-                      <span className="text-[#8c7e97] block">{t.dayHarmony}</span>
+                      <span className="text-[#8a7f83] block">{t.dayHarmony}</span>
                       <strong className="text-sm text-[#b06d4e]">
                         {language === "bn"
                           ? horoscopeData.numerology_synergy.day_relationship_bn
@@ -2003,7 +2003,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                       </strong>
                     </div>
                   </div>
-                  <p className="text-xs text-[#594f63] leading-relaxed">
+                  <p className="text-xs text-[#5c5156] leading-relaxed">
                     {language === "bn"
                       ? horoscopeData.numerology_synergy.advice_bn
                       : language === "hi"
@@ -2019,7 +2019,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2 text-[#8c5035]">
                       <Award className="size-5 text-[#b06d4e]" />
-                      <h3 className="font-cinzel text-base font-bold text-[#4D4664]">{t.ashtakavargaTitle}</h3>
+                      <h3 className="font-cinzel text-base font-bold text-[#5c5156]">{t.ashtakavargaTitle}</h3>
                     </div>
                     <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
                       {language === "bn"
@@ -2030,22 +2030,22 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                     </span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                    <div className="rounded-xl bg-[#fffaf5] border border-[#edd7c4] p-3 text-center">
-                      <span className="text-[#8c7e97] block">{t.savTitle}</span>
+                    <div className="rounded-xl bg-[#fff8f3] border border-[#edd7c4] p-3 text-center">
+                      <span className="text-[#8a7f83] block">{t.savTitle}</span>
                       <strong className="text-xl text-[#b06d4e]">{activeSignData.ashtakavarga.sarvashtakavarga_points} / 56</strong>
-                      <span className="text-[10px] text-[#7d7388] block">{t.savHint}</span>
+                      <span className="text-[10px] text-[#8a7f83] block">{t.savHint}</span>
                     </div>
-                    <div className="rounded-xl bg-[#fffaf5] border border-[#edd7c4] p-3 text-center">
-                      <span className="text-[#8c7e97] block">{t.bavTitle}</span>
-                      <strong className="text-xl text-[#4D4664]">{activeSignData.ashtakavarga.moon_bhinnashtakavarga_points} / 8</strong>
-                      <span className="text-[10px] text-[#7d7388] block">{t.bavHint}</span>
+                    <div className="rounded-xl bg-[#fff8f3] border border-[#edd7c4] p-3 text-center">
+                      <span className="text-[#8a7f83] block">{t.bavTitle}</span>
+                      <strong className="text-xl text-[#5c5156]">{activeSignData.ashtakavarga.moon_bhinnashtakavarga_points} / 8</strong>
+                      <span className="text-[10px] text-[#8a7f83] block">{t.bavHint}</span>
                     </div>
-                    <div className="rounded-xl bg-[#fffaf5] border border-[#edd7c4] p-3 text-center">
-                      <span className="text-[#8c7e97] block">{t.kpSubLord}</span>
-                      <strong className="text-sm text-[#4D4664] block mt-1">
+                    <div className="rounded-xl bg-[#fff8f3] border border-[#edd7c4] p-3 text-center">
+                      <span className="text-[#8a7f83] block">{t.kpSubLord}</span>
+                      <strong className="text-sm text-[#5c5156] block mt-1">
                         {activeSignData.nakshatra_pada_shift?.kp_sub_lord || "Active"}
                       </strong>
-                      <span className="text-[10px] text-[#7d7388] block">
+                      <span className="text-[10px] text-[#8a7f83] block">
                         Lord: {activeSignData.nakshatra_pada_shift?.nakshatra_lord || "Active"}
                       </span>
                     </div>
@@ -2058,13 +2058,13 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                 <div className="rounded-2xl border border-[#ebd7c8] bg-[#fbf5ee] p-5 sm:p-6 shadow-2xs">
                   <div className="flex items-center gap-2 text-[#8c5035] mb-3">
                     <Eye className="size-5 text-[#b06d4e]" />
-                    <h3 className="font-cinzel text-base font-bold text-[#4D4664]">{t.drishtiTitle}</h3>
+                    <h3 className="font-cinzel text-base font-bold text-[#5c5156]">{t.drishtiTitle}</h3>
                   </div>
                   <div className="space-y-3">
                     {activeSignData.planetary_drishtis.map((d, idx) => (
-                      <div key={idx} className="rounded-xl bg-[#fffaf5] border border-[#eedecf] p-3 text-xs">
+                      <div key={idx} className="rounded-xl bg-[#fff8f3] border border-[#eedecf] p-3 text-xs">
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-[#4D4664]">
+                          <span className="font-bold text-[#5c5156]">
                             {language === "bn"
                               ? d.yoga_name_bn
                               : language === "hi"
@@ -2078,7 +2078,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                             {d.aspect_type}
                           </span>
                         </div>
-                        <p className="mt-1 text-[#594f63] leading-relaxed">
+                        <p className="mt-1 text-[#5c5156] leading-relaxed">
                           {language === "bn"
                             ? d.impact_bn
                             : language === "hi"
@@ -2107,7 +2107,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2 text-[#8c5035]">
                       <BookOpen className="size-5 text-[#b06d4e]" />
-                      <h3 className="font-cinzel text-base font-bold text-[#4D4664]">{t.clientRulesTitle}</h3>
+                      <h3 className="font-cinzel text-base font-bold text-[#5c5156]">{t.clientRulesTitle}</h3>
                     </div>
                     <button
                       type="button"
@@ -2123,10 +2123,10 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                       .slice(0, showClientRules ? 15 : 6)
                       .map((cl: any, idx: number) => (
                         <div key={idx} className="rounded-xl bg-[#fff] border border-[#eedecf] p-2.5">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#8c7e97] block">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#8a7f83] block">
                             {cl.label}
                           </span>
-                          <strong className="text-xs text-[#4D4664] block mt-0.5">{cl.value}</strong>
+                          <strong className="text-xs text-[#5c5156] block mt-0.5">{cl.value}</strong>
                           <p className="text-[11px] text-[#6e5f7a] mt-1 line-clamp-2">{cl.definition}</p>
                         </div>
                       ))}
@@ -2141,11 +2141,11 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                 <div className="md:col-span-2 rounded-2xl border border-[#ebd7c8] bg-[#fefcf9] p-5 sm:p-6 shadow-2xs">
                   <div className="flex items-center gap-2.5 text-[#b06d4e] mb-3">
                     <Sparkles className="size-4" />
-                    <h3 className="font-cinzel text-base font-bold text-[#4D4664]">
+                    <h3 className="font-cinzel text-base font-bold text-[#5c5156]">
                       {t.generalSummary}
                     </h3>
                   </div>
-                  <p className="text-sm leading-relaxed text-[#594f63]">
+                  <p className="text-sm leading-relaxed text-[#5c5156]">
                     {activeSignData.summary}
                   </p>
                 </div>
@@ -2155,7 +2155,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2 text-blue-700">
                       <Briefcase className="size-4" />
-                      <h3 className="font-cinzel text-base font-bold text-[#4D4664]">
+                      <h3 className="font-cinzel text-base font-bold text-[#5c5156]">
                         {t.careerSummary}
                       </h3>
                     </div>
@@ -2163,7 +2163,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                       {activeSignData.career_score}%
                     </span>
                   </div>
-                  <p className="text-sm leading-relaxed text-[#594f63]">
+                  <p className="text-sm leading-relaxed text-[#5c5156]">
                     {activeSignData.career_prediction}
                   </p>
                 </div>
@@ -2173,7 +2173,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2 text-rose-600">
                       <Heart className="size-4" />
-                      <h3 className="font-cinzel text-base font-bold text-[#4D4664]">
+                      <h3 className="font-cinzel text-base font-bold text-[#5c5156]">
                         {t.loveSummary}
                       </h3>
                     </div>
@@ -2181,7 +2181,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                       {activeSignData.love_score}%
                     </span>
                   </div>
-                  <p className="text-sm leading-relaxed text-[#594f63]">
+                  <p className="text-sm leading-relaxed text-[#5c5156]">
                     {activeSignData.love_prediction}
                   </p>
                 </div>
@@ -2191,7 +2191,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2 text-emerald-700">
                       <Coins className="size-4" />
-                      <h3 className="font-cinzel text-base font-bold text-[#4D4664]">
+                      <h3 className="font-cinzel text-base font-bold text-[#5c5156]">
                         {t.financeSummary}
                       </h3>
                     </div>
@@ -2199,7 +2199,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                       {activeSignData.finance_score}%
                     </span>
                   </div>
-                  <p className="text-sm leading-relaxed text-[#594f63]">
+                  <p className="text-sm leading-relaxed text-[#5c5156]">
                     {activeSignData.finance_prediction}
                   </p>
                 </div>
@@ -2209,7 +2209,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2 text-amber-700">
                       <Activity className="size-4" />
-                      <h3 className="font-cinzel text-base font-bold text-[#4D4664]">
+                      <h3 className="font-cinzel text-base font-bold text-[#5c5156]">
                         {t.healthSummary}
                       </h3>
                     </div>
@@ -2217,7 +2217,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                       {activeSignData.health_score}%
                     </span>
                   </div>
-                  <p className="text-sm leading-relaxed text-[#594f63]">
+                  <p className="text-sm leading-relaxed text-[#5c5156]">
                     {activeSignData.health_prediction}
                   </p>
                 </div>
@@ -2229,29 +2229,29 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                 
                 {/* Lucky Attributes Card */}
                 <div className="lg:col-span-1 rounded-2xl border border-[#ebd7c8] bg-[#fbf3e9] p-5 sm:p-6 shadow-2xs">
-                  <h3 className="font-cinzel text-base font-bold text-[#4D4664] mb-4">
+                  <h3 className="font-cinzel text-base font-bold text-[#5c5156] mb-4">
                     {t.luckyAttributes}
                   </h3>
                   <div className="space-y-3 text-xs">
                     <div className="flex items-center justify-between py-1.5 border-b border-[#ebd7c8]">
-                      <span className="text-[#8c7e97] font-medium">{t.luckyNumber}</span>
+                      <span className="text-[#8a7f83] font-medium">{t.luckyNumber}</span>
                       <strong className="text-sm font-bold text-[#b06d4e]">{activeSignData.lucky_number}</strong>
                     </div>
                     <div className="flex items-center justify-between py-1.5 border-b border-[#ebd7c8]">
-                      <span className="text-[#8c7e97] font-medium">{t.luckyColor}</span>
-                      <strong className="text-[#4D4664] font-semibold">{activeSignData.lucky_color}</strong>
+                      <span className="text-[#8a7f83] font-medium">{t.luckyColor}</span>
+                      <strong className="text-[#5c5156] font-semibold">{activeSignData.lucky_color}</strong>
                     </div>
                     <div className="flex items-center justify-between py-1.5 border-b border-[#ebd7c8]">
-                      <span className="text-[#8c7e97] font-medium">{t.luckyTime}</span>
-                      <strong className="text-[#4D4664] font-semibold">{activeSignData.lucky_time}</strong>
+                      <span className="text-[#8a7f83] font-medium">{t.luckyTime}</span>
+                      <strong className="text-[#5c5156] font-semibold">{activeSignData.lucky_time}</strong>
                     </div>
                     <div className="flex items-center justify-between py-1.5 border-b border-[#ebd7c8]">
-                      <span className="text-[#8c7e97] font-medium">{t.direction}</span>
-                      <strong className="text-[#4D4664] font-semibold">{directionDisplay}</strong>
+                      <span className="text-[#8a7f83] font-medium">{t.direction}</span>
+                      <strong className="text-[#5c5156] font-semibold">{directionDisplay}</strong>
                     </div>
                     {activeSignData.tara_bala && (
                       <div className="flex items-center justify-between py-1.5">
-                        <span className="text-[#8c7e97] font-medium">{t.taraBalaBadge}</span>
+                        <span className="text-[#8a7f83] font-medium">{t.taraBalaBadge}</span>
                         <span className={`px-2 py-0.5 rounded-md font-bold text-[11px] border ${
                           activeSignData.tara_bala.is_auspicious ? "bg-emerald-100 text-emerald-800 border-emerald-300" : "bg-amber-100 text-amber-800 border-amber-300"
                         }`}>
@@ -2271,24 +2271,24 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
                 <div className="lg:col-span-2 rounded-2xl border border-[#d8bead] bg-gradient-to-br from-[#f8ebe0] via-[#f7e7da] to-[#f8ebe0] p-5 sm:p-6 shadow-2xs">
                   <div className="flex items-center gap-2 text-[#8c5035] mb-2.5">
                     <ShieldCheck className="size-5 text-[#b06d4e]" />
-                    <h3 className="font-cinzel text-base font-bold text-[#4D4664]">
+                    <h3 className="font-cinzel text-base font-bold text-[#5c5156]">
                       {t.remedyTitle}
                     </h3>
                   </div>
                   
                   {/* Classical Remedy */}
-                  <p className="text-sm leading-relaxed text-[#594f63] font-medium mb-3">
+                  <p className="text-sm leading-relaxed text-[#5c5156] font-medium mb-3">
                     {activeSignData.remedy}
                   </p>
 
                   {/* Beej Mantra Box */}
                   {activeSignData.beej_mantra && (
-                    <div className="mt-3 rounded-xl border border-[#e5ccba] bg-[#fffaf5] p-3 flex items-center justify-between gap-3">
+                    <div className="mt-3 rounded-xl border border-[#e5ccba] bg-[#fff8f3] p-3 flex items-center justify-between gap-3">
                       <div>
                         <span className="text-[10px] font-bold uppercase tracking-wider text-[#b06d4e] block">
                           {t.beejMantraTitle}
                         </span>
-                        <p className="font-serif text-sm font-bold text-[#4D4664] mt-0.5">
+                        <p className="font-serif text-sm font-bold text-[#5c5156] mt-0.5">
                           {activeSignData.beej_mantra}
                         </p>
                       </div>
@@ -2305,7 +2305,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
 
                   {/* Specific Charity Dana Box */}
                   {activeSignData.charity_dana && (
-                    <div className="mt-3 rounded-xl border border-[#edd7c4] bg-[#fdf8f2] p-3 text-xs text-[#594f63]">
+                    <div className="mt-3 rounded-xl border border-[#edd7c4] bg-[#fdf8f2] p-3 text-xs text-[#5c5156]">
                       <span className="font-bold text-[#8c5035] block mb-0.5">
                         {t.charityTitle}:
                       </span>
@@ -2332,7 +2332,7 @@ export function HoroscopeContent({ detailSign }: { detailSign?: string } = {}) {
 
               {/* Accuracy Transparency & Methodology Card */}
               <div className="rounded-2xl border border-[#ebd7c8] bg-[#fbf5ee] p-5 text-xs text-[#7d7088]">
-                <div className="flex items-center gap-2 text-[#4D4664] font-bold mb-1">
+                <div className="flex items-center gap-2 text-[#5c5156] font-bold mb-1">
                   <Info className="size-4 text-[#b06d4e]" />
                   <span>{t.accuracyTitle}</span>
                 </div>
@@ -2390,7 +2390,7 @@ export default function DailyHoroscopePage() {
   return (
     <React.Suspense
       fallback={
-        <div className="min-h-screen bg-[#faf6f0] flex items-center justify-center">
+        <div className="min-h-screen bg-[#fbeee5] flex items-center justify-center">
           <RotateCcw className="size-8 text-[#b06d4e] animate-spin" />
         </div>
       }

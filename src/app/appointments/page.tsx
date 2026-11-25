@@ -562,7 +562,7 @@ function AppointmentsContent() {
     <>
       <SiteHeader />
 
-      <main className="relative min-h-screen bg-[#FDFBF7] pb-36 overflow-hidden">
+      <main className="relative min-h-screen bg-[#fff8f3] pb-36 overflow-hidden">
         {/* =========================================================================
             COSMIC AMBIENT AURAS & SACRED GEOMETRY (Atmospheric Background)
         ========================================================================= */}
@@ -596,7 +596,7 @@ function AppointmentsContent() {
             {/* =========================================================================
             TOP EXPERIENCE SHOWCASE / HERO HEADER (BookMyShow / District Style)
         ========================================================================= */}
-        <section className="relative border-b border-amber-900/10 bg-gradient-to-b from-[#FFFDF9]/90 via-[#FAF6EE]/80 to-[#F5EEDD]/30 pt-6 pb-8 backdrop-blur-xs">
+        <section className="relative border-b border-amber-900/10 bg-gradient-to-b from-[#fff8f3]/90 via-[#FAF6EE]/80 to-[#F5EEDD]/30 pt-6 pb-8 backdrop-blur-xs">
           <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 space-y-6">
             
             {/* Back to Astrologers Selector & Change Option */}
@@ -1346,7 +1346,7 @@ function AppointmentsContent() {
               </div>
 
               {/* Selection Hero Header */}
-              <div className="relative overflow-hidden rounded-3xl border border-amber-900/15 bg-gradient-to-br from-white via-[#FFFDF9] to-[#FAF5EA] p-6 sm:p-10 shadow-[0_16px_40px_rgba(180,83,9,0.08)]">
+              <div className="relative overflow-hidden rounded-3xl border border-amber-900/15 bg-gradient-to-br from-white via-[#fff8f3] to-[#FAF5EA] p-6 sm:p-10 shadow-[0_16px_40px_rgba(180,83,9,0.08)]">
                 <div className="max-w-3xl space-y-4">
                   <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/10 border border-amber-500/25 px-3.5 py-1 text-xs font-bold text-amber-950 shadow-2xs">
                     <Sparkles className="size-3.5 text-amber-600" />
@@ -2196,7 +2196,7 @@ export default function AppointmentsPage() {
       fallback={
         <>
           <SiteHeader />
-          <main className="min-h-screen bg-[#FDFBF7] py-16">
+          <main className="min-h-screen bg-[#fff8f3] py-16">
             <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
               <LoadingBlock label="Loading Vedic booking experience..." />
             </div>

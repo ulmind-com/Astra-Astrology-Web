@@ -90,19 +90,19 @@ function AstrologerCardSkeleton() {
   return (
     <div className="shrink-0 w-[290px] sm:w-[320px] rounded-2xl border border-stone-200 bg-white p-5">
       <div className="flex items-start justify-between gap-3">
-        <div className="size-14 sm:size-16 rounded-2xl bg-[#faf3c4] animate-pulse" />
-        <div className="h-6 w-16 rounded-full bg-[#faf3c4] animate-pulse" />
+        <div className="size-14 sm:size-16 rounded-2xl bg-[#fde9dc] animate-pulse" />
+        <div className="h-6 w-16 rounded-full bg-[#fde9dc] animate-pulse" />
       </div>
-      <div className="mt-4 h-5 w-3/4 rounded bg-[#faf3c4] animate-pulse" />
-      <div className="mt-2 h-3.5 w-2/3 rounded bg-[#fdf6d0] animate-pulse" />
+      <div className="mt-4 h-5 w-3/4 rounded bg-[#fde9dc] animate-pulse" />
+      <div className="mt-2 h-3.5 w-2/3 rounded bg-[#fdeee3] animate-pulse" />
       <div className="mt-3.5 flex gap-1.5">
-        <div className="h-5 w-16 rounded-md bg-[#fdf6d0] animate-pulse" />
-        <div className="h-5 w-20 rounded-md bg-[#fdf6d0] animate-pulse" />
+        <div className="h-5 w-16 rounded-md bg-[#fdeee3] animate-pulse" />
+        <div className="h-5 w-20 rounded-md bg-[#fdeee3] animate-pulse" />
       </div>
-      <div className="mt-3 h-3.5 w-1/2 rounded bg-[#fdf6d0] animate-pulse" />
-      <div className="mt-5 pt-3.5 border-t border-[#faf3c4] flex items-center justify-between">
-        <div className="h-8 w-20 rounded bg-[#faf3c4] animate-pulse" />
-        <div className="h-9 w-24 rounded bg-[#faf3c4] animate-pulse" />
+      <div className="mt-3 h-3.5 w-1/2 rounded bg-[#fdeee3] animate-pulse" />
+      <div className="mt-5 pt-3.5 border-t border-[#fde9dc] flex items-center justify-between">
+        <div className="h-8 w-20 rounded bg-[#fde9dc] animate-pulse" />
+        <div className="h-9 w-24 rounded bg-[#fde9dc] animate-pulse" />
       </div>
     </div>
   );
@@ -175,7 +175,7 @@ export function AstrologersSideScroll() {
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <h2 className="font-cinzel text-2xl sm:text-4xl font-bold tracking-tight text-[#1a1208]">
+              <h2 className="font-cinzel text-2xl sm:text-4xl font-bold tracking-tight text-[#1d1a1c]">
                 Verified Astrologers Online Now
               </h2>
               {onlineCount > 0 && (
@@ -188,7 +188,7 @@ export function AstrologersSideScroll() {
                 </span>
               )}
             </div>
-            <p className="mt-2 text-xs sm:text-sm text-[#6b5f4d] max-w-xl">
+            <p className="mt-2 text-xs sm:text-sm text-[#5c5156] max-w-xl">
               {onlineCount > 0
                 ? "Connect instantly via real-time private chat or audio call. Rigorously vetted with transparent per-minute rates."
                 : "Nobody is at their desk this minute. Browse their profiles and book a time that suits you."}
@@ -209,7 +209,7 @@ export function AstrologersSideScroll() {
               onClick={() => scroll("left")}
               disabled={!canScrollLeft}
               aria-label="Previous Astrologer"
-              className={`flex size-10 items-center justify-center rounded-full border border-stone-200 bg-white text-[#1a1208] transition-all duration-200 hover:bg-stone-50 hover:scale-105 active:scale-95 ${
+              className={`flex size-10 items-center justify-center rounded-full border border-stone-200 bg-white text-[#1d1a1c] transition-all duration-200 hover:bg-stone-50 hover:scale-105 active:scale-95 ${
                 !canScrollLeft ? "opacity-40 cursor-not-allowed" : "shadow-sm"
               }`}
             >
@@ -220,7 +220,7 @@ export function AstrologersSideScroll() {
               onClick={() => scroll("right")}
               disabled={!canScrollRight}
               aria-label="Next Astrologer"
-              className={`flex size-10 items-center justify-center rounded-full border border-stone-200 bg-white text-[#1a1208] transition-all duration-200 hover:bg-stone-50 hover:scale-105 active:scale-95 ${
+              className={`flex size-10 items-center justify-center rounded-full border border-stone-200 bg-white text-[#1d1a1c] transition-all duration-200 hover:bg-stone-50 hover:scale-105 active:scale-95 ${
                 !canScrollRight ? "opacity-40 cursor-not-allowed" : "shadow-sm"
               }`}
             >
@@ -320,7 +320,7 @@ export function AstrologersSideScroll() {
                       {/* Name & Title */}
                       <div className="mt-4">
                         <div className="flex items-center gap-1.5">
-                          <h3 className="font-cinzel text-base sm:text-lg font-bold text-[#1a1208] group-hover:text-[#bd6c0c] transition-colors line-clamp-1">
+                          <h3 className="font-cinzel text-base sm:text-lg font-bold text-[#1d1a1c] group-hover:text-[#bd6c0c] transition-colors line-clamp-1">
                             {astro.display_name}
                           </h3>
                           <span title="Verified Astrologer">
@@ -328,7 +328,7 @@ export function AstrologersSideScroll() {
                           </span>
                         </div>
                         {astro.tagline && (
-                          <p className="mt-0.5 text-xs text-[#6b5f4d] line-clamp-1 font-medium">
+                          <p className="mt-0.5 text-xs text-[#5c5156] line-clamp-1 font-medium">
                             {astro.tagline}
                           </p>
                         )}
@@ -339,13 +339,13 @@ export function AstrologersSideScroll() {
                         {chips.map((s) => (
                           <span
                             key={s}
-                            className="rounded-md bg-[#fdf6d0] px-2 py-0.5 text-[10px] font-semibold text-[#6b5f4d]"
+                            className="rounded-md bg-[#fdeee3] px-2 py-0.5 text-[10px] font-semibold text-[#5c5156]"
                           >
                             {s}
                           </span>
                         ))}
                         {astro.experience_years > 0 && (
-                          <span className="rounded-md bg-stone-100 border border-stone-200 px-2 py-0.5 text-[10px] font-medium text-[#6b5f4d]">
+                          <span className="rounded-md bg-stone-100 border border-stone-200 px-2 py-0.5 text-[10px] font-medium text-[#5c5156]">
                             {astro.experience_years} yrs exp
                           </span>
                         )}
@@ -353,15 +353,15 @@ export function AstrologersSideScroll() {
 
                       {/* Languages */}
                       {astro.languages.length > 0 && (
-                        <p className="mt-3 text-[11px] text-[#6b5f4d] line-clamp-1">
-                          <span className="font-medium text-[#6b5f4d]">Languages: </span>
+                        <p className="mt-3 text-[11px] text-[#5c5156] line-clamp-1">
+                          <span className="font-medium text-[#5c5156]">Languages: </span>
                           {astro.languages.join(", ")}
                         </p>
                       )}
                     </div>
 
                     {/* Bottom: Pricing & Call to Action */}
-                    <div className="mt-5 pt-3.5 border-t border-[#faf3c4] flex items-center justify-between">
+                    <div className="mt-5 pt-3.5 border-t border-[#fde9dc] flex items-center justify-between">
                       <div>
                         <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
                           Rate
@@ -387,7 +387,7 @@ export function AstrologersSideScroll() {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="h-9 px-3 text-xs font-semibold border-[#e3d58f] text-[#1a1208] hover:bg-[#fef7cf]"
+                              className="h-9 px-3 text-xs font-semibold border-[#f3c9ac] text-[#1d1a1c] hover:bg-[#fdeee3]"
                             >
                               <Phone className="size-3.5 text-[#bd6c0c]" />
                             </Button>

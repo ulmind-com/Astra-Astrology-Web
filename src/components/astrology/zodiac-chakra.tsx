@@ -67,7 +67,7 @@ export function ZodiacChakra({
     >
       {/* 1. Dynamic Radiant Solar Aura Glow */}
       <div
-        className="absolute inset-[-6%] rounded-full bg-gradient-to-tr from-[#fcf6ad]/45 via-[#fef7cf]/40 to-[#f7ee7a]/35 blur-3xl pointer-events-none transition-all duration-700 ease-out animate-celestial-pulse"
+        className="absolute inset-[-6%] rounded-full bg-gradient-to-tr from-[#fcdaad]/45 via-[#fdeee3]/40 to-[#f7c17a]/35 blur-3xl pointer-events-none transition-all duration-700 ease-out animate-celestial-pulse"
         style={{
           transform: isHovered ? "scale(1.08)" : "scale(1)",
           opacity: isHovered ? 0.95 : 0.75,

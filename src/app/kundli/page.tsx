@@ -92,6 +92,7 @@ import {
   type UserPublic,
 } from "@/types";
 import { coinsPerMinute } from "@/lib/utils";
+import { takeKundliPrefill } from "@/lib/kundli-prefill";
 
 // Decorative Gold Diamond Divider matching Screenshots
 function GoldDiamondDivider({ className = "" }: { className?: string }) {
@@ -133,7 +134,7 @@ function VedicParchmentScroll({ className = "" }: { className?: string }) {
       </div>
 
       {/* Parchment Body */}
-      <div className="relative bg-gradient-to-b from-[#faf5e6] via-[#fbf7eb] to-[#f5edd4] border-x border-amber-700/40 p-1.5 sm:p-2 shadow-[0_6px_16px_rgba(180,83,9,0.08)] rounded-xs">
+      <div className="relative bg-gradient-to-b from-[#faeee6] via-[#fbf1eb] to-[#f5e1d4] border-x border-amber-700/40 p-1.5 sm:p-2 shadow-[0_6px_16px_rgba(180,83,9,0.08)] rounded-xs">
         {/* Subtle Watermark Glyph in Center */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.06]">
           <span className="text-3xl font-serif text-amber-900 select-none">ॐ</span>
@@ -429,7 +430,7 @@ function SampleReportModal({
             onClick={() => {
               if (typeof window !== "undefined") window.print();
             }}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[#fcd404] hover:bg-[#ebd500] px-4 py-2 text-xs font-bold text-stone-950 shadow-xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#f39419] hover:bg-[#e6860c] px-4 py-2 text-xs font-bold text-stone-950 shadow-xs transition-colors cursor-pointer"
           >
             <Download className="size-3.5" />
             <span>{language === "bn" ? "প্রিন্ট / পিডিএফ ডাউনলোড" : "Print / Save PDF"}</span>
@@ -610,6 +611,55 @@ export default function KundliPage() {
     },
     [],
   );
+
+  // Birth details typed into the home page's birth bar win over the saved
+  // profile, because they are what the visitor just asked for.
+  const submitFormRef = React.useRef<HTMLFormElement>(null);
+  const pendingHomeRun = React.useRef(false);
+  const applyHomePrefill = React.useCallback(() => {
+    const prefill = takeKundliPrefill();
+    if (!prefill) return;
+    hasAutoFilled.current = true;
+    setName(prefill.name);
+    setGender(prefill.gender);
+    setDay(String(prefill.day).padStart(2, "0"));
+    setMonth(String(prefill.month).padStart(2, "0"));
+    setYear(String(prefill.year));
+    if (prefill.time) {
+      setHour(String(prefill.time.hour).padStart(2, "0"));
+      setMinute(String(prefill.time.minute).padStart(2, "0"));
+      setSecond("00");
+      setPeriod(prefill.time.period);
+    }
+    if (prefill.place) {
+      setSelectedPlace(prefill.place);
+      setPlace(prefill.place.place);
+      setLatitude(prefill.place.latitude);
+      setLongitude(prefill.place.longitude);
+      if (prefill.place.timezoneOffset != null) setTimezone(String(prefill.place.timezoneOffset));
+    }
+    pendingHomeRun.current = true;
+  }, []);
+
+  // Read on the first frame, and cancel on cleanup, so Strict Mode's mount →
+  // unmount → mount takes the one-shot entry exactly once.
+  React.useEffect(() => {
+    const frame = requestAnimationFrame(applyHomePrefill);
+    return () => cancelAnimationFrame(frame);
+  }, [applyHomePrefill]);
+
+  // Run the chart straight away when it is free; when it costs coins, stop at
+  // the filled form so the visitor confirms the spend with the button there.
+  React.useEffect(() => {
+    if (!pendingHomeRun.current || !name || !selectedPlace) return;
+    pendingHomeRun.current = false;
+    const timer = window.setTimeout(() => {
+      const access = checkAccess("kundli");
+      if (access.allowed && access.requiredCoins === 0) submitFormRef.current?.requestSubmit();
+      else formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [name, selectedPlace, checkAccess]);
 
   React.useEffect(() => {
     if (profile && !hasAutoFilled.current) {
@@ -969,7 +1019,7 @@ export default function KundliPage() {
   };
 
   return (
-    <div suppressHydrationWarning className="min-h-screen bg-[#fafaf9]/70 text-stone-900 flex flex-col font-sans pb-24">
+    <div suppressHydrationWarning className="min-h-screen bg-[#fbf6f3]/70 text-stone-900 flex flex-col font-sans pb-24">
       <SiteHeader />
 
       {/* Main Container */}
@@ -1001,7 +1051,7 @@ export default function KundliPage() {
                 onClick={() => setLanguage(lang.code)}
                 className={`min-h-7 inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer ${
                   language === lang.code
-                    ? "bg-[#fcd404] text-stone-950 shadow-2xs font-extrabold"
+                    ? "bg-[#f39419] text-stone-950 shadow-2xs font-extrabold"
                     : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
                 }`}
               >
@@ -1073,7 +1123,7 @@ export default function KundliPage() {
             <div className="rounded-3xl border border-stone-200/90 bg-white p-6 sm:p-8 shadow-xs space-y-6">
               {/* Top Header of Form */}
               <div className="flex items-center justify-between">
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-[#fef9c3] border border-[#fde047] px-3.5 py-1 text-xs font-bold text-amber-900 shadow-2xs">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-[#fadbc7] border border-[#fdae47] px-3.5 py-1 text-xs font-bold text-amber-900 shadow-2xs">
                   <span className="text-sm">♂</span>
                   <span>{t.newKundliBadge}</span>
                 </div>
@@ -1099,7 +1149,7 @@ export default function KundliPage() {
               </div>
 
               {/* Form */}
-              <form onSubmit={handleFormSubmit} className="space-y-4 text-xs sm:text-sm">
+              <form ref={submitFormRef} onSubmit={handleFormSubmit} className="space-y-4 text-xs sm:text-sm">
                 {/* 1. Full Name */}
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold text-stone-700">
@@ -1136,7 +1186,7 @@ export default function KundliPage() {
                           onClick={() => setGender(g.val as any)}
                           className={`min-h-11 rounded-2xl border px-2 py-2 text-center text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                             gender === g.val
-                              ? "bg-[#fcd404] border-[#fcd404] text-stone-950 shadow-xs font-extrabold"
+                              ? "bg-[#f39419] border-[#f39419] text-stone-950 shadow-xs font-extrabold"
                               : "bg-stone-100/70 border-stone-200/80 text-stone-700 hover:bg-stone-200/60 font-semibold"
                           }`}
                         >
@@ -1345,7 +1395,7 @@ export default function KundliPage() {
                   <button
                     type="submit"
                     disabled={loading || (kundliFeature ? !kundliFeature.enabled : false)}
-                    className="w-full min-h-[50px] rounded-2xl bg-[#fcd404] hover:bg-[#ebd500] text-stone-950 font-bold shadow-sm hover:shadow-md text-base transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed press"
+                    className="w-full min-h-[50px] rounded-2xl bg-[#f39419] hover:bg-[#e6860c] text-stone-950 font-bold shadow-sm hover:shadow-md text-base transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed press"
                   >
                     {loading ? (
                       <>
@@ -1372,7 +1422,7 @@ export default function KundliPage() {
         {/* =========================================================================
             4. SAMPLE REPORT BANNER (NOT SURE YET? See a Sample Report First)
         ========================================================================= */}
-        <div className="rounded-2xl border border-amber-200/90 bg-[#fffdf0] p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xs">
+        <div className="rounded-2xl border border-amber-200/90 bg-[#fef6f1] p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xs">
           <div className="space-y-1">
             <span className="inline-block text-[11px] font-bold tracking-wider text-amber-800 uppercase">
               {t.notSureYet}
@@ -1387,7 +1437,7 @@ export default function KundliPage() {
           <button
             type="button"
             onClick={() => setSampleModalOpen(true)}
-            className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-[#fcd404] hover:bg-[#ebd500] px-5 py-2.5 text-xs sm:text-sm font-bold text-stone-950 shadow-xs press transition-colors cursor-pointer"
+            className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-[#f39419] hover:bg-[#e6860c] px-5 py-2.5 text-xs sm:text-sm font-bold text-stone-950 shadow-xs press transition-colors cursor-pointer"
           >
             <Download className="size-4" />
             <span>{t.downloadSampleReport}</span>

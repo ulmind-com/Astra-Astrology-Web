@@ -463,7 +463,7 @@ export default function MuhuratPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#fdfbf7] via-[#fffdf9] to-[#fbf8f1] text-[#2a1e17] flex flex-col font-sans">
+    <div className="min-h-screen bg-gradient-to-b from-[#fff8f3] via-[#fff8f3] to-[#fbf8f1] text-[#2a1e17] flex flex-col font-sans">
       <SiteHeader />
 
       <main className="mx-auto max-w-6xl px-4 sm:px-6 py-10 flex-1 w-full space-y-12">

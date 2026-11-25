@@ -67,10 +67,10 @@ function CourseCard({ course }: { course: CourseListItem }) {
             {course.category?.replace(/_/g, " ")}
           </span>
           {hasRating ? (
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1a1208] tabular-nums">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1d1a1c] tabular-nums">
               <Star className="size-3.5 fill-[#f5b301] text-[#f5b301]" />
               {rating}
-              <span className="font-normal text-[#a08a5e]">({ratingCount})</span>
+              <span className="font-normal text-[#8a7f83]">({ratingCount})</span>
             </span>
           ) : (
             <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
@@ -79,11 +79,11 @@ function CourseCard({ course }: { course: CourseListItem }) {
           )}
         </div>
 
-        <h3 className="mt-2 line-clamp-1 font-display text-base font-bold text-[#1a1208] transition-colors group-hover:text-brand-900">
+        <h3 className="mt-2 line-clamp-1 font-display text-base font-bold text-[#1d1a1c] transition-colors group-hover:text-brand-900">
           {course.title}
         </h3>
         {course.subtitle && (
-          <p className="mt-0.5 line-clamp-1 text-xs text-[#6b5f4d]">{course.subtitle}</p>
+          <p className="mt-0.5 line-clamp-1 text-xs text-[#5c5156]">{course.subtitle}</p>
         )}
 
         {/* Instructor */}
@@ -105,19 +105,19 @@ function CourseCard({ course }: { course: CourseListItem }) {
             )}
           </span>
           <div className="min-w-0">
-            <p className="truncate text-[13px] font-bold text-[#1a1208]">{course.instructor_name}</p>
-            <p className="truncate text-[11px] text-[#a08a5e]">{course.instructor_title}</p>
+            <p className="truncate text-[13px] font-bold text-[#1d1a1c]">{course.instructor_name}</p>
+            <p className="truncate text-[11px] text-[#8a7f83]">{course.instructor_title}</p>
           </div>
         </div>
 
         {/* Meta */}
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-medium text-[#6b5f4d]">
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-medium text-[#5c5156]">
           <span className="inline-flex items-center gap-1">
-            <Clock className="size-3.5 text-[#a08a5e]" />
+            <Clock className="size-3.5 text-[#8a7f83]" />
             {course.duration_hours} hrs
           </span>
           <span className="inline-flex items-center gap-1">
-            <BookOpen className="size-3.5 text-[#a08a5e]" />
+            <BookOpen className="size-3.5 text-[#8a7f83]" />
             {course.total_lessons} lessons
           </span>
           {course.certificate_enabled && (
@@ -131,14 +131,14 @@ function CourseCard({ course }: { course: CourseListItem }) {
         {/* Footer: price + CTA */}
         <div className="mt-4 flex items-center justify-between border-t border-stone-100 pt-3">
           <span className="flex items-baseline gap-1.5">
-            <span className="text-xl font-extrabold text-[#1a1208]">{money(course.currency, course.price)}</span>
+            <span className="text-xl font-extrabold text-[#1d1a1c]">{money(course.currency, course.price)}</span>
             {course.mrp > course.price && (
-              <span className="text-xs font-medium text-[#a08a5e] line-through">
+              <span className="text-xs font-medium text-[#8a7f83] line-through">
                 {money(course.currency, course.mrp)}
               </span>
             )}
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#fcd404] px-4 py-2 text-xs font-extrabold text-[#1c1304] shadow-sm transition-transform group-hover:scale-105">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#f39419] px-4 py-2 text-xs font-extrabold text-[#1d1a1c] shadow-sm transition-transform group-hover:scale-105">
             Explore
             <ArrowRight className="size-3.5" />
           </span>
@@ -266,10 +266,10 @@ export function CoursesSection({
               <GraduationCap className="size-3.5" />
               {t.badge}
             </span>
-            <h2 className="mt-3 text-2xl sm:text-4xl font-extrabold tracking-tight text-[#1a1208]">
+            <h2 className="mt-3 text-2xl sm:text-4xl font-extrabold tracking-tight text-[#1d1a1c]">
               {t.title}
             </h2>
-            <p className="mt-2 text-xs sm:text-sm text-[#6b5f4d]">{t.sub}</p>
+            <p className="mt-2 text-xs sm:text-sm text-[#5c5156]">{t.sub}</p>
           </div>
 
           <Link

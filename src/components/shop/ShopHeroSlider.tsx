@@ -90,7 +90,7 @@ export function ShopHeroSlider({ banners }: Props) {
     <div className="w-full">
       {/* 1. Main Hero Carousel Container (Exact Astrotalk Screenshot Layout) */}
       <section
-        className="relative w-full overflow-hidden rounded-[24px] sm:rounded-[32px] md:rounded-[36px] shadow-2xl bg-[#faf6f0] border border-amber-900/10 select-none group"
+        className="relative w-full overflow-hidden rounded-[24px] sm:rounded-[32px] md:rounded-[36px] shadow-2xl bg-[#fbeee5] border border-amber-900/10 select-none group"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onTouchStart={handleTouchStart}

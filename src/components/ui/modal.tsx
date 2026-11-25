@@ -55,8 +55,8 @@ export function Modal({
       ref={ref}
       aria-labelledby="modal-title"
       className={cn(
-        "m-auto w-[calc(100vw-2rem)] rounded-3xl border border-border bg-surface-raised p-0",
-        "text-foreground shadow-lift backdrop:bg-ink-900/40 backdrop:backdrop-blur-sm",
+        "m-auto w-[calc(100vw-2rem)] rounded-[18px] border-0 bg-surface-raised p-0 open:animate-[dl-pop-drop_0.45s_cubic-bezier(0.16,1,0.3,1)_both]",
+        "text-foreground shadow-[0_30px_80px_rgba(90,50,40,0.25)] backdrop:bg-ink-900/40 backdrop:backdrop-blur-sm",
         widths[size],
       )}
       // Clicking the backdrop (but not the panel) closes it.
@@ -66,7 +66,7 @@ export function Modal({
     >
       <div className="flex items-start justify-between gap-4 px-8 pt-8">
         <div className="min-w-0">
-          <h2 id="modal-title" className="text-lg font-semibold">
+          <h2 id="modal-title" className="text-2xl">
             {title}
           </h2>
           {description && (

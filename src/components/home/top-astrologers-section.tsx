@@ -229,11 +229,11 @@ export function TopAstrologersSection({
                 {items.length > 0 ? `${items.length} ${t.verified}` : t.verified}
               </span>
             )}
-            <h2 className="mt-3 text-3xl font-bold leading-[1.05] tracking-tight text-[#1a1208] sm:text-4xl lg:text-5xl">
+            <h2 className="mt-3 text-3xl font-bold leading-[1.05] tracking-tight text-[#1d1a1c] sm:text-4xl lg:text-5xl">
               {language === "en" ? (
                 <>
                   Talk to India&apos;s{" "}
-                  <span className="bg-gradient-to-r from-[#f5c000] via-[#f0b100] to-[#d9a300] bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-[#f58b00] via-[#f08800] to-[#d97b00] bg-clip-text text-transparent">
                     Top Rated
                   </span>{" "}
                   Astrologers
@@ -241,7 +241,7 @@ export function TopAstrologersSection({
               ) : language === "bn" ? (
                 <>
                   ভারতের{" "}
-                  <span className="bg-gradient-to-r from-[#f5c000] via-[#f0b100] to-[#d9a300] bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-[#f58b00] via-[#f08800] to-[#d97b00] bg-clip-text text-transparent">
                     সেরা
                   </span>{" "}
                   জ্যোতিষীদের সাথে কথা বলুন
@@ -249,14 +249,14 @@ export function TopAstrologersSection({
               ) : (
                 <>
                   भारत के{" "}
-                  <span className="bg-gradient-to-r from-[#f5c000] via-[#f0b100] to-[#d9a300] bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-[#f58b00] via-[#f08800] to-[#d97b00] bg-clip-text text-transparent">
                     शीर्ष
                   </span>{" "}
                   ज्योतिषियों से बात करें
                 </>
               )}
             </h2>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-[#6b5f4d]">
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-[#5c5156]">
               {language === "bn"
                 ? "প্রতিটি জ্যোতিষী ৪-ধাপের যাচাই পেরিয়েছেন — যোগ্যতা, প্যানেল ইন্টারভিউ, লাইভ অডিট এবং ৩০ দিনের প্রবেশন।"
                 : language === "hi"
@@ -283,7 +283,7 @@ export function TopAstrologersSection({
           </div>
         ) : cards.length === 0 ? (
           <div className="mt-8 rounded-2xl border border-dashed border-stone-200 bg-white p-8 text-center">
-            <p className="text-sm font-semibold text-[#1a1208]">No astrologers available right now.</p>
+            <p className="text-sm font-semibold text-[#1d1a1c]">No astrologers available right now.</p>
           </div>
         ) : (
           <div className={cn("mt-8 grid gap-5 sm:grid-cols-2", cards.length >= 3 ? "lg:grid-cols-4" : "max-w-3xl")}>

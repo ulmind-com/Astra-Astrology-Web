@@ -403,7 +403,7 @@ function SampleMatchReportModal({
             onClick={() => {
               if (typeof window !== "undefined") window.print();
             }}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[#fcd404] hover:bg-[#ebd500] px-4 py-2 text-xs font-bold text-stone-950 shadow-xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#f39419] hover:bg-[#e6860c] px-4 py-2 text-xs font-bold text-stone-950 shadow-xs transition-colors cursor-pointer"
           >
             <Download className="size-3.5" />
             <span>{language === "bn" ? "প্রিন্ট / পিডিএফ ডাউনলোড" : "Print / Save PDF"}</span>
@@ -841,7 +841,7 @@ export default function KundliMatchingPage() {
   }, [result?.kootas]);
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
+    <div className="min-h-screen bg-[#fbf6f3]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
       <SiteHeader />
 
       {/* Main Container */}
@@ -873,7 +873,7 @@ export default function KundliMatchingPage() {
                 onClick={() => setLanguage(lang.code)}
                 className={`min-h-7 inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer ${
                   language === lang.code
-                    ? "bg-[#fcd404] text-stone-950 shadow-2xs font-extrabold"
+                    ? "bg-[#f39419] text-stone-950 shadow-2xs font-extrabold"
                     : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
                 }`}
               >
@@ -968,7 +968,7 @@ export default function KundliMatchingPage() {
             <div className="space-y-4 md:pr-4">
               {/* Header */}
               <div className="flex items-center justify-between pb-1">
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-[#fef9c3] border border-[#fde047] px-3.5 py-1 text-xs font-bold text-amber-900 shadow-2xs">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-[#fadbc7] border border-[#fdae47] px-3.5 py-1 text-xs font-bold text-amber-900 shadow-2xs">
                   <span className="text-sm">♂</span>
                   <span>{t.yourDetailsTitle}</span>
                 </div>
@@ -1030,7 +1030,7 @@ export default function KundliMatchingPage() {
                       onClick={() => setGroom((p) => ({ ...p, gender: g.val as any }))}
                       className={`min-h-10 rounded-xl border px-2 py-1.5 text-center text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                         groom.gender === g.val
-                          ? "bg-[#fcd404] border-[#fcd404] text-stone-950 shadow-xs font-extrabold"
+                          ? "bg-[#f39419] border-[#f39419] text-stone-950 shadow-xs font-extrabold"
                           : "bg-stone-100/70 border-stone-200/80 text-stone-700 hover:bg-stone-200/60 font-semibold"
                       }`}
                     >
@@ -1221,7 +1221,7 @@ export default function KundliMatchingPage() {
             <div className="space-y-4 pt-4 md:pt-0 md:pl-4">
               {/* Header */}
               <div className="flex items-center justify-between pb-1">
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-[#fef9c3] border border-[#fde047] px-3.5 py-1 text-xs font-bold text-amber-900 shadow-2xs">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-[#fadbc7] border border-[#fdae47] px-3.5 py-1 text-xs font-bold text-amber-900 shadow-2xs">
                   <span className="text-sm">♀</span>
                   <span>{t.partnerDetailsTitle}</span>
                 </div>
@@ -1283,7 +1283,7 @@ export default function KundliMatchingPage() {
                       onClick={() => setBride((p) => ({ ...p, gender: g.val as any }))}
                       className={`min-h-10 rounded-xl border px-2 py-1.5 text-center text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                         bride.gender === g.val
-                          ? "bg-[#fcd404] border-[#fcd404] text-stone-950 shadow-xs font-extrabold"
+                          ? "bg-[#f39419] border-[#f39419] text-stone-950 shadow-xs font-extrabold"
                           : "bg-stone-100/70 border-stone-200/80 text-stone-700 hover:bg-stone-200/60 font-semibold"
                       }`}
                     >
@@ -1481,7 +1481,7 @@ export default function KundliMatchingPage() {
               type="button"
               disabled={isLoading}
               onClick={handleCalculateMatch}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-[#fcd404] hover:bg-[#ebd500] active:scale-[0.99] text-stone-950 font-bold px-8 py-3 text-sm shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-[#f39419] hover:bg-[#e6860c] active:scale-[0.99] text-stone-950 font-bold px-8 py-3 text-sm shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>
@@ -1727,7 +1727,7 @@ export default function KundliMatchingPage() {
                 <button
                   type="button"
                   onClick={() => setSampleModalOpen(true)}
-                  className="size-9 rounded-full bg-[#fcd404] hover:bg-[#ebd500] text-stone-950 flex items-center justify-center font-bold shadow-xs transition-colors cursor-pointer"
+                  className="size-9 rounded-full bg-[#f39419] hover:bg-[#e6860c] text-stone-950 flex items-center justify-center font-bold shadow-xs transition-colors cursor-pointer"
                   title="View Sample Report"
                 >
                   <ArrowRight className="size-4" />

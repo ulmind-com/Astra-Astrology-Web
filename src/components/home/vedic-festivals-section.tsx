@@ -216,10 +216,10 @@ export function VedicFestivalsSection() {
               <Sun className="size-3.5 text-[#e2561f]" />
               {t.badge}
             </span>
-            <h2 className="mt-2 text-2xl sm:text-4xl font-extrabold tracking-tight text-[#1a1208]">
+            <h2 className="mt-2 text-2xl sm:text-4xl font-extrabold tracking-tight text-[#1d1a1c]">
               {t.title}
             </h2>
-            <p className="mt-2 max-w-2xl text-xs sm:text-sm leading-relaxed text-[#6b5f4d]">
+            <p className="mt-2 max-w-2xl text-xs sm:text-sm leading-relaxed text-[#5c5156]">
               {t.subtitle}
             </p>
           </div>
@@ -248,8 +248,8 @@ export function VedicFestivalsSection() {
                 onClick={() => setFilter(tab.id)}
                 className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all whitespace-nowrap ${
                   active
-                    ? "bg-[#fcd404] text-[#1c1304] shadow-xs border border-[#d9af00]"
-                    : "bg-white text-[#6b5f4d] border border-stone-200 hover:border-amber-300 hover:bg-[#fffdf5]"
+                    ? "bg-[#f39419] text-[#1d1a1c] shadow-xs border border-[#d97b0b]"
+                    : "bg-white text-[#5c5156] border border-stone-200 hover:border-amber-300 hover:bg-[#fff8f3]"
                 }`}
               >
                 {tab.label}
@@ -270,7 +270,7 @@ export function VedicFestivalsSection() {
             return (
               <div
                 key={fest.id}
-                className="group relative flex flex-col justify-between overflow-hidden rounded-[24px] border border-[#f0e3aa]/90 bg-gradient-to-b from-white via-white to-[#fffdf5] p-5 shadow-[0_6px_20px_-10px_rgba(26,18,8,0.08)] transition-all duration-300 hover:-translate-y-1.5 hover:border-amber-400 hover:shadow-[0_12px_28px_-10px_rgba(245,158,11,0.22)]"
+                className="group relative flex flex-col justify-between overflow-hidden rounded-[24px] border border-[#f7d3a3]/90 bg-gradient-to-b from-white via-white to-[#fff8f3] p-5 shadow-[0_6px_20px_-10px_rgba(26,18,8,0.08)] transition-all duration-300 hover:-translate-y-1.5 hover:border-amber-400 hover:shadow-[0_12px_28px_-10px_rgba(245,158,11,0.22)]"
               >
                 {/* Subtle festive glow orb in background */}
                 <div
@@ -281,12 +281,12 @@ export function VedicFestivalsSection() {
                 <div>
                   {/* Top Header: Clipart + Badges */}
                   <div className="flex items-start justify-between gap-3 mb-4">
-                    <div className="relative flex size-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#fffdf5] to-[#fef3c7] p-2 ring-1 ring-[#ebd881] shadow-xs group-hover:scale-105 transition-transform">
+                    <div className="relative flex size-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#fff8f3] to-[#fbdeca] p-2 ring-1 ring-[#f4be78] shadow-xs group-hover:scale-105 transition-transform">
                       <FestivalClipart id={fest.id} className="size-full" />
                     </div>
 
                     <div className="flex flex-col items-end gap-1.5">
-                      <span className="rounded-full border border-amber-300/60 bg-[#fff8db] px-2.5 py-0.5 text-[11px] font-bold text-[#8b5e0a] shadow-2xs">
+                      <span className="rounded-full border border-amber-300/60 bg-[#fceade] px-2.5 py-0.5 text-[11px] font-bold text-[#8b5e0a] shadow-2xs">
                         {badge}
                       </span>
                       <div className="flex items-center gap-1 text-[11px] font-semibold text-[#8b7d63]">
@@ -297,7 +297,7 @@ export function VedicFestivalsSection() {
                   </div>
 
                   {/* Title & Tithi */}
-                  <h3 className="text-lg font-bold tracking-tight text-[#1a1208] group-hover:text-amber-900 transition-colors line-clamp-1">
+                  <h3 className="text-lg font-bold tracking-tight text-[#1d1a1c] group-hover:text-amber-900 transition-colors line-clamp-1">
                     {name}
                   </h3>
 
@@ -307,14 +307,14 @@ export function VedicFestivalsSection() {
                   </div>
 
                   {/* Description */}
-                  <p className="mt-2.5 text-xs text-[#6b5f4d] leading-relaxed line-clamp-3">
+                  <p className="mt-2.5 text-xs text-[#5c5156] leading-relaxed line-clamp-3">
                     {desc}
                   </p>
                 </div>
 
                 {/* Footer Link */}
-                <div className="mt-5 pt-3 border-t border-[#f2e9b0]/80 flex items-center justify-between">
-                  <span className="text-[11px] font-semibold text-[#a08a5e]">
+                <div className="mt-5 pt-3 border-t border-[#fbdcc8]/80 flex items-center justify-between">
+                  <span className="text-[11px] font-semibold text-[#8a7f83]">
                     {isBn ? "পবিত্র তিথি মহিমা" : isHi ? "पवित्र तिथि महात्म्य" : "Sacred Tithi Ritual"}
                   </span>
                   <Link

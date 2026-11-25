@@ -136,7 +136,7 @@ export function PrintableInvoiceModal({
                 {/* Gold Sacred Lotus SVG Emblem */}
                 <div className="flex items-center gap-3">
                   <svg
-                    className="w-14 h-14 text-[#c59b27]"
+                    className="w-14 h-14 text-[#da8312]"
                     viewBox="0 0 64 64"
                     fill="none"
                     stroke="currentColor"

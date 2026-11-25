@@ -623,7 +623,7 @@ export function CosmicWhiteboard({
         "flex flex-col rounded-2xl transition-all duration-300 z-30 overflow-hidden backdrop-blur-2xl shadow-2xl",
         isDark
           ? "border border-amber-500/30 bg-[#090e1c]/95 text-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] ring-1 ring-amber-500/20"
-          : "border border-[#e2d5a3] bg-[#fffdfa]/98 text-[#1a1208] shadow-[0_25px_60px_-12px_rgba(180,130,40,0.25)] ring-1 ring-[#f5e6b5]",
+          : "border border-[#f6c98f] bg-[#fffdfa]/98 text-[#1d1a1c] shadow-[0_25px_60px_-12px_rgba(180,130,40,0.25)] ring-1 ring-[#f9dab1]",
         fullscreen
           ? "fixed inset-2 md:inset-6 z-50 h-[calc(100vh-3rem)]"
           : "absolute inset-x-2 bottom-2 top-16 md:inset-auto md:right-4 md:top-16 md:w-[580px] md:h-[calc(100vh-6rem)]",
@@ -636,7 +636,7 @@ export function CosmicWhiteboard({
           "flex flex-wrap items-center justify-between gap-2 border-b px-3.5 py-2.5 transition-colors",
           isDark
             ? "border-white/10 bg-gradient-to-r from-[#0d1424] to-[#080d1a]"
-            : "border-[#e5d7a6] bg-gradient-to-r from-[#fff9eb] via-[#fdf5df] to-[#f9eed0]",
+            : "border-[#f6cc95] bg-gradient-to-r from-[#fff9eb] via-[#fcebe0] to-[#f9eed0]",
         )}
       >
         <div className="flex items-center gap-2">
@@ -684,7 +684,7 @@ export function CosmicWhiteboard({
               "flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-bold transition-all border",
               isDark
                 ? "border-amber-400/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20"
-                : "border-[#ded09b] bg-white text-[#78350f] hover:bg-[#fff7d6] shadow-2xs",
+                : "border-[#f5c484] bg-white text-[#78350f] hover:bg-[#fdf0e7] shadow-2xs",
             )}
             title={isDark ? "Switch to Sacred Light Mode" : "Switch to Celestial Dark Mode"}
           >
@@ -709,7 +709,7 @@ export function CosmicWhiteboard({
               "h-7 px-2 text-[10px] font-semibold border transition-colors",
               isDark
                 ? "border-white/10 text-white hover:bg-white/10"
-                : "border-[#ded09b] text-[#5c4a22] hover:bg-[#faeed1] hover:text-[#1a1208] bg-white/90 shadow-2xs font-bold",
+                : "border-[#f5c484] text-[#5c4a22] hover:bg-[#faeed1] hover:text-[#1d1a1c] bg-white/90 shadow-2xs font-bold",
             )}
             title="Download high-resolution marked cosmic chart keepsake"
           >
@@ -723,7 +723,7 @@ export function CosmicWhiteboard({
               "rounded-lg p-1.5 transition-colors",
               isDark
                 ? "text-white/70 hover:bg-white/10 hover:text-white"
-                : "text-[#766545] hover:bg-[#faeed1] hover:text-[#1a1208]",
+                : "text-[#5c5156] hover:bg-[#faeed1] hover:text-[#1d1a1c]",
             )}
             title={fullscreen ? "Exit Fullscreen" : "Fullscreen"}
           >
@@ -736,7 +736,7 @@ export function CosmicWhiteboard({
               "rounded-lg p-1.5 transition-colors",
               isDark
                 ? "text-white/70 hover:bg-rose-500/20 hover:text-rose-300"
-                : "text-[#766545] hover:bg-rose-100 hover:text-rose-700",
+                : "text-[#5c5156] hover:bg-rose-100 hover:text-rose-700",
             )}
             title="Close Whiteboard"
           >
@@ -751,7 +751,7 @@ export function CosmicWhiteboard({
           "flex flex-wrap items-center justify-between gap-2 border-b px-3 py-1.5 text-xs transition-colors",
           isDark
             ? "border-white/10 bg-night-950/80"
-            : "border-[#e5d7a6] bg-[#fbf5e4]/90",
+            : "border-[#f6cc95] bg-[#fbede4]/90",
         )}
       >
         <div
@@ -759,7 +759,7 @@ export function CosmicWhiteboard({
             "flex items-center rounded-xl p-0.5 border transition-colors",
             isDark
               ? "bg-black/50 border-white/10"
-              : "bg-[#f2e7c6]/75 border-[#dfd29f]",
+              : "bg-[#f2d8c6]/75 border-[#f5c689]",
           )}
         >
           {(
@@ -780,7 +780,7 @@ export function CosmicWhiteboard({
                     : "bg-gradient-to-r from-[#d97706] to-[#b45309] text-white font-extrabold shadow-sm"
                   : isDark
                     ? "text-white/70 hover:text-white"
-                    : "text-[#766545] hover:text-[#1a1208] font-bold",
+                    : "text-[#5c5156] hover:text-[#1d1a1c] font-bold",
               )}
             >
               {t.label}
@@ -799,7 +799,7 @@ export function CosmicWhiteboard({
                   : "border-emerald-600 bg-emerald-100/90 text-emerald-900 shadow-2xs font-bold ring-1 ring-emerald-400/50"
                 : isDark
                   ? "border-white/10 bg-white/5 text-white/60 hover:text-white"
-                  : "border-[#ded09b] bg-white/90 text-[#766545] hover:text-[#1a1208] font-semibold",
+                  : "border-[#f5c484] bg-white/90 text-[#5c5156] hover:text-[#1d1a1c] font-semibold",
             )}
             title="Toggle current real-time planetary transits (গোচর)"
           >
@@ -813,7 +813,7 @@ export function CosmicWhiteboard({
               "flex items-center gap-1 rounded-lg border px-2 py-0.5 text-[10px] transition-colors",
               isDark
                 ? "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
-                : "border-[#ded09b] bg-white/90 text-[#766545] hover:bg-[#fff9e6] font-semibold shadow-2xs",
+                : "border-[#f5c484] bg-white/90 text-[#5c5156] hover:bg-[#fdf0e8] font-semibold shadow-2xs",
             )}
             title="Toggle North Diamond vs South Grid chart style"
           >
@@ -860,7 +860,7 @@ export function CosmicWhiteboard({
           "relative flex-1 overflow-auto flex items-center justify-center p-2 select-none transition-colors",
           isDark
             ? "bg-gradient-to-b from-[#080d1a] via-[#091024] to-[#040711]"
-            : "bg-gradient-to-b from-[#fffef8] via-[#faf4e5] to-[#f4ebd6]",
+            : "bg-gradient-to-b from-[#fefbf9] via-[#faf4e5] to-[#f4ebd6]",
         )}
       >
         {loading ? (
@@ -1290,7 +1290,7 @@ export function CosmicWhiteboard({
             "border-t px-3 py-2 text-xs transition-colors",
             isDark
               ? "border-white/10 bg-night-950/95 text-white"
-              : "border-[#e2d5a3] bg-gradient-to-r from-[#fff9ea] to-[#fbf4de] text-[#1a1208] shadow-xs",
+              : "border-[#f6c98f] bg-gradient-to-r from-[#fff9ea] to-[#fbeade] text-[#1d1a1c] shadow-xs",
           )}
         >
           {(() => {

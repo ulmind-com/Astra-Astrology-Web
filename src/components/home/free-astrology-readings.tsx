@@ -65,10 +65,10 @@ export function FreeAstrologyReadings() {
             <span className="text-xs font-bold uppercase tracking-[0.18em] text-[#c2410c]">
               {language === "bn" ? "ক্যাটাগরি অনুযায়ী" : language === "hi" ? "श्रेणी अनुसार" : "Browse by Tool"}
             </span>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#1a1208] sm:text-4xl">
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#1d1a1c] sm:text-4xl">
               {t.title}
             </h2>
-            <p className="mt-2 max-w-xl text-sm leading-relaxed text-[#6b5f4d]">{subtitle}</p>
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-[#5c5156]">{subtitle}</p>
           </div>
 
           <Link
@@ -108,7 +108,7 @@ export function FreeAstrologyReadings() {
                 </div>
 
                 {/* label below panel */}
-                <span className="mt-2.5 pb-1 text-center text-[13px] font-bold leading-tight text-[#1a1208]">
+                <span className="mt-2.5 pb-1 text-center text-[13px] font-bold leading-tight text-[#1d1a1c]">
                   {label}
                 </span>
               </Link>

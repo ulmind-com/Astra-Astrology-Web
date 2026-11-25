@@ -1,12 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { Lock, ShieldCheck, Wallet } from "lucide-react";
 import { FaApple, FaFacebookF, FaGooglePlay, FaInstagram, FaLinkedinIn, FaYoutube } from "react-icons/fa";
 import Image from "next/image";
+import "./site-footer.css";
 import Link from "next/link";
 import { Year } from "@/components/ui";
-import { UlmindCredit } from "@/components/ulmind-credit";
 import { APP_STORE_URL, AppWaitlistModal, PLAY_STORE_URL } from "@/components/home/app-waitlist-modal";
 import { useLanguage } from "@/providers/language-provider";
 import type { AstrologyLanguage } from "@/types";
@@ -159,260 +158,219 @@ function getFooterColumns(lang: AstrologyLanguage): Column[] {
   ];
 }
 
+const VIDEO_SRC =
+  "https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/4d01c727-d9c5-47c8-a778-35a451ffd39f.mp4";
+const VIDEO_POSTER =
+  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20261014_121838_c97d0940-f430-4304-8573-4f47ee44f447.png";
+
+function pick(lang: AstrologyLanguage, en: string, bn: string, hi: string): string {
+  return lang === "bn" ? bn : lang === "hi" ? hi : en;
+}
+
+/** The corporate links and the astrologer login, as a fifth column. */
+function companyColumn(lang: AstrologyLanguage): Column {
+  return {
+    title: pick(lang, "Corporate Info", "কর্পোরেট তথ্য", "कॉर्पोरेट जानकारी"),
+    links: [
+      { href: "/privacy", label: pick(lang, "Privacy Policy", "গোপনীয়তা নীতি", "गोपनीयता नीति") },
+      { href: "/privacy#section-2", label: pick(lang, "Refund & Cancellation Policy", "রিফান্ড ও বাতিল নীতি", "रिफंड एवं रद्दीकरण नीति") },
+      { href: "/privacy", label: pick(lang, "Terms & Conditions", "শর্তাবলী", "नियम एवं शर्तें") },
+      { href: "/privacy", label: pick(lang, "Disclaimer", "দাবিত্যাগ", "अस्वीकरण") },
+      { href: "/support", label: pick(lang, "About Us", "আমাদের সম্পর্কে", "हमारे बारे में") },
+      { href: "/login", label: pick(lang, "Astrologer Login", "জ্যোতিষী লগইন", "ज्योतिषी लॉगिन") },
+    ],
+  };
+}
+
+/**
+ * The meadow video is about a megabyte a loop, so it is only fetched once the
+ * footer comes near the viewport, and it pauses whenever the footer is off
+ * screen. Visitors who ask for reduced motion keep the still poster frame.
+ */
+function useMeadowVideo() {
+  const ref = React.useRef<HTMLVideoElement>(null);
+  React.useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (typeof IntersectionObserver === "undefined") {
+      video.src = VIDEO_SRC;
+      void video.play().catch(() => {});
+      return;
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry) return;
+        if (entry.isIntersecting) {
+          if (!video.src) video.src = VIDEO_SRC;
+          void video.play().catch(() => {});
+        } else if (video.src) {
+          video.pause();
+        }
+      },
+      { rootMargin: "400px 0px" },
+    );
+    io.observe(video);
+    return () => io.disconnect();
+  }, []);
+  return ref;
+}
+
 export function SiteFooter() {
   const { language } = useLanguage();
-  const columns = getFooterColumns(language);
+  const columns = [...getFooterColumns(language), companyColumn(language)];
   const [waitlistStore, setWaitlistStore] = React.useState<"android" | "ios" | null>(null);
+  const videoRef = useMeadowVideo();
+
+  const socials = [
+    { label: "Facebook", Icon: FaFacebookF, href: process.env.NEXT_PUBLIC_FACEBOOK_URL || "/support" },
+    { label: "Instagram", Icon: FaInstagram, href: process.env.NEXT_PUBLIC_INSTAGRAM_URL || "/support" },
+    { label: "LinkedIn", Icon: FaLinkedinIn, href: process.env.NEXT_PUBLIC_LINKEDIN_URL || "/support" },
+    { label: "YouTube", Icon: FaYoutube, href: process.env.NEXT_PUBLIC_YOUTUBE_URL || "/support" },
+  ];
+
+  const storeButton = (platform: "android" | "ios") => {
+    const url = platform === "android" ? PLAY_STORE_URL : APP_STORE_URL;
+    const Icon = platform === "android" ? FaGooglePlay : FaApple;
+    const label = platform === "android" ? "Google Play" : "App Store";
+    const aria = platform === "android" ? "Get it on Google Play" : "Download on the App Store";
+    return url ? (
+      <a key={platform} href={url} target="_blank" rel="noopener noreferrer" aria-label={aria} className="dlf-btn">
+        <Icon aria-hidden />
+        {label}
+      </a>
+    ) : (
+      <button key={platform} type="button" onClick={() => setWaitlistStore(platform)} aria-label={aria} className="dlf-btn">
+        <Icon aria-hidden />
+        {label}
+      </button>
+    );
+  };
 
   return (
-    <footer className="relative mt-20 overflow-hidden border-t border-[#efe3c0] bg-gradient-to-b from-[#fffdf5] to-[#fdf6e3] print:hidden">
-      {/* Faint rotating zodiac wheel at the very bottom */}
-      <Image
-        src="/zodiac-wheel-gold.webp"
-        alt=""
-        width={560}
-        height={560}
-        loading="lazy"
-        aria-hidden="true"
-        className="pointer-events-none absolute -bottom-48 left-1/2 size-[560px] -translate-x-1/2 select-none opacity-[0.08] mix-blend-multiply animate-spin [animation-duration:140s] motion-reduce:animate-none"
-      />
+    <footer className="dlf">
+      <div className="dlf__stage" aria-hidden="true">
+        <video
+          ref={videoRef}
+          className="dlf__video"
+          poster={VIDEO_POSTER}
+          muted
+          loop
+          playsInline
+          preload="none"
+        />
+        <span className="dlf__grade" />
+        <span className="dlf__warm" />
+      </div>
+      <p className="dlf__wordmark" aria-hidden="true">
+        DivinLink
+      </p>
+      <div className="dlf__fog" aria-hidden="true" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="grid gap-10 md:grid-cols-6">
-          {/* Brand block */}
-          <div className="md:col-span-2">
-            <div className="flex items-center gap-2.5 font-semibold">
-              <span className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-[#eadf9a]">
-                <Image src="/logo.png" alt="DivinLink" width={40} height={40} className="size-full object-contain" />
-              </span>
-              <span className="font-display text-lg tracking-wide text-[#1a1208]">DivinLink</span>
-            </div>
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-[#6b5f4d]">
-              {language === "bn"
-                ? "বিশ্বস্ত বৈদিক জ্যোতিষীদের কাছ থেকে সঠিক পরামর্শ — কুণ্ডলী, যোটক বিচার, সংখ্যাতত্ত্ব ও বাস্তু, যখনই আপনার প্রয়োজন।"
-                : language === "hi"
-                ? "सत्यापित वैदिक विद्वानों से सही मार्गदर्शन — कुंडली, गुण मिलान, अंकशास्त्र एवं वास्तु समाधान।"
-                : "Guidance from verified astrologers — kundli, matchmaking, numerology and vastu, whenever you need clarity."}
-            </p>
-            <Link
-              href="/astrologers"
-              className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#fcd404] px-5 py-2.5 text-sm font-extrabold text-[#1c1304] shadow-sm transition-transform hover:scale-105"
-            >
-              {language === "bn" ? "ফ্রি পরামর্শ নিন" : language === "hi" ? "फ्री परामर्श लें" : "Consult for Free"}
+      <div className="dlf__content">
+        <div className="dlf-brand">
+          <Link href="/" className="dlf-brand__logo" aria-label="DivinLink home">
+            <span className="dlf-brand__mark">
+              <Image src="/logo.png" alt="" width={30} height={30} />
+            </span>
+            DivinLink
+          </Link>
+          <h2 className="dlf-brand__title">
+            {pick(language, "Talk to verified astrologers", "যাচাই করা জ্যোতিষীর সঙ্গে কথা বলুন", "सत्यापित ज्योतिषियों से बात करें")}
+          </h2>
+          <p className="dlf-brand__text">
+            {pick(
+              language,
+              "Guidance from verified astrologers — kundli, matchmaking, numerology and vastu, whenever you need clarity.",
+              "বিশ্বস্ত বৈদিক জ্যোতিষীদের কাছ থেকে সঠিক পরামর্শ — কুণ্ডলী, যোটক বিচার, সংখ্যাতত্ত্ব ও বাস্তু, যখনই আপনার প্রয়োজন।",
+              "सत्यापित वैदिक विद्वानों से सही मार्गदर्शन — कुंडली, गुण मिलान, अंकशास्त्र एवं वास्तु समाधान।",
+            )}
+          </p>
+          <div className="dlf-brand__actions">
+            <Link href="/astrologers" className="dlf-btn dlf-btn--cta">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.4L3 21l2.1-5.7A8.4 8.4 0 1 1 21 11.5Z" />
+              </svg>
+              {pick(language, "Consult for Free", "ফ্রি পরামর্শ নিন", "फ्री परामर्श लें")}
             </Link>
+            {storeButton("android")}
+            {storeButton("ios")}
           </div>
-
-          {/* Link columns */}
-          {columns.map((column) => (
-            <div key={column.title}>
-              <p className="text-sm font-bold tracking-tight text-[#1a1208]">{column.title}</p>
-              <ul className="mt-4 space-y-2.5">
-                {column.links.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="group inline-flex items-center gap-1.5 text-sm text-[#6b5f4d] transition-colors hover:text-[#8b5e0a]"
-                    >
-                      <span className="size-1 rounded-full bg-[#d9b64a] opacity-0 transition-opacity group-hover:opacity-100" />
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <p className="dlf-brand__copy">
+            © <Year /> DivinLink. {pick(language, "All rights reserved.", "সর্বস্বত্ব সংরক্ষিত।", "सर्वाधिकार सुरक्षित।")}
+          </p>
+          <p className="dlf-brand__note">
+            {pick(
+              language,
+              "Astrological guidance is offered for personal reflection and is not a substitute for professional medical, legal or financial advice.",
+              "জ্যোতিষ সংক্রান্ত পরামর্শ ব্যক্তিগত চিন্তাভাবনা ও দিকনির্দেশনার জন্য এবং এটি কোনো পেশাদার চিকিৎসা, আইনি বা আর্থিক পরামর্শের বিকল্প নয়।",
+              "ज्योतिषीय मार्गदर्शन व्यक्तिगत चिंतन हेतु है और यह किसी पेशेवर चिकित्सा, कानूनी या वित्तीय सलाह का विकल्प नहीं है।",
+            )}
+          </p>
+          <p className="dlf-brand__by">
+            Designed &amp; developed with <span className="dlf-brand__heart" aria-label="love">🧡</span> by
+            <a href="https://ulmind.com" target="_blank" rel="noopener noreferrer" className="dlf-brand__author">
+              <Image src="/ulmind.png" alt="ULMiND" width={480} height={162} />
+            </a>
+          </p>
+          <ul className="dlf-brand__status" aria-label={pick(language, "Why DivinLink", "কেন ডিভিনলিংক", "क्यों डिवाइनलिंक")}>
+            <li>
+              <Link href="/support" className="dlf-chip">
+                <span className="dlf-chip__dot" aria-hidden="true" />
+                {pick(language, "24x7 on chat support", "চ্যাট সাপোর্টে ২৪x৭", "चैट सपोर्ट पर 24x7")}
+              </Link>
+            </li>
+            <li className="dlf-chip">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="4" y="11" width="16" height="10" rx="2" />
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+              </svg>
+              {pick(language, "Private & Confidential", "গোপনীয় ও সুরক্ষিত", "निजी एवं गोपनीय")}
+            </li>
+            <li className="dlf-chip">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6Z" />
+                <path d="m9 12 2.2 2.2L15.5 10" />
+              </svg>
+              {pick(language, "Verified Astrologers", "যাচাইকৃত জ্যোতিষী", "सत्यापित ज्योतिषी")}
+            </li>
+            <li className="dlf-chip">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="3" y="6" width="18" height="13" rx="2.5" />
+                <path d="M3 10h18M16 14.5h2" />
+              </svg>
+              {pick(language, "Secure Payments", "নিরাপদ পেমেন্ট", "सुरक्षित भुगतान")}
+            </li>
+            {socials.map(({ label, Icon, href }) => (
+              <li key={label}>
+                {href.startsWith("http") ? (
+                  <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className="dlf-chip dlf-chip--icon">
+                    <Icon aria-hidden />
+                  </a>
+                ) : (
+                  <Link href={href} aria-label={label} className="dlf-chip dlf-chip--icon">
+                    <Icon aria-hidden />
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
         </div>
 
-        {/* Secondary row: corporate, astrologer/contact, secure, app */}
-        <div className="mt-12 grid gap-10 border-t border-[#efe3c0] pt-10 sm:grid-cols-2 md:grid-cols-4">
-          {/* Corporate Info */}
-          <div>
-            <p className="text-sm font-bold text-[#1a1208]">
-              {language === "bn" ? "কর্পোরেট তথ্য" : language === "hi" ? "कॉर्पोरेट जानकारी" : "Corporate Info"}
-            </p>
-            <ul className="mt-4 space-y-2.5">
-              {[
-                {
-                  label: language === "bn" ? "গোপনীয়তা নীতি" : language === "hi" ? "गोपनीयता नीति" : "Privacy Policy",
-                  href: "/privacy",
-                },
-                {
-                  label: language === "bn" ? "রিফান্ড ও বাতিল নীতি" : language === "hi" ? "रिफंड एवं रद्दीकरण नीति" : "Refund & Cancellation Policy",
-                  href: "/privacy#section-2",
-                },
-                {
-                  label: language === "bn" ? "শর্তাবলী" : language === "hi" ? "नियम एवं शर्तें" : "Terms & Conditions",
-                  href: "/privacy",
-                },
-                {
-                  label: language === "bn" ? "দাবিত্যাগ" : language === "hi" ? "अस्वीकरण" : "Disclaimer",
-                  href: "/privacy",
-                },
-                {
-                  label: language === "bn" ? "আমাদের সম্পর্কে" : language === "hi" ? "हमारे बारे में" : "About Us",
-                  href: "/support",
-                },
-                {
-                  label: language === "bn" ? "সাহায্য ও সাপোর্ট" : language === "hi" ? "सहायता एवं संपर्क" : "Help & Support",
-                  href: "/support",
-                },
-              ].map((item) => (
-                <li key={item.label}>
-                  <Link href={item.href} className="text-sm text-[#6b5f4d] transition-colors hover:text-[#8b5e0a]">
-                    {item.label}
-                  </Link>
+        {columns.map((column, i) => (
+          <nav key={column.title} className={i === 0 ? "dlf-col dlf-col--menu" : "dlf-col"} aria-label={column.title}>
+            <h3 className="dlf-col__title">{column.title}</h3>
+            <ul className="dlf-col__list">
+              {column.links.map((link) => (
+                <li key={link.href + link.label}>
+                  <Link href={link.href}>{link.label}</Link>
                 </li>
               ))}
             </ul>
-          </div>
-
-          {/* Astrologer + Contact */}
-          <div>
-            <p className="text-sm font-bold text-[#1a1208]">
-              {language === "bn" ? "জ্যোতিষী" : language === "hi" ? "ज्योतिषी" : "Astrologer"}
-            </p>
-            <ul className="mt-4 space-y-2.5">
-              <li>
-                <Link href="/login" className="text-sm text-[#6b5f4d] transition-colors hover:text-[#8b5e0a]">
-                  {language === "bn" ? "জ্যোতিষী লগইন" : language === "hi" ? "ज्योतिषी लॉगिन" : "Astrologer Login"}
-                </Link>
-              </li>
-              <li>
-                <Link href="/become-an-astrologer" className="text-sm text-[#6b5f4d] transition-colors hover:text-[#8b5e0a]">
-                  {language === "bn" ? "জ্যোতিষী নিবন্ধন" : language === "hi" ? "ज्योतिषी पंजीकरण" : "Astrologer Registration"}
-                </Link>
-              </li>
-              <li>
-                <Link href="/become-a-purohit" className="text-sm text-[#6b5f4d] transition-colors hover:text-[#8b5e0a]">
-                  {language === "bn" ? "পুরোহিত নিবন্ধন" : language === "hi" ? "पुरोहित पंजीकरण" : "Become a Purohit"}
-                </Link>
-              </li>
-            </ul>
-            <p className="mt-6 text-sm font-bold text-[#1a1208]">
-              {language === "bn" ? "যোগাযোগ" : language === "hi" ? "संपर्क करें" : "Contact us"}
-            </p>
-            <p className="mt-3 text-sm text-[#6b5f4d]">
-              {language === "bn" ? "চ্যাট সাপোর্টে ২৪x৭ উপলব্ধ" : language === "hi" ? "चैट सपोर्ट पर 24x7 उपलब्ध" : "We are available 24x7 on chat support"}
-            </p>
-            <Link href="/support" className="mt-1.5 inline-block text-sm font-semibold text-[#8b5e0a] hover:underline">
-              {language === "bn" ? "সাহায্য কেন্দ্র" : language === "hi" ? "सहायता केंद्र" : "Help & Support"}
-            </Link>
-          </div>
-
-          {/* Secure + social */}
-          <div>
-            <p className="text-sm font-bold text-[#1a1208]">
-              {language === "bn" ? "সুরক্ষিত" : language === "hi" ? "सुरक्षित" : "Secure"}
-            </p>
-            <ul className="mt-4 space-y-3">
-              <li className="flex items-center gap-2.5 text-sm text-[#6b5f4d]">
-                <Lock className="size-4 text-[#8b5e0a]" />
-                {language === "bn" ? "গোপনীয় ও সুরক্ষিত" : language === "hi" ? "निजी एवं गोपनीय" : "Private & Confidential"}
-              </li>
-              <li className="flex items-center gap-2.5 text-sm text-[#6b5f4d]">
-                <ShieldCheck className="size-4 text-[#8b5e0a]" />
-                {language === "bn" ? "যাচাইকৃত জ্যোতিষী" : language === "hi" ? "सत्यापित ज्योतिषी" : "Verified Astrologers"}
-              </li>
-              <li className="flex items-center gap-2.5 text-sm text-[#6b5f4d]">
-                <Wallet className="size-4 text-[#8b5e0a]" />
-                {language === "bn" ? "নিরাপদ পেমেন্ট" : language === "hi" ? "सुरक्षित भुगतान" : "Secure Payments"}
-              </li>
-            </ul>
-            <div className="mt-5 flex items-center gap-3">
-              {[
-                { label: "Facebook", Icon: FaFacebookF, href: process.env.NEXT_PUBLIC_FACEBOOK_URL || "/support" },
-                { label: "Instagram", Icon: FaInstagram, href: process.env.NEXT_PUBLIC_INSTAGRAM_URL || "/support" },
-                { label: "LinkedIn", Icon: FaLinkedinIn, href: process.env.NEXT_PUBLIC_LINKEDIN_URL || "/support" },
-                { label: "YouTube", Icon: FaYoutube, href: process.env.NEXT_PUBLIC_YOUTUBE_URL || "/support" },
-              ].map(({ label, Icon, href }) => {
-                const isExternal = href.startsWith("http");
-                return isExternal ? (
-                  <a
-                    key={label}
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={label}
-                    className="flex size-9 items-center justify-center rounded-full border border-[#eadf9a] bg-white text-[#6b5f4d] shadow-2xs transition-colors hover:border-[#d9b64a] hover:text-[#8b5e0a]"
-                  >
-                    <Icon className="size-4" aria-hidden="true" />
-                  </a>
-                ) : (
-                  <Link
-                    key={label}
-                    href={href}
-                    aria-label={label}
-                    className="flex size-9 items-center justify-center rounded-full border border-[#eadf9a] bg-white text-[#6b5f4d] shadow-2xs transition-colors hover:border-[#d9b64a] hover:text-[#8b5e0a]"
-                  >
-                    <Icon className="size-4" aria-hidden="true" />
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Download the App */}
-          <div>
-            <p className="text-sm font-bold text-[#1a1208]">
-              {language === "bn" ? "অ্যাপ ডাউনলোড করুন" : language === "hi" ? "ऐप डाउनलोड करें" : "Download the App"}
-            </p>
-            <div className="mt-4 flex flex-col gap-3">
-              {PLAY_STORE_URL ? (
-                <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="Get it on Google Play" className="inline-flex w-44 items-center gap-2.5 rounded-xl bg-[#1a1208] px-4 py-2.5 text-white transition-transform hover:scale-[1.02]">
-                  <FaGooglePlay className="size-6 shrink-0" />
-                  <span className="flex flex-col leading-tight">
-                    <span className="text-[9px] uppercase tracking-wide opacity-80">Get it on</span>
-                    <span className="text-sm font-bold">Google Play</span>
-                  </span>
-                </a>
-              ) : (
-                <button type="button" onClick={() => setWaitlistStore("android")} aria-label="Get it on Google Play" className="inline-flex w-44 items-center gap-2.5 rounded-xl bg-[#1a1208] px-4 py-2.5 text-left text-white transition-transform hover:scale-[1.02] cursor-pointer">
-                  <FaGooglePlay className="size-6 shrink-0" />
-                  <span className="flex flex-col leading-tight">
-                    <span className="text-[9px] uppercase tracking-wide opacity-80">Get it on</span>
-                    <span className="text-sm font-bold">Google Play</span>
-                  </span>
-                </button>
-              )}
-              {APP_STORE_URL ? (
-                <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" aria-label="Download on the App Store" className="inline-flex w-44 items-center gap-2.5 rounded-xl bg-[#1a1208] px-4 py-2.5 text-white transition-transform hover:scale-[1.02]">
-                  <FaApple className="size-6 shrink-0" />
-                  <span className="flex flex-col leading-tight">
-                    <span className="text-[9px] uppercase tracking-wide opacity-80">Download on the</span>
-                    <span className="text-sm font-bold">App Store</span>
-                  </span>
-                </a>
-              ) : (
-                <button type="button" onClick={() => setWaitlistStore("ios")} aria-label="Download on the App Store" className="inline-flex w-44 items-center gap-2.5 rounded-xl bg-[#1a1208] px-4 py-2.5 text-left text-white transition-transform hover:scale-[1.02] cursor-pointer">
-                  <FaApple className="size-6 shrink-0" />
-                  <span className="flex flex-col leading-tight">
-                    <span className="text-[9px] uppercase tracking-wide opacity-80">Download on the</span>
-                    <span className="text-sm font-bold">App Store</span>
-                  </span>
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-12 border-t border-[#efe3c0] pt-6">
-          <UlmindCredit />
-        </div>
-
-        <div className="mt-6 flex flex-col gap-3 text-xs text-[#8b7d63] sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            © <Year /> DivinLink.{" "}
-            {language === "bn" ? "সর্বস্বত্ব সংরক্ষিত।" : language === "hi" ? "सर्वाधिकार सुरक्षित।" : "All rights reserved."}
-          </p>
-          <p className="max-w-md sm:text-right">
-            {language === "bn"
-              ? "জ্যোতিষ সংক্রান্ত পরামর্শ ব্যক্তিগত চিন্তাভাবনা ও দিকনির্দেশনার জন্য এবং এটি কোনো পেশাদার চিকিৎসা, আইনি বা আর্থিক পরামর্শের বিকল্প নয়।"
-              : language === "hi"
-              ? "ज्योतिषीय मार्गदर्शन व्यक्तिगत चिंतन हेतु है और यह किसी पेशेवर चिकित्सा, कानूनी या वित्तीय सलाह का विकल्प नहीं है।"
-              : "Astrological guidance is offered for personal reflection and is not a substitute for professional medical, legal or financial advice."}
-          </p>
-        </div>
+          </nav>
+        ))}
       </div>
+
       <AppWaitlistModal
         open={Boolean(waitlistStore)}
         platform={waitlistStore}

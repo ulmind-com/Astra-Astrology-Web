@@ -1,0 +1,588 @@
+/* ==========================================================================
+   DivinLink site-wide layer: cursor, scroll reveal, page entrance and the
+   shared navigation bar. Plain top-level CSS (never inside @layer), so
+   Tailwind v4 cannot prune it and it wins over layered utilities.
+   ========================================================================== */
+
+/* ------------------------------------------------------------------ */
+/* Custom cursor                                                       */
+/* ------------------------------------------------------------------ */
+
+html.dl-cursor-on,
+html.dl-cursor-on * {
+  cursor: none !important;
+}
+
+.dl-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 2147483000;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border-radius: 50%;
+  background: rgba(72, 62, 68, 0.55);
+  border: 0 solid rgba(20, 16, 18, 0.9);
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    width 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    height 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    margin 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    border-width 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.2s linear;
+  will-change: transform;
+  contain: strict;
+}
+
+.dl-cursor.is-visible {
+  opacity: 1;
+}
+
+.dl-cursor.is-hover {
+  width: 38px;
+  height: 38px;
+  margin: -19px 0 0 -19px;
+  background: rgba(72, 62, 68, 0.35);
+}
+
+.dl-cursor.is-down {
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  background: transparent;
+  border-width: 5px;
+}
+
+.dl-cursor.is-rec {
+  width: 50px;
+  height: 50px;
+  margin: -25px 0 0 -25px;
+}
+
+.dl-cursor.is-rec.is-hover {
+  width: 58px;
+  height: 58px;
+  margin: -29px 0 0 -29px;
+}
+
+.dl-cursor.is-rec.is-down {
+  width: 62px;
+  height: 62px;
+  margin: -31px 0 0 -31px;
+  border-width: 7px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Scroll reveal (driven by DivinLinkMotion)                           */
+/* ------------------------------------------------------------------ */
+
+.dl-rv {
+  opacity: 0;
+  translate: 0 26px;
+}
+
+.dl-rv.dl-rv-in {
+  opacity: 1;
+  translate: 0 0;
+  transition:
+    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    translate 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--dl-rv-delay, 0ms);
+}
+
+/* Grid items rise a little further, like the home cards. */
+[class*="grid"] > .dl-rv:not(section) {
+  translate: 0 40px;
+}
+
+[class*="grid"] > .dl-rv.dl-rv-in:not(section) {
+  translate: 0 0;
+}
+
+/* Page entrance on client navigation: opacity only, so nothing fixed or
+   sticky gets a new containing block. */
+@keyframes dl-page-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+html.dl-page-in body > *:not(.dl-cursor):not([data-sonner-toaster]):not(header) {
+  animation: dl-page-fade 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ------------------------------------------------------------------ */
+/* Shared navigation bar (AstroyogiHeader)                             */
+/* ------------------------------------------------------------------ */
+
+.dl-site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  color: #1d1a1c;
+  background: rgba(247, 217, 198, 0.86);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(29, 26, 28, 0.08);
+  transition:
+    background-color 0.5s ease,
+    color 0.5s ease,
+    border-color 0.5s ease,
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+/* Over the home hero: transparent with white text until scrolled. */
+.dl-site-nav.is-overlay {
+  position: fixed;
+  left: 0;
+  right: 0;
+  color: rgba(255, 255, 255, 0.92);
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-bottom-color: rgba(255, 255, 255, 0.28);
+}
+
+.dl-site-nav.is-hidden {
+  transform: translate3d(0, -100%, 0);
+}
+
+.dl-site-nav-row {
+  height: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 1720px;
+  margin: 0 auto;
+  padding: 0 clamp(14px, 3.2vw, 56px);
+}
+
+.dl-site-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+}
+
+.dl-site-logo-mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex: 0 0 auto;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dl-site-logo:hover .dl-site-logo-mark {
+  transform: rotate(-6deg) scale(1.05);
+}
+
+.dl-site-logo-word {
+  font-family: var(--font-urbanist), system-ui, sans-serif;
+  font-weight: 300;
+  font-size: 26px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.dl-site-divider {
+  display: none;
+  width: 1px;
+  height: 42px;
+  margin: 0 22px;
+  background: currentColor;
+  opacity: 0.45;
+  flex: 0 0 auto;
+}
+
+.dl-site-links {
+  display: none;
+  align-items: center;
+  gap: clamp(14px, 1.5vw, 30px);
+  white-space: nowrap;
+}
+
+.dl-site-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: inherit;
+  white-space: nowrap;
+}
+
+.dl-site-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2px;
+  height: 1.5px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dl-site-link:hover::after,
+.dl-site-link:focus-visible::after,
+.dl-site-link.is-active::after {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+.dl-site-link.is-active {
+  font-weight: 700;
+}
+
+.dl-site-link svg {
+  width: 12px;
+  height: 12px;
+  opacity: 0.7;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dl-site-link[data-open="true"] svg {
+  transform: rotate(180deg);
+}
+
+.dl-site-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.dl-site-icon {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: inherit;
+  transition: background-color 0.3s ease;
+}
+
+.dl-site-icon:hover {
+  background: rgba(29, 26, 28, 0.06);
+}
+
+.dl-site-nav.is-overlay .dl-site-icon:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.dl-site-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.dl-site-lang-code {
+  position: absolute;
+  right: -2px;
+  bottom: 0;
+  padding: 1px 4px;
+  border-radius: 6px;
+  background: #1d1a1c;
+  color: #fff;
+  font-size: 8.5px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.dl-site-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding: 0 5px 0 12px;
+  border: 1.5px solid currentColor;
+  border-radius: 9px;
+  color: inherit;
+  transition: background-color 0.3s ease;
+}
+
+.dl-site-pill:hover {
+  background: rgba(29, 26, 28, 0.05);
+}
+
+.dl-site-nav.is-overlay .dl-site-pill:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.dl-site-pill > svg {
+  width: 18px;
+  height: 18px;
+}
+
+.dl-site-pill-avatar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: currentColor;
+}
+
+.dl-site-pill-avatar svg {
+  width: 15px;
+  height: 15px;
+  color: #f7d9c6;
+  fill: #f7d9c6;
+}
+
+.dl-site-nav.is-overlay .dl-site-pill-avatar svg {
+  color: #6b5560;
+  fill: #6b5560;
+}
+
+.dl-site-cta {
+  display: none;
+  align-items: center;
+  gap: 7px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #f39419;
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 10px 24px -12px rgba(243, 148, 25, 0.85);
+  transition:
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.3s ease;
+}
+
+.dl-site-cta:hover {
+  background: #e6860c;
+  transform: translateY(-1px);
+}
+
+.dl-site-cta svg {
+  width: 14px;
+  height: 14px;
+}
+
+.dl-site-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: #ff4d5e;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+/* Popovers hanging off the bar: white card, big soft shadow, drop in -8px. */
+.dl-pop-card {
+  border-radius: 18px;
+  background: #fff;
+  color: #1d1a1c;
+  box-shadow:
+    0 30px 80px rgba(90, 50, 40, 0.22),
+    0 4px 12px rgba(90, 50, 40, 0.06);
+  animation: dl-pop-drop 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes dl-pop-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.dl-pop-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: #1d1a1c;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+  transition: background-color 0.25s ease;
+}
+
+.dl-pop-item:hover,
+.dl-pop-item.is-current {
+  background: #fbeee5;
+}
+
+.dl-pop-item.is-current {
+  font-weight: 700;
+}
+
+.dl-pop-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fbe4d6;
+  color: #1d1a1c;
+}
+
+.dl-pop-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Visibility lives here, not in Tailwind classes: this file is unlayered,
+   so a layered `hidden` utility would lose to these display values. */
+@media (min-width: 640px) {
+  .dl-site-cta {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 1280px) {
+  .dl-site-links {
+    display: flex;
+  }
+
+  .dl-site-divider {
+    display: block;
+  }
+}
+
+/* Ten categories share the bar, so it tightens before anything wraps. */
+@media (max-width: 1679px) {
+  .dl-site-links {
+    gap: clamp(10px, 0.95vw, 20px);
+  }
+
+  .dl-site-link {
+    font-size: 13px;
+  }
+
+  .dl-site-divider {
+    margin: 0 16px;
+  }
+
+  .dl-site-logo-word {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 1535px) {
+  .dl-site-cta-arrow {
+    display: none;
+  }
+
+  .dl-site-cta {
+    padding: 0 14px;
+  }
+}
+
+@media (min-width: 1280px) and (max-width: 1439px) {
+  .dl-site-cta-label {
+    display: none;
+  }
+
+  .dl-site-cta {
+    width: 40px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .dl-site-divider {
+    display: none !important;
+  }
+
+  .dl-site-link {
+    font-size: 12.5px;
+  }
+}
+
+@media (max-width: 640px) {
+  .dl-site-row-sm {
+    height: 64px;
+  }
+
+  .dl-site-logo-word {
+    font-size: 22px;
+  }
+
+  .dl-site-cta {
+    height: 36px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .dl-site-pill {
+    height: 36px;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Shared headings                                                     */
+/* ------------------------------------------------------------------ */
+
+/* The home grid's "See All" pill: ink outline, fills ink on hover. */
+.dl-pill-outline {
+  border: 1.4px solid #1d1a1c;
+  border-radius: 999px;
+  color: #1d1a1c;
+  transition:
+    background-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dl-pill-outline:hover:not(:disabled) {
+  background: #1d1a1c;
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dl-rv,
+  .dl-rv.dl-rv-in {
+    opacity: 1 !important;
+    translate: none !important;
+  }
+
+  html.dl-page-in body > * {
+    animation: none !important;
+  }
+}
+
+/* The old horoscope pages set their display headings in Cinzel. In the
+   DivinLink system every display heading is Gilda Display. */
+.font-cinzel,
+.font-cinzel-decorative {
+  font-family: var(--font-gilda), Georgia, serif !important;
+  font-synthesis: none;
+}

@@ -13,7 +13,7 @@ export default function SignHoroscopePage() {
   return (
     <React.Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[#faf6f0]">
+        <div className="flex min-h-screen items-center justify-center bg-[#fbeee5]">
           <RotateCcw className="size-8 animate-spin text-[#b06d4e]" />
         </div>
       }

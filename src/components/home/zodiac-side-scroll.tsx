@@ -191,7 +191,7 @@ export function ZodiacSideScroll() {
       : ZODIAC_SIGNS.filter((s) => s.element === selectedElement);
 
   return (
-    <section className="relative overflow-hidden py-12 sm:py-16 bg-gradient-to-b from-[#fffdf5] via-[#fffdf2] to-[#fffdf5] border-y border-[#f2e9b0]/60">
+    <section className="relative overflow-hidden py-12 sm:py-16 bg-gradient-to-b from-[#fff8f3] via-[#fef7f3] to-[#fff8f3] border-y border-[#fbdcc8]/60">
       <div className="mx-auto max-w-[1360px] px-4 sm:px-6 lg:px-8">
         
         {/* Header & Controls Row */}
@@ -203,10 +203,10 @@ export function ZodiacSideScroll() {
                 Celestial Alignments
               </span>
             </div>
-            <h2 className="font-cinzel text-2xl sm:text-4xl font-bold tracking-tight text-[#1a1208]">
+            <h2 className="font-cinzel text-2xl sm:text-4xl font-bold tracking-tight text-[#1d1a1c]">
               The 12 Zodiac Constellations
             </h2>
-            <p className="mt-2 text-xs sm:text-sm text-[#6b5f4d] max-w-xl">
+            <p className="mt-2 text-xs sm:text-sm text-[#5c5156] max-w-xl">
               Scroll through the celestial houses to reveal elemental energies, ruling deities, and cosmic alignments.
             </p>
           </div>
@@ -214,7 +214,7 @@ export function ZodiacSideScroll() {
           {/* Right: Filter Chips & Arrow Buttons */}
           <div className="flex items-center justify-between sm:justify-end gap-3 flex-wrap">
             {/* Element Filter Pills */}
-            <div className="flex items-center gap-1.5 p-1 rounded-full bg-[#faf3c4]/70 border border-[#eadf9a]">
+            <div className="flex items-center gap-1.5 p-1 rounded-full bg-[#fde9dc]/70 border border-[#f7c9a8]">
               {["All", "Fire", "Earth", "Air", "Water"].map((elem) => (
                 <button
                   key={elem}
@@ -223,7 +223,7 @@ export function ZodiacSideScroll() {
                   className={`inline-flex min-h-9 items-center justify-center px-3 py-2 text-xs font-semibold rounded-full press transition-all duration-200 ${
                     selectedElement === elem
                       ? "bg-[#bd6c0c] text-white shadow-sm"
-                      : "text-[#6b5f4d] hover:text-[#bd6c0c]"
+                      : "text-[#5c5156] hover:text-[#bd6c0c]"
                   }`}
                 >
                   {elem}
@@ -238,7 +238,7 @@ export function ZodiacSideScroll() {
                 onClick={() => scroll("left")}
                 disabled={!canScrollLeft}
                 aria-label="Scroll left"
-                className={`flex size-10 items-center justify-center rounded-full border border-[#e3d58f] bg-[#fffbe8] text-[#1a1208] transition-all duration-200 hover:bg-[#fef7cf] hover:scale-105 active:scale-95 ${
+                className={`flex size-10 items-center justify-center rounded-full border border-[#f3c9ac] bg-[#fff6ef] text-[#1d1a1c] transition-all duration-200 hover:bg-[#fdeee3] hover:scale-105 active:scale-95 ${
                   !canScrollLeft ? "opacity-40 cursor-not-allowed" : "shadow-sm"
                 }`}
               >
@@ -249,7 +249,7 @@ export function ZodiacSideScroll() {
                 onClick={() => scroll("right")}
                 disabled={!canScrollRight}
                 aria-label="Scroll right"
-                className={`flex size-10 items-center justify-center rounded-full border border-[#e3d58f] bg-[#fffbe8] text-[#1a1208] transition-all duration-200 hover:bg-[#fef7cf] hover:scale-105 active:scale-95 ${
+                className={`flex size-10 items-center justify-center rounded-full border border-[#f3c9ac] bg-[#fff6ef] text-[#1d1a1c] transition-all duration-200 hover:bg-[#fdeee3] hover:scale-105 active:scale-95 ${
                   !canScrollRight ? "opacity-40 cursor-not-allowed" : "shadow-sm"
                 }`}
               >
@@ -272,7 +272,7 @@ export function ZodiacSideScroll() {
               <Link
                 key={sign.id}
                 href={`/daily-horoscope?sign=${sign.id}`}
-                className={`group shrink-0 snap-start w-[270px] sm:w-[290px] rounded-2xl border border-[#f2e9b0] bg-[#fffdf5] p-5 transition-all duration-300 hover:-translate-y-1.5 ${style.glow}`}
+                className={`group shrink-0 snap-start w-[270px] sm:w-[290px] rounded-2xl border border-[#fbdcc8] bg-[#fff8f3] p-5 transition-all duration-300 hover:-translate-y-1.5 ${style.glow}`}
               >
                 {/* Top: Modern Illustrated Mascot & Element Badge */}
                 <div className="flex items-center justify-between">
@@ -298,29 +298,29 @@ export function ZodiacSideScroll() {
                 {/* Name & Sanskrit Counterpart */}
                 <div className="mt-4">
                   <div className="flex items-baseline gap-2">
-                    <h3 className="font-cinzel text-lg sm:text-xl font-bold text-[#1a1208] group-hover:text-[#bd6c0c] transition-colors">
+                    <h3 className="font-cinzel text-lg sm:text-xl font-bold text-[#1d1a1c] group-hover:text-[#bd6c0c] transition-colors">
                       {sign.name}
                     </h3>
-                    <span className="text-xs font-serif italic text-[#6b5f4d]">
+                    <span className="text-xs font-serif italic text-[#5c5156]">
                       ({sign.sanskrit})
                     </span>
                   </div>
-                  <p className="mt-0.5 text-xs text-[#6b5f4d] font-medium">
+                  <p className="mt-0.5 text-xs text-[#5c5156] font-medium">
                     {sign.dates}
                   </p>
                 </div>
 
                 {/* Ruler Planet & Traits */}
-                <div className="mt-4 pt-3.5 border-t border-[#faf3c4] text-xs">
-                  <div className="flex items-center justify-between text-[#6b5f4d]">
+                <div className="mt-4 pt-3.5 border-t border-[#fde9dc] text-xs">
+                  <div className="flex items-center justify-between text-[#5c5156]">
                     <span className="text-muted-foreground font-medium">Ruler:</span>
-                    <span className="font-semibold text-[#1a1208]">{sign.ruler}</span>
+                    <span className="font-semibold text-[#1d1a1c]">{sign.ruler}</span>
                   </div>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {sign.traits.map((trait) => (
                       <span
                         key={trait}
-                        className="rounded-md bg-[#fdf6d0] px-2 py-0.5 text-[10px] font-semibold text-[#6b5f4d]"
+                        className="rounded-md bg-[#fdeee3] px-2 py-0.5 text-[10px] font-semibold text-[#5c5156]"
                       >
                         {trait}
                       </span>

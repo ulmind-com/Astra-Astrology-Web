@@ -1601,7 +1601,7 @@ export default function AIAstrologerPage() {
                 <button
                   type="submit"
                   disabled={!inputQuery.trim() || loading}
-                  className="no-focus-ring outline-none focus:outline-none focus-visible:outline-none flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-[#fcd404] hover:bg-[#ebd500] text-stone-950 font-bold px-5 text-xs sm:text-sm shadow-xs press transition-all active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+                  className="no-focus-ring outline-none focus:outline-none focus-visible:outline-none flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-[#f39419] hover:bg-[#e6860c] text-stone-950 font-bold px-5 text-xs sm:text-sm shadow-xs press transition-all active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
                 >
                   {loading ? (
                     <Loader2 className="size-4 animate-spin" />

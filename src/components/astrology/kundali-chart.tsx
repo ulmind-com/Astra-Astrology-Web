@@ -156,7 +156,7 @@ export function KundaliChart({
         className={`relative w-full max-w-[440px] aspect-square mx-auto rounded-2xl overflow-hidden select-none border-2 transition-colors duration-200 ${
           isCosmic
             ? "bg-[#0d111c] border-amber-500/60 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
-            : "bg-[#fffef7] border-amber-400/80 shadow-[0_8px_30px_rgba(217,119,6,0.12)]"
+            : "bg-[#fefaf8] border-amber-400/80 shadow-[0_8px_30px_rgba(217,119,6,0.12)]"
         }`}
       >
         {/* ===================================================================

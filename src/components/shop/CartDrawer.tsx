@@ -115,7 +115,7 @@ export function CartDrawer() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 300 }}
-            className="relative z-10 flex h-full w-full max-w-full sm:max-w-[460px] flex-col bg-[#fffdf9] text-stone-900 shadow-[-16px_0_48px_rgba(26,18,8,0.28)] border-l border-amber-900/10 focus:outline-none"
+            className="relative z-10 flex h-full w-full max-w-full sm:max-w-[460px] flex-col bg-[#fff8f3] text-stone-900 shadow-[-16px_0_48px_rgba(26,18,8,0.28)] border-l border-amber-900/10 focus:outline-none"
             role="dialog"
             aria-modal="true"
             aria-label="Shopping Cart"

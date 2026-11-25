@@ -34,17 +34,17 @@
      Pale at the low end for tints and chips, deepening into an olive that is
      readable as text on white. #f7ee7a is the brand fill; anything below 500
      is far too light to put words in. */
-  --color-brand-50: #fffdf0;
-  --color-brand-100: #fefbd4;
-  --color-brand-200: #fcf6ad;
-  --color-brand-300: #f7ee7a;
-  --color-brand-400: #f2e54a;
-  --color-brand-500: #ddcd21;
-  --color-brand-600: #b4a616;
-  --color-brand-700: #867c12;
-  --color-brand-800: #5a5310;
-  --color-brand-900: #3a350c;
-  --color-brand-950: #1c1304;
+  --color-brand-50: #fff6ef;
+  --color-brand-100: #fdeee3;
+  --color-brand-200: #fbdcc8;
+  --color-brand-300: #f7c9a8;
+  --color-brand-400: #f5ad6a;
+  --color-brand-500: #f39419;
+  --color-brand-600: #d97b0b;
+  --color-brand-700: #a95c0c;
+  --color-brand-800: #7a4410;
+  --color-brand-900: #4c2b0c;
+  --color-brand-950: #1d1a1c;
 
   /* --- gold: ratings and anything celestial ---------------------------
      Kept apart from the brand yellow so a star does not read as a button.
@@ -53,7 +53,7 @@
   --color-gold-100: #fef0d2;
   --color-gold-200: #fcdfa4;
   --color-gold-300: #f8c76b;
-  --color-gold-400: #f3ab35;
+  --color-gold-400: #f7c325;
   --color-gold-500: #e08c12;
   --color-gold-600: #bd6c0c;
   --color-gold-700: #964f0f;
@@ -61,12 +61,12 @@
   --color-gold-900: #653512;
 
   /* --- ink: the warm near-blacks the spec names ----------------------- */
-  --color-ink-500: #6b5f4d;
-  --color-ink-600: #4a4034;
-  --color-ink-700: #2b2217;
-  --color-ink-800: #1a1a1a;
-  --color-ink-900: #1a1208;
-  --color-ink-950: #1c1304;
+  --color-ink-500: #8a7f83;
+  --color-ink-600: #5c5156;
+  --color-ink-700: #3a3236;
+  --color-ink-800: #262124;
+  --color-ink-900: #1d1a1c;
+  --color-ink-950: #141113;
 
   /* --- night: the video stage, and only that ---------------------------
      A call fills the screen with someone's face, and every video product
@@ -78,26 +78,101 @@
 
   /* --- cream: page and promotional surfaces --------------------------- */
   --color-cream-50: #ffffff;
-  --color-cream-100: #fafafa;
+  --color-cream-100: #fdf0e7;
   --color-cream-200: #ffffff;
-  --color-cream-300: #f5f5f5;
+  --color-cream-300: #fbe7da;
+
+
+  /* --- DivinLink palette remap ---------------------------------------
+     The pages were written against Tailwind's amber and stone scales. Rather
+     than rewrite thousands of class names, the scales themselves now carry
+     the DivinLink look: amber is the peach-orange accent (500 = the Book
+     Now orange), and every grey family is the same warm mauve ink. */
+  --color-amber-50: #fff7f0;
+  --color-amber-100: #feecdf;
+  --color-amber-200: #fcd9bf;
+  --color-amber-300: #f9bf8e;
+  --color-amber-400: #f6a650;
+  --color-amber-500: #f39419;
+  --color-amber-600: #d97b0b;
+  --color-amber-700: #b0610c;
+  --color-amber-800: #8c4c12;
+  --color-amber-900: #723f13;
+  --color-amber-950: #401f07;
+  --color-stone-50: #fbf6f3;
+  --color-stone-100: #f5ece8;
+  --color-stone-200: #eadcd6;
+  --color-stone-300: #d8c7c2;
+  --color-stone-400: #ab9b9d;
+  --color-stone-500: #8a7f83;
+  --color-stone-600: #5c5156;
+  --color-stone-700: #463c41;
+  --color-stone-800: #2f282c;
+  --color-stone-900: #1d1a1c;
+  --color-stone-950: #121011;
+  --color-slate-50: #fbf6f3;
+  --color-slate-100: #f5ece8;
+  --color-slate-200: #eadcd6;
+  --color-slate-300: #d8c7c2;
+  --color-slate-400: #ab9b9d;
+  --color-slate-500: #8a7f83;
+  --color-slate-600: #5c5156;
+  --color-slate-700: #463c41;
+  --color-slate-800: #2f282c;
+  --color-slate-900: #1d1a1c;
+  --color-slate-950: #121011;
+  --color-neutral-50: #fbf6f3;
+  --color-neutral-100: #f5ece8;
+  --color-neutral-200: #eadcd6;
+  --color-neutral-300: #d8c7c2;
+  --color-neutral-400: #ab9b9d;
+  --color-neutral-500: #8a7f83;
+  --color-neutral-600: #5c5156;
+  --color-neutral-700: #463c41;
+  --color-neutral-800: #2f282c;
+  --color-neutral-900: #1d1a1c;
+  --color-neutral-950: #121011;
+  --color-gray-50: #fbf6f3;
+  --color-gray-100: #f5ece8;
+  --color-gray-200: #eadcd6;
+  --color-gray-300: #d8c7c2;
+  --color-gray-400: #ab9b9d;
+  --color-gray-500: #8a7f83;
+  --color-gray-600: #5c5156;
+  --color-gray-700: #463c41;
+  --color-gray-800: #2f282c;
+  --color-gray-900: #1d1a1c;
+  --color-gray-950: #121011;
+  --color-zinc-50: #fbf6f3;
+  --color-zinc-100: #f5ece8;
+  --color-zinc-200: #eadcd6;
+  --color-zinc-300: #d8c7c2;
+  --color-zinc-400: #ab9b9d;
+  --color-zinc-500: #8a7f83;
+  --color-zinc-600: #5c5156;
+  --color-zinc-700: #463c41;
+  --color-zinc-800: #2f282c;
+  --color-zinc-900: #1d1a1c;
+  --color-zinc-950: #121011;
+  --color-rose-500: #ff4d5e;
+  --color-rose-600: #e63a4c;
 
   /* Poppins throughout. The design calls for a numeral-friendly companion
      ("PoppinsNum") for prices and metrics; Poppins ships tabular figures, so
      `.tabular-nums` does that job rather than a second webfont. */
-  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-urbanist), var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-gilda), Georgia, "Times New Roman", serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
   /* Cards 16px, modals 24px, everything interactive a full pill. */
-  --radius-card: 16px;
-  --radius-modal: 24px;
+  --radius-card: 14px;
+  --radius-modal: 18px;
 
   /* Soft and warm. Depth is a gentle lift, never a hard edge. */
-  --shadow-soft: 0 1px 2px rgb(26 18 8 / 0.04), 0 8px 24px -16px rgb(26 18 8 / 0.14);
-  --shadow-lift: 0 2px 6px rgb(26 18 8 / 0.06), 0 18px 40px -20px rgb(26 18 8 / 0.22);
+  --shadow-soft: 0 1px 2px rgb(110 60 50 / 0.05), 0 12px 30px -14px rgb(110 60 50 / 0.2);
+  --shadow-lift: 0 2px 6px rgb(110 60 50 / 0.06), 0 24px 46px -16px rgb(110 60 50 / 0.3);
   /* The one glow in the system: under the yellow call to action. */
-  --shadow-glow: 0 10px 30px -12px rgb(242 229 74 / 0.9), 0 2px 6px rgb(26 18 8 / 0.08);
+  --shadow-glow: 0 12px 28px -12px rgb(243 148 25 / 0.75), 0 2px 6px rgb(29 26 28 / 0.08);
 }
 
 /* --------------------------------------------------------------------------
@@ -108,18 +183,24 @@
 
   /* Cream page, white cards — the contrast that makes content read as
      content and the page as a backdrop. */
-  --background: #ffffff;
+  --background: #fdf0e7;
   --surface: #ffffff;
-  --surface-muted: #f9fafb;
+  --surface-muted: #fbf3ee;
   --surface-raised: #ffffff;
   --surface-solid: #ffffff;
 
-  --border: rgb(26 18 8 / 0.08);
-  --border-strong: rgb(26 18 8 / 0.18);
+  --border: rgb(29 26 28 / 0.08);
+  --border-strong: rgb(29 26 28 / 0.18);
 
-  --foreground: #1a1208;
-  --muted-foreground: #6b5f4d;
-  --ring: #1c1304;
+  --foreground: #1d1a1c;
+  --muted-foreground: #5c5156;
+  --ring: #1d1a1c;
+
+  /* DivinLink motion curves: layout moves and reveals. */
+  --ease: cubic-bezier(0.65, 0, 0.35, 1);
+  --out: cubic-bezier(0.16, 1, 0.3, 1);
+  --peach: #f7d9c6;
+  --ink-muted-light: #8a7f83;
 
   /* Status. Warm and muted rather than signal-bright, so nothing competes
      with the yellow. */
@@ -164,13 +245,23 @@
      container — hidden breaks position: sticky on the header. */
   html {
     -webkit-text-size-adjust: 100%;
-    background-color: var(--background);
+    background-color: #f7d9c6;
     overflow-x: clip;
     max-width: 100vw;
   }
 
+  /* The DivinLink page: solid peach to 115vh, easing to the palest peach at
+     the foot, so every page shares the home page's ground. */
   body {
     background-color: var(--background);
+    background-image: linear-gradient(
+      180deg,
+      #f7d9c6 0,
+      #f7d9c6 115vh,
+      #fbe7da 175vh,
+      #fdf0e7 100%
+    );
+    background-repeat: no-repeat;
     color: var(--foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
@@ -187,14 +278,15 @@
   /* Confident and tight, as the type scale asks. The negative tracking is
      what gives the headlines their editorial feel; it is set per size because
      a single value would be far too tight on the small ones. */
-  h1 {
-    letter-spacing: -0.035em;
-    font-weight: 600;
-  }
-
+  /* Section headings are Gilda Display, the high-contrast serif. It ships one
+     weight, so synthesis is off: a `font-bold` on a heading keeps the real
+     letterforms instead of a smeared fake bold. */
+  h1,
   h2 {
-    letter-spacing: -0.03em;
-    font-weight: 600;
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    font-synthesis: none;
   }
 
   h3 {
@@ -214,13 +306,13 @@
   }
 
   ::selection {
-    background-color: var(--color-brand-300);
-    color: var(--color-ink-950);
+    background-color: #f7c9a8;
+    color: #1d1a1c;
   }
 
   /* Scrollbars, warm rather than grey. */
   * {
-    scrollbar-color: rgb(26 18 8 / 0.2) transparent;
+    scrollbar-color: rgb(92 81 86 / 0.28) transparent;
   }
 
   ::-webkit-scrollbar {
@@ -278,21 +370,22 @@
   /* A card that should catch the eye: the warm promotional surface. */
   .card-glow {
     background-color: var(--surface);
-    border-color: rgb(242 229 74 / 0.6);
+    border-color: rgb(243 148 25 / 0.35);
     box-shadow: var(--shadow-glow);
   }
 
   /* The primary action, and nothing else. Yellow fill, dark text, full pill,
      and the one glow in the system under it. */
+  /* The primary action: the DivinLink orange pill, white label. */
   .btn-cosmic {
-    background-color: var(--color-brand-300);
-    color: var(--color-brand-950);
+    background-color: #f39419;
+    color: #ffffff;
     box-shadow: var(--shadow-glow);
   }
 
   .btn-cosmic:hover:not(:disabled) {
-    background-color: var(--color-brand-400);
-    box-shadow: 0 12px 34px -12px rgb(242 229 74 / 1), 0 2px 6px rgb(26 18 8 / 0.1);
+    background-color: #e6860c;
+    box-shadow: 0 16px 34px -12px rgb(243 148 25 / 0.85), 0 2px 6px rgb(29 26 28 / 0.1);
   }
 
   /* A warm promotional band, used where the old design had a night sky. */
@@ -330,10 +423,10 @@
 
   /* A soft yellow disc behind an icon. */
   .medallion {
-    background-color: var(--color-brand-300);
-    color: var(--color-brand-950);
-    border: 1px solid rgb(26 18 8 / 0.06);
-    box-shadow: 0 6px 18px -10px rgb(242 229 74 / 0.9);
+    background-color: #fbdcc8;
+    color: #1d1a1c;
+    border: 1px solid rgb(29 26 28 / 0.06);
+    box-shadow: 0 6px 18px -10px rgb(243 148 25 / 0.6);
   }
 
   /* The selected item in the panel's sidebar. A soft yellow wash rather than
@@ -341,8 +434,8 @@
      at that frequency the solid colour stops meaning "this is the action"
      and starts competing with the button that is. */
   .nav-active {
-    background-color: var(--color-brand-200);
-    color: var(--color-brand-950);
+    background-color: #fbdcc8;
+    color: #1d1a1c;
     font-weight: 600;
   }
 
@@ -370,9 +463,9 @@
   .text-gradient-brand {
     background-image: linear-gradient(
       100deg,
-      var(--color-ink-900),
-      var(--color-gold-600) 45%,
-      var(--color-brand-600)
+      #1d1a1c,
+      #b0610c 45%,
+      #f39419
     );
     -webkit-background-clip: text;
     background-clip: text;
@@ -393,9 +486,9 @@
   .shimmer {
     background: linear-gradient(
       90deg,
-      rgb(26 18 8 / 0.04) 25%,
-      rgb(26 18 8 / 0.09) 37%,
-      rgb(26 18 8 / 0.04) 63%
+      rgb(110 60 50 / 0.05) 25%,
+      rgb(110 60 50 / 0.11) 37%,
+      rgb(110 60 50 / 0.05) 63%
     );
     background-size: 400% 100%;
     animation: shimmer 1.4s ease-in-out infinite;
@@ -685,7 +778,7 @@
 @keyframes rise-in {
   from {
     opacity: 0;
-    transform: translate3d(0, 14px, 0) scale(0.985);
+    transform: translate3d(0, 26px, 0);
   }
   to {
     opacity: 1;
@@ -702,7 +795,7 @@
 }
 
 .reveal-in {
-  animation: rise-in 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: rise-in 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* A group whose children rise in one after another. The wrapper itself stays
@@ -722,21 +815,21 @@
    it — a set of results after a calculation. It animates the moment it mounts.
    `:is()` lets both share one set of delays. */
 :is(.stagger-group.reveal-in, .reveal-cascade) > * {
-  animation: rise-in 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: rise-in 800ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 :is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(1) { animation-delay: 0ms; }
-:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(2) { animation-delay: 60ms; }
-:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(3) { animation-delay: 120ms; }
-:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(4) { animation-delay: 180ms; }
-:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(5) { animation-delay: 230ms; }
-:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(6) { animation-delay: 280ms; }
-:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(7) { animation-delay: 320ms; }
-:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(8) { animation-delay: 360ms; }
-:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(9) { animation-delay: 390ms; }
-:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(10) { animation-delay: 420ms; }
-:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(11) { animation-delay: 450ms; }
-:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(n + 12) { animation-delay: 480ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(2) { animation-delay: 70ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(3) { animation-delay: 140ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(4) { animation-delay: 210ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(5) { animation-delay: 280ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(6) { animation-delay: 350ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(7) { animation-delay: 420ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(8) { animation-delay: 490ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(9) { animation-delay: 560ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(10) { animation-delay: 630ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(11) { animation-delay: 700ms; }
+:is(.stagger-group.reveal-in, .reveal-cascade) > *:nth-child(n + 12) { animation-delay: 770ms; }
 
 /* A single panel appearing in place: a tab's contents, a disclosure opening,
    an overlay. Quicker than a scroll reveal, because the reader has just acted
@@ -780,22 +873,45 @@
 @media (hover: hover) {
   .lift {
     transition:
-      transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
-      box-shadow 260ms cubic-bezier(0.16, 1, 0.3, 1),
-      border-color 260ms ease;
+      transform 600ms cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 600ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 300ms ease;
   }
 
   .lift:hover {
-    transform: translate3d(0, -3px, 0);
+    transform: translate3d(0, -6px, 0);
     box-shadow: var(--shadow-lift);
-    border-color: rgb(221 205 33 / 0.45);
+    border-color: rgb(243 148 25 / 0.3);
+  }
+
+  /* The card photo zoom from the home grid, for any lifting card. */
+  .lift img.object-cover,
+  :where(a, button).card-surface img.object-cover {
+    transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .lift:hover img.object-cover,
+  :where(a, button).card-surface:hover img.object-cover {
+    transform: scale(1.07);
+  }
+
+  /* A linked card lifts the same way a .lift card does. */
+  :where(a).card-surface {
+    transition:
+      transform 600ms cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  :where(a).card-surface:hover {
+    transform: translate3d(0, -6px, 0);
+    box-shadow: var(--shadow-lift);
   }
 }
 
 /* Keyboard focus, one shape for the whole app. `focus-visible` keeps it off
    the screen for mouse users and present for everyone navigating by Tab. */
 .focus-ring:focus-visible {
-  outline: 2px solid var(--color-brand-500);
+  outline: 2px solid #1d1a1c;
   outline-offset: 2px;
   border-radius: inherit;
 }
@@ -806,7 +922,7 @@
    wins on specificity; the `:where()` keeps this rule at zero specificity so
    that is always true. */
 :where(button, a[href], [role="button"], summary, select, input, textarea):focus-visible {
-  outline: 2px solid var(--color-brand-500);
+  outline: 2px solid #1d1a1c;
   outline-offset: 2px;
 }
 

@@ -132,7 +132,7 @@ export default function CallPage() {
         "relative flex h-dvh flex-col transition-colors duration-300",
         theme === "dark"
           ? "bg-night-950 text-white"
-          : "bg-gradient-to-br from-[#fcf9f2] via-[#f7f2e4] to-[#ede3cf] text-[#1a1208]",
+          : "bg-gradient-to-br from-[#fcf9f2] via-[#f7ece4] to-[#ede3cf] text-[#1d1a1c]",
       )}
     >
       {/* The SDK fills the frame once connected; everything else floats over. */}
@@ -149,7 +149,7 @@ export default function CallPage() {
             "absolute inset-0 transition-opacity",
             theme === "dark"
               ? "bg-cosmos"
-              : "bg-[radial-gradient(ellipse_at_center,rgba(250,204,21,0.18)_0%,rgba(245,235,215,0.85)_60%,rgba(237,227,207,1)_100%)]",
+              : "bg-[radial-gradient(ellipse_at_center,rgba(250,151,21,0.18)_0%,rgba(245,235,215,0.85)_60%,rgba(237,227,207,1)_100%)]",
           )}
         />
       )}
@@ -212,17 +212,17 @@ export default function CallPage() {
             "pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center gap-3 px-4 py-3 transition-colors",
             theme === "dark"
               ? "bg-gradient-to-b from-black/80 via-black/40 to-transparent text-white"
-              : "bg-white/85 border-b border-[#ebdca5] text-[#1a1208] shadow-xs backdrop-blur-md",
+              : "bg-white/85 border-b border-[#f7ce99] text-[#1d1a1c] shadow-xs backdrop-blur-md",
           )}
         >
           <div className="min-w-0 flex-1">
-            <p className={cn("truncate text-sm font-bold", theme === "dark" ? "text-white" : "text-[#1a1208]")}>
+            <p className={cn("truncate text-sm font-bold", theme === "dark" ? "text-white" : "text-[#1d1a1c]")}>
               {call.peer?.name}
             </p>
             <p
               className={cn(
                 "flex items-center gap-1.5 text-xs font-semibold",
-                theme === "dark" ? "text-white/70" : "text-[#766545]",
+                theme === "dark" ? "text-white/70" : "text-[#5c5156]",
               )}
             >
               <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -238,7 +238,7 @@ export default function CallPage() {
                 "flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold transition-all border shadow-xs pointer-events-auto",
                 theme === "dark"
                   ? "bg-night-900/90 border-white/20 text-amber-300 hover:bg-night-800"
-                  : "bg-white/95 border-[#ecd57c] text-amber-900 hover:bg-[#fff7d6]",
+                  : "bg-white/95 border-[#f4bc74] text-amber-900 hover:bg-[#fdf0e7]",
               )}
               title={theme === "dark" ? "Switch to Sacred Light Mode" : "Switch to Celestial Dark Mode"}
             >
@@ -264,7 +264,7 @@ export default function CallPage() {
                   ? "bg-amber-400 text-slate-950 border border-amber-300 ring-2 ring-amber-400/50"
                   : theme === "dark"
                     ? "bg-amber-950/70 hover:bg-amber-900 text-amber-200 border border-amber-500/40"
-                    : "bg-white/95 hover:bg-[#fff7d6] text-amber-900 border border-[#ecd57c] shadow-xs",
+                    : "bg-white/95 hover:bg-[#fdf0e7] text-amber-900 border border-[#f4bc74] shadow-xs",
               )}
               title="Open live Astro Co-Pilot cheat-sheet"
             >
@@ -281,7 +281,7 @@ export default function CallPage() {
                   ? "bg-amber-400 text-slate-950 border border-amber-300 ring-2 ring-amber-400/50"
                   : theme === "dark"
                     ? "bg-amber-950/70 hover:bg-amber-900 text-amber-200 border border-amber-500/40"
-                    : "bg-white/95 hover:bg-[#fff7d6] text-amber-900 border border-[#ecd57c] shadow-xs",
+                    : "bg-white/95 hover:bg-[#fdf0e7] text-amber-900 border border-[#f4bc74] shadow-xs",
               )}
               title="Open interactive Kundali cosmic whiteboard"
             >
@@ -336,7 +336,7 @@ export default function CallPage() {
               </span>
 
               <div>
-                <p className={cn("text-xl font-bold", theme === "dark" ? "text-white" : "text-[#1a1208]")}>
+                <p className={cn("text-xl font-bold", theme === "dark" ? "text-white" : "text-[#1d1a1c]")}>
                   {call.peer?.name}
                 </p>
                 <p
@@ -350,7 +350,7 @@ export default function CallPage() {
                 </p>
               </div>
 
-              <p className={cn("max-w-xs text-xs", theme === "dark" ? "text-white/40" : "text-[#766545] font-medium")}>
+              <p className={cn("max-w-xs text-xs", theme === "dark" ? "text-white/40" : "text-[#5c5156] font-medium")}>
                 We will connect you the moment they answer. Keep this screen open.
               </p>
 
@@ -362,7 +362,7 @@ export default function CallPage() {
                     "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all border shadow-xs",
                     theme === "dark"
                       ? "bg-night-900/90 border-white/20 text-amber-300 hover:bg-night-800"
-                      : "bg-white/95 border-[#ecd57c] text-amber-900 hover:bg-[#fff7d6]",
+                      : "bg-white/95 border-[#f4bc74] text-amber-900 hover:bg-[#fdf0e7]",
                   )}
                 >
                   {theme === "dark" ? (
@@ -390,7 +390,7 @@ export default function CallPage() {
             </>
           ) : (
             call.end_reason === "Ran out of coins" ? (
-              <div className={cn("rounded-2xl p-6", theme === "dark" ? "bg-white/5" : "bg-white/90 border border-[#e2d5a3] shadow-md")}>
+              <div className={cn("rounded-2xl p-6", theme === "dark" ? "bg-white/5" : "bg-white/90 border border-[#f6c98f] shadow-md")}>
                 <OutOfCoins onBack={() => router.replace("/astrologers")} />
               </div>
             ) : (
@@ -404,14 +404,14 @@ export default function CallPage() {
                 <PhoneOff className="size-8 text-rose-500" />
               </span>
               <div>
-                <p className={cn("text-xl font-bold", theme === "dark" ? "text-white" : "text-[#1a1208]")}>
+                <p className={cn("text-xl font-bold", theme === "dark" ? "text-white" : "text-[#1d1a1c]")}>
                   {CALL_STATUS_LABELS[call.status]}
                 </p>
                 {call.duration_seconds > 0 && (
                   <p
                     className={cn(
                       "mt-1 text-sm font-semibold",
-                      theme === "dark" ? "text-white/60" : "text-[#766545]",
+                      theme === "dark" ? "text-white/60" : "text-[#5c5156]",
                     )}
                   >
                     {formatDuration(call.duration_seconds)}
@@ -428,7 +428,7 @@ export default function CallPage() {
                 onClick={() => router.replace("/astrologers")}
                 className={cn(
                   "font-bold shadow-xs",
-                  theme === "light" && "bg-white border-[#ecd57c] text-amber-950 hover:bg-[#fff7d6]",
+                  theme === "light" && "bg-white border-[#f4bc74] text-amber-950 hover:bg-[#fdf0e7]",
                 )}
               >
                 Back to Astrologers

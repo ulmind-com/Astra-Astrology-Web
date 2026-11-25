@@ -439,7 +439,7 @@ function ShopInner() {
   );
 
   return (
-    <div className="min-h-screen bg-[#faf6f0] text-stone-900 selection:bg-amber-200 selection:text-amber-950 font-sans">
+    <div className="min-h-screen bg-[#fbeee5] text-stone-900 selection:bg-amber-200 selection:text-amber-950 font-sans">
       {/* 1. Astrotalk-Style Unified Header (No Extra Top Strip) */}
       <SiteHeader />
       <CartDrawer />
@@ -812,7 +812,7 @@ export default function ShopPage() {
   return (
     <React.Suspense
       fallback={
-        <div className="min-h-screen bg-[#faf6f0] flex items-center justify-center">
+        <div className="min-h-screen bg-[#fbeee5] flex items-center justify-center">
           <div className="size-8 rounded-full border-2 border-amber-600 border-t-transparent animate-spin" />
         </div>
       }

@@ -606,7 +606,7 @@ export default function NakshatraCalculatorPage() {
     : "";
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
+    <div className="min-h-screen bg-[#fbf6f3]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
       <SiteHeader />
 
       <main className="mx-auto max-w-5xl px-4 pt-6 sm:px-6 lg:px-8 space-y-8 flex-1">
@@ -634,7 +634,7 @@ export default function NakshatraCalculatorPage() {
                 onClick={() => handleLanguageSwitch(lang.code)}
                 className={`min-h-7 inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer ${
                   language === lang.code
-                    ? "bg-[#fcd404] text-stone-950 shadow-2xs font-extrabold"
+                    ? "bg-[#f39419] text-stone-950 shadow-2xs font-extrabold"
                     : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
                 }`}
               >
@@ -740,7 +740,7 @@ export default function NakshatraCalculatorPage() {
           {/* Header inside form */}
           <div className="flex items-center justify-between pb-2 border-b border-stone-100">
             <div className="inline-flex items-center gap-2">
-              <div className="size-2 rounded-full bg-[#fcd404]" />
+              <div className="size-2 rounded-full bg-[#f39419]" />
               <span className="text-sm font-bold text-stone-900">
                 {language === "bn" ? "আপনার জন্ম বিবরণ (Your Birth Details)" : language === "hi" ? "जन्म विवरण (Your Birth Details)" : "Your Birth Details"}
               </span>
@@ -801,7 +801,7 @@ export default function NakshatraCalculatorPage() {
                       onClick={() => setGender(g.id as any)}
                       className={`min-h-10 rounded-xl border px-2 py-1.5 text-center text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                         gender === g.id
-                          ? "bg-[#fcd404] border-[#fcd404] text-stone-950 shadow-xs font-extrabold"
+                          ? "bg-[#f39419] border-[#f39419] text-stone-950 shadow-xs font-extrabold"
                           : "bg-stone-100/70 border-stone-200/80 text-stone-700 hover:bg-stone-200/60 font-semibold"
                       }`}
                     >
@@ -912,7 +912,7 @@ export default function NakshatraCalculatorPage() {
                         type="button"
                         onClick={() => setPeriod("AM")}
                         className={`flex-1 text-[11px] font-bold py-1 rounded-md transition-all cursor-pointer ${
-                          period === "AM" ? "bg-[#fcd404] text-stone-950 font-extrabold shadow-2xs" : "text-stone-600 hover:text-stone-900"
+                          period === "AM" ? "bg-[#f39419] text-stone-950 font-extrabold shadow-2xs" : "text-stone-600 hover:text-stone-900"
                         }`}
                       >
                         AM
@@ -921,7 +921,7 @@ export default function NakshatraCalculatorPage() {
                         type="button"
                         onClick={() => setPeriod("PM")}
                         className={`flex-1 text-[11px] font-bold py-1 rounded-md transition-all cursor-pointer ${
-                          period === "PM" ? "bg-[#fcd404] text-stone-950 font-extrabold shadow-2xs" : "text-stone-600 hover:text-stone-900"
+                          period === "PM" ? "bg-[#f39419] text-stone-950 font-extrabold shadow-2xs" : "text-stone-600 hover:text-stone-900"
                         }`}
                       >
                         PM
@@ -1066,7 +1066,7 @@ export default function NakshatraCalculatorPage() {
                   type="submit"
                   size="lg"
                   disabled={loading || (nakshatraFeature ? !nakshatraFeature.enabled : false)}
-                  className="flex-1 sm:flex-none min-h-11 px-8 py-2.5 rounded-xl bg-[#fcd404] hover:bg-[#ebd500] text-stone-950 font-bold text-xs sm:text-sm shadow-xs transition-all cursor-pointer border border-amber-300/80 active:scale-95"
+                  className="flex-1 sm:flex-none min-h-11 px-8 py-2.5 rounded-xl bg-[#f39419] hover:bg-[#e6860c] text-stone-950 font-bold text-xs sm:text-sm shadow-xs transition-all cursor-pointer border border-amber-300/80 active:scale-95"
                 >
                   {loading ? (
                     <span className="flex items-center gap-2">
@@ -2146,7 +2146,7 @@ export default function NakshatraCalculatorPage() {
                 key={st.step}
                 className="relative overflow-hidden rounded-2xl border border-amber-200/70 bg-gradient-to-b from-amber-50/40 via-white to-white p-5 space-y-2.5 shadow-2xs hover:shadow-xs hover:border-amber-400 transition-all"
               >
-                <div className="size-9 rounded-xl bg-[#fcd404] text-stone-950 font-black flex items-center justify-center text-sm shadow-2xs">
+                <div className="size-9 rounded-xl bg-[#f39419] text-stone-950 font-black flex items-center justify-center text-sm shadow-2xs">
                   0{st.step}
                 </div>
                 <h4 className="text-sm font-bold text-stone-900 pt-1">
@@ -2272,7 +2272,7 @@ export default function NakshatraCalculatorPage() {
                 onClick={() => setSelectedLordFilter(f.id)}
                 className={`px-3 py-1 text-xs rounded-full font-bold transition-all cursor-pointer ${
                   selectedLordFilter === f.id
-                    ? "bg-[#fcd404] text-stone-950 font-extrabold shadow-2xs"
+                    ? "bg-[#f39419] text-stone-950 font-extrabold shadow-2xs"
                     : "bg-stone-100/80 text-stone-600 hover:bg-stone-200/70"
                 }`}
               >
@@ -2384,7 +2384,7 @@ export default function NakshatraCalculatorPage() {
                 className="group rounded-2xl border border-stone-200/80 bg-stone-50/50 hover:bg-white p-5 space-y-2 hover:border-amber-400 hover:shadow-xs transition-all flex flex-col justify-between"
               >
                 <div className="space-y-1.5">
-                  <div className="size-8 rounded-xl bg-amber-500/10 text-amber-800 flex items-center justify-center font-bold text-xs group-hover:bg-[#fcd404] group-hover:text-stone-950 transition-colors">
+                  <div className="size-8 rounded-xl bg-amber-500/10 text-amber-800 flex items-center justify-center font-bold text-xs group-hover:bg-[#f39419] group-hover:text-stone-950 transition-colors">
                     ✦
                   </div>
                   <h4 className="text-sm font-bold text-stone-900 group-hover:text-amber-800 transition-colors">

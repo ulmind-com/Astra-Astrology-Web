@@ -269,7 +269,7 @@ export default function TarotPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
+    <div className="min-h-screen bg-[#fbf6f3]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
       <SiteHeader />
 
       <main className="mx-auto max-w-6xl px-3 sm:px-6 py-4 flex-1 w-full space-y-6">
@@ -300,7 +300,7 @@ export default function TarotPage() {
                 onClick={() => setLanguage(lang.code)}
                 className={`min-h-7 inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer ${
                   language === lang.code
-                    ? "bg-[#fcd404] text-stone-950 shadow-2xs font-extrabold"
+                    ? "bg-[#f39419] text-stone-950 shadow-2xs font-extrabold"
                     : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
                 }`}
               >
@@ -351,7 +351,7 @@ export default function TarotPage() {
                 onClick={() => setMainTab("reading")}
                 className={`px-3.5 py-1.5 rounded-full font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   mainTab === "reading"
-                    ? "bg-[#fcd404] text-[#1c1304] border border-[#d9af00] shadow-2xs font-extrabold"
+                    ? "bg-[#f39419] text-[#1d1a1c] border border-[#d97b0b] shadow-2xs font-extrabold"
                     : "text-stone-600 hover:text-stone-900"
                 }`}
               >
@@ -368,7 +368,7 @@ export default function TarotPage() {
                 onClick={() => setMainTab("explorer")}
                 className={`px-3.5 py-1.5 rounded-full font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   mainTab === "explorer"
-                    ? "bg-[#fcd404] text-[#1c1304] border border-[#d9af00] shadow-2xs font-extrabold"
+                    ? "bg-[#f39419] text-[#1d1a1c] border border-[#d97b0b] shadow-2xs font-extrabold"
                     : "text-stone-600 hover:text-stone-900"
                 }`}
               >

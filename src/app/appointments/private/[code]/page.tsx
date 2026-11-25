@@ -263,7 +263,7 @@ function PrivateBookingContent() {
 
   if (validatingInvite) {
     return (
-      <main className="min-h-screen bg-[#FDFBF7] py-20">
+      <main className="min-h-screen bg-[#fff8f3] py-20">
         <div className="mx-auto max-w-xl px-4">
           <LoadingBlock label="Verifying private VIP invitation..." />
         </div>
@@ -273,7 +273,7 @@ function PrivateBookingContent() {
 
   if (isError || !invite || !invite.valid) {
     return (
-      <main className="min-h-screen bg-[#FDFBF7] py-20">
+      <main className="min-h-screen bg-[#fff8f3] py-20">
         <div className="mx-auto max-w-md px-4 text-center space-y-6">
           <div className="mx-auto flex size-16 items-center justify-center rounded-3xl bg-rose-100 text-rose-700 shadow-sm">
             <Lock className="size-8" />
@@ -299,7 +299,7 @@ function PrivateBookingContent() {
   // Passcode Gate View
   if (invite.has_passcode && !isUnlocked) {
     return (
-      <main className="min-h-screen bg-[#FDFBF7] py-20">
+      <main className="min-h-screen bg-[#fff8f3] py-20">
         <div className="mx-auto max-w-md px-4">
           <div className="rounded-3xl border border-amber-200/90 bg-white p-8 shadow-[0_20px_50px_rgba(217,119,6,0.08)] space-y-6">
             <div className="text-center space-y-3">
@@ -376,7 +376,7 @@ function PrivateBookingContent() {
 
   // Unlocked Booking Workspace View
   return (
-    <main className="min-h-screen bg-[#FDFBF7] py-12 pb-24">
+    <main className="min-h-screen bg-[#fff8f3] py-12 pb-24">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 space-y-8">
         {/* VIP Invite Header Banner */}
         <div className="rounded-3xl border border-amber-300 bg-gradient-to-br from-amber-500/15 via-yellow-500/10 to-amber-500/20 p-6 sm:p-8 shadow-sm space-y-4">
@@ -689,7 +689,7 @@ export default function PrivateBookingPage() {
       <SiteHeader />
       <React.Suspense
         fallback={
-          <main className="min-h-screen bg-[#FDFBF7] py-20">
+          <main className="min-h-screen bg-[#fff8f3] py-20">
             <div className="mx-auto max-w-xl px-4">
               <LoadingBlock label="Loading VIP reservation..." />
             </div>

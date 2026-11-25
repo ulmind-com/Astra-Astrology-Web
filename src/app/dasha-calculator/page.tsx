@@ -450,7 +450,7 @@ export default function DashaCalculatorPage() {
   }, [phalaList, selectedPhalaPlanet]);
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
+    <div className="min-h-screen bg-[#fbf6f3]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
       <SiteHeader />
 
       {/* Main Container */}
@@ -484,7 +484,7 @@ export default function DashaCalculatorPage() {
                 onClick={() => setLanguage(lang.code)}
                 className={`min-h-7 inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer ${
                   language === lang.code
-                    ? "bg-[#fcd404] text-stone-950 shadow-2xs font-extrabold"
+                    ? "bg-[#f39419] text-stone-950 shadow-2xs font-extrabold"
                     : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
                 }`}
               >
@@ -558,7 +558,7 @@ export default function DashaCalculatorPage() {
           {/* Header inside form */}
           <div className="flex items-center justify-between pb-2 border-b border-stone-100">
             <div className="inline-flex items-center gap-2">
-              <div className="size-2 rounded-full bg-[#fcd404]" />
+              <div className="size-2 rounded-full bg-[#f39419]" />
               <span className="text-sm font-bold text-stone-900">
                 {language === "bn" ? "জন্ম বিবরণ প্রদান করুন" : language === "hi" ? "जन्म विवरण दर्ज करें" : "Enter Birth Details"}
               </span>
@@ -617,7 +617,7 @@ export default function DashaCalculatorPage() {
                       onClick={() => setGender(g.val as any)}
                       className={`min-h-10 rounded-xl border px-2 py-1.5 text-center text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                         gender === g.val
-                          ? "bg-[#fcd404] border-[#fcd404] text-stone-950 shadow-xs font-extrabold"
+                          ? "bg-[#f39419] border-[#f39419] text-stone-950 shadow-xs font-extrabold"
                           : "bg-stone-100/70 border-stone-200/80 text-stone-700 hover:bg-stone-200/60 font-semibold"
                       }`}
                     >
@@ -740,7 +740,7 @@ export default function DashaCalculatorPage() {
                         type="button"
                         onClick={() => setPeriod("AM")}
                         className={`flex-1 text-[11px] font-bold py-1 rounded-md transition-all cursor-pointer ${
-                          period === "AM" ? "bg-[#fcd404] text-stone-950 font-extrabold shadow-2xs" : "text-stone-600 hover:text-stone-900"
+                          period === "AM" ? "bg-[#f39419] text-stone-950 font-extrabold shadow-2xs" : "text-stone-600 hover:text-stone-900"
                         }`}
                       >
                         AM
@@ -749,7 +749,7 @@ export default function DashaCalculatorPage() {
                         type="button"
                         onClick={() => setPeriod("PM")}
                         className={`flex-1 text-[11px] font-bold py-1 rounded-md transition-all cursor-pointer ${
-                          period === "PM" ? "bg-[#fcd404] text-stone-950 font-extrabold shadow-2xs" : "text-stone-600 hover:text-stone-900"
+                          period === "PM" ? "bg-[#f39419] text-stone-950 font-extrabold shadow-2xs" : "text-stone-600 hover:text-stone-900"
                         }`}
                       >
                         PM
@@ -858,7 +858,7 @@ export default function DashaCalculatorPage() {
                 <button
                   type="submit"
                   disabled={loading || (dashaFeature ? !dashaFeature.enabled : false)}
-                  className="min-h-[48px] w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-8 rounded-2xl text-xs sm:text-sm font-bold text-stone-950 bg-[#fcd404] hover:bg-[#ebd500] shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer active:scale-[0.99]"
+                  className="min-h-[48px] w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-8 rounded-2xl text-xs sm:text-sm font-bold text-stone-950 bg-[#f39419] hover:bg-[#e6860c] shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer active:scale-[0.99]"
                 >
                   {loading ? (
                     <>

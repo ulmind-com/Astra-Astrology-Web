@@ -291,7 +291,7 @@ export function AnnualHoroscopeGeneratorModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-      <div className="relative w-full max-w-xl rounded-3xl border-2 border-amber-500/50 bg-[#faf6f0] p-6 sm:p-8 text-[#332c39] shadow-2xl max-h-[92vh] overflow-y-auto">
+      <div className="relative w-full max-w-xl rounded-3xl border-2 border-amber-500/50 bg-[#fbeee5] p-6 sm:p-8 text-[#1d1a1c] shadow-2xl max-h-[92vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-start justify-between pb-4 border-b border-[#ebd7c8]">
           <div className="space-y-1">
@@ -305,7 +305,7 @@ export function AnnualHoroscopeGeneratorModal({
                   : "Vedic Varshphal Configuration"}
               </span>
             </div>
-            <h3 className="font-cinzel text-xl sm:text-2xl font-bold text-[#4D4664]">
+            <h3 className="font-cinzel text-xl sm:text-2xl font-bold text-[#5c5156]">
               {selectedLanguage === "bn"
                 ? "১ বছরের বার্ষিক রাশিফল ও লাল কিতাব সনদ"
                 : selectedLanguage === "hi"
@@ -330,7 +330,7 @@ export function AnnualHoroscopeGeneratorModal({
                 <RotateCcw className="size-8 text-amber-950 animate-spin" />
               </div>
             </div>
-            <h4 className="font-cinzel text-lg font-bold text-[#4D4664]">
+            <h4 className="font-cinzel text-lg font-bold text-[#5c5156]">
               {loadingStep}
             </h4>
             <p className="text-xs text-stone-500 max-w-md mx-auto">
@@ -571,7 +571,7 @@ export function AnnualHoroscopeDossierModal({
     <div className="dossier-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md overflow-y-auto animate-in fade-in print:p-0 print:bg-white print:static print:inset-auto">
       <div
         id="annual-dossier-printable-content"
-        className="relative w-full max-w-4xl my-auto rounded-3xl border-4 border-double border-amber-600/70 bg-gradient-to-b from-[#faf4eb] via-[#fffdf9] to-[#faf4eb] p-6 sm:p-10 text-[#332c39] shadow-2xl max-h-[95vh] overflow-y-auto print:max-h-none print:shadow-none print:border-amber-700 print:rounded-none print:p-6 print:m-0"
+        className="relative w-full max-w-4xl my-auto rounded-3xl border-4 border-double border-amber-600/70 bg-gradient-to-b from-[#faf4eb] via-[#fff8f3] to-[#faf4eb] p-6 sm:p-10 text-[#1d1a1c] shadow-2xl max-h-[95vh] overflow-y-auto print:max-h-none print:shadow-none print:border-amber-700 print:rounded-none print:p-6 print:m-0"
       >
         
         {/* Floating Top Action Bar (Hidden in Print) */}
@@ -693,7 +693,7 @@ export function AnnualHoroscopeDossierModal({
 
         {/* 6 Life Pillars Grid */}
         <div className="mt-8 space-y-3">
-          <h2 className="font-cinzel text-lg font-bold text-[#4D4664] flex items-center gap-2 border-b border-amber-300/80 pb-2">
+          <h2 className="font-cinzel text-lg font-bold text-[#5c5156] flex items-center gap-2 border-b border-amber-300/80 pb-2">
             <BookOpen className="size-4 text-amber-700" />
             <span>
               {lang === "bn"
@@ -742,7 +742,7 @@ export function AnnualHoroscopeDossierModal({
 
         {/* 4 Quarters Seasonal Roadmap */}
         <div className="mt-8 space-y-3">
-          <h2 className="font-cinzel text-lg font-bold text-[#4D4664] flex items-center gap-2 border-b border-amber-300/80 pb-2">
+          <h2 className="font-cinzel text-lg font-bold text-[#5c5156] flex items-center gap-2 border-b border-amber-300/80 pb-2">
             <Calendar className="size-4 text-amber-700" />
             <span>
               {lang === "bn"
@@ -817,7 +817,7 @@ export function AnnualHoroscopeDossierModal({
 
         {/* Varshphal 9 Planets Chart Table */}
         <div className="mt-8 space-y-3">
-          <h2 className="font-cinzel text-lg font-bold text-[#4D4664] flex items-center gap-2 border-b border-amber-300/80 pb-2">
+          <h2 className="font-cinzel text-lg font-bold text-[#5c5156] flex items-center gap-2 border-b border-amber-300/80 pb-2">
             <Scale className="size-4 text-amber-700" />
             <span>
               {lang === "bn"

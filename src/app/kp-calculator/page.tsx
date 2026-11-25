@@ -489,7 +489,7 @@ export default function KPCalculatorPage() {
   }, [result]);
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
+    <div className="min-h-screen bg-[#fbf6f3]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
       <SiteHeader />
 
       <main className="mx-auto max-w-6xl px-3 sm:px-6 py-4 flex-1 w-full space-y-6">
@@ -520,7 +520,7 @@ export default function KPCalculatorPage() {
                 onClick={() => setLanguage(lang.code)}
                 className={`min-h-7 inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer ${
                   language === lang.code
-                    ? "bg-[#fcd404] text-stone-950 shadow-2xs font-extrabold"
+                    ? "bg-[#f39419] text-stone-950 shadow-2xs font-extrabold"
                     : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
                 }`}
               >
@@ -908,7 +908,7 @@ export default function KPCalculatorPage() {
                 <button
                   type="submit"
                   disabled={loading || (kpFeature ? !kpFeature.enabled : false)}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-7 rounded-full text-xs sm:text-sm font-extrabold text-[#1c1304] bg-[#fcd404] hover:bg-[#e6be00] border border-[#d9af00] shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed press transition-all cursor-pointer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-7 rounded-full text-xs sm:text-sm font-extrabold text-[#1d1a1c] bg-[#f39419] hover:bg-[#e68200] border border-[#d97b0b] shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed press transition-all cursor-pointer"
                 >
                   {loading ? (
                     <>

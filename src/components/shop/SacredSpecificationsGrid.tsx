@@ -606,7 +606,7 @@ export function SacredSpecificationsGrid({
         </div>
 
         {/* Card 2: Interactive Beej Mantra with Audio & Pronunciation Guide (7 cols) */}
-        <div className="md:col-span-7 rounded-2xl bg-gradient-to-br from-amber-950/95 via-[#1a1208] to-stone-950 text-white border border-amber-500/40 p-4 space-y-3 shadow-md relative overflow-hidden">
+        <div className="md:col-span-7 rounded-2xl bg-gradient-to-br from-amber-950/95 via-[#1d1a1c] to-stone-950 text-white border border-amber-500/40 p-4 space-y-3 shadow-md relative overflow-hidden">
           {/* Subtle Golden Glow */}
           <div className="pointer-events-none absolute -right-6 -bottom-6 size-24 rounded-full bg-amber-500/20 blur-xl" />
 

@@ -8,15 +8,15 @@ import { cn } from "@/lib/utils";
 type Variant = "primary" | "secondary" | "ghost" | "danger" | "outline";
 type Size = "sm" | "md" | "lg" | "icon";
 
-// Primary is the one yellow pill on a screen. The design is explicit about
+// Primary is the one orange DivinLink pill on a screen. The design is explicit about
 // this: the brand colour marks the single action that matters, and using it
 // twice on one view is what makes it stop meaning anything.
 const VARIANTS: Record<Variant, string> = {
   primary: "btn-cosmic",
-  secondary:
-    "bg-transparent text-foreground border border-border-strong hover:bg-brand-100",
-  outline: "border border-border-strong bg-transparent text-foreground hover:bg-brand-100",
-  ghost: "bg-transparent text-muted-foreground hover:bg-brand-100 hover:text-foreground",
+  // The home grid's "See All": ink outline that fills ink on hover.
+  secondary: "dl-pill-outline bg-transparent",
+  outline: "dl-pill-outline bg-transparent",
+  ghost: "bg-transparent text-muted-foreground hover:bg-[#fbeee5] hover:text-foreground",
   danger: "bg-danger-surface text-danger border border-danger/30 hover:bg-danger/15",
 };
 

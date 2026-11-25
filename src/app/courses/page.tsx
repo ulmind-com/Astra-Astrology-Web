@@ -100,7 +100,7 @@ export default function CoursesPage() {
   }, [fetchedCourses, enrolledCourseIds]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#fafaf9]/70 text-stone-900 selection:bg-amber-100 selection:text-amber-900">
+    <div className="flex min-h-screen flex-col bg-[#fbf6f3]/70 text-stone-900 selection:bg-amber-100 selection:text-amber-900">
       <SiteHeader />
 
       <main className="flex-1 pb-20">
@@ -136,7 +136,7 @@ export default function CoursesPage() {
               <div className="mt-6 flex justify-center">
                 <Link
                   href="/account/courses"
-                  className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-[#fcd404] px-5 py-2.5 text-xs sm:text-sm font-extrabold text-[#1c1304] transition-all hover:bg-[#e6be00] shadow-sm"
+                  className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-[#f39419] px-5 py-2.5 text-xs sm:text-sm font-extrabold text-[#1d1a1c] transition-all hover:bg-[#e68200] shadow-sm"
                 >
                   <GraduationCap className="size-4" />
                   <span>Go to My Enrolled Courses &rarr;</span>
@@ -186,7 +186,7 @@ export default function CoursesPage() {
                   onClick={() => setSelectedLevel(lvl.id)}
                   className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                     selectedLevel === lvl.id
-                      ? "bg-[#fcd404] text-[#1c1304] border border-[#d9af00] shadow-2xs"
+                      ? "bg-[#f39419] text-[#1d1a1c] border border-[#d97b0b] shadow-2xs"
                       : "bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 hover:text-stone-900"
                   }`}
                 >
@@ -207,7 +207,7 @@ export default function CoursesPage() {
                   onClick={() => setSelectedCategory(cat.id)}
                   className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                     active
-                      ? "bg-[#fcd404] text-[#1c1304] border border-[#d9af00] shadow-xs"
+                      ? "bg-[#f39419] text-[#1d1a1c] border border-[#d97b0b] shadow-xs"
                       : "bg-white border border-stone-200 text-stone-600 hover:bg-stone-50 hover:text-stone-900"
                   }`}
                 >
