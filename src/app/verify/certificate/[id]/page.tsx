@@ -4,7 +4,7 @@ import * as React from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import QRCode from "qrcode";
+import { DivinLinkQrBadge } from "@/components/ui/divinlink-qr-card";
 import {
   Award,
   CheckCircle2,
@@ -47,8 +47,12 @@ export default function CourseCertificateVerificationPage() {
   const [loading, setLoading] = React.useState(true);
   const [cert, setCert] = React.useState<CourseCertificate | null>(null);
   const [error, setError] = React.useState<string | null>(null);
-  const [qrCodeDataUrl, setQrCodeDataUrl] = React.useState<string>("");
   const [showInspector, setShowInspector] = React.useState(false);
+  const pageUrl = React.useSyncExternalStore(
+    () => () => {},
+    () => window.location.href,
+    () => "",
+  );
 
   React.useEffect(() => {
     if (!certificateId) return;
@@ -90,26 +94,6 @@ export default function CourseCertificateVerificationPage() {
       mounted = false;
     };
   }, [certificateId, sigToken]);
-
-  // Generate tamper-resistant QR code once cert data is loaded
-  React.useEffect(() => {
-    if (!cert) return;
-
-    const targetUrl =
-      cert.verification_url ||
-      (typeof window !== "undefined" ? window.location.href : "");
-
-    QRCode.toDataURL(targetUrl, {
-      width: 280,
-      margin: 1,
-      color: {
-        dark: "#381e00",
-        light: "#fffef9",
-      },
-    })
-      .then((url) => setQrCodeDataUrl(url))
-      .catch((err) => console.error("QR Code generation error:", err));
-  }, [cert]);
 
   const handlePrint = () => {
     if (typeof window !== "undefined") {
@@ -574,27 +558,24 @@ export default function CourseCertificateVerificationPage() {
             </div>
 
             {/* Official QR Code Box */}
-            {qrCodeDataUrl && (
-              <div className="absolute bottom-[4.6%] right-[3.2%] flex flex-col items-center text-center z-20">
-                <div className="p-0.5 bg-white rounded border border-[#da8312]/40 shadow-xs">
-                  <img
-                    src={qrCodeDataUrl}
-                    alt="Verification QR Code"
-                    style={{ width: "clamp(28px, 4.4cqi, 44px)", height: "clamp(28px, 4.4cqi, 44px)" }}
-                    className="object-contain"
-                  />
-                </div>
-                <span
-                  className="font-bold text-[#9E7730] uppercase tracking-[0.5px] mt-0.5"
-                  style={{
-                    fontFamily: "'Montserrat', sans-serif",
-                    fontSize: "clamp(5px, 0.65cqi, 6.5px)",
-                  }}
-                >
-                  Verify Credential
-                </span>
-              </div>
-            )}
+            <div className="absolute bottom-[4.6%] right-[3.2%] flex flex-col items-center text-center z-20">
+              <DivinLinkQrBadge
+                value={cert.verification_url || pageUrl || (certificateId ? `https://www.divinlink.com/verify/certificate/${certificateId}` : "")}
+                sizeClassName=""
+                className="p-0.5 rounded-lg border-stone-200"
+                style={{ width: "clamp(32px, 4.8cqi, 48px)", height: "clamp(32px, 4.8cqi, 48px)" }}
+                alt="Verification QR Code"
+              />
+              <span
+                className="font-bold text-[#9E7730] uppercase tracking-[0.5px] mt-0.5"
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: "clamp(5px, 0.65cqi, 6.5px)",
+                }}
+              >
+                Verify Credential
+              </span>
+            </div>
 
             {/* Anti-Fraud Security Bar */}
             <div

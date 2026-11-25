@@ -3,7 +3,6 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import QRCode from "qrcode";
 import {
   Scroll,
   Sparkles,
@@ -28,6 +27,7 @@ import {
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { DivinLinkQrCard } from "@/components/ui/divinlink-qr-card";
 import { BirthPlaceField, type SelectedPlace } from "@/components/astrology/birth-place-field";
 import { astrologyApi } from "@/lib/api";
 import { useAuth } from "@/providers/auth-provider";
@@ -96,7 +96,6 @@ export default function AnnualHoroscopePage() {
   const [loadingStep, setLoadingStep] = React.useState<string>("");
   const [report, setReport] = React.useState<AnnualHoroscopeResponse | null>(null);
   const [expandedPillar, setExpandedPillar] = React.useState<string | null>("career");
-  const [qrCodeUrl, setQrCodeUrl] = React.useState<string>("");
 
   // Pre-fill from user profile
   React.useEffect(() => {
@@ -129,19 +128,6 @@ export default function AnnualHoroscopePage() {
       }
     }
   }, [profile]);
-
-  // Generate QR code for report digital seal verification
-  React.useEffect(() => {
-    if (report?.digital_seal?.verification_url) {
-      QRCode.toDataURL(report.digital_seal.verification_url, {
-        width: 140,
-        margin: 1,
-        color: { dark: "#2a1b12", light: "#ffffff" },
-      })
-        .then((url) => setQrCodeUrl(url))
-        .catch(() => {});
-    }
-  }, [report?.digital_seal?.verification_url]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -746,37 +732,25 @@ export default function AnnualHoroscopePage() {
 
             {/* Cryptographic Digital Seal & Verification Link */}
             {report.digital_seal && (
-              <div className="rounded-3xl border-2 border-dashed border-amber-400 bg-gradient-to-r from-amber-50/70 via-white to-amber-50/70 p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6">
-                {qrCodeUrl && (
-                  <img
-                    src={qrCodeUrl}
-                    alt="Digital Seal QR"
-                    className="size-28 rounded-xl border border-amber-300 shadow-sm shrink-0"
-                  />
-                )}
-                <div className="flex-1 space-y-2 text-center sm:text-left">
-                  <div className="flex items-center justify-center sm:justify-start gap-2 text-amber-900 font-bold text-sm">
-                    <ShieldCheck className="size-5 text-amber-600" />
-                    <span>{report.digital_seal.seal_title}</span>
-                  </div>
-                  <p className="text-xs text-stone-600 font-serif italic">
-                    {report.digital_seal.seal_motto}
-                  </p>
-                  <div className="text-[11px] text-stone-500 space-y-0.5">
-                    <p>ID: <strong className="text-stone-800">{report.digital_seal.report_id}</strong></p>
-                    <p className="truncate">Hash: <strong className="text-stone-800">{report.digital_seal.authenticity_hash}</strong></p>
-                  </div>
-                  {report.digital_seal.verification_url && (
+              <DivinLinkQrCard
+                verificationUrl={report.digital_seal.verification_url}
+                badgeSizeClassName="size-20 sm:size-24"
+                title={report.digital_seal.seal_title}
+                badgeText={lang === "bn" ? "ডিজিটাল সীলমোহর" : lang === "hi" ? "सत्यापित मुहर" : "Verified Seal"}
+                description={report.digital_seal.seal_motto}
+                metaText={`ID: ${report.digital_seal.report_id} • ${report.digital_seal.authenticity_hash.slice(0, 18)}...`}
+                action={
+                  report.digital_seal.verification_url ? (
                     <Link
                       href={report.digital_seal.verification_url}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 hover:text-amber-950 pt-1"
+                      className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-800 hover:text-amber-950 transition-colors"
                     >
                       <span>{lang === "bn" ? "সনদ অনলাইন যাচাইকরণ" : "Verify Authenticity Online"}</span>
-                      <ExternalLink className="size-3.5" />
+                      <ExternalLink className="size-3" />
                     </Link>
-                  )}
-                </div>
-              </div>
+                  ) : null
+                }
+              />
             )}
           </div>
         )}

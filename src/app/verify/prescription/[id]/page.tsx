@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
-import QRCode from "qrcode";
+import { DivinLinkQrBadge } from "@/components/ui/divinlink-qr-card";
 import {
   ShieldCheck,
   CheckCircle2,
@@ -71,7 +71,11 @@ export default function PrescriptionVerificationPage() {
   const [loading, setLoading] = React.useState(true);
   const [data, setData] = React.useState<VerificationData | null>(null);
   const [error, setError] = React.useState<string | null>(null);
-  const [qrDataUrl, setQrDataUrl] = React.useState<string>("");
+  const pageUrl = React.useSyncExternalStore(
+    () => () => {},
+    () => window.location.href,
+    () => "",
+  );
 
   React.useEffect(() => {
     if (!appointmentId) return;
@@ -85,20 +89,6 @@ export default function PrescriptionVerificationPage() {
       .then((res) => {
         if (!mounted) return;
         setData(res);
-        // Generate high-resolution QR
-        const verifyUrl = res.verification_url || window.location.href;
-        QRCode.toDataURL(verifyUrl, {
-          width: 256,
-          margin: 1,
-          color: {
-            dark: "#3b1e08",
-            light: "#fffdfa",
-          },
-        })
-          .then((url) => {
-            if (mounted) setQrDataUrl(url);
-          })
-          .catch(() => {});
       })
       .catch((err) => {
         if (!mounted) return;
@@ -411,20 +401,12 @@ export default function PrescriptionVerificationPage() {
         {/* Bottom Seal, Signature & QR Code Footer */}
         <div className="px-6 sm:px-12 py-6 bg-linear-to-r from-amber-100/40 via-amber-50 to-amber-100/40 border-t-2 border-amber-300 grid grid-cols-1 sm:grid-cols-3 gap-6 items-center">
           {/* 1. QR Code */}
-          <div className="flex flex-col items-center text-center space-y-1">
-            <div className="p-1.5 bg-white rounded-xl border border-amber-300 shadow-2xs">
-              {qrDataUrl ? (
-                <img
-                  src={qrDataUrl}
-                  alt="Astra Authenticity QR Code"
-                  className="size-24 rounded-lg object-contain"
-                />
-              ) : (
-                <div className="size-24 bg-amber-50 flex items-center justify-center">
-                  <Loader2 className="size-6 text-amber-600 animate-spin" />
-                </div>
-              )}
-            </div>
+          <div className="flex flex-col items-center text-center space-y-1.5">
+            <DivinLinkQrBadge
+              value={data.verification_url || pageUrl}
+              sizeClassName="size-24"
+              alt="Astra Authenticity QR Code"
+            />
             <p className="text-[9px] font-mono text-amber-900 tracking-tighter max-w-[140px] truncate">
               {seal.verification_hash}
             </p>

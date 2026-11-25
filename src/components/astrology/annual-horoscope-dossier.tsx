@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import QRCode from "qrcode";
+import { DivinLinkQrBadge } from "@/components/ui/divinlink-qr-card";
 import {
   Sparkles,
   BookOpen,
@@ -522,20 +522,7 @@ export function AnnualHoroscopeDossierModal({
   report: AnnualHoroscopeResponse | null;
   onClose: () => void;
 }) {
-  const [qrCodeUrl, setQrCodeUrl] = React.useState<string>("");
   const lang = report?.language || "en";
-
-  React.useEffect(() => {
-    if (report?.digital_seal?.verification_url) {
-      QRCode.toDataURL(report.digital_seal.verification_url, {
-        width: 160,
-        margin: 1,
-        color: { dark: "#2a1b12", light: "#ffffff" },
-      })
-        .then((url) => setQrCodeUrl(url))
-        .catch(() => {});
-    }
-  }, [report?.digital_seal?.verification_url]);
 
   // Activate isolated print mode on body while dossier modal is open
   React.useEffect(() => {
@@ -1143,20 +1130,12 @@ export function AnnualHoroscopeDossierModal({
         {/* -------------------- ROYAL SEAL & SIGNATURE FOOTER -------------------- */}
         <div className="mt-10 pt-6 border-t-2 border-amber-400 grid grid-cols-1 sm:grid-cols-3 gap-6 items-center page-avoid">
           {/* QR Code */}
-          <div className="flex flex-col items-center sm:items-start text-center sm:text-left space-y-1">
-            <div className="p-1.5 bg-white rounded-xl border border-amber-300 shadow-xs inline-block">
-              {qrCodeUrl ? (
-                <img
-                  src={qrCodeUrl}
-                  alt="Astra Verification QR Code"
-                  className="size-24 rounded-lg object-contain"
-                />
-              ) : (
-                <div className="size-24 bg-amber-50 flex items-center justify-center text-[10px] text-stone-400">
-                  QR Loading...
-                </div>
-              )}
-            </div>
+          <div className="flex flex-col items-center sm:items-start text-center sm:text-left space-y-1.5">
+            <DivinLinkQrBadge
+              value={report.digital_seal.verification_url}
+              sizeClassName="size-24"
+              alt="Astra Verification QR Code"
+            />
             <p className="text-[10px] font-bold text-amber-900">
               {lang === "bn" ? "স্ক্যান করে অনলাইনে সত্যতা যাচাই করুন" : lang === "hi" ? "स्कैन कर ऑनलाइन सत्यापन करें" : "Scan to verify online authenticity"}
             </p>

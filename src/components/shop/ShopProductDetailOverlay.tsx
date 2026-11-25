@@ -33,6 +33,7 @@ import { ProductPincodeEstimator } from "@/components/shop/ProductPincodeEstimat
 import { AstraPromiseSection } from "@/components/shop/AstraPromiseSection";
 import { SacredDevoteeReviews } from "@/components/shop/SacredDevoteeReviews";
 import { CardTilt } from "@/components/ui/card-tilt";
+import { DivinLinkQrCard } from "@/components/ui/divinlink-qr-card";
 import { type ShopProduct } from "@/lib/api";
 import { useCartStore } from "@/lib/stores/use-cart-store";
 
@@ -284,50 +285,18 @@ export function ShopProductDetailOverlay({
             </div>
 
             {/* QR Code Authenticity Card */}
-            <div className="rounded-2xl border border-amber-300/80 bg-gradient-to-r from-amber-50/70 via-stone-50 to-white p-3.5 sm:p-4 shadow-xs space-y-2.5 dl-rise" style={rise()}>
-              <div className="flex items-center gap-3">
-                <div className="size-16 rounded-xl bg-white border border-stone-200 p-1.5 shadow-2xs shrink-0 flex flex-col items-center justify-center relative overflow-hidden">
-                  <div className="size-full bg-stone-900 rounded-sm p-1 flex flex-col justify-between">
-                    <div className="flex justify-between">
-                      <div className="size-3 bg-white rounded-xs flex items-center justify-center">
-                        <div className="size-1.5 bg-stone-900" />
-                      </div>
-                      <div className="size-3 bg-white rounded-xs flex items-center justify-center">
-                        <div className="size-1.5 bg-stone-900" />
-                      </div>
-                    </div>
-                    <div className="flex justify-center items-center">
-                      <Sparkles className="size-2.5 text-amber-300 animate-spin" />
-                    </div>
-                    <div className="flex justify-between">
-                      <div className="size-3 bg-white rounded-xs flex items-center justify-center">
-                        <div className="size-1.5 bg-stone-900" />
-                      </div>
-                      <div className="size-1.5 bg-amber-400 rounded-full" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-1 min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-xs font-bold text-stone-900">
-                      {isBn ? "QR কোড দিয়ে আসল প্রতিকার যাচাই" : "Scan QR for 100% Authenticity"}
-                    </span>
-                    <span className="text-[9px] font-extrabold text-emerald-800 bg-emerald-100 px-1.5 py-0.2 rounded border border-emerald-300">
-                      ✓ {isBn ? "ল্যাব ভেরিফায়েড" : "Lab Verified"}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-stone-600 leading-snug">
-                    {isBn
-                      ? "প্রতিটি পার্সেলের বাক্সে থাকবে সরকারি ল্যাব সার্টিফাইড হলোগ্রাফিক কিউআর কোড সিলমোহর।"
-                      : "Each parcel comes with a govt-approved lab certified holographic tamper-evident seal."}
-                  </p>
-                  <p className="text-[10px] font-mono text-amber-900 font-semibold">
-                    {isBn ? "সার্টিফিকেট আইডি:" : "Cert ID:"} #{product.sku || "ASTR-7089"} • {isBn ? "কাশীর প্রাণ-প্রতিষ্ঠা" : "Kashi Energized"}
-                  </p>
-                </div>
-              </div>
-            </div>
+            <DivinLinkQrCard
+              className="dl-rise"
+              style={rise()}
+              title={isBn ? "QR কোড দিয়ে আসল প্রতিকার যাচাই" : "Scan QR for 100% Authenticity"}
+              badgeText={isBn ? "ল্যাব ভেরিফায়েড" : "Lab Verified"}
+              description={
+                isBn
+                  ? "প্রতিটি পার্সেলের বাক্সে থাকবে সরকারি ল্যাব সার্টিফাইড হলোগ্রাফিক কিউআর কোড সিলমোহর।"
+                  : "Each parcel comes with a govt-approved lab certified holographic tamper-evident seal."
+              }
+              metaText={`${isBn ? "সার্টিফিকেট আইডি:" : "Cert ID:"} #${product.sku || "ASTR-7089"} • ${isBn ? "কাশীর প্রাণ-প্রতিষ্ঠা" : "Kashi Energized"}`}
+            />
           </div>
 
           {/* ================= Right: Product Details & Purchase ================= */}

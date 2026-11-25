@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useParams } from "next/navigation";
-import QRCode from "qrcode";
+import { DivinLinkQrBadge } from "@/components/ui/divinlink-qr-card";
 import { useQuery } from "@tanstack/react-query";
 import {
   ShieldCheck,
@@ -30,7 +30,11 @@ export default function AnnualReportVerificationPage() {
   const params = useParams();
   const reportId = typeof params?.id === "string" ? params.id : Array.isArray(params?.id) ? params.id[0] : "";
 
-  const [qrDataUrl, setQrDataUrl] = React.useState<string>("");
+  const pageUrl = React.useSyncExternalStore(
+    () => () => {},
+    () => window.location.href,
+    () => "",
+  );
 
   const {
     data: verifiedData,
@@ -46,18 +50,6 @@ export default function AnnualReportVerificationPage() {
   });
 
   const isValid = verifiedData?.is_valid ?? false;
-
-  React.useEffect(() => {
-    if (reportId && typeof window !== "undefined") {
-      QRCode.toDataURL(window.location.href, {
-        width: 180,
-        margin: 1,
-        color: { dark: "#2a1b12", light: "#ffffff" },
-      })
-        .then((url) => setQrDataUrl(url))
-        .catch(() => {});
-    }
-  }, [reportId]);
 
   const handlePrint = () => {
     if (typeof window !== "undefined") {
@@ -262,20 +254,12 @@ export default function AnnualReportVerificationPage() {
           {/* Seal, QR and Signatures */}
           <div className="mt-8 pt-6 border-t-2 border-amber-400 grid grid-cols-1 sm:grid-cols-3 gap-6 items-center">
             {/* QR Code */}
-            <div className="flex flex-col items-center sm:items-start text-center sm:text-left space-y-1">
-              <div className="p-1.5 bg-white rounded-xl border border-amber-300 shadow-xs inline-block">
-                {qrDataUrl ? (
-                  <img
-                    src={qrDataUrl}
-                    alt="Astra Verification QR Code"
-                    className="size-24 rounded-lg object-contain"
-                  />
-                ) : (
-                  <div className="size-24 bg-amber-50 flex items-center justify-center text-[10px] text-stone-400">
-                    QR
-                  </div>
-                )}
-              </div>
+            <div className="flex flex-col items-center sm:items-start text-center sm:text-left space-y-1.5">
+              <DivinLinkQrBadge
+                value={pageUrl || (reportId ? `https://www.divinlink.com/verify/annual-report/${reportId}` : "")}
+                sizeClassName="size-24"
+                alt="Astra Verification QR Code"
+              />
               <p className="text-[10px] font-bold text-amber-900">
                 স্ক্যান করে অনলাইনে সত্যতা যাচাই করুন
               </p>

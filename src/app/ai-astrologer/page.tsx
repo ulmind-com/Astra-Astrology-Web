@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -51,6 +52,18 @@ import { toast } from "sonner";
 import { AiAvatar } from "@/components/ai/ai-avatar";
 import { AiMarkdown } from "@/components/ai/ai-markdown";
 import { CelestialZodiacHalo } from "@/components/astro/celestial-zodiac-halo";
+
+const AiGuruHero3D = dynamic(
+  () => import("@/components/ai/AiGuruHero3D").then((m) => m.AiGuruHero3D),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full min-h-[460px] rounded-3xl border border-amber-200/80 bg-gradient-to-b from-[#fffcf7] via-[#fdf4eb] to-[#fbeee5] flex items-center justify-center">
+        <div className="size-11 rounded-full border-2 border-amber-200 border-t-amber-500 animate-spin" />
+      </div>
+    ),
+  },
+);
 import { SiteHeader } from "@/components/layout/site-header";
 import { Button } from "@/components/ui";
 import { useAuth } from "@/providers/auth-provider";
@@ -1210,56 +1223,32 @@ export default function AIAstrologerPage() {
         {/* ===================================================================
             Chat Message Stream (Dynamic Viewport Scroller)
             =================================================================== */}
-        <div className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-y-auto px-4 py-4 sm:px-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          {/* Welcome Screen / Hero Cards (Shown only on fresh session) */}
+        <div className="relative mx-auto flex w-full max-w-5xl flex-1 flex-col overflow-y-auto overflow-x-hidden px-4 py-4 sm:px-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          {/* Interactive 3D Robot Hero + Welcome Topics (Shown only on fresh session) */}
           {isFreshConversation && (
-            <div className="my-auto py-6 text-center fade-in">
-              {/* Sacred Logo Emblem with Luminous Golden Aura Glow */}
-              <div className="relative mx-auto mb-6 flex size-28 items-center justify-center">
-                {/* Luminous Warm Yellow Radiant Glow (No hard circle boundary) */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-400/50 via-yellow-400/60 to-amber-500/40 blur-2xl pointer-events-none" />
-                <div className="absolute -inset-3 rounded-full bg-yellow-300/30 blur-xl pointer-events-none" />
-                <div className="absolute size-20 rounded-full bg-amber-400/35 blur-md pointer-events-none" />
-
-                {/* Static Logo - No rotation, No hard circular boundary */}
-                <div className="relative z-10 flex size-24 sm:size-26 items-center justify-center">
-                  <Image
-                    src="/logo.png"
-                    alt="DivinLink Emblem"
-                    width={96}
-                    height={96}
-                    className="size-full object-contain drop-shadow-[0_4px_20px_rgba(245,158,11,0.5)]"
-                    priority
-                  />
-                </div>
-              </div>
-
-              <h2 className="font-serif text-xl sm:text-3xl font-extrabold tracking-tight text-stone-900">
-                {language === "bn" ? (
-                  <>
-                    নক্ষত্র ও গ্রহের নির্দেশনায় জীবনের{" "}
-                    <span className="text-amber-800 font-serif">সঠিক দিশা পান</span>
-                  </>
-                ) : language === "hi" ? (
-                  <>
-                    ग्रह-नक्षत्रों के मार्गदर्शन से अपने जीवन का{" "}
-                    <span className="text-amber-800 font-serif">सही मार्ग जानें</span>
-                  </>
-                ) : (
-                  <>
-                    Discover Celestial Clarity Through{" "}
-                    <span className="text-amber-800 font-serif">Vedic Wisdom</span>
-                  </>
-                )}
-              </h2>
-
-              <p className="mx-auto mt-2 max-w-xl text-xs sm:text-sm text-stone-600 leading-relaxed">
-                {t.heroDesc}
-              </p>
+            <div className="my-auto py-3 sm:py-5 space-y-6 fade-in">
+              <AiGuruHero3D
+                language={
+                  language === "bn" || language === "hi" || language === "en"
+                    ? language
+                    : "bn"
+                }
+                paused={
+                  !isFreshConversation ||
+                  showBirthModal ||
+                  showSessionsDrawer ||
+                  showPurgeModal ||
+                  dislikeModalIndex !== null
+                }
+                onStartClick={() => {
+                  inputRef.current?.focus();
+                  inputRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                }}
+              />
 
               {/* Kundli Prompt Banner if not linked */}
               {!birthDate && (
-                <div className="mx-auto mt-5 max-w-md rounded-2xl border border-amber-300/80 bg-gradient-to-r from-amber-100/80 via-white to-amber-100/60 p-3 shadow-sm flex items-center justify-between gap-3">
+                <div className="mx-auto max-w-2xl rounded-2xl border border-amber-300/80 bg-gradient-to-r from-amber-100/80 via-white to-amber-100/60 p-3.5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5 text-left">
                     <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-amber-800">
                       <Sparkles className="size-4 text-amber-600 animate-pulse" />
@@ -1271,7 +1260,7 @@ export default function AIAstrologerPage() {
                   <Button
                     size="sm"
                     onClick={() => setShowBirthModal(true)}
-                    className="shrink-0 bg-gradient-to-r from-amber-600 to-amber-700 text-white font-bold text-xs shadow-xs hover:from-amber-700 hover:to-amber-800"
+                    className="shrink-0 bg-gradient-to-r from-amber-600 to-amber-700 text-white font-bold text-xs shadow-xs hover:from-amber-700 hover:to-amber-800 cursor-pointer"
                   >
                     {t.linkKundli}
                   </Button>
@@ -1279,7 +1268,7 @@ export default function AIAstrologerPage() {
               )}
 
               {/* Categorized Suggested Prompt Cards */}
-              <div className="mt-8 text-left">
+              <div className="mx-auto max-w-4xl text-left">
                 <p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-900/80">
                   <Wand2 className="size-3.5 text-amber-600" />
                   {t.popularTopics}
@@ -1324,7 +1313,7 @@ export default function AIAstrologerPage() {
           )}
 
           {/* Messages Feed */}
-          <div className="space-y-4">
+          <div className="mx-auto w-full max-w-4xl space-y-4">
             {messages.map((msg, idx) => {
               const isUser = msg.role === "user";
 
