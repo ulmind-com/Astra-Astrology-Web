@@ -10,7 +10,6 @@ import {
   RAIL_ORDER,
   tr,
 } from "@/components/home/home-cinematic-data";
-import { DivinLinkGlowBrand } from "@/components/home/divinlink-glow-brand";
 import type { AstrologyLanguage } from "@/types";
 import type { CinematicHeroSlideCMS } from "@/lib/api";
 
@@ -383,14 +382,6 @@ export function CinematicHero({ language, paused = false, slides, children }: He
         </div>
 
         <div className="dl-fade" aria-hidden />
-
-        {/* Ambient Cosmic Stardust Emblem (Living Sacred Geometry) */}
-        <div
-          className="pointer-events-none absolute left-1/2 top-[44%] -translate-x-1/2 -translate-y-1/2 z-[6] w-[280px] h-[280px] sm:w-[380px] sm:h-[380px] select-none opacity-85 transition-opacity duration-1000"
-          aria-hidden="true"
-        >
-          <DivinLinkGlowBrand className="w-full h-full" />
-        </div>
 
         <div ref={railRef} className="dl-rail">
           {layout && (

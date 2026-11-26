@@ -139,8 +139,29 @@ function rupees(paise: number): string {
 }
 
 function clock(d: Date): string {
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
+  return d.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "Asia/Kolkata",
+  });
 }
+
+function getISTHour(d: Date): number {
+  const formatted = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Kolkata",
+    hour: "numeric",
+    hour12: false,
+  }).format(d);
+  return parseInt(formatted, 10);
+}
+
+const istDayFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Kolkata",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
 
 type Range = { starts_at: string; ends_at: string };
 
@@ -159,21 +180,23 @@ function startsThatFit(
     new Date(b.ends_at).getTime(),
   ]);
 
+  // Use clean 15-minute consultation showtime intervals so UI is not flooded with micro-overlapping 5m buttons
+  const stepMinutes = Math.max(15, slotMinutes);
+  const step = stepMinutes * 60_000;
+  const length = minutes * 60_000;
+
   for (const w of windows) {
     const windowStart = new Date(w.starts_at).getTime();
     const windowEnd = new Date(w.ends_at).getTime();
-    const step = slotMinutes * 60_000;
-    const length = minutes * 60_000;
-    const buffer = bufferMinutes * 60_000;
 
-    for (let t = windowStart; t + length + buffer <= windowEnd; t += step) {
+    for (let t = windowStart; t + length <= windowEnd; t += step) {
       if (t <= now) continue;
 
       const asDate = new Date(t);
-      const pad = (n: number) => String(n).padStart(2, "0");
-      const key = `${asDate.getFullYear()}-${pad(asDate.getMonth() + 1)}-${pad(asDate.getDate())}`;
+      const key = istDayFormatter.format(asDate);
       if (key !== dayKey) continue;
 
+      // Note: backend booked array already includes astrologer buffer_minutes
       const clashes = taken.some(([s, e]) => t < e && s < t + length);
       if (!clashes) starts.push(asDate);
     }
@@ -302,18 +325,19 @@ function AppointmentsContent() {
     router.replace("/appointments", { scroll: false });
   }, [router]);
 
-  // 4. BookMyShow Horizontal Date Strip State (21 Days)
-  const today = React.useMemo(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
+  // 4. BookMyShow Horizontal Date Strip State (21 Days - Calibrated to IST Chamber Calendar)
+  const todayKey = React.useMemo(() => {
+    return istDayFormatter.format(new Date());
   }, []);
 
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const todayKey = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+  const today = React.useMemo(() => {
+    const [y, m, d] = todayKey.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  }, [todayKey]);
 
   const dateStrip = React.useMemo(() => {
     const days = [];
+    const pad = (n: number) => String(n).padStart(2, "0");
     for (let i = 0; i < 21; i++) {
       const d = new Date(today);
       d.setDate(d.getDate() + i);
@@ -404,7 +428,7 @@ function AppointmentsContent() {
     });
   }, [rawSlots, language]);
 
-  // Filter by Auspicious & Time of Day
+  // Filter by Auspicious & Time of Day (IST Calibrated)
   const filteredSlots = React.useMemo(() => {
     let list = slotsWithMuhurat;
     if (onlyAuspiciousSlots) {
@@ -414,7 +438,7 @@ function AppointmentsContent() {
     }
     if (timeFilter !== "all") {
       list = list.filter((item) => {
-        const hours = item.slot.getHours();
+        const hours = getISTHour(item.slot);
         if (timeFilter === "morning") return hours >= 6 && hours < 12;
         if (timeFilter === "afternoon") return hours >= 12 && hours < 17;
         if (timeFilter === "evening") return hours >= 17 && hours < 21;
@@ -425,7 +449,7 @@ function AppointmentsContent() {
     return list;
   }, [slotsWithMuhurat, onlyAuspiciousSlots, timeFilter]);
 
-  // Group slots into BookMyShow Time-of-Day Shows
+  // Group slots into BookMyShow Time-of-Day Shows (IST Standard)
   const groupedSlots = React.useMemo(() => {
     const morning: typeof slotsWithMuhurat = [];
     const afternoon: typeof slotsWithMuhurat = [];
@@ -433,7 +457,7 @@ function AppointmentsContent() {
     const night: typeof slotsWithMuhurat = [];
 
     for (const item of filteredSlots) {
-      const hours = item.slot.getHours();
+      const hours = getISTHour(item.slot);
       if (hours >= 6 && hours < 12) {
         morning.push(item);
       } else if (hours >= 12 && hours < 17) {
@@ -448,13 +472,31 @@ function AppointmentsContent() {
     return { morning, afternoon, evening, night };
   }, [filteredSlots]);
 
-  // Pricing calculation
+  // Pricing calculation (synced dynamically with Tatkal windows & multipliers)
   const computedPricePaise = React.useMemo(() => {
     if (!selectedAstrologer?.appointment) return 0;
     const basePrice = selectedAstrologer.appointment.price_paise;
     const baseBlock = selectedAstrologer.appointment.block_minutes || 30;
-    return Math.round((basePrice * minutes) / baseBlock);
-  }, [selectedAstrologer, minutes]);
+    let price = Math.round((basePrice * minutes) / baseBlock);
+
+    if (selectedSlot && dayView?.windows) {
+      const slotTime = selectedSlot.getTime();
+      const length = minutes * 60_000;
+      const coveringWindow = dayView.windows.find((w: any) => {
+        const ws = new Date(w.starts_at).getTime();
+        const we = new Date(w.ends_at).getTime();
+        return slotTime >= ws && (slotTime + length) <= we;
+      });
+      if (coveringWindow?.is_tatkal) {
+        if (coveringWindow.tatkal_fixed_paise) {
+          price = coveringWindow.tatkal_fixed_paise;
+        } else {
+          price = Math.round(price * (coveringWindow.tatkal_multiplier || 1.5));
+        }
+      }
+    }
+    return price;
+  }, [selectedAstrologer, minutes, selectedSlot, dayView?.windows]);
 
   // 6. Query: Quote for booking
   const { data: quote } = useQuery({
@@ -639,7 +681,7 @@ function AppointmentsContent() {
               <div className="flex items-center gap-2.5 text-xs font-semibold text-amber-950/80">
                 <Link href="/" className="hover:text-amber-700 transition-colors flex items-center gap-1.5">
                   <Compass className="size-3.5 text-amber-600" />
-                  <span>Astra Home</span>
+                  <span>{language === "bn" ? "DivinLink হোম" : "DivinLink Home"}</span>
                 </Link>
                 <span className="text-amber-900/30">/</span>
                 <span className="text-slate-900 font-bold">Vedic Consultation Chamber</span>
@@ -774,7 +816,10 @@ function AppointmentsContent() {
                           className="size-full object-cover group-hover/avatar:scale-105 transition-transform duration-500"
                         />
                       </div>
-                      <span className="absolute -bottom-1.5 -right-1.5 sm:-bottom-2 sm:-right-2 flex size-6 sm:size-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md ring-2 ring-white">
+                      <span
+                        title="DivinLink Verified Master Astrologer"
+                        className="absolute -bottom-1.5 -right-1.5 sm:-bottom-2 sm:-right-2 flex size-6 sm:size-7 items-center justify-center rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md ring-2 ring-white"
+                      >
                         <Check className="size-3.5 sm:size-4 stroke-[3]" />
                       </span>
                     </div>
@@ -1318,7 +1363,7 @@ function AppointmentsContent() {
                 <div className="flex items-center gap-2.5 text-xs font-semibold text-amber-950/80">
                   <Link href="/" className="hover:text-amber-700 transition-colors flex items-center gap-1.5">
                     <Compass className="size-3.5 text-amber-600" />
-                    <span>Astra Home</span>
+                    <span>{language === "bn" ? "DivinLink হোম" : "DivinLink Home"}</span>
                   </Link>
                   <span className="text-amber-900/30">/</span>
                   <span className="text-slate-900 font-bold">Vedic Consultation Chamber</span>
@@ -2050,7 +2095,7 @@ function AppointmentsContent() {
                     <CalendarCheck className="mr-1.5 inline size-4" />
                     {language === "bn"
                       ? "আপনার একটি সক্রিয় অ্যাপয়েন্টমেন্ট ইতোমধ্যে রয়েছে। নতুন বুকিং করার আগে পূর্বের সেশনটি সমাপ্ত করুন।"
-                      : "You already have an active appointment. Astra policy permits only 1 active booking at a time."}
+                      : "You already have an active appointment. DivinLink policy permits only 1 active booking at a time."}
                   </Alert>
                   <Link href="/account/appointments" className="block w-full">
                     <Button size="lg" variant="secondary" className="w-full text-xs font-bold">
@@ -2113,7 +2158,10 @@ function AppointmentsContent() {
     });
     const isTatkal = Boolean(matchingTatkalWindow);
     const tatkalMultiplier = matchingTatkalWindow?.tatkal_multiplier ?? 1.5;
-    const slotPrice = matchingTatkalWindow?.tatkal_fixed_paise ?? Math.round(computedPricePaise * (isTatkal ? tatkalMultiplier : 1));
+    const baseBlock = selectedAstrologer?.appointment?.block_minutes || 30;
+    const basePrice = selectedAstrologer?.appointment?.price_paise ?? 0;
+    const standardPrice = Math.round((basePrice * minutes) / baseBlock);
+    const slotPrice = matchingTatkalWindow?.tatkal_fixed_paise ?? Math.round(standardPrice * (isTatkal ? tatkalMultiplier : 1));
 
     return (
       <button
