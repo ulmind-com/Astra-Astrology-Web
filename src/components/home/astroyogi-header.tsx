@@ -13,9 +13,7 @@ import {
   Compass,
   FileText,
   Flame,
-  Gem,
   Globe,
-  GraduationCap,
   Hand,
   HeartHandshake,
   Hourglass,
@@ -27,7 +25,6 @@ import {
   Moon,
   Orbit,
   Phone,
-  Radio,
   ScanFace,
   ScrollText,
   ShieldCheck,
@@ -132,16 +129,6 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
-
-  // Over the home hero the bar changes slightly after scrolling 25% of viewport
-  const [scrolledPast, setScrolledPast] = React.useState(false);
-  React.useEffect(() => {
-    if (!overlay) return;
-    const onScroll = () => setScrolledPast(window.scrollY > window.innerHeight * 0.25);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [overlay]);
 
   // Fetch real-time active shop categories
   const { data: dynamicCategories = (initialCategoriesData as any) } = useQuery<ShopProductCategory[]>({
@@ -302,7 +289,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
             href: "/shop?category=rudraksha#products",
             desc: "১-১৪ মুখী কাশীর মহাদেবের প্রাণ-প্রতিষ্ঠিত রুদ্রাক্ষ",
             icon: Sparkles,
-            badge: "ল্যাব সার্টিফাইড",
+            badge: "সার্টিফাইড",
           },
           {
             label: "আসল করুঙ্গলি কালেকশন",
@@ -326,7 +313,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
           {
             label: "৩ডি হস্তরেখা বিচার (এআই)",
             href: "/palm-reading",
-            desc: "৩ডি ক্যামেরা স্ক্যানে হৃদয়, শিরো ও জীবন রেখা বিশ্লেষণ",
+            desc: "৩ডি ক্যামেরা স্ক্যানে হস্তরেখা বিচার ও বিশ্লেষণ",
             icon: Hand,
             badge: "৩ডি এআই",
           },
@@ -520,7 +507,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
           {
             label: "3D हस्तरेखा विश्लेषण (एआई)",
             href: "/palm-reading",
-            desc: "3D कैमरा स्कैन से हृदय, मस्तिष्क व जीवन रेखा विश्लेषण",
+            desc: "3D कैमरा स्कैन से हस्तरेखा विश्लेषण",
             icon: Hand,
             badge: "3D एआई",
           },
@@ -743,7 +730,10 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
   }, [language]);
 
   const nameOf = user?.full_name || user?.first_name || (language === "bn" ? "ব্যবহারকারী" : language === "hi" ? "यूज़र" : "User");
-  const signInLabel = language === "bn" ? "লগ ইন" : language === "hi" ? "लॉग इन" : "Sign In";
+  const signInLabel = language === "bn" ? "লগ ইন" : language === "hi" ? "लॉग ইন" : "Sign In";
+
+  // Warm surface color for the notch body & matching SVG ears
+  const notchBgColor = "#fffbf7"; // Warm Sanctuary Ivory/Cream matching site theme
 
   return (
     <>
@@ -751,26 +741,21 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
       {!overlay && <div className="h-[54px] w-full shrink-0" aria-hidden="true" />}
 
       {/* =========================================================================
-          iOS Dynamic Notch Container
-          Fixed at top center of screen with smooth spring expansion on hover/tap
+          iOS Dynamic Notch Container — Warm Vedic Sanctuary Theme
+          Anchored flush at top center of screen with smooth spring expansion on hover/tap
           ========================================================================= */}
-      <div
-        className={cn(
-          "fixed top-0 left-0 right-0 z-[120] pointer-events-none flex justify-center px-2 sm:px-4",
-          overlay && "dl-notch-overlay",
-        )}
-      >
+      <div className="fixed top-0 left-0 right-0 z-[120] pointer-events-none flex justify-center">
         <header
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           className={cn(
             "pointer-events-auto relative isolate mx-auto transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)]",
-            "bg-[#0e0d11]/95 text-white backdrop-blur-2xl -webkit-backdrop-blur-2xl",
-            "border-b border-x border-white/[0.09] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.65),0_0_25px_rgba(243,148,25,0.08)]",
+            "bg-[#fffbf7]/95 text-[#1d1a1c] backdrop-blur-2xl -webkit-backdrop-blur-2xl",
+            "border-b border-x border-amber-900/10 shadow-[0_16px_40px_-10px_rgba(114,63,19,0.15),0_2px_12px_rgba(114,63,19,0.06)]",
             // Collapsed vs Expanded Dimensions & Corners
             !isExpanded
               ? "w-[min(96vw,1080px)] rounded-b-[22px] max-h-[52px]"
-              : "w-[min(96vw,1260px)] rounded-b-[30px] max-h-[min(640px,88vh)] shadow-[0_28px_60px_-12px_rgba(0,0,0,0.85),0_0_35px_rgba(243,148,25,0.12)]",
+              : "w-[min(96vw,1260px)] rounded-b-[30px] max-h-[min(640px,88vh)] shadow-[0_24px_56px_-12px_rgba(114,63,19,0.22),0_4px_18px_rgba(114,63,19,0.08)]",
           )}
           aria-expanded={isExpanded}
           role="navigation"
@@ -779,6 +764,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
           {/* ===================================================================
               Outer Concave Notch Ears (Wings)
               Seamlessly blends the vertical notch sides into the top edge of screen
+              Color matches the warm cream #fffbf7 notch surface exactly!
               =================================================================== */}
           {/* Left Concave Ear */}
           <svg
@@ -790,10 +776,10 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
             xmlns="http://www.w3.org/2000/svg"
             aria-hidden="true"
           >
-            <path d="M 0 0 C 11.04 0 20 8.96 20 20 L 20 0 Z" fill="#0e0d11" />
+            <path d="M 0 0 C 11.04 0 20 8.96 20 20 L 20 0 Z" fill={notchBgColor} />
             <path
               d="M 0 0 C 11.04 0 20 8.96 20 20"
-              stroke="rgba(255, 255, 255, 0.09)"
+              stroke="rgba(114, 63, 19, 0.12)"
               strokeWidth="1"
               fill="none"
             />
@@ -809,23 +795,23 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
             xmlns="http://www.w3.org/2000/svg"
             aria-hidden="true"
           >
-            <path d="M 0 20 C 0 8.96 8.96 0 20 0 L 0 0 Z" fill="#0e0d11" />
+            <path d="M 0 20 C 0 8.96 8.96 0 20 0 L 0 0 Z" fill={notchBgColor} />
             <path
               d="M 0 20 C 0 8.96 8.96 0 20 0"
-              stroke="rgba(255, 255, 255, 0.09)"
+              stroke="rgba(114, 63, 19, 0.12)"
               strokeWidth="1"
               fill="none"
             />
           </svg>
 
-          {/* Inner Golden Rim Line for Luxury Feel */}
+          {/* Subtle Inner Warm Highlight Rim */}
           <div
-            className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-amber-400/40 to-transparent"
+            className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/30 to-transparent"
             aria-hidden="true"
           />
 
           {/* ===================================================================
-              Top Bar (Always Visible at 50px Height)
+              Top Bar (Always Visible at 50px Height) — Warm DivinLink Styling
               =================================================================== */}
           <div className="flex h-[50px] items-center justify-between gap-2 px-3 sm:px-4">
             {/* BRAND: Logo Mark + Wordmark */}
@@ -839,7 +825,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
               className="group flex items-center gap-2.5 shrink-0"
               aria-label="DivinLink Home"
             >
-              <span className="relative flex size-7 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 p-0.5 shadow-[0_0_12px_rgba(243,148,25,0.45)] transition-transform duration-300 group-hover:scale-105 group-hover:rotate-[-6deg]">
+              <span className="relative flex size-7 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 p-0.5 shadow-[0_2px_8px_rgba(243,148,25,0.35)] transition-transform duration-300 group-hover:scale-105 group-hover:rotate-[-6deg]">
                 <Image
                   src="/logo.png"
                   alt=""
@@ -849,7 +835,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                   priority
                 />
               </span>
-              <span className="font-serif text-[18px] sm:text-[20px] font-bold tracking-tight text-white group-hover:text-amber-300 transition-colors">
+              <span className="font-serif text-[18px] sm:text-[20px] font-bold tracking-tight text-[#1d1a1c] group-hover:text-amber-800 transition-colors">
                 DivinLink
               </span>
             </Link>
@@ -865,21 +851,21 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                     setIsManualExpanded(false);
                   }}
                   className={cn(
-                    "relative inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[13px] font-medium transition-colors",
+                    "relative inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[13px] font-medium transition-all",
                     item.isAi
-                      ? "bg-amber-500/15 text-amber-300 hover:bg-amber-500/25 border border-amber-500/30"
-                      : "text-white/80 hover:text-white hover:bg-white/[0.08]",
+                      ? "bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-300/80 shadow-2xs font-semibold"
+                      : "text-[#3d3235] hover:text-[#1d1a1c] hover:bg-amber-500/[0.08]",
                   )}
                 >
                   {item.isAi && (
                     <span className="relative flex size-2 shrink-0">
-                      <span className="absolute inline-flex size-full animate-ping rounded-full bg-amber-400 opacity-75" />
-                      <span className="relative inline-flex size-2 rounded-full bg-amber-400" />
+                      <span className="absolute inline-flex size-full animate-ping rounded-full bg-amber-500 opacity-75" />
+                      <span className="relative inline-flex size-2 rounded-full bg-amber-600" />
                     </span>
                   )}
                   <span>{item.label}</span>
                   {item.badge && !item.isAi && (
-                    <span className="rounded-full bg-amber-500/20 text-amber-300 px-1.5 py-0.2 text-[9px] font-bold leading-none">
+                    <span className="rounded-full bg-amber-100 text-amber-900 border border-amber-300/60 px-1.5 py-0.2 text-[9px] font-bold leading-none">
                       {item.badge}
                     </span>
                   )}
@@ -890,15 +876,15 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
               <button
                 type="button"
                 onClick={() => setIsManualExpanded((prev) => !prev)}
-                className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] px-2.5 py-1 text-[12px] font-medium text-amber-300/90 transition-colors ml-1 cursor-pointer"
+                className="inline-flex items-center gap-1 rounded-full bg-amber-50 hover:bg-amber-100/80 border border-amber-200/90 px-2.5 py-1 text-[12px] font-semibold text-amber-900 transition-colors ml-1 cursor-pointer"
                 title={isExpanded ? "Collapse Menu" : "Explore Mega Menu"}
                 aria-label="Toggle Cosmic Menu"
               >
                 <span>{isExpanded ? (language === "bn" ? "সংক্ষেপ" : language === "hi" ? "संक्षिप्त" : "Close") : (language === "bn" ? "মেনু" : language === "hi" ? "मेन्यू" : "Explore")}</span>
                 <ChevronDown
                   className={cn(
-                    "size-3.5 transition-transform duration-300",
-                    isExpanded && "rotate-180 text-amber-400",
+                    "size-3.5 transition-transform duration-300 text-amber-700",
+                    isExpanded && "rotate-180",
                   )}
                 />
               </button>
@@ -911,12 +897,12 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                 <button
                   type="button"
                   onClick={() => setLangDropdownOpen((v) => !v)}
-                  className="inline-flex items-center gap-1 rounded-full bg-white/[0.07] hover:bg-white/[0.14] border border-white/[0.08] px-2.5 py-1 text-[12px] font-medium text-white/90 transition-colors"
+                  className="inline-flex items-center gap-1 rounded-full bg-amber-50/90 hover:bg-amber-100 border border-amber-200 px-2.5 py-1 text-[12px] font-medium text-[#1d1a1c] transition-colors"
                   aria-label="Change language"
                   aria-expanded={langDropdownOpen}
                 >
-                  <Globe className="size-3.5 text-amber-400" />
-                  <span>{language === "bn" ? "বাং" : language === "hi" ? "हि" : "EN"}</span>
+                  <Globe className="size-3.5 text-amber-600" />
+                  <span className="font-semibold">{language === "bn" ? "বাং" : language === "hi" ? "हि" : "EN"}</span>
                 </button>
 
                 {langDropdownOpen && (
@@ -925,7 +911,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                       className="fixed inset-0 z-30"
                       onClick={() => setLangDropdownOpen(false)}
                     />
-                    <div className="absolute right-0 top-full mt-2 z-40 w-36 rounded-2xl border border-white/10 bg-[#16141a]/95 p-1.5 shadow-2xl backdrop-blur-xl">
+                    <div className="absolute right-0 top-full mt-2 z-40 w-36 rounded-2xl border border-amber-200 bg-[#fffdfa] p-1.5 shadow-xl backdrop-blur-xl">
                       {[
                         { code: "bn", label: "বাংলা", badge: "বাং" },
                         { code: "hi", label: "हिन्दी", badge: "हिन्दी" },
@@ -939,12 +925,12 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                             setLangDropdownOpen(false);
                           }}
                           className={cn(
-                            "w-full flex items-center justify-between rounded-xl px-2.5 py-1.5 text-xs font-medium text-white/80 hover:bg-white/[0.08] hover:text-white transition-colors",
-                            language === l.code && "bg-amber-500/20 text-amber-300 font-bold",
+                            "w-full flex items-center justify-between rounded-xl px-2.5 py-1.5 text-xs font-medium text-[#3a3235] hover:bg-[#fbeee5] hover:text-[#1d1a1c] transition-colors",
+                            language === l.code && "bg-[#fbe4d6] text-[#78350f] font-bold",
                           )}
                         >
                           <span>{l.label}</span>
-                          <span className="text-[10px] text-white/40">{l.badge}</span>
+                          <span className="text-[10px] text-[#8a7f83]">{l.badge}</span>
                         </button>
                       ))}
                     </div>
@@ -956,13 +942,13 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
               <button
                 type="button"
                 onClick={openCart}
-                className="relative inline-flex size-8 items-center justify-center rounded-full bg-white/[0.07] hover:bg-white/[0.14] border border-white/[0.08] text-white/90 transition-colors"
+                className="relative inline-flex size-8 items-center justify-center rounded-full bg-amber-50/90 hover:bg-amber-100 border border-amber-200 text-[#1d1a1c] transition-colors"
                 title={language === "bn" ? "কার্ট দেখুন" : language === "hi" ? "कार्ट देखें" : "View Cart"}
                 aria-label="Shopping Cart"
               >
-                <ShoppingBag className="size-4 text-amber-400" />
+                <ShoppingBag className="size-4 text-amber-700" />
                 {cartItemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-[#f39419] text-[9px] font-bold text-white shadow-sm">
+                  <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-[#f39419] text-[9px] font-bold text-white shadow-xs">
                     {cartItemCount > 99 ? "99+" : cartItemCount}
                   </span>
                 )}
@@ -974,7 +960,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                   <button
                     type="button"
                     onClick={() => setProfileDropdownOpen((v) => !v)}
-                    className="relative flex size-8 items-center justify-center rounded-full ring-1 ring-amber-400/50 overflow-hidden hover:ring-amber-400 transition-all cursor-pointer"
+                    className="relative flex size-8 items-center justify-center rounded-full ring-2 ring-amber-400/80 overflow-hidden hover:ring-amber-500 transition-all cursor-pointer shadow-xs"
                     aria-label="User Account Menu"
                     aria-expanded={profileDropdownOpen}
                   >
@@ -987,10 +973,10 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                       setIsHovered(false);
                       setIsManualExpanded(false);
                     }}
-                    className="inline-flex items-center gap-1 rounded-full bg-white/[0.07] hover:bg-white/[0.14] border border-white/[0.08] px-2.5 py-1 text-[12px] font-medium text-white/90 transition-colors"
+                    className="inline-flex items-center gap-1 rounded-full bg-amber-50/90 hover:bg-amber-100 border border-amber-200 px-2.5 py-1 text-[12px] font-semibold text-[#1d1a1c] transition-colors"
                     title={signInLabel}
                   >
-                    <User className="size-3.5 text-amber-400" />
+                    <User className="size-3.5 text-amber-700" />
                     <span className="hidden sm:inline">{signInLabel}</span>
                   </Link>
                 )}
@@ -1002,43 +988,43 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                       className="fixed inset-0 z-30"
                       onClick={() => setProfileDropdownOpen(false)}
                     />
-                    <div className="absolute right-0 top-full mt-2 z-40 w-72 rounded-2xl border border-white/10 bg-[#16141a]/98 p-3 shadow-2xl backdrop-blur-2xl text-white">
-                      <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.05] border border-white/[0.06]">
+                    <div className="absolute right-0 top-full mt-2 z-40 w-72 rounded-2xl border border-amber-200 bg-[#fffdfa] p-3 shadow-2xl backdrop-blur-2xl text-[#1d1a1c]">
+                      <div className="flex items-center gap-3 p-2.5 rounded-xl bg-[#fbeee5] border border-amber-200/60">
                         <Avatar
                           src={user?.avatar_url}
                           name={nameOf}
                           size="md"
-                          className="size-10 border border-amber-400/60 shadow-sm shrink-0"
+                          className="size-10 border-2 border-white shadow-xs shrink-0"
                         />
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-sm text-white truncate leading-tight">{nameOf}</p>
-                          <p className="text-[11.5px] text-amber-300/80 truncate mt-0.5">
+                          <p className="font-semibold text-sm text-[#1d1a1c] truncate leading-tight">{nameOf}</p>
+                          <p className="text-[11.5px] text-[#8a7f83] truncate mt-0.5">
                             {user?.email || (user as { phone_number?: string })?.phone_number || (language === "bn" ? "অ্যাস্ট্রা ভক্ত" : language === "hi" ? "एस्ट्रा भक्त" : "Astra Devotee")}
                           </p>
                         </div>
                       </div>
 
-                      <div className="my-2 h-px bg-white/[0.08]" />
+                      <div className="my-2 h-px bg-amber-200/60" />
 
                       <div className="space-y-0.5">
                         <Link
                           href="/account"
                           onClick={() => setProfileDropdownOpen(false)}
-                          className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-white/80 hover:bg-white/[0.08] hover:text-white transition-colors"
+                          className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-[#3a3235] hover:bg-[#fbeee5] hover:text-[#1d1a1c] transition-colors"
                         >
-                          <Bell className="size-4 text-amber-400 shrink-0" />
+                          <Bell className="size-4 text-amber-600 shrink-0" />
                           <span>{language === "bn" ? "বিজ্ঞপ্তি" : language === "hi" ? "सूचनाएं" : "Notifications"}</span>
                         </Link>
                         <Link
                           href="/account/wallet"
                           onClick={() => setProfileDropdownOpen(false)}
-                          className="flex items-center justify-between rounded-xl px-2.5 py-2 text-xs font-medium text-white/80 hover:bg-white/[0.08] hover:text-white transition-colors"
+                          className="flex items-center justify-between rounded-xl px-2.5 py-2 text-xs font-medium text-[#3a3235] hover:bg-[#fbeee5] hover:text-[#1d1a1c] transition-colors"
                         >
                           <span className="flex items-center gap-2.5">
-                            <Coins className="size-4 text-amber-400 shrink-0" />
+                            <Coins className="size-4 text-amber-600 shrink-0" />
                             <span>{language === "bn" ? "ওয়ালেট কয়েন" : language === "hi" ? "वॉलेट कॉइन" : "Wallet Coins"}</span>
                           </span>
-                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 bg-amber-500/20 border border-amber-500/30 px-2 py-0.5 rounded-full tabular-nums">
+                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#1d1a1c] bg-[#fbe4d6] border border-amber-300/60 px-2.5 py-0.5 rounded-full tabular-nums">
                             <GoldCoinIcon className="size-3.5 shrink-0" />
                             <span>{coinsBalance !== undefined ? formatCoins(coinsBalance) : walletLoading ? "..." : "0"}</span>
                           </span>
@@ -1046,22 +1032,22 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                         <Link
                           href="/account/orders"
                           onClick={() => setProfileDropdownOpen(false)}
-                          className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-white/80 hover:bg-white/[0.08] hover:text-white transition-colors"
+                          className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-[#3a3235] hover:bg-[#fbeee5] hover:text-[#1d1a1c] transition-colors"
                         >
-                          <FileText className="size-4 text-amber-400 shrink-0" />
+                          <FileText className="size-4 text-amber-600 shrink-0" />
                           <span>{language === "bn" ? "অর্ডারের ইতিহাস" : language === "hi" ? "ऑर्डर इतिहास" : "Order History"}</span>
                         </Link>
                         <Link
                           href="/support"
                           onClick={() => setProfileDropdownOpen(false)}
-                          className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-white/80 hover:bg-white/[0.08] hover:text-white transition-colors"
+                          className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-[#3a3235] hover:bg-[#fbeee5] hover:text-[#1d1a1c] transition-colors"
                         >
-                          <MessageSquare className="size-4 text-amber-400 shrink-0" />
+                          <MessageSquare className="size-4 text-amber-600 shrink-0" />
                           <span>{language === "bn" ? "কাস্টমার সাপোর্ট চ্যাট" : language === "hi" ? "कस्टमर सपोर्ट चैट" : "Customer Support"}</span>
                         </Link>
                       </div>
 
-                      <div className="my-2 h-px bg-white/[0.08]" />
+                      <div className="my-2 h-px bg-amber-200/60" />
 
                       <button
                         type="button"
@@ -1069,9 +1055,9 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                           setProfileDropdownOpen(false);
                           signOut();
                         }}
-                        className="w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-500/15 transition-colors cursor-pointer"
+                        className="w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                       >
-                        <LogOut className="size-4 text-rose-400 shrink-0" />
+                        <LogOut className="size-4 text-rose-500 shrink-0" />
                         <span>{language === "bn" ? "লগআউট" : language === "hi" ? "लॉग आउट" : "Logout"}</span>
                       </button>
                     </div>
@@ -1086,7 +1072,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                   setIsHovered(false);
                   setIsManualExpanded(false);
                 }}
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 px-3.5 py-1.5 text-[12.5px] font-bold text-white shadow-[0_4px_14px_rgba(217,119,6,0.4)] hover:brightness-110 hover:shadow-[0_4px_18px_rgba(217,119,6,0.6)] transition-all shrink-0"
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#f6a650] via-[#f39419] to-[#d97706] px-3.5 py-1.5 text-[12.5px] font-bold text-white shadow-[0_4px_14px_rgba(217,119,6,0.4)] hover:brightness-105 hover:shadow-[0_4px_18px_rgba(217,119,6,0.6)] transition-all shrink-0"
               >
                 <Phone className="size-3.5 stroke-[2.2]" />
                 <span>{menuData.talkCta}</span>
@@ -1097,7 +1083,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
               <button
                 type="button"
                 onClick={() => setIsManualExpanded((prev) => !prev)}
-                className="lg:hidden inline-flex size-8 items-center justify-center rounded-full bg-white/[0.08] text-white hover:bg-white/[0.15] transition-colors"
+                className="lg:hidden inline-flex size-8 items-center justify-center rounded-full bg-amber-100/80 text-[#1d1a1c] hover:bg-amber-200 transition-colors"
                 aria-label="Toggle Navigation"
               >
                 {isExpanded ? <X className="size-4" /> : <Menu className="size-4" />}
@@ -1107,6 +1093,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
 
           {/* ===================================================================
               Expanded Cosmic Mega Menu (Smooth Slide-Down on Hover/Click)
+              Warm Sanctuary Ivory/Cream Theme matching DivinLink design language
               =================================================================== */}
           <div
             className={cn(
@@ -1117,20 +1104,20 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
             )}
           >
             {/* Hairline Divider */}
-            <div className="h-px w-full bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-amber-300/60 to-transparent" />
 
             {/* 4-Column Mega Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 p-4 lg:p-6 overflow-y-auto max-h-[min(480px,70vh)]">
               {/* Column 1: Consultations */}
               <div className="space-y-2">
-                <div className="flex items-center gap-2 pb-1.5 border-b border-white/[0.08]">
-                  <span className="flex size-6 items-center justify-center rounded-lg bg-amber-500/20 text-amber-400">
+                <div className="flex items-center gap-2 pb-1.5 border-b border-amber-200/60">
+                  <span className="flex size-6 items-center justify-center rounded-lg bg-[#fbe7da] text-[#b45309]">
                     <menuData.col1Icon className="size-3.5" />
                   </span>
-                  <span className="text-[13px] font-bold text-white tracking-wide">
+                  <span className="text-[13px] font-bold text-[#1d1a1c] tracking-wide">
                     {menuData.col1Title}
                   </span>
-                  <span className="ml-auto rounded-full bg-amber-500/20 px-2 py-0.5 text-[9px] font-bold text-amber-300">
+                  <span className="ml-auto rounded-full bg-[#fbe4d6] px-2 py-0.5 text-[9px] font-bold text-[#78350f]">
                     {menuData.col1Badge}
                   </span>
                 </div>
@@ -1145,23 +1132,23 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                           setIsHovered(false);
                           setIsManualExpanded(false);
                         }}
-                        className="group flex items-start gap-2.5 rounded-xl p-2 hover:bg-white/[0.06] transition-colors"
+                        className="group flex items-start gap-2.5 rounded-xl p-2 bg-white/70 hover:bg-white border border-amber-100 hover:border-amber-300/80 shadow-2xs hover:shadow-xs transition-all"
                       >
-                        <span className="mt-0.5 flex size-6.5 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-amber-400 group-hover:bg-amber-500/20 group-hover:scale-105 transition-all">
+                        <span className="mt-0.5 flex size-6.5 shrink-0 items-center justify-center rounded-lg bg-[#fdf2e9] text-[#d97706] group-hover:bg-[#fbe7da] group-hover:scale-105 transition-all">
                           <Icon className="size-3.5" />
                         </span>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-1.5">
-                            <span className="text-[12.5px] font-semibold text-white/90 group-hover:text-amber-300 transition-colors truncate">
+                            <span className="text-[12.5px] font-semibold text-[#1d1a1c] group-hover:text-[#b45309] transition-colors truncate">
                               {item.label}
                             </span>
                             {item.badge && (
-                              <span className="shrink-0 rounded-full bg-amber-500/20 text-amber-300 text-[9px] font-bold px-1.5 py-0.2">
+                              <span className="shrink-0 rounded-full bg-[#fef3c7] text-[#92400e] border border-amber-300/50 text-[9px] font-bold px-1.5 py-0.2">
                                 {item.badge}
                               </span>
                             )}
                           </div>
-                          <p className="text-[11px] text-white/50 line-clamp-1 mt-0.5">
+                          <p className="text-[11px] text-[#73676c] line-clamp-1 mt-0.5">
                             {item.desc}
                           </p>
                         </div>
@@ -1173,14 +1160,14 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
 
               {/* Column 2: Kundli & Tools */}
               <div className="space-y-2">
-                <div className="flex items-center gap-2 pb-1.5 border-b border-white/[0.08]">
-                  <span className="flex size-6 items-center justify-center rounded-lg bg-amber-500/20 text-amber-400">
+                <div className="flex items-center gap-2 pb-1.5 border-b border-amber-200/60">
+                  <span className="flex size-6 items-center justify-center rounded-lg bg-[#fbe7da] text-[#b45309]">
                     <menuData.col2Icon className="size-3.5" />
                   </span>
-                  <span className="text-[13px] font-bold text-white tracking-wide">
+                  <span className="text-[13px] font-bold text-[#1d1a1c] tracking-wide">
                     {menuData.col2Title}
                   </span>
-                  <span className="ml-auto rounded-full bg-amber-500/20 px-2 py-0.5 text-[9px] font-bold text-amber-300">
+                  <span className="ml-auto rounded-full bg-[#fbe4d6] px-2 py-0.5 text-[9px] font-bold text-[#78350f]">
                     {menuData.col2Badge}
                   </span>
                 </div>
@@ -1195,23 +1182,23 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                           setIsHovered(false);
                           setIsManualExpanded(false);
                         }}
-                        className="group flex items-start gap-2.5 rounded-xl p-2 hover:bg-white/[0.06] transition-colors"
+                        className="group flex items-start gap-2.5 rounded-xl p-2 bg-white/70 hover:bg-white border border-amber-100 hover:border-amber-300/80 shadow-2xs hover:shadow-xs transition-all"
                       >
-                        <span className="mt-0.5 flex size-6.5 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-amber-400 group-hover:bg-amber-500/20 group-hover:scale-105 transition-all">
+                        <span className="mt-0.5 flex size-6.5 shrink-0 items-center justify-center rounded-lg bg-[#fdf2e9] text-[#d97706] group-hover:bg-[#fbe7da] group-hover:scale-105 transition-all">
                           <Icon className="size-3.5" />
                         </span>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-1.5">
-                            <span className="text-[12.5px] font-semibold text-white/90 group-hover:text-amber-300 transition-colors truncate">
+                            <span className="text-[12.5px] font-semibold text-[#1d1a1c] group-hover:text-[#b45309] transition-colors truncate">
                               {item.label}
                             </span>
                             {item.badge && (
-                              <span className="shrink-0 rounded-full bg-amber-500/20 text-amber-300 text-[9px] font-bold px-1.5 py-0.2">
+                              <span className="shrink-0 rounded-full bg-[#fef3c7] text-[#92400e] border border-amber-300/50 text-[9px] font-bold px-1.5 py-0.2">
                                 {item.badge}
                               </span>
                             )}
                           </div>
-                          <p className="text-[11px] text-white/50 line-clamp-1 mt-0.5">
+                          <p className="text-[11px] text-[#73676c] line-clamp-1 mt-0.5">
                             {item.desc}
                           </p>
                         </div>
@@ -1223,14 +1210,14 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
 
               {/* Column 3: Horoscope & Almanac */}
               <div className="space-y-2">
-                <div className="flex items-center gap-2 pb-1.5 border-b border-white/[0.08]">
-                  <span className="flex size-6 items-center justify-center rounded-lg bg-amber-500/20 text-amber-400">
+                <div className="flex items-center gap-2 pb-1.5 border-b border-amber-200/60">
+                  <span className="flex size-6 items-center justify-center rounded-lg bg-[#fbe7da] text-[#b45309]">
                     <menuData.col3Icon className="size-3.5" />
                   </span>
-                  <span className="text-[13px] font-bold text-white tracking-wide">
+                  <span className="text-[13px] font-bold text-[#1d1a1c] tracking-wide">
                     {menuData.col3Title}
                   </span>
-                  <span className="ml-auto rounded-full bg-amber-500/20 px-2 py-0.5 text-[9px] font-bold text-amber-300">
+                  <span className="ml-auto rounded-full bg-[#fbe4d6] px-2 py-0.5 text-[9px] font-bold text-[#78350f]">
                     {menuData.col3Badge}
                   </span>
                 </div>
@@ -1245,23 +1232,23 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                           setIsHovered(false);
                           setIsManualExpanded(false);
                         }}
-                        className="group flex items-start gap-2.5 rounded-xl p-2 hover:bg-white/[0.06] transition-colors"
+                        className="group flex items-start gap-2.5 rounded-xl p-2 bg-white/70 hover:bg-white border border-amber-100 hover:border-amber-300/80 shadow-2xs hover:shadow-xs transition-all"
                       >
-                        <span className="mt-0.5 flex size-6.5 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-amber-400 group-hover:bg-amber-500/20 group-hover:scale-105 transition-all">
+                        <span className="mt-0.5 flex size-6.5 shrink-0 items-center justify-center rounded-lg bg-[#fdf2e9] text-[#d97706] group-hover:bg-[#fbe7da] group-hover:scale-105 transition-all">
                           <Icon className="size-3.5" />
                         </span>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-1.5">
-                            <span className="text-[12.5px] font-semibold text-white/90 group-hover:text-amber-300 transition-colors truncate">
+                            <span className="text-[12.5px] font-semibold text-[#1d1a1c] group-hover:text-[#b45309] transition-colors truncate">
                               {item.label}
                             </span>
                             {item.badge && (
-                              <span className="shrink-0 rounded-full bg-amber-500/20 text-amber-300 text-[9px] font-bold px-1.5 py-0.2">
+                              <span className="shrink-0 rounded-full bg-[#fef3c7] text-[#92400e] border border-amber-300/50 text-[9px] font-bold px-1.5 py-0.2">
                                 {item.badge}
                               </span>
                             )}
                           </div>
-                          <p className="text-[11px] text-white/50 line-clamp-1 mt-0.5">
+                          <p className="text-[11px] text-[#73676c] line-clamp-1 mt-0.5">
                             {item.desc}
                           </p>
                         </div>
@@ -1273,14 +1260,14 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
 
               {/* Column 4: DivinLink Shop */}
               <div className="space-y-2">
-                <div className="flex items-center gap-2 pb-1.5 border-b border-white/[0.08]">
-                  <span className="flex size-6 items-center justify-center rounded-lg bg-amber-500/20 text-amber-400">
+                <div className="flex items-center gap-2 pb-1.5 border-b border-amber-200/60">
+                  <span className="flex size-6 items-center justify-center rounded-lg bg-[#fbe7da] text-[#b45309]">
                     <menuData.col4Icon className="size-3.5" />
                   </span>
-                  <span className="text-[13px] font-bold text-white tracking-wide">
+                  <span className="text-[13px] font-bold text-[#1d1a1c] tracking-wide">
                     {menuData.col4Title}
                   </span>
-                  <span className="ml-auto rounded-full bg-amber-500/20 px-2 py-0.5 text-[9px] font-bold text-amber-300">
+                  <span className="ml-auto rounded-full bg-[#fbe4d6] px-2 py-0.5 text-[9px] font-bold text-[#78350f]">
                     {menuData.col4Badge}
                   </span>
                 </div>
@@ -1295,23 +1282,23 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                           setIsHovered(false);
                           setIsManualExpanded(false);
                         }}
-                        className="group flex items-start gap-2.5 rounded-xl p-2 hover:bg-white/[0.06] transition-colors"
+                        className="group flex items-start gap-2.5 rounded-xl p-2 bg-white/70 hover:bg-white border border-amber-100 hover:border-amber-300/80 shadow-2xs hover:shadow-xs transition-all"
                       >
-                        <span className="mt-0.5 flex size-6.5 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-amber-400 group-hover:bg-amber-500/20 group-hover:scale-105 transition-all">
+                        <span className="mt-0.5 flex size-6.5 shrink-0 items-center justify-center rounded-lg bg-[#fdf2e9] text-[#d97706] group-hover:bg-[#fbe7da] group-hover:scale-105 transition-all">
                           <Icon className="size-3.5" />
                         </span>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-1.5">
-                            <span className="text-[12.5px] font-semibold text-white/90 group-hover:text-amber-300 transition-colors truncate">
+                            <span className="text-[12.5px] font-semibold text-[#1d1a1c] group-hover:text-[#b45309] transition-colors truncate">
                               {item.label}
                             </span>
                             {item.badge && (
-                              <span className="shrink-0 rounded-full bg-amber-500/20 text-amber-300 text-[9px] font-bold px-1.5 py-0.2">
+                              <span className="shrink-0 rounded-full bg-[#fef3c7] text-[#92400e] border border-amber-300/50 text-[9px] font-bold px-1.5 py-0.2">
                                 {item.badge}
                               </span>
                             )}
                           </div>
-                          <p className="text-[11px] text-white/50 line-clamp-1 mt-0.5">
+                          <p className="text-[11px] text-[#73676c] line-clamp-1 mt-0.5">
                             {item.desc}
                           </p>
                         </div>
@@ -1323,27 +1310,27 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
             </div>
 
             {/* Bottom Status & Quick Links Strip inside Notch */}
-            <div className="border-t border-white/[0.08] bg-black/40 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="border-t border-amber-200/70 bg-[#f8ede3] px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
               {/* Left Live Status */}
-              <div className="flex items-center gap-2 text-white/80">
+              <div className="flex items-center gap-2 text-[#1d1a1c]">
                 <span className="relative flex size-2 shrink-0">
-                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+                  <span className="relative inline-flex size-2 rounded-full bg-emerald-600" />
                 </span>
-                <span className="text-[11.5px] font-medium text-emerald-400/90">{menuData.statusText}</span>
+                <span className="text-[11.5px] font-semibold text-emerald-800">{menuData.statusText}</span>
               </div>
 
               {/* Right Utility Links */}
-              <div className="flex items-center gap-3 ml-auto text-[11.5px] text-white/60">
+              <div className="flex items-center gap-3 ml-auto text-[11.5px] text-[#6b5f63]">
                 <Link
                   href="/palm-reading"
                   onClick={() => {
                     setIsHovered(false);
                     setIsManualExpanded(false);
                   }}
-                  className="hover:text-amber-300 transition-colors flex items-center gap-1"
+                  className="hover:text-amber-800 transition-colors flex items-center gap-1 font-medium"
                 >
-                  <Hand className="size-3 text-amber-400" />
+                  <Hand className="size-3 text-amber-600" />
                   <span>3D Palm AI</span>
                 </Link>
                 <span>•</span>
@@ -1353,9 +1340,9 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                     setIsHovered(false);
                     setIsManualExpanded(false);
                   }}
-                  className="hover:text-amber-300 transition-colors flex items-center gap-1"
+                  className="hover:text-amber-800 transition-colors flex items-center gap-1 font-medium"
                 >
-                  <ShieldCheck className="size-3 text-amber-400" />
+                  <ShieldCheck className="size-3 text-amber-600" />
                   <span>{menuData.verifyText}</span>
                 </Link>
                 <span>•</span>
@@ -1365,9 +1352,9 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                     setIsHovered(false);
                     setIsManualExpanded(false);
                   }}
-                  className="hover:text-amber-300 transition-colors flex items-center gap-1"
+                  className="hover:text-amber-800 transition-colors flex items-center gap-1 font-medium"
                 >
-                  <MessageSquare className="size-3 text-amber-400" />
+                  <MessageSquare className="size-3 text-amber-600" />
                   <span>{menuData.supportText}</span>
                 </Link>
               </div>
