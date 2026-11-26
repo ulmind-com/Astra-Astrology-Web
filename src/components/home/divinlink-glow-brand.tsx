@@ -69,6 +69,7 @@ export function DivinLinkGlowBrand({
         orbitDamping: 0.94,
         idleMotion: true,
         entranceDuration: 1.2,
+        pauseOffscreen: false,
       });
 
       instanceRef.current = inst;
