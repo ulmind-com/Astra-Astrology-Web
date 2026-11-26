@@ -358,7 +358,23 @@ function AppointmentsContent() {
     return days;
   }, [today]);
 
-  const [selectedDayKey, setSelectedDayKey] = React.useState<string>(todayKey);
+  const initialDayKey = React.useMemo(() => {
+    const fromUrl = searchParams.get("date") || searchParams.get("day");
+    if (fromUrl && /^\d{4}-\d{2}-\d{2}$/.test(fromUrl)) {
+      return fromUrl;
+    }
+    return todayKey;
+  }, [searchParams, todayKey]);
+
+  const [selectedDayKey, setSelectedDayKey] = React.useState<string>(initialDayKey);
+
+  // Sync date selection when URL parameter changes
+  React.useEffect(() => {
+    const fromUrl = searchParams.get("date") || searchParams.get("day");
+    if (fromUrl && /^\d{4}-\d{2}-\d{2}$/.test(fromUrl)) {
+      setSelectedDayKey(fromUrl);
+    }
+  }, [searchParams]);
   const [selectedSlot, setSelectedSlot] = React.useState<Date | null>(null);
   const [minutes, setMinutes] = React.useState<number>(30);
   const [timeFilter, setTimeFilter] = React.useState<TimeOfDayFilter>("all");
