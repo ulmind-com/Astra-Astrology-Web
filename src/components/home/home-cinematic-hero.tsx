@@ -250,13 +250,13 @@ export function CinematicHero({ language, paused = false, slides, children }: He
       const parX = e.px * 0.6;
       const parY = e.py * 0.5;
 
-      // 2.5D Holographic inverse cloud parallax response
-      const pointerSettled = Math.abs(e.tx - e.px) < 0.001 && Math.abs(e.ty - e.py) < 0.001;
+      // 2.5D Holographic inverse cloud parallax response (flicker-free pixel quantization)
+      const pointerSettled = Math.abs(e.tx - e.px) < 0.0005 && Math.abs(e.ty - e.py) < 0.0005;
       if (cloudsRef.current && (!pointerSettled || sy !== e.lastSy)) {
-        const cloudParX = parX * -0.75;
-        const cloudParY = parY * -0.4;
-        const scrollScale = 1 + (0.35 * clampedSy) / vh;
-        cloudsRef.current.style.transform = `translate3d(${cloudParX}%, ${-0.38 * clampedSy + cloudParY * 12}px, 0) scale(${scrollScale})`;
+        const cloudPx = (parX * -14).toFixed(1);
+        const cloudPy = (-0.38 * clampedSy + parY * -6).toFixed(1);
+        const scrollScale = (1 + (0.35 * clampedSy) / vh).toFixed(4);
+        cloudsRef.current.style.transform = `translate3d(${cloudPx}px, ${cloudPy}px, 0) scale(${scrollScale})`;
       }
 
       if (e.animating) {
