@@ -220,8 +220,8 @@ function usePageEntrance(pathname: string) {
 
 export function DivinLinkMotion() {
   const pathname = usePathname() ?? "/";
-  const fine = useFinePointer();
   useScrollReveal(pathname);
   usePageEntrance(pathname);
-  return fine ? <Cursor /> : null;
+  // Custom circle cursor removed per user request - standard native OS cursor restored
+  return null;
 }
