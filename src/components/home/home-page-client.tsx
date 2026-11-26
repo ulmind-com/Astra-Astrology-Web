@@ -16,6 +16,7 @@ import { HomeMarquee } from "@/components/home/home-marquee";
 import { HomeBottomCta, HomeTrustSections } from "@/components/home/home-trust-sections";
 import { OurServicesSection } from "@/components/home/our-services-section";
 import { INITIAL_TOP_ASTROLOGERS, TopAstrologersSection } from "@/components/home/top-astrologers-section";
+import { DivinLinkGlowBrand } from "@/components/home/divinlink-glow-brand";
 import { VedicFestivalsSection } from "@/components/home/vedic-festivals-section";
 import { CinematicHero } from "@/components/home/home-cinematic-hero";
 import {
@@ -142,6 +143,7 @@ export function HomePageClient({
 
         <div className="dl-legacy">
           <TopAstrologersSection initialAstrologers={initialAstrologers} />
+          <DivinLinkGlowBrand />
           <HeroAstroyogi initialCms={initialCms} />
           <AstrologyPredictionZodiac />
           <FreeAstrologyReadings />
