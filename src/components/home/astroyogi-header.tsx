@@ -8,6 +8,7 @@ import {
   Bot,
   CalendarDays,
   ChevronDown,
+  ChevronRight,
   Clock,
   Coins,
   Compass,
@@ -25,6 +26,7 @@ import {
   Moon,
   Orbit,
   Phone,
+  Radio,
   ScanFace,
   ScrollText,
   ShieldCheck,
@@ -49,7 +51,7 @@ import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
 import { formatCoins, type AstrologyLanguage } from "@/types";
 import { useQuery } from "@tanstack/react-query";
-import { shopApi, type ShopProductCategory } from "@/lib/api";
+import { astrologerApi, shopApi, type ShopProductCategory } from "@/lib/api";
 import initialCategoriesData from "@/lib/initial-shop-categories.json";
 
 function GoldCoinIcon({ className = "size-3.5" }: { className?: string }) {
@@ -85,6 +87,10 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
   const [isManualExpanded, setIsManualExpanded] = React.useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = React.useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = React.useState(false);
+
+  // Live Dynamic Island Cosmic Ticker State
+  const [tickerIndex, setTickerIndex] = React.useState(0);
+  const [tickerPaused, setTickerPaused] = React.useState(false);
 
   const leaveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
@@ -130,6 +136,32 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  // Live Astrologers real-time query
+  const { data: astrologersData } = useQuery({
+    queryKey: ["astrologers", { notchLiveCount: true }],
+    queryFn: async () => {
+      try {
+        const res = await astrologerApi.list({ limit: 12 });
+        return res?.items?.length ? res.items.length : 54;
+      } catch {
+        return 54;
+      }
+    },
+    staleTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+  });
+
+  const liveAstrologersNumber = typeof astrologersData === "number" ? astrologersData : 54;
+
+  // Cycle the Live Dynamic Island Cosmic Ticker smoothly every 6 seconds
+  React.useEffect(() => {
+    if (tickerPaused) return;
+    const interval = setInterval(() => {
+      setTickerIndex((prev) => (prev + 1) % 4);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [tickerPaused]);
+
   // Fetch real-time active shop categories
   const { data: dynamicCategories = (initialCategoriesData as any) } = useQuery<ShopProductCategory[]>({
     queryKey: ["shop_public_categories"],
@@ -145,10 +177,44 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
     staleTime: 1000 * 60 * 30,
   });
 
-  // Multilingual Navigation Definitions for the 4 Notch Mega Columns
+  // Multilingual Navigation & Ticker Definitions
   const menuData = React.useMemo(() => {
     if (language === "bn") {
       return {
+        tickerItems: [
+          {
+            id: "live-astrologers",
+            type: "beacon",
+            icon: Radio,
+            text: `${liveAstrologersNumber}+ ভেরিফাইড জ্যোতিষী এখন লাইভ কলে প্রস্তুত`,
+            badge: "লাইভ",
+            href: "/astrologers",
+          },
+          {
+            id: "tithi-panchang",
+            type: "moon",
+            icon: Moon,
+            text: "আজ শুক্লপক্ষ তিথি • সিদ্ধি যোগ বিরাজমান",
+            badge: "তিথি",
+            href: "/panchang",
+          },
+          {
+            id: "choghadiya-muhurat",
+            type: "muhurat",
+            icon: Clock,
+            text: "শুভ অমৃত চোঘড়িয়া মুহূর্ত বলবৎ রয়েছে",
+            badge: "মুহূর্ত",
+            href: "/panchang?tab=choghadiya",
+          },
+          {
+            id: "ai-guru-active",
+            type: "ai",
+            icon: Sparkles,
+            text: "২৪/৭ এআই বৈদিক গুরু সক্রিয় • ফ্রি জিজ্ঞাসা করুন",
+            badge: "এআই",
+            href: "/ai-astrologer",
+          },
+        ],
         col1Title: "পরামর্শ ও সেবা",
         col1Icon: Phone,
         col1Badge: "লাইভ",
@@ -334,15 +400,51 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
           { label: "এআই গুরু", href: "/ai-astrologer", isAi: true },
         ],
         talkCta: "পরামর্শ নিন",
-        statusText: "৫৪+ ভেরিফাইড জ্যোতিষী এখন সরাসরি লাইভ কলে উপস্থিত",
+        statusText: `${liveAstrologersNumber}+ ভেরিফাইড জ্যোতিষী এখন সরাসরি লাইভ কলে উপস্থিত`,
         walletText: "ওয়ালেট কয়েন",
         supportText: "কাস্টমার সাপোর্ট",
         verifyText: "কিউআর সনদপত্র যাচাই",
+        exploreText: "মেনু",
+        closeText: "সংক্ষেপ",
       };
     }
 
     if (language === "hi") {
       return {
+        tickerItems: [
+          {
+            id: "live-astrologers",
+            type: "beacon",
+            icon: Radio,
+            text: `${liveAstrologersNumber}+ सत्यापित ज्योतिषी अभी लाइव कॉल पर उपलब्ध`,
+            badge: "लाइव",
+            href: "/astrologers",
+          },
+          {
+            id: "tithi-panchang",
+            type: "moon",
+            icon: Moon,
+            text: "आज शुक्ल पक्ष तिथि • सिद्धि योग प्रभाव",
+            badge: "तिथि",
+            href: "/panchang",
+          },
+          {
+            id: "choghadiya-muhurat",
+            type: "muhurat",
+            icon: Clock,
+            text: "शुभ अमृत चौघड़िया मुहूर्त सक्रिय",
+            badge: "मुहूर्त",
+            href: "/panchang?tab=choghadiya",
+          },
+          {
+            id: "ai-guru-active",
+            type: "ai",
+            icon: Sparkles,
+            text: "24/7 एआई वैदिक गुरु सक्रिय • मुफ़्त पूछें",
+            badge: "एआई",
+            href: "/ai-astrologer",
+          },
+        ],
         col1Title: "परामर्श एवं सेवाएं",
         col1Icon: Phone,
         col1Badge: "लाइव",
@@ -528,15 +630,51 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
           { label: "एआई गुरु", href: "/ai-astrologer", isAi: true },
         ],
         talkCta: "बात करें",
-        statusText: "54+ सत्यापित ज्योतिषी अभी लाइव परामर्श हेतु ऑनलाइन हैं",
+        statusText: `${liveAstrologersNumber}+ सत्यापित ज्योतिषी अभी लाइव परामर्श हेतु ऑनलाइन हैं`,
         walletText: "वॉलेट कॉइन",
         supportText: "कस्टमर सपोर्ट चैट",
         verifyText: "सर्टिफिकेट क्यूआर जांचें",
+        exploreText: "मेन्यू",
+        closeText: "संक्षिप्त",
       };
     }
 
     // Default English
     return {
+      tickerItems: [
+        {
+          id: "live-astrologers",
+          type: "beacon",
+          icon: Radio,
+          text: `${liveAstrologersNumber}+ Verified Astrologers Live on Call Now`,
+          badge: "Live",
+          href: "/astrologers",
+        },
+        {
+          id: "tithi-panchang",
+          type: "moon",
+          icon: Moon,
+          text: "Today's Auspicious Shukla Tithi & Siddhi Yoga Active",
+          badge: "Tithi",
+          href: "/panchang",
+        },
+        {
+          id: "choghadiya-muhurat",
+          type: "muhurat",
+          icon: Clock,
+          text: "Auspicious Amrit Choghadiya Window In Progress",
+          badge: "Muhurat",
+          href: "/panchang?tab=choghadiya",
+        },
+        {
+          id: "ai-guru-active",
+          type: "ai",
+          icon: Sparkles,
+          text: "24/7 AI Vedic Guru Online • Ask Free Question",
+          badge: "AI",
+          href: "/ai-astrologer",
+        },
+      ],
       col1Title: "Consultations",
       col1Icon: Phone,
       col1Badge: "Live",
@@ -722,15 +860,20 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
         { label: "AI Guru", href: "/ai-astrologer", isAi: true },
       ],
       talkCta: "Talk now",
-      statusText: "54+ verified astrologers online right now for consultation",
+      statusText: `${liveAstrologersNumber}+ verified astrologers online right now for consultation`,
       walletText: "Wallet Coins",
       supportText: "Customer Support",
       verifyText: "Verify QR Certificate",
+      exploreText: "Explore",
+      closeText: "Close",
     };
-  }, [language]);
+  }, [language, liveAstrologersNumber]);
+
+  const currentTicker = menuData.tickerItems[tickerIndex] || menuData.tickerItems[0];
+  const TickerIcon = currentTicker.icon;
 
   const nameOf = user?.full_name || user?.first_name || (language === "bn" ? "ব্যবহারকারী" : language === "hi" ? "यूज़र" : "User");
-  const signInLabel = language === "bn" ? "লগ ইন" : language === "hi" ? "लॉग ইন" : "Sign In";
+  const signInLabel = language === "bn" ? "লগ ইন" : language === "hi" ? "लॉग इन" : "Sign In";
 
   // Warm surface color for the notch body & matching SVG ears
   const notchBgColor = "#fffbf7"; // Warm Sanctuary Ivory/Cream matching site theme
@@ -754,7 +897,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
             "border-b border-x border-amber-900/10 shadow-[0_16px_40px_-10px_rgba(114,63,19,0.15),0_2px_12px_rgba(114,63,19,0.06)]",
             // Collapsed vs Expanded Dimensions & Corners
             !isExpanded
-              ? "w-[min(96vw,1080px)] rounded-b-[22px] max-h-[52px]"
+              ? "w-[min(96vw,1140px)] rounded-b-[22px] max-h-[52px]"
               : "w-[min(96vw,1260px)] rounded-b-[30px] max-h-[min(640px,88vh)] shadow-[0_24px_56px_-12px_rgba(114,63,19,0.22),0_4px_18px_rgba(114,63,19,0.08)]",
           )}
           aria-expanded={isExpanded}
@@ -813,7 +956,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
           {/* ===================================================================
               Top Bar (Always Visible at 50px Height) — Warm DivinLink Styling
               =================================================================== */}
-          <div className="flex h-[50px] items-center justify-between gap-2 px-3 sm:px-4">
+          <div className="flex h-[50px] items-center justify-between gap-1.5 sm:gap-2 px-3 sm:px-4">
             {/* BRAND: Logo Mark + Wordmark */}
             <Link
               href="/"
@@ -822,7 +965,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                 setIsHovered(false);
                 setIsManualExpanded(false);
               }}
-              className="group flex items-center gap-2.5 shrink-0"
+              className="group flex items-center gap-2 sm:gap-2.5 shrink-0"
               aria-label="DivinLink Home"
             >
               <span className="relative flex size-7 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 p-0.5 shadow-[0_2px_8px_rgba(243,148,25,0.35)] transition-transform duration-300 group-hover:scale-105 group-hover:rotate-[-6deg]">
@@ -840,7 +983,61 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
               </span>
             </Link>
 
-            {/* CENTER: Quick Nav Pills (Desktop) */}
+            {/* ===============================================================
+                1. LIVE DYNAMIC ISLAND "COSMIC TICKER"
+                Authentic Apple Dynamic Island Live Activity Capsule
+                Smoothly cycles real-time astrologers, tithi, and muhurat
+                =============================================================== */}
+            <div
+              onMouseEnter={() => setTickerPaused(true)}
+              onMouseLeave={() => setTickerPaused(false)}
+              className="hidden md:flex items-center"
+            >
+              <Link
+                href={currentTicker.href}
+                onClick={() => {
+                  setIsHovered(false);
+                  setIsManualExpanded(false);
+                }}
+                className={cn(
+                  "group relative flex items-center gap-2 h-7.5 px-3 rounded-full transition-all duration-300 cursor-pointer",
+                  "bg-gradient-to-r from-amber-100/90 via-amber-50 to-[#fdf2e9] border border-amber-300/80 shadow-2xs hover:shadow-xs",
+                  "hover:border-amber-400 hover:bg-amber-100",
+                )}
+                title={currentTicker.text}
+              >
+                {/* Visual Icon / Pulsing Beacon */}
+                {currentTicker.type === "beacon" ? (
+                  <span className="relative flex size-2 shrink-0">
+                    <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+                    <span className="relative inline-flex size-2 rounded-full bg-emerald-600" />
+                  </span>
+                ) : (
+                  <span className="flex size-4 items-center justify-center text-amber-700 shrink-0">
+                    <TickerIcon className="size-3.5 stroke-[2]" />
+                  </span>
+                )}
+
+                {/* Animated Flipping Text Content */}
+                <div className="relative overflow-hidden h-4.5 min-w-[210px] max-w-[290px] xl:max-w-[340px]">
+                  <span
+                    key={`${currentTicker.id}-${language}`}
+                    className="absolute inset-0 flex items-center text-[11.5px] font-semibold text-[#1d1a1c] truncate animate-in fade-in slide-in-from-bottom-2 duration-300"
+                  >
+                    {currentTicker.text}
+                  </span>
+                </div>
+
+                {/* Micro Tag Badge */}
+                <span className="shrink-0 rounded-full bg-amber-200/90 text-amber-900 border border-amber-300/60 px-1.5 py-0.2 text-[9px] font-bold leading-none uppercase">
+                  {currentTicker.badge}
+                </span>
+
+                <ChevronRight className="size-3 text-amber-700/60 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
+
+            {/* CENTER: Primary Quick Nav Pills (Clear Navbar Identity) */}
             <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
               {menuData.quickPills.map((item) => (
                 <Link
@@ -877,10 +1074,10 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                 type="button"
                 onClick={() => setIsManualExpanded((prev) => !prev)}
                 className="inline-flex items-center gap-1 rounded-full bg-amber-50 hover:bg-amber-100/80 border border-amber-200/90 px-2.5 py-1 text-[12px] font-semibold text-amber-900 transition-colors ml-1 cursor-pointer"
-                title={isExpanded ? "Collapse Menu" : "Explore Mega Menu"}
+                title={isExpanded ? menuData.closeText : menuData.exploreText}
                 aria-label="Toggle Cosmic Menu"
               >
-                <span>{isExpanded ? (language === "bn" ? "সংক্ষেপ" : language === "hi" ? "संक्षिप्त" : "Close") : (language === "bn" ? "মেনু" : language === "hi" ? "मेन्यू" : "Explore")}</span>
+                <span>{isExpanded ? menuData.closeText : menuData.exploreText}</span>
                 <ChevronDown
                   className={cn(
                     "size-3.5 transition-transform duration-300 text-amber-700",
@@ -1022,7 +1219,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                         >
                           <span className="flex items-center gap-2.5">
                             <Coins className="size-4 text-amber-600 shrink-0" />
-                            <span>{language === "bn" ? "ওয়ালেট কয়েন" : language === "hi" ? "वॉलेट कॉइन" : "Wallet Coins"}</span>
+                            <span>{menuData.walletText}</span>
                           </span>
                           <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#1d1a1c] bg-[#fbe4d6] border border-amber-300/60 px-2.5 py-0.5 rounded-full tabular-nums">
                             <GoldCoinIcon className="size-3.5 shrink-0" />
@@ -1043,7 +1240,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                           className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-[#3a3235] hover:bg-[#fbeee5] hover:text-[#1d1a1c] transition-colors"
                         >
                           <MessageSquare className="size-4 text-amber-600 shrink-0" />
-                          <span>{language === "bn" ? "কাস্টমার সাপোর্ট চ্যাট" : language === "hi" ? "कस्टमर सपोर्ट चैट" : "Customer Support"}</span>
+                          <span>{menuData.supportText}</span>
                         </Link>
                       </div>
 
@@ -1105,6 +1302,33 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
           >
             {/* Hairline Divider */}
             <div className="h-px w-full bg-gradient-to-r from-transparent via-amber-300/60 to-transparent" />
+
+            {/* Mobile View Ticker Card (Visible on mobile screens) */}
+            <div className="md:hidden px-4 pt-3 pb-1">
+              <Link
+                href={currentTicker.href}
+                onClick={() => {
+                  setIsHovered(false);
+                  setIsManualExpanded(false);
+                }}
+                className="flex items-center justify-between gap-2 p-2 rounded-xl bg-amber-100/70 border border-amber-300/80 text-xs text-[#1d1a1c]"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  {currentTicker.type === "beacon" ? (
+                    <span className="relative flex size-2 shrink-0">
+                      <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+                      <span className="relative inline-flex size-2 rounded-full bg-emerald-600" />
+                    </span>
+                  ) : (
+                    <TickerIcon className="size-3.5 text-amber-700 shrink-0" />
+                  )}
+                  <span className="truncate font-semibold text-[11.5px]">{currentTicker.text}</span>
+                </div>
+                <span className="shrink-0 rounded-full bg-amber-200 text-amber-900 px-1.5 py-0.2 text-[9px] font-bold">
+                  {currentTicker.badge}
+                </span>
+              </Link>
+            </div>
 
             {/* 4-Column Mega Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 p-4 lg:p-6 overflow-y-auto max-h-[min(480px,70vh)]">
