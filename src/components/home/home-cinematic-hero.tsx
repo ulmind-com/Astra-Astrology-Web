@@ -227,12 +227,10 @@ export function CinematicHero({ language, paused = false, slides, children }: He
       const W = window.innerWidth;
 
       // Scroll choreography (updated only when scrollY actually changes).
+      const clampedSy = Math.min(sy, vh * 1.6);
       if (sy !== e.lastSy) {
-        const clampedSy = Math.min(sy, vh * 1.6);
         e.lastSy = sy;
         if (stackRef.current) stackRef.current.style.transform = `translate3d(0, ${clampedSy * 0.42}px, 0)`;
-        if (cloudsRef.current)
-          cloudsRef.current.style.transform = `translate3d(0, ${-0.38 * clampedSy}px, 0) scale(${1 + (0.35 * clampedSy) / vh})`;
         if (cloudsTopRef.current) {
           cloudsTopRef.current.style.opacity = String(Math.min(1, clampedSy / (0.45 * vh)));
           cloudsTopRef.current.style.transform = `translate3d(0, ${-0.25 * clampedSy}px, 0)`;
@@ -251,6 +249,15 @@ export function CinematicHero({ language, paused = false, slides, children }: He
       e.py += (e.ty - e.py) * 0.05;
       const parX = e.px * 0.6;
       const parY = e.py * 0.5;
+
+      // 2.5D Holographic inverse cloud parallax response
+      const pointerSettled = Math.abs(e.tx - e.px) < 0.001 && Math.abs(e.ty - e.py) < 0.001;
+      if (cloudsRef.current && (!pointerSettled || sy !== e.lastSy)) {
+        const cloudParX = parX * -0.75;
+        const cloudParY = parY * -0.4;
+        const scrollScale = 1 + (0.35 * clampedSy) / vh;
+        cloudsRef.current.style.transform = `translate3d(${cloudParX}%, ${-0.38 * clampedSy + cloudParY * 12}px, 0) scale(${scrollScale})`;
+      }
 
       if (e.animating) {
         const t = Math.min(1, (now - e.start) / WIPE_MS);
@@ -377,8 +384,11 @@ export function CinematicHero({ language, paused = false, slides, children }: He
         </div>
 
         <div ref={cloudsRef} className="dl-clouds" aria-hidden>
-          <div className="dl-cloud dl-cloud--back" style={{ backgroundImage: `url(${CLOUD_IMAGE})` }} />
+          <div className="dl-cloud-glow" />
+          <div className="dl-cloud dl-cloud--deep" style={{ backgroundImage: `url(${CLOUD_IMAGE})` }} />
+          <div className="dl-cloud dl-cloud--mid" style={{ backgroundImage: `url(${CLOUD_IMAGE})` }} />
           <div className="dl-cloud dl-cloud--front" style={{ backgroundImage: `url(${CLOUD_IMAGE})` }} />
+          <div className="dl-cloud-shimmer" />
         </div>
 
         <div className="dl-fade" aria-hidden />
