@@ -5,6 +5,7 @@ import {
   Cinzel_Decorative,
   Geist_Mono,
   Gilda_Display,
+  Outfit,
   Poppins,
   Urbanist,
 } from "next/font/google";
@@ -50,6 +51,11 @@ const gildaDisplay = Gilda_Display({
   subsets: ["latin"],
   weight: ["400"],
 });
+const outfit = Outfit({
+  variable: "--font-outfit",
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800", "900"],
+});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -84,7 +90,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${poppins.variable} ${geistMono.variable} ${cinzel.variable} ${cinzelDecorative.variable} ${urbanist.variable} ${gildaDisplay.variable} h-full`}
+      className={`${poppins.variable} ${geistMono.variable} ${cinzel.variable} ${cinzelDecorative.variable} ${urbanist.variable} ${gildaDisplay.variable} ${outfit.variable} h-full`}
     >
       <body suppressHydrationWarning className="min-h-full pb-[104px] md:pb-0">
         <ThemeProvider>

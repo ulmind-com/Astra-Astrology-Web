@@ -482,6 +482,10 @@
     font-family: var(--font-display);
   }
 
+  .font-brand {
+    font-family: var(--font-outfit), var(--font-urbanist), ui-sans-serif, system-ui, sans-serif;
+  }
+
   /* Skeletons and "loading" states. */
   .shimmer {
     background: linear-gradient(

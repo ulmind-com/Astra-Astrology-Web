@@ -139,12 +139,14 @@ export function SiteRail() {
         </span>
         <span
           className={cn(
-            "font-display whitespace-nowrap text-[15px] font-bold tracking-wide text-foreground",
+            "font-brand whitespace-nowrap text-[16px] font-extrabold tracking-[-0.035em] inline-flex items-center select-none",
             "transition-all duration-300",
             expanded ? "translate-x-0 opacity-100" : "pointer-events-none -translate-x-2 opacity-0",
           )}
         >
-          DivinLink
+          <span className="text-foreground font-extrabold">Divin</span>
+          <span className="bg-gradient-to-r from-amber-600 via-[#f39419] to-amber-500 bg-clip-text text-transparent font-black ml-[0.5px]">Link</span>
+          <span className="size-1.5 rounded-full bg-gradient-to-tr from-amber-500 to-[#f39419] ml-1 shadow-[0_0_6px_rgba(243,148,25,0.6)]" />
         </span>
       </Link>
 
