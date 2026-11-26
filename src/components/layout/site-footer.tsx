@@ -273,10 +273,8 @@ export function SiteFooter() {
             <span className="dlf-brand__mark">
               <Image src="/logo.png" alt="" width={30} height={30} />
             </span>
-            <span className="font-brand font-extrabold tracking-[-0.035em] text-[19px] inline-flex items-center select-none">
-              <span className="text-[#191410]">Divin</span>
-              <span className="bg-gradient-to-r from-amber-600 via-[#f39419] to-amber-500 bg-clip-text text-transparent font-black ml-[0.5px]">Link</span>
-              <span className="size-1.5 rounded-full bg-gradient-to-tr from-amber-500 to-[#f39419] ml-1 shadow-[0_0_6px_rgba(243,148,25,0.6)]" />
+            <span className="font-voyage text-[24px] font-normal leading-none tracking-[-0.01em] text-[#1c1613] select-none inline-flex items-center">
+              DivinLink
             </span>
           </Link>
           <h2 className="dlf-brand__title">

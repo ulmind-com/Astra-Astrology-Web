@@ -893,14 +893,8 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                   priority
                 />
               </span>
-              <span className="font-brand text-[19px] sm:text-[21px] font-extrabold tracking-[-0.035em] inline-flex items-baseline select-none">
-                <span className="text-[#191410] transition-colors duration-200 group-hover:text-black font-extrabold">
-                  Divin
-                </span>
-                <span className="bg-gradient-to-r from-amber-600 via-[#f39419] to-amber-500 bg-clip-text text-transparent font-black ml-[0.5px]">
-                  Link
-                </span>
-                <span className="inline-block size-1.5 rounded-full bg-gradient-to-tr from-amber-500 to-[#f39419] ml-1 shadow-[0_0_8px_rgba(243,148,25,0.7)] group-hover:scale-125 transition-transform duration-300 self-center" />
+              <span className="font-voyage text-[22px] sm:text-[24px] font-normal leading-none tracking-[-0.01em] text-[#1c1613] group-hover:text-amber-800 transition-colors select-none inline-flex items-center">
+                DivinLink
               </span>
             </Link>
 
