@@ -43,6 +43,8 @@ import { cn, coinsPerMinute, formatNumber } from "@/lib/utils";
 import { DurationPicker } from "@/components/consult/duration-picker";
 import { ReviewList } from "@/components/reviews/review-list";
 import { useLanguage } from "@/providers/language-provider";
+import { useLiveAstrologer } from "@/providers/realtime-provider";
+import { isPresent } from "@/lib/realtime";
 import { ASTROLOGERS_I18N } from "@/lib/astrologers-translations";
 import { useAuth } from "@/providers/auth-provider";
 import {
@@ -71,6 +73,14 @@ export default function AstrologerDetailPage() {
     enabled: Boolean(slug),
     refetchInterval: 15000,
   });
+
+  const liveAstrologer = useLiveAstrologer(astrologer?.id);
+  const isOnline = liveAstrologer
+    ? isPresent(liveAstrologer)
+    : (astrologer?.availability.is_online ?? false);
+  const isBusy = liveAstrologer
+    ? liveAstrologer.availability.is_busy
+    : (astrologer?.availability.is_busy ?? false);
 
   const { data: favData } = useQuery({
     queryKey: ["astrologer-favorite", slug],
@@ -178,15 +188,18 @@ export default function AstrologerDetailPage() {
                 {/* Gradient top strip based on online status */}
                 <div className={cn(
                   "h-1",
-                  astrologer.availability.is_online && !astrologer.availability.is_busy
+                  isOnline && !isBusy
                     ? "bg-gradient-to-r from-transparent via-success to-transparent"
-                    : astrologer.availability.is_busy
+                    : isBusy
                     ? "bg-gradient-to-r from-transparent via-gold-400 to-transparent"
-                    : "bg-gradient-to-r from-transparent via-brand-400/40 to-transparent",
+                    : "bg-gradient-to-r from-transparent via-slate-300 to-transparent",
                 )} />
                 <div className="flex flex-col gap-5 p-5 sm:p-6 sm:flex-row sm:items-start">
                   <div className="relative shrink-0">
-                    <div className="ring-2 ring-brand-500/30 rounded-full">
+                    <div className={cn(
+                      "rounded-full p-0.5 ring-2",
+                      isOnline ? "ring-emerald-500/80" : "ring-slate-300/80"
+                    )}>
                       <Avatar
                         src={astrologer.profile_image_url}
                         name={astrologer.display_name}
@@ -195,8 +208,8 @@ export default function AstrologerDetailPage() {
                     </div>
                     <span className="absolute right-1 bottom-1 rounded-full bg-surface-solid p-1.5 shadow-md">
                       <StatusDot
-                        online={astrologer.availability.is_online}
-                        busy={astrologer.availability.is_busy}
+                        online={isOnline}
+                        busy={isBusy}
                       />
                     </span>
                   </div>
@@ -209,16 +222,16 @@ export default function AstrologerDetailPage() {
                       {astrologer.is_featured && <Badge tone="gold">{t.featuredBadge}</Badge>}
                       <Badge
                         tone={
-                          astrologer.availability.is_busy
+                          isBusy
                             ? "gold"
-                            : astrologer.availability.is_online
+                            : isOnline
                             ? "green"
                             : "neutral"
                         }
                       >
-                        {astrologer.availability.is_busy
+                        {isBusy
                           ? t.inSessionBadge
-                          : astrologer.availability.is_online
+                          : isOnline
                           ? t.onlineBadge
                           : t.offlineBadge}
                       </Badge>
@@ -395,7 +408,11 @@ export default function AstrologerDetailPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardBody className="space-y-3 pt-0">
-                  <ConsultationOptions astrologer={astrologer} />
+                  <ConsultationOptions
+                    astrologer={astrologer}
+                    isOnline={isOnline}
+                    isBusy={isBusy}
+                  />
                 </CardBody>
               </Card>
             </aside>
@@ -556,7 +573,15 @@ export default function AstrologerDetailPage() {
  * but have paused is shown disabled with the reason, so the person knows to
  * come back rather than assuming the app is broken.
  */
-function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
+function ConsultationOptions({
+  astrologer,
+  isOnline,
+  isBusy,
+}: {
+  astrologer: AstrologerPublic;
+  isOnline?: boolean;
+  isBusy?: boolean;
+}) {
   const { language } = useLanguage();
   const t = ASTROLOGERS_I18N[language] || ASTROLOGERS_I18N.en;
   const router = useRouter();
@@ -573,7 +598,8 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
     onError: (e: ApiError) => setError(e.message),
   });
 
-  const online = astrologer.availability.is_online;
+  const online = isOnline !== undefined ? isOnline : astrologer.availability.is_online;
+  const busy = isBusy !== undefined ? isBusy : astrologer.availability.is_busy;
   const modes = astrologer.modes_enabled;
 
   if (modes.length === 0) {
@@ -587,6 +613,7 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
   function pausedReason(mode: ConsultationMode): string | null {
     if (!online) return t.offlineRightNow;
     const a = astrologer.availability;
+    if (busy || a.is_busy) return t.inSessionBadge;
     if (mode === "chat" && !a.is_available_for_chat) return t.chatPaused;
     if (mode === "call" && !a.is_available_for_call) return t.callPaused;
     if (mode === "video" && !a.is_available_for_video) return t.videoPaused;
@@ -595,6 +622,28 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
 
   return (
     <>
+      {!online && (
+        <div className="rounded-xl border border-amber-500/20 bg-amber-50/70 dark:bg-amber-950/20 p-3 text-xs text-muted-foreground flex items-start gap-2.5 mb-1 shadow-2xs">
+          <span className="size-2 rounded-full bg-slate-400 mt-1 shrink-0" />
+          <div className="space-y-0.5">
+            <p className="font-semibold text-amber-950 dark:text-amber-200">
+              {language === "bn"
+                ? `${astrologer.display_name} বর্তমানে অফলাইন আছেন`
+                : language === "hi"
+                ? `${astrologer.display_name} अभी ऑफ़लाइन हैं`
+                : `${astrologer.display_name} is currently offline`}
+            </p>
+            <p className="text-[11px] leading-relaxed text-amber-900/80 dark:text-amber-300/80">
+              {language === "bn"
+                ? "জ্যোতিষী অনলাইনে এলে সরাসরি লাইভ চ্যাট, কল বা ভিডিও কল নিতে পারবেন।"
+                : language === "hi"
+                ? "ज्योतिषी के ऑनलाइन आने पर आप लाइव चैट, कॉल या वीडियो शुरू कर सकेंगे।"
+                : "Live chat, audio call and video consultation will activate once the astrologer comes online."}
+            </p>
+          </div>
+        </div>
+      )}
+
       {modes.map((mode: ConsultationMode) => {
         const Icon = MODE_ICONS[mode];
         const rate = coinsPerMinute(astrologer.rates, mode);
@@ -617,19 +666,23 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
             className={cn(
               "flex w-full items-center justify-between rounded-xl border p-3.5 text-left transition-all duration-200 group",
               disabled
-                ? "cursor-not-allowed border-border/50 opacity-55"
+                ? "cursor-not-allowed border-border/40 bg-surface-muted/60 opacity-60"
                 : "border-border hover:border-brand-500/55 hover:bg-brand-500/8 hover:shadow-soft",
             )}
           >
             <span className="flex items-center gap-3 text-sm font-medium">
               <span className={cn(
-                "icon-box flex size-9 items-center justify-center rounded-xl icon-box-brand transition-all duration-200",
-                !disabled && "group-hover:shadow-soft",
+                "icon-box flex size-9 items-center justify-center rounded-xl transition-all duration-200",
+                disabled
+                  ? "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500"
+                  : "icon-box-brand group-hover:shadow-soft",
               )}>
                 <Icon className="size-4" />
               </span>
               <span>
-                <span className="font-semibold text-foreground">{MODE_LABELS[mode]}</span>
+                <span className={cn("font-semibold", disabled ? "text-muted-foreground" : "text-foreground")}>
+                  {MODE_LABELS[mode]}
+                </span>
                 {paused && (
                   <span className="block text-xs font-normal text-muted-foreground mt-0.5">
                     {paused}
@@ -639,7 +692,9 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
             </span>
 
             <span className="text-right">
-              <span className="text-base font-bold text-foreground">{formatCoins(rate)}</span>
+              <span className={cn("text-base font-bold", disabled ? "text-muted-foreground" : "text-foreground")}>
+                {formatCoins(rate)}
+              </span>
               <span className="block text-xs text-muted-foreground">{coinWord(rate)}{t.perMinute}</span>
             </span>
           </button>
@@ -648,7 +703,7 @@ function ConsultationOptions({ astrologer }: { astrologer: AstrologerPublic }) {
 
       {/* A family consultation is its own thing, not a fourth "mode": it is
           booked with the guests named up front. */}
-      <MilanLauncher astrologer={astrologer} />
+      <MilanLauncher astrologer={astrologer} isOnline={online} />
 
       {!user && (
         <p className="pt-1 text-center text-xs text-muted-foreground">

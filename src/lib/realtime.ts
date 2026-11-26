@@ -93,7 +93,9 @@ export function isPresent(astrologer: LiveAstrologer, now: number = Date.now()):
   if (!is_online || !last_seen_at) return false;
   const seen = Date.parse(last_seen_at);
   if (Number.isNaN(seen)) return false;
-  return now - seen <= ttl_seconds * 1000;
+  const diff = now - seen;
+  // Allow max 5s clock skew into future, and must be within TTL window
+  return diff >= -5000 && diff <= ttl_seconds * 1000;
 }
 
 /** How often we prove the socket is still alive. */

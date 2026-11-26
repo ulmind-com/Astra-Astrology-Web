@@ -8,6 +8,8 @@ import { toast } from "sonner";
 
 import { Avatar, StatusDot } from "@/components/ui";
 import { useLanguage } from "@/providers/language-provider";
+import { useLiveAstrologer } from "@/providers/realtime-provider";
+import { isPresent } from "@/lib/realtime";
 import { ASTROLOGERS_I18N } from "@/lib/astrologers-translations";
 import { cn, coinsPerMinute, formatNumber } from "@/lib/utils";
 import {
@@ -43,8 +45,9 @@ export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic })
     : (astrologer.modes_enabled[0] ?? "chat");
   const price = coinsPerMinute(rates, primaryMode);
 
-  const isOnline = availability.is_online;
-  const isBusy = availability.is_busy;
+  const live = useLiveAstrologer(astrologer.id);
+  const isOnline = live ? isPresent(live) : availability.is_online;
+  const isBusy = live ? live.availability.is_busy : availability.is_busy;
 
   const [bookmarked, setBookmarked] = React.useState(false);
 
@@ -211,35 +214,53 @@ export function AstrologerCard({ astrologer }: { astrologer: AstrologerPublic })
         </div>
 
 
-        {/* Action Buttons: Chat + Call (both open the profile/booking page) */}
-        <div className="mt-auto grid grid-cols-2 gap-2 pt-1">
-          <button
-            type="button"
-            aria-label={`${t.chat} — ${astrologer.display_name}`}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              router.push(`${href}?mode=chat`);
-            }}
-            className="flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white py-2.5 px-3 text-sm font-semibold tracking-wide shadow-[0_6px_16px_-6px_rgba(217,119,6,0.55)] transition-all duration-200 hover:brightness-105 active:scale-[0.97]"
-          >
-            <MessageSquare className="size-4 shrink-0" />
-            <span>{t.chat}</span>
-          </button>
-          <button
-            type="button"
-            aria-label={`${t.call} — ${astrologer.display_name}`}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              router.push(`${href}?mode=call`);
-            }}
-            className="flex items-center justify-center gap-1.5 rounded-full bg-ink-950 text-white py-2.5 px-3 text-sm font-semibold tracking-wide shadow-xs transition-all duration-200 hover:bg-black active:scale-[0.97]"
-          >
-            <Phone className="size-4 shrink-0" />
-            <span>{t.call}</span>
-          </button>
-        </div>
+        {/* Action Buttons: Chat + Call when online, Profile view when offline */}
+        {isOnline ? (
+          <div className="mt-auto grid grid-cols-2 gap-2 pt-1">
+            <button
+              type="button"
+              aria-label={`${t.chat} — ${astrologer.display_name}`}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                router.push(`${href}?mode=chat`);
+              }}
+              className="flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white py-2.5 px-3 text-sm font-semibold tracking-wide shadow-[0_6px_16px_-6px_rgba(217,119,6,0.55)] transition-all duration-200 hover:brightness-105 active:scale-[0.97]"
+            >
+              <MessageSquare className="size-4 shrink-0" />
+              <span>{t.chat}</span>
+            </button>
+            <button
+              type="button"
+              aria-label={`${t.call} — ${astrologer.display_name}`}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                router.push(`${href}?mode=call`);
+              }}
+              className="flex items-center justify-center gap-1.5 rounded-full bg-ink-950 text-white py-2.5 px-3 text-sm font-semibold tracking-wide shadow-xs transition-all duration-200 hover:bg-black active:scale-[0.97]"
+            >
+              <Phone className="size-4 shrink-0" />
+              <span>{t.call}</span>
+            </button>
+          </div>
+        ) : (
+          <div className="mt-auto pt-1">
+            <button
+              type="button"
+              aria-label={`${t.offlineBadge} — ${astrologer.display_name}`}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                router.push(href);
+              }}
+              className="w-full flex items-center justify-center gap-2 rounded-full border border-black/10 bg-slate-100/90 text-slate-700 py-2.5 px-3 text-sm font-semibold transition-all duration-200 hover:bg-slate-200/90 active:scale-[0.98]"
+            >
+              <span className="size-2 rounded-full bg-slate-400" />
+              <span>{t.offlineBadge} · {language === "bn" ? "প্রোফাইল দেখুন" : language === "hi" ? "प्रोफ़ाइल देखें" : "View Profile"}</span>
+            </button>
+          </div>
+        )}
       </div>
     </Link>
   );

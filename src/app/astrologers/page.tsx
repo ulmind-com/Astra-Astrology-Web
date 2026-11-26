@@ -135,11 +135,17 @@ function TrendingSidebar({
             );
             const skills = a.skills.slice(0, 2).map((s) => SKILL_LABELS[s]).join(" · ");
             const rating = a.rating?.average ? a.rating.average.toFixed(1) : "5.0";
+            const isOnline = a.availability?.is_online;
             return (
               <li key={a.id}>
                 <div className="flex items-center gap-3 rounded-2xl border border-black/[0.06] bg-white px-3 py-2.5 shadow-2xs transition-colors hover:border-brand-400/40 hover:bg-brand-50/40">
                   <Link href={href} className="relative shrink-0">
-                    <span className="block size-11 overflow-hidden rounded-full ring-2 ring-emerald-400/70 ring-offset-2 ring-offset-white">
+                    <span
+                      className={cn(
+                        "block size-11 overflow-hidden rounded-full ring-2 ring-offset-2 ring-offset-white",
+                        isOnline ? "ring-emerald-400/70" : "ring-slate-300/80",
+                      )}
+                    >
                       <Avatar
                         src={a.profile_image_url}
                         name={a.display_name}
@@ -162,12 +168,21 @@ function TrendingSidebar({
                       <span className="font-normal text-muted-foreground">· {formatCoins(price)}/min</span>
                     </p>
                   </div>
-                  <Link
-                    href={`${href}?mode=chat`}
-                    className="shrink-0 rounded-full border border-brand-500/40 bg-brand-50 px-3.5 py-1.5 text-xs font-bold text-brand-800 transition-colors hover:border-brand-500 hover:bg-brand-500 hover:text-white"
-                  >
-                    {chatLabel}
-                  </Link>
+                  {isOnline ? (
+                    <Link
+                      href={`${href}?mode=chat`}
+                      className="shrink-0 rounded-full border border-brand-500/40 bg-brand-50 px-3.5 py-1.5 text-xs font-bold text-brand-800 transition-colors hover:border-brand-500 hover:bg-brand-500 hover:text-white"
+                    >
+                      {chatLabel}
+                    </Link>
+                  ) : (
+                    <Link
+                      href={href}
+                      className="shrink-0 rounded-full border border-black/10 bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-200"
+                    >
+                      {language === "bn" ? "অফলাইন" : language === "hi" ? "ऑफ़लाइन" : "Offline"}
+                    </Link>
+                  )}
                 </div>
               </li>
             );

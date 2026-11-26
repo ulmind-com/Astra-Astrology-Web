@@ -98,7 +98,13 @@ const COPY: Record<"en" | "bn" | "hi", Strings> = {
 const MAX_GUESTS = 8;
 const MINUTES = [15, 20, 30, 45, 60];
 
-export function MilanLauncher({ astrologer }: { astrologer: AstrologerPublic }) {
+export function MilanLauncher({
+  astrologer,
+  isOnline,
+}: {
+  astrologer: AstrologerPublic;
+  isOnline?: boolean;
+}) {
   const router = useRouter();
   const { user } = useAuth();
   const { language } = useLanguage();
@@ -118,7 +124,7 @@ export function MilanLauncher({ astrologer }: { astrologer: AstrologerPublic }) 
   const offered =
     astrologer.modes_enabled.includes("video") ||
     astrologer.modes_enabled.includes("call");
-  const online = astrologer.availability.is_online;
+  const online = isOnline !== undefined ? isOnline : astrologer.availability.is_online;
 
   const create = useMutation({
     mutationFn: () =>
