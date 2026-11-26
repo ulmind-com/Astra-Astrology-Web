@@ -15,7 +15,7 @@ interface DivinLinkGlowBrandProps {
 
 export function DivinLinkGlowBrand({
   className,
-  source = "/logo.svg",
+  source = "/logo.png",
   bloom = 0.4,
   clickBurst = true,
 }: DivinLinkGlowBrandProps) {
@@ -47,8 +47,8 @@ export function DivinLinkGlowBrand({
         instanceRef.current = null;
       }
 
-      // Exact implementation requested by user:
-      // logo('#brand', { source: '/logo.svg', preserveColors: true, bloom: 0.4, clickBurst: true })
+      // Exact implementation requested by user with logo.png:
+      // logo('#brand', { source: '/logo.png', preserveColors: true, bloom: 0.4, clickBurst: true })
       const inst = logo(target, {
         source,
         preserveColors: true,
@@ -72,6 +72,12 @@ export function DivinLinkGlowBrand({
       });
 
       instanceRef.current = inst;
+
+      // Ensure canvas is positioned visibly above the background
+      const canvas = target.querySelector("canvas");
+      if (canvas) {
+        canvas.style.zIndex = "1";
+      }
 
       inst.on("charge:release", () => {
         setIsCharged(false);
@@ -211,7 +217,7 @@ export function DivinLinkGlowBrand({
 
           {/* 
             Container ID #brand matching user specification:
-            logo('#brand', { source: '/logo.svg', preserveColors: true, bloom: 0.4, clickBurst: true })
+            logo('#brand', { source: '/logo.png', preserveColors: true, bloom: 0.4, clickBurst: true })
           */}
           <div
             id="brand"
@@ -220,15 +226,15 @@ export function DivinLinkGlowBrand({
             style={{ touchAction: "none" }}
           >
             {/* Subtle background cosmic nebula gradient inside canvas */}
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-950/40 via-[#180e07]/80 to-[#0d0703]" />
+            <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-950/40 via-[#180e07]/80 to-[#0d0703]" />
 
             {/* Interactive hint overlay */}
-            <div className="pointer-events-none absolute bottom-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-black/60 backdrop-blur-md px-3.5 py-1 text-[10px] sm:text-xs font-medium text-amber-200/90 border border-amber-500/20 shadow-md">
+            <div className="pointer-events-none absolute bottom-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-black/60 backdrop-blur-md px-3.5 py-1 text-[10px] sm:text-xs font-medium text-amber-200/90 border border-amber-500/20 shadow-md z-10">
               {t.hint}
             </div>
 
             {/* Corner 3D Orbit Badge */}
-            <div className="pointer-events-none absolute top-3.5 right-3.5 flex items-center gap-1.5 rounded-full bg-black/50 backdrop-blur-md px-2.5 py-1 text-[10px] font-semibold text-amber-400 border border-amber-500/20">
+            <div className="pointer-events-none absolute top-3.5 right-3.5 flex items-center gap-1.5 rounded-full bg-black/50 backdrop-blur-md px-2.5 py-1 text-[10px] font-semibold text-amber-400 border border-amber-500/20 z-10">
               <Orbit className="size-3 animate-spin" style={{ animationDuration: "8s" }} />
               <span>3D Orbit Enabled</span>
             </div>
