@@ -20,6 +20,7 @@ export interface KundliPrefill {
 }
 
 const KEY = "divinlink_kundli_prefill";
+const RASHI_KEY = "divinlink_rashi_prefill";
 const TTL_MS = 10 * 60 * 1000;
 
 export function saveKundliPrefill(data: KundliPrefill): void {
@@ -35,6 +36,27 @@ export function takeKundliPrefill(): KundliPrefill | null {
     const raw = sessionStorage.getItem(KEY);
     if (!raw) return null;
     sessionStorage.removeItem(KEY);
+    const parsed = JSON.parse(raw) as { at: number; data: KundliPrefill };
+    if (!parsed?.data || Date.now() - parsed.at > TTL_MS) return null;
+    return parsed.data;
+  } catch {
+    return null;
+  }
+}
+
+export function saveRashiPrefill(data: KundliPrefill): void {
+  try {
+    sessionStorage.setItem(RASHI_KEY, JSON.stringify({ at: Date.now(), data }));
+  } catch {
+    /* storage unavailable */
+  }
+}
+
+export function takeRashiPrefill(): KundliPrefill | null {
+  try {
+    const raw = sessionStorage.getItem(RASHI_KEY);
+    if (!raw) return null;
+    sessionStorage.removeItem(RASHI_KEY);
     const parsed = JSON.parse(raw) as { at: number; data: KundliPrefill };
     if (!parsed?.data || Date.now() - parsed.at > TTL_MS) return null;
     return parsed.data;

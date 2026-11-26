@@ -79,6 +79,7 @@ import {
   FeatureDisabledAlert,
   FeatureCoinModal,
 } from "@/components/astrology/feature-pricing-banner";
+import { takeRashiPrefill } from "@/lib/kundli-prefill";
 import type {
   AstrologyLanguage,
   AyanamsaType,
@@ -497,6 +498,57 @@ export default function RashiCalculatorPage() {
     if (next.timezoneOffset != null) setTimezone(String(next.timezoneOffset));
   }, []);
 
+  const submitFormRef = React.useRef<HTMLFormElement>(null);
+  const pendingHomeRun = React.useRef(false);
+
+  // Birth details typed into the home page's birth bar win over saved profile
+  const applyHomePrefill = React.useCallback(() => {
+    const prefill = takeRashiPrefill();
+    if (!prefill) return;
+    hasAutoFilled.current = true;
+    setName(prefill.name || "");
+    setGender(prefill.gender || "male");
+    setDay(String(prefill.day).padStart(2, "0"));
+    setMonth(String(prefill.month).padStart(2, "0"));
+    setYear(String(prefill.year));
+    if (prefill.time) {
+      setHour(String(prefill.time.hour).padStart(2, "0"));
+      setMinute(String(prefill.time.minute).padStart(2, "0"));
+      setSecond("00");
+      setPeriod(prefill.time.period);
+    } else {
+      setHour("12");
+      setMinute("00");
+      setSecond("00");
+      setPeriod("PM");
+    }
+    if (prefill.place) {
+      handlePlaceSelected(prefill.place);
+    }
+    pendingHomeRun.current = true;
+  }, [handlePlaceSelected]);
+
+  // Read on the first frame, and cancel on cleanup
+  React.useEffect(() => {
+    const frame = requestAnimationFrame(applyHomePrefill);
+    return () => cancelAnimationFrame(frame);
+  }, [applyHomePrefill]);
+
+  // Run calculation straight away when free
+  React.useEffect(() => {
+    if (!pendingHomeRun.current || !selectedPlace || !day || !month || !year) return;
+    pendingHomeRun.current = false;
+    const timer = window.setTimeout(() => {
+      const access = checkAccess("rashi_calculator");
+      if (access.allowed && access.requiredCoins === 0) {
+        submitFormRef.current?.requestSubmit();
+      } else {
+        submitFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [selectedPlace, day, month, year, checkAccess]);
+
   const getDecimalCoords = () => {
     if (!latDeg && !lonDeg) {
       // Default fallback coordinates if user leaves advanced empty
@@ -514,11 +566,9 @@ export default function RashiCalculatorPage() {
   const handleCalculate = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
-    // Validation
-    if (!name.trim()) {
-      toast.error(t.toastNameRequired);
-      return;
-    }
+    // Validation - graceful fallback so user is never blocked
+    const effectiveName =
+      name.trim() || (language === "bn" ? "জিজ্ঞাসু" : language === "hi" ? "जिज्ञासु" : "Seeker");
 
     // 1. Mandatory Date of Birth (DOB) Validation
     const d = parseInt(day, 10);
@@ -567,7 +617,7 @@ export default function RashiCalculatorPage() {
       : getDecimalCoords();
 
     const payload: RashiCalculatePayload = {
-      name: name.trim() || "Seeker",
+      name: effectiveName,
       gender,
       day: d,
       month: m,
@@ -815,7 +865,7 @@ export default function RashiCalculatorPage() {
             </div>
           )}
 
-          <form onSubmit={handleCalculate} className="space-y-4">
+          <form ref={submitFormRef} onSubmit={handleCalculate} className="space-y-4">
             {/* Name and Gender */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">

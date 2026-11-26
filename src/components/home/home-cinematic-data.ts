@@ -314,9 +314,14 @@ export const COPY = {
   account: { en: "My account", bn: "আমার অ্যাকাউন্ট", hi: "मेरा खाता" },
   signIn: { en: "Sign in", bn: "সাইন ইন", hi: "साइन इन" },
 
-  // Birth bar (the hero's Free Kundli form)
+  // Birth bar (the hero's Free Kundli & Rashi Calculator form)
   barTab: { en: "Free Janam Kundli", bn: "ফ্রি জন্ম কুণ্ডলী", hi: "मुफ़्त जन्म कुंडली" },
   barTabSub: { en: "Lagna, Navamsa & Dasha in seconds", bn: "কয়েক সেকেন্ডে লগ্ন, নবাংশ ও দশা", hi: "कुछ सेकंड में लग्न, नवांश और दशा" },
+  barTabKundli: { en: "Free Kundli", bn: "ফ্রি জন্ম কুণ্ডলী", hi: "मुफ़्त जन्म कुंडली" },
+  barTabKundliSub: { en: "Lagna, Navamsa & Dasha", bn: "লগ্ন, নবাংশ ও দশা", hi: "लग्न, नवांश और दशा" },
+  barTabRashi: { en: "Know Your Rashi", bn: "আমার রাশি জানুন", hi: "अपनी राशि जानें" },
+  barTabRashiSub: { en: "Moon sign & Nakshatra", bn: "চন্দ্র রাশি ও নক্ষত্র", hi: "चंद्र राशि व नक्षत्र" },
+  generateRashi: { en: "Calculate Rashi", bn: "রাশি গণনা করুন", hi: "राशि की गणना करें" },
   nameLabel: { en: "Name", bn: "নাম", hi: "नाम" },
   addName: { en: "Who is it for?", bn: "কার জন্য?", hi: "किसके लिए?" },
   namePlaceholder: { en: "Full name", bn: "পুরো নাম", hi: "पूरा नाम" },

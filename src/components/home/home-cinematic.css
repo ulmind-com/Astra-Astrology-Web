@@ -752,7 +752,88 @@ html:has(.dl-home) body {
 
 /* Birth bar additions ------------------------------------------------ */
 
-/* The little tab that names the bar, sitting on its top-left edge. */
+/* Tab strip sitting on top-left edge of the search bar */
+.dl-search-tabs {
+  position: absolute;
+  left: 20px;
+  bottom: calc(100% - 1px);
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 6px;
+  max-width: calc(100% - 40px);
+  z-index: 5;
+  pointer-events: auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.dl-search-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.dl-search-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px 10px;
+  border-radius: 14px 14px 0 0;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-bottom: none;
+  background: rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #6a5e54;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.dl-search-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.88);
+  color: #1f160e;
+}
+
+.dl-search-tab-btn.is-active {
+  background: #ffffff;
+  color: #1f160e;
+  border-color: rgba(230, 220, 210, 0.7);
+  border-bottom: none;
+  box-shadow: 0 -4px 16px rgba(120, 70, 60, 0.08);
+  font-weight: 600;
+  padding-bottom: 11px;
+  transform: translateY(1px);
+}
+
+.dl-search-tab-btn .dl-tab-icon {
+  flex: 0 0 15px;
+  width: 15px;
+  height: 15px;
+  color: #f39419;
+  transition: transform 0.25s ease;
+}
+
+.dl-search-tab-btn.is-active .dl-tab-icon {
+  transform: scale(1.12);
+}
+
+.dl-search-tab-btn strong {
+  font-weight: 700;
+  color: #1f160e;
+}
+
+.dl-search-tab-btn .dl-tab-desc {
+  color: #8c827a;
+  font-size: 11.5px;
+  font-weight: 400;
+  margin-left: 2px;
+}
+
+.dl-search-tab-btn.is-active .dl-tab-desc {
+  color: #63574c;
+}
+
+/* The little tab that names the bar, sitting on its top-left edge (legacy fallback) */
 .dl-search-tab {
   position: absolute;
   left: 22px;
@@ -1749,6 +1830,22 @@ html:has(.dl-home) body {
 
   .dl-cal-grid {
     grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+
+  .dl-search-tabs {
+    left: 10px;
+    max-width: calc(100% - 20px);
+    gap: 4px;
+  }
+
+  .dl-search-tab-btn {
+    padding: 7px 12px 8px;
+    font-size: 11.5px;
+    gap: 6px;
+  }
+
+  .dl-search-tab-btn .dl-tab-desc {
+    display: none;
   }
 
   .dl-search-tab {

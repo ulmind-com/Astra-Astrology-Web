@@ -18,9 +18,14 @@ import { OurServicesSection } from "@/components/home/our-services-section";
 import { INITIAL_TOP_ASTROLOGERS, TopAstrologersSection } from "@/components/home/top-astrologers-section";
 import { VedicFestivalsSection } from "@/components/home/vedic-festivals-section";
 import { CinematicHero } from "@/components/home/home-cinematic-hero";
-import { CinematicSearch, EMPTY_BIRTH, type BirthState } from "@/components/home/home-cinematic-search";
+import {
+  CinematicSearch,
+  EMPTY_BIRTH,
+  type BirthState,
+  type SearchMode,
+} from "@/components/home/home-cinematic-search";
 import { SiteFooter } from "@/components/layout/site-footer";
-import { saveKundliPrefill } from "@/lib/kundli-prefill";
+import { saveKundliPrefill, saveRashiPrefill } from "@/lib/kundli-prefill";
 import { astrologerApi, cmsApi, type HomePageCMSData } from "@/lib/api";
 import { useLanguage } from "@/providers/language-provider";
 import type { CourseListItem, PaginatedAstrologers } from "@/types";
@@ -87,9 +92,11 @@ export function HomePageClient({
     [],
   );
 
-  const generateKundli = () => {
+  const [searchMode, setSearchMode] = React.useState<SearchMode>("kundli");
+
+  const handleSearchSubmit = (mode: SearchMode) => {
     if (!birth.dob) return;
-    saveKundliPrefill({
+    const prefillData = {
       name: birth.name.trim(),
       gender: birth.gender,
       day: birth.dob.getDate(),
@@ -100,8 +107,15 @@ export function HomePageClient({
           ? null
           : { hour: birth.hour, minute: birth.minute, period: birth.period },
       place: birth.place,
-    });
-    router.push("/kundli");
+    };
+
+    if (mode === "rashi") {
+      saveRashiPrefill(prefillData);
+      router.push("/rashi-calculator");
+    } else {
+      saveKundliPrefill(prefillData);
+      router.push("/kundli");
+    }
   };
 
   return (
@@ -118,7 +132,9 @@ export function HomePageClient({
             language={language}
             value={birth}
             onChange={setBirth}
-            onSubmit={generateKundli}
+            mode={searchMode}
+            onModeChange={setSearchMode}
+            onSubmit={handleSearchSubmit}
           />
         </CinematicHero>
 

@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Clock,
   MapPin,
+  MoonStar,
   Send,
   Sparkles,
   UserRound,
@@ -145,14 +146,35 @@ function TimeInputs({
   );
 }
 
+export type SearchMode = "kundli" | "rashi";
+
 interface BarProps {
   language: AstrologyLanguage;
   value: BirthState;
   onChange: (next: BirthState) => void;
-  onSubmit: () => void;
+  onSubmit: (mode: SearchMode) => void;
+  mode?: SearchMode;
+  onModeChange?: (mode: SearchMode) => void;
 }
 
-export function CinematicSearch({ language, value, onChange, onSubmit }: BarProps) {
+export function CinematicSearch({
+  language,
+  value,
+  onChange,
+  onSubmit,
+  mode: controlledMode,
+  onModeChange,
+}: BarProps) {
+  const [internalMode, setInternalMode] = React.useState<SearchMode>("kundli");
+  const mode = controlledMode ?? internalMode;
+  const setMode = React.useCallback(
+    (next: SearchMode) => {
+      setInternalMode(next);
+      onModeChange?.(next);
+    },
+    [onModeChange],
+  );
+
   const rootRef = React.useRef<HTMLDivElement>(null);
   const nameInputRef = React.useRef<HTMLInputElement>(null);
   const [panel, setPanel] = React.useState<Panel>(null);
@@ -220,11 +242,17 @@ export function CinematicSearch({ language, value, onChange, onSubmit }: BarProp
   };
 
   const submit = () => {
-    if (!value.name.trim()) {
-      setHint(tr(COPY.needName, language));
-      setRaised("name");
-      setPanel("name");
-      return;
+    let effectiveName = value.name.trim();
+    if (!effectiveName) {
+      if (mode === "rashi") {
+        effectiveName = language === "bn" ? "জিজ্ঞাসু" : language === "hi" ? "जिज्ञासु" : "Seeker";
+        onChange({ ...value, name: effectiveName });
+      } else {
+        setHint(tr(COPY.needName, language));
+        setRaised("name");
+        setPanel("name");
+        return;
+      }
     }
     if (!value.dob) {
       setHint(tr(COPY.needDob, language));
@@ -238,7 +266,7 @@ export function CinematicSearch({ language, value, onChange, onSubmit }: BarProp
       return;
     }
     setPanel(null);
-    onSubmit();
+    onSubmit(mode);
   };
 
   // Calendar grid, Monday first.
@@ -266,11 +294,35 @@ export function CinematicSearch({ language, value, onChange, onSubmit }: BarProp
     `dl-field${extra}${raised === key ? " is-raised" : ""}`;
 
   return (
-    <div ref={rootRef} className="dl-search" role="search" aria-label={tr(COPY.barTab, language)}>
-      <div className="dl-search-tab" aria-hidden>
-        <Sparkles strokeWidth={1.8} />
-        <strong>{tr(COPY.barTab, language)}</strong>
-        <span>{tr(COPY.barTabSub, language)}</span>
+    <div
+      ref={rootRef}
+      className="dl-search"
+      role="search"
+      aria-label={tr(mode === "rashi" ? COPY.barTabRashi : COPY.barTabKundli, language)}
+    >
+      <div className="dl-search-tabs" role="tablist" aria-label="Calculator Mode">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mode === "kundli"}
+          className={`dl-search-tab-btn ${mode === "kundli" ? "is-active" : ""}`}
+          onClick={() => setMode("kundli")}
+        >
+          <Sparkles className="dl-tab-icon" strokeWidth={1.8} />
+          <strong>{tr(COPY.barTabKundli, language)}</strong>
+          <span className="dl-tab-desc">{tr(COPY.barTabKundliSub, language)}</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mode === "rashi"}
+          className={`dl-search-tab-btn ${mode === "rashi" ? "is-active" : ""}`}
+          onClick={() => setMode("rashi")}
+        >
+          <MoonStar className="dl-tab-icon" strokeWidth={1.8} />
+          <strong>{tr(COPY.barTabRashi, language)}</strong>
+          <span className="dl-tab-desc">{tr(COPY.barTabRashiSub, language)}</span>
+        </button>
       </div>
 
       <button type="button" className={fieldClass("name")} onClick={() => open("name")} aria-expanded={panel === "name"}>
@@ -316,9 +368,17 @@ export function CinematicSearch({ language, value, onChange, onSubmit }: BarProp
         </span>
       </button>
 
-      <button type="button" className="dl-send" onClick={submit} aria-label={tr(COPY.generate, language)} title={tr(COPY.generate, language)}>
+      <button
+        type="button"
+        className="dl-send"
+        onClick={submit}
+        aria-label={tr(mode === "rashi" ? COPY.generateRashi : COPY.generate, language)}
+        title={tr(mode === "rashi" ? COPY.generateRashi : COPY.generate, language)}
+      >
         <Send strokeWidth={1.7} />
-        <span className="dl-send-text">{tr(COPY.generate, language)}</span>
+        <span className="dl-send-text">
+          {tr(mode === "rashi" ? COPY.generateRashi : COPY.generate, language)}
+        </span>
       </button>
 
       {/* ---------- Name ---------- */}
