@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import * as React from "react";
@@ -9,28 +10,12 @@ import {
   Mountain,
   Star,
   RotateCw,
-  Crown,
-  Heart,
-  CircleDot,
-  Sun,
-  Moon,
-  Compass,
-  Scale,
-  Orbit,
-  Eye,
-  BookOpen,
-  Shield,
-  Hourglass,
-  Zap,
-  Globe,
-  Feather,
-  Gem,
-  KeyRound,
 } from "lucide-react";
 import type { DrawnCardDetail, TarotCard } from "@/types/tarot";
 import type { AstrologyLanguage } from "@/types";
 import { CARD_NAMES_LOCALIZED, ELEMENTS_LOCALIZED } from "@/lib/tarot-translations";
 
+import { TarotIllustration } from "./tarot-illustrations";
 import "./tarot-card-3d.css";
 
 interface TarotCardViewProps {
@@ -92,65 +77,6 @@ function formatArcanaCrest(card: TarotCard): string {
   }
   const suitLabel = (card.suit || "MINOR").toUpperCase();
   return `${suitLabel} · ${card.number}`;
-}
-
-function renderCardEmblem(card: TarotCard) {
-  const cls = "w-9 h-9 sm:w-11 sm:h-11 drop-shadow-xs";
-  if (card.arcana === "major") {
-    const num = card.number;
-    switch (num) {
-      case 0:
-        return <Feather className={`${cls} text-sky-700`} />;
-      case 1:
-        return <Sparkles className={`${cls} text-amber-600`} />;
-      case 2:
-        return <Moon className={`${cls} text-indigo-700`} />;
-      case 3:
-        return <Gem className={`${cls} text-emerald-700`} />;
-      case 4:
-        return <Crown className={`${cls} text-amber-700`} />;
-      case 5:
-        return <KeyRound className={`${cls} text-amber-800`} />;
-      case 6:
-        return <Heart className={`${cls} text-rose-600`} />;
-      case 7:
-        return <Compass className={`${cls} text-amber-700`} />;
-      case 8:
-        return <Flame className={`${cls} text-orange-600`} />;
-      case 9:
-        return <Eye className={`${cls} text-amber-800`} />;
-      case 10:
-        return <Orbit className={`${cls} text-amber-600`} />;
-      case 11:
-        return <Scale className={`${cls} text-amber-800`} />;
-      case 12:
-        return <Hourglass className={`${cls} text-sky-700`} />;
-      case 13:
-        return <Shield className={`${cls} text-stone-700`} />;
-      case 14:
-        return <Droplets className={`${cls} text-cyan-700`} />;
-      case 15:
-        return <Zap className={`${cls} text-rose-700`} />;
-      case 16:
-        return <Zap className={`${cls} text-amber-600`} />;
-      case 17:
-        return <Star className={`${cls} text-sky-600`} />;
-      case 18:
-        return <Moon className={`${cls} text-cyan-800`} />;
-      case 19:
-        return <Sun className={`${cls} text-amber-600`} />;
-      case 20:
-        return <BookOpen className={`${cls} text-amber-700`} />;
-      case 21:
-        return <Globe className={`${cls} text-emerald-700`} />;
-      default:
-        return <Crown className={`${cls} text-amber-700`} />;
-    }
-  }
-  if (card.suit === "wands") return <Flame className={`${cls} text-amber-600`} />;
-  if (card.suit === "cups") return <Heart className={`${cls} text-cyan-700`} />;
-  if (card.suit === "swords") return <Wind className={`${cls} text-sky-700`} />;
-  return <CircleDot className={`${cls} text-emerald-700`} />;
 }
 
 export function TarotCardView({
@@ -303,15 +229,6 @@ export function TarotCardView({
     ? "सीधा (सकारात्मक)"
     : "Upright";
 
-  const auraGlowClass =
-    cardData.element === "Fire"
-      ? "bg-amber-400"
-      : cardData.element === "Water"
-      ? "bg-cyan-400"
-      : cardData.element === "Air"
-      ? "bg-sky-300"
-      : "bg-emerald-400";
-
   return (
     <div className={`flex flex-col items-center select-none ${className}`}>
       {/* Position Header above the Card */}
@@ -338,38 +255,24 @@ export function TarotCardView({
             className="tarot-3d-flipper shadow-[0_14px_34px_rgba(64,31,7,0.14)] group-hover:shadow-[0_24px_52px_rgba(169,92,12,0.28)]"
             data-flipped={isFlipped ? "true" : "false"}
           >
-            {/* ==================== FRONT FACE (Luxury Warm Parchment & 3D Foil) ==================== */}
+            {/* ==================== FRONT FACE (Luxury Warm Parchment + Illustrated Tarot Art) ==================== */}
             <div
-              className={`tarot-3d-face p-3.5 sm:p-4 flex flex-col justify-between border-2 bg-gradient-to-b from-[#fffdfa] via-[#fff7ed] to-[#fdebd6] ${
+              className={`tarot-3d-face p-3 sm:p-3.5 flex flex-col justify-between border-2 bg-gradient-to-b from-[#fffdfa] via-[#fff7ed] to-[#fdebd6] ${
                 isReversed ? "border-amber-600" : "border-amber-400"
               }`}
             >
-              {/* Clipped Background Filigree + Specular Glare + Holographic Gold Foil */}
+              {/* Clipped Specular Glare + Holographic Gold Foil */}
               <div className="tarot-3d-clip">
-                {/* Engraved Sacred Mandala Watermark */}
-                <svg
-                  viewBox="0 0 200 200"
-                  aria-hidden="true"
-                  className="absolute inset-0 m-auto w-[86%] h-[86%] text-amber-500/[0.11] pointer-events-none"
-                >
-                  <circle cx="100" cy="100" r="88" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="3 4" />
-                  <circle cx="100" cy="100" r="68" fill="none" stroke="currentColor" strokeWidth="0.8" />
-                  <polygon points="100,22 167,138 33,138" fill="none" stroke="currentColor" strokeWidth="0.9" />
-                  <polygon points="100,178 167,62 33,62" fill="none" stroke="currentColor" strokeWidth="0.9" />
-                  <circle cx="100" cy="100" r="24" fill="none" stroke="currentColor" strokeWidth="0.9" />
-                </svg>
-
                 <div className="tarot-3d-foil" />
                 <div className="tarot-3d-glare" />
               </div>
 
               {/* Elevated Inner Gold Filigree Frame & Corner Crescent Brackets */}
               <div className="tarot-z-frame absolute inset-1.5 rounded-xl border border-amber-400/65 pointer-events-none" />
-              <div className="tarot-z-frame absolute inset-2.5 rounded-lg border border-dashed border-amber-400/40 pointer-events-none" />
-              <div className="tarot-z-frame absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-amber-600 rounded-tl pointer-events-none" />
-              <div className="tarot-z-frame absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-amber-600 rounded-tr pointer-events-none" />
-              <div className="tarot-z-frame absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-amber-600 rounded-bl pointer-events-none" />
-              <div className="tarot-z-frame absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-amber-600 rounded-br pointer-events-none" />
+              <div className="tarot-z-frame absolute top-2 left-2 w-2.5 h-2.5 border-t-2 border-l-2 border-amber-600 rounded-tl pointer-events-none" />
+              <div className="tarot-z-frame absolute top-2 right-2 w-2.5 h-2.5 border-t-2 border-r-2 border-amber-600 rounded-tr pointer-events-none" />
+              <div className="tarot-z-frame absolute bottom-2 left-2 w-2.5 h-2.5 border-b-2 border-l-2 border-amber-600 rounded-bl pointer-events-none" />
+              <div className="tarot-z-frame absolute bottom-2 right-2 w-2.5 h-2.5 border-b-2 border-r-2 border-amber-600 rounded-br pointer-events-none" />
 
               {/* Top Floating Badge Row (Z-Plane 18px) */}
               <div className="tarot-z-mid flex items-center justify-between relative z-10 gap-1">
@@ -385,28 +288,14 @@ export function TarotCardView({
                 )}
               </div>
 
-              {/* Center Hero Sacred Medallion (Deepest Z-Plane 28px Parallax Pop) */}
-              <div className="tarot-z-hero flex-1 flex flex-col items-center justify-center my-2 relative z-10">
-                <div className={`absolute w-28 h-28 rounded-full blur-xl opacity-35 ${auraGlowClass}`} />
-
-                {/* Orbiting Celestial Ring */}
-                <div
-                  aria-hidden="true"
-                  className="absolute w-28 h-28 sm:w-32 sm:h-32 rounded-full border border-dashed border-amber-500/45 animate-spin [animation-duration:28s] motion-reduce:animate-none pointer-events-none"
-                />
-
-                {/* Raised 3D Gold Medallion */}
-                <div
-                  className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 border-amber-500/90 bg-gradient-to-br from-[#fffefb] via-[#fff2db] to-[#fadcb4] flex items-center justify-center shadow-[0_10px_24px_rgba(180,100,14,0.22),inset_0_2px_6px_rgba(255,255,255,0.9)] transition-transform duration-300 group-hover:scale-105 relative ${
-                    isReversed ? "rotate-180" : ""
-                  }`}
-                >
-                  <div className="absolute inset-1.5 rounded-full border border-amber-400/50 pointer-events-none" />
-                  {renderCardEmblem(cardData)}
+              {/* Center Painted Rider-Waite / Vedic Tarot Artwork Window (Z-Plane 28px) */}
+              <div className="tarot-z-hero flex-1 flex flex-col my-1.5 relative z-10 min-h-0">
+                <div className="relative flex-1 w-full min-h-[120px] rounded-xl shadow-[0_10px_24px_rgba(36,22,16,0.25)] transition-transform duration-300 group-hover:scale-[1.02]">
+                  <TarotIllustration card={cardData} isReversed={isReversed} />
                 </div>
 
                 {isReversed && (
-                  <div className="mt-2 flex items-center gap-1 text-[9px] font-bold text-rose-800 bg-rose-50/95 border border-rose-200 px-2.5 py-0.5 rounded-full shadow-2xs">
+                  <div className="self-center -mt-2.5 z-20 flex items-center gap-1 text-[9px] font-bold text-rose-900 bg-rose-50/95 border border-rose-300 px-2.5 py-0.5 rounded-full shadow-xs">
                     <RotateCw className="w-2.5 h-2.5 rotate-180" />
                     <span>
                       {language === "bn" ? "উল্টো" : language === "hi" ? "उल्टा" : "Reversed"}
@@ -417,16 +306,16 @@ export function TarotCardView({
 
               {/* Bottom Title & Cosmic Tags (Z-Plane 18px) */}
               <div className="tarot-z-mid relative z-10 text-center">
-                <h4 className="font-serif font-bold text-stone-950 text-xs sm:text-sm tracking-wide leading-tight group-hover:text-amber-800 transition-colors">
+                <h4 className="font-serif font-bold text-stone-950 text-xs sm:text-sm tracking-wide leading-tight truncate group-hover:text-amber-800 transition-colors">
                   {localizedName}
                 </h4>
-                <p className="text-[10px] text-stone-600 font-semibold mt-1 leading-tight">
+                <p className="text-[10px] text-stone-600 font-semibold mt-0.5 leading-tight truncate">
                   {cardData.astrology}
                 </p>
 
-                <div className="mt-2 flex items-center justify-center gap-1.5 flex-wrap">
+                <div className="mt-1.5 flex items-center justify-center gap-1 flex-nowrap">
                   <span
-                    className={`text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full border font-bold flex items-center gap-1 shadow-2xs ${
+                    className={`text-[9px] px-1.5 py-0.5 rounded-full border font-bold inline-flex items-center gap-0.5 shadow-2xs whitespace-nowrap ${
                       ELEMENT_COLORS[cardData.element] || "border-stone-200 bg-stone-50 text-stone-700"
                     }`}
                   >
@@ -435,7 +324,7 @@ export function TarotCardView({
                   </span>
 
                   <span
-                    className={`text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full border font-bold ${
+                    className={`text-[9px] px-1.5 py-0.5 rounded-full border font-bold whitespace-nowrap ${
                       isReversed
                         ? "border-rose-200 bg-rose-50 text-rose-800"
                         : "border-emerald-200 bg-emerald-50 text-emerald-800"
@@ -447,31 +336,30 @@ export function TarotCardView({
               </div>
             </div>
 
-            {/* ==================== BACK FACE (Mahogany-Rosewood Temple Velvet + 24K Shatkona) ==================== */}
-            <div className="tarot-3d-face tarot-3d-face--back p-4 flex flex-col items-center justify-center border-2 border-amber-400/90 bg-gradient-to-br from-[#26140e] via-[#402116] to-[#1a0d09] text-amber-200 shadow-lg">
+            {/* ==================== BACK FACE (Royal Burgundy Velvet & 24K Gold Mandala Back) ==================== */}
+            <div className="tarot-3d-face tarot-3d-face--back overflow-hidden border-2 border-amber-400/90 bg-[#1a0d10] shadow-lg flex items-center justify-center">
+              <img
+                src="/images/tarot/card-back.webp"
+                alt=""
+                loading="lazy"
+                draggable={false}
+                className="tarot-art-breath absolute inset-0 w-full h-full object-cover"
+              />
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60 pointer-events-none"
+              />
               <div className="tarot-3d-clip">
                 <div className="tarot-3d-foil" />
                 <div className="tarot-3d-glare" />
               </div>
 
-              {/* Sacred Shatkona Geometry Mandala */}
-              <div className="tarot-z-frame absolute inset-2.5 rounded-xl border border-amber-400/45 flex items-center justify-center pointer-events-none">
-                <svg viewBox="0 0 160 160" aria-hidden="true" className="w-[84%] h-[84%] text-amber-300/40">
-                  <circle cx="80" cy="80" r="68" fill="none" stroke="currentColor" strokeWidth="1" />
-                  <circle cx="80" cy="80" r="56" fill="none" stroke="currentColor" strokeWidth="0.7" strokeDasharray="3 3" />
-                  <polygon points="80,18 134,112 26,112" fill="none" stroke="currentColor" strokeWidth="1.1" />
-                  <polygon points="80,142 134,48 26,48" fill="none" stroke="currentColor" strokeWidth="1.1" />
-                </svg>
-              </div>
-
-              <div className="tarot-z-hero relative z-10 flex flex-col items-center text-center">
-                <div className="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-300/80 flex items-center justify-center mb-2.5 shadow-[0_0_20px_rgba(243,148,25,0.4)]">
-                  <Sparkles className="w-6 h-6 text-amber-300 animate-pulse" />
-                </div>
-                <span className="font-serif text-xs font-bold text-amber-200 tracking-[0.2em] uppercase">
+              <div className="tarot-z-hero relative z-10 flex flex-col items-center text-center px-3 py-2.5 rounded-2xl bg-[#1a0b0e]/75 backdrop-blur-sm border border-amber-300/60 shadow-[0_8px_28px_rgba(0,0,0,0.6)]">
+                <Sparkles className="w-5 h-5 text-amber-300 animate-pulse mb-1" />
+                <span className="font-serif text-[11px] font-bold text-amber-200 tracking-[0.2em] uppercase">
                   DivinLink
                 </span>
-                <p className="text-[10px] text-amber-300/90 font-medium mt-1">
+                <p className="text-[10px] text-amber-200/90 font-medium mt-0.5">
                   {language === "bn" ? "স্পর্শ করুন" : language === "hi" ? "स्पर्श करें" : "Tap to reveal"}
                 </p>
               </div>

@@ -39,6 +39,7 @@ import {
   FeatureCoinModal,
 } from "@/components/astrology/feature-pricing-banner";
 import { TarotCardView } from "@/components/tarot/tarot-card-view";
+import { TarotFanDeck } from "@/components/tarot/tarot-fan-deck";
 import { TarotLanternHero } from "@/components/tarot/tarot-lantern-hero";
 import { TarotSpreadLayout } from "@/components/tarot/tarot-spread-layout";
 import { TarotReadingDetail } from "@/components/tarot/tarot-reading-detail";
@@ -694,85 +695,58 @@ export default function TarotPage() {
                 </div>
 
                 {/* Selected Cards Preview Slots */}
-                <div className="p-4 rounded-2xl border border-amber-300/80 bg-amber-50/50 flex items-center justify-center gap-3 flex-wrap">
+                <div className="p-5 rounded-3xl border border-amber-300/80 bg-gradient-to-b from-amber-50/80 to-white flex items-center justify-center gap-3.5 sm:gap-4 flex-wrap shadow-2xs">
                   {Array.from({ length: targetCardCount }).map((_, slotIdx) => {
                     const pickedIndex = selectedCardIndices[slotIdx];
                     const isPicked = pickedIndex !== undefined;
                     return (
-                      <div
+                      <button
                         key={slotIdx}
-                        className={`w-16 h-24 sm:w-20 sm:h-28 rounded-xl border-2 flex flex-col items-center justify-center p-2 text-center transition-all ${
+                        type="button"
+                        onClick={() => isPicked && handleToggleCardPick(pickedIndex)}
+                        title={isPicked ? "Click to remove card" : undefined}
+                        className={`relative overflow-hidden w-18 h-28 sm:w-22 sm:h-32 rounded-xl border-2 flex flex-col items-center justify-center p-2 text-center transition-all ${
                           isPicked
-                            ? "border-amber-500 bg-white shadow-md ring-2 ring-amber-400/20"
-                            : "border-dashed border-stone-300 bg-white/80 text-stone-400"
+                            ? "border-amber-400 bg-[#1a0b0e] text-amber-200 shadow-lg ring-2 ring-amber-400/45 hover:-translate-y-1 cursor-pointer"
+                            : "border-dashed border-stone-300 bg-white/80 text-stone-400 cursor-default"
                         }`}
                       >
                         {isPicked ? (
                           <>
-                            <Sparkles className="w-4 h-4 text-amber-500 mb-1" />
-                            <span className="text-[10px] font-bold text-amber-900">
-                              {language === "bn" ? `কার্ড #${slotIdx + 1}` : language === "hi" ? `कार्ड #${slotIdx + 1}` : `Card #${slotIdx + 1}`}
-                            </span>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src="/images/tarot/card-back-fan.webp"
+                              alt=""
+                              draggable={false}
+                              className="absolute inset-0 w-full h-full object-cover opacity-90 pointer-events-none"
+                            />
+                            <div className="relative z-10 px-2 py-0.5 rounded-full bg-black/70 border border-amber-300/75 text-[10px] font-serif font-bold text-amber-200 tracking-wide shadow-sm">
+                              #{slotIdx + 1}
+                            </div>
                           </>
                         ) : (
-                          <span className="text-[10px] text-stone-400 font-medium">
-                            {language === "bn" ? `স্থান ${slotIdx + 1}` : language === "hi" ? `स्थान ${slotIdx + 1}` : `Slot ${slotIdx + 1}`}
-                          </span>
+                          <>
+                            <span className="text-xs font-serif font-bold text-stone-300 mb-0.5">
+                              {slotIdx + 1}
+                            </span>
+                            <span className="text-[9px] text-stone-400 font-medium">
+                              {language === "bn" ? `স্থান` : language === "hi" ? `स्थान` : `Slot`}
+                            </span>
+                          </>
                         )}
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
 
-                {/* The 78-card Celestial Fanned Grid (Mahogany-Rosewood & Temple Gold Card Backs) */}
-                <div
-                  className={`p-6 rounded-3xl border border-stone-200 bg-white shadow-sm relative overflow-hidden transition-all duration-500 ${
-                    isShuffling ? "scale-98 opacity-50" : "scale-100 opacity-100"
-                  }`}
-                >
-                  <p className="text-xs text-center text-stone-600 font-medium mb-4">
-                    {language === "bn"
-                      ? "আপনার অন্তর্নিহিত অনুভূতি দিয়ে নিচের যেকোনো কার্ড স্পর্শ করে বেছে নিন:"
-                      : language === "hi"
-                      ? "अपनी सहज अंतर्ज्ञान से नीचे दिए गए किसी भी कार्ड को स्पर्श करके चुनें:"
-                      : "Touch any cards below to channel your intuitive subconscious energy:"}
-                  </p>
-
-                  <div className="grid grid-cols-6 sm:grid-cols-9 md:grid-cols-13 gap-1.5 sm:gap-2 justify-items-center max-h-[460px] overflow-y-auto p-3 scrollbar-thin scrollbar-thumb-stone-200">
-                    {Array.from({ length: 78 }).map((_, cardIndex) => {
-                      const pickOrder = selectedCardIndices.indexOf(cardIndex);
-                      const isChosen = pickOrder !== -1;
-                      return (
-                        <button
-                          key={cardIndex}
-                          type="button"
-                          onClick={() => handleToggleCardPick(cardIndex)}
-                          className={`tarot-pick-card w-10 h-16 sm:w-12 sm:h-20 rounded-xl border-2 hover:-translate-y-2 hover:scale-105 hover:shadow-lg flex flex-col items-center justify-center cursor-pointer relative ${
-                            isChosen
-                              ? "border-amber-500 bg-gradient-to-br from-[#f7c325] via-[#f39419] to-amber-600 text-stone-950 -translate-y-2.5 scale-105 shadow-md ring-2 ring-amber-400/50"
-                              : "border-amber-400/75 bg-gradient-to-br from-[#2c1912] via-[#4a2618] to-[#21120c] text-amber-200 hover:border-amber-300 shadow-2xs"
-                          }`}
-                        >
-                          <div
-                            aria-hidden="true"
-                            className={`absolute inset-1 rounded-lg border pointer-events-none ${
-                              isChosen ? "border-stone-950/25" : "border-amber-300/30"
-                            }`}
-                          />
-                          <div
-                            className={`relative z-10 w-5 h-5 rounded-full border flex items-center justify-center text-[9px] font-serif ${
-                              isChosen
-                                ? "border-stone-900/40 bg-white/40 text-stone-950 font-extrabold"
-                                : "border-amber-300/45 text-amber-200"
-                            }`}
-                          >
-                            {isChosen ? pickOrder + 1 : "✦"}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+                {/* Curved Interactive 3D Fanned Arc Tarot Deck */}
+                <TarotFanDeck
+                  selectedIndices={selectedCardIndices}
+                  targetCount={targetCardCount}
+                  isShuffling={isShuffling}
+                  onTogglePick={handleToggleCardPick}
+                  language={language}
+                />
 
                 {/* Action button to reveal reading */}
                 <div className="text-center pt-4">

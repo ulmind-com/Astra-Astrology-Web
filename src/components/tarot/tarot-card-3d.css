@@ -1,5 +1,5 @@
 /* ==========================================================================
-   DivinLink Sacred Tarot Card — True 3D Parallax, Specular Foil & Flip Physics
+   DivinLink Sacred Tarot Card — True 3D Parallax, Specular Foil & Living Motion
    ========================================================================== */
 
 .tarot-3d-stage {
@@ -65,9 +65,9 @@
   transition: opacity 0.25s ease;
   background: radial-gradient(
     circle 180px at var(--gx, 50%) var(--gy, 50%),
-    rgba(255, 248, 224, 0.52) 0%,
-    rgba(243, 148, 25, 0.2) 38%,
-    rgba(247, 195, 37, 0.06) 62%,
+    rgba(255, 248, 224, 0.54) 0%,
+    rgba(243, 148, 25, 0.22) 38%,
+    rgba(247, 195, 37, 0.08) 62%,
     transparent 85%
   );
   mix-blend-mode: soft-light;
@@ -78,14 +78,14 @@
   position: absolute;
   inset: -40%;
   pointer-events: none;
-  opacity: calc(var(--glare-op, 0) * 0.65);
+  opacity: calc(var(--glare-op, 0) * 0.68);
   transition: opacity 0.3s ease;
   background: linear-gradient(
     115deg,
     transparent 34%,
-    rgba(247, 195, 37, 0.18) 46%,
-    rgba(255, 250, 232, 0.34) 50%,
-    rgba(243, 148, 25, 0.16) 54%,
+    rgba(247, 195, 37, 0.2) 46%,
+    rgba(255, 250, 232, 0.38) 50%,
+    rgba(243, 148, 25, 0.18) 54%,
     transparent 66%
   );
   transform: translate3d(var(--foil-x, 0%), var(--foil-y, 0%), 0);
@@ -104,12 +104,73 @@
   transform: translateZ(28px);
 }
 
-/* Step 3 tactile deck pick card gleam */
+/* Living Painted Artwork Motion Layers */
+@keyframes tarotArtBreath {
+  0%,
+  100% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: scale(1.045) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes tarotRingOrbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes tarotSparkFloat {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(4px) scale(0.8);
+  }
+  50% {
+    opacity: 0.95;
+    transform: translateY(-7px) scale(1.2);
+  }
+}
+
+@keyframes tarotSunbeamSweep {
+  0% {
+    transform: translateX(-130%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(190%) skewX(-18deg);
+  }
+}
+
+.tarot-art-breath {
+  animation: tarotArtBreath 12s ease-in-out infinite;
+  will-change: transform;
+}
+
+.tarot-ring-orbit {
+  animation: tarotRingOrbit 44s linear infinite;
+  will-change: transform;
+}
+
+.tarot-spark-float {
+  animation: tarotSparkFloat 4.2s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.tarot-sunbeam-sweep {
+  animation: tarotSunbeamSweep 8.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Step 3 tactile deck pick card gleam (no position override so desktop absolute fan stays arched) */
 .tarot-pick-card {
-  position: relative;
   overflow: hidden;
   transition:
-    transform 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    bottom 0.28s cubic-bezier(0.22, 1, 0.36, 1),
     border-color 0.22s ease,
     box-shadow 0.25s ease;
 }
@@ -123,7 +184,7 @@
   background: linear-gradient(
     125deg,
     transparent 20%,
-    rgba(255, 240, 194, 0.35) 50%,
+    rgba(255, 240, 194, 0.42) 50%,
     transparent 80%
   );
   transform: translateX(-110%);
@@ -144,7 +205,13 @@
   }
   .tarot-3d-glare,
   .tarot-3d-foil,
-  .tarot-pick-card::after {
+  .tarot-pick-card::after,
+  .tarot-sunbeam-sweep {
     display: none;
+  }
+  .tarot-art-breath,
+  .tarot-ring-orbit,
+  .tarot-spark-float {
+    animation: none !important;
   }
 }
