@@ -93,10 +93,10 @@
 }
 
 .tarot-stack .L.chakra {
-  left: calc(840px * var(--u));
-  top: calc(115px * var(--u));
-  width: calc(560px * var(--u));
-  height: calc(560px * var(--u));
+  left: calc(860px * var(--u));
+  top: calc(130px * var(--u));
+  width: calc(520px * var(--u));
+  height: calc(520px * var(--u));
 }
 
 .tarot-stack .L.arcade {
@@ -128,7 +128,7 @@
 
 .tarot-stack--dark .L.chakra img {
   opacity: 0.14;
-  filter: sepia(0.4) saturate(1.2);
+  filter: sepia(0.45) brightness(0.62) saturate(0.75) drop-shadow(0 0 12px rgba(243, 148, 25, 0.22));
 }
 
 .tarot-stack--dark .L.statue img {
@@ -145,8 +145,8 @@
 }
 
 .tarot-stack--lit .L.chakra img {
-  opacity: 0.44;
-  filter: brightness(1.18) saturate(1.35);
+  opacity: 0.42;
+  filter: sepia(0.28) brightness(0.95) saturate(0.95) contrast(1.06) drop-shadow(0 0 32px rgba(243, 148, 25, 0.5));
 }
 
 .tarot-stack--lit .L.arcade img {

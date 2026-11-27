@@ -424,7 +424,7 @@ export function TarotLanternHero({
       </div>
       <div className="L chakra" data-k="-0.14" ref={registerLayer("chakra", stackIdx)}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/zodiac-wheel-gold.webp" alt="" />
+        <img src="/logo.png" alt="" fetchPriority={id === "dark" ? "high" : undefined} />
       </div>
       <div className="L arcade" data-k="0.175" ref={registerLayer("arcade", stackIdx)}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
