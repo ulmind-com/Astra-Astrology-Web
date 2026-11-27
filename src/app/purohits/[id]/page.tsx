@@ -30,6 +30,7 @@ import { Avatar, Badge, Button, Card, CardBody, CardHeader, CardTitle, LoadingBl
 import { purohitApi, walletApi, type PujaBookingData, type PurohitData, type PurohitPujaItem } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/providers/auth-provider";
+import { usePlatform } from "@/providers/realtime-provider";
 
 const RZP_SRC = "https://checkout.razorpay.com/v1/checkout.js";
 
@@ -58,6 +59,8 @@ export default function PurohitDetailPage() {
   const { user, isSignedIn } = useAuth();
 
   const idOrSlug = params.id;
+  const platform = usePlatform();
+  const coinsPerRupee = platform?.coins_per_rupee ?? 1;
 
   // Selected puja for booking modal
   const [selectedPuja, setSelectedPuja] = React.useState<PurohitPujaItem | null>(null);
@@ -200,6 +203,7 @@ export default function PurohitDetailPage() {
       router.push(`/login?redirect=/purohits/${idOrSlug}`);
       return;
     }
+    void loadRazorpay();
     setSelectedPuja(puja);
   };
 
@@ -215,8 +219,9 @@ export default function PurohitDetailPage() {
       toast.error("গোত্র প্রদান করুন (অজানা থাকলে কাশ্যপ লিখুন)");
       return;
     }
-    if (paymentMethod === "wallet" && walletBalanceCoins < Math.ceil(selectedPuja.price_inr)) {
-      toast.error(`ওয়ালেটে পর্যাপ্ত কয়েন নেই (প্রয়োজন: ${Math.ceil(selectedPuja.price_inr)} কয়েন)`);
+    const coinsRequired = Math.max(1, Math.round(selectedPuja.price_inr * coinsPerRupee));
+    if (paymentMethod === "wallet" && walletBalanceCoins < coinsRequired) {
+      toast.error(`ওয়ালেটে পর্যাপ্ত কয়েন নেই (প্রয়োজন: ${coinsRequired} কয়েন)`);
       return;
     }
 
@@ -588,7 +593,10 @@ export default function PurohitDetailPage() {
                   }`}
                 >
                   <div>Wallet Coins</div>
-                  <div className="text-[10px] font-normal opacity-75">ব্যালেন্স: {walletBalanceCoins} কয়েন</div>
+                  <div className="text-[10px] font-normal opacity-75">
+                    ব্যালেন্স: {walletBalanceCoins} / প্রয়োজন:{" "}
+                    {Math.max(1, Math.round(selectedPuja.price_inr * coinsPerRupee))}
+                  </div>
                 </button>
               </div>
             </div>
@@ -611,13 +619,25 @@ export default function PurohitDetailPage() {
                 className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs"
               >
                 <Video className="size-3.5 mr-1" />
-                {paymentMethod === "wallet"
-                  ? `ওয়ালেট থেকে পে ও রুমে যান (${Math.ceil(selectedPuja.price_inr)} কয়েন)`
+                {isVerifyingPayment
+                  ? "পেমেন্ট যাচাই ও রুম খুলছে..."
+                  : paymentMethod === "wallet"
+                  ? `ওয়ালেট থেকে পে ও রুমে যান (${Math.max(1, Math.round(selectedPuja.price_inr * coinsPerRupee))} কয়েন)`
                   : `পেমেন্ট করুন ও রুমে যান (₹${selectedPuja.price_inr})`}
               </Button>
             </div>
           </form>
         </Modal>
+      )}
+
+      {isVerifyingPayment && (
+        <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 text-white">
+          <div className="rounded-2xl bg-stone-900 border border-amber-500/40 px-6 py-5 text-center space-y-2 shadow-2xl max-w-xs w-full">
+            <Flame className="size-8 text-amber-400 animate-pulse mx-auto" />
+            <p className="text-sm font-bold text-amber-200">পেমেন্ট যাচাই চলছে...</p>
+            <p className="text-xs text-stone-400">আপনাকে সরাসরি পুরোহিতজীর লাইভ পূজা রুমে নেওয়া হচ্ছে।</p>
+          </div>
+        </div>
       )}
     </div>
   );

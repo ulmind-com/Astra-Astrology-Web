@@ -34,13 +34,13 @@ import { CallRoom } from "@/components/call/call-room";
 import { Badge, Button, LoadingBlock } from "@/components/ui";
 import { purohitApi, type PujaBookingData } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
-import { useAuth } from "@/providers/auth-provider";
+import { useRequireAuth } from "@/providers/auth-provider";
 import { useRealtime } from "@/providers/realtime-provider";
 
 export default function DevoteePujaVideoRoomPage() {
   const params = useParams<{ bookingId: string }>();
   const router = useRouter();
-  const { user } = useAuth();
+  const { ready, user } = useRequireAuth();
   const queryClient = useQueryClient();
   const bookingId = params?.bookingId || "";
 
@@ -52,7 +52,7 @@ export default function DevoteePujaVideoRoomPage() {
   const [remainingSeconds, setRemainingSeconds] = React.useState<number | null>(null);
   const { onPujaEvent } = useRealtime();
 
-  // Fetch Booking Details & Video Token (polls every 3s while awaiting Purohit accept)
+  // Fetch Booking Details & Video Token (waits for auth hydration so user_id matches token)
   const {
     data: booking,
     isLoading,
@@ -64,7 +64,7 @@ export default function DevoteePujaVideoRoomPage() {
       const res = await purohitApi.getRoomToken(bookingId);
       return ((res as any)?.data !== undefined ? (res as any).data : res) as PujaBookingData;
     },
-    enabled: Boolean(bookingId),
+    enabled: ready && Boolean(bookingId),
     refetchOnWindowFocus: true,
     refetchInterval: (q) => (q.state.data?.status === "confirmed" ? 3000 : false),
     staleTime: 10 * 1000,
@@ -140,7 +140,7 @@ export default function DevoteePujaVideoRoomPage() {
     router.push("/purohits");
   };
 
-  if (isLoading) {
+  if (!ready || isLoading) {
     return (
       <div className="min-h-screen bg-[#070B12] flex items-center justify-center text-white p-4">
         <LoadingBlock label="পবিত্র ভার্চুয়াল মন্দির ও হোম চেম্বারে সংযোগ স্থাপন করা হচ্ছে..." />
@@ -148,7 +148,7 @@ export default function DevoteePujaVideoRoomPage() {
     );
   }
 
-  if (error || !booking || !booking.zego_token || !booking.zego_app_id) {
+  if (error || !booking || !booking.zego_token || !booking.zego_app_id || !user?.id) {
     return (
       <div className="min-h-screen bg-[#070B12] flex flex-col items-center justify-center p-6 text-center text-white">
         <div className="size-16 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4 animate-pulse">
@@ -228,8 +228,8 @@ export default function DevoteePujaVideoRoomPage() {
     app_id: booking.zego_app_id,
     token: booking.zego_token,
     room_id: booking.room_id,
-    user_id: user?.id || (isPurohit ? "purohit" : `devotee_${booking.id.slice(0, 8)}`),
-    user_name: user?.full_name || (isPurohit ? `Purohit ${booking.purohit_name}` : booking.sankalpa_name || "ভক্ত"),
+    user_id: user.id,
+    user_name: user.full_name || (isPurohit ? `Purohit ${booking.purohit_name}` : booking.sankalpa_name || "ভক্ত"),
   };
 
   return (
@@ -377,6 +377,7 @@ export default function DevoteePujaVideoRoomPage() {
               className="w-full h-full object-cover"
               audioOnly={false}
               group={false}
+              stayInRoomOnPeerLeave={true}
             />
           </div>
 
