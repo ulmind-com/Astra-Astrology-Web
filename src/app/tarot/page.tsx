@@ -291,16 +291,12 @@ export default function TarotPage() {
 
   return (
     <div className="min-h-screen bg-[#fbf6f3] text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
-      <SiteHeader />
+      <SiteHeader overlay />
 
       {/* =========================================================================
-          1. LANTERN ARCADE INTERACTIVE HERO (Warm DivinLink Calm Glow Theme)
+          1. LANTERN ARCADE INTERACTIVE HERO (Full-Bleed under Dynamic Notch)
       ========================================================================= */}
-      <TarotLanternHero
-        title={t.title}
-        onMainTabChange={setMainTab}
-        onGoToStep={(nextStep) => setStep(nextStep)}
-      />
+      <TarotLanternHero title={t.title} />
 
       <main id="tarot-workspace" className="mx-auto max-w-6xl px-3 sm:px-6 pb-8 flex-1 w-full space-y-8 scroll-mt-20">
         {/* Architectural Sanctuary Threshold Card overlapping Hero horizon smoothly */}

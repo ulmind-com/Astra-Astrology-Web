@@ -11,16 +11,8 @@ const ARCADE_IMG =
 const STATUE_IMG =
   "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20261127_092859_29381ed5-b5f0-4343-8606-3fc0734faea9.png&w=2048&q=85";
 
-interface CorniceNavItem {
-  label: string;
-  dataX: number;
-  action: () => void;
-}
-
 interface TarotLanternHeroProps {
   title: string;
-  onMainTabChange: (tab: "reading" | "explorer") => void;
-  onGoToStep: (step: 1 | 2 | 3) => void;
 }
 
 function measureBaseRatio(fontShorthand: string, fallback: number): number {
@@ -46,16 +38,11 @@ function clamp(v: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, v));
 }
 
-export function TarotLanternHero({
-  title,
-  onMainTabChange,
-  onGoToStep,
-}: TarotLanternHeroProps) {
+export function TarotLanternHero({ title }: TarotLanternHeroProps) {
   const stageRef = React.useRef<HTMLElement>(null);
   const frameRef = React.useRef<HTMLDivElement>(null);
   const orbRef = React.useRef<HTMLDivElement>(null);
   const monogramRef = React.useRef<HTMLAnchorElement>(null);
-  const navRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
   const layerRefs = React.useRef<{
     sky: HTMLDivElement[];
     chakra: HTMLDivElement[];
@@ -73,7 +60,6 @@ export function TarotLanternHero({
     halfVis: 720,
     vw: 1440,
     vh: 720,
-    montBase: 0.78,
     italBase: 0.68,
   });
 
@@ -87,63 +73,7 @@ export function TarotLanternHero({
     reducedMotion: false,
   });
 
-  const corniceItems: CorniceNavItem[] = React.useMemo(
-    () => [
-      {
-        label: "oracle",
-        dataX: 135.7,
-        action: () => {
-          onMainTabChange("reading");
-          document.getElementById("tarot-workspace")?.scrollIntoView({ behavior: "smooth" });
-        },
-      },
-      {
-        label: "spreads",
-        dataX: 242.6,
-        action: () => {
-          onMainTabChange("reading");
-          onGoToStep(1);
-          document.getElementById("tarot-workspace")?.scrollIntoView({ behavior: "smooth" });
-        },
-      },
-      {
-        label: "intent",
-        dataX: 360.7,
-        action: () => {
-          onMainTabChange("reading");
-          onGoToStep(2);
-          document.getElementById("tarot-workspace")?.scrollIntoView({ behavior: "smooth" });
-        },
-      },
-      {
-        label: "draw",
-        dataX: 1013.9,
-        action: () => {
-          onMainTabChange("reading");
-          onGoToStep(3);
-          document.getElementById("tarot-workspace")?.scrollIntoView({ behavior: "smooth" });
-        },
-      },
-      {
-        label: "78 deck",
-        dataX: 1115.2,
-        action: () => {
-          onMainTabChange("explorer");
-          document.getElementById("tarot-workspace")?.scrollIntoView({ behavior: "smooth" });
-        },
-      },
-      {
-        label: "sanctum",
-        dataX: 1229.8,
-        action: () => {
-          document.getElementById("tarot-workspace")?.scrollIntoView({ behavior: "smooth" });
-        },
-      },
-    ],
-    [onGoToStep, onMainTabChange],
-  );
-
-  // Compute responsive 1440x960 architecture metrics & exact font baselines
+  // Compute responsive 1440x960 architecture metrics & monogram baseline
   const runLayout = React.useCallback(() => {
     const stage = stageRef.current;
     const frame = frameRef.current;
@@ -151,18 +81,18 @@ export function TarotLanternHero({
 
     const rect = stage.getBoundingClientRect();
     const vw = Math.max(320, rect.width || window.innerWidth);
-    const vh = Math.max(420, rect.height || window.innerHeight);
+    const vh = Math.max(460, rect.height || window.innerHeight);
 
     const extra = Math.min(250, Math.max(0, (vw / vh - 1.6) * 400));
     const u = Math.max(vw / (1440 + extra), vh / 960);
     const fx = (vw - 1440 * u) / 2;
-    const fy = Math.min(0, Math.max(vh - 960 * u, vh - 900 * u, -90 * u));
+    // Keep arch crowns visible cleanly under the 52px floating overlay header without clipping top or pool edge
+    const fy = Math.min(0, Math.max(vh - 960 * u, vh - 900 * u, -42 * u));
     const halfVis = vw / (2 * u);
 
-    const montBase = measureBaseRatio('italic 200 100px "Montserrat", system-ui, sans-serif', 0.78);
     const italBase = measureBaseRatio('normal 400 100px "Italianno", Georgia, serif', 0.68);
 
-    metricsRef.current = { u, fx, fy, halfVis, vw, vh, montBase, italBase };
+    metricsRef.current = { u, fx, fy, halfVis, vw, vh, italBase };
 
     stage.style.setProperty("--u", String(u));
     frame.style.transform = `translate3d(${fx}px, ${fy}px, 0)`;
@@ -170,52 +100,18 @@ export function TarotLanternHero({
     const radius = Math.min(320 * u, 0.45 * Math.min(vw, 1.2 * vh));
     stage.style.setProperty("--r", `${radius.toFixed(2)}px`);
 
-    const isSmall = vw < 820 || vw / vh < 1.05;
-    if (isSmall) {
-      const fs = clamp(vw / 30, 11.5, 15);
-      stage.style.setProperty("--nu", `${fs / 19.2}`);
-      const widths = navRefs.current.map((el) => {
-        if (!el) return 0;
-        el.style.fontSize = `${fs}px`;
-        return el.getBoundingClientRect().width;
-      });
-      const total = widths.reduce((sum, w) => sum + w, 0);
-      const gap = clamp((vw - 24 - total) / 5, 6, 26);
-      let cursorX = (vw - total - 5 * gap) / 2;
-      navRefs.current.forEach((el, idx) => {
-        if (!el) return;
-        el.style.left = `${cursorX.toFixed(2)}px`;
-        el.style.top = "22px";
-        cursorX += widths[idx] + gap;
-      });
-    } else {
-      const nu = clamp(u, 0.62, 1.6);
-      stage.style.setProperty("--nu", `${nu}`);
-      const fontSize = 19.2 * nu;
-      const baselineY = Math.max(fy + 54.1 * u, 16 + fontSize * montBase);
-      const top = baselineY - fontSize * montBase;
-
-      navRefs.current.forEach((el, idx) => {
-        const item = corniceItems[idx];
-        if (!el || !item) return;
-        el.style.fontSize = "";
-        el.style.left = `${(fx + item.dataX * u).toFixed(2)}px`;
-        el.style.top = `${top.toFixed(2)}px`;
-      });
-    }
-
-    // Script monogram resting on the pool edge below the plinth (frame x=725, y=791)
+    // Script monogram resting cleanly at pool threshold above the Sanctuary card
     const mono = monogramRef.current;
     if (mono) {
       const qfs = Math.max(vh < 420 ? 28 : 34, 50 * u);
       mono.style.fontSize = `${qfs.toFixed(2)}px`;
       mono.style.left = `${(fx + 725 * u).toFixed(2)}px`;
-      const monoTop = Math.min(fy + 791 * u + 0.56 * qfs - italBase * qfs, vh - qfs - 48);
+      const monoTop = Math.min(fy + 791 * u + 0.56 * qfs - italBase * qfs, vh - qfs - 62);
       mono.style.top = `${monoTop.toFixed(2)}px`;
     }
-  }, [corniceItems]);
+  }, []);
 
-  // Image readiness detection that also catches SSR pre-loaded/cached <img> elements
+  // SSR-safe image readiness detection + 2.5s failsafe
   React.useEffect(() => {
     const frame = frameRef.current;
     if (!frame) {
@@ -282,6 +178,8 @@ export function TarotLanternHero({
       io.observe(stageEl);
     }
 
+    const lastMouseRef = { x: -1, y: -1 };
+
     const onPointerMove = (e: PointerEvent) => {
       const stage = stageRef.current;
       if (!stage) return;
@@ -296,6 +194,8 @@ export function TarotLanternHero({
       }
 
       if (e.pointerType === "mouse") {
+        lastMouseRef.x = e.clientX;
+        lastMouseRef.y = e.clientY;
         const insideHero =
           localX >= 0 && localX <= rect.width && localY >= 0 && localY <= rect.height;
         setHasPointer(insideHero);
@@ -315,8 +215,6 @@ export function TarotLanternHero({
       motionRef.current.targetY = (e.clientY - rect.top - fy) / u;
     };
 
-    const onLeave = () => setHasPointer(false);
-    const lastMouseRef = { x: -1, y: -1 };
     const onScroll = () => {
       const stage = stageRef.current;
       if (!stage || lastMouseRef.x < 0) return;
@@ -329,15 +227,9 @@ export function TarotLanternHero({
       setHasPointer(inside);
     };
 
-    const onPointerMoveTracked = (e: PointerEvent) => {
-      if (e.pointerType === "mouse") {
-        lastMouseRef.x = e.clientX;
-        lastMouseRef.y = e.clientY;
-      }
-      onPointerMove(e);
-    };
+    const onLeave = () => setHasPointer(false);
 
-    window.addEventListener("pointermove", onPointerMoveTracked, { passive: true });
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("pointerdown", onPointerDown, { passive: true });
     window.addEventListener("scroll", onScroll, { passive: true });
     document.addEventListener("pointerleave", onLeave);
@@ -400,7 +292,7 @@ export function TarotLanternHero({
     return () => {
       window.cancelAnimationFrame(rafId);
       window.removeEventListener("resize", runLayout);
-      window.removeEventListener("pointermove", onPointerMoveTracked);
+      window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("scroll", onScroll);
       document.removeEventListener("pointerleave", onLeave);
@@ -447,34 +339,16 @@ export function TarotLanternHero({
     >
       <h1 className="sr-only">{title}</h1>
 
-      <div className="tarot-hero-top-bridge" aria-hidden="true" />
-
       <div ref={frameRef} className="tarot-lantern-frame" aria-hidden="true">
         {renderStack("dark", 0)}
         {renderStack("lit", 1)}
         <div className="tarot-lantern-glow" />
       </div>
 
+      <div className="tarot-hero-notch-scrim" aria-hidden="true" />
       <div className="tarot-hero-cream-fade" aria-hidden="true" />
 
-      {/* Six-word cornice navigation aligned cleanly along the arch lintel */}
-      <nav className="tarot-cornice-nav" aria-label="Tarot Sanctuary Navigation">
-        {corniceItems.map((item, idx) => (
-          <button
-            key={item.label}
-            ref={(el) => {
-              navRefs.current[idx] = el;
-            }}
-            type="button"
-            onClick={item.action}
-            className="tarot-cornice-link"
-          >
-            {item.label}
-          </button>
-        ))}
-      </nav>
-
-      {/* Italianno calligraphic script monogram resting at the oasis pool edge */}
+      {/* Italianno calligraphic DivinLink monogram resting at the oasis pool edge */}
       <a
         ref={monogramRef}
         href="#tarot-workspace"

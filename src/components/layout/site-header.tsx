@@ -10,6 +10,6 @@
 
 import { AstroyogiHeader } from "@/components/home/astroyogi-header";
 
-export function SiteHeader() {
-  return <AstroyogiHeader />;
+export function SiteHeader({ overlay = false }: { overlay?: boolean } = {}) {
+  return <AstroyogiHeader overlay={overlay} />;
 }

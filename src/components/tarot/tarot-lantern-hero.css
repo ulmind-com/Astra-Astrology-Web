@@ -31,28 +31,11 @@
   --my: 470px;
   position: relative;
   width: 100%;
-  height: clamp(460px, calc(100svh - 150px), 760px);
+  height: clamp(520px, calc(100svh - 64px), 820px);
   overflow: hidden;
   touch-action: pan-y;
   background: var(--bg);
   user-select: none;
-}
-
-/* Soft ivory mist along very top edge so the bright SiteHeader meets the temple lintel naturally */
-.tarot-hero-top-bridge {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 22px;
-  z-index: 2;
-  pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgba(251, 246, 243, 0.42) 0%,
-    rgba(251, 246, 243, 0.12) 45%,
-    transparent 100%
-  );
 }
 
 .tarot-lantern-frame {
@@ -222,42 +205,20 @@
   );
 }
 
-/* Cornice navigation */
-.tarot-cornice-nav {
+/* Soft ambient edge shading right behind the floating notch header */
+.tarot-hero-notch-scrim {
   position: absolute;
-  inset: 0;
-  z-index: 3;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 76px;
   pointer-events: none;
-}
-
-.tarot-cornice-link {
-  position: absolute;
-  pointer-events: auto;
-  font-family: "Montserrat", system-ui, sans-serif;
-  font-style: italic;
-  font-weight: 200;
-  text-transform: lowercase;
-  letter-spacing: 0.005em;
-  line-height: 1;
-  color: var(--ink);
-  opacity: 0.94;
-  text-decoration: none;
-  white-space: nowrap;
-  font-size: calc(19.2px * var(--nu));
-  padding: 7px 4px;
-  margin: -7px 0 0 -4px;
-  transition: opacity 0.3s ease, color 0.3s ease;
-  text-shadow: 0 1px 12px rgba(36, 22, 16, 0.72);
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-}
-
-.tarot-cornice-link:hover,
-.tarot-cornice-link:focus-visible {
-  opacity: 1;
-  color: #fdeee3;
-  outline: none;
+  z-index: 2;
+  background: linear-gradient(
+    to bottom,
+    rgba(24, 14, 10, 0.45) 0%,
+    rgba(24, 14, 10, 0) 100%
+  );
 }
 
 /* Italianno script DivinLink monogram resting on the pool edge below plinth */
