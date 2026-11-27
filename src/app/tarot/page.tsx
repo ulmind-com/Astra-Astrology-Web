@@ -124,6 +124,12 @@ export default function TarotPage() {
   // Load initial spreads and deck
   React.useEffect(() => {
     let mounted = true;
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("tab") === "explorer") {
+        setMainTab("explorer");
+      }
+    }
     async function loadTarotInitialData() {
       try {
         setLoadingData(true);
@@ -695,7 +701,7 @@ export default function TarotPage() {
                 </div>
 
                 {/* Selected Cards Preview Slots */}
-                <div className="p-5 rounded-3xl border border-amber-300/80 bg-gradient-to-b from-amber-50/80 to-white flex items-center justify-center gap-3.5 sm:gap-4 flex-wrap shadow-2xs">
+                <div className="p-5 rounded-3xl border border-[#d4af37]/40 bg-gradient-to-b from-[#1b1018] via-[#120a11] to-[#0c050a] flex items-center justify-center gap-3.5 sm:gap-4 flex-wrap shadow-inner">
                   {Array.from({ length: targetCardCount }).map((_, slotIdx) => {
                     const pickedIndex = selectedCardIndices[slotIdx];
                     const isPicked = pickedIndex !== undefined;
@@ -705,10 +711,10 @@ export default function TarotPage() {
                         type="button"
                         onClick={() => isPicked && handleToggleCardPick(pickedIndex)}
                         title={isPicked ? "Click to remove card" : undefined}
-                        className={`relative overflow-hidden w-18 h-28 sm:w-22 sm:h-32 rounded-xl border-2 flex flex-col items-center justify-center p-2 text-center transition-all ${
+                        className={`relative overflow-hidden w-18 h-28 sm:w-22 sm:h-32 rounded-xl border flex flex-col items-center justify-center p-2 text-center transition-all ${
                           isPicked
-                            ? "border-amber-400 bg-[#1a0b0e] text-amber-200 shadow-lg ring-2 ring-amber-400/45 hover:-translate-y-1 cursor-pointer"
-                            : "border-dashed border-stone-300 bg-white/80 text-stone-400 cursor-default"
+                            ? "border-[#d4af37] bg-[#1a0b0e] text-[#fae8b2] shadow-lg ring-2 ring-[#d4af37]/45 hover:-translate-y-1 cursor-pointer"
+                            : "border-dashed border-[#d4af37]/30 bg-black/30 text-[#d4ba94]/60 cursor-default"
                         }`}
                       >
                         {isPicked ? (
@@ -720,16 +726,16 @@ export default function TarotPage() {
                               draggable={false}
                               className="absolute inset-0 w-full h-full object-cover opacity-90 pointer-events-none"
                             />
-                            <div className="relative z-10 px-2 py-0.5 rounded-full bg-black/70 border border-amber-300/75 text-[10px] font-serif font-bold text-amber-200 tracking-wide shadow-sm">
+                            <div className="relative z-10 px-2 py-0.5 rounded-full bg-black/75 border border-[#d4af37]/75 text-[10px] font-serif font-bold text-[#fae8b2] tracking-wide shadow-sm">
                               #{slotIdx + 1}
                             </div>
                           </>
                         ) : (
                           <>
-                            <span className="text-xs font-serif font-bold text-stone-300 mb-0.5">
+                            <span className="text-xs font-serif font-bold text-[#d4ba94]/50 mb-0.5">
                               {slotIdx + 1}
                             </span>
-                            <span className="text-[9px] text-stone-400 font-medium">
+                            <span className="text-[9px] text-[#d4ba94]/60 font-medium">
                               {language === "bn" ? `স্থান` : language === "hi" ? `स्थान` : `Slot`}
                             </span>
                           </>
@@ -782,22 +788,22 @@ export default function TarotPage() {
             {step === 4 && readingResult && (
               <div className="space-y-8 animate-fadeIn">
                 {/* Unified Master Spread Container */}
-                <div className="rounded-3xl border-2 border-amber-300 bg-white p-6 sm:p-8 shadow-sm">
+                <div className="rounded-3xl border border-[#d4af37]/40 bg-gradient-to-b from-[#180e16] via-[#120910] to-[#090407] p-6 sm:p-8 shadow-xl text-stone-100">
                   {/* Master Header with Question and Actions */}
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-stone-100">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-[#d4af37]/20">
                     <div>
                       <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                        <span className="text-xs uppercase font-bold tracking-wider text-amber-900 bg-amber-100 border border-amber-300 px-3 py-0.5 rounded-full shadow-2xs">
+                        <span className="text-xs uppercase font-bold tracking-wider text-[#fae8b2] bg-[#1f121a]/80 border border-[#d4af37]/40 px-3 py-0.5 rounded-full shadow-2xs">
                           {readingResult.spread_name}
                         </span>
-                        <span className="text-xs text-stone-500 font-bold uppercase tracking-wide">
+                        <span className="text-xs text-[#d4ba94] font-bold uppercase tracking-wide">
                           • {category.toUpperCase()}
                         </span>
                       </div>
-                      <h2 className="text-2xl sm:text-3xl font-serif font-bold text-stone-950">
+                      <h2 className="text-2xl sm:text-3xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#fffaf0] via-[#fdefcc] to-[#dfba6f]">
                         {readingResult.question || activeSpreadMeta.name}
                       </h2>
-                      <p className="text-xs sm:text-sm text-stone-600 mt-1">
+                      <p className="text-xs sm:text-sm text-[#d4ba94] mt-1">
                         {t.readingSubtitle}
                       </p>
                     </div>
@@ -806,17 +812,17 @@ export default function TarotPage() {
                       <button
                         type="button"
                         onClick={() => setFlippedCards((prev) => prev.map(() => true))}
-                        className="inline-flex items-center justify-center rounded-xl border border-stone-200 bg-white px-3.5 py-2 text-xs font-bold text-stone-700 hover:bg-stone-50 shadow-2xs transition-colors cursor-pointer"
+                        className="inline-flex items-center justify-center rounded-xl border border-[#d4af37]/35 bg-[#1f121a]/70 px-3.5 py-2 text-xs font-bold text-[#fae8b2] hover:bg-[#2c1a25] shadow-2xs transition-colors cursor-pointer"
                       >
-                        <Eye className="w-3.5 h-3.5 mr-1.5 text-stone-500" />
+                        <Eye className="w-3.5 h-3.5 mr-1.5 text-[#d4af37]" />
                         <span>{t.flipAllBtn}</span>
                       </button>
                       <button
                         type="button"
                         onClick={handleReset}
-                        className="inline-flex items-center justify-center rounded-xl border border-amber-300 bg-amber-50/80 px-3.5 py-2 text-xs font-bold text-amber-900 hover:bg-amber-100 shadow-2xs transition-colors cursor-pointer"
+                        className="inline-flex items-center justify-center rounded-xl border border-amber-500/50 bg-gradient-to-r from-[#f39419] to-amber-500 px-3.5 py-2 text-xs font-bold text-stone-950 hover:from-amber-500 hover:to-amber-600 shadow-2xs transition-colors cursor-pointer"
                       >
-                        <RotateCw className="w-3.5 h-3.5 mr-1.5 text-amber-600" />
+                        <RotateCw className="w-3.5 h-3.5 mr-1.5 text-stone-950" />
                         <span>{t.newReadingBtn}</span>
                       </button>
                     </div>
@@ -957,12 +963,12 @@ export default function TarotPage() {
 
         {/* Selected Card Modal in Explorer */}
         {selectedExplorerCard && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-            <div className="relative w-full max-w-2xl rounded-3xl border border-amber-300 bg-white p-6 sm:p-8 shadow-xl overflow-y-auto max-h-[90vh]">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-fadeIn">
+            <div className="relative w-full max-w-2xl rounded-3xl border border-[#d4af37]/45 bg-gradient-to-b from-[#1a0f18] via-[#120a11] to-[#090407] text-stone-100 p-6 sm:p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
               <button
                 type="button"
                 onClick={() => setSelectedExplorerCard(null)}
-                className="absolute top-4 right-4 text-stone-400 hover:text-stone-800 p-1.5 rounded-lg border border-stone-200"
+                className="absolute top-4 right-4 text-[#d4ba94] hover:text-white p-1.5 rounded-lg border border-[#d4af37]/30 bg-[#22131e]/70 cursor-pointer"
               >
                 ✕
               </button>
@@ -978,22 +984,22 @@ export default function TarotPage() {
 
                 <div className="flex-1 text-center sm:text-left">
                   <div className="flex items-center gap-2 justify-center sm:justify-start mb-1.5">
-                    <span className="text-xs uppercase font-bold text-amber-900 bg-amber-100 border border-amber-300 px-2.5 py-0.5 rounded-full shadow-2xs">
+                    <span className="text-xs uppercase font-bold text-[#fae8b2] bg-[#22131e]/80 border border-[#d4af37]/40 px-2.5 py-0.5 rounded-full shadow-2xs">
                       {selectedExplorerCard.arcana} Arcana
                     </span>
-                    <span className="text-xs text-stone-500 font-semibold">
+                    <span className="text-xs text-[#d4ba94] font-semibold">
                       • {ELEMENTS_LOCALIZED[language]?.[selectedExplorerCard.element] || selectedExplorerCard.element}
                     </span>
                   </div>
 
-                  <h3 className="text-2xl font-serif font-bold text-stone-950">
+                  <h3 className="text-2xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#fffaf0] via-[#fdefcc] to-[#dfba6f]">
                     {CARD_NAMES_LOCALIZED[language]?.[selectedExplorerCard.id] || selectedExplorerCard.name}
                   </h3>
-                  <p className="text-xs text-stone-600 font-medium mt-1">
-                    Astrology: <strong>{selectedExplorerCard.astrology}</strong> | Vedic Graha: <strong>{selectedExplorerCard.vedic_graha}</strong>
+                  <p className="text-xs text-[#d4ba94] font-medium mt-1">
+                    Astrology: <strong className="text-[#fae8b2]">{selectedExplorerCard.astrology}</strong> | Vedic Graha: <strong className="text-[#fae8b2]">{selectedExplorerCard.vedic_graha}</strong>
                   </p>
 
-                  <div className="mt-4 p-3 rounded-xl border border-amber-200 bg-amber-50/60 text-xs text-amber-950">
+                  <div className="mt-4 p-3 rounded-xl border border-[#d4af37]/30 bg-[#22131e]/60 text-xs text-[#fae8b2]">
                     <strong>{language === "bn" ? "সংকল্প বাণী:" : language === "hi" ? "सकारात्मक विचार:" : "Affirmation:"}</strong> &ldquo;{selectedExplorerCard.affirmation}&rdquo;
                   </div>
                 </div>
@@ -1001,43 +1007,43 @@ export default function TarotPage() {
 
               {/* Interpretations */}
               <div className="space-y-4 text-xs sm:text-sm">
-                <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50">
-                  <h4 className="font-serif font-bold text-emerald-950 mb-1">
+                <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/30">
+                  <h4 className="font-serif font-bold text-emerald-300 mb-1">
                     {language === "bn" ? "সোজা (জাগ্রত অবস্থা)" : language === "hi" ? "सीधी स्थिति (सकारात्मक)" : "Upright Meaning"}
                   </h4>
-                  <p className="text-stone-700 leading-relaxed mb-2">
+                  <p className="text-stone-300 leading-relaxed mb-2">
                     {selectedExplorerCard.upright.general}
                   </p>
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {selectedExplorerCard.upright.keywords.map((kw, i) => (
-                      <span key={i} className="text-[10px] font-semibold text-emerald-800 bg-white border border-emerald-200 px-2 py-0.5 rounded shadow-2xs">
+                      <span key={i} className="text-[10px] font-semibold text-emerald-300 bg-[#0c1e14] border border-emerald-500/40 px-2 py-0.5 rounded shadow-2xs">
                         #{kw}
                       </span>
                     ))}
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl border border-rose-200 bg-rose-50/50">
-                  <h4 className="font-serif font-bold text-rose-950 mb-1">
+                <div className="p-4 rounded-xl border border-rose-500/30 bg-rose-950/30">
+                  <h4 className="font-serif font-bold text-rose-300 mb-1">
                     {language === "bn" ? "উল্টো (অন্তর্মুখী রূপান্তর)" : language === "hi" ? "उल्टी स्थिति (आंतरिक बदलाव)" : "Reversed Meaning"}
                   </h4>
-                  <p className="text-stone-700 leading-relaxed mb-2">
+                  <p className="text-stone-300 leading-relaxed mb-2">
                     {selectedExplorerCard.reversed.general}
                   </p>
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {selectedExplorerCard.reversed.keywords.map((kw, i) => (
-                      <span key={i} className="text-[10px] font-semibold text-rose-800 bg-white border border-rose-200 px-2 py-0.5 rounded shadow-2xs">
+                      <span key={i} className="text-[10px] font-semibold text-rose-300 bg-[#220e14] border border-rose-500/40 px-2 py-0.5 rounded shadow-2xs">
                         #{kw}
                       </span>
                     ))}
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/40">
-                  <h4 className="font-serif font-bold text-amber-950 mb-1">
+                <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-950/30">
+                  <h4 className="font-serif font-bold text-[#fae8b2] mb-1">
                     {language === "bn" ? "শাস্ত্রীয় বৈদিক প্রতিকার" : language === "hi" ? "वैदिक ज्योतिषीय उपाय" : "Astrological Remedy"}
                   </h4>
-                  <p className="text-stone-700 leading-relaxed">
+                  <p className="text-stone-300 leading-relaxed">
                     {selectedExplorerCard.remedy}
                   </p>
                 </div>

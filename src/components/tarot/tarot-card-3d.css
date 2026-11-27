@@ -1,6 +1,43 @@
 /* ==========================================================================
    DivinLink Sacred Tarot Card — True 3D Parallax, Specular Foil & Living Motion
+   Museum-Grade Luxury Midnight Temple Velvet & 24K Imperial Gold Foil
    ========================================================================== */
+
+:root {
+  /* Midnight Temple Velvet Frame */
+  --tarot-card-bg-start: #1b1017;
+  --tarot-card-bg-mid:   #120a10;
+  --tarot-card-bg-end:   #090407;
+  --tarot-card-radial:   radial-gradient(130% 120% at 50% 0%, #22131e 0%, #120910 52%, #080306 100%);
+
+  /* 24K Imperial Gold Foil */
+  --tarot-gold-300: #fae8b2;
+  --tarot-gold-400: #f7d070;
+  --tarot-gold-500: #d4af37;
+  --tarot-gold-600: #b3832c;
+  --tarot-gold-700: #78511a;
+  --tarot-gold-gradient: linear-gradient(135deg, #fae8b2 0%, #f7d070 30%, #d4af37 60%, #b3832c 100%);
+  --tarot-gold-hairline: rgba(226, 183, 85, 0.42);
+  --tarot-gold-glow: rgba(243, 148, 25, 0.28);
+
+  /* Museum Passe-Partout Plate Matting */
+  --tarot-mat-bg: linear-gradient(180deg, #160d13 0%, #0e070c 50%, #140b11 100%);
+  --tarot-mat-bevel: inset 0 2px 10px rgba(0, 0, 0, 0.85), inset 0 0 0 1px rgba(212, 175, 55, 0.22);
+
+  /* Text & Inks */
+  --tarot-text-title: #fff7e6;
+  --tarot-text-subtitle: #d4ba94;
+  --tarot-text-muted: #9c8266;
+  --tarot-text-graha: #f0cb7e;
+
+  /* Ambient Velvet Bloom Shadows */
+  --tarot-shadow-rest: 0 14px 38px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(250, 232, 178, 0.14);
+  --tarot-shadow-hover: 0 24px 54px rgba(0, 0, 0, 0.75), 0 0 32px rgba(243, 148, 25, 0.24), 0 0 12px rgba(250, 232, 178, 0.35), inset 0 0 0 1px rgba(250, 232, 178, 0.3);
+}
+
+.font-cinzel {
+  font-family: var(--font-cinzel), "Cinzel", "Times New Roman", serif;
+}
 
 .tarot-3d-stage {
   perspective: 1400px;
@@ -20,8 +57,13 @@
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
-  transition: transform 0.78s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.78s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
   border-radius: 1rem;
+  box-shadow: var(--tarot-shadow-rest);
+}
+
+.group:hover .tarot-3d-flipper {
+  box-shadow: var(--tarot-shadow-hover);
 }
 
 .tarot-3d-flipper[data-flipped="true"] {
@@ -41,6 +83,7 @@
   -webkit-backface-visibility: hidden;
   transform-style: preserve-3d;
   border-radius: 1rem;
+  overflow: hidden;
 }
 
 .tarot-3d-face--back {
@@ -64,10 +107,10 @@
   opacity: var(--glare-op, 0);
   transition: opacity 0.25s ease;
   background: radial-gradient(
-    circle 180px at var(--gx, 50%) var(--gy, 50%),
-    rgba(255, 248, 224, 0.54) 0%,
-    rgba(243, 148, 25, 0.22) 38%,
-    rgba(247, 195, 37, 0.08) 62%,
+    circle 220px at var(--gx, 50%) var(--gy, 50%),
+    rgba(255, 248, 224, 0.45) 0%,
+    rgba(243, 148, 25, 0.2) 35%,
+    rgba(212, 175, 55, 0.1) 60%,
     transparent 85%
   );
   mix-blend-mode: soft-light;
@@ -78,15 +121,15 @@
   position: absolute;
   inset: -40%;
   pointer-events: none;
-  opacity: calc(var(--glare-op, 0) * 0.68);
+  opacity: calc(var(--glare-op, 0) * 0.75);
   transition: opacity 0.3s ease;
   background: linear-gradient(
     115deg,
-    transparent 34%,
-    rgba(247, 195, 37, 0.2) 46%,
-    rgba(255, 250, 232, 0.38) 50%,
-    rgba(243, 148, 25, 0.18) 54%,
-    transparent 66%
+    transparent 30%,
+    rgba(212, 175, 55, 0.15) 42%,
+    rgba(255, 245, 214, 0.4) 50%,
+    rgba(243, 148, 25, 0.2) 58%,
+    transparent 70%
   );
   transform: translate3d(var(--foil-x, 0%), var(--foil-y, 0%), 0);
 }
@@ -194,6 +237,13 @@
 .tarot-pick-card:hover::after {
   opacity: 1;
   transform: translateX(110%);
+}
+
+@media (hover: none) {
+  .tarot-3d-glare,
+  .tarot-3d-foil {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
