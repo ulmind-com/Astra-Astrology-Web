@@ -1,0 +1,150 @@
+/* ==========================================================================
+   DivinLink Sacred Tarot Card — True 3D Parallax, Specular Foil & Flip Physics
+   ========================================================================== */
+
+.tarot-3d-stage {
+  perspective: 1400px;
+}
+
+.tarot-3d-tilt {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(var(--cs, 1));
+  will-change: transform;
+}
+
+.tarot-3d-flipper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.78s cubic-bezier(0.22, 1, 0.36, 1);
+  border-radius: 1rem;
+}
+
+.tarot-3d-flipper[data-flipped="true"] {
+  transform: rotateY(0deg);
+}
+
+.tarot-3d-flipper[data-flipped="false"] {
+  transform: rotateY(180deg);
+}
+
+.tarot-3d-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
+  border-radius: 1rem;
+}
+
+.tarot-3d-face--back {
+  transform: rotateY(180deg);
+}
+
+/* Clipped foil/sheen layer kept separate so sibling translateZ planes stay intact */
+.tarot-3d-clip {
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Holographic golden specular lantern glare driven by pointer CSS vars */
+.tarot-3d-glare {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--glare-op, 0);
+  transition: opacity 0.25s ease;
+  background: radial-gradient(
+    circle 180px at var(--gx, 50%) var(--gy, 50%),
+    rgba(255, 248, 224, 0.52) 0%,
+    rgba(243, 148, 25, 0.2) 38%,
+    rgba(247, 195, 37, 0.06) 62%,
+    transparent 85%
+  );
+  mix-blend-mode: soft-light;
+}
+
+/* Diagonal 24K prismatic foil sheen across card edges and background */
+.tarot-3d-foil {
+  position: absolute;
+  inset: -40%;
+  pointer-events: none;
+  opacity: calc(var(--glare-op, 0) * 0.65);
+  transition: opacity 0.3s ease;
+  background: linear-gradient(
+    115deg,
+    transparent 34%,
+    rgba(247, 195, 37, 0.18) 46%,
+    rgba(255, 250, 232, 0.34) 50%,
+    rgba(243, 148, 25, 0.16) 54%,
+    transparent 66%
+  );
+  transform: translate3d(var(--foil-x, 0%), var(--foil-y, 0%), 0);
+}
+
+/* Depth pop planes when card face is elevated */
+.tarot-z-frame {
+  transform: translateZ(10px);
+}
+
+.tarot-z-mid {
+  transform: translateZ(18px);
+}
+
+.tarot-z-hero {
+  transform: translateZ(28px);
+}
+
+/* Step 3 tactile deck pick card gleam */
+.tarot-pick-card {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.22s ease,
+    box-shadow 0.25s ease;
+}
+
+.tarot-pick-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    125deg,
+    transparent 20%,
+    rgba(255, 240, 194, 0.35) 50%,
+    transparent 80%
+  );
+  transform: translateX(-110%);
+  transition: transform 0.55s ease, opacity 0.25s ease;
+}
+
+.tarot-pick-card:hover::after {
+  opacity: 1;
+  transform: translateX(110%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tarot-3d-tilt {
+    transform: none !important;
+  }
+  .tarot-3d-flipper {
+    transition-duration: 0.01ms !important;
+  }
+  .tarot-3d-glare,
+  .tarot-3d-foil,
+  .tarot-pick-card::after {
+    display: none;
+  }
+}

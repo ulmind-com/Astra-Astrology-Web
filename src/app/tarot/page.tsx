@@ -738,28 +738,35 @@ export default function TarotPage() {
                       : "Touch any cards below to channel your intuitive subconscious energy:"}
                   </p>
 
-                  <div className="grid grid-cols-6 sm:grid-cols-9 md:grid-cols-13 gap-1.5 sm:gap-2 justify-items-center max-h-[460px] overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-stone-200">
+                  <div className="grid grid-cols-6 sm:grid-cols-9 md:grid-cols-13 gap-1.5 sm:gap-2 justify-items-center max-h-[460px] overflow-y-auto p-3 scrollbar-thin scrollbar-thumb-stone-200">
                     {Array.from({ length: 78 }).map((_, cardIndex) => {
-                      const isChosen = selectedCardIndices.includes(cardIndex);
+                      const pickOrder = selectedCardIndices.indexOf(cardIndex);
+                      const isChosen = pickOrder !== -1;
                       return (
                         <button
                           key={cardIndex}
                           type="button"
                           onClick={() => handleToggleCardPick(cardIndex)}
-                          className={`w-10 h-16 sm:w-12 sm:h-20 rounded-xl border-2 transition-all transform hover:-translate-y-2 hover:shadow-md flex flex-col items-center justify-center cursor-pointer ${
+                          className={`tarot-pick-card w-10 h-16 sm:w-12 sm:h-20 rounded-xl border-2 hover:-translate-y-2 hover:scale-105 hover:shadow-lg flex flex-col items-center justify-center cursor-pointer relative ${
                             isChosen
-                              ? "border-amber-500 bg-amber-500 text-stone-950 -translate-y-2.5 shadow-md ring-2 ring-amber-400/40"
-                              : "border-amber-400/75 bg-gradient-to-br from-[#2c1912] via-[#4a2618] to-[#21120c] text-amber-200 hover:border-amber-500 shadow-2xs"
+                              ? "border-amber-500 bg-gradient-to-br from-[#f7c325] via-[#f39419] to-amber-600 text-stone-950 -translate-y-2.5 scale-105 shadow-md ring-2 ring-amber-400/50"
+                              : "border-amber-400/75 bg-gradient-to-br from-[#2c1912] via-[#4a2618] to-[#21120c] text-amber-200 hover:border-amber-300 shadow-2xs"
                           }`}
                         >
                           <div
-                            className={`w-5 h-5 rounded-full border flex items-center justify-center text-[9px] font-serif ${
+                            aria-hidden="true"
+                            className={`absolute inset-1 rounded-lg border pointer-events-none ${
+                              isChosen ? "border-stone-950/25" : "border-amber-300/30"
+                            }`}
+                          />
+                          <div
+                            className={`relative z-10 w-5 h-5 rounded-full border flex items-center justify-center text-[9px] font-serif ${
                               isChosen
-                                ? "border-stone-900/40 text-stone-950 font-bold"
+                                ? "border-stone-900/40 bg-white/40 text-stone-950 font-extrabold"
                                 : "border-amber-300/45 text-amber-200"
                             }`}
                           >
-                            ✦
+                            {isChosen ? pickOrder + 1 : "✦"}
                           </div>
                         </button>
                       );
@@ -944,12 +951,12 @@ export default function TarotPage() {
             </div>
 
             {/* Cards Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 justify-items-center">
               {filteredCards.map((c) => (
                 <div
                   key={c.id}
                   onClick={() => setSelectedExplorerCard(c)}
-                  className="cursor-pointer group transform transition-transform hover:-translate-y-1.5"
+                  className="cursor-pointer group"
                 >
                   <TarotCardView
                     card={c}
