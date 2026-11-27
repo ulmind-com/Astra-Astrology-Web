@@ -352,7 +352,7 @@ export default function WebPurohitDeskPage() {
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      {b.status === "confirmed" && (
+                      {(b.status === "confirmed" || b.status === "awaiting_acceptance") && (
                         <>
                           <Button
                             size="sm"
@@ -361,7 +361,7 @@ export default function WebPurohitDeskPage() {
                             className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white"
                           >
                             <Video className="size-3.5" />
-                            Accept &amp; Enter Live Room
+                            {b.status === "awaiting_acceptance" ? "Accept (Pay অপেক্ষা)" : "Accept & Enter Live Room"}
                           </Button>
                           <Button
                             size="sm"

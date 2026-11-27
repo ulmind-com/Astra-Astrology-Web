@@ -96,7 +96,13 @@ export default function MyPujaBookingsPage() {
       ) : (
         <div className="space-y-4">
           {bookings.map((b: PujaBookingData) => {
-            const isLive = b.status === "confirmed" || b.status === "in_progress";
+            const isLive =
+              b.status === "awaiting_acceptance" ||
+              b.status === "awaiting_payment" ||
+              b.status === "confirmed" ||
+              b.status === "in_progress";
+            const isFailedOrCancelled =
+              b.status === "declined" || b.status === "cancelled" || b.status === "expired";
             return (
               <Card
                 key={b.id}
@@ -157,9 +163,17 @@ export default function MyPujaBookingsPage() {
                         className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-4 shadow-md shadow-emerald-600/20"
                       >
                         <Video className="size-4 mr-1.5" />
-                        লাইভ ভিডিও রুমে যোগ দিন &rarr;
+                        {b.status === "awaiting_payment"
+                          ? "পেমেন্ট করে রুমে ঢুকুন →"
+                          : b.status === "awaiting_acceptance"
+                          ? "অনুরোধ দেখুন →"
+                          : "লাইভ ভিডিও রুমে যোগ দিন →"}
                       </Button>
                     </Link>
+                  ) : isFailedOrCancelled ? (
+                    <Badge tone="neutral" className="bg-rose-50 text-rose-700 border-rose-200 text-xs px-3 py-1.5 font-bold">
+                      {b.payment_status === "refunded" ? "১০০% রিফান্ড সম্পন্ন" : "বাতিল / সময়োত্তীর্ণ"}
+                    </Badge>
                   ) : (
                     <Badge tone="neutral" className="bg-stone-100 text-stone-600 border-stone-200 text-xs px-3 py-1.5 font-bold">
                       <CheckCircle2 className="size-3.5 mr-1 text-emerald-600 inline" />

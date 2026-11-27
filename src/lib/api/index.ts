@@ -2268,13 +2268,27 @@ export interface PujaBookingData {
   room_id: string;
   zego_app_id?: number;
   zego_token?: string | null;
-  status: "pending" | "confirmed" | "in_progress" | "completed" | "declined" | "cancelled" | "expired";
+  status:
+    | "pending"
+    | "awaiting_acceptance"
+    | "awaiting_payment"
+    | "confirmed"
+    | "in_progress"
+    | "completed"
+    | "declined"
+    | "cancelled"
+    | "expired";
   payment_status: "pending" | "paid" | "failed" | "refunded";
-  payment_method?: "razorpay" | "wallet";
+  payment_method?: "deferred" | "razorpay" | "wallet";
   razorpay_order_id?: string | null;
   razorpay_key_id?: string | null;
   started_at?: string | null;
   accepted_at?: string | null;
+  accept_expires_at?: string | null;
+  payment_expires_at?: string | null;
+  purohit_join_deadline_at?: string | null;
+  purohit_joined_at?: string | null;
+  devotee_joined_at?: string | null;
   expires_at?: string | null;
   completed_at?: string | null;
   declined_at?: string | null;
@@ -2360,8 +2374,17 @@ export const purohitApi = {
     sankalpa_gotra: string;
     sankalpa_nakshatra?: string | null;
     sankalpa_wish?: string | null;
-    payment_method?: "razorpay" | "wallet";
+    payment_method?: "deferred" | "razorpay" | "wallet";
   }) => api.post<PujaBookingData>(endpoints.purohits.book, body),
+
+  createPaymentOrder: (bookingId: string) =>
+    api.post<PujaBookingData>(`/purohits/bookings/${bookingId}/create-payment-order`),
+
+  payWallet: (bookingId: string) =>
+    api.post<PujaBookingData>(`/purohits/bookings/${bookingId}/pay-wallet`),
+
+  cancelBooking: (bookingId: string, reason?: string) =>
+    api.post<PujaBookingData>(`/purohits/bookings/${bookingId}/cancel`, reason ? { reason } : {}),
 
   verifyPayment: (
     bookingId: string,
