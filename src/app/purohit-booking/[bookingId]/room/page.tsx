@@ -39,7 +39,7 @@ export default function DevoteePujaVideoRoomPage() {
       return ((res as any)?.data !== undefined ? (res as any).data : res) as PujaBookingData;
     },
     enabled: ready && Boolean(bookingId),
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
     refetchInterval: (q) => (q.state.data?.status === "confirmed" ? 3000 : false),
     staleTime: 10 * 1000,
   });
