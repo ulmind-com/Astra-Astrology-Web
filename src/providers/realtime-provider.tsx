@@ -64,6 +64,14 @@ export type PujaEvent = {
 
 type PujaListener = (event: PujaEvent) => void;
 
+export type WebrtcSignalEvent = {
+  type: "webrtc_signal";
+  from_user?: string;
+  data: Record<string, any>;
+};
+
+type WebrtcListener = (event: WebrtcSignalEvent) => void;
+
 import type { FeaturePricingItem } from "@/types";
 
 type RealtimeValue = {
@@ -77,6 +85,8 @@ type RealtimeValue = {
   onWhiteboard: (listener: WhiteboardListener) => () => void;
   /** Subscribe to live Purohit puja events. */
   onPujaEvent: (listener: PujaListener) => () => void;
+  /** Subscribe to direct WebRTC P2P signaling relay events. */
+  onWebrtcSignal: (listener: WebrtcListener) => () => void;
   /** Broadcast a payload over WebSocket. */
   sendLive: (data: string | object) => boolean;
 };
@@ -89,6 +99,7 @@ const RealtimeContext = React.createContext<RealtimeValue>({
   onChat: () => () => {},
   onWhiteboard: () => () => {},
   onPujaEvent: () => () => {},
+  onWebrtcSignal: () => () => {},
   sendLive: () => false,
 });
 
@@ -296,6 +307,14 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  const webrtcListeners = React.useRef<Set<WebrtcListener>>(new Set());
+  const onWebrtcSignal = React.useCallback((listener: WebrtcListener) => {
+    webrtcListeners.current.add(listener);
+    return () => {
+      webrtcListeners.current.delete(listener);
+    };
+  }, []);
+
   const liveConnRef = React.useRef<LiveConnection | null>(null);
   const sendLive = React.useCallback((data: string | object) => {
     return liveConnRef.current?.send(data) ?? false;
@@ -378,6 +397,10 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
           pujaListeners.current.forEach((listener) => listener(message as PujaEvent));
           break;
 
+        case "webrtc_signal":
+          webrtcListeners.current.forEach((listener) => listener(message as WebrtcSignalEvent));
+          break;
+
         case "chat_message":
         case "chat_read":
         case "chat_ended":
@@ -425,8 +448,8 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
   }, [queryClient]);
 
   const value = React.useMemo(
-    () => ({ astrologers, platform, featurePricing, connected, onChat, onWhiteboard, onPujaEvent, sendLive }),
-    [astrologers, platform, featurePricing, connected, onChat, onWhiteboard, onPujaEvent, sendLive],
+    () => ({ astrologers, platform, featurePricing, connected, onChat, onWhiteboard, onPujaEvent, onWebrtcSignal, sendLive }),
+    [astrologers, platform, featurePricing, connected, onChat, onWhiteboard, onPujaEvent, onWebrtcSignal, sendLive],
   );
 
   return <RealtimeContext.Provider value={value}>{children}</RealtimeContext.Provider>;

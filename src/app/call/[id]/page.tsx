@@ -7,7 +7,7 @@ import * as React from "react";
 import { toast } from "sonner";
 
 import { AstroCoPilotDrawer } from "@/components/call/astro-copilot-drawer";
-import { CallRoom } from "@/components/call/call-room";
+import { BentoVideoStudio } from "@/components/call/bento-video-studio";
 import { CosmicWhiteboard } from "@/components/call/cosmic-whiteboard";
 import { RedFlagModal } from "@/components/call/red-flag-modal";
 import { OutOfCoins, SessionMeter } from "@/components/consult/session-meter";
@@ -135,15 +135,106 @@ export default function CallPage() {
           : "bg-gradient-to-br from-[#fcf9f2] via-[#f7ece4] to-[#ede3cf] text-[#1d1a1c]",
       )}
     >
-      {/* The SDK fills the frame once connected; everything else floats over. */}
       {connected && data?.credentials ? (
-        <CallRoom
+        <BentoVideoStudio
           credentials={data.credentials}
-          onLeave={hangUp}
-          className="absolute inset-0"
+          sessionId={id}
+          peerUserId={isAstrologer ? call.user_id : call.astrologer_user_id}
+          peerName={call.peer?.name || (isAstrologer ? "Seeker" : "Vedic Astrologer")}
+          peerRoleLabel={isAstrologer ? "Seeker · Client" : "Vedic Astrologer"}
+          peerAvatarUrl={call.peer?.avatar_url}
+          selfName={user?.full_name || (isAstrologer ? "Astrologer" : "You")}
+          selfRoleLabel={isAstrologer ? "Astrologer (Host)" : "Seeker"}
+          selfAvatarUrl={user?.avatar_url}
+          title={isVideo ? "Sacred 1:1 Video Consultation" : "Sacred Voice Consultation"}
+          subtitle={`${call.peer?.name || "Consultation"} · Live Room`}
+          timerText={formatDuration(seconds)}
           audioOnly={!isVideo}
+          onLeave={hangUp}
+          checklistTitle="Consultation Checklist"
+          initialTasks={[
+            { id: "lagna", label: "Confirm Birth Details & Lagna Chart", defaultDone: true },
+            { id: "dasha", label: "Review Current Mahadasha & Transits" },
+            { id: "prashna", label: "Address Key Life Questions & Prashna" },
+            { id: "remedy", label: "Prescribe Vedic Remedies & Mantras" },
+            { id: "wrapup", label: "Summarize Actionable Guidance" },
+          ]}
+          leftExtra={
+            call.billing ? (
+              <div className="mt-1">
+                <SessionMeter
+                  sessionId={id}
+                  kind="call"
+                  billing={call.billing}
+                  elapsedSeconds={seconds}
+                  onDark={true}
+                  onExtended={() => refetch()}
+                />
+              </div>
+            ) : null
+          }
+          headerActions={
+            <>
+              <button
+                type="button"
+                onClick={() => setCopilotOpen((v) => !v)}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all border",
+                  copilotOpen
+                    ? "bg-amber-400 text-slate-950 border-amber-300"
+                    : "bg-white/10 hover:bg-white/15 text-amber-200 border-white/15",
+                )}
+              >
+                <Compass className="size-3.5" />
+                <span className="hidden sm:inline">Astro Co-Pilot</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setWhiteboardOpen((v) => !v)}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all border",
+                  whiteboardOpen
+                    ? "bg-teal-400 text-slate-950 border-teal-300"
+                    : "bg-white/10 hover:bg-white/15 text-teal-200 border-white/15",
+                )}
+              >
+                <Sparkles className="size-3.5" />
+                <span className="hidden sm:inline">Whiteboard</span>
+              </button>
+              {isAstrologer && (
+                <button
+                  type="button"
+                  onClick={() => setRedFlagOpen(true)}
+                  className="flex items-center gap-1.5 rounded-full bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/30 px-3 py-1.5 text-xs font-bold text-rose-200 transition-all"
+                  title="Report misconduct, capture fee and blacklist client"
+                >
+                  <ShieldAlert className="size-3.5" />
+                  <span className="hidden md:inline">Report Abuse</span>
+                </button>
+              )}
+            </>
+          }
+          sideActions={[
+            {
+              id: "copilot",
+              icon: <Compass className="size-4" />,
+              title: "Astro Co-Pilot",
+              active: copilotOpen,
+              onClick: () => setCopilotOpen((v) => !v),
+            },
+            {
+              id: "whiteboard",
+              icon: <Sparkles className="size-4" />,
+              title: "Cosmic Whiteboard",
+              active: whiteboardOpen,
+              onClick: () => setWhiteboardOpen((v) => !v),
+            },
+          ]}
+          onToggleToolsDrawer={() => setWhiteboardOpen((v) => !v)}
+          toolsDrawerActive={whiteboardOpen || copilotOpen}
+          bottomBannerText={`Live 1:1 Consultation with ${call.peer?.name || (isAstrologer ? "Seeker" : "Vedic Astrologer")} — Ask freely about your Kundali, Dasha periods, Career, Relationships & Remedies.`}
         />
-      ) : (
+      ) : !connected ? (
         <div
           className={cn(
             "absolute inset-0 transition-opacity",
@@ -152,167 +243,46 @@ export default function CallPage() {
               : "bg-[radial-gradient(ellipse_at_center,rgba(250,151,21,0.18)_0%,rgba(245,235,215,0.85)_60%,rgba(237,227,207,1)_100%)]",
           )}
         />
-      )}
+      ) : null}
 
       {connected && (
-        <CosmicWhiteboard
-          callId={id}
-          peerUserId={call.astrologer_user_id}
-          role="seeker"
-          isOpen={whiteboardOpen}
-          onClose={() => setWhiteboardOpen(false)}
-          theme={theme}
-          onToggleTheme={toggleTheme}
-        />
-      )}
-
-      {connected && (
-        <AstroCoPilotDrawer
-          callId={id}
-          isOpen={copilotOpen}
-          onClose={() => setCopilotOpen(false)}
-          theme={theme}
-          appointmentId={call.appointment_id}
-          userRole={user?.role}
-        />
-      )}
-
-      {connected && isAstrologer && (
-        <RedFlagModal
-          isOpen={redFlagOpen}
-          onClose={() => setRedFlagOpen(false)}
-          callId={id}
-          appointmentId={call.appointment_id}
-          clientName={call.peer?.name}
-          theme={theme}
-          onSuccess={() => {
-            hangUp();
-            router.replace("/account/appointments?tab=blacklist");
-          }}
-        />
-      )}
-
-      {/* ------------------------------------------------- connected chrome */}
-      {connected && call.billing && (
-        <div className="pointer-events-auto absolute inset-x-0 top-16 z-10 px-3">
-          <SessionMeter
-            sessionId={id}
-            kind="call"
-            billing={call.billing}
-            elapsedSeconds={seconds}
-            onDark={theme === "dark"}
-            onExtended={() => refetch()}
+        <div className="relative z-[55]">
+          <CosmicWhiteboard
+            callId={id}
+            peerUserId={call.astrologer_user_id}
+            role={isAstrologer ? "astrologer" : "seeker"}
+            isOpen={whiteboardOpen}
+            onClose={() => setWhiteboardOpen(false)}
+            theme={theme}
+            onToggleTheme={toggleTheme}
           />
+          <AstroCoPilotDrawer
+            callId={id}
+            isOpen={copilotOpen}
+            onClose={() => setCopilotOpen(false)}
+            theme={theme}
+            appointmentId={call.appointment_id}
+            userRole={user?.role}
+          />
+          {isAstrologer && (
+            <RedFlagModal
+              isOpen={redFlagOpen}
+              onClose={() => setRedFlagOpen(false)}
+              callId={id}
+              appointmentId={call.appointment_id}
+              clientName={call.peer?.name}
+              theme={theme}
+              onSuccess={() => {
+                hangUp();
+                router.replace("/account/appointments?tab=blacklist");
+              }}
+            />
+          )}
         </div>
       )}
 
-      {connected ? (
-        <header
-          className={cn(
-            "pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center gap-3 px-4 py-3 transition-colors",
-            theme === "dark"
-              ? "bg-gradient-to-b from-black/80 via-black/40 to-transparent text-white"
-              : "bg-white/85 border-b border-[#f7ce99] text-[#1d1a1c] shadow-xs backdrop-blur-md",
-          )}
-        >
-          <div className="min-w-0 flex-1">
-            <p className={cn("truncate text-sm font-bold", theme === "dark" ? "text-white" : "text-[#1d1a1c]")}>
-              {call.peer?.name}
-            </p>
-            <p
-              className={cn(
-                "flex items-center gap-1.5 text-xs font-semibold",
-                theme === "dark" ? "text-white/70" : "text-[#5c5156]",
-              )}
-            >
-              <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-              {formatDuration(seconds)}
-            </p>
-          </div>
-          <div className="pointer-events-auto flex items-center gap-2">
-            {/* Theme Toggle (Light / Dark) */}
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className={cn(
-                "flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold transition-all border shadow-xs pointer-events-auto",
-                theme === "dark"
-                  ? "bg-night-900/90 border-white/20 text-amber-300 hover:bg-night-800"
-                  : "bg-white/95 border-[#f4bc74] text-amber-900 hover:bg-[#fdf0e7]",
-              )}
-              title={theme === "dark" ? "Switch to Sacred Light Mode" : "Switch to Celestial Dark Mode"}
-            >
-              {theme === "dark" ? (
-                <>
-                  <Sun className="size-3.5 text-amber-400" />
-                  <span className="hidden sm:inline">Light Mode</span>
-                </>
-              ) : (
-                <>
-                  <Moon className="size-3.5 text-indigo-600" />
-                  <span className="hidden sm:inline">Dark Mode</span>
-                </>
-              )}
-            </button>
-
-            <Button
-              size="sm"
-              onClick={() => setCopilotOpen((v) => !v)}
-              className={cn(
-                "text-xs font-bold transition-all shadow-sm",
-                copilotOpen
-                  ? "bg-amber-400 text-slate-950 border border-amber-300 ring-2 ring-amber-400/50"
-                  : theme === "dark"
-                    ? "bg-amber-950/70 hover:bg-amber-900 text-amber-200 border border-amber-500/40"
-                    : "bg-white/95 hover:bg-[#fdf0e7] text-amber-900 border border-[#f4bc74] shadow-xs",
-              )}
-              title="Open live Astro Co-Pilot cheat-sheet"
-            >
-              <Compass className="size-3.5 mr-1 text-amber-500" />
-              Astro Co-Pilot
-            </Button>
-
-            <Button
-              size="sm"
-              onClick={() => setWhiteboardOpen((v) => !v)}
-              className={cn(
-                "text-xs font-bold transition-all shadow-sm",
-                whiteboardOpen
-                  ? "bg-amber-400 text-slate-950 border border-amber-300 ring-2 ring-amber-400/50"
-                  : theme === "dark"
-                    ? "bg-amber-950/70 hover:bg-amber-900 text-amber-200 border border-amber-500/40"
-                    : "bg-white/95 hover:bg-[#fdf0e7] text-amber-900 border border-[#f4bc74] shadow-xs",
-              )}
-              title="Open interactive Kundali cosmic whiteboard"
-            >
-              <Sparkles className="size-3.5 mr-1 text-amber-400" />
-              Cosmic Whiteboard
-            </Button>
-
-            {isAstrologer && (
-              <Button
-                size="sm"
-                onClick={() => setRedFlagOpen(true)}
-                className="bg-red-600/90 hover:bg-red-600 text-white border border-red-500/50 shadow-sm text-xs font-bold"
-                title="Report misconduct, capture fee and blacklist client"
-              >
-                <ShieldAlert className="size-3.5 mr-1 text-white animate-pulse" />
-                <span className="hidden sm:inline">Report Abuse</span>
-              </Button>
-            )}
-
-            <Button
-              size="sm"
-              onClick={hangUp}
-              disabled={end.isPending}
-              className="bg-rose-600 text-white hover:bg-rose-500 shadow-sm font-bold"
-            >
-              <PhoneOff className="size-4 mr-1" />
-              End
-            </Button>
-          </div>
-        </header>
-      ) : (
+      {/* ------------------------------------------------- pre-connect overlay */}
+      {connected ? null : (
         /* ------------------------------------------ ringing / finished */
         <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-6 px-6 text-center">
           {live ? (
