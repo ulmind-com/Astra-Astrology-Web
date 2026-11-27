@@ -30,7 +30,7 @@
     "date-fns": "^4.4.0",
     "firebase": "^13.0.0",
     "framer-motion": "^14.14.0",
-    "glowdots": "^2.0.1",
+    "glowdots": "^2.1.0",
     "lottie-react": "^2.4.1",
     "lucide-react": "^1.57.0",
     "next": "^16.4.6",

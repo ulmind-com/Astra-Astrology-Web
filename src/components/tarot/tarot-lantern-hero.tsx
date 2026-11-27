@@ -43,6 +43,7 @@ export function TarotLanternHero({ title }: TarotLanternHeroProps) {
   const frameRef = React.useRef<HTMLDivElement>(null);
   const orbRef = React.useRef<HTMLDivElement>(null);
   const monogramRef = React.useRef<HTMLAnchorElement>(null);
+  const litChakraHostRef = React.useRef<HTMLDivElement>(null);
   const layerRefs = React.useRef<{
     sky: HTMLDivElement[];
     chakra: HTMLDivElement[];
@@ -52,6 +53,7 @@ export function TarotLanternHero({ title }: TarotLanternHeroProps) {
 
   const [ready, setReady] = React.useState(false);
   const [hasPointer, setHasPointer] = React.useState(false);
+  const [glowLogoReady, setGlowLogoReady] = React.useState(false);
 
   const metricsRef = React.useRef({
     u: 1,
@@ -86,7 +88,6 @@ export function TarotLanternHero({ title }: TarotLanternHeroProps) {
     const extra = Math.min(250, Math.max(0, (vw / vh - 1.6) * 400));
     const u = Math.max(vw / (1440 + extra), vh / 960);
     const fx = (vw - 1440 * u) / 2;
-    // Keep arch crowns visible cleanly under the 52px floating overlay header without clipping top or pool edge
     const fy = Math.min(0, Math.max(vh - 960 * u, vh - 900 * u, -42 * u));
     const halfVis = vw / (2 * u);
 
@@ -100,7 +101,6 @@ export function TarotLanternHero({ title }: TarotLanternHeroProps) {
     const radius = Math.min(320 * u, 0.45 * Math.min(vw, 1.2 * vh));
     stage.style.setProperty("--r", `${radius.toFixed(2)}px`);
 
-    // Script monogram resting cleanly at pool threshold above the Sanctuary card
     const mono = monogramRef.current;
     if (mono) {
       const qfs = Math.max(vh < 420 ? 28 : 34, 50 * u);
@@ -109,6 +109,70 @@ export function TarotLanternHero({ title }: TarotLanternHeroProps) {
       const monoTop = Math.min(fy + 791 * u + 0.56 * qfs - italBase * qfs, vh - qfs - 62);
       mono.style.top = `${monoTop.toFixed(2)}px`;
     }
+  }, []);
+
+  // Mount glowdots GPU particle DivinLink logo inside the central arch chakra halo
+  React.useEffect(() => {
+    const host = litChakraHostRef.current;
+    if (!host) return;
+
+    let cancelled = false;
+    let instance: { destroy: () => void } | null = null;
+
+    void import("glowdots")
+      .then(({ logo }) => {
+        if (cancelled || !litChakraHostRef.current) return;
+        instance = logo(litChakraHostRef.current, {
+          source: "/logo.png",
+          preserveColors: true,
+          bloom: 0.45,
+          bloomRadius: 9,
+          count: 34000,
+          size: 1.55,
+          intensity: 1.38,
+          softness: 0.32,
+          dust: 0.14,
+          depth: 0.05,
+          scale: 0.96,
+          rotationSpeed: 0.03,
+          pointerTilt: 0.18,
+          interaction: "repel",
+          interactionRadius: 0.32,
+          interactionStrength: 0.48,
+          trailMemory: 0.35,
+          clickBurst: true,
+          entranceDuration: 0.9,
+          pauseOffscreen: true,
+          respectReducedMotion: true,
+          adaptive: true,
+          maxDpr: 2,
+          pointerTarget: "window",
+          on: {
+            "asset:loaded": () => {
+              if (!cancelled) setGlowLogoReady(true);
+            },
+            "asset:error": () => {
+              if (!cancelled) setGlowLogoReady(false);
+            },
+            unsupported: () => {
+              if (!cancelled) setGlowLogoReady(false);
+            },
+          },
+        });
+      })
+      .catch(() => {
+        if (!cancelled) setGlowLogoReady(false);
+      });
+
+    return () => {
+      cancelled = true;
+      try {
+        instance?.destroy();
+      } catch {
+        /* ignore cleanup race */
+      }
+      instance = null;
+    };
   }, []);
 
   // SSR-safe image readiness detection + 2.5s failsafe
@@ -314,9 +378,25 @@ export function TarotLanternHero({ title }: TarotLanternHeroProps) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={SKY_IMG} alt="" fetchPriority={id === "dark" ? "high" : undefined} />
       </div>
-      <div className="L chakra" data-k="-0.14" ref={registerLayer("chakra", stackIdx)}>
+      <div
+        id={id === "lit" ? "brand" : undefined}
+        className="L chakra"
+        data-k="-0.14"
+        ref={(el) => {
+          registerLayer("chakra", stackIdx)(el);
+          if (id === "lit") {
+            litChakraHostRef.current = el;
+          }
+        }}
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="" fetchPriority={id === "dark" ? "high" : undefined} />
+        <img
+          src="/logo.png"
+          alt=""
+          data-hidden={id === "lit" && glowLogoReady ? "true" : "false"}
+          fetchPriority={id === "dark" ? "high" : undefined}
+          className="transition-opacity duration-500"
+        />
       </div>
       <div className="L arcade" data-k="0.175" ref={registerLayer("arcade", stackIdx)}>
         {/* eslint-disable-next-line @next/next/no-img-element */}

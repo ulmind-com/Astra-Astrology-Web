@@ -76,10 +76,29 @@
 }
 
 .tarot-stack .L.chakra {
-  left: calc(860px * var(--u));
-  top: calc(130px * var(--u));
-  width: calc(520px * var(--u));
-  height: calc(520px * var(--u));
+  left: calc(820px * var(--u));
+  top: calc(90px * var(--u));
+  width: calc(600px * var(--u));
+  height: calc(600px * var(--u));
+}
+
+.tarot-stack--dark .L.chakra img {
+  opacity: 0.11;
+  transform: scale(0.8);
+  transform-origin: center;
+  filter: sepia(0.45) brightness(0.62) saturate(0.75) drop-shadow(0 0 12px rgba(243, 148, 25, 0.22));
+}
+
+.tarot-stack--lit .L.chakra img[data-hidden="true"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tarot-stack--lit .L.chakra canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none;
 }
 
 .tarot-stack .L.arcade {
@@ -107,11 +126,6 @@
 /* Warm dusk palette at rest: readable terracotta sandstone, zero cold harsh black */
 .tarot-stack--dark .L.sky img {
   filter: brightness(0.36) saturate(0.84) sepia(0.28) hue-rotate(-6deg);
-}
-
-.tarot-stack--dark .L.chakra img {
-  opacity: 0.14;
-  filter: sepia(0.45) brightness(0.62) saturate(0.75) drop-shadow(0 0 12px rgba(243, 148, 25, 0.22));
 }
 
 .tarot-stack--dark .L.statue img {
