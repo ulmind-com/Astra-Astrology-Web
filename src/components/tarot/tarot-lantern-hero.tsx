@@ -103,10 +103,10 @@ export function TarotLanternHero({ title }: TarotLanternHeroProps) {
 
     const mono = monogramRef.current;
     if (mono) {
-      const qfs = Math.max(vh < 420 ? 28 : 34, 50 * u);
+      const qfs = Math.max(vh < 420 ? 30 : 34, 44 * u);
       mono.style.fontSize = `${qfs.toFixed(2)}px`;
-      mono.style.left = `${(fx + 725 * u).toFixed(2)}px`;
-      const monoTop = Math.min(fy + 791 * u + 0.56 * qfs - italBase * qfs, vh - qfs - 62);
+      mono.style.left = `${(fx + 720 * u).toFixed(2)}px`;
+      const monoTop = Math.min(fy + 782 * u + 0.5 * qfs - italBase * qfs, vh - qfs - 66);
       mono.style.top = `${monoTop.toFixed(2)}px`;
     }
   }, []);
@@ -131,17 +131,19 @@ export function TarotLanternHero({ title }: TarotLanternHeroProps) {
           size: 1.55,
           intensity: 1.38,
           softness: 0.32,
-          dust: 0.14,
-          depth: 0.05,
-          scale: 0.96,
-          rotationSpeed: 0.03,
-          pointerTilt: 0.18,
+          dust: 0.12,
+          depth: 0.04,
+          scale: 0.94,
+          tilt: 0,
+          rotationSpeed: 0,
+          pointerTilt: 0,
+          orbit: false,
           interaction: "repel",
-          interactionRadius: 0.32,
-          interactionStrength: 0.48,
-          trailMemory: 0.35,
+          interactionRadius: 0.28,
+          interactionStrength: 0.4,
+          trailMemory: 0.3,
           clickBurst: true,
-          entranceDuration: 0.9,
+          entranceDuration: 0.85,
           pauseOffscreen: true,
           respectReducedMotion: true,
           adaptive: true,
@@ -428,14 +430,14 @@ export function TarotLanternHero({ title }: TarotLanternHeroProps) {
       <div className="tarot-hero-notch-scrim" aria-hidden="true" />
       <div className="tarot-hero-cream-fade" aria-hidden="true" />
 
-      {/* Italianno calligraphic DivinLink monogram resting at the oasis pool edge */}
+      {/* Italianno calligraphic DivinLink wordmark resting at the oasis pool edge */}
       <a
         ref={monogramRef}
         href="#tarot-workspace"
         aria-label="Enter DivinLink Tarot Oracle"
         className="tarot-monogram"
       >
-        D
+        DivinLink
       </a>
 
       {/* Instant magnetic diya cursor orb */}
