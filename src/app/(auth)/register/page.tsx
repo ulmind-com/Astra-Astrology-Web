@@ -294,6 +294,10 @@ function RegisterForm() {
 
       <p className="mt-4 text-center text-xs text-muted-foreground">
         By signing up, you agree to DivinLink&apos;s{" "}
+        <Link href="/terms-condition" className="underline hover:text-foreground">
+          Terms &amp; Conditions
+        </Link>{" "}
+        and{" "}
         <Link href="/privacy" className="underline hover:text-foreground">
           Privacy Policy
         </Link>.

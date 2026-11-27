@@ -173,9 +173,9 @@ function companyColumn(lang: AstrologyLanguage): Column {
     title: pick(lang, "Corporate Info", "কর্পোরেট তথ্য", "कॉर्पोरेट जानकारी"),
     links: [
       { href: "/privacy", label: pick(lang, "Privacy Policy", "গোপনীয়তা নীতি", "गोपनीयता नीति") },
-      { href: "/privacy#section-2", label: pick(lang, "Refund & Cancellation Policy", "রিফান্ড ও বাতিল নীতি", "रिफंड एवं रद्दीकरण नीति") },
-      { href: "/privacy", label: pick(lang, "Terms & Conditions", "শর্তাবলী", "नियम एवं शर्तें") },
-      { href: "/privacy", label: pick(lang, "Disclaimer", "দাবিত্যাগ", "अस्वीकरण") },
+      { href: "/terms-condition#refund-policy", label: pick(lang, "Refund & Cancellation Policy", "রিফান্ড ও বাতিল নীতি", "रिफंड एवं रद्दीकरण नीति") },
+      { href: "/terms-condition", label: pick(lang, "Terms & Conditions", "শর্তাবলী", "नियम एवं शर्तें") },
+      { href: "/terms-condition#disclaimer", label: pick(lang, "Disclaimer", "দাবিত্যাগ", "अस्वीकरण") },
       { href: "/support", label: pick(lang, "About Us", "আমাদের সম্পর্কে", "हमारे बारे में") },
       { href: "/login", label: pick(lang, "Astrologer Login", "জ্যোতিষী লগইন", "ज्योतिषी लॉगिन") },
     ],
