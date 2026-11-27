@@ -25,7 +25,7 @@ import { purohitApi, type PurohitData, type PurohitPujaItem } from "@/lib/api";
 
 function PurohitsDirectoryContent() {
   const searchParams = useSearchParams();
-  const initialOnlineOnly = searchParams.get("online") === "true";
+  const initialOnlineOnly = searchParams.get("online") !== "false";
 
   const [searchPuja, setSearchPuja] = React.useState("");
   const [onlineOnly, setOnlineOnly] = React.useState(initialOnlineOnly);
@@ -35,19 +35,20 @@ function PurohitsDirectoryContent() {
     queryKey: ["purohits_list", onlineOnly, searchPuja, selectedLanguage],
     queryFn: async () => {
       const res = await purohitApi.list({
-        online_only: onlineOnly ? true : undefined,
+        online_only: onlineOnly,
         search_puja: searchPuja.trim() || undefined,
         language: selectedLanguage !== "all" ? selectedLanguage : undefined,
       });
       return Array.isArray(res) ? res : ((res as any)?.data || []);
     },
     placeholderData: (prev) => prev,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 15 * 1000,
+    refetchInterval: 15 * 1000,
     retry: 2,
   });
 
   const onlineCount = React.useMemo(() => {
-    return purohits.filter((p: PurohitData) => p.is_online).length;
+    return purohits.filter((p: PurohitData) => p.is_online && !p.is_busy).length;
   }, [purohits]);
 
   return (
@@ -214,9 +215,13 @@ function PurohitsDirectoryContent() {
                       </div>
 
                       <div className="flex flex-col items-end gap-1">
-                        {purohit.is_online ? (
+                        {purohit.is_busy ? (
+                          <Badge tone="neutral" className="bg-amber-100 text-amber-900 border-amber-300 font-bold text-[11px]">
+                            🟡 অন্য পূজায় ব্যস্ত
+                          </Badge>
+                        ) : purohit.is_online ? (
                           <Badge tone="neutral" className="bg-emerald-100 text-emerald-900 border-emerald-300 font-bold text-[11px] animate-pulse">
-                            🟢 Online Now
+                            🟢 Live Available
                           </Badge>
                         ) : (
                           <Badge tone="neutral" className="bg-stone-100 text-stone-500 border-stone-200 text-[10px]">
@@ -277,18 +282,30 @@ function PurohitsDirectoryContent() {
                     <div className="p-3 rounded-xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40 text-xs space-y-1.5">
                       <div className="flex items-center justify-between font-bold text-amber-950 dark:text-amber-200 text-[11px]">
                         <span>পূজা ক্যাটালগ ({activePujas.length} টি পূজা)</span>
-                        <span className="text-amber-700 dark:text-amber-400">নির্ধারিত দক্ষিণা</span>
+                        <span className="text-amber-700 dark:text-amber-400">দক্ষিণা ও সময়</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5">
-                        {activePujas.slice(0, 3).map((puja: PurohitPujaItem) => (
-                          <span
-                            key={puja.id}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white dark:bg-stone-900 border border-amber-200 dark:border-amber-800 text-[11px] font-medium text-stone-700 dark:text-stone-300"
-                          >
-                            <span>{puja.puja_name.split("(")[0]}</span>
-                            <span className="font-bold text-emerald-600 dark:text-emerald-400">₹{puja.price_inr}</span>
-                          </span>
-                        ))}
+                        {activePujas.slice(0, 3).map((puja: PurohitPujaItem) => {
+                          const matchesQuery = Boolean(
+                            searchPuja.trim() &&
+                              puja.puja_name.toLowerCase().includes(searchPuja.trim().toLowerCase())
+                          );
+                          return (
+                            <span
+                              key={puja.id}
+                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md border text-[11px] font-medium ${
+                                matchesQuery
+                                  ? "bg-amber-600 text-white border-amber-600 font-bold shadow-xs"
+                                  : "bg-white dark:bg-stone-900 border-amber-200 dark:border-amber-800 text-stone-700 dark:text-stone-300"
+                              }`}
+                            >
+                              <span>{puja.puja_name.split("(")[0]}</span>
+                              <span className={matchesQuery ? "text-amber-100 font-bold" : "font-bold text-emerald-600 dark:text-emerald-400"}>
+                                ₹{puja.price_inr} ({puja.duration_minutes}m)
+                              </span>
+                            </span>
+                          );
+                        })}
                         {activePujas.length > 3 && (
                           <span className="text-[11px] text-amber-700 dark:text-amber-400 font-bold self-center">
                             +{activePujas.length - 3} আরও

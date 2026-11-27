@@ -2,19 +2,19 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  CalendarClock,
   Camera,
   CheckCircle2,
-  Clock,
   Edit2,
   Flame,
   Loader2,
+  PhoneOff,
   Plus,
   Trash2,
   Video,
   Wallet,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import * as React from "react";
 import { toast } from "sonner";
 
@@ -39,28 +39,14 @@ import {
 import { earningsApi, purohitApi, type PujaBookingData, type PurohitPujaItem } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
+import { useRealtime } from "@/providers/realtime-provider";
 
-const DAYS_OF_WEEK = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
-
-const DEFAULT_SLOTS = [
-  "06:00 AM - 08:00 AM",
-  "08:30 AM - 11:00 AM",
-  "05:00 PM - 07:30 PM",
-  "08:00 PM - 10:00 PM",
-];
-
-type DeskTab = "bookings" | "pujas" | "availability" | "earnings" | "profile";
+type DeskTab = "bookings" | "pujas" | "earnings" | "profile";
 
 export default function WebPurohitDeskPage() {
   const { user } = useAuth();
+  const { onPujaEvent } = useRealtime();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [tab, setTab] = React.useState<DeskTab>("bookings");
 
@@ -114,17 +100,19 @@ export default function WebPurohitDeskPage() {
   });
 
   const [isOnline, setIsOnline] = React.useState(false);
-  const [selectedDays, setSelectedDays] = React.useState<string[]>(DAYS_OF_WEEK.slice(0, 5));
-  const [selectedSlots, setSelectedSlots] = React.useState<string[]>(DEFAULT_SLOTS.slice(0, 2));
 
   React.useEffect(() => {
     if (!profile) return;
     setIsOnline(Boolean(profile.is_online));
-    const days = (profile as unknown as { available_days?: string[] }).available_days;
-    const slots = (profile as unknown as { available_slots?: string[] }).available_slots;
-    if (Array.isArray(days) && days.length) setSelectedDays(days);
-    if (Array.isArray(slots) && slots.length) setSelectedSlots(slots);
   }, [profile]);
+
+  React.useEffect(() => {
+    if (!isPurohit) return;
+    return onPujaEvent(() => {
+      void queryClient.invalidateQueries({ queryKey: ["purohit", "me", "bookings"] });
+      void queryClient.invalidateQueries({ queryKey: ["purohit", "me", "profile"] });
+    });
+  }, [isPurohit, onPujaEvent, queryClient]);
 
   const avatarInputRef = React.useRef<HTMLInputElement>(null);
   const uploadAvatarMutation = useMutation({
@@ -140,17 +128,37 @@ export default function WebPurohitDeskPage() {
     mutationFn: (nextOnline?: boolean) =>
       purohitApi.updateMyAvailability({
         is_online: nextOnline ?? isOnline,
-        available_days: selectedDays,
-        available_slots: selectedSlots,
       }),
     onSuccess: (updated) => {
       setIsOnline(updated.is_online);
       void queryClient.invalidateQueries({ queryKey: ["purohit", "me", "profile"] });
       toast.success(
-        updated.is_online ? "You are now Online for live Pujas!" : "Status updated successfully."
+        updated.is_online ? "You are now Online for live Pujas!" : "You are now Offline."
       );
     },
     onError: (err: any) => toast.error(err?.message || "Failed to update availability"),
+  });
+
+  const acceptBookingMutation = useMutation({
+    mutationFn: (bookingId: string) => purohitApi.acceptBooking(bookingId),
+    onSuccess: (booking: any) => {
+      const id = booking?.id || booking?.data?.id;
+      void queryClient.invalidateQueries({ queryKey: ["purohit", "me", "bookings"] });
+      void queryClient.invalidateQueries({ queryKey: ["purohit", "me", "profile"] });
+      toast.success("Puja accepted! Opening live room...");
+      if (id) router.push(`/purohit-booking/${id}/room`);
+    },
+    onError: (err: any) => toast.error(err?.message || "Could not accept booking"),
+  });
+
+  const declineBookingMutation = useMutation({
+    mutationFn: (bookingId: string) => purohitApi.declineBooking(bookingId, "Purohit unavailable right now"),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["purohit", "me", "bookings"] });
+      void queryClient.invalidateQueries({ queryKey: ["purohit", "me", "profile"] });
+      toast.info("Request declined and devotee refunded 100%.");
+    },
+    onError: (err: any) => toast.error(err?.message || "Could not decline booking"),
   });
 
   const completeBookingMutation = useMutation({
@@ -294,9 +302,8 @@ export default function WebPurohitDeskPage() {
       <div className="flex flex-wrap gap-2">
         {(
           [
-            { id: "bookings", label: `Bookings (${bookings.length})` },
+            { id: "bookings", label: `Live Bookings (${bookings.length})` },
             { id: "pujas", label: `Puja Catalog (${pujasCatalog.length})` },
-            { id: "availability", label: "Auspicious Availability" },
             { id: "earnings", label: "Earnings & Payouts" },
             { id: "profile", label: "Profile & Avatar" },
           ] as const
@@ -345,9 +352,32 @@ export default function WebPurohitDeskPage() {
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      {b.status !== "completed" && b.status !== "cancelled" && (
+                      {b.status === "confirmed" && (
                         <>
-                          <Link href={`/purohits/live/${b.id}`}>
+                          <Button
+                            size="sm"
+                            loading={acceptBookingMutation.isPending}
+                            onClick={() => acceptBookingMutation.mutate(b.id)}
+                            className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white"
+                          >
+                            <Video className="size-3.5" />
+                            Accept &amp; Enter Live Room
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            loading={declineBookingMutation.isPending}
+                            onClick={() => declineBookingMutation.mutate(b.id)}
+                            className="gap-1.5 border-rose-300 text-rose-700 hover:bg-rose-50"
+                          >
+                            <PhoneOff className="size-3.5" />
+                            Decline
+                          </Button>
+                        </>
+                      )}
+                      {b.status === "in_progress" && (
+                        <>
+                          <Link href={`/purohit-booking/${b.id}/room`}>
                             <Button size="sm" className="gap-1.5">
                               <Video className="size-3.5" />
                               Enter Live Chamber
@@ -463,89 +493,7 @@ export default function WebPurohitDeskPage() {
         </div>
       )}
 
-      {/* TAB 3: AVAILABILITY */}
-      {tab === "availability" && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CalendarClock className="size-5 text-amber-600" />
-              Weekly Auspicious Schedule
-            </CardTitle>
-            <CardDescription>
-              Select the days and Muhurat time blocks when devotees can schedule virtual pujas with you.
-            </CardDescription>
-          </CardHeader>
-          <CardBody className="space-y-5">
-            <div>
-              <p className="text-xs font-bold text-stone-700 mb-2">Available Days</p>
-              <div className="flex flex-wrap gap-2">
-                {DAYS_OF_WEEK.map((day) => {
-                  const active = selectedDays.includes(day);
-                  return (
-                    <button
-                      key={day}
-                      type="button"
-                      onClick={() =>
-                        setSelectedDays((prev) =>
-                          active ? prev.filter((d) => d !== day) : [...prev, day]
-                        )
-                      }
-                      className={cn(
-                        "rounded-xl px-3 py-1.5 text-xs font-bold border transition-all cursor-pointer",
-                        active
-                          ? "bg-amber-600 text-white border-amber-600"
-                          : "bg-white text-stone-600 border-stone-200 hover:border-amber-300"
-                      )}
-                    >
-                      {day}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div>
-              <p className="text-xs font-bold text-stone-700 mb-2">Auspicious Time Slots</p>
-              <div className="flex flex-wrap gap-2">
-                {DEFAULT_SLOTS.map((slot) => {
-                  const active = selectedSlots.includes(slot);
-                  return (
-                    <button
-                      key={slot}
-                      type="button"
-                      onClick={() =>
-                        setSelectedSlots((prev) =>
-                          active ? prev.filter((s) => s !== slot) : [...prev, slot]
-                        )
-                      }
-                      className={cn(
-                        "inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold border transition-all cursor-pointer",
-                        active
-                          ? "bg-emerald-600 text-white border-emerald-600"
-                          : "bg-white text-stone-600 border-stone-200 hover:border-emerald-300"
-                      )}
-                    >
-                      <Clock className="size-3.5" />
-                      {slot}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <Button
-                loading={updateAvailabilityMutation.isPending}
-                onClick={() => updateAvailabilityMutation.mutate(isOnline)}
-              >
-                Save Availability Schedule
-              </Button>
-            </div>
-          </CardBody>
-        </Card>
-      )}
-
-      {/* TAB 4: EARNINGS & PAYOUTS */}
+      {/* TAB 3: EARNINGS & PAYOUTS */}
       {tab === "earnings" && (
         <div className="space-y-4">
           {earningsLoading ? (

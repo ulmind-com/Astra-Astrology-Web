@@ -151,11 +151,19 @@ export default function PurohitDetailPage() {
               razorpay_signature: response.razorpay_signature,
             });
             toast.dismiss("puja-rzp-verify");
+            if (verified?.status === "cancelled" || verified?.payment_status === "refunded") {
+              toast.error(
+                verified?.cancel_reason ||
+                  "পুরোহিতজী এই মুহূর্তে অন্য পূজায় ব্যস্ত হয়ে গেছেন। আপনার টাকা ১০০% রিফান্ড করা হয়েছে।"
+              );
+              setSelectedPuja(null);
+              return;
+            }
             if (verified?.payment_status !== "paid") {
               toast.error("পেমেন্ট নিশ্চিত করা যায়নি।");
               return;
             }
-            toast.success("পেমেন্ট সম্পন্ন! ভিডিও রুমে প্রবেশ করা হচ্ছে...");
+            toast.success("পেমেন্ট সম্পন্ন! পুরোহিতজীর সাথে লাইভ রুমে সংযুক্ত হচ্ছেন...");
             setSelectedPuja(null);
             router.push(`/purohit-booking/${booking.id}/room`);
           } catch (err) {
@@ -263,7 +271,11 @@ export default function PurohitDetailPage() {
             <span>সমস্ত পুরোহিতদের তালিকা</span>
           </Link>
 
-          {purohit.is_online ? (
+          {purohit.is_busy ? (
+            <Badge tone="neutral" className="bg-amber-100 text-amber-900 border-amber-300 font-bold text-xs">
+              🟡 অন্য লাইভ পূজায় ব্যস্ত (Busy Now)
+            </Badge>
+          ) : purohit.is_online ? (
             <Badge tone="neutral" className="bg-emerald-100 text-emerald-900 border-emerald-300 font-bold text-xs">
               🟢 লাইভ অনলাইন (পূজার জন্য প্রস্তুত)
             </Badge>
@@ -439,16 +451,27 @@ export default function PurohitDetailPage() {
 
                 <div className="p-4 bg-stone-50/80 dark:bg-stone-900/40 border-t border-stone-200 dark:border-stone-800 flex items-center justify-between gap-3">
                   <div className="text-xs text-stone-500">
-                    <span>ভিডিওতে ২-ওয়ে সংযোগ</span>
+                    <span>
+                      {purohit.is_busy
+                        ? "পুরোহিতজী এখন অন্য পূজায় ব্যস্ত"
+                        : purohit.is_online
+                        ? "ভিডিওতে ২-ওয়ে লাইভ সংযোগ"
+                        : "পুরোহিতজী এখন অফলাইন"}
+                    </span>
                   </div>
 
                   <Button
                     variant="primary"
+                    disabled={!purohit.is_online || Boolean(purohit.is_busy)}
                     onClick={() => handleOpenBooking(puja)}
-                    className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-5 py-2.5 shadow-md shadow-amber-600/20"
+                    className="bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white font-bold text-xs px-5 py-2.5 shadow-md shadow-amber-600/20"
                   >
                     <Video className="size-3.5 mr-1.5" />
-                    পূজা বুক করুন (₹{puja.price_inr})
+                    {purohit.is_busy
+                      ? "এখন ব্যস্ত"
+                      : !purohit.is_online
+                      ? "অফলাইন"
+                      : `এখনই বুক করুন (₹${puja.price_inr})`}
                   </Button>
                 </div>
               </Card>

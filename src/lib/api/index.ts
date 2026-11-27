@@ -2235,6 +2235,9 @@ export interface PurohitData {
   state?: string | null;
   is_online: boolean;
   is_verified: boolean;
+  is_busy?: boolean;
+  last_seen_at?: string | null;
+  busy_booking_id?: string | null;
   rating: number;
   total_reviews: number;
   total_pujas_performed: number;
@@ -2264,13 +2267,19 @@ export interface PujaBookingData {
   room_id: string;
   zego_app_id?: number;
   zego_token?: string | null;
-  status: "pending" | "confirmed" | "in_progress" | "completed" | "cancelled";
+  status: "pending" | "confirmed" | "in_progress" | "completed" | "declined" | "cancelled" | "expired";
   payment_status: "pending" | "paid" | "failed" | "refunded";
   payment_method?: "razorpay" | "wallet";
   razorpay_order_id?: string | null;
   razorpay_key_id?: string | null;
   started_at?: string | null;
+  accepted_at?: string | null;
+  expires_at?: string | null;
   completed_at?: string | null;
+  declined_at?: string | null;
+  cancel_reason?: string | null;
+  refund_id?: string | null;
+  refunded_at?: string | null;
   created_at: string;
 }
 
@@ -2365,11 +2374,23 @@ export const purohitApi = {
   getMyBookings: () =>
     api.get<PujaBookingData[]>(endpoints.purohits.myBookings),
 
+  getBooking: (bookingId: string) =>
+    api.get<PujaBookingData>(`/purohits/bookings/${bookingId}`),
+
   getRoomToken: (bookingId: string) =>
     api.get<PujaBookingData>(endpoints.purohits.roomToken(bookingId)),
 
+  acceptBooking: (bookingId: string) =>
+    api.post<PujaBookingData>(`/purohits/bookings/${bookingId}/accept`),
+
+  declineBooking: (bookingId: string, reason?: string) =>
+    api.post<PujaBookingData>(`/purohits/bookings/${bookingId}/decline`, reason ? { reason } : {}),
+
   completeBooking: (bookingId: string) =>
     api.post<PujaBookingData>(`/purohits/bookings/${bookingId}/complete`),
+
+  getActivePurohitBooking: () =>
+    api.get<PujaBookingData | null>("/purohits/me/bookings/active"),
 
   sendApplicationOtp: (email: string) =>
     api.post<{ email: string }>(endpoints.purohits.applicationSendOtp, { email }, { auth: false }),

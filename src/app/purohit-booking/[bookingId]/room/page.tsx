@@ -35,6 +35,7 @@ import { Badge, Button, LoadingBlock } from "@/components/ui";
 import { purohitApi, type PujaBookingData } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/providers/auth-provider";
+import { useRealtime } from "@/providers/realtime-provider";
 
 export default function DevoteePujaVideoRoomPage() {
   const params = useParams<{ bookingId: string }>();
@@ -48,8 +49,10 @@ export default function DevoteePujaVideoRoomPage() {
   const [vedicAudioMode, setVedicAudioMode] = React.useState(true);
   const [pushpanjaliPetals, setPushpanjaliPetals] = React.useState<{ id: number; left: number }[]>([]);
   const [consecratedModalOpen, setConsecratedModalOpen] = React.useState(false);
+  const [remainingSeconds, setRemainingSeconds] = React.useState<number | null>(null);
+  const { onPujaEvent } = useRealtime();
 
-  // Fetch Booking Details & Video Token
+  // Fetch Booking Details & Video Token (polls every 3s while awaiting Purohit accept)
   const {
     data: booking,
     isLoading,
@@ -62,8 +65,9 @@ export default function DevoteePujaVideoRoomPage() {
       return ((res as any)?.data !== undefined ? (res as any).data : res) as PujaBookingData;
     },
     enabled: Boolean(bookingId),
-    refetchOnWindowFocus: false,
-    staleTime: 30 * 1000,
+    refetchOnWindowFocus: true,
+    refetchInterval: (q) => (q.state.data?.status === "confirmed" ? 3000 : false),
+    staleTime: 10 * 1000,
   });
 
   // Complete Puja Mutation (For Purohit)
@@ -75,12 +79,47 @@ export default function DevoteePujaVideoRoomPage() {
       setConsecratedModalOpen(true);
       toast.success("পবিত্র পূজা সফলভাবে সম্পন্ন ও প্রতিষ্ঠিত হয়েছে!");
       queryClient.invalidateQueries({ queryKey: ["purohit_booking_token", bookingId] });
+      queryClient.invalidateQueries({ queryKey: ["purohits_list"] });
     },
     onError: (err) => {
       const msg = err instanceof ApiError ? err.message : "Failed to mark puja completed";
       toast.error(msg);
     },
   });
+
+  React.useEffect(() => {
+    return onPujaEvent((msg) => {
+      if (String(msg.data.booking?.id) !== bookingId) return;
+      if (msg.data.event === "puja_accepted") {
+        toast.success("পুরোহিতজী লাইভ রুমে যুক্ত হচ্ছেন!");
+        void refetch();
+      } else if (msg.data.event === "puja_declined") {
+        toast.error("পুরোহিতজী এই মুহূর্তে ব্যস্ত — আপনার টাকা ১০০% রিফান্ড করা হয়েছে।");
+        void refetch();
+      } else if (msg.data.event === "puja_ended") {
+        setConsecratedModalOpen(true);
+        void queryClient.invalidateQueries({ queryKey: ["purohit_booking_token", bookingId] });
+      }
+    });
+  }, [bookingId, onPujaEvent, queryClient, refetch]);
+
+  React.useEffect(() => {
+    if (!booking?.expires_at || booking.status !== "in_progress") return;
+    const expiryMs = Date.parse(booking.expires_at);
+    if (Number.isNaN(expiryMs)) return;
+
+    const tick = () => {
+      const secs = Math.max(0, Math.floor((expiryMs - Date.now()) / 1000));
+      setRemainingSeconds(secs);
+      if (secs === 0 && !consecratedModalOpen) {
+        setConsecratedModalOpen(true);
+        toast.info("নির্ধারিত পূজার সময় সম্পূর্ণ হয়েছে।");
+      }
+    };
+    tick();
+    const timer = window.setInterval(tick, 1000);
+    return () => window.clearInterval(timer);
+  }, [booking?.expires_at, booking?.status, consecratedModalOpen]);
 
   // Handle Offer Pushpanjali (Devotee flower offering animation)
   const handleOfferPushpanjali = () => {
@@ -141,6 +180,50 @@ export default function DevoteePujaVideoRoomPage() {
   const isPurohit = user?.id === booking.purohit_id || (user as any)?.role === "purohit";
   const isCompleted = booking.status === "completed";
 
+  // Waiting for Purohit to accept incoming live request (for Devotee)
+  if (booking.status === "confirmed" && !isPurohit) {
+    return (
+      <div className="min-h-screen bg-[#070B12] flex flex-col items-center justify-center p-6 text-center text-white">
+        <div className="max-w-md w-full rounded-3xl bg-stone-900/90 border border-amber-500/40 p-7 space-y-5 shadow-2xl">
+          <div className="size-16 rounded-full bg-amber-500/20 border-2 border-amber-400 flex items-center justify-center mx-auto text-amber-300 animate-pulse">
+            <Flame className="size-8" />
+          </div>
+          <div className="space-y-2">
+            <Badge tone="neutral" className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-xs font-bold">
+              পেমেন্ট সম্পন্ন · ₹{booking.amount_inr}
+            </Badge>
+            <h2 className="text-xl font-bold font-serif text-amber-200">
+              {booking.purohit_name}-কে পূজার অনুরোধ পাঠানো হয়েছে
+            </h2>
+            <p className="text-xs text-stone-300 leading-relaxed">
+              পুরোহিতজী অনুরোধটি গ্রহণ করলেই <b>{booking.puja_name} ({booking.puja_duration_minutes} মিনিট)</b> লাইভ ভিডিও রুম শুরু হবে। পুরোহিতজী ২ মিনিটের মধ্যে যুক্ত না হলে সম্পূর্ণ টাকা অটো-রিফান্ড হবে।
+            </p>
+          </div>
+          <div className="p-3 rounded-2xl bg-black/40 border border-stone-800 text-xs text-stone-300 text-left space-y-1">
+            <div><span className="text-stone-500">সংকল্প নাম:</span> <b>{booking.sankalpa_name}</b></div>
+            <div><span className="text-stone-500">গোত্র:</span> <b>{booking.sankalpa_gotra || "Kashyapa"}</b></div>
+            <div><span className="text-stone-500">বুকিং নম্বর:</span> <span className="font-mono">{booking.booking_number}</span></div>
+          </div>
+          <div className="flex justify-center gap-3 pt-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              className="border-amber-500/40 text-amber-200 hover:bg-amber-950/50 text-xs"
+            >
+              স্ট্যাটাস রিফ্রেশ করুন
+            </Button>
+            <Link href="/purohits">
+              <Button variant="ghost" size="sm" className="text-stone-400 hover:text-white text-xs">
+                তালিকায় ফিরুন
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const credentials = {
     app_id: booking.zego_app_id,
     token: booking.zego_token,
@@ -191,6 +274,23 @@ export default function DevoteePujaVideoRoomPage() {
 
         {/* Header Right Actions */}
         <div className="flex items-center gap-2">
+          {remainingSeconds !== null && !isCompleted && (
+            <div
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono font-extrabold ${
+                remainingSeconds <= 120
+                  ? "bg-rose-500/20 border-rose-400/60 text-rose-200 animate-pulse"
+                  : "bg-emerald-500/20 border-emerald-400/40 text-emerald-200"
+              }`}
+              title="লাইভ পূজার বাকি সময়"
+            >
+              <Clock className="size-3.5" />
+              <span>
+                {String(Math.floor(remainingSeconds / 60)).padStart(2, "0")}:
+                {String(remainingSeconds % 60).padStart(2, "0")}
+              </span>
+            </div>
+          )}
+
           {/* Vedic Audio Mode Pill */}
           <button
             type="button"
