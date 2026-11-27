@@ -58,6 +58,26 @@ import {
   ELEMENTS_LOCALIZED,
 } from "@/lib/tarot-translations";
 
+function MiniSpreadDiagram({ count, active }: { count: number; active: boolean }) {
+  const tone = active
+    ? "bg-amber-500 border-amber-600"
+    : "bg-amber-200/70 border-amber-400/70 group-hover:bg-amber-400/80";
+  const slots = Math.min(count, 6);
+  return (
+    <div className="flex items-center gap-1" aria-hidden="true">
+      {Array.from({ length: slots }).map((_, idx) => (
+        <span
+          key={idx}
+          className={`inline-block w-2 h-3 rounded-[2px] border transition-colors ${tone}`}
+        />
+      ))}
+      {count > 6 && (
+        <span className="text-[10px] font-bold text-amber-700 ml-0.5">+{count - 6}</span>
+      )}
+    </div>
+  );
+}
+
 export default function TarotPage() {
   const { getFeature, checkAccess, walletBalance, refresh: refreshWallet } = useFeaturePricing();
   const tarotFeature = getFeature("tarot");
@@ -282,108 +302,109 @@ export default function TarotPage() {
         onGoToStep={(nextStep) => setStep(nextStep)}
       />
 
-      <main id="tarot-workspace" className="mx-auto max-w-6xl px-3 sm:px-6 pt-4 pb-4 flex-1 w-full space-y-6">
-        {/* Breadcrumb & Sanctum Control Sanctuary */}
-        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-stone-500">
-          <div className="flex items-center gap-1.5 uppercase tracking-wider font-semibold">
-            <Link href="/" className="hover:text-amber-700 transition-colors">
-              {language === "bn" ? "হোম" : language === "hi" ? "होम" : "Home"}
-            </Link>
-            <span className="text-stone-300">&gt;</span>
-            <span className="text-stone-900 font-bold">{t.title}</span>
+      <main id="tarot-workspace" className="mx-auto max-w-6xl px-3 sm:px-6 pb-8 flex-1 w-full space-y-8 scroll-mt-20">
+        {/* Architectural Sanctuary Threshold Card overlapping Hero horizon smoothly */}
+        <section className="relative z-20 -mt-10 sm:-mt-12 rounded-3xl border border-amber-200/90 bg-[#fffcf9]/95 backdrop-blur-md p-4 sm:p-6 shadow-[0_18px_50px_rgba(64,31,7,0.09)] space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-stone-500 border-b border-stone-200/70 pb-3">
+            <div className="flex items-center gap-1.5 uppercase tracking-wider font-semibold">
+              <Link href="/" className="hover:text-amber-700 transition-colors">
+                {language === "bn" ? "হোম" : language === "hi" ? "होम" : "Home"}
+              </Link>
+              <span className="text-stone-300">&gt;</span>
+              <span className="text-stone-900 font-bold">{t.title}</span>
+            </div>
+            <span className="text-stone-500 font-medium">
+              {language === "bn"
+                ? "আলো ছড়াতে মন্দিরের ওপর মাউস বা আঙুল নাড়ুন · ৭৮টি প্রামাণ্য কার্ড"
+                : language === "hi"
+                ? "रोशनी फैलाने के लिए मंदिर पर कर्सर घुमाएं · 78 प्रामाणिक कार्ड"
+                : "Carry the lantern across the temple arcade above · 78 Arcana"}
+            </span>
           </div>
-          <span className="text-[11px] text-stone-500">
-            {language === "bn"
-              ? "আলো ছড়াতে মন্দিরের ওপর মাউস বা আঙুল নাড়ুন · ৭৮টি প্রামাণ্য কার্ড"
-              : language === "hi"
-              ? "रोशनी फैलाने के लिए मंदिर पर कर्सर घुमाएं · 78 प्रामाणिक कार्ड"
-              : "Carry the lantern across the temple arcade above · 78 Arcana"}
-          </span>
-        </div>
 
-        {/* Sanctuary Controls Header Card (Warm Cream & Saffron Gold DivinLink Theme) */}
-        <div className="relative overflow-hidden rounded-2xl border border-amber-200/70 bg-gradient-to-r from-amber-50/70 via-white to-amber-50/40 px-4 sm:px-6 py-4 shadow-2xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="space-y-1.5 max-w-2xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-0.5 text-[11px] font-bold text-amber-900">
-                <Sparkles className="size-3 text-amber-600" />
-                <span>{t.badge}</span>
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="space-y-2 max-w-2xl">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-0.5 text-[11px] font-bold text-amber-900">
+                  <Sparkles className="size-3 text-amber-600" />
+                  <span>{t.badge}</span>
+                </div>
+                <FeatureCoinBadge
+                  feature={tarotFeature}
+                  walletBalance={walletBalance}
+                  language={language}
+                />
               </div>
-              <FeatureCoinBadge
-                feature={tarotFeature}
-                walletBalance={walletBalance}
-                language={language}
-              />
+
+              <h2 className="text-xl sm:text-2xl font-serif font-bold text-stone-900 tracking-tight leading-tight">
+                {t.title}
+              </h2>
+              <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+                {t.subtitle}
+              </p>
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-serif font-bold text-stone-900 tracking-tight leading-tight">
-              {t.title}
-            </h2>
-            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-              {t.subtitle}
-            </p>
-          </div>
+            <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+              {/* Language Switcher Bar */}
+              <div className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white p-0.5 text-xs font-semibold shadow-2xs">
+                {(
+                  [
+                    { code: "bn", label: "বাংলা" },
+                    { code: "hi", label: "हिन्दी" },
+                    { code: "en", label: "English" },
+                  ] as const
+                ).map((lang) => (
+                  <button
+                    key={lang.code}
+                    type="button"
+                    onClick={() => setLanguage(lang.code)}
+                    className={`min-h-7 inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer ${
+                      language === lang.code
+                        ? "bg-[#f39419] text-stone-950 shadow-2xs font-extrabold"
+                        : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
+                    }`}
+                  >
+                    {lang.label}
+                  </button>
+                ))}
+              </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            {/* Language Switcher Bar */}
-            <div className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white p-0.5 text-xs font-semibold shadow-2xs">
-              {(
-                [
-                  { code: "bn", label: "বাংলা" },
-                  { code: "hi", label: "हिन्दी" },
-                  { code: "en", label: "English" },
-                ] as const
-              ).map((lang) => (
+              {/* Navigation Tabs (Tarot Oracle vs 78 Cards Deck) */}
+              <div className="inline-flex items-center rounded-full border border-stone-200 bg-stone-100/70 p-1 text-xs shadow-2xs">
                 <button
-                  key={lang.code}
                   type="button"
-                  onClick={() => setLanguage(lang.code)}
-                  className={`min-h-7 inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer ${
-                    language === lang.code
-                      ? "bg-[#f39419] text-stone-950 shadow-2xs font-extrabold"
-                      : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
+                  onClick={() => setMainTab("reading")}
+                  className={`px-3.5 py-1.5 rounded-full font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    mainTab === "reading"
+                      ? "bg-[#f39419] text-[#1d1a1c] border border-[#d97b0b] shadow-2xs font-extrabold"
+                      : "text-stone-600 hover:text-stone-900"
                   }`}
                 >
-                  {lang.label}
+                  <Compass className="w-3.5 h-3.5" />
+                  <span>
+                    {language === "bn"
+                      ? "ট্যারো ওরাকল"
+                      : language === "hi"
+                      ? "टैरो ऑरेकल"
+                      : "Tarot Oracle"}
+                  </span>
                 </button>
-              ))}
-            </div>
-
-            {/* Navigation Tabs (Tarot Oracle vs 78 Cards Deck) */}
-            <div className="inline-flex items-center rounded-full border border-stone-200 bg-white p-1 text-xs shadow-2xs">
-              <button
-                type="button"
-                onClick={() => setMainTab("reading")}
-                className={`px-3.5 py-1.5 rounded-full font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                  mainTab === "reading"
-                    ? "bg-[#f39419] text-[#1d1a1c] border border-[#d97b0b] shadow-2xs font-extrabold"
-                    : "text-stone-600 hover:text-stone-900"
-                }`}
-              >
-                <Compass className="w-3.5 h-3.5" />
-                <span>
-                  {language === "bn"
-                    ? "ট্যারো ওরাকল"
-                    : language === "hi"
-                    ? "टैरो ऑरेकल"
-                    : "Tarot Oracle"}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setMainTab("explorer")}
-                className={`px-3.5 py-1.5 rounded-full font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                  mainTab === "explorer"
-                    ? "bg-[#f39419] text-[#1d1a1c] border border-[#d97b0b] shadow-2xs font-extrabold"
-                    : "text-stone-600 hover:text-stone-900"
-                }`}
-              >
-                <BookOpen className="w-3.5 h-3.5" />
-                <span>{t.tabDeckExplorer}</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setMainTab("explorer")}
+                  className={`px-3.5 py-1.5 rounded-full font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    mainTab === "explorer"
+                      ? "bg-[#f39419] text-[#1d1a1c] border border-[#d97b0b] shadow-2xs font-extrabold"
+                      : "text-stone-600 hover:text-stone-900"
+                  }`}
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  <span>{t.tabDeckExplorer}</span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
       <div className="space-y-10">
         {/* Feature disabled alert if toggled off in admin */}
@@ -396,34 +417,53 @@ export default function TarotPage() {
         {/* ===================== TAB 1: READING WIZARD ===================== */}
         {mainTab === "reading" && (
           <div>
-            {/* Step Progress Bar */}
-            <div className="max-w-3xl mx-auto mb-8">
-              <div className="grid grid-cols-4 gap-2 text-center text-xs">
+            {/* Connected Medallion Stepper */}
+            <div className="relative max-w-4xl mx-auto mb-8">
+              <div
+                aria-hidden="true"
+                className="hidden sm:block absolute top-1/2 left-10 right-10 h-px -translate-y-1/2 bg-gradient-to-r from-amber-300/60 via-stone-300 to-amber-300/60"
+              />
+              <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
                 {[
                   { stepNum: 1, label: t.stepChooseSpread },
                   { stepNum: 2, label: t.stepAskQuestion },
                   { stepNum: 3, label: t.stepDrawCards },
                   { stepNum: 4, label: t.stepInterpretation },
-                ].map((s) => (
-                  <button
-                    key={s.stepNum}
-                    onClick={() => {
-                      if (s.stepNum < step || (s.stepNum === 4 && readingResult)) {
-                        setStep(s.stepNum as any);
-                      }
-                    }}
-                    disabled={s.stepNum > step && !(s.stepNum === 4 && readingResult)}
-                    className={`py-2 px-1.5 rounded-xl border transition-all text-center flex flex-col items-center gap-1 ${
-                      step === s.stepNum
-                        ? "border-2 border-amber-500 bg-amber-50/90 text-amber-950 font-bold shadow-xs"
-                        : step > s.stepNum
-                        ? "border-emerald-300 bg-emerald-50/60 text-emerald-800 font-semibold"
-                        : "border-slate-200 text-slate-400 bg-white"
-                    }`}
-                  >
-                    <span className="line-clamp-1">{s.label}</span>
-                  </button>
-                ))}
+                ].map((s) => {
+                  const isActive = step === s.stepNum;
+                  const isDone = step > s.stepNum;
+                  const canJump = s.stepNum < step || (s.stepNum === 4 && readingResult);
+                  return (
+                    <button
+                      key={s.stepNum}
+                      type="button"
+                      onClick={() => {
+                        if (canJump) setStep(s.stepNum as 1 | 2 | 3 | 4);
+                      }}
+                      disabled={!canJump && !isActive}
+                      className={`py-2.5 px-3 rounded-2xl border transition-all flex items-center justify-center gap-2 ${
+                        isActive
+                          ? "border-amber-500 bg-amber-50 text-stone-950 font-bold shadow-sm ring-2 ring-amber-400/20"
+                          : isDone
+                          ? "border-emerald-300 bg-white text-emerald-900 font-semibold hover:bg-emerald-50/70 cursor-pointer"
+                          : "border-stone-200 text-stone-400 bg-white/85"
+                      }`}
+                    >
+                      <span
+                        className={`size-5 rounded-full text-[10px] font-bold inline-flex items-center justify-center shrink-0 ${
+                          isActive
+                            ? "bg-[#f39419] text-stone-950"
+                            : isDone
+                            ? "bg-emerald-600 text-white"
+                            : "bg-stone-100 text-stone-500"
+                        }`}
+                      >
+                        {isDone ? "✓" : `0${s.stepNum}`}
+                      </span>
+                      <span className="line-clamp-1">{s.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -431,10 +471,10 @@ export default function TarotPage() {
             {step === 1 && (
               <div className="space-y-6">
                 <div className="text-center mb-6">
-                  <h2 className="text-2xl font-display font-bold text-slate-900">
+                  <h2 className="text-2xl sm:text-3xl font-serif font-bold text-stone-900">
                     {t.stepChooseSpread}
                   </h2>
-                  <p className="text-sm text-slate-600 mt-1">
+                  <p className="text-sm text-stone-600 mt-1">
                     {language === "bn"
                       ? "আপনার প্রশ্নের গভীরতার সাথে সামঞ্জস্যপূর্ণ প্রামাণ্য স্প্রেডটি বেছে নিন।"
                       : language === "hi"
@@ -455,41 +495,47 @@ export default function TarotPage() {
                           e.currentTarget.style.setProperty("--card-mx", `${e.clientX - rect.left}px`);
                           e.currentTarget.style.setProperty("--card-my", `${e.clientY - rect.top}px`);
                         }}
-                        className={`tarot-magnetic-card rounded-2xl p-6 cursor-pointer flex flex-col justify-between ${
+                        className={`group tarot-magnetic-card rounded-2xl p-6 cursor-pointer flex flex-col justify-between ${
                           isSelected
-                            ? "border-2 border-amber-500 bg-amber-50/70 shadow-md ring-2 ring-amber-400/25 -translate-y-0.5"
-                            : "border border-stone-200 bg-white hover:border-amber-300 hover:shadow-md hover:-translate-y-1"
+                            ? "border-2 border-amber-500 bg-gradient-to-b from-amber-50/90 to-white shadow-md ring-2 ring-amber-400/25 -translate-y-0.5"
+                            : "border border-stone-200/90 bg-white hover:border-amber-300 hover:shadow-md hover:-translate-y-1"
                         }`}
                       >
                         <div>
-                          <div className="flex items-center justify-between mb-3.5">
-                            <span className="text-xs font-bold text-amber-900 bg-amber-100 border border-amber-300 px-3 py-0.5 rounded-full shadow-2xs">
+                          <div className="flex items-center justify-between gap-2 mb-4">
+                            <span className="text-xs font-bold text-amber-900 bg-amber-100/90 border border-amber-300/80 px-3 py-0.5 rounded-full shadow-2xs">
                               {s.card_count} {language === "bn" ? "কার্ড" : language === "hi" ? "कार्ड" : s.card_count === 1 ? "Card" : "Cards"}
                             </span>
-                            {isSelected && <CheckCircle2 className="w-5 h-5 text-amber-600" />}
+                            <div className="flex items-center gap-2">
+                              <MiniSpreadDiagram count={s.card_count} active={isSelected} />
+                              {isSelected && <CheckCircle2 className="w-5 h-5 text-amber-600 shrink-0" />}
+                            </div>
                           </div>
 
-                          <h3 className="text-lg font-display font-bold text-slate-900 mb-2">
+                          <h3 className="text-lg font-serif font-bold text-stone-900 mb-2">
                             {s.name}
                           </h3>
-                          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
+                          <p className="text-xs sm:text-sm text-stone-600 leading-relaxed mb-4">
                             {s.description}
                           </p>
                         </div>
 
-                        <div className="pt-3 border-t border-slate-100 text-xs text-amber-800 font-medium">
-                          {language === "bn" ? "উপযুক্ত:" : language === "hi" ? "उपयुक्त:" : "Ideal for:"} {s.ideal_for}
+                        <div className="pt-3 border-t border-stone-100 text-xs text-amber-800 font-semibold flex items-center justify-between gap-2">
+                          <span>
+                            {language === "bn" ? "উপযুক্ত:" : language === "hi" ? "उपयुक्त:" : "Ideal for:"} {s.ideal_for}
+                          </span>
+                          <ChevronRight className={`w-4 h-4 shrink-0 transition-transform ${isSelected ? "text-amber-700 translate-x-0.5" : "text-stone-300 group-hover:text-amber-600"}`} />
                         </div>
                       </div>
                     );
                   })}
                 </div>
 
-                <div className="text-center pt-6">
+                <div className="text-center pt-4">
                   <Button
                     size="lg"
                     onClick={() => setStep(2)}
-                    className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold px-8 py-3.5 rounded-xl shadow-md shadow-amber-500/20"
+                    className="bg-gradient-to-r from-[#f39419] to-amber-500 hover:from-amber-500 hover:to-amber-600 text-stone-950 font-extrabold px-8 py-3.5 rounded-full shadow-md shadow-amber-500/20"
                   >
                     <span>{t.selectSpreadBtn}</span>
                     <ArrowRight className="w-4 h-4 ml-2" />
@@ -500,13 +546,13 @@ export default function TarotPage() {
 
             {/* STEP 2: SET QUESTION & HARMONIC RESONANCE */}
             {step === 2 && (
-              <div className="max-w-2xl mx-auto rounded-2xl border border-amber-300/80 bg-white p-6 sm:p-8 shadow-sm">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+              <div className="max-w-2xl mx-auto rounded-3xl border border-amber-300/80 bg-white p-6 sm:p-8 shadow-sm">
+                <div className="flex items-center justify-between pb-4 border-b border-stone-100 mb-6">
                   <div>
-                    <h2 className="text-xl font-display font-bold text-slate-900">
+                    <h2 className="text-xl font-serif font-bold text-stone-900">
                       {t.stepAskQuestion}
                     </h2>
-                    <p className="text-xs text-slate-500 font-medium mt-0.5">
+                    <p className="text-xs text-stone-500 font-medium mt-0.5">
                       {language === "bn" ? "নির্বাচিত স্প্রেড:" : language === "hi" ? "चयनित स्प्रेड:" : "Selected Spread:"}{" "}
                       <span className="text-amber-800 font-bold">
                         {activeSpreadMeta.name} ({targetCardCount} {language === "bn" ? "কার্ড" : language === "hi" ? "कार्ड" : "Cards"})
@@ -517,7 +563,7 @@ export default function TarotPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setStep(1)}
-                    className="text-xs text-slate-500 hover:text-slate-800"
+                    className="text-xs text-stone-500 hover:text-stone-900"
                   >
                     {language === "bn" ? "স্প্রেড পরিবর্তন" : language === "hi" ? "स्प्रेड बदलें" : "Change Spread"}
                   </Button>
@@ -525,7 +571,7 @@ export default function TarotPage() {
 
                 {/* Focus Pillar Pills */}
                 <div className="mb-6">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
+                  <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2.5">
                     {language === "bn" ? "প্রশ্নের মুখ্য ক্ষেত্র" : language === "hi" ? "प्रश्न का मुख्य क्षेत्र" : "Focus Pillar"}
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
@@ -543,13 +589,13 @@ export default function TarotPage() {
                           key={c.key}
                           type="button"
                           onClick={() => setCategory(c.key as QuestionCategory)}
-                          className={`p-3 rounded-xl border text-xs font-semibold flex items-center gap-2 transition-all ${
+                          className={`p-3 rounded-xl border text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
                             isCatActive
                               ? "border-2 border-amber-500 bg-amber-50 text-amber-950 shadow-xs"
-                              : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                              : "border-stone-200 bg-white text-stone-600 hover:border-amber-300"
                           }`}
                         >
-                          <Icon className={`w-4 h-4 ${isCatActive ? "text-amber-600" : "text-slate-400"}`} />
+                          <Icon className={`w-4 h-4 ${isCatActive ? "text-amber-600" : "text-stone-400"}`} />
                           <span>{c.label}</span>
                         </button>
                       );
@@ -559,7 +605,7 @@ export default function TarotPage() {
 
                 {/* Sacred Question Input */}
                 <div className="mb-6">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
                     {t.questionLabel}
                   </label>
                   <textarea
@@ -567,14 +613,14 @@ export default function TarotPage() {
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
                     placeholder={t.questionPlaceholder}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none"
+                    className="w-full rounded-xl border border-stone-200 bg-stone-50/70 px-4 py-3 text-sm text-stone-900 placeholder-stone-400 focus:border-amber-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none"
                   />
                 </div>
 
                 {/* Optional Astrological Parameters */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                    <label className="block text-xs font-medium text-stone-600 mb-1.5">
                       {t.moonSignLabel}
                     </label>
                     <input
@@ -582,11 +628,11 @@ export default function TarotPage() {
                       value={moonSign}
                       onChange={(e) => setMoonSign(e.target.value)}
                       placeholder={t.moonSignPlaceholder}
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:bg-white focus:outline-none"
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50/70 px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 focus:border-amber-500 focus:bg-white focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                    <label className="block text-xs font-medium text-stone-600 mb-1.5">
                       {t.dashaLordLabel}
                     </label>
                     <input
@@ -594,18 +640,18 @@ export default function TarotPage() {
                       value={dashaLord}
                       onChange={(e) => setDashaLord(e.target.value)}
                       placeholder={t.dashaLordPlaceholder}
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:bg-white focus:outline-none"
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50/70 px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 focus:border-amber-500 focus:bg-white focus:outline-none"
                     />
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                  <Button variant="ghost" onClick={() => setStep(1)} className="text-slate-600">
+                <div className="flex items-center justify-between pt-4 border-t border-stone-100">
+                  <Button variant="ghost" onClick={() => setStep(1)} className="text-stone-600">
                     {language === "bn" ? "পেছনে যান" : language === "hi" ? "वापस जाएं" : "Back"}
                   </Button>
                   <Button
                     onClick={() => setStep(3)}
-                    className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-xs"
+                    className="bg-gradient-to-r from-[#f39419] to-amber-500 hover:from-amber-500 hover:to-amber-600 text-stone-950 font-extrabold px-6 py-2.5 rounded-full shadow-xs"
                   >
                     <span>{t.startDrawBtn}</span>
                     <ArrowRight className="w-4 h-4 ml-2" />
@@ -618,12 +664,12 @@ export default function TarotPage() {
             {step === 3 && (
               <div className="space-y-6">
                 {/* Control Bar */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-stone-200 bg-white p-5 sm:p-6 shadow-sm">
                   <div>
-                    <h2 className="text-lg font-display font-bold text-slate-900">
+                    <h2 className="text-lg font-serif font-bold text-stone-900">
                       {t.stepDrawCards}
                     </h2>
-                    <p className="text-xs text-slate-600 font-medium mt-0.5">
+                    <p className="text-xs text-stone-600 font-medium mt-0.5">
                       {selectedCardIndices.length < targetCardCount
                         ? t.pickCardPrompt(targetCardCount - selectedCardIndices.length, targetCardCount)
                         : t.cardsReadyPrompt}
@@ -635,7 +681,7 @@ export default function TarotPage() {
                       type="button"
                       onClick={handleShuffle}
                       disabled={isShuffling}
-                      className="inline-flex items-center justify-center rounded-xl border border-amber-300 bg-amber-50/80 px-3.5 py-2 text-xs font-bold text-amber-900 hover:bg-amber-100 shadow-2xs transition-colors"
+                      className="inline-flex items-center justify-center rounded-xl border border-amber-300 bg-amber-50/80 px-3.5 py-2 text-xs font-bold text-amber-900 hover:bg-amber-100 shadow-2xs transition-colors cursor-pointer"
                     >
                       <Shuffle className={`w-3.5 h-3.5 mr-1.5 ${isShuffling ? "animate-spin" : ""}`} />
                       <span>{t.shuffleDeckBtn}</span>
@@ -643,7 +689,7 @@ export default function TarotPage() {
                     <button
                       type="button"
                       onClick={handleAutoPick}
-                      className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-2xs transition-colors"
+                      className="inline-flex items-center justify-center rounded-xl border border-stone-200 bg-white px-3.5 py-2 text-xs font-bold text-stone-700 hover:bg-stone-50 shadow-2xs transition-colors cursor-pointer"
                     >
                       <Sparkles className="w-3.5 h-3.5 mr-1.5 text-amber-500" />
                       <span>{t.autoPickBtn}</span>
@@ -652,7 +698,7 @@ export default function TarotPage() {
                 </div>
 
                 {/* Selected Cards Preview Slots */}
-                <div className="p-4 rounded-2xl border border-amber-300/80 bg-amber-50/40 flex items-center justify-center gap-3 flex-wrap">
+                <div className="p-4 rounded-2xl border border-amber-300/80 bg-amber-50/50 flex items-center justify-center gap-3 flex-wrap">
                   {Array.from({ length: targetCardCount }).map((_, slotIdx) => {
                     const pickedIndex = selectedCardIndices[slotIdx];
                     const isPicked = pickedIndex !== undefined;
@@ -662,7 +708,7 @@ export default function TarotPage() {
                         className={`w-16 h-24 sm:w-20 sm:h-28 rounded-xl border-2 flex flex-col items-center justify-center p-2 text-center transition-all ${
                           isPicked
                             ? "border-amber-500 bg-white shadow-md ring-2 ring-amber-400/20"
-                            : "border-dashed border-slate-300 bg-white/70 text-slate-400"
+                            : "border-dashed border-stone-300 bg-white/80 text-stone-400"
                         }`}
                       >
                         {isPicked ? (
@@ -673,7 +719,7 @@ export default function TarotPage() {
                             </span>
                           </>
                         ) : (
-                          <span className="text-[10px] text-slate-400 font-medium">
+                          <span className="text-[10px] text-stone-400 font-medium">
                             {language === "bn" ? `স্থান ${slotIdx + 1}` : language === "hi" ? `स्थान ${slotIdx + 1}` : `Slot ${slotIdx + 1}`}
                           </span>
                         )}
@@ -682,13 +728,13 @@ export default function TarotPage() {
                   })}
                 </div>
 
-                {/* The 78-card Celestial Fanned Grid */}
+                {/* The 78-card Celestial Fanned Grid (Mahogany-Rosewood & Temple Gold Card Backs) */}
                 <div
-                  className={`p-6 rounded-2xl border border-slate-200 bg-white shadow-sm relative overflow-hidden transition-all duration-500 ${
+                  className={`p-6 rounded-3xl border border-stone-200 bg-white shadow-sm relative overflow-hidden transition-all duration-500 ${
                     isShuffling ? "scale-98 opacity-50" : "scale-100 opacity-100"
                   }`}
                 >
-                  <p className="text-xs text-center text-slate-600 font-medium mb-4">
+                  <p className="text-xs text-center text-stone-600 font-medium mb-4">
                     {language === "bn"
                       ? "আপনার অন্তর্নিহিত অনুভূতি দিয়ে নিচের যেকোনো কার্ড স্পর্শ করে বেছে নিন:"
                       : language === "hi"
@@ -696,7 +742,7 @@ export default function TarotPage() {
                       : "Touch any cards below to channel your intuitive subconscious energy:"}
                   </p>
 
-                  <div className="grid grid-cols-6 sm:grid-cols-9 md:grid-cols-13 gap-1.5 sm:gap-2 justify-items-center max-h-[460px] overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-slate-200">
+                  <div className="grid grid-cols-6 sm:grid-cols-9 md:grid-cols-13 gap-1.5 sm:gap-2 justify-items-center max-h-[460px] overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-stone-200">
                     {Array.from({ length: 78 }).map((_, cardIndex) => {
                       const isChosen = selectedCardIndices.includes(cardIndex);
                       return (
@@ -704,17 +750,17 @@ export default function TarotPage() {
                           key={cardIndex}
                           type="button"
                           onClick={() => handleToggleCardPick(cardIndex)}
-                          className={`w-10 h-16 sm:w-12 sm:h-20 rounded-xl border-2 transition-all transform hover:-translate-y-2 hover:shadow-md flex flex-col items-center justify-center ${
+                          className={`w-10 h-16 sm:w-12 sm:h-20 rounded-xl border-2 transition-all transform hover:-translate-y-2 hover:shadow-md flex flex-col items-center justify-center cursor-pointer ${
                             isChosen
-                              ? "border-amber-500 bg-amber-500 text-white -translate-y-2.5 shadow-md ring-2 ring-amber-400/40"
-                              : "border-amber-400/80 bg-gradient-to-br from-[#0F172A] via-[#1E1B4B] to-[#0F172A] text-amber-300 hover:border-amber-500 shadow-2xs"
+                              ? "border-amber-500 bg-amber-500 text-stone-950 -translate-y-2.5 shadow-md ring-2 ring-amber-400/40"
+                              : "border-amber-400/75 bg-gradient-to-br from-[#2c1912] via-[#4a2618] to-[#21120c] text-amber-200 hover:border-amber-500 shadow-2xs"
                           }`}
                         >
                           <div
                             className={`w-5 h-5 rounded-full border flex items-center justify-center text-[9px] font-serif ${
                               isChosen
-                                ? "border-white/60 text-white font-bold"
-                                : "border-amber-300/40 text-amber-300"
+                                ? "border-stone-900/40 text-stone-950 font-bold"
+                                : "border-amber-300/45 text-amber-200"
                             }`}
                           >
                             ✦
@@ -731,7 +777,7 @@ export default function TarotPage() {
                     size="lg"
                     disabled={selectedCardIndices.length < targetCardCount || drawingReading}
                     onClick={handleRevealReading}
-                    className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold px-10 py-3.5 rounded-xl text-base shadow-md shadow-amber-500/20 disabled:opacity-50"
+                    className="bg-gradient-to-r from-[#f39419] to-amber-500 hover:from-amber-500 hover:to-amber-600 text-stone-950 font-extrabold px-10 py-3.5 rounded-full text-base shadow-md shadow-amber-500/20 disabled:opacity-50"
                   >
                     {drawingReading ? (
                       <>
@@ -759,22 +805,22 @@ export default function TarotPage() {
             {step === 4 && readingResult && (
               <div className="space-y-8 animate-fadeIn">
                 {/* Unified Master Spread Container */}
-                <div className="rounded-2xl border-2 border-amber-300 bg-white p-6 sm:p-8 shadow-sm">
+                <div className="rounded-3xl border-2 border-amber-300 bg-white p-6 sm:p-8 shadow-sm">
                   {/* Master Header with Question and Actions */}
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-stone-100">
                     <div>
                       <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                         <span className="text-xs uppercase font-bold tracking-wider text-amber-900 bg-amber-100 border border-amber-300 px-3 py-0.5 rounded-full shadow-2xs">
                           {readingResult.spread_name}
                         </span>
-                        <span className="text-xs text-slate-500 font-bold uppercase tracking-wide">
+                        <span className="text-xs text-stone-500 font-bold uppercase tracking-wide">
                           • {category.toUpperCase()}
                         </span>
                       </div>
-                      <h2 className="text-2xl sm:text-3xl font-display font-bold text-slate-950">
+                      <h2 className="text-2xl sm:text-3xl font-serif font-bold text-stone-950">
                         {readingResult.question || activeSpreadMeta.name}
                       </h2>
-                      <p className="text-xs sm:text-sm text-slate-600 mt-1">
+                      <p className="text-xs sm:text-sm text-stone-600 mt-1">
                         {t.readingSubtitle}
                       </p>
                     </div>
@@ -783,15 +829,15 @@ export default function TarotPage() {
                       <button
                         type="button"
                         onClick={() => setFlippedCards((prev) => prev.map(() => true))}
-                        className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-2xs transition-colors"
+                        className="inline-flex items-center justify-center rounded-xl border border-stone-200 bg-white px-3.5 py-2 text-xs font-bold text-stone-700 hover:bg-stone-50 shadow-2xs transition-colors cursor-pointer"
                       >
-                        <Eye className="w-3.5 h-3.5 mr-1.5 text-slate-500" />
+                        <Eye className="w-3.5 h-3.5 mr-1.5 text-stone-500" />
                         <span>{t.flipAllBtn}</span>
                       </button>
                       <button
                         type="button"
                         onClick={handleReset}
-                        className="inline-flex items-center justify-center rounded-xl border border-amber-300 bg-amber-50/80 px-3.5 py-2 text-xs font-bold text-amber-900 hover:bg-amber-100 shadow-2xs transition-colors"
+                        className="inline-flex items-center justify-center rounded-xl border border-amber-300 bg-amber-50/80 px-3.5 py-2 text-xs font-bold text-amber-900 hover:bg-amber-100 shadow-2xs transition-colors cursor-pointer"
                       >
                         <RotateCw className="w-3.5 h-3.5 mr-1.5 text-amber-600" />
                         <span>{t.newReadingBtn}</span>
@@ -824,14 +870,14 @@ export default function TarotPage() {
         {mainTab === "explorer" && (
           <div className="space-y-8">
             <div className="text-center max-w-2xl mx-auto">
-              <h2 className="text-2xl sm:text-3xl font-display font-bold text-slate-950">
+              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-stone-950">
                 {language === "bn"
                   ? "৭৮টি প্রামাণ্য ট্যারো আর্খানা সংগ্রহ"
                   : language === "hi"
                   ? "78 प्रामाणिक टैरो आर्काना संग्रह"
                   : "The Complete 78 Arcana Deck"}
               </h2>
-              <p className="text-xs sm:text-sm text-slate-600 mt-1">
+              <p className="text-xs sm:text-sm text-stone-600 mt-1">
                 {language === "bn"
                   ? "মেজর ও মাইনর আর্খানার প্রতীকী অর্থ, পঞ্চভূত তত্ত্ব, বৈদিক গ্রহ সংযোগ ও দ্বি-মুখী ব্যাখ্যা জানুন।"
                   : language === "hi"
@@ -841,10 +887,10 @@ export default function TarotPage() {
             </div>
 
             {/* Filter and Search Bar */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+            <div className="rounded-2xl border border-stone-200 bg-white p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
               {/* Search */}
               <div className="relative w-full md:w-80">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -856,23 +902,23 @@ export default function TarotPage() {
                       ? "कार्ड का नाम या ग्रह से खोजें..."
                       : "Search by card name, sign or graha..."
                   }
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-2 text-xs text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:bg-white focus:outline-none"
+                  className="w-full rounded-xl border border-stone-200 bg-stone-50/60 pl-10 pr-4 py-2 text-xs text-stone-900 placeholder-stone-400 focus:border-amber-500 focus:bg-white focus:outline-none"
                 />
               </div>
 
               {/* Arcana Filter */}
               <div className="flex items-center gap-2 flex-wrap text-xs">
-                <span className="text-slate-500 font-semibold">
+                <span className="text-stone-500 font-semibold">
                   {language === "bn" ? "আর্খানা:" : language === "hi" ? "आर्काना:" : "Arcana:"}
                 </span>
                 {(["all", "major", "minor"] as const).map((arc) => (
                   <button
                     key={arc}
                     onClick={() => setFilterArcana(arc)}
-                    className={`px-3 py-1 rounded-full border capitalize transition-colors font-semibold ${
+                    className={`px-3 py-1 rounded-full border capitalize transition-colors font-semibold cursor-pointer ${
                       filterArcana === arc
-                        ? "border-amber-500 bg-amber-500 text-white shadow-2xs"
-                        : "border-slate-200 bg-white text-slate-600 hover:text-slate-900"
+                        ? "border-amber-500 bg-[#f39419] text-stone-950 font-bold shadow-2xs"
+                        : "border-stone-200 bg-white text-stone-600 hover:text-stone-900"
                     }`}
                   >
                     {arc}
@@ -882,17 +928,17 @@ export default function TarotPage() {
 
               {/* Suit Filter */}
               <div className="flex items-center gap-2 flex-wrap text-xs">
-                <span className="text-slate-500 font-semibold">
+                <span className="text-stone-500 font-semibold">
                   {language === "bn" ? "স্যুট:" : language === "hi" ? "सूट:" : "Suit:"}
                 </span>
                 {(["all", "wands", "cups", "swords", "pentacles"] as const).map((suit) => (
                   <button
                     key={suit}
                     onClick={() => setFilterSuit(suit)}
-                    className={`px-3 py-1 rounded-full border capitalize transition-colors font-semibold ${
+                    className={`px-3 py-1 rounded-full border capitalize transition-colors font-semibold cursor-pointer ${
                       filterSuit === suit
-                        ? "border-amber-500 bg-amber-500 text-white shadow-2xs"
-                        : "border-slate-200 bg-white text-slate-600 hover:text-slate-900"
+                        ? "border-amber-500 bg-[#f39419] text-stone-950 font-bold shadow-2xs"
+                        : "border-stone-200 bg-white text-stone-600 hover:text-stone-900"
                     }`}
                   >
                     {suit}
@@ -921,7 +967,7 @@ export default function TarotPage() {
             </div>
 
             {filteredCards.length === 0 && (
-              <div className="text-center py-12 text-slate-500 text-sm">
+              <div className="text-center py-12 text-stone-500 text-sm">
                 {language === "bn"
                   ? "কোনো কার্ড খুঁজে পাওয়া যায়নি।"
                   : language === "hi"
@@ -935,11 +981,11 @@ export default function TarotPage() {
         {/* Selected Card Modal in Explorer */}
         {selectedExplorerCard && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-            <div className="relative w-full max-w-2xl rounded-2xl border border-amber-300 bg-white p-6 sm:p-8 shadow-xl overflow-y-auto max-h-[90vh]">
+            <div className="relative w-full max-w-2xl rounded-3xl border border-amber-300 bg-white p-6 sm:p-8 shadow-xl overflow-y-auto max-h-[90vh]">
               <button
                 type="button"
                 onClick={() => setSelectedExplorerCard(null)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-slate-800 p-1.5 rounded-lg border border-slate-200"
+                className="absolute top-4 right-4 text-stone-400 hover:text-stone-800 p-1.5 rounded-lg border border-stone-200"
               >
                 ✕
               </button>
@@ -958,15 +1004,15 @@ export default function TarotPage() {
                     <span className="text-xs uppercase font-bold text-amber-900 bg-amber-100 border border-amber-300 px-2.5 py-0.5 rounded-full shadow-2xs">
                       {selectedExplorerCard.arcana} Arcana
                     </span>
-                    <span className="text-xs text-slate-500 font-semibold">
+                    <span className="text-xs text-stone-500 font-semibold">
                       • {ELEMENTS_LOCALIZED[language]?.[selectedExplorerCard.element] || selectedExplorerCard.element}
                     </span>
                   </div>
 
-                  <h3 className="text-2xl font-display font-bold text-slate-950">
+                  <h3 className="text-2xl font-serif font-bold text-stone-950">
                     {CARD_NAMES_LOCALIZED[language]?.[selectedExplorerCard.id] || selectedExplorerCard.name}
                   </h3>
-                  <p className="text-xs text-slate-600 font-medium mt-1">
+                  <p className="text-xs text-stone-600 font-medium mt-1">
                     Astrology: <strong>{selectedExplorerCard.astrology}</strong> | Vedic Graha: <strong>{selectedExplorerCard.vedic_graha}</strong>
                   </p>
 
@@ -979,10 +1025,10 @@ export default function TarotPage() {
               {/* Interpretations */}
               <div className="space-y-4 text-xs sm:text-sm">
                 <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50">
-                  <h4 className="font-display font-bold text-emerald-950 mb-1">
+                  <h4 className="font-serif font-bold text-emerald-950 mb-1">
                     {language === "bn" ? "সোজা (জাগ্রত অবস্থা)" : language === "hi" ? "सीधी स्थिति (सकारात्मक)" : "Upright Meaning"}
                   </h4>
-                  <p className="text-slate-700 leading-relaxed mb-2">
+                  <p className="text-stone-700 leading-relaxed mb-2">
                     {selectedExplorerCard.upright.general}
                   </p>
                   <div className="flex items-center gap-1.5 flex-wrap">
@@ -995,10 +1041,10 @@ export default function TarotPage() {
                 </div>
 
                 <div className="p-4 rounded-xl border border-rose-200 bg-rose-50/50">
-                  <h4 className="font-display font-bold text-rose-950 mb-1">
+                  <h4 className="font-serif font-bold text-rose-950 mb-1">
                     {language === "bn" ? "উল্টো (অন্তর্মুখী রূপান্তর)" : language === "hi" ? "उल्टी स्थिति (आंतरिक बदलाव)" : "Reversed Meaning"}
                   </h4>
-                  <p className="text-slate-700 leading-relaxed mb-2">
+                  <p className="text-stone-700 leading-relaxed mb-2">
                     {selectedExplorerCard.reversed.general}
                   </p>
                   <div className="flex items-center gap-1.5 flex-wrap">
@@ -1011,10 +1057,10 @@ export default function TarotPage() {
                 </div>
 
                 <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/40">
-                  <h4 className="font-display font-bold text-amber-950 mb-1">
+                  <h4 className="font-serif font-bold text-amber-950 mb-1">
                     {language === "bn" ? "শাস্ত্রীয় বৈদিক প্রতিকার" : language === "hi" ? "वैदिक ज्योतिषीय उपाय" : "Astrological Remedy"}
                   </h4>
-                  <p className="text-slate-700 leading-relaxed">
+                  <p className="text-stone-700 leading-relaxed">
                     {selectedExplorerCard.remedy}
                   </p>
                 </div>

@@ -58,9 +58,10 @@ export function TarotLanternHero({
   const navRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
   const layerRefs = React.useRef<{
     sky: HTMLDivElement[];
+    chakra: HTMLDivElement[];
     arcade: HTMLDivElement[];
     statue: HTMLDivElement[];
-  }>({ sky: [], arcade: [], statue: [] });
+  }>({ sky: [], chakra: [], arcade: [], statue: [] });
 
   const [ready, setReady] = React.useState(false);
   const [hasPointer, setHasPointer] = React.useState(false);
@@ -209,7 +210,7 @@ export function TarotLanternHero({
       const qfs = Math.max(vh < 420 ? 28 : 34, 50 * u);
       mono.style.fontSize = `${qfs.toFixed(2)}px`;
       mono.style.left = `${(fx + 725 * u).toFixed(2)}px`;
-      const monoTop = Math.min(fy + 791 * u + 0.56 * qfs - italBase * qfs, vh - qfs - 26);
+      const monoTop = Math.min(fy + 791 * u + 0.56 * qfs - italBase * qfs, vh - qfs - 48);
       mono.style.top = `${monoTop.toFixed(2)}px`;
     }
   }, [corniceItems]);
@@ -315,9 +316,30 @@ export function TarotLanternHero({
     };
 
     const onLeave = () => setHasPointer(false);
+    const lastMouseRef = { x: -1, y: -1 };
+    const onScroll = () => {
+      const stage = stageRef.current;
+      if (!stage || lastMouseRef.x < 0) return;
+      const rect = stage.getBoundingClientRect();
+      const inside =
+        lastMouseRef.x >= rect.left &&
+        lastMouseRef.x <= rect.right &&
+        lastMouseRef.y >= rect.top &&
+        lastMouseRef.y <= rect.bottom;
+      setHasPointer(inside);
+    };
 
-    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    const onPointerMoveTracked = (e: PointerEvent) => {
+      if (e.pointerType === "mouse") {
+        lastMouseRef.x = e.clientX;
+        lastMouseRef.y = e.clientY;
+      }
+      onPointerMove(e);
+    };
+
+    window.addEventListener("pointermove", onPointerMoveTracked, { passive: true });
     window.addEventListener("pointerdown", onPointerDown, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
     document.addEventListener("pointerleave", onLeave);
     document.addEventListener("mouseleave", onLeave);
 
@@ -359,6 +381,7 @@ export function TarotLanternHero({
         };
 
         setLayerShift(layerRefs.current.sky, -0.28, 1120);
+        setLayerShift(layerRefs.current.chakra, -0.14, 1120);
         setLayerShift(layerRefs.current.arcade, 0.175, 848.85);
         setLayerShift(layerRefs.current.statue, 0.079, Infinity);
       }
@@ -368,20 +391,28 @@ export function TarotLanternHero({
 
     rafId = window.requestAnimationFrame(tick);
 
+    let ro: ResizeObserver | null = null;
+    if (stageEl && typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(() => runLayout());
+      ro.observe(stageEl);
+    }
+
     return () => {
       window.cancelAnimationFrame(rafId);
       window.removeEventListener("resize", runLayout);
-      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointermove", onPointerMoveTracked);
       window.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("scroll", onScroll);
       document.removeEventListener("pointerleave", onLeave);
       document.removeEventListener("mouseleave", onLeave);
       mq.removeEventListener?.("change", onMqChange);
       io?.disconnect();
+      ro?.disconnect();
     };
   }, [runLayout]);
 
   const registerLayer =
-    (key: "sky" | "arcade" | "statue", stackIdx: 0 | 1) => (el: HTMLDivElement | null) => {
+    (key: "sky" | "chakra" | "arcade" | "statue", stackIdx: 0 | 1) => (el: HTMLDivElement | null) => {
       if (el) layerRefs.current[key][stackIdx] = el;
     };
 
@@ -390,6 +421,10 @@ export function TarotLanternHero({
       <div className="L sky" data-k="-0.28" ref={registerLayer("sky", stackIdx)}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={SKY_IMG} alt="" fetchPriority={id === "dark" ? "high" : undefined} />
+      </div>
+      <div className="L chakra" data-k="-0.14" ref={registerLayer("chakra", stackIdx)}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/zodiac-wheel-gold.webp" alt="" />
       </div>
       <div className="L arcade" data-k="0.175" ref={registerLayer("arcade", stackIdx)}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -411,6 +446,8 @@ export function TarotLanternHero({
       aria-label={title}
     >
       <h1 className="sr-only">{title}</h1>
+
+      <div className="tarot-hero-top-bridge" aria-hidden="true" />
 
       <div ref={frameRef} className="tarot-lantern-frame" aria-hidden="true">
         {renderStack("dark", 0)}
@@ -444,7 +481,7 @@ export function TarotLanternHero({
         aria-label="Enter DivinLink Tarot Oracle"
         className="tarot-monogram"
       >
-        Q
+        D
       </a>
 
       {/* Instant magnetic diya cursor orb */}

@@ -17,12 +17,12 @@
 }
 
 /* ==========================================================================
-   DivinLink Tarot — Lantern Arcade Stage (Calm Glow Amber/Sandstone Palette)
+   DivinLink Tarot — Warm Sandstone Lantern Arcade Hero (Calm Glow Harmonized)
    ========================================================================== */
 
 .tarot-lantern-stage {
   --ink: #fff7f0;
-  --bg: #1e130e;
+  --bg: #241610;
   --accent: #f39419;
   --u: 1;
   --nu: 1;
@@ -31,11 +31,28 @@
   --my: 470px;
   position: relative;
   width: 100%;
-  height: clamp(460px, calc(100svh - 140px), 780px);
+  height: clamp(460px, calc(100svh - 150px), 760px);
   overflow: hidden;
   touch-action: pan-y;
   background: var(--bg);
   user-select: none;
+}
+
+/* Soft ivory mist along very top edge so the bright SiteHeader meets the temple lintel naturally */
+.tarot-hero-top-bridge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 22px;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(251, 246, 243, 0.42) 0%,
+    rgba(251, 246, 243, 0.12) 45%,
+    transparent 100%
+  );
 }
 
 .tarot-lantern-frame {
@@ -75,6 +92,13 @@
   height: calc(960px * var(--u));
 }
 
+.tarot-stack .L.chakra {
+  left: calc(840px * var(--u));
+  top: calc(115px * var(--u));
+  width: calc(560px * var(--u));
+  height: calc(560px * var(--u));
+}
+
 .tarot-stack .L.arcade {
   left: calc(271.15px * var(--u));
   top: 0;
@@ -97,30 +121,40 @@
   -webkit-user-drag: none;
 }
 
-/* Warm dusk palette (DivinLink Warm Umber/Amber night instead of stark blue-black) */
+/* Warm dusk palette at rest: readable terracotta sandstone, zero cold harsh black */
 .tarot-stack--dark .L.sky img {
-  filter: brightness(0.24) saturate(0.6) sepia(0.32) hue-rotate(-6deg);
+  filter: brightness(0.36) saturate(0.84) sepia(0.28) hue-rotate(-6deg);
+}
+
+.tarot-stack--dark .L.chakra img {
+  opacity: 0.14;
+  filter: sepia(0.4) saturate(1.2);
 }
 
 .tarot-stack--dark .L.statue img {
-  filter: brightness(0.28) saturate(0.55) sepia(0.26);
+  filter: brightness(0.42) saturate(0.68) sepia(0.24);
 }
 
 .tarot-stack--dark .L.arcade img {
-  filter: brightness(0.48) saturate(0.72) sepia(0.22);
+  filter: brightness(0.58) saturate(0.78) sepia(0.24);
 }
 
-/* Lit stack — warm DivinLink sandstone & golden sunlight/diya reveal */
+/* Lit stack: radiant DivinLink golden-hour saffron & rose-sandstone reveal */
 .tarot-stack--lit .L.sky img {
-  filter: brightness(1.04) saturate(1.1) sepia(0.14) hue-rotate(-4deg);
+  filter: brightness(1.08) saturate(1.16) sepia(0.14) hue-rotate(-4deg);
+}
+
+.tarot-stack--lit .L.chakra img {
+  opacity: 0.44;
+  filter: brightness(1.18) saturate(1.35);
 }
 
 .tarot-stack--lit .L.arcade img {
-  filter: brightness(1.06) saturate(1.14) sepia(0.14);
+  filter: brightness(1.1) saturate(1.18) sepia(0.14);
 }
 
 .tarot-stack--lit .L.statue img {
-  filter: brightness(1.06) saturate(1.1) sepia(0.12);
+  filter: brightness(1.12) saturate(1.14) sepia(0.12);
 }
 
 .tarot-stack--lit {
@@ -153,7 +187,7 @@
   will-change: mask-image;
 }
 
-/* Subtle warm saffron aura centered inside the active lantern beam */
+/* Warm saffron diya glow centered inside the lantern spotlight */
 .tarot-lantern-glow {
   position: absolute;
   top: 0;
@@ -163,26 +197,27 @@
   pointer-events: none;
   mix-blend-mode: soft-light;
   background: radial-gradient(
-    circle calc(var(--r) * 0.95) at var(--mx) var(--my),
-    rgba(247, 195, 37, 0.42) 0%,
-    rgba(243, 148, 25, 0.18) 45%,
+    circle calc(var(--r) * 0.96) at var(--mx) var(--my),
+    rgba(247, 195, 37, 0.48) 0%,
+    rgba(243, 148, 25, 0.22) 45%,
     transparent 100%
   );
 }
 
-/* Seamless melt into DivinLink #fbf6f3 Warm Cream page below */
+/* Smooth luminous cream transition into the #fbf6f3 Sanctuary body below (no grey band) */
 .tarot-hero-cream-fade {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 44px;
+  height: 92px;
   pointer-events: none;
   z-index: 2;
   background: linear-gradient(
     to bottom,
-    transparent 0%,
-    rgba(251, 246, 243, 0.75) 68%,
+    rgba(251, 246, 243, 0) 0%,
+    rgba(253, 240, 231, 0.38) 46%,
+    rgba(251, 246, 243, 0.86) 80%,
     #fbf6f3 100%
   );
 }
@@ -212,7 +247,7 @@
   padding: 7px 4px;
   margin: -7px 0 0 -4px;
   transition: opacity 0.3s ease, color 0.3s ease;
-  text-shadow: 0 1px 10px rgba(20, 14, 10, 0.65);
+  text-shadow: 0 1px 12px rgba(36, 22, 16, 0.72);
   background: transparent;
   border: 0;
   cursor: pointer;
@@ -225,7 +260,7 @@
   outline: none;
 }
 
-/* Italianno script monogram on the pool edge below plinth */
+/* Italianno script DivinLink monogram resting on the pool edge below plinth */
 .tarot-monogram {
   position: absolute;
   z-index: 3;
@@ -235,21 +270,24 @@
   color: var(--ink);
   opacity: 0.95;
   line-height: 1;
-  padding: 6px 10px;
+  padding: 6px 12px;
   margin: -6px 0 0;
   transform: translateX(-50%);
   text-decoration: none;
-  text-shadow: 0 2px 16px rgba(243, 148, 25, 0.45);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  text-shadow:
+    0 2px 18px rgba(243, 148, 25, 0.55),
+    0 1px 6px rgba(36, 22, 16, 0.85);
+  transition: opacity 0.3s ease, color 0.3s ease;
 }
 
 .tarot-monogram:hover,
 .tarot-monogram:focus-visible {
   opacity: 1;
+  color: #ffe9a6;
   outline: none;
 }
 
-/* Floating golden lantern cursor orb */
+/* Instant golden lantern cursor orb */
 .tarot-cursor-orb {
   position: fixed;
   left: 0;
@@ -270,8 +308,8 @@
     rgba(255, 196, 80, 0) 100%
   );
   box-shadow:
-    0 0 10px 3px rgba(255, 214, 120, 0.62),
-    0 0 26px 8px rgba(243, 148, 25, 0.26);
+    0 0 10px 3px rgba(255, 214, 120, 0.65),
+    0 0 26px 8px rgba(243, 148, 25, 0.28);
   will-change: transform, opacity;
 }
 
@@ -285,11 +323,14 @@
   }
 }
 
-/* Subtle interactive golden sheen for Tarot cards in the sanctuary below */
+/* Sacred pointer-follow golden glow on cards inside the Sanctuary */
 .tarot-magnetic-card {
   position: relative;
   overflow: hidden;
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .tarot-magnetic-card::before {
@@ -300,7 +341,7 @@
   opacity: 0;
   transition: opacity 0.3s ease;
   background: radial-gradient(
-    260px circle at var(--card-mx, 50%) var(--card-my, 50%),
+    280px circle at var(--card-mx, 50%) var(--card-my, 50%),
     rgba(243, 148, 25, 0.14),
     rgba(247, 195, 37, 0.05) 45%,
     transparent 75%
