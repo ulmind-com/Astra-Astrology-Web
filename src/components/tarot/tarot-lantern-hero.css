@@ -1,0 +1,321 @@
+@font-face {
+  font-family: "Montserrat";
+  font-style: italic;
+  font-weight: 200;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/montserrat/v31/JTUFjIg1_i6t8kCHKm459Wx7xQYXK0vOoz6jqyR9WXh0pg.woff2")
+    format("woff2");
+}
+
+@font-face {
+  font-family: "Italianno";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/italianno/v18/dg4n_p3sv6gCJkwzT6RXiJwo.woff2")
+    format("woff2");
+}
+
+/* ==========================================================================
+   DivinLink Tarot — Lantern Arcade Stage (Calm Glow Amber/Sandstone Palette)
+   ========================================================================== */
+
+.tarot-lantern-stage {
+  --ink: #fff7f0;
+  --bg: #1e130e;
+  --accent: #f39419;
+  --u: 1;
+  --nu: 1;
+  --r: 320px;
+  --mx: 1120px;
+  --my: 470px;
+  position: relative;
+  width: 100%;
+  height: clamp(460px, calc(100svh - 140px), 780px);
+  overflow: hidden;
+  touch-action: pan-y;
+  background: var(--bg);
+  user-select: none;
+}
+
+.tarot-lantern-frame {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(1440px * var(--u));
+  height: calc(960px * var(--u));
+  opacity: 0;
+  transition: opacity 0.7s ease-out;
+  will-change: transform, opacity;
+}
+
+.tarot-lantern-stage[data-ready="true"] .tarot-lantern-frame {
+  opacity: 1;
+}
+
+.tarot-stack {
+  position: absolute;
+  top: 0;
+  left: calc(-400px * var(--u));
+  width: calc(2240px * var(--u));
+  height: 100%;
+  pointer-events: none;
+}
+
+.tarot-stack .L {
+  position: absolute;
+  will-change: transform;
+  transform: translate3d(var(--tx, 0px), 0, 0);
+}
+
+.tarot-stack .L.sky {
+  left: 0;
+  top: 0;
+  width: calc(2240px * var(--u));
+  height: calc(960px * var(--u));
+}
+
+.tarot-stack .L.arcade {
+  left: calc(271.15px * var(--u));
+  top: 0;
+  width: calc(1697.7px * var(--u));
+  height: calc(960px * var(--u));
+}
+
+.tarot-stack .L.statue {
+  left: calc(690.5px * var(--u));
+  top: calc(226.4px * var(--u));
+  width: calc(859.3px * var(--u));
+  height: calc(570.6px * var(--u));
+}
+
+.tarot-stack .L img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Warm dusk palette (DivinLink Warm Umber/Amber night instead of stark blue-black) */
+.tarot-stack--dark .L.sky img {
+  filter: brightness(0.24) saturate(0.6) sepia(0.32) hue-rotate(-6deg);
+}
+
+.tarot-stack--dark .L.statue img {
+  filter: brightness(0.28) saturate(0.55) sepia(0.26);
+}
+
+.tarot-stack--dark .L.arcade img {
+  filter: brightness(0.48) saturate(0.72) sepia(0.22);
+}
+
+/* Lit stack — warm DivinLink sandstone & golden sunlight/diya reveal */
+.tarot-stack--lit .L.sky img {
+  filter: brightness(1.04) saturate(1.1) sepia(0.14) hue-rotate(-4deg);
+}
+
+.tarot-stack--lit .L.arcade img {
+  filter: brightness(1.06) saturate(1.14) sepia(0.14);
+}
+
+.tarot-stack--lit .L.statue img {
+  filter: brightness(1.06) saturate(1.1) sepia(0.12);
+}
+
+.tarot-stack--lit {
+  -webkit-mask-image: radial-gradient(
+    circle var(--r) at var(--mx) var(--my),
+    #000 0%,
+    #000 22%,
+    rgba(0, 0, 0, 0.94) 30%,
+    rgba(0, 0, 0, 0.75) 40%,
+    rgba(0, 0, 0, 0.65) 48%,
+    rgba(0, 0, 0, 0.5) 58%,
+    rgba(0, 0, 0, 0.3) 68%,
+    rgba(0, 0, 0, 0.2) 75%,
+    rgba(0, 0, 0, 0.1) 85%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    circle var(--r) at var(--mx) var(--my),
+    #000 0%,
+    #000 22%,
+    rgba(0, 0, 0, 0.94) 30%,
+    rgba(0, 0, 0, 0.75) 40%,
+    rgba(0, 0, 0, 0.65) 48%,
+    rgba(0, 0, 0, 0.5) 58%,
+    rgba(0, 0, 0, 0.3) 68%,
+    rgba(0, 0, 0, 0.2) 75%,
+    rgba(0, 0, 0, 0.1) 85%,
+    transparent 100%
+  );
+  will-change: mask-image;
+}
+
+/* Subtle warm saffron aura centered inside the active lantern beam */
+.tarot-lantern-glow {
+  position: absolute;
+  top: 0;
+  left: calc(-400px * var(--u));
+  width: calc(2240px * var(--u));
+  height: 100%;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  background: radial-gradient(
+    circle calc(var(--r) * 0.95) at var(--mx) var(--my),
+    rgba(247, 195, 37, 0.42) 0%,
+    rgba(243, 148, 25, 0.18) 45%,
+    transparent 100%
+  );
+}
+
+/* Seamless melt into DivinLink #fbf6f3 Warm Cream page below */
+.tarot-hero-cream-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 44px;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(251, 246, 243, 0.75) 68%,
+    #fbf6f3 100%
+  );
+}
+
+/* Cornice navigation */
+.tarot-cornice-nav {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.tarot-cornice-link {
+  position: absolute;
+  pointer-events: auto;
+  font-family: "Montserrat", system-ui, sans-serif;
+  font-style: italic;
+  font-weight: 200;
+  text-transform: lowercase;
+  letter-spacing: 0.005em;
+  line-height: 1;
+  color: var(--ink);
+  opacity: 0.94;
+  text-decoration: none;
+  white-space: nowrap;
+  font-size: calc(19.2px * var(--nu));
+  padding: 7px 4px;
+  margin: -7px 0 0 -4px;
+  transition: opacity 0.3s ease, color 0.3s ease;
+  text-shadow: 0 1px 10px rgba(20, 14, 10, 0.65);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.tarot-cornice-link:hover,
+.tarot-cornice-link:focus-visible {
+  opacity: 1;
+  color: #fdeee3;
+  outline: none;
+}
+
+/* Italianno script monogram on the pool edge below plinth */
+.tarot-monogram {
+  position: absolute;
+  z-index: 3;
+  font-family: "Italianno", Georgia, serif;
+  font-style: normal;
+  font-weight: 400;
+  color: var(--ink);
+  opacity: 0.95;
+  line-height: 1;
+  padding: 6px 10px;
+  margin: -6px 0 0;
+  transform: translateX(-50%);
+  text-decoration: none;
+  text-shadow: 0 2px 16px rgba(243, 148, 25, 0.45);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.tarot-monogram:hover,
+.tarot-monogram:focus-visible {
+  opacity: 1;
+  outline: none;
+}
+
+/* Floating golden lantern cursor orb */
+.tarot-cursor-orb {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 9999px;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  background: radial-gradient(
+    circle,
+    #fffbe8 0%,
+    #ffe9a6 38%,
+    #ffcf5e 70%,
+    rgba(255, 196, 80, 0) 100%
+  );
+  box-shadow:
+    0 0 10px 3px rgba(255, 214, 120, 0.62),
+    0 0 26px 8px rgba(243, 148, 25, 0.26);
+  will-change: transform, opacity;
+}
+
+.tarot-lantern-stage[data-has-pointer="true"] .tarot-cursor-orb {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .tarot-cursor-orb {
+    display: none;
+  }
+}
+
+/* Subtle interactive golden sheen for Tarot cards in the sanctuary below */
+.tarot-magnetic-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.tarot-magnetic-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(
+    260px circle at var(--card-mx, 50%) var(--card-my, 50%),
+    rgba(243, 148, 25, 0.14),
+    rgba(247, 195, 37, 0.05) 45%,
+    transparent 75%
+  );
+}
+
+.tarot-magnetic-card:hover::before {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tarot-lantern-frame {
+    transition: none;
+  }
+  .tarot-magnetic-card::before {
+    display: none;
+  }
+}

@@ -39,6 +39,7 @@ import {
   FeatureCoinModal,
 } from "@/components/astrology/feature-pricing-banner";
 import { TarotCardView } from "@/components/tarot/tarot-card-view";
+import { TarotLanternHero } from "@/components/tarot/tarot-lantern-hero";
 import { TarotSpreadLayout } from "@/components/tarot/tarot-spread-layout";
 import { TarotReadingDetail } from "@/components/tarot/tarot-reading-detail";
 import { fireCelestialConfetti } from "@/components/ui/confetti";
@@ -269,14 +270,21 @@ export default function TarotPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#fbf6f3]/70 text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
+    <div className="min-h-screen bg-[#fbf6f3] text-stone-900 flex flex-col font-sans pb-24 selection:bg-amber-100 selection:text-amber-900">
       <SiteHeader />
 
-      <main className="mx-auto max-w-6xl px-3 sm:px-6 py-4 flex-1 w-full space-y-6">
-        {/* =========================================================================
-            1. BREADCRUMB & LANGUAGE SWITCHER
-        ========================================================================= */}
-        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-stone-500 pt-0.5 pb-1">
+      {/* =========================================================================
+          1. LANTERN ARCADE INTERACTIVE HERO (Warm DivinLink Calm Glow Theme)
+      ========================================================================= */}
+      <TarotLanternHero
+        title={t.title}
+        onMainTabChange={setMainTab}
+        onGoToStep={(nextStep) => setStep(nextStep)}
+      />
+
+      <main id="tarot-workspace" className="mx-auto max-w-6xl px-3 sm:px-6 pt-4 pb-4 flex-1 w-full space-y-6">
+        {/* Breadcrumb & Sanctum Control Sanctuary */}
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-stone-500">
           <div className="flex items-center gap-1.5 uppercase tracking-wider font-semibold">
             <Link href="/" className="hover:text-amber-700 transition-colors">
               {language === "bn" ? "হোম" : language === "hi" ? "होम" : "Home"}
@@ -284,70 +292,67 @@ export default function TarotPage() {
             <span className="text-stone-300">&gt;</span>
             <span className="text-stone-900 font-bold">{t.title}</span>
           </div>
-
-          {/* Language Switcher Bar */}
-          <div className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white p-0.5 text-xs font-semibold shadow-2xs">
-            {(
-              [
-                { code: "bn", label: "বাংলা" },
-                { code: "hi", label: "हिन्दी" },
-                { code: "en", label: "English" },
-              ] as const
-            ).map((lang) => (
-              <button
-                key={lang.code}
-                type="button"
-                onClick={() => setLanguage(lang.code)}
-                className={`min-h-7 inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer ${
-                  language === lang.code
-                    ? "bg-[#f39419] text-stone-950 shadow-2xs font-extrabold"
-                    : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
-                }`}
-              >
-                {lang.label}
-              </button>
-            ))}
-          </div>
+          <span className="text-[11px] text-stone-500">
+            {language === "bn"
+              ? "আলো ছড়াতে মন্দিরের ওপর মাউস বা আঙুল নাড়ুন · ৭৮টি প্রামাণ্য কার্ড"
+              : language === "hi"
+              ? "रोशनी फैलाने के लिए मंदिर पर कर्सर घुमाएं · 78 प्रामाणिक कार्ड"
+              : "Carry the lantern across the temple arcade above · 78 Arcana"}
+          </span>
         </div>
 
-        {/* =========================================================================
-            2. HERO SECTION: Sleek with rotating faint gold zodiac circle in background
-        ========================================================================= */}
-        <div className="relative overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-r from-amber-50/50 via-white to-amber-50/30 px-4 sm:px-6 py-5 shadow-2xs">
-          {/* Faint rotating zodiac wheel in background */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/zodiac-wheel-gold.webp"
-            alt=""
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-12 -top-16 size-[260px] sm:size-[340px] select-none opacity-[0.14] mix-blend-multiply animate-spin [animation-duration:120s] motion-reduce:animate-none"
-          />
-
-          <div className="relative z-10 max-w-2xl space-y-1.5">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-bold text-amber-900">
-              <Sparkles className="size-3 text-amber-600" />
-              <span>{t.badge}</span>
-            </div>
-
-            <h1 className="text-xl sm:text-2xl font-serif font-bold text-stone-900 tracking-tight leading-tight">
-              {t.title}
-            </h1>
-
-            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-              {t.subtitle}
-            </p>
-
-            {/* Pricing & Navigation Bar */}
-            <div className="pt-2 flex items-center gap-3 flex-wrap">
+        {/* Sanctuary Controls Header Card (Warm Cream & Saffron Gold DivinLink Theme) */}
+        <div className="relative overflow-hidden rounded-2xl border border-amber-200/70 bg-gradient-to-r from-amber-50/70 via-white to-amber-50/40 px-4 sm:px-6 py-4 shadow-2xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="space-y-1.5 max-w-2xl">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-0.5 text-[11px] font-bold text-amber-900">
+                <Sparkles className="size-3 text-amber-600" />
+                <span>{t.badge}</span>
+              </div>
               <FeatureCoinBadge
                 feature={tarotFeature}
                 walletBalance={walletBalance}
                 language={language}
               />
+            </div>
 
-              {/* Navigation Tabs (Tarot Oracle vs 78 Cards Deck) */}
-              <div className="inline-flex items-center rounded-full border border-stone-200 bg-white p-1 text-xs shadow-2xs">
+            <h2 className="text-xl sm:text-2xl font-serif font-bold text-stone-900 tracking-tight leading-tight">
+              {t.title}
+            </h2>
+            <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+              {t.subtitle}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            {/* Language Switcher Bar */}
+            <div className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white p-0.5 text-xs font-semibold shadow-2xs">
+              {(
+                [
+                  { code: "bn", label: "বাংলা" },
+                  { code: "hi", label: "हिन्दी" },
+                  { code: "en", label: "English" },
+                ] as const
+              ).map((lang) => (
+                <button
+                  key={lang.code}
+                  type="button"
+                  onClick={() => setLanguage(lang.code)}
+                  className={`min-h-7 inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold transition-all cursor-pointer ${
+                    language === lang.code
+                      ? "bg-[#f39419] text-stone-950 shadow-2xs font-extrabold"
+                      : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
+                  }`}
+                >
+                  {lang.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Navigation Tabs (Tarot Oracle vs 78 Cards Deck) */}
+            <div className="inline-flex items-center rounded-full border border-stone-200 bg-white p-1 text-xs shadow-2xs">
               <button
+                type="button"
                 onClick={() => setMainTab("reading")}
                 className={`px-3.5 py-1.5 rounded-full font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   mainTab === "reading"
@@ -365,6 +370,7 @@ export default function TarotPage() {
                 </span>
               </button>
               <button
+                type="button"
                 onClick={() => setMainTab("explorer")}
                 className={`px-3.5 py-1.5 rounded-full font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   mainTab === "explorer"
@@ -378,7 +384,6 @@ export default function TarotPage() {
             </div>
           </div>
         </div>
-      </div>
 
       <div className="space-y-10">
         {/* Feature disabled alert if toggled off in admin */}
@@ -445,10 +450,15 @@ export default function TarotPage() {
                       <div
                         key={s.id}
                         onClick={() => setSelectedSpreadId(s.id)}
-                        className={`rounded-2xl p-6 cursor-pointer transition-all flex flex-col justify-between ${
+                        onPointerMove={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          e.currentTarget.style.setProperty("--card-mx", `${e.clientX - rect.left}px`);
+                          e.currentTarget.style.setProperty("--card-my", `${e.clientY - rect.top}px`);
+                        }}
+                        className={`tarot-magnetic-card rounded-2xl p-6 cursor-pointer flex flex-col justify-between ${
                           isSelected
-                            ? "border-2 border-amber-500 bg-amber-50/50 shadow-md ring-2 ring-amber-400/20"
-                            : "border border-slate-200 bg-white hover:border-amber-300 hover:shadow-xs"
+                            ? "border-2 border-amber-500 bg-amber-50/70 shadow-md ring-2 ring-amber-400/25 -translate-y-0.5"
+                            : "border border-stone-200 bg-white hover:border-amber-300 hover:shadow-md hover:-translate-y-1"
                         }`}
                       >
                         <div>
