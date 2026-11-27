@@ -26,6 +26,7 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
+    qualities: [75, 80, 85, 90],
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 2678400,
     // Profile pictures, Google OAuth avatars, course thumbnails, and CDN galleries.
