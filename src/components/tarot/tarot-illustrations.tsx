@@ -7,358 +7,141 @@ interface TarotIllustrationProps {
   isReversed?: boolean;
 }
 
-interface ArtTreatment {
-  src: string;
-  objectPosition?: string;
-  washClass: string;
-  ringColor: string;
-  sparkBg: string;
-  filterStyle?: string;
-}
-
-const MAJOR_TREATMENT_MAP: Record<number, ArtTreatment> = {
-  // 0: The Fool — dawn sky oracle
-  0: {
-    src: "/images/tarot/major-oracle.webp",
-    objectPosition: "50% 18%",
-    washClass: "from-sky-900/20 via-transparent to-amber-900/45",
-    ringColor: "rgba(253, 230, 138, 0.45)",
-    sparkBg: "rgba(254, 243, 199, 0.9)",
-    filterStyle: "brightness(1.04) saturate(1.08)",
+const ELEMENT_MOOD: Record<
+  string,
+  { mountBg: string; sparkBg: string; ringBorder: string }
+> = {
+  Fire: {
+    mountBg: "from-[#f5e7c9] via-[#edd7ac] to-[#e4c38d]",
+    sparkBg: "rgba(217, 119, 6, 0.85)",
+    ringBorder: "border-amber-700/30",
   },
-  // 1: The Magician — sacred flame & zodiac wheel
-  1: {
-    src: "/images/tarot/suit-wands.webp",
-    objectPosition: "50% 25%",
-    washClass: "from-amber-900/25 via-transparent to-orange-950/55",
-    ringColor: "rgba(251, 191, 36, 0.5)",
-    sparkBg: "rgba(253, 224, 71, 0.95)",
-    filterStyle: "contrast(1.04) saturate(1.12)",
+  Water: {
+    mountBg: "from-[#e6edf2] via-[#dbe6ee] to-[#cad8e4]",
+    sparkBg: "rgba(14, 116, 144, 0.8)",
+    ringBorder: "border-cyan-800/30",
   },
-  // 2: The High Priestess — crescent lunar mystic
-  2: {
-    src: "/images/tarot/major-moon.webp",
-    objectPosition: "50% 45%",
-    washClass: "from-indigo-950/20 via-transparent to-slate-950/45",
-    ringColor: "rgba(199, 210, 254, 0.45)",
-    sparkBg: "rgba(224, 231, 255, 0.9)",
+  Air: {
+    mountBg: "from-[#eef1f5] via-[#e2e7ef] to-[#d2dbe6]",
+    sparkBg: "rgba(3, 105, 161, 0.8)",
+    ringBorder: "border-sky-800/30",
   },
-  // 3: The Empress — blooming golden orchard coin
-  3: {
-    src: "/images/tarot/suit-pentacles.webp",
-    objectPosition: "50% 25%",
-    washClass: "from-emerald-950/15 via-transparent to-amber-950/40",
-    ringColor: "rgba(251, 191, 36, 0.48)",
-    sparkBg: "rgba(254, 240, 138, 0.9)",
-    filterStyle: "saturate(1.06)",
+  Earth: {
+    mountBg: "from-[#efe8d2] via-[#e5dcc0] to-[#d6cba5]",
+    sparkBg: "rgba(5, 150, 105, 0.82)",
+    ringBorder: "border-emerald-800/30",
   },
-  // 4: The Emperor — blazing solar crown
-  4: {
-    src: "/images/tarot/major-sun.webp",
-    objectPosition: "50% 45%",
-    washClass: "from-amber-950/15 via-transparent to-orange-950/45",
-    ringColor: "rgba(253, 224, 71, 0.5)",
-    sparkBg: "rgba(254, 240, 138, 0.95)",
-    filterStyle: "hue-rotate(-8deg) saturate(1.08)",
-  },
-  // 5: The Hierophant — sacred Vedic scroll & temple pillars
-  5: {
-    src: "/images/tarot/major-scroll.webp",
-    objectPosition: "50% 50%",
-    washClass: "from-amber-900/20 via-transparent to-stone-950/45",
-    ringColor: "rgba(245, 158, 11, 0.48)",
-    sparkBg: "rgba(253, 230, 138, 0.9)",
-  },
-  // 6: The Lovers — temple archway oracle under golden sun-wheel
-  6: {
-    src: "/images/tarot/major-oracle.webp",
-    objectPosition: "50% 42%",
-    washClass: "from-rose-950/20 via-transparent to-amber-950/45",
-    ringColor: "rgba(253, 186, 116, 0.45)",
-    sparkBg: "rgba(254, 215, 170, 0.9)",
-    filterStyle: "saturate(1.12)",
-  },
-  // 7: The Chariot — golden celestial astrolabe navigation
-  7: {
-    src: "/images/tarot/suit-swords.webp",
-    objectPosition: "50% 50%",
-    washClass: "from-amber-950/15 via-transparent to-stone-950/50",
-    ringColor: "rgba(251, 191, 36, 0.5)",
-    sparkBg: "rgba(253, 224, 71, 0.92)",
-    filterStyle: "brightness(1.08) contrast(1.06)",
-  },
-  // 8: Strength — luminous desert Agni fire
-  8: {
-    src: "/images/tarot/suit-wands.webp",
-    objectPosition: "50% 42%",
-    washClass: "from-orange-900/15 via-transparent to-red-950/45",
-    ringColor: "rgba(251, 146, 60, 0.5)",
-    sparkBg: "rgba(253, 186, 116, 0.95)",
-    filterStyle: "saturate(1.15)",
-  },
-  // 9: The Hermit — mystic night lantern star
-  9: {
-    src: "/images/tarot/major-star.webp",
-    objectPosition: "50% 45%",
-    washClass: "from-indigo-950/20 via-transparent to-slate-950/50",
-    ringColor: "rgba(253, 224, 71, 0.48)",
-    sparkBg: "rgba(254, 249, 195, 0.95)",
-  },
-  // 10: Wheel of Fortune — cosmic Vedic kundli-chakra
-  10: {
-    src: "/images/tarot/major-scroll.webp",
-    objectPosition: "50% 56%",
-    washClass: "from-amber-950/15 via-transparent to-amber-950/45",
-    ringColor: "rgba(245, 158, 11, 0.52)",
-    sparkBg: "rgba(253, 224, 71, 0.95)",
-    filterStyle: "contrast(1.06) saturate(1.1)",
-  },
-  // 11: Justice — cosmic temple equilibrium
-  11: {
-    src: "/images/tarot/suit-swords.webp",
-    objectPosition: "54% 48%",
-    washClass: "from-slate-900/20 via-transparent to-amber-950/45",
-    ringColor: "rgba(226, 232, 240, 0.45)",
-    sparkBg: "rgba(254, 240, 138, 0.9)",
-    filterStyle: "contrast(1.08) brightness(1.06)",
-  },
-  // 12: The Hanged Man — tranquil twilight sacred waters
-  12: {
-    src: "/images/tarot/suit-cups.webp",
-    objectPosition: "50% 40%",
-    washClass: "from-cyan-950/25 via-transparent to-slate-950/55",
-    ringColor: "rgba(125, 211, 252, 0.45)",
-    sparkBg: "rgba(186, 230, 253, 0.9)",
-  },
-  // 13: Death — eclipsed crescent transition
-  13: {
-    src: "/images/tarot/major-moon.webp",
-    objectPosition: "50% 50%",
-    washClass: "from-stone-950/30 via-transparent to-slate-950/60",
-    ringColor: "rgba(214, 211, 209, 0.45)",
-    sparkBg: "rgba(253, 230, 138, 0.85)",
-    filterStyle: "contrast(1.1) saturate(0.82)",
-  },
-  // 14: Temperance — luminous flowing river lamps
-  14: {
-    src: "/images/tarot/suit-cups.webp",
-    objectPosition: "45% 58%",
-    washClass: "from-sky-950/20 via-transparent to-amber-950/45",
-    ringColor: "rgba(253, 224, 71, 0.45)",
-    sparkBg: "rgba(254, 240, 138, 0.9)",
-    filterStyle: "saturate(1.1)",
-  },
-  // 15: The Devil — deep obsidian ember staff
-  15: {
-    src: "/images/tarot/suit-wands.webp",
-    objectPosition: "50% 35%",
-    washClass: "from-rose-950/25 via-transparent to-stone-950/60",
-    ringColor: "rgba(251, 113, 133, 0.42)",
-    sparkBg: "rgba(253, 186, 116, 0.92)",
-    filterStyle: "hue-rotate(-14deg) contrast(1.08)",
-  },
-  // 16: The Tower — cosmic lightning storm orb
-  16: {
-    src: "/images/tarot/major-star.webp",
-    objectPosition: "50% 38%",
-    washClass: "from-slate-950/25 via-transparent to-amber-950/55",
-    ringColor: "rgba(251, 191, 36, 0.52)",
-    sparkBg: "rgba(254, 240, 138, 0.95)",
-    filterStyle: "contrast(1.12)",
-  },
-  // 17: The Star — 8-pointed blazing Nakshatra star
-  17: {
-    src: "/images/tarot/major-star.webp",
-    objectPosition: "50% 50%",
-    washClass: "from-blue-950/15 via-transparent to-indigo-950/40",
-    ringColor: "rgba(253, 224, 71, 0.55)",
-    sparkBg: "rgba(254, 249, 195, 0.95)",
-  },
-  // 18: The Moon — gilded crescent reflection
-  18: {
-    src: "/images/tarot/major-moon.webp",
-    objectPosition: "50% 50%",
-    washClass: "from-indigo-950/15 via-transparent to-blue-950/45",
-    ringColor: "rgba(253, 224, 71, 0.5)",
-    sparkBg: "rgba(254, 243, 199, 0.95)",
-  },
-  // 19: The Sun — radiant Suryadev medallion
-  19: {
-    src: "/images/tarot/major-sun.webp",
-    objectPosition: "50% 48%",
-    washClass: "from-amber-900/10 via-transparent to-orange-950/35",
-    ringColor: "rgba(253, 224, 71, 0.55)",
-    sparkBg: "rgba(255, 251, 235, 0.98)",
-    filterStyle: "saturate(1.08)",
-  },
-  // 20: Judgement — temple gateway awakening
-  20: {
-    src: "/images/tarot/major-oracle.webp",
-    objectPosition: "50% 36%",
-    washClass: "from-amber-950/15 via-transparent to-stone-950/40",
-    ringColor: "rgba(253, 230, 138, 0.48)",
-    sparkBg: "rgba(254, 243, 199, 0.95)",
-  },
-  // 21: The World — complete celestial zodiac temple
-  21: {
-    src: "/images/tarot/major-oracle.webp",
-    objectPosition: "50% 28%",
-    washClass: "from-emerald-950/15 via-transparent to-amber-950/40",
-    ringColor: "rgba(251, 191, 36, 0.52)",
-    sparkBg: "rgba(254, 249, 195, 0.95)",
-    filterStyle: "brightness(1.05) saturate(1.1)",
+  Spirit: {
+    mountBg: "from-[#f6ead0] via-[#ecdbba] to-[#dfc79b]",
+    sparkBg: "rgba(180, 83, 9, 0.88)",
+    ringBorder: "border-amber-800/35",
   },
 };
 
-const SUIT_TREATMENT_MAP: Record<string, ArtTreatment> = {
-  wands: {
-    src: "/images/tarot/suit-wands.webp",
-    objectPosition: "50% 42%",
-    washClass: "from-amber-950/15 via-transparent to-orange-950/45",
-    ringColor: "rgba(251, 191, 36, 0.5)",
-    sparkBg: "rgba(253, 224, 71, 0.95)",
-  },
-  cups: {
-    src: "/images/tarot/suit-cups.webp",
-    objectPosition: "50% 50%",
-    washClass: "from-cyan-950/20 via-transparent to-indigo-950/55",
-    ringColor: "rgba(125, 211, 252, 0.5)",
-    sparkBg: "rgba(224, 242, 254, 0.92)",
-  },
-  swords: {
-    src: "/images/tarot/suit-swords.webp",
-    objectPosition: "52% 48%",
-    washClass: "from-slate-900/20 via-transparent to-sky-950/50",
-    ringColor: "rgba(253, 224, 71, 0.48)",
-    sparkBg: "rgba(224, 242, 254, 0.9)",
-  },
-  pentacles: {
-    src: "/images/tarot/suit-pentacles.webp",
-    objectPosition: "50% 45%",
-    washClass: "from-amber-950/10 via-transparent to-emerald-950/40",
-    ringColor: "rgba(251, 191, 36, 0.5)",
-    sparkBg: "rgba(254, 240, 138, 0.92)",
-  },
-};
-
-function getCardArt(card: TarotCard): ArtTreatment {
+function getDeckImagePath(card: TarotCard): string {
   if (card.arcana === "major") {
-    return MAJOR_TREATMENT_MAP[card.number] || MAJOR_TREATMENT_MAP[0];
+    const num = Math.max(0, Math.min(21, card.number));
+    return `/images/tarot/cards/major_${num}.webp`;
   }
-  const base = SUIT_TREATMENT_MAP[card.suit || "pentacles"] || SUIT_TREATMENT_MAP.pentacles;
-
-  // Give Ace / Court / Numbered Minor cards subtle visual variation in framing
-  const yShift = card.number === 1 ? "42%" : card.number >= 11 ? "34%" : "52%";
-  const hueOffset = ((card.number % 5) - 2) * 5;
-  return {
-    ...base,
-    objectPosition: `50% ${yShift}`,
-    filterStyle: hueOffset !== 0 ? `hue-rotate(${hueOffset}deg) saturate(1.06)` : base.filterStyle,
-  };
+  const validSuit =
+    card.suit === "wands" ||
+    card.suit === "cups" ||
+    card.suit === "swords" ||
+    card.suit === "pentacles"
+      ? card.suit
+      : "pentacles";
+  const num = Math.max(1, Math.min(14, card.number));
+  return `/images/tarot/cards/${validSuit}_${num}.webp`;
 }
 
 export function TarotIllustration({ card, isReversed = false }: TarotIllustrationProps) {
-  const art = getCardArt(card);
+  const mood = ELEMENT_MOOD[card.element] || ELEMENT_MOOD.Spirit;
+  const src = getDeckImagePath(card);
 
   return (
-    <div className="relative w-full h-full overflow-hidden rounded-xl border border-amber-400/75 bg-[#1b110d] select-none">
-      {/* 1. Painted Vintage / Vedic Rider-Waite Illustration with subtle Ken-Burns motion */}
+    <div
+      className={`relative w-full h-full overflow-hidden rounded-xl border border-amber-400/80 bg-gradient-to-b ${mood.mountBg} p-1.5 flex items-center justify-center select-none shadow-inner`}
+    >
+      {/* Subtle Radial Warm Temple Matte Behind Mounted Plate */}
       <div
-        className={`w-full h-full ${isReversed ? "rotate-180" : ""} transition-transform duration-700`}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-60"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 45%, rgba(255,253,247,0.85) 0%, rgba(217,183,124,0.18) 65%, rgba(120,66,22,0.22) 100%)",
+        }}
+      />
+
+      {/* Genuine Authentic 1909 Rider-Waite Engraving from PDF */}
+      <div
+        className={`relative z-10 h-full w-full flex items-center justify-center transition-transform duration-700 ${
+          isReversed ? "rotate-180" : ""
+        }`}
       >
         <img
-          src={art.src}
+          src={src}
           alt={card.name}
           loading="lazy"
           decoding="async"
           draggable={false}
-          style={{
-            objectPosition: art.objectPosition || "50% 50%",
-            filter: art.filterStyle,
-          }}
-          className="tarot-art-breath w-full h-full object-cover"
+          className={`tarot-art-breath max-h-full w-auto max-w-full object-contain rounded-[6px] border ${mood.ringBorder} shadow-[0_6px_16px_rgba(36,22,16,0.26)]`}
         />
       </div>
 
-      {/* 2. Atmospheric vignette + bottom readability wash */}
+      {/* Subtle Sweeping Sunbeam Glaze */}
       <div
         aria-hidden="true"
-        className={`pointer-events-none absolute inset-0 bg-gradient-to-b ${art.washClass}`}
-      />
-
-      {/* 3. Subtle Sweeping Sunbeam Glaze */}
-      <div
-        aria-hidden="true"
-        className="tarot-sunbeam-sweep pointer-events-none absolute inset-y-0 left-0 w-1/2 opacity-35"
+        className="tarot-sunbeam-sweep pointer-events-none absolute inset-y-0 left-0 w-1/2 z-20 opacity-30"
         style={{
           background:
-            "linear-gradient(90deg, transparent 0%, rgba(255, 245, 214, 0.35) 50%, transparent 100%)",
+            "linear-gradient(90deg, transparent 0%, rgba(255, 250, 232, 0.55) 50%, transparent 100%)",
         }}
       />
 
-      {/* 4. Ultra-Delicate Slow-Orbiting Sacred Astrolabe Hairline Ring */}
-      <svg
-        viewBox="0 0 120 120"
-        aria-hidden="true"
-        className="tarot-ring-orbit pointer-events-none absolute inset-0 m-auto w-[78%] h-[78%] opacity-45"
-      >
-        <circle
-          cx="60"
-          cy="60"
-          r="53"
-          fill="none"
-          stroke={art.ringColor}
-          strokeWidth="0.6"
-          strokeDasharray="2 5"
-        />
-        <circle cx="60" cy="7" r="1.4" fill={art.sparkBg} />
-        <circle cx="60" cy="113" r="1.4" fill={art.sparkBg} />
-      </svg>
-
-      {/* 5. Floating Kinetic Light Motes */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+      {/* Unobtrusive Corner Kinetic Gold Spangle Sparks */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-20">
         <span
-          className="tarot-spark-float absolute w-1.5 h-1.5 rounded-full blur-[0.3px]"
+          className="tarot-spark-float absolute w-1.5 h-1.5 rounded-full"
           style={{
-            top: "18%",
-            left: "20%",
-            backgroundColor: art.sparkBg,
+            top: "8%",
+            left: "8%",
+            backgroundColor: mood.sparkBg,
             animationDelay: "0s",
           }}
         />
         <span
           className="tarot-spark-float absolute w-1 h-1 rounded-full"
           style={{
-            top: "28%",
-            right: "18%",
-            backgroundColor: art.sparkBg,
-            animationDelay: "1.4s",
-          }}
-        />
-        <span
-          className="tarot-spark-float absolute w-1.5 h-1.5 rounded-full blur-[0.3px]"
-          style={{
-            bottom: "22%",
-            left: "26%",
-            backgroundColor: art.sparkBg,
-            animationDelay: "2.3s",
+            top: "10%",
+            right: "8%",
+            backgroundColor: mood.sparkBg,
+            animationDelay: "1.6s",
           }}
         />
         <span
           className="tarot-spark-float absolute w-1 h-1 rounded-full"
           style={{
-            bottom: "28%",
-            right: "24%",
-            backgroundColor: art.sparkBg,
-            animationDelay: "0.7s",
+            bottom: "8%",
+            left: "9%",
+            backgroundColor: mood.sparkBg,
+            animationDelay: "2.4s",
+          }}
+        />
+        <span
+          className="tarot-spark-float absolute w-1.5 h-1.5 rounded-full"
+          style={{
+            bottom: "9%",
+            right: "9%",
+            backgroundColor: mood.sparkBg,
+            animationDelay: "0.9s",
           }}
         />
       </div>
 
-      {/* 6. Crisp Brass Inner Bevel */}
+      {/* Inner Brass Frame Bevel */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-1 rounded-lg border border-amber-200/35"
+        className="pointer-events-none absolute inset-1 z-30 rounded-lg border border-amber-500/30"
       />
     </div>
   );

@@ -192,9 +192,9 @@ export function TarotCardView({
   };
 
   const sizeClasses = {
-    sm: "w-48 sm:w-52 h-76 sm:h-84 text-xs",
-    md: "w-56 sm:w-60 h-88 sm:h-96 text-sm",
-    lg: "w-68 sm:w-72 h-104 text-base",
+    sm: "w-52 sm:w-56 h-[398px] sm:h-[420px] text-xs",
+    md: "w-56 sm:w-64 h-[438px] sm:h-[468px] text-sm",
+    lg: "w-68 sm:w-72 h-[488px] sm:h-[512px] text-base",
   }[size];
 
   if (!cardData) {
