@@ -1,16 +1,16 @@
 {
   "name": "astra-web",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "dev:mobile": "node scripts/dev-mobile.mjs",
     "qr": "node scripts/dev-mobile.mjs --qr-only",
     "tunnel": "node scripts/dev-mobile-tunnel.mjs",
-    "build": "npx opennextjs-cloudflare build",
-    "cf:build": "npx opennextjs-cloudflare build",
-    "cf:preview": "npx opennextjs-cloudflare build && npx opennextjs-cloudflare preview",
-    "cf:deploy": "npx opennextjs-cloudflare build && npx opennextjs-cloudflare deploy",
+    "build": "opennextjs-cloudflare build",
+    "cf:build": "opennextjs-cloudflare build",
+    "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "start": "next start",
     "lint": "eslint",
     "deploy": "npx vercel --prod --yes"
