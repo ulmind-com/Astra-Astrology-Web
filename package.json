@@ -7,7 +7,10 @@
     "dev:mobile": "node scripts/dev-mobile.mjs",
     "qr": "node scripts/dev-mobile.mjs --qr-only",
     "tunnel": "node scripts/dev-mobile-tunnel.mjs",
-    "build": "next build",
+    "build": "npx opennextjs-cloudflare build",
+    "cf:build": "npx opennextjs-cloudflare build",
+    "cf:preview": "npx opennextjs-cloudflare build && npx opennextjs-cloudflare preview",
+    "cf:deploy": "npx opennextjs-cloudflare build && npx opennextjs-cloudflare deploy",
     "start": "next start",
     "lint": "eslint",
     "deploy": "npx vercel --prod --yes"
@@ -51,6 +54,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.20.19",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -59,6 +63,7 @@
     "eslint-config-next": "^16.4.6",
     "qrcode-terminal": "^0.12.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.169.0"
   }
 }
