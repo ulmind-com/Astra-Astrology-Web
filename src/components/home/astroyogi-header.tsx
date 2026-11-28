@@ -265,6 +265,13 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
             desc: "মূলাঙ্ক, ভাগ্যাঙ্ক ও শুভ সংখ্যার বিশদ বিশ্লেষণ",
             icon: Sparkles,
           },
+          {
+            label: "ট্যারো কার্ড রিডিং",
+            href: "/tarot",
+            desc: "৭৮টি আধ্যাত্মিক কার্ড ও ৩ডি ওরাকল ভাগ্যদর্শন",
+            icon: Layers,
+            badge: "নতুন",
+          },
         ],
         col3Title: "দৈনিক ও পঞ্জিকা",
         col3Icon: Sun,
@@ -358,6 +365,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
           { label: "পরামর্শ", href: "/astrologers", badge: "লাইভ" },
           { label: "কুন্ডলী", href: "/kundli", badge: "ফ্রি" },
           { label: "রাশিফল", href: "/daily-horoscope" },
+          { label: "ট্যারো", href: "/tarot", badge: "নতুন" },
           { label: "পঞ্জিকা", href: "/panchang" },
           { label: "শপ", href: "/shop" },
           { label: "এআই গুরু", href: "/ai-astrologer", isAi: true },
@@ -459,6 +467,13 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
             desc: "मूलांक, भाग्यांक व शुभ अंक विस्तृत रिपोर्ट",
             icon: Sparkles,
           },
+          {
+            label: "टैरो कार्ड रीडिंग",
+            href: "/tarot",
+            desc: "78 दिव्य कार्ड एवं 3D ओरैकल मार्गदर्शन",
+            icon: Layers,
+            badge: "नया",
+          },
         ],
         col3Title: "दैनिक एवं पंचांग",
         col3Icon: Sun,
@@ -552,6 +567,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
           { label: "परामर्श", href: "/astrologers", badge: "लाइव" },
           { label: "कुंडली", href: "/kundli", badge: "फ्री" },
           { label: "राशिफल", href: "/daily-horoscope" },
+          { label: "टैरो", href: "/tarot", badge: "नया" },
           { label: "पंचांग", href: "/panchang" },
           { label: "शॉप", href: "/shop" },
           { label: "एआई गुरु", href: "/ai-astrologer", isAi: true },
@@ -653,6 +669,13 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
           desc: "Mulank, Bhagyank, destiny numbers & name correction",
           icon: Sparkles,
         },
+        {
+          label: "Sacred Tarot Reading",
+          href: "/tarot",
+          desc: "78 Major & Minor Arcana 3D Oracle Divination",
+          icon: Layers,
+          badge: "New",
+        },
       ],
       col3Title: "Horoscope & Almanac",
       col3Icon: Sun,
@@ -746,6 +769,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
         { label: "Consult", href: "/astrologers", badge: "Live" },
         { label: "Kundli", href: "/kundli", badge: "Free" },
         { label: "Horoscope", href: "/daily-horoscope" },
+        { label: "Tarot", href: "/tarot", badge: "New" },
         { label: "Panchang", href: "/panchang" },
         { label: "Shop", href: "/shop" },
         { label: "AI Guru", href: "/ai-astrologer", isAi: true },
@@ -902,7 +926,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
             <nav
               ref={navRef}
               onMouseLeave={handleNavLeave}
-              className="relative hidden lg:flex items-center gap-1 xl:gap-1.5 p-1 rounded-full"
+              className="relative hidden lg:flex items-center gap-0.5 xl:gap-1 p-1 rounded-full"
             >
               {/* Fluid Magnetic Pill Highlight (Apple Fluid Spring Physics) */}
               <div
