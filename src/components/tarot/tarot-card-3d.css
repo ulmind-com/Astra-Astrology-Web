@@ -1,38 +1,32 @@
 /* ==========================================================================
    DivinLink Sacred Tarot Card — True 3D Parallax, Specular Foil & Living Motion
-   Museum-Grade Luxury Midnight Temple Velvet & 24K Imperial Gold Foil
+   Harmonious Authentic Physical Card Architecture & 24K Embossed Gold Gilt
    ========================================================================== */
 
 :root {
-  /* Midnight Temple Velvet Frame */
-  --tarot-card-bg-start: #1b1017;
-  --tarot-card-bg-mid:   #120a10;
-  --tarot-card-bg-end:   #090407;
-  --tarot-card-radial:   radial-gradient(130% 120% at 50% 0%, #22131e 0%, #120910 52%, #080306 100%);
+  /* Authentic Gilded Vellum Cardstock */
+  --tarot-cardstock-top: #ffffff;
+  --tarot-cardstock-mid: #fffcf5;
+  --tarot-cardstock-bot: #f9f0df;
 
-  /* 24K Imperial Gold Foil */
-  --tarot-gold-300: #fae8b2;
-  --tarot-gold-400: #f7d070;
-  --tarot-gold-500: #d4af37;
-  --tarot-gold-600: #b3832c;
-  --tarot-gold-700: #78511a;
-  --tarot-gold-gradient: linear-gradient(135deg, #fae8b2 0%, #f7d070 30%, #d4af37 60%, #b3832c 100%);
-  --tarot-gold-hairline: rgba(226, 183, 85, 0.42);
-  --tarot-gold-glow: rgba(243, 148, 25, 0.28);
+  /* 24K Embossed Gold Gilt Edges */
+  --tarot-gilt-primary: #d4af37;
+  --tarot-gilt-light:   #fae8b2;
+  --tarot-gilt-dark:    #996515;
+  --tarot-gilt-gradient: linear-gradient(135deg, #fae8b2 0%, #f7d070 25%, #d4af37 60%, #b3832c 100%);
+  --tarot-gilt-border: 1.5px solid rgba(212, 175, 55, 0.75);
 
-  /* Museum Passe-Partout Plate Matting */
-  --tarot-mat-bg: linear-gradient(180deg, #160d13 0%, #0e070c 50%, #140b11 100%);
-  --tarot-mat-bevel: inset 0 2px 10px rgba(0, 0, 0, 0.85), inset 0 0 0 1px rgba(212, 175, 55, 0.22);
+  /* Sanctuary Warm Velvet Shadows (No harsh pitch-black shadow!) */
+  --tarot-shadow-physical:
+    0 12px 30px rgba(120, 66, 22, 0.16),
+    0 4px 10px rgba(36, 22, 16, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.7);
 
-  /* Text & Inks */
-  --tarot-text-title: #fff7e6;
-  --tarot-text-subtitle: #d4ba94;
-  --tarot-text-muted: #9c8266;
-  --tarot-text-graha: #f0cb7e;
-
-  /* Ambient Velvet Bloom Shadows */
-  --tarot-shadow-rest: 0 14px 38px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(250, 232, 178, 0.14);
-  --tarot-shadow-hover: 0 24px 54px rgba(0, 0, 0, 0.75), 0 0 32px rgba(243, 148, 25, 0.24), 0 0 12px rgba(250, 232, 178, 0.35), inset 0 0 0 1px rgba(250, 232, 178, 0.3);
+  --tarot-shadow-physical-hover:
+    0 22px 48px rgba(217, 119, 6, 0.28),
+    0 0 28px rgba(243, 148, 25, 0.24),
+    0 0 12px rgba(250, 232, 178, 0.4),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.9);
 }
 
 .font-cinzel {
@@ -40,7 +34,7 @@
 }
 
 .tarot-3d-stage {
-  perspective: 1400px;
+  perspective: 1200px;
 }
 
 .tarot-3d-tilt {
@@ -52,18 +46,42 @@
   will-change: transform;
 }
 
+/* Ambient Backlight Halo Bloom */
+.tarot-3d-flipper::before {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: 1.5rem;
+  background: radial-gradient(
+    ellipse at var(--gx, 50%) var(--gy, 50%),
+    rgba(243, 148, 25, 0.32) 0%,
+    rgba(212, 175, 55, 0.18) 40%,
+    transparent 75%
+  );
+  opacity: var(--halo-op, 0);
+  filter: blur(18px);
+  transition: opacity 0.35s ease-out;
+  pointer-events: none;
+  z-index: -1;
+  transform: translateZ(-20px);
+}
+
+.group:hover .tarot-3d-flipper::before {
+  --halo-op: 1;
+}
+
 .tarot-3d-flipper {
   position: relative;
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
-  transition: transform 0.78s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+  transition: transform 0.78s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
   border-radius: 1rem;
-  box-shadow: var(--tarot-shadow-rest);
+  box-shadow: var(--tarot-shadow-physical);
 }
 
 .group:hover .tarot-3d-flipper {
-  box-shadow: var(--tarot-shadow-hover);
+  box-shadow: var(--tarot-shadow-physical-hover);
 }
 
 .tarot-3d-flipper[data-flipped="true"] {
@@ -97,54 +115,86 @@
   border-radius: 1rem;
   overflow: hidden;
   pointer-events: none;
+  z-index: 25;
 }
 
-/* Holographic golden specular lantern glare driven by pointer CSS vars */
+/* Dynamic Specular Radial Spotlight */
 .tarot-3d-glare {
   position: absolute;
   inset: 0;
   pointer-events: none;
   opacity: var(--glare-op, 0);
-  transition: opacity 0.25s ease;
+  transition: opacity 0.25s ease-out;
   background: radial-gradient(
-    circle 220px at var(--gx, 50%) var(--gy, 50%),
-    rgba(255, 248, 224, 0.45) 0%,
-    rgba(243, 148, 25, 0.2) 35%,
-    rgba(212, 175, 55, 0.1) 60%,
-    transparent 85%
+    circle 240px at var(--gx, 50%) var(--gy, 50%),
+    rgba(255, 255, 255, 0.65) 0%,
+    rgba(254, 240, 138, 0.42) 22%,
+    rgba(243, 148, 25, 0.2) 48%,
+    transparent 78%
   );
-  mix-blend-mode: soft-light;
+  mix-blend-mode: screen;
+  will-change: opacity, background;
 }
 
-/* Diagonal 24K prismatic foil sheen across card edges and background */
+/* Prismatic Chromatic Iridescent Holographic Foil */
 .tarot-3d-foil {
   position: absolute;
-  inset: -40%;
+  inset: -50%;
   pointer-events: none;
-  opacity: calc(var(--glare-op, 0) * 0.75);
-  transition: opacity 0.3s ease;
+  opacity: calc(var(--glare-op, 0) * 0.72);
+  transition: opacity 0.3s ease-out;
   background: linear-gradient(
-    115deg,
-    transparent 30%,
-    rgba(212, 175, 55, 0.15) 42%,
-    rgba(255, 245, 214, 0.4) 50%,
-    rgba(243, 148, 25, 0.2) 58%,
-    transparent 70%
+    var(--foil-angle, 115deg),
+    transparent 15%,
+    rgba(244, 114, 182, 0.22) 28%,
+    rgba(147, 197, 253, 0.38) 38%,
+    rgba(253, 224, 71, 0.45) 48%,
+    rgba(255, 255, 255, 0.8) 51%,
+    rgba(168, 85, 247, 0.35) 56%,
+    rgba(56, 189, 248, 0.3) 65%,
+    rgba(244, 114, 182, 0.22) 75%,
+    transparent 88%
   );
+  mix-blend-mode: color-dodge;
   transform: translate3d(var(--foil-x, 0%), var(--foil-y, 0%), 0);
+  will-change: transform, opacity;
 }
 
-/* Depth pop planes when card face is elevated */
-.tarot-z-frame {
+/* Micro-interference holographic lines overlay */
+.tarot-3d-foil::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(255, 255, 255, 0.08) 3px,
+    rgba(255, 255, 255, 0.08) 4px
+  );
+  mix-blend-mode: overlay;
+  opacity: 0.6;
+}
+
+/* Spatial Shadow-box 2.5D/3D Z-Planes */
+.tarot-z-recessed {
+  transform: translateZ(0px);
+}
+
+.tarot-z-matting {
   transform: translateZ(10px);
 }
 
-.tarot-z-mid {
-  transform: translateZ(18px);
+.tarot-z-frame {
+  transform: translateZ(20px);
 }
 
-.tarot-z-hero {
-  transform: translateZ(28px);
+.tarot-z-crest {
+  transform: translateZ(26px);
+}
+
+.tarot-z-nameplate {
+  transform: translateZ(24px);
 }
 
 /* Living Painted Artwork Motion Layers */
@@ -154,7 +204,7 @@
     transform: scale(1) translate3d(0, 0, 0);
   }
   50% {
-    transform: scale(1.045) translate3d(0, 0, 0);
+    transform: scale(1.035) translate3d(0, 0, 0);
   }
 }
 
@@ -208,7 +258,32 @@
   will-change: transform;
 }
 
-/* Step 3 tactile deck pick card gleam (no position override so desktop absolute fan stays arched) */
+/* Gentle Hypnotic Celestial Idle Float Animation */
+@keyframes tarotIdleFloat {
+  0%, 100% {
+    transform: translateY(0px) rotateX(0deg) rotateY(0deg);
+  }
+  25% {
+    transform: translateY(-4px) rotateX(1.8deg) rotateY(-1.4deg);
+  }
+  50% {
+    transform: translateY(-7px) rotateX(0deg) rotateY(1.6deg);
+  }
+  75% {
+    transform: translateY(-3px) rotateX(-1.5deg) rotateY(-0.7deg);
+  }
+}
+
+.tarot-idle-float {
+  animation: tarotIdleFloat 8s ease-in-out infinite;
+}
+
+/* Pause idle float when pointer or touch is active */
+.tarot-3d-tilt[data-active="true"] {
+  animation: none !important;
+}
+
+/* Step 3 tactile deck pick card gleam */
 .tarot-pick-card {
   overflow: hidden;
   transition:
@@ -249,10 +324,12 @@
 @media (prefers-reduced-motion: reduce) {
   .tarot-3d-tilt {
     transform: none !important;
+    animation: none !important;
   }
   .tarot-3d-flipper {
     transition-duration: 0.01ms !important;
   }
+  .tarot-3d-flipper::before,
   .tarot-3d-glare,
   .tarot-3d-foil,
   .tarot-pick-card::after,
@@ -261,7 +338,8 @@
   }
   .tarot-art-breath,
   .tarot-ring-orbit,
-  .tarot-spark-float {
+  .tarot-spark-float,
+  .tarot-idle-float {
     animation: none !important;
   }
 }

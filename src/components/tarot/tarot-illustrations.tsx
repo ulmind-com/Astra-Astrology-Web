@@ -23,22 +23,57 @@ function getDeckImagePath(card: TarotCard): string {
   return `/images/tarot/cards/${validSuit}_${num}.webp`;
 }
 
+function CardCornerPip({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={`pointer-events-none select-none text-[#d4af37] ${className}`}
+    >
+      <path
+        d="M2 14V5C2 3.34315 3.34315 2 5 2H14"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+      <circle cx="5" cy="5" r="1.2" fill="currentColor" />
+    </svg>
+  );
+}
+
 export function TarotIllustration({ card, isReversed = false }: TarotIllustrationProps) {
   const src = getDeckImagePath(card);
 
   return (
-    <div className="relative w-full h-full overflow-hidden rounded-xl border border-[#d4af37]/35 bg-gradient-to-b from-[#160d13] via-[#0e070c] to-[#140b11] p-2 flex items-center justify-center select-none shadow-[inset_0_3px_12px_rgba(0,0,0,0.85)]">
+    <div className="relative w-full h-full rounded-2xl overflow-hidden bg-gradient-to-b from-[#ffffff] via-[#fffcf5] to-[#f8f1e2] p-1.5 sm:p-2 border-2 border-[#e0b44a] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.8),inset_0_2px_6px_rgba(212,175,55,0.2)] flex items-center justify-center select-none">
+      {/* Subtle Inner Hairline Bevel */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-1 rounded-xl border border-amber-400/40"
+      />
+
+      {/* 4 Delicate Gilded Corner Flourishes */}
+      <div aria-hidden="true" className="pointer-events-none">
+        <CardCornerPip className="absolute top-1.5 left-1.5" />
+        <CardCornerPip className="absolute top-1.5 right-1.5 rotate-90" />
+        <CardCornerPip className="absolute bottom-1.5 right-1.5 rotate-180" />
+        <CardCornerPip className="absolute bottom-1.5 left-1.5 -rotate-90" />
+      </div>
+
       {/* Subtle Radial Warm Sanctuary Matte Behind Mounted Plate */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-70"
+        className="pointer-events-none absolute inset-0 opacity-40"
         style={{
           background:
-            "radial-gradient(circle at 50% 45%, rgba(247,208,112,0.12) 0%, rgba(18,9,16,0.3) 60%, rgba(8,3,6,0.8) 100%)",
+            "radial-gradient(circle at 50% 45%, rgba(254,243,199,0.8) 0%, rgba(253,230,138,0.2) 60%, rgba(245,158,11,0.08) 100%)",
         }}
       />
 
-      {/* Genuine Authentic 1909 Rider-Waite Engraving Plate Window */}
+      {/* Genuine Authentic 1909 Rider-Waite Engraving Plate Window (Fills 85-90% Heroically) */}
       <div
         className={`relative z-10 h-full w-full flex items-center justify-center transition-transform duration-700 ${
           isReversed ? "rotate-180" : ""
@@ -50,24 +85,18 @@ export function TarotIllustration({ card, isReversed = false }: TarotIllustratio
           loading="lazy"
           decoding="async"
           draggable={false}
-          className="tarot-art-breath max-h-full w-auto max-w-full object-contain rounded-xs border border-[#d4af37]/25 shadow-[0_6px_20px_rgba(0,0,0,0.7)]"
+          className="tarot-art-breath h-full w-auto max-w-full object-contain rounded-lg shadow-[0_4px_16px_rgba(70,40,15,0.18),0_0_1px_rgba(180,83,9,0.3)] border border-amber-400/40"
         />
       </div>
 
       {/* Subtle Sweeping Sunbeam Glaze */}
       <div
         aria-hidden="true"
-        className="tarot-sunbeam-sweep pointer-events-none absolute inset-y-0 left-0 w-1/2 z-20 opacity-25"
+        className="tarot-sunbeam-sweep pointer-events-none absolute inset-y-0 left-0 w-1/2 z-20 opacity-30"
         style={{
           background:
-            "linear-gradient(90deg, transparent 0%, rgba(255, 245, 214, 0.45) 50%, transparent 100%)",
+            "linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%)",
         }}
-      />
-
-      {/* Inner Antique Brass Beveled Fillet */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-1 z-30 rounded-lg border border-[#d4af37]/20"
       />
     </div>
   );
