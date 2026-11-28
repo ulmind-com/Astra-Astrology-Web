@@ -8,6 +8,9 @@
     "qr": "node scripts/dev-mobile.mjs --qr-only",
     "tunnel": "node scripts/dev-mobile-tunnel.mjs",
     "build": "next build",
+    "cf:build": "npx opennextjs-cloudflare build",
+    "cf:preview": "npx opennextjs-cloudflare build && npx opennextjs-cloudflare preview",
+    "cf:deploy": "npx opennextjs-cloudflare build && npx opennextjs-cloudflare deploy",
     "start": "next start",
     "lint": "eslint",
     "deploy": "npx vercel --prod --yes"
@@ -16,6 +19,7 @@
     "@arivedha/astro-icons": "^0.1.2",
     "@hookform/resolvers": "^5.9.1",
     "@mediapipe/tasks-vision": "^1.1.1",
+    "@opennextjs/cloudflare": "^1.20.19",
     "@simplewebauthn/browser": "^14.0.0",
     "@tanstack/react-query": "^5.104.2",
     "@tanstack/react-query-devtools": "^5.104.2",
@@ -59,6 +63,7 @@
     "eslint-config-next": "^16.4.6",
     "qrcode-terminal": "^0.12.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.169.0"
   }
 }

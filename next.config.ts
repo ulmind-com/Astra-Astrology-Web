@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
   // on nearly every page — so it only produced build failures. Off, those
   // routes simply render on demand, which is what they need anyway.
   turbopack: {
-    root: path.resolve(__dirname, ".."),
+    root: path.resolve(__dirname),
     rules: {
       "*.css": {
         loaders: ["@tailwindcss/turbopack"],
@@ -26,6 +26,7 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
+    unoptimized: true,
     qualities: [75, 80, 85, 90],
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 2678400,
