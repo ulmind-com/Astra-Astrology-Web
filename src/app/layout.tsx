@@ -79,6 +79,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  applicationName: "DivinLink",
   title: {
     default: "DivinLink — Talk to verified astrologers",
     template: "%s · DivinLink",
