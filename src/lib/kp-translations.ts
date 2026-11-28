@@ -1871,8 +1871,21 @@ export function translateKPPlanet(
   lang: "en" | "bn" | "hi" = "en"
 ): string {
   if (!planet) return "";
-  const clean = planet.trim();
-  return KP_PLANET_NAMES[clean]?.[lang] || clean;
+  const isRetro =
+    planet.includes("®") ||
+    /\((?:R|retro|retrograde|বক্রী®?|वक्री®?)\)/i.test(planet);
+  const clean = planet
+    .replace(/®/g, "")
+    .replace(/\((?:R|retro|retrograde|বক্রী®?|वक्री®?)\)/gi, "")
+    .trim();
+
+  const found = KP_PLANET_NAMES[clean]?.[lang] || clean;
+  if (isRetro) {
+    if (lang === "bn") return `${found} (বক্রী®)`;
+    if (lang === "hi") return `${found} (वक्री®)`;
+    return `${found} (R)`;
+  }
+  return found;
 }
 
 export function translateKPSign(

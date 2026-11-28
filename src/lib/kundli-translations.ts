@@ -36,24 +36,82 @@ export const KUNDLI_PLANET_NAMES: Record<string, Record<KundliLanguage, string>>
   Uranus: { en: "Uranus", bn: "ইউরেনাস", hi: "यूरेनस" },
   Neptune: { en: "Neptune", bn: "নেপচুন", hi: "नेपच्यून" },
   Pluto: { en: "Pluto", bn: "প্লুটো", hi: "प्लूटो" },
+  // Common 2-letter abbreviation codes (often returned in nakshatra / sub-lord contexts)
+  Su: { en: "Sun (Su)", bn: "সূর্য (Su)", hi: "सूर्य (Su)" },
+  Mo: { en: "Moon (Mo)", bn: "চন্দ্র (Mo)", hi: "चन्द्र (Mo)" },
+  Ma: { en: "Mars (Ma)", bn: "মঙ্গল (Ma)", hi: "मंगल (Ma)" },
+  Me: { en: "Mercury (Me)", bn: "বুধ (Me)", hi: "बुध (Me)" },
+  Ju: { en: "Jupiter (Ju)", bn: "বৃহস্পতি (Ju)", hi: "बृहस्पति (Ju)" },
+  Ve: { en: "Venus (Ve)", bn: "শুক্র (Ve)", hi: "शुक्र (Ve)" },
+  Sa: { en: "Saturn (Sa)", bn: "শনি (Sa)", hi: "शनि (Sa)" },
+  Ra: { en: "Rahu (Ra)", bn: "রাহু (Ra)", hi: "राहु (Ra)" },
+  Ke: { en: "Ketu (Ke)", bn: "কেতু (Ke)", hi: "केतु (Ke)" },
+  // Reverse lookups for Bengali input
+  "সূর্য": { en: "Sun", bn: "সূর্য", hi: "सूर्य" },
+  "চন্দ্র": { en: "Moon", bn: "চন্দ্র", hi: "चन्द्र" },
+  "মঙ্গল": { en: "Mars", bn: "মঙ্গল", hi: "मंगल" },
+  "বুধ": { en: "Mercury", bn: "বুধ", hi: "बुध" },
+  "বৃহস্পতি": { en: "Jupiter", bn: "বৃহস্পতি", hi: "बृहस्पति" },
+  "শুক্র": { en: "Venus", bn: "শুক্র", hi: "शुक्र" },
+  "শনি": { en: "Saturn", bn: "শনি", hi: "शनि" },
+  "রাহু": { en: "Rahu", bn: "রাহু", hi: "राहु" },
+  "কেতু": { en: "Ketu", bn: "কেতু", hi: "केतु" },
+  // Reverse lookups for Hindi input
+  "सूर्य": { en: "Sun", bn: "सूर्य", hi: "सूर्य" },
+  "चन्द्र": { en: "Moon", bn: "चन्द्र", hi: "चन्द्र" },
+  "मंगल": { en: "Mars", bn: "मंगल", hi: "मंगल" },
+  "बुध": { en: "Mercury", bn: "बुध", hi: "बुध" },
+  "बृहस्पति": { en: "Jupiter", bn: "बृहस्पति", hi: "बृहस्पति" },
+  "शुक्र": { en: "Venus", bn: "शुक्र", hi: "शुक्र" },
+  "शनि": { en: "Saturn", bn: "शनि", hi: "शनि" },
+  "राहु": { en: "Rahu", bn: "राहु", hi: "राहु" },
+  "केतु": { en: "Ketu", bn: "केतु", hi: "केतु" },
 };
 
 export function translatePlanetName(name: string, lang: KundliLanguage): string {
   if (!name) return "";
-  const isRetro = name.includes("®") || name.includes("(R)");
-  const cleanName = name.replace(/[®()R]/g, "").trim();
+
+  // 1. Detect retrograde: "®", "(R)", "[R]", "(বক্রী®)", "(वक्री®)"
+  const isRetro =
+    name.includes("®") ||
+    /\((?:R|retro|retrograde|বক্রী®?|वक्री®?)\)/i.test(name) ||
+    /\[(?:R|retro|retrograde)\]/i.test(name);
+
+  // 2. Safely strip ONLY retrograde tokens without touching planet characters like 'R' in Rahu
+  let cleanName = name
+    .replace(/®/g, "")
+    .replace(/\((?:R|retro|retrograde|বক্রী®?|वक्री®?)\)/gi, "")
+    .replace(/\[(?:R|retro|retrograde)\]/gi, "")
+    .trim();
+
+  // 3. Handle abbreviations in parentheses like "Rahu (Ra)" or "Jupiter (Ju)"
+  const abbrMatch = cleanName.match(/^([A-Za-z\u0980-\u09FF\u0900-\u097F]+)\s*\(([A-Za-z]{2,3})\)$/);
+  let abbrSuffix = "";
+  if (abbrMatch) {
+    cleanName = abbrMatch[1].trim();
+    abbrSuffix = ` (${abbrMatch[2]})`;
+  }
+
+  // 4. Case-insensitive dictionary lookup
+  const cleanKey = cleanName.trim();
+  const titleCase =
+    cleanKey.length > 0
+      ? cleanKey.charAt(0).toUpperCase() + cleanKey.slice(1).toLowerCase()
+      : cleanKey;
 
   const found =
-    KUNDLI_PLANET_NAMES[cleanName]?.[lang] ||
-    KUNDLI_PLANET_NAMES[cleanName.charAt(0).toUpperCase() + cleanName.slice(1).toLowerCase()]?.[lang] ||
-    cleanName;
+    KUNDLI_PLANET_NAMES[cleanKey]?.[lang] ||
+    KUNDLI_PLANET_NAMES[titleCase]?.[lang] ||
+    cleanKey;
+
+  const withAbbr = abbrSuffix ? `${found}${abbrSuffix}` : found;
 
   if (isRetro) {
-    if (lang === "bn") return `${found} (বক্রী®)`;
-    if (lang === "hi") return `${found} (वक्री®)`;
-    return `${found} (R)`;
+    if (lang === "bn") return `${withAbbr} (বক্রী®)`;
+    if (lang === "hi") return `${withAbbr} (वक्री®)`;
+    return `${withAbbr} (R)`;
   }
-  return found;
+  return withAbbr;
 }
 
 // 2. Rashis (12 Zodiac Signs)
