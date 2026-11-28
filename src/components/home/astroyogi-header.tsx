@@ -893,7 +893,7 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
                   priority
                 />
               </span>
-              <span className="font-voyage text-[22px] sm:text-[24px] font-normal leading-none tracking-[-0.01em] text-[#1c1613] group-hover:text-amber-800 transition-colors select-none inline-flex items-center">
+              <span className="font-voyage text-[30px] sm:text-[34px] font-normal leading-none tracking-[0.01em] text-[#1c1613] group-hover:text-amber-800 transition-colors select-none inline-flex items-center pt-0.5">
                 DivinLink
               </span>
             </Link>

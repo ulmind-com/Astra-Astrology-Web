@@ -34,7 +34,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               priority
             />
           </span>
-          <span className="font-display tracking-wide text-2xl font-bold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+          <span className="font-voyage text-[36px] sm:text-[40px] font-normal tracking-[0.01em] text-white drop-shadow-[0_2px_18px_rgba(243,148,25,0.55)] drop-shadow-[0_1px_6px_rgba(36,22,16,0.85)] inline-flex items-center pt-1">
             DivinLink
           </span>
         </Link>
@@ -67,7 +67,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                 priority
               />
             </span>
-            <span className="font-display tracking-wide">DivinLink</span>
+            <span className="font-voyage text-[30px] font-normal tracking-[0.01em] text-stone-900 dark:text-stone-100 inline-flex items-center pt-0.5">DivinLink</span>
           </Link>
           {children}
 

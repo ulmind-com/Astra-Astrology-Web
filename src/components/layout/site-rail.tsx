@@ -139,7 +139,7 @@ export function SiteRail() {
         </span>
         <span
           className={cn(
-            "font-voyage whitespace-nowrap text-[18px] font-normal leading-none tracking-[-0.01em] text-foreground select-none inline-flex items-center",
+            "font-voyage whitespace-nowrap text-[26px] sm:text-[28px] font-normal leading-none tracking-[0.01em] text-foreground select-none inline-flex items-center pt-0.5",
             "transition-all duration-300",
             expanded ? "translate-x-0 opacity-100" : "pointer-events-none -translate-x-2 opacity-0",
           )}

@@ -273,7 +273,7 @@ export function SiteFooter() {
             <span className="dlf-brand__mark">
               <Image src="/logo.png" alt="" width={30} height={30} />
             </span>
-            <span className="font-voyage text-[24px] font-normal leading-none tracking-[-0.01em] text-[#1c1613] select-none inline-flex items-center">
+            <span className="font-voyage text-[30px] sm:text-[34px] font-normal leading-none tracking-[0.01em] text-[#1c1613] select-none inline-flex items-center pt-0.5">
               DivinLink
             </span>
           </Link>

@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Italianno";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/italianno.woff2") format("woff2"),
+       url("https://fonts.gstatic.com/s/italianno/v18/dg4n_p3sv6gCJkwzT6RXiJwo.woff2") format("woff2");
+}
+
 /* ==========================================================================
    Astra Astrology — Calm Glow
 
@@ -487,10 +496,12 @@
     font-feature-settings: "liga" 1, "dlig" 1, "calt" 1;
   }
 
-  .font-voyage {
-    font-family: var(--font-instrument), var(--font-bodoni), var(--font-gilda), "Didot", "Bodoni MT", Georgia, serif;
-    font-feature-settings: "liga" 1, "dlig" 1, "calt" 1;
-    letter-spacing: -0.015em;
+  .font-voyage,
+  .font-brand-script {
+    font-family: "Italianno", Georgia, serif;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0.01em;
   }
 
   /* Skeletons and "loading" states. */
