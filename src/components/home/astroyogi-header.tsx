@@ -47,9 +47,10 @@ import { CartDrawer } from "@/components/shop/CartDrawer";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
-import { formatCoins, type AstrologyLanguage } from "@/types";
+import { formatCoins, type AstrologyLanguage, type PaginatedAstrologers, type AstrologerPublic } from "@/types";
 import { useQuery } from "@tanstack/react-query";
-import { shopApi, type ShopProductCategory } from "@/lib/api";
+import { shopApi, astrologerApi, type ShopProductCategory } from "@/lib/api";
+import { toLocalizedDigits } from "@/lib/kundli-translations";
 import initialCategoriesData from "@/lib/initial-shop-categories.json";
 
 function GoldCoinIcon({ className = "size-3.5" }: { className?: string }) {
@@ -173,6 +174,33 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
     initialData: initialCategoriesData as any,
     staleTime: 1000 * 60 * 30,
   });
+
+  // Fetch real-time live & verified astrologers count
+  const { data: astrologersData } = useQuery<PaginatedAstrologers | null>({
+    queryKey: ["header_live_astrologers"],
+    queryFn: async () => {
+      try {
+        const res = await astrologerApi.list({ limit: 50 });
+        return res || null;
+      } catch {
+        return null;
+      }
+    },
+    staleTime: 1000 * 60 * 2,
+    refetchInterval: 1000 * 60 * 2,
+  });
+
+  const activeAstrologerCount = React.useMemo(() => {
+    if (!astrologersData) return 0;
+    const items = astrologersData.items || [];
+    const available = items.filter(
+      (a: AstrologerPublic) =>
+        a.availability?.is_online ||
+        a.availability?.is_available_for_call ||
+        a.availability?.is_available_for_chat,
+    );
+    return available.length > 0 ? available.length : (astrologersData.meta?.total ?? items.length);
+  }, [astrologersData]);
 
   // Multilingual Navigation Definitions for the 4 Notch Mega Columns
   const menuData = React.useMemo(() => {
@@ -371,7 +399,12 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
           { label: "এআই গুরু", href: "/ai-astrologer", isAi: true },
         ],
         talkCta: "পরামর্শ নিন",
-        statusText: "৫৪+ ভেরিফাইড জ্যোতিষী এখন সরাসরি লাইভ কলে উপস্থিত",
+        statusText:
+          activeAstrologerCount >= 10
+            ? `${toLocalizedDigits(activeAstrologerCount, "bn")}+ ভেরিফাইড জ্যোতিষী এখন সরাসরি লাইভ কলে উপস্থিত`
+            : activeAstrologerCount > 0
+            ? `${toLocalizedDigits(activeAstrologerCount, "bn")} জন ভেরিফাইড জ্যোতিষী এখন সরাসরি লাইভ কলে উপস্থিত`
+            : "ভেরিফাইড জ্যোতিষীদের সাথে সরাসরি লাইভ কলে কথা বলুন",
         walletText: "ওয়ালেট কয়েন",
         supportText: "কাস্টমার সাপোর্ট",
         verifyText: "কিউআর সনদপত্র যাচাই",
@@ -573,7 +606,12 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
           { label: "एआई गुरु", href: "/ai-astrologer", isAi: true },
         ],
         talkCta: "बात करें",
-        statusText: "54+ सत्यापित ज्योतिषी अभी लाइव परामर्श हेतु ऑनलाइन हैं",
+        statusText:
+          activeAstrologerCount >= 10
+            ? `${toLocalizedDigits(activeAstrologerCount, "hi")}+ सत्यापित ज्योतिषी अभी सीधे लाइव परामर्श हेतु उपलब्ध हैं`
+            : activeAstrologerCount > 0
+            ? `${toLocalizedDigits(activeAstrologerCount, "hi")} सत्यापित ज्योतिषी अभी सीधे लाइव परामर्श हेतु उपलब्ध हैं`
+            : "सत्यापित ज्योतिषियों से सीधे लाइव कॉल पर बात करें",
         walletText: "वॉलेट कॉइन",
         supportText: "कस्टमर सपोर्ट चैट",
         verifyText: "सर्टिफिकेट क्यूआर जांचें",
@@ -775,12 +813,17 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
         { label: "AI Guru", href: "/ai-astrologer", isAi: true },
       ],
       talkCta: "Talk now",
-      statusText: "54+ verified astrologers online right now for consultation",
+      statusText:
+        activeAstrologerCount >= 10
+          ? `${activeAstrologerCount}+ verified astrologers online right now for consultation`
+          : activeAstrologerCount > 0
+          ? `${activeAstrologerCount} verified astrologer${activeAstrologerCount > 1 ? "s" : ""} online right now for consultation`
+          : "Connect directly with verified astrologers on live consultation",
       walletText: "Wallet Coins",
       supportText: "Customer Support",
       verifyText: "Verify QR Certificate",
     };
-  }, [language]);
+  }, [language, activeAstrologerCount]);
 
   // Find active pill element for the current pathname
   const getActivePillElement = React.useCallback(() => {
@@ -1446,13 +1489,22 @@ export function AstroyogiHeader({ overlay = false, forceSolid = false, onLogoCli
             {/* Bottom Status & Quick Links Strip inside Notch */}
             <div className="border-t border-amber-200/70 bg-[#f8ede3] px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
               {/* Left Live Status */}
-              <div className="flex items-center gap-2 text-[#1d1a1c]">
+              <Link
+                href="/astrologers"
+                onClick={() => {
+                  setIsHovered(false);
+                  setIsManualExpanded(false);
+                }}
+                className="flex items-center gap-2 text-[#1d1a1c] hover:opacity-85 transition-opacity cursor-pointer group/status"
+              >
                 <span className="relative flex size-2 shrink-0">
                   <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75" />
                   <span className="relative inline-flex size-2 rounded-full bg-emerald-600" />
                 </span>
-                <span className="text-[11.5px] font-semibold text-emerald-800">{menuData.statusText}</span>
-              </div>
+                <span className="text-[11.5px] font-semibold text-emerald-800 group-hover/status:underline underline-offset-2">
+                  {menuData.statusText}
+                </span>
+              </Link>
 
               {/* Right Utility Links */}
               <div className="flex items-center gap-3 ml-auto text-[11.5px] text-[#6b5f63]">
